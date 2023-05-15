@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -23,8 +22,6 @@ public abstract class HearingCorrespondenceBaseTest {
     NotificationService notificationService;
     @Mock
     BulkPrintService bulkPrintService;
-    @Mock
-    NotificationRequestMapper notificationRequestMapper;
 
     @Mock
     DocumentHelper documentHelper;

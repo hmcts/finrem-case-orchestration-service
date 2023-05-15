@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -26,9 +25,8 @@ public class AdditionalHearingCorresponder extends HearingCorresponder {
     @Autowired
     public AdditionalHearingCorresponder(BulkPrintService bulkPrintService,
                                          NotificationService notificationService,
-                                         NotificationRequestMapper notificationRequestMapper,
                                          DocumentHelper documentHelper) {
-        super(bulkPrintService, notificationService, notificationRequestMapper);
+        super(bulkPrintService, notificationService);
         this.documentHelper = documentHelper;
     }
 

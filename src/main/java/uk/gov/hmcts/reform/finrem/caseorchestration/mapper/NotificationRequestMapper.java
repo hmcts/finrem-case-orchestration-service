@@ -129,38 +129,6 @@ public class NotificationRequestMapper {
             .build();
     }
 
-    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerOneSolicitor() {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey("intervener1SolEmail")
-            .solicitorNameKey("intervener1SolName")
-            .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE) // TODO: check sol reference for intervener
-            .build();
-    }
-
-    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerTwoSolicitor() {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey("intervener2SolEmail")
-            .solicitorNameKey("intervener2SolName")
-            .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE)
-            .build();
-    }
-
-    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerThreeSolicitor() {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey("intervener3SolEmail")
-            .solicitorNameKey("intervener3SolName")
-            .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE)
-            .build();
-    }
-
-    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerFourSolicitor() {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey("intervener4SolEmail")
-            .solicitorNameKey("intervener4SolName")
-            .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE)
-            .build();
-    }
-
     private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(CaseDetails caseDetails) {
         return getLastRepresentationUpdate(caseDetails).getParty().equals(RESPONDENT);
     }

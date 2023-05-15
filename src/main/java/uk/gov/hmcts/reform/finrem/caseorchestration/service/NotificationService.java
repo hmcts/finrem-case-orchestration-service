@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -524,8 +525,9 @@ public class NotificationService {
         sendPrepareForHearingEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper));
     }
 
-    public void sendPrepareForHearingEmailIntervener(FinremCaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper ) {
-        sendPrepareForHearingEmail(finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper));
+    public void sendPrepareForHearingEmailIntervener(FinremCaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        sendPrepareForHearingEmail(finremNotificationRequestMapper
+            .getNotificationRequestForIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper));
     }
 
     private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
@@ -1094,41 +1096,58 @@ public class NotificationService {
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
 
-    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails, String intervenerField) {
-        return caseDataService.isNotEmpty(intervenerField, caseDetails.getData())
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1);
-    }
-
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isRespondentSolicitorPopulated()
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
 
-    public boolean isIntervenerOneDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerOneEmailPopulated()
+    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails,
+                                                                 String intervenerEmail,
+                                                                 CaseRole caseRole) {
+        return caseDataService.isNotEmpty(intervenerEmail, caseDetails.getData())
             && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1);
+            caseRole);
     }
 
-    public boolean isIntervenerTwoDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerTwoEmailPopulated()
+    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails,
+                                                                 String intervenerEmail,
+                                                                 CaseRole caseRole) {
+        return StringUtils.isNotEmpty(intervenerEmail)
             && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_2);
+            caseRole);
     }
 
-    public boolean isIntervenerThreeDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerThreeEmailPopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_3);
+    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerOneSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey("intervener1SolEmail")
+            .solicitorNameKey("intervener1SolName")
+            .solicitorReferenceKey("intervener1SolicitorReference")
+            .build();
     }
 
-    public boolean isIntervenerFourDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerFourEmailPopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_4);
+    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerTwoSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey("intervener2SolEmail")
+            .solicitorNameKey("intervener2SolName")
+            .solicitorReferenceKey("intervener2SolicitorReference")
+            .build();
     }
 
+    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerThreeSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey("intervener3SolEmail")
+            .solicitorNameKey("intervener3SolName")
+            .solicitorReferenceKey("intervener3SolicitorReference")
+            .build();
+    }
+
+    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerFourSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey("intervener4SolEmail")
+            .solicitorNameKey("intervener4SolName")
+            .solicitorReferenceKey("intervener4SolicitorReference")
+            .build();
+    }
 
     @Deprecated
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {

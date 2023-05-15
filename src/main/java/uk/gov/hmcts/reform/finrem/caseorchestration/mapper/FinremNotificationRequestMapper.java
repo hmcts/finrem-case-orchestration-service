@@ -71,7 +71,7 @@ public class FinremNotificationRequestMapper {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getIntervenerOneWrapper().getIntervener1SolEmail())
             .solicitorNameKey(caseData.getIntervenerOneWrapper().getIntervener1SolName())
-            .solicitorReferenceKey(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()) // TODO: check intervener sol ref
+            .solicitorReferenceKey(caseData.getIntervenerOneWrapper().getIntervener1SolicitorReference())
             .build();
     }
 
@@ -79,7 +79,7 @@ public class FinremNotificationRequestMapper {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getIntervenerTwoWrapper().getIntervener2SolEmail())
             .solicitorNameKey(caseData.getIntervenerTwoWrapper().getIntervener2SolName())
-            .solicitorReferenceKey(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()) // TODO: check intervener sol ref
+            .solicitorReferenceKey(caseData.getIntervenerTwoWrapper().getIntervener2SolicitorReference())
             .build();
     }
 
@@ -87,7 +87,7 @@ public class FinremNotificationRequestMapper {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getIntervenerThreeWrapper().getIntervener3SolEmail())
             .solicitorNameKey(caseData.getIntervenerThreeWrapper().getIntervener3SolName())
-            .solicitorReferenceKey(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()) // TODO: check intervener sol ref
+            .solicitorReferenceKey(caseData.getIntervenerThreeWrapper().getIntervener3SolicitorReference())
             .build();
     }
 
@@ -95,7 +95,7 @@ public class FinremNotificationRequestMapper {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getIntervenerFourWrapper().getIntervener4SolEmail())
             .solicitorNameKey(caseData.getIntervenerFourWrapper().getIntervener4SolName())
-            .solicitorReferenceKey(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()) // TODO: check intervener sol ref
+            .solicitorReferenceKey(caseData.getIntervenerFourWrapper().getIntervener4SolicitorReference())
             .build();
     }
 
