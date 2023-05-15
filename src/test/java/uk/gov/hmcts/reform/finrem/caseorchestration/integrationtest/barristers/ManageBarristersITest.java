@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.CcdCallbackController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
@@ -148,6 +149,8 @@ public class ManageBarristersITest implements IntegrationTest {
     private EvidenceManagementDownloadService evidenceManagementDownloadService;
     @Captor
     private ArgumentCaptor<NotificationRequest> notificationRequestArgumentCaptor;
+    @MockBean
+    private DocumentHelper documentHelper;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
