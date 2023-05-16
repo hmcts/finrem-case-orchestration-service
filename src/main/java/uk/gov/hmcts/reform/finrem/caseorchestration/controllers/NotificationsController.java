@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
@@ -349,7 +350,7 @@ public class NotificationsController extends BaseController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
-
+        FinremCaseData finremCaseData = new FinremCaseData();
         if (!caseDataService.isPaperApplication(caseData)) {
             if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
                 log.info("Sending email notification to Applicant Solicitor about interim hearing");

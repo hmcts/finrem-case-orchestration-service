@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsEmailOnlyAllSolicitorsCorresponder;
 
@@ -26,6 +27,12 @@ public class ConsentOrderMadeCorresponder extends CaseDetailsEmailOnlyAllSolicit
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made' for case: {}", caseDetails.getId());
         notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(caseDetails);
+    }
+
+    @Override
+    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made' for case: {}", caseDetails.getId());
+        notificationService.sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
     }
 }
 

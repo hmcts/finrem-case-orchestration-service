@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsEmailOnlyAllSolicitorsCorresponder;
 
@@ -27,6 +28,13 @@ public class ContestedConsentOrderNotApprovedCorresponder extends CaseDetailsEma
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         log.info("Sending email notification to Respondent Solicitor for 'Contested Consent Order Not Approved' for case: {}", caseDetails.getId());
         notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(caseDetails);
+
+    }
+
+    @Override
+    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        log.info("Sending email notification to Intervener Solicitor for 'Contested Consent Order Not Approved' for case: {}", caseDetails.getId());
+        notificationService.sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
 
     }
 }
