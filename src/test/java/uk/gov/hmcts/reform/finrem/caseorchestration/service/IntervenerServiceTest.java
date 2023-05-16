@@ -197,7 +197,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         ).build();
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
             .builder().intervener3Name("Three name").intervener3Email("test@test.com")
-             .intervener3SolEmail("test@test.com")
+            .intervener3SolEmail("test@test.com")
             .intervener3SolicitorFirm(INTERVENER_SOL_FIRM)
             .intervener3SolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervener3Represented(YesOrNo.YES)
