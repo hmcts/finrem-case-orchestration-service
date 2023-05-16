@@ -238,6 +238,38 @@ class SendOrderContestedSubmittedHandlerTest {
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
     }
 
+    @Test
+    void givenAppSolIsDigital_WhenApplicantSelectedToHearingShareOrder_ThenSendContestOrderApprovedEmailToApplicant() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        setupData(caseDetails);
+        FinremCaseData data = caseDetails.getData();
+        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
+        data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
+        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
+        data.setUploadHearingOrder(of(DirectionOrderCollection.builder()
+            .id(uuid)
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(caseDocument())
+                .build())
+            .build()));
+
+        when(generalOrderService.getParties(any(FinremCaseDetails.class)))
+            .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getValue()));
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
+        when(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument())).thenReturn(getBulkPrintDocument(caseDocument()));
+        when(generalOrderService.hearingOrderToProcess(caseDetails, data.getOrdersToShare())).thenReturn(of(caseDocument()));
+
+        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
+        verify(notificationService).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
+        verifyNoInteractions(bulkPrintService);
+        verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
+    }
+
     public BulkPrintDocument getBulkPrintDocument(CaseDocument caseDocument) {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
             .fileName(caseDocument.getDocumentFilename())
