@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 public class EmailToSendTest {
     private EmailToSend emailToSend;
-    private Map<String, String> templateVars;
+    private Map<String, Object> templateVars;
 
     @Before
     public void setUp() {

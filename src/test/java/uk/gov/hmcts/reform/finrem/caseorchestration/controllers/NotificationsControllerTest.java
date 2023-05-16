@@ -145,7 +145,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
         verifyNoMoreInteractions(notificationService);
-        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class), anyString());
     }
 
     @Test
@@ -334,26 +334,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendDraftOrderEmail(buildCallbackRequest());
 
         verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void sendGeneralEmailConsented() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-
-        notificationsController.sendGeneralEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService).sendConsentGeneralEmail(any(CaseDetails.class));
-        verify(generalEmailService).storeGeneralEmail(any(CaseDetails.class));
-    }
-
-    @Test
-    public void sendGeneralEmailContested() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-
-        notificationsController.sendGeneralEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService).sendContestedGeneralEmail(any(CaseDetails.class));
-        verify(generalEmailService).storeGeneralEmail(any(CaseDetails.class));
     }
 
     @Test
