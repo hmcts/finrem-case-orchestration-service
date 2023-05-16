@@ -26,7 +26,7 @@ public class FinremCaseDataTest {
 
     private String consentedFileNameWithPath = null;
     private String contestedFileNameWithPath = null;
-    private boolean localMode = false;
+    private boolean localMode = System.getenv("JENKINS_BRANCH") == null;
     private boolean testEnabled = true;
 
     @Before
