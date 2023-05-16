@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -77,7 +76,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ADDITIONAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
@@ -199,22 +197,10 @@ public class DocumentHelper {
 
 
     public boolean hasAnotherHearing(FinremCaseData caseData) {
-
         List<DirectionDetailCollection> directionDetailsCollection = caseData.getDirectionDetailsCollection();
-
         // use a utility to handle directionDetailsCollectionList being null as well as empty
         return !directionDetailsCollection.isEmpty() && YES_VALUE.equalsIgnoreCase(
             nullToEmpty(directionDetailsCollection.get(0).getValue().getIsAnotherHearingYN()));
-    }
-
-    public boolean hasAnotherHearing(Map<String, Object> caseData) {
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList =
-            convertToDirectionDetailsCollectionData(caseData
-                .get(DIRECTION_DETAILS_COLLECTION_CT));
-
-        // use a utility to handle directionDetailsCollectionList being null as well as empty
-        return !CollectionUtils.isEmpty(directionDetailsCollectionList) && YES_VALUE.equalsIgnoreCase(
-            nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()));
     }
 
     public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
@@ -222,7 +208,6 @@ public class DocumentHelper {
             log.warn("Latest general order not found for printing for case");
             return null;
         }
-
         return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
     }
 
@@ -509,7 +494,7 @@ public class DocumentHelper {
             .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
                 .fileName(caseDocument.getDocumentFilename())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {

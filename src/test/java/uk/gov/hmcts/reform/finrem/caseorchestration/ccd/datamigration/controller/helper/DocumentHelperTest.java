@@ -14,12 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -52,8 +53,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
@@ -62,7 +61,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
@@ -152,40 +150,26 @@ public class DocumentHelperTest {
 
     @Test
     public void hasAnotherHearing_shouldReturnTrue() {
-        Map<String, Object> caseData = new HashMap<>();
-        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(YES_VALUE).build();
-        DirectionDetailsCollectionData directionDetailsCollectionData
-            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        DirectionDetailCollection directionDetailsCollection = DirectionDetailCollection.builder()
+            .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build();
 
+        caseData.setDirectionDetailsCollection(singletonList(directionDetailsCollection));
         assertTrue(documentHelper.hasAnotherHearing(caseData));
+
+        directionDetailsCollection = DirectionDetailCollection.builder()
+            .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.NO).build()).build();
+
+        caseData.setDirectionDetailsCollection(singletonList(directionDetailsCollection));
+        assertFalse(documentHelper.hasAnotherHearing(caseData));
     }
 
     @Test
     public void hasAnotherHearing_noDirectionDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, emptyList());
-
-        assertFalse(documentHelper.hasAnotherHearing(caseData));
-    }
-
-    @Test
-    public void hasAnotherHearing_missingDirectionDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-
-        assertFalse(documentHelper.hasAnotherHearing(caseData));
-    }
-
-    @Test
-    public void hasAnotherHearing_noNextHearing() {
-        Map<String, Object> caseData = new HashMap<>();
-        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(NO_VALUE).build();
-        DirectionDetailsCollectionData directionDetailsCollectionData
-            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
-
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        caseData.setDirectionDetailsCollection(emptyList());
         assertFalse(documentHelper.hasAnotherHearing(caseData));
     }
 
