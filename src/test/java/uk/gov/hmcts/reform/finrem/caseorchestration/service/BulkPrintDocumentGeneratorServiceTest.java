@@ -41,11 +41,14 @@ public class BulkPrintDocumentGeneratorServiceTest {
     @Mock private AuthTokenGenerator authTokenGenerator;
     @Mock private SendLetterApi sendLetterApi;
 
+    @Mock private FeatureToggleService featureToggleService;
+
     @Test
     public void downloadDocuments() {
 
         UUID randomId = UUID.randomUUID();
         when(authTokenGenerator.generate()).thenReturn("random-string");
+        when(featureToggleService.isSendLetterDuplicateCheckEnabled()).thenReturn(false);
 
         when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
             .thenReturn(new SendLetterResponse(randomId));
