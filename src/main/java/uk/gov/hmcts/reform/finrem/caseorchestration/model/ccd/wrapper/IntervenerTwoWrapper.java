@@ -33,5 +33,7 @@ public class IntervenerTwoWrapper {
     private String intervener2SolName;
     private String intervener2SolEmail;
     private String intervener2SolPhone;
+    private String intervener2SolicitorFirm;
+    private String intervener2SolicitorReference;
     private OrganisationPolicy intervener2Organisation;
 }

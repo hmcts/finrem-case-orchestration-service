@@ -33,5 +33,7 @@ public class IntervenerFourWrapper {
     private String intervener4SolName;
     private String intervener4SolEmail;
     private String intervener4SolPhone;
+    private String intervener4SolicitorFirm;
+    private String intervener4SolicitorReference;
     private OrganisationPolicy intervener4Organisation;
 }
