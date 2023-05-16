@@ -133,6 +133,8 @@ public class IntervenerService {
                     intervenerFourWrapper.setIntervener4SolEmail(null);
                     intervenerFourWrapper.setIntervener4SolName(null);
                     intervenerFourWrapper.setIntervener4SolPhone(null);
+                    intervenerFourWrapper.setIntervener4SolicitorFirm(null);
+                    intervenerFourWrapper.setIntervener4SolicitorReference(null);
                 }
                 log.info("Intervener4 add default case role and organisation for case {}", caseId);
                 setDefaultOrgForintervenerFour(intervenerFourWrapper);
@@ -178,6 +180,8 @@ public class IntervenerService {
                     intervenerThreeWrapper.setIntervener3SolEmail(null);
                     intervenerThreeWrapper.setIntervener3SolName(null);
                     intervenerThreeWrapper.setIntervener3SolPhone(null);
+                    intervenerThreeWrapper.setIntervener3SolicitorFirm(null);
+                    intervenerThreeWrapper.setIntervener3SolicitorReference(null);
                 }
                 log.info("Intervener3 add default case role and organisation for case {}", caseId);
                 setDefaultOrgForintervenerThree(intervenerThreeWrapper);
@@ -222,6 +226,8 @@ public class IntervenerService {
                     intervenerTwoWrapper.setIntervener2SolEmail(null);
                     intervenerTwoWrapper.setIntervener2SolName(null);
                     intervenerTwoWrapper.setIntervener2SolPhone(null);
+                    intervenerTwoWrapper.setIntervener2SolicitorFirm(null);
+                    intervenerTwoWrapper.setIntervener2SolicitorReference(null);
                 }
                 log.info("Intervener2 add default case role and organisation for case {}", caseId);
                 setDefaultOrgForintervenerTwo(intervenerTwoWrapper);
@@ -267,6 +273,8 @@ public class IntervenerService {
                     intervenerOneWrapper.setIntervener1SolEmail(null);
                     intervenerOneWrapper.setIntervener1SolName(null);
                     intervenerOneWrapper.setIntervener1SolPhone(null);
+                    intervenerOneWrapper.setIntervener1SolicitorFirm(null);
+                    intervenerOneWrapper.setIntervener1SolicitorReference(null);
                 }
                 log.info("Intervener1 add default case role and organisation for case {}", caseId);
                 setDefaultOrgForintervenerOne(intervenerOneWrapper);
