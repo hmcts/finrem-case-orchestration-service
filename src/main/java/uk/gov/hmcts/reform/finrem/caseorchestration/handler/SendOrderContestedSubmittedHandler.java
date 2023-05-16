@@ -28,7 +28,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 
 @Slf4j
 @Service
@@ -181,16 +180,11 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     }
 
     private boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, String documentName) {
-        Optional<DynamicMultiSelectListElement> selectedOrder = isLatestGeneralOrderSelectedToShare(selectedDocs);
-        return selectedOrder.map(dynamicMultiSelectListElement -> dynamicMultiSelectListElement.getCode()
-            .equals(documentName)).orElse(false);
+        Optional<DynamicMultiSelectListElement> listElement = selectedDocs.getValue().stream()
+            .filter(e -> e.getCode().equals(documentName)).findAny();
+        return listElement.isPresent();
     }
 
-    private Optional<DynamicMultiSelectListElement> isLatestGeneralOrderSelectedToShare(DynamicMultiSelectList selectedDocs) {
-        List<DynamicMultiSelectListElement> selectedOrder = selectedDocs.getValue();
-        return selectedOrder.stream()
-            .filter(doc -> doc.getCode().equals(GENERAL_ORDER_LATEST_DOCUMENT)).findAny();
-    }
 
     private void updateCaseWithPostStateOption(FinremCaseDetails caseDetails, String userAuthorisation) {
 
