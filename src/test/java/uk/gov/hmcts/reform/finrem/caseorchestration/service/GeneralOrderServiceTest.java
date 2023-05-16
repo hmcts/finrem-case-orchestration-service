@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContes
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -335,9 +334,40 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertEquals("6 parties availablle ", 6, partyList.size());
     }
 
+    @Test
+    public void givenContestedCaseWhenRequestedHearingOrderToProcess_thenReturnList() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        List<DirectionOrderCollection> hearingOrderDocuments =  List.of(
+            DirectionOrderCollection.builder()
+                .id(uuid.toString())
+                .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
+                .build());
+
+        data.setUploadHearingOrder(hearingOrderDocuments);
+        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument("hmctsurl", "hmcts.pdf", "hmctsbinaryurl"));
+
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(
+            caseDocument("url", "moj.pdf", "binaryurl")));
+
+        DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+
+        data.setOrdersToShare(selectList);
+
+        List<CaseDocument> documentList = generalOrderService.hearingOrderToProcess(caseDetails, selectList);
+
+        assertEquals("One document available to share with other parties", 1, documentList.size());
+    }
+
+
     private DynamicMultiSelectListElement getDynamicElementList(CaseDocument caseDocument) {
         return DynamicMultiSelectListElement.builder()
-            .code(UUID.randomUUID().toString())
+            .code(uuid.toString())
             .label(caseDocument.getDocumentFilename())
             .build();
     }
@@ -359,17 +389,6 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
                 .data(new FinremCaseData()).build())
             .build();
     }
-
-    private CallbackRequest callbackRequest() {
-        return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CONTESTED.getCcdType()).id(123L).data(new HashMap<>()).build())
-            .caseDetailsBefore(CaseDetails.builder()
-                .caseTypeId(CONTESTED.getCcdType()).id(123L).data(new HashMap<>()).build())
-            .build();
-
-    }
-
 
     private CaseDetails consentedCaseDetails() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-consented.json")) {

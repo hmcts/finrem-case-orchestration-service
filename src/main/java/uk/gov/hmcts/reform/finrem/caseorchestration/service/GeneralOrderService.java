@@ -271,7 +271,7 @@ public class GeneralOrderService {
         return orders;
     }
 
-    public void addToList(DynamicMultiSelectListElement doc, DirectionOrderCollection obj,
+    private void addToList(DynamicMultiSelectListElement doc, DirectionOrderCollection obj,
                            List<CaseDocument> hearingDocumentPack, Long caseId) {
         if (obj.getId().equals(doc.getCode())) {
             CaseDocument caseDocument = obj.getValue().getUploadDraftDocument();
