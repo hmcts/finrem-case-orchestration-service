@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
@@ -171,6 +173,33 @@ public class DocumentHelperTest {
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         caseData.setDirectionDetailsCollection(emptyList());
         assertFalse(documentHelper.hasAnotherHearing(caseData));
+    }
+
+    @Test
+    public void getLatestAdditionalHearingDocument() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+        Optional<CaseDocument> latestDocumentNotAvailable = documentHelper.getLatestAdditionalHearingDocument(caseData);
+        assertFalse(latestDocumentNotAvailable.isPresent());
+
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = new ArrayList<>();
+        AdditionalHearingDocumentCollection doc1
+            = AdditionalHearingDocumentCollection.builder().value(AdditionalHearingDocument
+            .builder().document(caseDocument()).build()).build();
+        AdditionalHearingDocumentCollection doc2
+            = AdditionalHearingDocumentCollection.builder().value(AdditionalHearingDocument
+            .builder().document(caseDocument("url","abc.pdf","binaryURL")).build()).build();
+
+        additionalHearingDocuments.add(doc1);
+        additionalHearingDocuments.add(doc2);
+
+        caseData.setAdditionalHearingDocuments(additionalHearingDocuments);
+
+        Optional<CaseDocument> latestDocumentAvailable = documentHelper.getLatestAdditionalHearingDocument(caseData);
+
+        assertTrue(latestDocumentAvailable.isPresent());
+        assertEquals("abc.pdf", latestDocumentAvailable.get().getDocumentFilename());
     }
 
     @Test
