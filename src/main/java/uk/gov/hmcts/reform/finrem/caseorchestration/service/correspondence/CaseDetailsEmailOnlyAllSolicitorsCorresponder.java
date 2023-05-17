@@ -37,7 +37,7 @@ public abstract class CaseDetailsEmailOnlyAllSolicitorsCorresponder extends Emai
         }
     }
 
-    public void sendIntervenerCorrespondence(CaseDetails caseDetails) {
+    private void sendIntervenerCorrespondence(CaseDetails caseDetails) {
         if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener1SolEmail", CaseRole.INTVR_SOLICITOR_1)) {
             log.info("Sending email correspondence to intervener 1 for case: {}", caseDetails.getId());
             SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerOneSolicitor();

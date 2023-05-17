@@ -117,6 +117,10 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private DocumentHelper documentHelper;
     @MockBean
     private GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
+    @MockBean
+    private ContestedIntermHearingCorresponder contestedIntermHearingCorresponder;
+    @MockBean
+    private ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
@@ -287,27 +291,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
 
-        verify(notificationService).sendSolicitorToDraftOrderEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendDraftOrderEmailAsSolicitorOptedOutOfEmailComms() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-
-        notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendDraftOrderEmailAsRespondentSolicitorIsNominated() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(any())).thenReturn(false);
-
-        notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CaseDetails.class));
+        verify(contestedDraftOrderCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
@@ -317,27 +301,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendDraftOrderEmail(buildCallbackRequest());
 
-        verify(notificationService).sendSolicitorToDraftOrderEmailRespondent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldSendSolicitorToDraftOrderEmailRespondent_shouldNotSendEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
-
-        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldSendSolicitorToDraftOrderEmailRespondent_respSolicitorNotResponsible() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(false);
-
-        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any(CaseDetails.class));
+        verify(contestedDraftOrderCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
@@ -553,21 +517,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
 
-        verify(notificationService, times(1)).sendInterimNotificationEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, times(1)).sendInterimNotificationEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendInterimHearingWhenNotAgreed() {
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
-        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
-
-        verify(notificationService, never()).sendInterimNotificationEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, never()).sendInterimNotificationEmailToRespondentSolicitor(any(CaseDetails.class));
+        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
@@ -579,8 +529,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
 
-        verify(notificationService, times(1)).sendInterimNotificationEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, never()).sendInterimNotificationEmailToRespondentSolicitor(any(CaseDetails.class));
+        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
@@ -592,8 +541,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
 
-        verify(notificationService, never()).sendInterimNotificationEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, times(1)).sendInterimNotificationEmailToRespondentSolicitor(any(CaseDetails.class));
+        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
