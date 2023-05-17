@@ -32,6 +32,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.conse
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderNotApprovedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedDraftOrderCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedIntermHearingCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.GeneralOrderRaisedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfConsentedApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfContestedApplicantCorresponder;
@@ -78,6 +80,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
     ContestedConsentOrderNotApprovedCorresponder.class,
     ConsentOrderAvailableCorresponder.class,
     ConsentOrderNotApprovedSentCorresponder.class,
+    ContestedIntermHearingCorresponder.class,
+    ContestedDraftOrderCorresponder.class,
     DocumentHelper.class})
 public class NotificationsControllerTest extends BaseControllerTest {
 

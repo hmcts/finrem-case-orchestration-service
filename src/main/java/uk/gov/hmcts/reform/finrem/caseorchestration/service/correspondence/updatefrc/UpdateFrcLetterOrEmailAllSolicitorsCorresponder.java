@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsSingleLetterOrEmailAllPartiesCorresponder;
@@ -40,6 +41,12 @@ public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends CaseDetails
     public void emailRespondentSolicitor(CaseDetails caseDetails) {
         log.info("Sending email notification to Respondent Solicitor for 'Update Frc information' for case: {}", caseDetails.getId());
         notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(caseDetails);
+    }
+
+    @Override
+    public void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        log.info("Sending email notification to Intervener Solicitor for 'Update Frc information' for case: {}", caseDetails.getId());
+        notificationService.sendUpdateFrcInformationEmailToIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
     }
 
 }
