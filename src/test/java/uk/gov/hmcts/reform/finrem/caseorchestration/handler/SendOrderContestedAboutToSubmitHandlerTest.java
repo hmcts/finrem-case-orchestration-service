@@ -149,6 +149,52 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
     }
 
+    @Test
+    public void givenContestedCase_whenOrderAvailableToStampAndNoAdditionalDocumentUploaded_thenHandlerHandleRequest() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setPartiesOnCase(getParties());
+
+        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .build();
+
+        data.setOrdersToShare(selectedDocs);
+
+        when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
+        when(generalOrderService.hearingOrderToProcess(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
+            .thenReturn(caseDocument());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
+            = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+        assertEquals("selected parties on case", 6, caseData.getPartiesOnCase().getValue().size());
+        assertEquals(1, caseData.getFinalOrderCollection().size());
+        assertEquals(1, caseData.getIntv1OrderCollection().size());
+        assertNull(caseData.getIntv1AdditionalOrderDocsColl());
+        assertEquals(1, caseData.getIntv2OrderCollection().size());
+        assertNull(caseData.getIntv2AdditionalOrderDocsColl());
+        assertEquals(1, caseData.getIntv3OrderCollection().size());
+        assertNull(caseData.getIntv3AdditionalOrderDocsColl());
+        assertEquals(1, caseData.getIntv4OrderCollection().size());
+        assertNull(caseData.getIntv4AdditionalOrderDocsColl());
+
+        verify(genericDocumentService).stampDocument(any(), any(), any());
+        verify(documentHelper).getStampType(caseData);
+
+    }
+
     private DynamicMultiSelectList getParties() {
 
         List<DynamicMultiSelectListElement> list =  new ArrayList<>();
