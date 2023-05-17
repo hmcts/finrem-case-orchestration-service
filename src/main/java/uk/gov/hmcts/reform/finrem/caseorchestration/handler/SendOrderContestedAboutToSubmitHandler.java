@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -25,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 
 @Slf4j
@@ -75,7 +73,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 stampAndAddToCollection(caseDetails, orderToStamp, parties, userAuthorisation);
             });
 
-        } catch (InvalidCaseDataException e) {
+        } catch (RuntimeException e) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
         }
@@ -118,13 +116,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
             finalOrder.add(getIntervenerFinalOrderList(stampedDocs));
             caseData.setIntv1OrderCollection(finalOrder);
-            if (obj != null) {
-                List<IntervenerOrderCollection> additionalDoc =  Optional.ofNullable(caseData.getIntv1AdditionalOrderDocsColl())
-                    .orElse(new ArrayList<>());
-
-                additionalDoc.add(getIntervenerFinalOrderList(obj));
-                caseData.setIntv1AdditionalOrderDocsColl(additionalDoc);
-            }
+            addIntervener1AdditionalSupportingDocWithOrder(caseData, obj);
         }
 
         if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getValue()) || partyList.contains(CaseRole.INTVR_BARRISTER_2.getValue())) {
@@ -133,13 +125,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
             finalOrder.add(getIntervenerFinalOrderList(stampedDocs));
             caseData.setIntv2OrderCollection(finalOrder);
-            if (obj != null) {
-                List<IntervenerOrderCollection> additionalDoc =  Optional.ofNullable(caseData.getIntv2AdditionalOrderDocsColl())
-                    .orElse(new ArrayList<>());
-
-                additionalDoc.add(getIntervenerFinalOrderList(obj));
-                caseData.setIntv2AdditionalOrderDocsColl(additionalDoc);
-            }
+            addIntervener2AdditionalSupportingDocWithOrder(caseData, obj);
         }
 
         if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getValue()) || partyList.contains(CaseRole.INTVR_BARRISTER_3.getValue())) {
@@ -148,13 +134,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
             finalOrder.add(getIntervenerFinalOrderList(stampedDocs));
             caseData.setIntv3OrderCollection(finalOrder);
-            if (obj != null) {
-                List<IntervenerOrderCollection> additionalDoc =  Optional.ofNullable(caseData.getIntv3AdditionalOrderDocsColl())
-                    .orElse(new ArrayList<>());
-
-                additionalDoc.add(getIntervenerFinalOrderList(obj));
-                caseData.setIntv3AdditionalOrderDocsColl(additionalDoc);
-            }
+            addIntervener3AdditionalSupportingDocWithOrder(caseData, obj);
         }
 
         if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getValue()) || partyList.contains(CaseRole.INTVR_BARRISTER_4.getValue())) {
@@ -163,19 +143,51 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
             finalOrder.add(getIntervenerFinalOrderList(stampedDocs));
             caseData.setIntv4OrderCollection(finalOrder);
-            if (obj != null) {
-                List<IntervenerOrderCollection> additionalDoc =  Optional.ofNullable(caseData.getIntv4AdditionalOrderDocsColl())
-                    .orElse(new ArrayList<>());
+            addIntervener4AdditionalSupportingDocWithOrder(caseData, obj);
+        }
+    }
 
-                additionalDoc.add(getIntervenerFinalOrderList(obj));
-                caseData.setIntv4AdditionalOrderDocsColl(additionalDoc);
-            }
+    private void addIntervener4AdditionalSupportingDocWithOrder(FinremCaseData caseData, CaseDocument obj) {
+        if (obj != null) {
+            List<IntervenerOrderCollection> additionalDoc =  Optional.ofNullable(caseData.getIntv4AdditionalOrderDocsColl())
+                .orElse(new ArrayList<>());
+
+            additionalDoc.add(getIntervenerFinalOrderList(obj));
+            caseData.setIntv4AdditionalOrderDocsColl(additionalDoc);
+        }
+    }
+
+    private void addIntervener3AdditionalSupportingDocWithOrder(FinremCaseData caseData, CaseDocument obj) {
+        if (obj != null) {
+            List<IntervenerOrderCollection> additionalDoc =  Optional.ofNullable(caseData.getIntv3AdditionalOrderDocsColl())
+                .orElse(new ArrayList<>());
+
+            additionalDoc.add(getIntervenerFinalOrderList(obj));
+            caseData.setIntv3AdditionalOrderDocsColl(additionalDoc);
+        }
+    }
+
+    private void addIntervener2AdditionalSupportingDocWithOrder(FinremCaseData caseData, CaseDocument obj) {
+        if (obj != null) {
+            List<IntervenerOrderCollection> additionalDoc =  Optional.ofNullable(caseData.getIntv2AdditionalOrderDocsColl())
+                .orElse(new ArrayList<>());
+
+            additionalDoc.add(getIntervenerFinalOrderList(obj));
+            caseData.setIntv2AdditionalOrderDocsColl(additionalDoc);
+        }
+    }
+
+    private void addIntervener1AdditionalSupportingDocWithOrder(FinremCaseData caseData, CaseDocument obj) {
+        if (obj != null) {
+            List<IntervenerOrderCollection> additionalDoc =  Optional.ofNullable(caseData.getIntv1AdditionalOrderDocsColl())
+                .orElse(new ArrayList<>());
+            additionalDoc.add(getIntervenerFinalOrderList(obj));
+            caseData.setIntv1AdditionalOrderDocsColl(additionalDoc);
         }
     }
 
     private DirectionOrderCollection prepareFinalOrderList(CaseDocument document) {
         return DirectionOrderCollection.builder()
-            .id(UUID.randomUUID().toString())
             .value(DirectionOrder.builder().uploadDraftDocument(document).build())
             .build();
     }
