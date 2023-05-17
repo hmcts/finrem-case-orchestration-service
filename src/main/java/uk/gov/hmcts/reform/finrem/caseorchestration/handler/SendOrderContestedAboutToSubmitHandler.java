@@ -110,7 +110,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         }
 
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getValue()) || partyList.contains(CaseRole.INTVR_BARRISTER_1.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
             List<IntervenerOrderCollection> finalOrder =  Optional.ofNullable(caseData.getIntv1OrderCollection())
                 .orElse(new ArrayList<>());
 
@@ -119,7 +119,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             addIntervener1AdditionalSupportingDocWithOrder(caseData, obj);
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getValue()) || partyList.contains(CaseRole.INTVR_BARRISTER_2.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
             List<IntervenerOrderCollection> finalOrder =  Optional.ofNullable(caseData.getIntv2OrderCollection())
                 .orElse(new ArrayList<>());
 
@@ -128,7 +128,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             addIntervener2AdditionalSupportingDocWithOrder(caseData, obj);
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getValue()) || partyList.contains(CaseRole.INTVR_BARRISTER_3.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
             List<IntervenerOrderCollection> finalOrder =  Optional.ofNullable(caseData.getIntv3OrderCollection())
                 .orElse(new ArrayList<>());
 
@@ -137,7 +137,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             addIntervener3AdditionalSupportingDocWithOrder(caseData, obj);
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getValue()) || partyList.contains(CaseRole.INTVR_BARRISTER_4.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
             List<IntervenerOrderCollection> finalOrder =  Optional.ofNullable(caseData.getIntv4OrderCollection())
                 .orElse(new ArrayList<>());
 
