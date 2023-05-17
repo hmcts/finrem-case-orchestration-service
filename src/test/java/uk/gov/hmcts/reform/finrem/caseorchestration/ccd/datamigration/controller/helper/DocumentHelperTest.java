@@ -206,6 +206,11 @@ public class DocumentHelperTest {
     public void getHearingDocumentsAsBulkPrintDocuments() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+        List<BulkPrintDocument> hearingDocuments1
+            = documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER);
+        assertEquals(0, hearingDocuments1.size());
+
         DocumentCollection dc = DocumentCollection
             .builder()
             .value(caseDocument(DOCUMENT_URL, FILE_NAME, BINARY_URL))
@@ -215,9 +220,9 @@ public class DocumentHelperTest {
         caseData.setHearingOrderOtherDocuments(documentCollections);
 
         when(service.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
-        List<BulkPrintDocument> hearingDocuments = documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER);
-        assertEquals("app_docs.pdf", hearingDocuments.get(0).getFileName());
-        assertEquals(BINARY_URL, hearingDocuments.get(0).getBinaryFileUrl());
+        List<BulkPrintDocument> hearingDocuments2 = documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER);
+        assertEquals("app_docs.pdf", hearingDocuments2.get(0).getFileName());
+        assertEquals(BINARY_URL, hearingDocuments2.get(0).getBinaryFileUrl());
 
         verify(service).convertDocumentIfNotPdfAlready(any(), any());
     }

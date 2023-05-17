@@ -494,7 +494,8 @@ public class DocumentHelper {
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<DocumentCollection> pdfDocuments = new ArrayList<>();
-        List<DocumentCollection> documentCollections = data.getHearingOrderOtherDocuments();
+        List<DocumentCollection> documentCollections
+            = Optional.ofNullable(data.getHearingOrderOtherDocuments()).orElse(new ArrayList<>());
         if (!documentCollections.isEmpty()) {
             documentCollections.forEach(doc -> {
                 CaseDocument caseDocument = doc.getValue();
