@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationReq
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -42,10 +40,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TRANSFER_COURTS_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TRANSFER_COURTS_INSTRUCTIONS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTV1_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTV2_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTV3_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTV4_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED;
@@ -1042,29 +1036,5 @@ public class NotificationService {
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
         }
         return DEFAULT_EMAIL;
-    }
-
-    public boolean isIntervenerOneSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
-        return ObjectUtils.isNotEmpty(caseDetails.getData().get(INTV1_SOLICITOR_EMAIL))
-            && checkSolicitorIsDigitalService.isSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1.getValue());
-    }
-
-    public boolean isIntervenerTwoSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
-        return ObjectUtils.isNotEmpty(caseDetails.getData().get(INTV2_SOLICITOR_EMAIL))
-            && checkSolicitorIsDigitalService.isSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_2.getValue());
-    }
-
-    public boolean isIntervenerThreeSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
-        return ObjectUtils.isNotEmpty(caseDetails.getData().get(INTV3_SOLICITOR_EMAIL))
-            && checkSolicitorIsDigitalService.isSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_3.getValue());
-    }
-
-    public boolean isIntervenerFourSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
-        return ObjectUtils.isNotEmpty(caseDetails.getData().get(INTV4_SOLICITOR_EMAIL))
-            && checkSolicitorIsDigitalService.isSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_4.getValue());
     }
 }

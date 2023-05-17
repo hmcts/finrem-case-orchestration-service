@@ -54,10 +54,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTV1_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTV2_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTV3_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTV4_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING;
@@ -790,6 +786,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(true);
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
 
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
         CaseDetails caseDetails = CaseDetails.builder().id(123456780L).data(caseData).build();
 
         assertTrue(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
@@ -1014,65 +1011,6 @@ public class NotificationServiceTest extends BaseServiceTest {
                 verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails(), data);
                 verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_LIST_FOR_HEARING);
             }
-        });
-    }
-
-
-    @Test
-    public void shouldEmailIntervenerSolicitorWhenIntervenerSolicitorIsRegistered() {
-        when(checkSolicitorIsDigitalService.isSolicitorDigital(any(), any())).thenReturn(true);
-
-        CaseDetails caseDetails = CaseDetails.builder().id(123456780L).data(new HashMap<>()).build();
-        Map<String, Object> caseData = caseDetails.getData();
-        List<String> solicitorEmail = List.of(INTV1_SOLICITOR_EMAIL, INTV2_SOLICITOR_EMAIL,
-            INTV3_SOLICITOR_EMAIL, INTV4_SOLICITOR_EMAIL);
-        solicitorEmail.forEach(email -> {
-            caseData.put(email, "inter1@test.com");
-            assertTrue(notificationService.isIntervenerOneSolicitorDigitalAndEmailPopulated(caseDetails));
-        });
-    }
-
-    @Test
-    public void shouldNotEmailIntervenerSolicitorWhenIntervenerSolicitorIsNoRegistered() {
-        when(checkSolicitorIsDigitalService.isSolicitorDigital(any(), any())).thenReturn(false);
-        CaseDetails caseDetails = CaseDetails.builder().id(123456780L).data(new HashMap<>()).build();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        List<String> solicitorEmail = List.of(INTV1_SOLICITOR_EMAIL, INTV2_SOLICITOR_EMAIL,
-            INTV3_SOLICITOR_EMAIL, INTV4_SOLICITOR_EMAIL);
-        solicitorEmail.forEach(email -> {
-            caseData.put(email, "inter1@test.com");
-            assertFalse(notificationService.isIntervenerOneSolicitorDigitalAndEmailPopulated(caseDetails));
-        });
-    }
-
-    @Test
-    public void shouldNotEmailIntervenerSolicitorWhenIntervenerSolicitorIsRegisteredButEmailIsMissing() {
-        when(checkSolicitorIsDigitalService.isSolicitorDigital(any(), any())).thenReturn(true);
-        CaseDetails caseDetails = CaseDetails.builder().id(123456780L).data(new HashMap<>()).build();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        List<String> solicitorEmail = List.of(INTV1_SOLICITOR_EMAIL, INTV2_SOLICITOR_EMAIL,
-            INTV3_SOLICITOR_EMAIL, INTV4_SOLICITOR_EMAIL);
-        solicitorEmail.forEach(email -> {
-            caseData.put(email, null);
-            assertFalse(notificationService.isIntervenerOneSolicitorDigitalAndEmailPopulated(caseDetails));
-            caseData.put(email, "");
-            assertFalse(notificationService.isIntervenerOneSolicitorDigitalAndEmailPopulated(caseDetails));
-        });
-    }
-
-    @Test
-    public void shouldNotEmailIntervenerSolicitorWhenIntervenerSolicitorIsNoRegisteredButEmailProvided() {
-        when(checkSolicitorIsDigitalService.isSolicitorDigital(any(), any())).thenReturn(false);
-        CaseDetails caseDetails = CaseDetails.builder().id(123456780L).data(new HashMap<>()).build();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        List<String> solicitorEmail = List.of(INTV1_SOLICITOR_EMAIL, INTV2_SOLICITOR_EMAIL,
-            INTV3_SOLICITOR_EMAIL, INTV4_SOLICITOR_EMAIL);
-        solicitorEmail.forEach(email -> {
-            caseData.put(email, null);
-            assertFalse(notificationService.isIntervenerOneSolicitorDigitalAndEmailPopulated(caseDetails));
         });
     }
 
