@@ -59,7 +59,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
@@ -196,10 +195,11 @@ public class DocumentHelper {
 
 
     public boolean hasAnotherHearing(FinremCaseData caseData) {
-        List<DirectionDetailCollection> directionDetailsCollection = caseData.getDirectionDetailsCollection();
-        // use a utility to handle directionDetailsCollectionList being null as well as empty
-        return !directionDetailsCollection.isEmpty() && YES_VALUE.equalsIgnoreCase(
-            nullToEmpty(directionDetailsCollection.get(0).getValue().getIsAnotherHearingYN()));
+        List<DirectionDetailCollection> directionDetailsCollection
+            = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
+        Optional<DirectionDetailCollection> detailCollection
+            = directionDetailsCollection.stream().filter(e -> e.getValue().getIsAnotherHearingYN().isYes()).findAny();
+        return detailCollection.isPresent();
     }
 
     public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {

@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -18,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -28,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
@@ -267,6 +271,10 @@ class SendOrderContestedSubmittedHandlerTest {
         data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
         data.setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
+        data.setAdditionalDocument(caseDocument());
+
+        data.setDirectionDetailsCollection(singletonList(DirectionDetailCollection.builder()
+            .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build()));
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
@@ -274,6 +282,10 @@ class SendOrderContestedSubmittedHandlerTest {
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
         when(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument())).thenReturn(getBulkPrintDocument(caseDocument()));
         when(generalOrderService.hearingOrderToProcess(caseDetails, data.getOrdersToShare())).thenReturn(of(caseDocument()));
+        when(documentHelper.hasAnotherHearing(data)).thenReturn(true);
+        when(documentHelper.getLatestAdditionalHearingDocument(data)).thenReturn(Optional.of(caseDocument()));
+        when(documentHelper.getHearingDocumentsAsBulkPrintDocuments(data, AUTH_TOKEN))
+            .thenReturn(singletonList(getBulkPrintDocument(caseDocument())));
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
