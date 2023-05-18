@@ -216,14 +216,14 @@ public class GeneralOrderService {
 
         if (hearingOrderDocuments != null) {
             hearingOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
-                "Approved Order" + " - " + obj.getValue().getUploadDraftDocument().getDocumentFilename())));
+                "Case documents tab [Approved Order]" + " - " + obj.getValue().getUploadDraftDocument().getDocumentFilename())));
         }
 
         if (ObjectUtils.isNotEmpty(data.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
             CaseDocument orderLatestDocument = data.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
             String orderLatestDocumentFilename = orderLatestDocument.getDocumentFilename();
             dynamicListElements.add(getDynamicMultiSelectListElement(orderLatestDocumentFilename,
-                "Lastest general order" + " - " + orderLatestDocumentFilename));
+                "Orders tab [Lastest general order]" + " - " + orderLatestDocumentFilename));
         }
 
         DynamicMultiSelectList selectedOrders = data.getOrdersToShare();
