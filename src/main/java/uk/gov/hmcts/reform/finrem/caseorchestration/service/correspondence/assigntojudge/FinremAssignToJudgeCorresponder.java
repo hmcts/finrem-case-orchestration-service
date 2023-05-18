@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -37,6 +38,11 @@ public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAl
     @Override
     protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
         notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+    }
+
+    @Override
+    protected void emailIntervenerSolicitor(FinremCaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+        notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
     }
 
 }

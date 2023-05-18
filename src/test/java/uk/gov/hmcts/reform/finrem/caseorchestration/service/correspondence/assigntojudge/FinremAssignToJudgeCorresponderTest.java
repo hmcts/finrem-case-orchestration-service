@@ -8,7 +8,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -38,7 +41,7 @@ public class FinremAssignToJudgeCorresponderTest {
     @Before
     public void setUp() throws Exception {
         assignToJudgeCorresponder = new FinremAssignToJudgeCorresponder(notificationService, bulkPrintService, assignedToJudgeDocumentService);
-        caseDetails = FinremCaseDetails.builder().build();
+        caseDetails = FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
         caseDocument = CaseDocument.builder().build();
         when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
@@ -80,6 +83,74 @@ public class FinremAssignToJudgeCorresponderTest {
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+    }
+
+    @Test
+    public void emailIntervenerSolicitorShouldSendToIntervenerOne() {
+        String intervenerEmail = "1SolEmail";
+        caseDetails.getData().getIntervenerOneWrapper().setIntervener1SolEmail(intervenerEmail);
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
+            .builder().build();
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails,
+            intervenerEmail, CaseRole.INTVR_SOLICITOR_1)).thenReturn(true);
+        when(notificationService.getFinremCaseDataKeysForIntervenerOneSolicitor(caseDetails.getData())).thenReturn(dataKeysWrapper);
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails,
+            intervenerEmail, CaseRole.INTVR_SOLICITOR_1);
+        verify(notificationService).getFinremCaseDataKeysForIntervenerOneSolicitor(caseDetails.getData());
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
+    }
+
+    @Test
+    public void emailIntervenerSolicitorShouldSendToIntervenerTwo() {
+        String intervenerEmail = "2SolEmail";
+        caseDetails.getData().getIntervenerTwoWrapper().setIntervener2SolEmail(intervenerEmail);
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
+            .builder().build();
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails,
+            intervenerEmail, CaseRole.INTVR_SOLICITOR_2)).thenReturn(true);
+        when(notificationService.getFinremCaseDataKeysForIntervenerTwoSolicitor(caseDetails.getData())).thenReturn(dataKeysWrapper);
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails,
+            intervenerEmail, CaseRole.INTVR_SOLICITOR_2);
+        verify(notificationService).getFinremCaseDataKeysForIntervenerTwoSolicitor(caseDetails.getData());
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
+    }
+
+    @Test
+    public void emailIntervenerSolicitorShouldSendToIntervenerThree() {
+        String intervenerEmail = "3SolEmail";
+        caseDetails.getData().getIntervenerThreeWrapper().setIntervener3SolEmail(intervenerEmail);
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
+            .builder().build();
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails,
+            intervenerEmail, CaseRole.INTVR_SOLICITOR_3)).thenReturn(true);
+        when(notificationService.getFinremCaseDataKeysForIntervenerThreeSolicitor(caseDetails.getData())).thenReturn(dataKeysWrapper);
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails,
+            intervenerEmail, CaseRole.INTVR_SOLICITOR_3);
+        verify(notificationService).getFinremCaseDataKeysForIntervenerThreeSolicitor(caseDetails.getData());
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
+    }
+
+    @Test
+    public void emailIntervenerSolicitorShouldSendToIntervenerFour() {
+        String intervenerEmail = "4SolEmail";
+        caseDetails.getData().getIntervenerFourWrapper().setIntervener4SolEmail(intervenerEmail);
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
+            .builder().build();
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails,
+            intervenerEmail, CaseRole.INTVR_SOLICITOR_4)).thenReturn(true);
+        when(notificationService.getFinremCaseDataKeysForIntervenerFourSolicitor(caseDetails.getData())).thenReturn(dataKeysWrapper);
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails,
+            intervenerEmail, CaseRole.INTVR_SOLICITOR_4);
+        verify(notificationService).getFinremCaseDataKeysForIntervenerFourSolicitor(caseDetails.getData());
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
     }
 
     @Test
