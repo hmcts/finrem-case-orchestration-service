@@ -86,7 +86,7 @@
       "solicitorAgreeToReceiveEmails": "Yes",
       "generalLetterAddressTo": "applicantSolicitor",
       "generalLetterRecipient": "",
-      "generalLetterRecipientAddress": "",
+      "generalLetterRecipientAddress": null,
       "generalLetterCreatedBy": "",
       "generalLetterBody": "Test content for the letter body",
       "generalEmailRecipient": "b1@b.com",
