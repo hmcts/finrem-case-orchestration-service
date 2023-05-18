@@ -19,19 +19,19 @@ public class BulkPrintDocumentService {
     private final EvidenceManagementDownloadService service;
 
     public List<byte[]> downloadDocuments(BulkPrintRequest bulkPrintRequest) {
-        log.info("Downloading document for bulk print for case id {}", bulkPrintRequest.getCaseId());
+        String caseId = bulkPrintRequest.getCaseId();
+        log.info("Downloading document for bulk print for case id {}", caseId);
 
         List<byte[]> documents = bulkPrintRequest.getBulkPrintDocuments().stream().map(bulkPrintDocument -> {
             ResponseEntity<byte[]> response = service.download(bulkPrintDocument.getBinaryFileUrl());
             if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("Download failed for url {}, filename {} ", bulkPrintDocument.getBinaryFileUrl(),
-                    bulkPrintDocument.getFileName());
-                throw new RuntimeException(String.format("Unexpected error DM store: %s ", response.getStatusCode()));
+                log.error("Download failed for url {}, filename {} for caseId{}", bulkPrintDocument.getBinaryFileUrl(),
+                    bulkPrintDocument.getFileName(), caseId);
+                throw new RuntimeException(String.format("Unexpected error DM store: %s for caseId %s", response.getStatusCode(), caseId));
             }
             return response.getBody();
         }).collect(Collectors.toList());
-        log.info("Download document count for bulk print {} for case id {} ", documents.size(),
-            bulkPrintRequest.getCaseId());
+        log.info("Download document count for bulk print {} for case id {} ", documents.size(), caseId);
         return documents;
     }
 }
