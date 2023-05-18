@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseExcep
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -64,6 +65,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     private CaseDataService caseDataService;
     @MockBean
     private NotificationService notificationService;
+    @MockBean
+    private GenerateCoverSheetService coverSheetService;
     @MockBean
     private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
@@ -157,6 +160,11 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
         verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(coverSheetService).generateApplicantCoverSheet(any(CaseDetails.class), any());
+        verify(coverSheetService).generateRespondentCoverSheet(any(CaseDetails.class), any());
     }
 
     @Test
