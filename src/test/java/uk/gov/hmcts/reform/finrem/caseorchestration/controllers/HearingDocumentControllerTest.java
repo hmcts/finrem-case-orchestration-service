@@ -151,12 +151,18 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantAddressConfidential(any())).thenReturn(false);
+        when(caseDataService.isRespondentAddressConfidential(any())).thenReturn(false);
+        when(coverSheetService.generateApplicantCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
+        when(coverSheetService.generateRespondentCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetApp.document_url", is(DOC_URL)))
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes.document_url", is(DOC_URL)));
 
         verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
         verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
@@ -174,12 +180,19 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantAddressConfidential(any())).thenReturn(true);
+        when(caseDataService.isRespondentAddressConfidential(any())).thenReturn(true);
+        when(coverSheetService.generateApplicantCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
+        when(coverSheetService.generateRespondentCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetAppConfidential.document_url", is(DOC_URL)))
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetResConfidential.document_url", is(DOC_URL)));
+
 
 
         verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
