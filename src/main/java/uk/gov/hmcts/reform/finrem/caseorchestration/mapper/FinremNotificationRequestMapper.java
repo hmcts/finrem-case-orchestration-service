@@ -67,38 +67,6 @@ public class FinremNotificationRequestMapper {
             .build();
     }
 
-    public SolicitorCaseDataKeysWrapper getIntervenerOneSolicitorCaseData(FinremCaseData caseData) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(caseData.getIntervenerOneWrapper().getIntervener1SolEmail())
-            .solicitorNameKey(caseData.getIntervenerOneWrapper().getIntervener1SolName())
-            .solicitorReferenceKey(caseData.getIntervenerOneWrapper().getIntervener1SolicitorReference())
-            .build();
-    }
-
-    public SolicitorCaseDataKeysWrapper getIntervenerTwoSolicitorCaseData(FinremCaseData caseData) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(caseData.getIntervenerTwoWrapper().getIntervener2SolEmail())
-            .solicitorNameKey(caseData.getIntervenerTwoWrapper().getIntervener2SolName())
-            .solicitorReferenceKey(caseData.getIntervenerTwoWrapper().getIntervener2SolicitorReference())
-            .build();
-    }
-
-    public SolicitorCaseDataKeysWrapper getIntervenerThreeSolicitorCaseData(FinremCaseData caseData) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(caseData.getIntervenerThreeWrapper().getIntervener3SolEmail())
-            .solicitorNameKey(caseData.getIntervenerThreeWrapper().getIntervener3SolName())
-            .solicitorReferenceKey(caseData.getIntervenerThreeWrapper().getIntervener3SolicitorReference())
-            .build();
-    }
-
-    public SolicitorCaseDataKeysWrapper getIntervenerFourolicitorCaseData(FinremCaseData caseData) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(caseData.getIntervenerFourWrapper().getIntervener4SolEmail())
-            .solicitorNameKey(caseData.getIntervenerFourWrapper().getIntervener4SolName())
-            .solicitorReferenceKey(caseData.getIntervenerFourWrapper().getIntervener4SolicitorReference())
-            .build();
-    }
-
     private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(FinremCaseDetails caseDetails) {
         return getLastRepresentationUpdate(caseDetails).getParty().equalsIgnoreCase(RESPONDENT);
     }
