@@ -168,6 +168,30 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void generateAdditionalHearingDocumentAndConfidentialCoversheet() throws Exception {
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/bulkprint/bulk-print-additional-hearing-confidential.json")).toURI()));
+
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+
+        verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(coverSheetService).generateApplicantCoverSheet(any(CaseDetails.class), any());
+        verify(coverSheetService).generateRespondentCoverSheet(any(CaseDetails.class), any());
+    }
+
+    @Test
     public void generateHearingDocumentDirectionOrder_isAnotherHearingTrue() throws Exception {
         mvc.perform(post(DIRECTION_ORDER_URL)
                 .content(requestContent.toString())
