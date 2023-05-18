@@ -36,8 +36,8 @@ public class ContestedDraftOrderCorresponder extends CaseDetailsEmailOnlyAllSoli
     }
 
     @Override
-    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         log.info("Sending email notification to Intervener Solicitor for 'Draft Order' for case: {}", caseDetails.getId());
-        notificationService.sendSolicitorToDraftOrderEmailIntervener(caseDetails, solicitorCaseDataKeysWrapper);
+        notificationService.sendSolicitorToDraftOrderEmailIntervener(caseDetails, caseDataKeysWrapper);
     }
 }

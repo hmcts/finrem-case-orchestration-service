@@ -58,14 +58,14 @@ public class GeneralOrderRaisedCorresponder extends CaseDetailsEmailOnlyAllSolic
     }
 
     @Override
-    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         if (caseDataService.isConsentedInContestedCase(caseDetails)) {
             log.info("Sending email notification to intervener Solicitor for 'Contested consent General Order' for case id: {}",
                 caseDetails.getId());
-            notificationService.sendContestedConsentGeneralOrderEmailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+            notificationService.sendContestedConsentGeneralOrderEmailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
         } else {
             log.info("Sending email notification to intervener solicitor for 'Contested General Order' for case id: {}", caseDetails.getId());
-            notificationService.sendContestedGeneralOrderEmailIntervener(caseDetails, solicitorCaseDataKeysWrapper);
+            notificationService.sendContestedGeneralOrderEmailIntervener(caseDetails, caseDataKeysWrapper);
         }
 
     }

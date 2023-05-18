@@ -24,7 +24,7 @@ public abstract class MultiLetterOrEmailAllPartiesCorresponder<D> extends EmailA
 
     protected abstract void emailRespondentSolicitor(D caseDetails);
 
-    protected abstract void emailIntervenerSolicitor(D caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper);
+    protected abstract void emailIntervenerSolicitor(D caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper);
 
     public abstract List<BulkPrintDocument> getDocumentsToPrint(D caseDetails);
 }

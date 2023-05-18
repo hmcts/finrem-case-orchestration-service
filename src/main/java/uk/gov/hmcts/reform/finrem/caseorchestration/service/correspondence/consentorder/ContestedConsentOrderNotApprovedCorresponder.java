@@ -32,9 +32,9 @@ public class ContestedConsentOrderNotApprovedCorresponder extends CaseDetailsEma
     }
 
     @Override
-    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         log.info("Sending email notification to Intervener Solicitor for 'Contested Consent Order Not Approved' for case: {}", caseDetails.getId());
-        notificationService.sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+        notificationService.sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
 
     }
 }

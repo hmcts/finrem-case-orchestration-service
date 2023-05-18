@@ -30,8 +30,8 @@ public class ConsentOrderAvailableCorresponder extends CaseDetailsEmailOnlyAllSo
     }
 
     @Override
-    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         log.info("case - {}: Sending email notification for to Intervener Solicitor for 'Consent Order Available'", caseDetails.getId());
-        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
     }
 }

@@ -40,23 +40,23 @@ public abstract class CaseDetailsEmailOnlyAllSolicitorsCorresponder extends Emai
     private void sendIntervenerCorrespondence(CaseDetails caseDetails) {
         if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener1SolEmail", CaseRole.INTVR_SOLICITOR_1)) {
             log.info("Sending email correspondence to intervener 1 for case: {}", caseDetails.getId());
-            SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerOneSolicitor();
-            this.emailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+            SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerOneSolicitor();
+            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
         }
         if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener2SolEmail", CaseRole.INTVR_SOLICITOR_2)) {
             log.info("Sending email correspondence to intervener 2 for case: {}", caseDetails.getId());
-            final SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerTwoSolicitor();
-            this.emailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+            final SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerTwoSolicitor();
+            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
         }
         if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener3SolEmail", CaseRole.INTVR_SOLICITOR_3)) {
             log.info("Sending email correspondence to intervener 3 for case: {}", caseDetails.getId());
-            final SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerThreeSolicitor();
-            this.emailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+            final SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerThreeSolicitor();
+            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
         }
         if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener4SolEmail", CaseRole.INTVR_SOLICITOR_4)) {
             log.info("Sending email correspondence to intervener 4 for case: {}", caseDetails.getId());
-            final SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerFourSolicitor();
-            this.emailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+            final SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerFourSolicitor();
+            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
         }
     }
 
@@ -76,6 +76,6 @@ public abstract class CaseDetailsEmailOnlyAllSolicitorsCorresponder extends Emai
 
     protected abstract void emailRespondentSolicitor(CaseDetails caseDetails);
 
-    protected abstract void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper);
+    protected abstract void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper);
 
 }

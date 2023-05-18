@@ -30,8 +30,8 @@ public class ConsentOrderNotApprovedSentCorresponder extends CaseDetailsEmailOnl
     }
 
     @Override
-    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         log.info("Sending email notification to Intervener Solicitor about consent order not approved being sent for case: {}", caseDetails.getId());
-        notificationService.sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+        notificationService.sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
     }
 }

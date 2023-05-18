@@ -30,8 +30,8 @@ public abstract class HearingCorresponder extends CaseDetailsMultiLetterOrEmailA
     }
 
     @Override
-    public void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
-        notificationService.sendPrepareForHearingEmailIntervener(caseDetails, solicitorCaseDataKeysWrapper);
+    public void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+        notificationService.sendPrepareForHearingEmailIntervener(caseDetails, caseDataKeysWrapper);
     }
 
 

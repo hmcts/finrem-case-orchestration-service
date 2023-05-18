@@ -44,9 +44,9 @@ public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends CaseDetails
     }
 
     @Override
-    public void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+    public void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         log.info("Sending email notification to Intervener Solicitor for 'Update Frc information' for case: {}", caseDetails.getId());
-        notificationService.sendUpdateFrcInformationEmailToIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+        notificationService.sendUpdateFrcInformationEmailToIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
     }
 
 }

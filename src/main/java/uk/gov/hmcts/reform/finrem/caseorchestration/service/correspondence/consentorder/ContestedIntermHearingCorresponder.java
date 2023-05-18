@@ -34,8 +34,8 @@ public class ContestedIntermHearingCorresponder extends CaseDetailsEmailOnlyAllS
     }
 
     @Override
-    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         log.info("Sending email notification to Intervener Solicitor for 'interim hearing' for case: {}", caseDetails.getId());
-        notificationService.sendInterimNotificationEmailToIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+        notificationService.sendInterimNotificationEmailToIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
     }
 }

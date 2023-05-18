@@ -30,9 +30,9 @@ public class ConsentOrderMadeCorresponder extends CaseDetailsEmailOnlyAllSolicit
     }
 
     @Override
-    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made' for case: {}", caseDetails.getId());
-        notificationService.sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+        notificationService.sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
     }
 }
 

@@ -34,8 +34,8 @@ public class ContestedSendOrderCorresponder extends CaseDetailsEmailOnlyAllSolic
     }
 
     @Override
-    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         log.info("Sending email notification to Intervener Solicitor for 'Contest Order Approved' for case: {}", caseDetails.getId());
-        notificationService.sendContestOrderApprovedEmailIntervener(caseDetails, solicitorCaseDataKeysWrapper);
+        notificationService.sendContestOrderApprovedEmailIntervener(caseDetails, caseDataKeysWrapper);
     }
 }
