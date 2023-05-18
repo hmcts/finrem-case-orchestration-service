@@ -64,8 +64,10 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             this.emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
+            String recipient = DocumentHelper.PaperNotificationRecipient.APPLICANT.toString();
             bulkPrintService.sendDocumentForPrint(
-                getAppRepDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails);
+                getAppRepDocumentToPrint(caseDetails, authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, recipient);
         }
     }
 
@@ -76,8 +78,10 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             this.emailRespondentSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
+            String recipient = DocumentHelper.PaperNotificationRecipient.RESPONDENT.toString();
             bulkPrintService.sendDocumentForPrint(
-                getAppRepDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
+                getAppRepDocumentToPrint(caseDetails, authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, recipient);
         }
     }
 
@@ -87,12 +91,13 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             //send email
         } else {
             log.info("Sending letter correspondence to Intervener One for case: {}", caseDetails.getId());
+            String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE.toString();
             caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(
                 intervenerOneDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerOneWrapper()));
 
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails);
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails, recipient);
         }
     }
 
@@ -102,12 +107,13 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             //send email
         } else {
             log.info("Sending letter correspondence to Intervener Two for case: {}", caseDetails.getId());
+            String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO.toString();
             caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(
                 intervenerTwoDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerTwoWrapper()));
 
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails);
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails, recipient);
         }
     }
 
@@ -117,12 +123,13 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             //send email
         } else {
             log.info("Sending letter correspondence to Intervener Three for case: {}", caseDetails.getId());
+            String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE.toString();
             caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(
                 intervenerThreeDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerThreeWrapper()));
 
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails);
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails, recipient);
         }
     }
 
@@ -132,12 +139,13 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             //send email
         } else {
             log.info("Sending letter correspondence to Intervener Four for case: {}", caseDetails.getId());
+            String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR.toString();
             caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(
                 intervenerFourDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerFourWrapper()));
 
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails);
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails, recipient);
         }
     }
 
