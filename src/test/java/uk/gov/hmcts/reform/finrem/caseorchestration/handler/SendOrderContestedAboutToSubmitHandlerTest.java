@@ -18,8 +18,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.util.ArrayList;
@@ -32,8 +34,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -52,6 +56,12 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     private DocumentHelper documentHelper;
     @Mock
     private GeneralOrderService generalOrderService;
+
+    @Mock
+    private BulkPrintService bulkPrintService;
+    @Mock
+    private NotificationService notificationService;
+
 
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
@@ -76,13 +86,11 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
             = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
-        DynamicMultiSelectList selectedOrders = caseData.getOrdersToShare();
 
-        assertNull(selectedOrders);
         assertNull(caseData.getPartiesOnCase());
 
         verify(generalOrderService).getParties(callbackRequest.getCaseDetails());
-        verify(generalOrderService).hearingOrderToProcess(callbackRequest.getCaseDetails(), selectedOrders);
+        verify(generalOrderService).hearingOrdersToShare(callbackRequest.getCaseDetails(), null);
 
         verify(genericDocumentService, never()).stampDocument(any(), any(), any());
         verify(documentHelper, never()).getStampType(caseData);
@@ -94,7 +102,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        when(generalOrderService.hearingOrderToProcess(caseDetails, caseDetails.getData().getOrdersToShare()))
+        when(generalOrderService.hearingOrdersToShare(caseDetails, caseDetails.getData().getOrdersToShare()))
             .thenThrow(RuntimeException.class);
 
         Exception exception = Assert.assertThrows(RuntimeException.class,
@@ -113,6 +121,9 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
             .value(List.of(DynamicMultiSelectListElement.builder()
                 .code(uuid)
                 .label("app_docs.pdf")
+                .build(), DynamicMultiSelectListElement.builder()
+                .code("app_docs.pdf")
+                .label("app_docs.pdf")
                 .build()))
             .listItems(List.of(DynamicMultiSelectListElement.builder()
                 .code(uuid)
@@ -122,9 +133,13 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.setOrdersToShare(selectedDocs);
         data.setAdditionalDocument(caseDocument());
+        data.setOrderApprovedCoverLetter(caseDocument());
+        List<CaseDocument> caseDocuments  = new ArrayList<>();
+        caseDocuments.add(caseDocument());
+        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrderToProcess(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(caseDocuments);
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
             .thenReturn(caseDocument());
@@ -135,16 +150,15 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
         assertEquals("selected parties on case", 6, caseData.getPartiesOnCase().getValue().size());
         assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertEquals(1, caseData.getIntv1OrderCollection().size());
-        assertEquals(1, caseData.getIntv1AdditionalOrderDocsColl().size());
-        assertEquals(1, caseData.getIntv2OrderCollection().size());
-        assertEquals(1, caseData.getIntv2AdditionalOrderDocsColl().size());
-        assertEquals(1, caseData.getIntv3OrderCollection().size());
-        assertEquals(1, caseData.getIntv3AdditionalOrderDocsColl().size());
-        assertEquals(1, caseData.getIntv4OrderCollection().size());
-        assertEquals(1, caseData.getIntv4AdditionalOrderDocsColl().size());
+        assertEquals(3, caseData.getIntv1OrderCollection().size());
+        assertEquals(3, caseData.getAppOrderCollection().size());
+        assertEquals(3, caseData.getRespOrderCollection().size());
 
         verify(genericDocumentService).stampDocument(any(), any(), any());
+        verify(bulkPrintService, times(2)).printApplicantDocuments(any(FinremCaseDetails.class), any(), anyList());
+        verify(bulkPrintService, times(2)).printRespondentDocuments(any(FinremCaseDetails.class), any(), anyList());
+        verify(notificationService, times(2)).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
+        verify(notificationService, times(2)).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(documentHelper).getStampType(caseData);
 
     }
@@ -170,7 +184,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         data.setOrdersToShare(selectedDocs);
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrderToProcess(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
             .thenReturn(caseDocument());
@@ -181,15 +195,12 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
         assertEquals("selected parties on case", 6, caseData.getPartiesOnCase().getValue().size());
         assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertEquals(1, caseData.getIntv1OrderCollection().size());
-        assertNull(caseData.getIntv1AdditionalOrderDocsColl());
-        assertEquals(1, caseData.getIntv2OrderCollection().size());
-        assertNull(caseData.getIntv2AdditionalOrderDocsColl());
-        assertEquals(1, caseData.getIntv3OrderCollection().size());
-        assertNull(caseData.getIntv3AdditionalOrderDocsColl());
-        assertEquals(1, caseData.getIntv4OrderCollection().size());
-        assertNull(caseData.getIntv4AdditionalOrderDocsColl());
+        assertEquals(2, caseData.getIntv1OrderCollection().size());
 
+        verify(bulkPrintService).printApplicantDocuments(any(FinremCaseDetails.class), any(), anyList());
+        verify(bulkPrintService).printRespondentDocuments(any(FinremCaseDetails.class), any(), anyList());
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
+        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(genericDocumentService).stampDocument(any(), any(), any());
         verify(documentHelper).getStampType(caseData);
 

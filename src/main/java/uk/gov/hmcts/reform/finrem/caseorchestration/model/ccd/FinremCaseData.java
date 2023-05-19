@@ -247,17 +247,12 @@ public class FinremCaseData {
     private List<DocumentCollection> hearingOrderOtherDocuments;
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;
-    private List<DirectionOrderCollection> additionalOrderDocsCollection;
-    private List<IntervenerOrderCollection> intv1OrderCollection;
-    private List<IntervenerOrderCollection> intv2OrderCollection;
-    private List<IntervenerOrderCollection> intv3OrderCollection;
-    private List<IntervenerOrderCollection> intv4OrderCollection;
-    private List<IntervenerOrderCollection> intv1AdditionalOrderDocsColl;
-    private List<IntervenerOrderCollection> intv2AdditionalOrderDocsColl;
-    private List<IntervenerOrderCollection> intv3AdditionalOrderDocsColl;
-    private List<IntervenerOrderCollection> intv4AdditionalOrderDocsColl;
-
-
+    private List<ApprovedOrderCollection> appOrderCollection;
+    private List<ApprovedOrderCollection> respOrderCollection;
+    private List<ApprovedOrderCollection> intv1OrderCollection;
+    private List<ApprovedOrderCollection> intv2OrderCollection;
+    private List<ApprovedOrderCollection> intv3OrderCollection;
+    private List<ApprovedOrderCollection> intv4OrderCollection;
     private List<JudgeNotApprovedReasonsCollection> judgeNotApprovedReasons;
     private JudgeType refusalOrderJudgeType;
     private String refusalOrderJudgeName;

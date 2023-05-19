@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
@@ -482,6 +483,14 @@ public class DocumentHelper {
             .toList();
     }
 
+    public List<BulkPrintDocument> getBulkPrintDocuments(List<ApprovedOrderCollection> orderColl) {
+        return orderColl.stream()
+            .map(o -> BulkPrintDocument.builder().binaryFileUrl(o.getValue().getCaseDocument().getDocumentBinaryUrl())
+                .fileName(o.getValue().getCaseDocument().getDocumentFilename())
+                .build())
+            .toList();
+    }
+
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
         CaseDocument caseDocument = nullCheckAndConvertToCaseDocument(data.get(documentName));
         return caseDocument != null
@@ -490,9 +499,9 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
-    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(FinremCaseData data, String authorisationToken) {
+    public List<CaseDocument> getHearingDocumentsAsPdfDocuments(FinremCaseData data, String authorisationToken) {
 
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        List<CaseDocument> documents = new ArrayList<>();
         List<DocumentCollection> pdfDocuments = new ArrayList<>();
         List<DocumentCollection> documentCollections
             = Optional.ofNullable(data.getHearingOrderOtherDocuments()).orElse(new ArrayList<>());
@@ -501,11 +510,11 @@ public class DocumentHelper {
                 CaseDocument caseDocument = doc.getValue();
                 CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
                 pdfDocuments.add(DocumentCollection.builder().value(pdfDocument).build());
-                bulkPrintDocuments.add(getCaseDocumentAsBulkPrintDocument(pdfDocument));
+                documents.add(pdfDocument);
             });
             data.setHearingOrderOtherDocuments(pdfDocuments);
         }
-        return bulkPrintDocuments;
+        return documents;
     }
 
 

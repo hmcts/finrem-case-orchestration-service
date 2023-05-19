@@ -359,7 +359,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         data.setOrdersToShare(selectList);
 
-        List<CaseDocument> documentList = generalOrderService.hearingOrderToProcess(caseDetails, selectList);
+        List<CaseDocument> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
 
         assertEquals("One document available to share with other parties", 1, documentList.size());
     }

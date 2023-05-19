@@ -61,6 +61,7 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
         DynamicMultiSelectList roleList = getAllActivePartyList(caseDetails);
         finremCaseData.setPartiesOnCase(roleList);
 
+        finremCaseData.setAdditionalDocument(null);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
     }

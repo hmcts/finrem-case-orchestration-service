@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class IntervenerOrderCollection {
+public class ApprovedOrderCollection {
 
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private IntervenerOrder value;
+    private ApproveOrder value;
 }

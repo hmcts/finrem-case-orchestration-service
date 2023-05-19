@@ -259,7 +259,7 @@ public class GeneralOrderService {
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
 
-    public List<CaseDocument> hearingOrderToProcess(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {
+    public List<CaseDocument> hearingOrdersToShare(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {
         FinremCaseData caseData = caseDetails.getData();
         List<CaseDocument> orders = new ArrayList<>();
         List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
@@ -272,11 +272,11 @@ public class GeneralOrderService {
     }
 
     private void addToList(DynamicMultiSelectListElement doc, DirectionOrderCollection obj,
-                           List<CaseDocument> hearingDocumentPack, Long caseId) {
+                           List<CaseDocument> orders, Long caseId) {
         if (obj.getId().equals(doc.getCode())) {
             CaseDocument caseDocument = obj.getValue().getUploadDraftDocument();
-            log.info("Adding document to pack {} for caseId {}", caseDocument, caseId);
-            hearingDocumentPack.add(caseDocument);
+            log.info("Adding document to orders {} for caseId {}", caseDocument, caseId);
+            orders.add(caseDocument);
         }
     }
 }

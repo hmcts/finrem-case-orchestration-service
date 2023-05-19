@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -207,8 +206,8 @@ public class DocumentHelperTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
-        List<BulkPrintDocument> hearingDocuments1
-            = documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER);
+        List<CaseDocument> hearingDocuments1
+            = documentHelper.getHearingDocumentsAsPdfDocuments(caseData, AUTHORIZATION_HEADER);
         assertEquals(0, hearingDocuments1.size());
 
         DocumentCollection dc = DocumentCollection
@@ -220,9 +219,9 @@ public class DocumentHelperTest {
         caseData.setHearingOrderOtherDocuments(documentCollections);
 
         when(service.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
-        List<BulkPrintDocument> hearingDocuments2 = documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER);
-        assertEquals("app_docs.pdf", hearingDocuments2.get(0).getFileName());
-        assertEquals(BINARY_URL, hearingDocuments2.get(0).getBinaryFileUrl());
+        List<CaseDocument> hearingDocuments2 = documentHelper.getHearingDocumentsAsPdfDocuments(caseData, AUTHORIZATION_HEADER);
+        assertEquals("app_docs.pdf", hearingDocuments2.get(0).getDocumentFilename());
+        assertEquals(BINARY_URL, hearingDocuments2.get(0).getDocumentBinaryUrl());
 
         verify(service).convertDocumentIfNotPdfAlready(any(), any());
     }
