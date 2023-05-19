@@ -47,13 +47,52 @@ public class ConsentOrderMadeCorresponderTest {
     }
 
     @Test
-    public void shouldEmailIntervenerSolicitor() {
+    public void shouldEmailIntervenerOneSolicitor() {
         String intervenerEmailKey = "intervener1SolEmail";
         caseDetails.getData().put(intervenerEmailKey, TEST_SOLICITOR_EMAIL);
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
         when(notificationService.getCaseDataKeysForIntervenerOneSolicitor()).thenReturn(dataKeysWrapper);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails, intervenerEmailKey,
             CaseRole.INTVR_SOLICITOR_1)).thenReturn(true);
+        consentOrderMadeCorresponder.sendCorrespondence(caseDetails);
+        verify(notificationService).sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(caseDetails,
+            dataKeysWrapper);
+    }
+
+    @Test
+    public void shouldEmailIntervenerTwoSolicitor() {
+        String intervenerEmailKey = "intervener2SolEmail";
+        caseDetails.getData().put(intervenerEmailKey, TEST_SOLICITOR_EMAIL);
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
+        when(notificationService.getCaseDataKeysForIntervenerTwoSolicitor()).thenReturn(dataKeysWrapper);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails, intervenerEmailKey,
+            CaseRole.INTVR_SOLICITOR_2)).thenReturn(true);
+        consentOrderMadeCorresponder.sendCorrespondence(caseDetails);
+        verify(notificationService).sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(caseDetails,
+            dataKeysWrapper);
+    }
+
+    @Test
+    public void shouldEmailIntervenerThreeSolicitor() {
+        String intervenerEmailKey = "intervener3SolEmail";
+        caseDetails.getData().put(intervenerEmailKey, TEST_SOLICITOR_EMAIL);
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
+        when(notificationService.getCaseDataKeysForIntervenerThreeSolicitor()).thenReturn(dataKeysWrapper);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails, intervenerEmailKey,
+            CaseRole.INTVR_SOLICITOR_3)).thenReturn(true);
+        consentOrderMadeCorresponder.sendCorrespondence(caseDetails);
+        verify(notificationService).sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(caseDetails,
+            dataKeysWrapper);
+    }
+
+    @Test
+    public void shouldEmailIntervenerFourSolicitor() {
+        String intervenerEmailKey = "intervener4SolEmail";
+        caseDetails.getData().put(intervenerEmailKey, TEST_SOLICITOR_EMAIL);
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
+        when(notificationService.getCaseDataKeysForIntervenerFourSolicitor()).thenReturn(dataKeysWrapper);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails, intervenerEmailKey,
+            CaseRole.INTVR_SOLICITOR_4)).thenReturn(true);
         consentOrderMadeCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(caseDetails,
             dataKeysWrapper);

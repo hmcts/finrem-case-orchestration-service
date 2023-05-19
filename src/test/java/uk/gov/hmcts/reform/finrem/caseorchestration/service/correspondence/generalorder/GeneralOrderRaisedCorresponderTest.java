@@ -6,9 +6,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -61,12 +65,18 @@ public class GeneralOrderRaisedCorresponderTest {
     public void shouldNotSendGeneralOrderEmail() {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(CaseDetails.class), anyString(), any(CaseRole.class) )).thenReturn(false);
 
         generalOrderRaisedCorresponder.sendCorrespondence(caseDetails);
 
         verify(notificationService, never()).sendConsentedGeneralOrderEmailToRespondentSolicitor(caseDetails);
         verify(notificationService, never()).sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(caseDetails);
+
+        verify(notificationService, never()).sendContestedConsentGeneralOrderEmailIntervenerSolicitor(any(CaseDetails.class),
+            any(SolicitorCaseDataKeysWrapper.class));
+        verify(notificationService, never()).sendContestedGeneralOrderEmailIntervener(any(CaseDetails.class),
+            any(SolicitorCaseDataKeysWrapper.class));
     }
 
     @Test
@@ -101,6 +111,19 @@ public class GeneralOrderRaisedCorresponderTest {
 
         verify(notificationService, never()).sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(caseDetails);
+    }
+
+    @Test
+    public void shouldNotSendContestedGeneralOrderEmailToIntervener_ThenTheEmailIsNotIssued() {
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(CaseDetails.class), anyString(),
+            any(CaseRole.class))).thenReturn(false);
+
+        generalOrderRaisedCorresponder.sendCorrespondence(caseDetails);
+
+        verify(notificationService, never()).sendContestedConsentGeneralOrderEmailIntervenerSolicitor(any(CaseDetails.class),
+            any(SolicitorCaseDataKeysWrapper.class));
+        verify(notificationService, never()).sendContestedGeneralOrderEmailIntervener(any(CaseDetails.class),
+            any(SolicitorCaseDataKeysWrapper.class));
     }
 
 }
