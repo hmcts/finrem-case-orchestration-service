@@ -76,7 +76,7 @@ public class IntervenerRemovedCorresponderTest {
     public void shouldAlwaysSendLetterCorrespondenceToAppAndRespIfNotRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.NO)
             .build();
@@ -98,7 +98,7 @@ public class IntervenerRemovedCorresponderTest {
     public void shouldSendLetterCorrespondenceIfIntervenerIsRepresentedToAppAndRespIfNotRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -109,10 +109,10 @@ public class IntervenerRemovedCorresponderTest {
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
-            .generateIntervenerSolicitorAddedLetter(finremCaseDetails, AUTHORISATION_TOKEN,
+            .generateIntervenerSolicitorRemovedLetter(finremCaseDetails, AUTHORISATION_TOKEN,
                 DocumentHelper.PaperNotificationRecipient.APPLICANT);
         verify(intervenerDocumentService, times(1))
-            .generateIntervenerSolicitorAddedLetter(finremCaseDetails, AUTHORISATION_TOKEN,
+            .generateIntervenerSolicitorRemovedLetter(finremCaseDetails, AUTHORISATION_TOKEN,
                 DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 
@@ -120,7 +120,7 @@ public class IntervenerRemovedCorresponderTest {
     public void shouldSendIntervenerOneLetterCorrespondenceIfNotRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.NO)
             .build();
@@ -139,7 +139,7 @@ public class IntervenerRemovedCorresponderTest {
     public void shouldSendIntervenerTwoLetterCorrespondenceIfNotRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.NO)
             .build();
@@ -158,7 +158,7 @@ public class IntervenerRemovedCorresponderTest {
     public void shouldSendIntervenerThreeLetterCorrespondenceIfNotRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.NO)
             .build();
@@ -177,7 +177,7 @@ public class IntervenerRemovedCorresponderTest {
     public void shouldSendIntervenerFourLetterCorrespondenceIfNotRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.NO)
             .build();
@@ -196,7 +196,7 @@ public class IntervenerRemovedCorresponderTest {
     public void shouldSendEmailIfIntervenerOneIsRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -213,7 +213,7 @@ public class IntervenerRemovedCorresponderTest {
     public void shouldSendEmailIfIntervenerTwoIsRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -231,7 +231,7 @@ public class IntervenerRemovedCorresponderTest {
     public void shouldSendEmailIfIntervenerThreeIsRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -249,7 +249,7 @@ public class IntervenerRemovedCorresponderTest {
     public void shouldSendEmailIfIntervenerFourIsRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
