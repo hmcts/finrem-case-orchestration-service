@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -40,7 +41,7 @@ public class FinremAssignToJudgeConsentInContestedCorresponderTest {
     @Before
     public void setUp() throws Exception {
         corresponder = new FinremAssignToJudgeConsentInContestedCorresponder(notificationService, bulkPrintService, assignedToJudgeDocumentService);
-        caseDetails = FinremCaseDetails.builder().build();
+        caseDetails = FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
         caseDocument = CaseDocument.builder().build();
         when(assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
