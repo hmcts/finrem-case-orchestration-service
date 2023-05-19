@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Finre
 
 @Slf4j
 @Component
-public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
+public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
 
     private final IntervenerDocumentService intervenerDocumentService;
     private final IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper;
@@ -26,13 +26,12 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     private final IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper;
     private final IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper;
 
-
-    public IntervenerAddedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
-                                       IntervenerDocumentService intervenerDocumentService,
-                                       IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper,
-                                       IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper,
-                                       IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper,
-                                       IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper) {
+    public IntervenerRemovedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
+                                         IntervenerDocumentService intervenerDocumentService,
+                                         IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper,
+                                         IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper,
+                                         IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper,
+                                         IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper) {
         super(notificationService, bulkPrintService);
         this.intervenerDocumentService = intervenerDocumentService;
         this.intervenerOneDetailsMapper = intervenerOneDetailsMapper;
@@ -140,32 +139,32 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     public CaseDocument getAppRepDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                            DocumentHelper.PaperNotificationRecipient recipient) {
         if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
-            return intervenerDocumentService.generateIntervenerSolicitorAddedLetter(caseDetails, authorisationToken, recipient);
+            return intervenerDocumentService.generateIntervenerSolicitorRemovedLetter(caseDetails, authorisationToken, recipient);
         } else {
-            return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken, recipient);
+            return intervenerDocumentService.generateIntervenerRemovedNotificationLetter(caseDetails, authorisationToken, recipient);
         }
     }
 
     @Override
     public CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                                  DocumentHelper.PaperNotificationRecipient recipient) {
-        return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken, recipient);
+        return intervenerDocumentService.generateIntervenerRemovedNotificationLetter(caseDetails, authorisationToken, recipient);
     }
 
     protected boolean shouldSendIntervenerOneSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.isIntervenerOneSolicitorDigitalAndEmailPopulated(caseDetails);
+        return notificationService.wasIntervenerOneSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
     protected boolean shouldSendIntervenerTwoSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.isIntervenerTwoSolicitorDigitalAndEmailPopulated(caseDetails);
+        return notificationService.wasIntervenerTwoSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
     protected boolean shouldSendIntervenerThreeSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.isIntervenerThreeSolicitorDigitalAndEmailPopulated(caseDetails);
+        return notificationService.wasIntervenerThreeSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
     protected boolean shouldSendIntervenerFourSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.isIntervenerFourSolicitorDigitalAndEmailPopulated(caseDetails);
+        return notificationService.wasIntervenerFourSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
     @Override

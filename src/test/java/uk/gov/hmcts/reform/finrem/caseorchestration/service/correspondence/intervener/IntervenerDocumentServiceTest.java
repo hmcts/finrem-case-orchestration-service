@@ -42,9 +42,12 @@ public class IntervenerDocumentServiceTest {
 
     private static final String INTERVENER_ADDED_TEMPLATE = "intervener_added_template";
     private static final String INTERVENER_ADDED_FILENAME = "intervener_added_filename";
-
+    private static final String INTERVENER_REMOVED_TEMPLATE = "intervener_removed_template";
+    private static final String INTERVENER_REMOVED_FILENAME = "intervener_removed_filename";
     private static final String INTERVENER_ADDED_SOLICITOR_TEMPLATE = "intervener_added_solicitor_template";
     private static final String INTERVENER_ADDED_SOLICITOR_FILENAME = "intervener_added_solicitor_filename";
+    private static final String INTERVENER_REMOVED_SOLICITOR_TEMPLATE = "intervener_removed_solicitor_template";
+    private static final String INTERVENER_REMOVED_SOLICITOR_FILENAME = "intervener_removed_solicitor_filename";
 
     private static final String INTERVENER_NAME = "intervenerName";
     private static final String INTERVENER_SOLICITOR_FIRM = "intervenerSolicitorFirm";
@@ -72,7 +75,6 @@ public class IntervenerDocumentServiceTest {
             documentConfiguration, documentHelper, objectMapper);
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         Organisation organisation = Organisation.builder()
             .organisationName(INTERVENER_SOLICITOR_FIRM).build();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
@@ -95,6 +97,7 @@ public class IntervenerDocumentServiceTest {
 
     @Test
     public void shouldGenerateIntervenerAddedLetter() {
+        finremCaseData.getCurrentIntervenerChangeDetails().setIntervenerAction(IntervenerAction.ADDED);
         when(documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
             .thenReturn(caseDetails);
 
@@ -114,7 +117,29 @@ public class IntervenerDocumentServiceTest {
     }
 
     @Test
+    public void shouldGenerateIntervenerRemovedLetter() {
+        finremCaseData.getCurrentIntervenerChangeDetails().setIntervenerAction(IntervenerAction.REMOVED);
+        when(documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+            .thenReturn(caseDetails);
+
+        when(documentConfiguration.getIntervenerAddedTemplate()).thenReturn(INTERVENER_REMOVED_TEMPLATE);
+        when(documentConfiguration.getIntervenerAddedFilename()).thenReturn(INTERVENER_REMOVED_FILENAME);
+
+        intervenerDocumentService.generateIntervenerAddedNotificationLetter(finremCaseDetails,
+            AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            placeholdersMapCaptor.capture(), eq(INTERVENER_REMOVED_TEMPLATE), eq(INTERVENER_REMOVED_FILENAME));
+
+        Map<String, Object> letterData = getPlaceholdersMap(placeholdersMapCaptor);
+        assertThat(letterData.get("intervenerFullName"), is(INTERVENER_NAME));
+        assertThat(letterData.get("divorceCaseNumber"), is(CASE_NUMBER));
+
+    }
+
+    @Test
     public void shouldGenerateIntervenerAddedSolicitorLetter() {
+        finremCaseData.getCurrentIntervenerChangeDetails().setIntervenerAction(IntervenerAction.ADDED);
         when(documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
             .thenReturn(caseDetails);
 
@@ -131,7 +156,27 @@ public class IntervenerDocumentServiceTest {
         assertThat(letterData.get("intervenerFullName"), is(INTERVENER_NAME));
         assertThat(letterData.get("intervenerSolicitorFirm"), is(INTERVENER_SOLICITOR_FIRM));
         assertThat(letterData.get("divorceCaseNumber"), is(CASE_NUMBER));
+    }
 
+    @Test
+    public void shouldGenerateIntervenerRemovedSolicitorLetter() {
+        finremCaseData.getCurrentIntervenerChangeDetails().setIntervenerAction(IntervenerAction.REMOVED);
+        when(documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+            .thenReturn(caseDetails);
+
+        when(documentConfiguration.getIntervenerRemovedSolicitorTemplate()).thenReturn(INTERVENER_REMOVED_SOLICITOR_TEMPLATE);
+        when(documentConfiguration.getIntervenerRemovedSolicitorFilename()).thenReturn(INTERVENER_REMOVED_SOLICITOR_FILENAME);
+
+        intervenerDocumentService.generateIntervenerSolicitorRemovedLetter(finremCaseDetails,
+            AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            placeholdersMapCaptor.capture(), eq(INTERVENER_REMOVED_SOLICITOR_TEMPLATE), eq(INTERVENER_REMOVED_SOLICITOR_FILENAME));
+
+        Map<String, Object> letterData = getPlaceholdersMap(placeholdersMapCaptor);
+        assertThat(letterData.get("intervenerFullName"), is(INTERVENER_NAME));
+        assertThat(letterData.get("intervenerSolicitorFirm"), is(INTERVENER_SOLICITOR_FIRM));
+        assertThat(letterData.get("divorceCaseNumber"), is(CASE_NUMBER));
     }
 
     private Map<String, Object> getPlaceholdersMap(ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor) {

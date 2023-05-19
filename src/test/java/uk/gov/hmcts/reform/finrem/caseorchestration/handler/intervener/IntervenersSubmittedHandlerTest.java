@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerAddedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerRemovedCorresponder;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -32,6 +34,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_ONE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_THREE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_TWO_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
 @ExtendWith(MockitoExtension.class)
 class IntervenersSubmittedHandlerTest {
@@ -43,6 +49,9 @@ class IntervenersSubmittedHandlerTest {
 
     @Mock
     private IntervenerAddedCorresponder intervenerAddedCorresponder;
+
+    @Mock
+    private IntervenerRemovedCorresponder intervenerRemovedCorresponder;
 
     @Mock
     private IntervenerService service;
@@ -79,8 +88,12 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerOneChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
-
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_ONE_CODE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerOneChangeDetails);
@@ -100,8 +113,12 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerTwoChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
-
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_TWO_CODE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         when(service.setIntervenerTwoAddedChangeDetails(finremCaseData)).thenReturn(intervenerTwoChangeDetails);
@@ -121,8 +138,12 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerThreeChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
-
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_THREE_CODE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         when(service.setIntervenerThreeAddedChangeDetails(finremCaseData)).thenReturn(intervenerThreeChangeDetails);
@@ -142,8 +163,12 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerFourChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
-
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_FOUR_CODE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         when(service.setIntervenerFourAddedChangeDetails(finremCaseData)).thenReturn(intervenerFourChangeDetails);
@@ -163,14 +188,19 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerOneChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
-
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_ONE_CODE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        when(service.setIntervenerOneRemovedChangeDetails()).thenReturn(intervenerOneChangeDetails);
+        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        when(service.setIntervenerOneRemovedChangeDetails(finremCaseDataBefore)).thenReturn(intervenerOneChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntervenerOneRemovedChangeDetails();
+        verify(intervenerRemovedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
@@ -184,14 +214,19 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerTwoChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
-
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_TWO_CODE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        when(service.setIntervenerTwoRemovedChangeDetails()).thenReturn(intervenerTwoChangeDetails);
+        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        when(service.setIntervenerTwoRemovedChangeDetails(finremCaseDataBefore)).thenReturn(intervenerTwoChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntervenerTwoRemovedChangeDetails();
+        verify(intervenerRemovedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
@@ -205,14 +240,19 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerThreeChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
-
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_THREE_CODE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        when(service.setIntervenerThreeRemovedChangeDetails()).thenReturn(intervenerThreeChangeDetails);
+        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        when(service.setIntervenerThreeRemovedChangeDetails(finremCaseDataBefore)).thenReturn(intervenerThreeChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntervenerThreeRemovedChangeDetails();
+        verify(intervenerRemovedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
@@ -226,14 +266,19 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerFourChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
-
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_FOUR_CODE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
+        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
-        when(service.setIntervenerFourRemovedChangeDetails()).thenReturn(intervenerFourChangeDetails);
+        when(service.setIntervenerFourRemovedChangeDetails(finremCaseDataBefore)).thenReturn(intervenerFourChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntervenerFourRemovedChangeDetails();
+        verify(intervenerRemovedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

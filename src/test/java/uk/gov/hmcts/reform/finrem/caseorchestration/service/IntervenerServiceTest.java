@@ -1458,7 +1458,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenCalled_setIntervenerChangeDetailsForIntervenerOne() {
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerOneOnAdding() {
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
             .intervener1Name("Intervener One")
             .build();
@@ -1474,7 +1474,23 @@ public class IntervenerServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenCalled_setIntervenerChangeDetailsForIntervenerTwo() {
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerOneOnRemoving() {
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervener1Name("Intervener One")
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerOneWrapper(intervenerOneWrapper)
+            .build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener One").build();
+        when(intervenerOneToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerOneWrapper)).thenReturn(intervenerDetails);
+
+        IntervenerChangeDetails result = service.setIntervenerOneAddedChangeDetails(finremCaseData);
+        Assert.assertEquals(IntervenerAction.REMOVED.toString(), result.getIntervenerAction().toString());
+        Assert.assertEquals(IntervenerType.INTERVENER_ONE.toString(), result.getIntervenerType().toString());
+    }
+
+    @Test
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerTwoOnAdding() {
         IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder()
             .intervener2Name("Intervener Two")
             .build();
@@ -1490,7 +1506,23 @@ public class IntervenerServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenCalled_setIntervenerChangeDetailsForIntervenerThree() {
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerTwoOnRemoving() {
+        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder()
+            .intervener2Name("Intervener Two")
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerTwoWrapper(intervenerTwoWrapper)
+            .build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener One").build();
+        when(intervenerTwoToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerTwoWrapper)).thenReturn(intervenerDetails);
+
+        IntervenerChangeDetails result = service.setIntervenerTwoAddedChangeDetails(finremCaseData);
+        Assert.assertEquals(IntervenerAction.REMOVED.toString(), result.getIntervenerAction().toString());
+        Assert.assertEquals(IntervenerType.INTERVENER_TWO.toString(), result.getIntervenerType().toString());
+    }
+
+    @Test
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerThreeOnAdding() {
         IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder()
             .intervener3Name("Intervener Three")
             .build();
@@ -1506,7 +1538,23 @@ public class IntervenerServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenCalled_setIntervenerChangeDetailsForIntervenerFour() {
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerThreeOnRemoving() {
+        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder()
+            .intervener3Name("Intervener Three")
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerThreeWrapper(intervenerThreeWrapper)
+            .build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener One").build();
+        when(intervenerThreeToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerThreeWrapper)).thenReturn(intervenerDetails);
+
+        IntervenerChangeDetails result = service.setIntervenerThreeAddedChangeDetails(finremCaseData);
+        Assert.assertEquals(IntervenerAction.REMOVED.toString(), result.getIntervenerAction().toString());
+        Assert.assertEquals(IntervenerType.INTERVENER_THREE.toString(), result.getIntervenerType().toString());
+    }
+
+    @Test
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerFourOnAdding() {
         IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder()
             .intervener4Name("Intervener Four")
             .build();
@@ -1518,6 +1566,22 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         IntervenerChangeDetails result = service.setIntervenerFourAddedChangeDetails(finremCaseData);
         Assert.assertEquals(IntervenerAction.ADDED.toString(), result.getIntervenerAction().toString());
+        Assert.assertEquals(IntervenerType.INTERVENER_FOUR.toString(), result.getIntervenerType().toString());
+    }
+
+    @Test
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerFourOnRemoving() {
+        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder()
+            .intervener4Name("Intervener Four")
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerFourWrapper(intervenerFourWrapper)
+            .build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener One").build();
+        when(intervenerFourToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerFourWrapper)).thenReturn(intervenerDetails);
+
+        IntervenerChangeDetails result = service.setIntervenerFourAddedChangeDetails(finremCaseData);
+        Assert.assertEquals(IntervenerAction.REMOVED.toString(), result.getIntervenerAction().toString());
         Assert.assertEquals(IntervenerType.INTERVENER_FOUR.toString(), result.getIntervenerType().toString());
     }
 

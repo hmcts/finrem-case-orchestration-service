@@ -22,11 +22,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -448,10 +446,11 @@ public class DocumentHelperTest {
     public void whenRecipientIsIntervenerOne_AndIntervenerNotRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
-            .intervener1Name("Name")
-            .intervener1Address(address).build();
-        caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Name").intervenerAddress(address).build();
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(intervenerChangeDetails);
+
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
@@ -464,10 +463,10 @@ public class DocumentHelperTest {
     public void whenRecipientIsIntervenerTwo_AndIntervenerNotRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder()
-            .intervener2Name("Name")
-            .intervener2Address(address).build();
-        caseDetails.getData().setIntervenerTwoWrapper(intervenerTwoWrapper);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Name").intervenerAddress(address).build();
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
@@ -480,10 +479,10 @@ public class DocumentHelperTest {
     public void whenRecipientIsIntervenerThree_AndIntervenerNotRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder()
-            .intervener3Name("Name")
-            .intervener3Address(address).build();
-        caseDetails.getData().setIntervenerThreeWrapper(intervenerThreeWrapper);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Name").intervenerAddress(address).build();
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
@@ -496,10 +495,10 @@ public class DocumentHelperTest {
     public void whenRecipientIsIntervenerFour_AndIntervenerNotRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder()
-            .intervener4Name("Name")
-            .intervener4Address(address).build();
-        caseDetails.getData().setIntervenerFourWrapper(intervenerFourWrapper);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Name").intervenerAddress(address).build();
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
