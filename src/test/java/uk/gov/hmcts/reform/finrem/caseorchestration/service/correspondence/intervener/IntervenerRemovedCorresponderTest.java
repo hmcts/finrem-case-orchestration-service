@@ -200,13 +200,14 @@ public class IntervenerRemovedCorresponderTest {
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
+        intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         when(intervenerRemovedCorresponder.shouldSendIntervenerOneSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerOneSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).wasIntervenerOneSolicitorDigitalAndEmailPopulated(finremCaseDetails);
     }
 
     @Test
@@ -217,6 +218,7 @@ public class IntervenerRemovedCorresponderTest {
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
+        intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
@@ -224,7 +226,7 @@ public class IntervenerRemovedCorresponderTest {
         when(intervenerRemovedCorresponder.shouldSendIntervenerTwoSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerTwoSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).wasIntervenerTwoSolicitorDigitalAndEmailPopulated(finremCaseDetails);
     }
 
     @Test
@@ -235,6 +237,7 @@ public class IntervenerRemovedCorresponderTest {
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
+        intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
@@ -242,7 +245,7 @@ public class IntervenerRemovedCorresponderTest {
         when(intervenerRemovedCorresponder.shouldSendIntervenerThreeSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerThreeSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).wasIntervenerThreeSolicitorDigitalAndEmailPopulated(finremCaseDetails);
     }
 
     @Test
@@ -253,6 +256,7 @@ public class IntervenerRemovedCorresponderTest {
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
+        intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
@@ -260,6 +264,6 @@ public class IntervenerRemovedCorresponderTest {
         when(intervenerRemovedCorresponder.shouldSendIntervenerFourSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerFourSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).wasIntervenerFourSolicitorDigitalAndEmailPopulated(finremCaseDetails);
     }
 }
