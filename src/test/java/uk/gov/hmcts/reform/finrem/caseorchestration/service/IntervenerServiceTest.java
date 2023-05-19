@@ -1497,7 +1497,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .intervenerTwoWrapper(intervenerTwoWrapper)
             .build();
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener One").build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener Two").build();
         when(intervenerTwoToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerTwoWrapper)).thenReturn(intervenerDetails);
 
         IntervenerChangeDetails result = service.setIntervenerTwoAddedChangeDetails(finremCaseData);
@@ -1513,7 +1513,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .intervenerTwoWrapper(intervenerTwoWrapper)
             .build();
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener One").build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener Two").build();
         when(intervenerTwoToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerTwoWrapper)).thenReturn(intervenerDetails);
 
         IntervenerChangeDetails result = service.setIntervenerTwoRemovedChangeDetails(finremCaseData);
@@ -1529,7 +1529,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .intervenerThreeWrapper(intervenerThreeWrapper)
             .build();
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener One").build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener Three").build();
         when(intervenerThreeToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerThreeWrapper)).thenReturn(intervenerDetails);
 
         IntervenerChangeDetails result = service.setIntervenerThreeAddedChangeDetails(finremCaseData);
@@ -1545,7 +1545,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .intervenerThreeWrapper(intervenerThreeWrapper)
             .build();
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener One").build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener Three").build();
         when(intervenerThreeToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerThreeWrapper)).thenReturn(intervenerDetails);
 
         IntervenerChangeDetails result = service.setIntervenerThreeRemovedChangeDetails(finremCaseData);
@@ -1561,7 +1561,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .intervenerFourWrapper(intervenerFourWrapper)
             .build();
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener One").build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener Four").build();
         when(intervenerFourToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerFourWrapper)).thenReturn(intervenerDetails);
 
         IntervenerChangeDetails result = service.setIntervenerFourAddedChangeDetails(finremCaseData);
@@ -1577,7 +1577,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .intervenerFourWrapper(intervenerFourWrapper)
             .build();
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener One").build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().intervenerName("Intervener Four").build();
         when(intervenerFourToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerFourWrapper)).thenReturn(intervenerDetails);
 
         IntervenerChangeDetails result = service.setIntervenerFourRemovedChangeDetails(finremCaseData);
