@@ -104,10 +104,12 @@ public class SendOrderContestedAboutToSubmitHandler
             BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData(), authorisationToken);
 
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
+                log.info("Sending Applicant Order for Contested Case ID: {}", caseDetails.getId());
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
             }
 
             if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+                log.info("Sending Respondent Order for Contested Case ID: {}", caseDetails.getId());
                 bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
             }
         }
