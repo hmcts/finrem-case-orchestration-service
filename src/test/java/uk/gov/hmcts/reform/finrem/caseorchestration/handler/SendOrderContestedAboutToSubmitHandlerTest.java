@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -68,6 +69,13 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         assertThat(sendOrderContestedAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER),
             is(true));
+    }
+
+    @Test
+    public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventClose_thenHandlerCanNotHandle() {
+        assertThat(sendOrderContestedAboutToSubmitHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE),
+            is(false));
     }
 
     @Test
@@ -108,6 +116,57 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         Exception exception = Assert.assertThrows(RuntimeException.class,
             () -> sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN));
         Assertions.assertNull(exception.getMessage());
+    }
+
+    @Test
+    public void givenContestedCase_whenOrderAvailableButNoParty_thenHandlerHandleRequest() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setPartiesOnCase(new DynamicMultiSelectList());
+
+        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build(), DynamicMultiSelectListElement.builder()
+                .code("app_docs.pdf")
+                .label("app_docs.pdf")
+                .build()))
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .build();
+
+        data.setOrdersToShare(selectedDocs);
+        data.setAdditionalDocument(caseDocument());
+        data.setOrderApprovedCoverLetter(caseDocument());
+        List<CaseDocument> caseDocuments  = new ArrayList<>();
+        caseDocuments.add(caseDocument());
+        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
+
+        when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(caseDocuments);
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
+            .thenReturn(caseDocument());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
+            = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+        assertNull(caseData.getPartiesOnCase().getValue());
+        assertEquals(1, caseData.getFinalOrderCollection().size());
+        assertNull(caseData.getIntv1OrderCollection());
+        assertNull(caseData.getAppOrderCollection());
+        assertNull(caseData.getRespOrderCollection());
+
+        verify(genericDocumentService).stampDocument(any(), any(), any());
+        verifyNoInteractions(bulkPrintService);
+        verifyNoInteractions(notificationService);
+        verify(documentHelper).getStampType(caseData);
+
     }
 
     @Test
