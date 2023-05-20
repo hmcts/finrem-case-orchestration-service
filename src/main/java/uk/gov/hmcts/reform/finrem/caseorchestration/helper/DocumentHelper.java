@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
@@ -75,7 +74,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ADDITIONAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
@@ -483,14 +481,6 @@ public class DocumentHelper {
             .toList();
     }
 
-    public List<BulkPrintDocument> getBulkPrintDocuments(List<ApprovedOrderCollection> orderColl) {
-        return orderColl.stream()
-            .map(o -> BulkPrintDocument.builder().binaryFileUrl(o.getValue().getCaseDocument().getDocumentBinaryUrl())
-                .fileName(o.getValue().getCaseDocument().getDocumentFilename())
-                .build())
-            .toList();
-    }
-
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
         CaseDocument caseDocument = nullCheckAndConvertToCaseDocument(data.get(documentName));
         return caseDocument != null
@@ -566,11 +556,6 @@ public class DocumentHelper {
 
     public List<ContestedConsentOrderData> convertToContestedConsentOrderData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    public List<HearingOrderCollectionData> getFinalAdditionalDocOrderDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(FINAL_ADDITIONAL_ORDER_COLLECTION), new TypeReference<>() {
         });
     }
 
