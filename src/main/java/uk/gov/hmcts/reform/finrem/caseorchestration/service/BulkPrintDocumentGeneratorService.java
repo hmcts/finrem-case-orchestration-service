@@ -31,6 +31,7 @@ public class BulkPrintDocumentGeneratorService {
     private static final String RECIPIENTS = "recipients";
 
     private final AuthTokenGenerator authTokenGenerator;
+    private final FeatureToggleService featureToggleService;
     private final SendLetterApi sendLetterApi;
 
     /**
@@ -53,7 +54,7 @@ public class BulkPrintDocumentGeneratorService {
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
             new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, recipient, letterType, bulkPrintRequest)));
 
-        log.info("Letter service produced the following letter Id {} for case {}", sendLetterResponse.letterId, caseId);
+        log.info("Letter service produced the following letter Id {} for party {} and  case {}", sendLetterResponse.letterId, recipient, caseId);
         return sendLetterResponse.letterId;
     }
 
@@ -65,7 +66,11 @@ public class BulkPrintDocumentGeneratorService {
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
         additionalData.put(FILE_NAMES, getFileNames(bulkPrintRequest));
-        additionalData.put(RECIPIENTS, recipient);
+
+        log.info("isSendLetterDuplicateCheckEnabled {} for caseId {}", featureToggleService.isSendLetterDuplicateCheckEnabled(), caseId);
+        additionalData.put(RECIPIENTS, featureToggleService.isSendLetterDuplicateCheckEnabled() ? recipient
+            : "%s:%d".formatted(recipient, System.nanoTime()));
+
         return additionalData;
     }
 

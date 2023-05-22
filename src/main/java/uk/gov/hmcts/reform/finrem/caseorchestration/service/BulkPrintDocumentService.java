@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -17,13 +19,14 @@ public class BulkPrintDocumentService {
     private final EvidenceManagementDownloadService service;
 
     public List<byte[]> downloadDocuments(BulkPrintRequest bulkPrintRequest, String auth) {
-        log.info("Downloading document for bulk print for case id {}", bulkPrintRequest.getCaseId());
+        String caseId = bulkPrintRequest.getCaseId();
+        log.info("Downloading document for bulk print for case id {}", caseId);
 
         List<byte[]> documents = bulkPrintRequest.getBulkPrintDocuments().stream()
             .map(bulkPrintDocument -> service.download(bulkPrintDocument.getBinaryFileUrl(), auth))
             .collect(Collectors.toList());
         log.info("Download document count for bulk print {} for case id {} ", documents.size(),
-            bulkPrintRequest.getCaseId());
+            caseId);
         return documents;
     }
 }
