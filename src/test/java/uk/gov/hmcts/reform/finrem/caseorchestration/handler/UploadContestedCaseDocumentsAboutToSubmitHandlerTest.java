@@ -32,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -102,6 +103,28 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
         verify(applicantCaseSummariesHandler).handle(uploadedDocumentPost, caseDetails.getData());
         verify(applicantChronologiesStatementHandler).handle(uploadedDocumentPost, caseDetails.getData());
+    }
+
+    @Test
+    public void givenUploadCaseDocument_whenDocIsValidAndUploadedByCaseWorkerAndPartyChoosenApplicant_thenExecuteHandlers() {
+        List<String> roles = List.of(CASE_LEVEL_ROLE);
+
+        for (String activeRole : roles) {
+            CallbackRequest callbackRequest = buildCallbackRequest();
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN)).thenReturn(activeRole);
+            uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Other Example"));
+            caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+            caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+            uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            List<ContestedUploadedDocumentData> uploadedDocumentPost
+                = convertToUploadDocList(caseDetails.getData().get(CONTESTED_UPLOADED_DOCUMENTS));
+
+            verify(applicantCaseSummariesHandler).handle(uploadedDocumentPost, caseDetails.getData());
+            verify(applicantChronologiesStatementHandler).handle(uploadedDocumentPost, caseDetails.getData());
+        }
     }
 
     @Test

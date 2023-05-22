@@ -33,8 +33,8 @@ import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.USER_ROLES_CACHE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.RejectGeneralApplicationSubmittedHandler.CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 
 @Service
 @Slf4j
@@ -280,7 +280,7 @@ public class AssignCaseAccessService {
                 return caseRole;
             }
         }
-        return CASE;
+        return CASE_LEVEL_ROLE;
     }
 
 }

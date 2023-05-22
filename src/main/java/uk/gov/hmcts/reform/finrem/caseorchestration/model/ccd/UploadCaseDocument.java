@@ -24,6 +24,7 @@ public class UploadCaseDocument {
     private String caseDocumentOther;
     private YesOrNo caseDocumentConfidential;
     private String hearingDetails;
+    private String currentUserCaseRole;
     private YesOrNo caseDocumentFdr;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime caseDocumentUploadDateTime;

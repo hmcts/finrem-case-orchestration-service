@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
@@ -80,7 +81,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
         log.info("Loggedin User case role {}", loggedInUserCaseRole);
 
         List<ContestedUploadedDocumentData> uploadedDocuments = (List<ContestedUploadedDocumentData>) caseData.get(CONTESTED_UPLOADED_DOCUMENTS);
-        uploadedDocuments.forEach(doc -> doc.getUploadedCaseDocument().setCaseDocumentParty(loggedInUserCaseRole));
+
+        if (!loggedInUserCaseRole.equals(CASE_LEVEL_ROLE)) {
+            uploadedDocuments.forEach(doc -> doc.getUploadedCaseDocument().setCaseDocumentParty(loggedInUserCaseRole));
+        }
+
         caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
         uploadedDocuments.sort(Comparator.comparing(
             ContestedUploadedDocumentData::getUploadedCaseDocument, Comparator.comparing(
