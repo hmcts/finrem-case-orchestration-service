@@ -46,6 +46,8 @@ public class EmailService {
     public static final String BARRISTER_ACCESS_ADDED = "FR_BARRISTER_ACCESS_ADDED";
     public static final String BARRISTER_ACCESS_REMOVED = "FR_BARRISTER_ACCESS_REMOVED";
     public static final String CONSENTED_LIST_FOR_HEARING = "FR_CONSENTED_LIST_FOR_HEARING";
+    public static final String INTERVENER_ADDED_EMAIL = "FR_INTERVENER_ADDED_EMAIL";
+    public static final String INTERVENER_SOLICITOR_ADDED_EMAIL = "FR_INTERVENER_SOLICITOR_ADDED_EMAIL";
 
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
@@ -111,6 +113,14 @@ public class EmailService {
         if (BARRISTER_ACCESS_ADDED.equals(templateName) || BARRISTER_ACCESS_REMOVED.equals(templateName)) {
             templateVars.put("BarristerReferenceNumber", notificationRequest.getBarristerReferenceNumber());
             templateVars.put("phoneOpeningHours", notificationRequest.getPhoneOpeningHours());
+        }
+        if (INTERVENER_ADDED_EMAIL.equals(templateName)) {
+            templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
+            templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
+        }
+
+        if (INTERVENER_SOLICITOR_ADDED_EMAIL.equals(templateName)) {
+
         }
 
         templateVars.putAll(emailTemplateVars.get(templateName));
