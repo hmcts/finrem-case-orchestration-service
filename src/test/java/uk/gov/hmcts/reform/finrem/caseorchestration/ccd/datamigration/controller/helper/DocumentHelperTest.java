@@ -446,7 +446,6 @@ public class DocumentHelperTest {
     @Test
     public void whenRecipientIsApplicant_AndIntervenerRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-        Addressee expected = Addressee.builder().name("Tracy Applicant").formattedAddress("Applicant Address" + "\nSW11 6HL").build();
 
         Address address = Address.builder().addressLine1("Applicant Address").postCode("SW11 6HL").build();
         caseDetails.getData().getContactDetailsWrapper().setApplicantAddress(address);
@@ -461,14 +460,13 @@ public class DocumentHelperTest {
         caseDetails.getData().setCurrentIntervenerChangeDetails(intervenerChangeDetails);
 
         CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, APPLICANT);
-
+        Addressee expected = Addressee.builder().name("Tracy Applicant").formattedAddress("Applicant Address" + "\nSW11 6HL").build();
         assertEquals(result.getData().get(ADDRESSEE), expected);
     }
 
     @Test
     public void whenRecipientIsRespondent_AndIntervenerRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-        Addressee expected = Addressee.builder().name("Tracy Applicant").formattedAddress("Applicant Address" + "\nSW11 6HL").build();
 
         Address address = Address.builder().addressLine1("Applicant Address").postCode("SW11 6HL").build();
         caseDetails.getData().getContactDetailsWrapper().setRespondentAddress(address);
@@ -483,7 +481,7 @@ public class DocumentHelperTest {
         caseDetails.getData().setCurrentIntervenerChangeDetails(intervenerChangeDetails);
 
         CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, RESPONDENT);
-
+        Addressee expected = Addressee.builder().name("Tracy Applicant").formattedAddress("Applicant Address" + "\nSW11 6HL").build();
         assertEquals(result.getData().get(ADDRESSEE), expected);
     }
 
