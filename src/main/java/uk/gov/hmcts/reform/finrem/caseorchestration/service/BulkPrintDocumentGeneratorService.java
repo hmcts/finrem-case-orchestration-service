@@ -54,7 +54,7 @@ public class BulkPrintDocumentGeneratorService {
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
             new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, recipient, letterType, bulkPrintRequest)));
 
-        log.info("Letter service produced the following letter Id {} for case {}", sendLetterResponse.letterId, caseId);
+        log.info("Letter service produced the following letter Id {} for party {} and  case {}", sendLetterResponse.letterId, recipient, caseId);
         return sendLetterResponse.letterId;
     }
 
