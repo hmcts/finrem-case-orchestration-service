@@ -1585,6 +1585,81 @@ public class IntervenerServiceTest extends BaseServiceTest {
         Assert.assertEquals(IntervenerType.INTERVENER_FOUR.toString(), result.getIntervenerType().toString());
     }
 
+    @Test
+    public void whenIntervenerOneSolicitorRemoved_ShouldReturnTrue() {
+        IntervenerOneWrapper intervenerOneWrapperBefore = IntervenerOneWrapper.builder()
+            .intervener1Represented(YesOrNo.YES)
+            .build();
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervener1Represented(YesOrNo.NO)
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerOneWrapper(intervenerOneWrapper)
+            .build();
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+            .intervenerOneWrapper(intervenerOneWrapperBefore)
+            .build();
+        Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+    }
+
+    @Test
+    public void whenIntervenerTwoSolicitorRemoved_ShouldReturnTrue() {
+        IntervenerTwoWrapper intervenerTwoWrapperBefore = IntervenerTwoWrapper.builder()
+            .intervener2Represented(YesOrNo.YES)
+            .build();
+        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder()
+            .intervener2Represented(YesOrNo.NO)
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerTwoWrapper(intervenerTwoWrapper)
+            .build();
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+            .intervenerTwoWrapper(intervenerTwoWrapperBefore)
+            .build();
+        Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+    }
+
+    @Test
+    public void whenIntervenerThreeSolicitorRemoved_ShouldReturnTrue() {
+        IntervenerThreeWrapper intervenerThreeWrapperBefore = IntervenerThreeWrapper.builder()
+            .intervener3Represented(YesOrNo.YES)
+            .build();
+        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder()
+            .intervener3Represented(YesOrNo.NO)
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerThreeWrapper(intervenerThreeWrapper)
+            .build();
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+            .intervenerThreeWrapper(intervenerThreeWrapperBefore)
+            .build();
+        Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+    }
+
+    @Test
+    public void whenIntervenerFourSolicitorRemoved_ShouldReturnTrue() {
+        IntervenerFourWrapper intervenerFourWrapperBefore = IntervenerFourWrapper.builder()
+            .intervener4Represented(YesOrNo.YES)
+            .build();
+        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder()
+            .intervener4Represented(YesOrNo.NO)
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerFourWrapper(intervenerFourWrapper)
+            .build();
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+            .intervenerFourWrapper(intervenerFourWrapperBefore)
+            .build();
+        Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+    }
+
+    @Test
+    public void whenNoIntervenerRemoved_ShouldReturnFalse() {
+        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder().build();
+        Assert.assertFalse(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+    }
+
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()

@@ -23,6 +23,8 @@ public class IntervenerTwoToIntervenerDetailsMapper {
             .intervenerSolEmail(intervenerTwoWrapper.getIntervener2SolEmail())
             .intervenerSolPhone(intervenerTwoWrapper.getIntervener2SolPhone())
             .intervenerOrganisation(intervenerTwoWrapper.getIntervener2Organisation())
+            .intervenerSolicitorFirm(intervenerTwoWrapper.getIntervener2SolicitorFirm())
+            .intervenerSolicitorReference(intervenerTwoWrapper.getIntervener2SolicitorReference())
             .build();
     }
 }

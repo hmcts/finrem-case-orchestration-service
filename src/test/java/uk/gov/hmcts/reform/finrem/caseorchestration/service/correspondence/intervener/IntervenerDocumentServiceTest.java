@@ -122,10 +122,10 @@ public class IntervenerDocumentServiceTest {
         when(documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
             .thenReturn(caseDetails);
 
-        when(documentConfiguration.getIntervenerAddedTemplate()).thenReturn(INTERVENER_REMOVED_TEMPLATE);
-        when(documentConfiguration.getIntervenerAddedFilename()).thenReturn(INTERVENER_REMOVED_FILENAME);
+        when(documentConfiguration.getIntervenerRemovedTemplate()).thenReturn(INTERVENER_REMOVED_TEMPLATE);
+        when(documentConfiguration.getIntervenerRemovedFilename()).thenReturn(INTERVENER_REMOVED_FILENAME);
 
-        intervenerDocumentService.generateIntervenerAddedNotificationLetter(finremCaseDetails,
+        intervenerDocumentService.generateIntervenerRemovedNotificationLetter(finremCaseDetails,
             AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
 
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),

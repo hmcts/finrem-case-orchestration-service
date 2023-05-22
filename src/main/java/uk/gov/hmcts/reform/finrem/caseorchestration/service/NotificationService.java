@@ -903,19 +903,7 @@ public class NotificationService {
             CaseRole.INTVR_SOLICITOR_4.getValue());
     }
 
-    public boolean wasIntervenerOneSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented().isYes();
-    }
-
-    public boolean wasIntervenerTwoSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented().isYes();
-    }
-
-    public boolean wasIntervenerThreeSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented().isYes();
-    }
-
-    public boolean wasIntervenerFourSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+    public boolean wasIntervenerSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         return caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented().isYes();
     }
 

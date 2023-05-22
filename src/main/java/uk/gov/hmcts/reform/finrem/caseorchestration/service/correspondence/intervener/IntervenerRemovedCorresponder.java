@@ -85,7 +85,7 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
     }
 
     protected void sendIntervenerOneCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        if (shouldSendIntervenerOneSolicitorEmail(caseDetails)) {
+        if (shouldSendIntervenerSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener One for case: {}", caseDetails.getId());
             //send email
         } else {
@@ -98,7 +98,7 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
     }
 
     protected void sendIntervenerTwoCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        if (shouldSendIntervenerTwoSolicitorEmail(caseDetails)) {
+        if (shouldSendIntervenerSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Two for case: {}", caseDetails.getId());
             //send email
         } else {
@@ -111,7 +111,7 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
     }
 
     protected void sendIntervenerThreeCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        if (shouldSendIntervenerThreeSolicitorEmail(caseDetails)) {
+        if (shouldSendIntervenerSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Three for case: {}", caseDetails.getId());
             //send email
         } else {
@@ -124,7 +124,7 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
     }
 
     protected void sendIntervenerFourCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        if (shouldSendIntervenerFourSolicitorEmail(caseDetails)) {
+        if (shouldSendIntervenerSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Four for case: {}", caseDetails.getId());
             //send email
         } else {
@@ -151,20 +151,8 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
         return intervenerDocumentService.generateIntervenerRemovedNotificationLetter(caseDetails, authorisationToken, recipient);
     }
 
-    protected boolean shouldSendIntervenerOneSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.wasIntervenerOneSolicitorDigitalAndEmailPopulated(caseDetails);
-    }
-
-    protected boolean shouldSendIntervenerTwoSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.wasIntervenerTwoSolicitorDigitalAndEmailPopulated(caseDetails);
-    }
-
-    protected boolean shouldSendIntervenerThreeSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.wasIntervenerThreeSolicitorDigitalAndEmailPopulated(caseDetails);
-    }
-
-    protected boolean shouldSendIntervenerFourSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.wasIntervenerFourSolicitorDigitalAndEmailPopulated(caseDetails);
+    protected boolean shouldSendIntervenerSolicitorEmail(FinremCaseDetails caseDetails) {
+        return notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
     @Override
