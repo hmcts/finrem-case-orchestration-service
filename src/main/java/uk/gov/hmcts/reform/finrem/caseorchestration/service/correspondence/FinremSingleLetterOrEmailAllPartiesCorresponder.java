@@ -29,7 +29,9 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
-        sendIntervenerCorrespondence(caseDetails, authToken);
+        if (caseDetails.isContestedApplication()) {
+            sendIntervenerCorrespondence(caseDetails, authToken);
+        }
     }
 
     protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
