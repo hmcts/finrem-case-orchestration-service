@@ -9,7 +9,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum BarristerParty {
     APPLICANT("applicant"),
-    RESPONDENT("respondent");
+    RESPONDENT("respondent"),
+    INTERVENER1("intervener1"),
+    INTERVENER2("intervener2"),
+    INTERVENER3("intervener3"),
+    INTERVENER4("intervener4");
 
     private final String value;
 

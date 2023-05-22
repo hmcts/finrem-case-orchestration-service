@@ -33,6 +33,20 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_EMAIL = "respondentEmail";
     public static final String RESPONDENT = "Respondent";
 
+    // Intervener related
+    public static final String INTERVENER1_FIRST_MIDDLE_NAME = "intervener1FMName";
+    public static final String INTERVENER1_LAST_NAME = "intervener1LName";
+    public static final String INTERVENER2_FIRST_MIDDLE_NAME = "intervener2FMName";
+    public static final String INTERVENER2_LAST_NAME = "intervener2LName";
+    public static final String INTERVENER3_FIRST_MIDDLE_NAME = "intervener3FMName";
+    public static final String INTERVENER3_LAST_NAME = "intervener3LName";
+    public static final String INTERVENER4_FIRST_MIDDLE_NAME = "intervener4FMName";
+    public static final String INTERVENER4_LAST_NAME = "intervener4LName";
+    public static final String INTERVENER = "Intervener";
+    public static final String INTERVENER1 = "Intervener1";
+    public static final String INTERVENER2 = "Intervener2";
+    public static final String INTERVENER3 = "Intervener3";
+    public static final String INTERVENER4 = "Intervener4";
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
@@ -499,6 +513,10 @@ public class CCDConfigConstant {
     public static final String ORGANISATION_POLICY_ORGANISATION_ID = "OrganisationID";
     public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
     public static final String RESP_SOLICITOR_POLICY = "[RESPSOLICITOR]";
+    public static final String INTVR_SOLICITOR_1_POLICY = "[INTVRSOLICITOR1]";
+    public static final String INTVR_SOLICITOR_2_POLICY = "[INTVRSOLICITOR2]";
+    public static final String INTVR_SOLICITOR_3_POLICY = "[INTVRSOLICITOR3]";
+    public static final String INTVR_SOLICITOR_4_POLICY = "[INTVRSOLICITOR4]";
     public static final String CREATOR_USER_ROLE = "[CREATOR]";
     public static final String SUBMIT_CASE_DATE = "authorisation3";
 
@@ -618,8 +636,16 @@ public class CCDConfigConstant {
     //Manage Barristers
     public static final String APPLICANT_BARRISTER_COLLECTION = "appBarristerCollection";
     public static final String RESPONDENT_BARRISTER_COLLECTION = "respBarristerCollection";
+    public static final String INTERVENER_BARRISTER_1_COLLECTION = "intvr1BarristerCollection";
+    public static final String INTERVENER_BARRISTER_2_COLLECTION = "intvr2BarristerCollection";
+    public static final String INTERVENER_BARRISTER_3_COLLECTION = "intvr3BarristerCollection";
+    public static final String INTERVENER_BARRISTER_4_COLLECTION = "intvr4BarristerCollection";
     public static final String APPLICANT_BARRISTER_ROLE = "[APPBARRISTER]";
     public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
+    public static final String INTERVENER_BARRISTER_1_ROLE = "[INTVRBARRISTER1]";
+    public static final String INTERVENER_BARRISTER_2_ROLE = "[INTVRBARRISTER2]";
+    public static final String INTERVENER_BARRISTER_3_ROLE = "[INTVRBARRISTER3]";
+    public static final String INTERVENER_BARRISTER_4_ROLE = "[INTVRBARRISTER4]";
     public static final String CASEWORKER_ROLE = "[CASEWORKER]";
     public static final String CASEWORKER_ROLE_FIELD_SHOW_LABEL = "CASEWORKER";
     public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
