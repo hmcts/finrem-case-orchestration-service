@@ -101,8 +101,8 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldBulkPrintDocument() {
-        genericDocumentService.bulkPrint(BulkPrintRequest.builder().build());
+        genericDocumentService.bulkPrint(BulkPrintRequest.builder().build(), any());
 
-        verify(bulkPrintDocumentGeneratorService, times(1)).send(any(), any());
+        verify(bulkPrintDocumentGeneratorService, times(1)).send(any(), any(), any());
     }
 }

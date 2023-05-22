@@ -214,6 +214,7 @@ pitest {
                          'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService'])
+    excludedTestClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet.FinremCaseDataTest'])
     threads.set(4)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
@@ -359,6 +360,7 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
     implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }

@@ -81,6 +81,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(data.get("ccdCaseNumber"), is(1234567890L));
         assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Applicant Solicitor Street\n"
             + "Second Address Line\n"
+            + "Third Address Line\n"
             + "Greater London\n"
             + "London\n"
             + "SE12 9SE"));
@@ -108,6 +109,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(data.get("ccdCaseNumber"), is(1234567890L));
         assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Applicant Solicitor Street\n"
             + "Second Address Line\n"
+            + "Third Address Line\n"
             + "Greater London\n"
             + "London\n"
             + "SW1V 4FG"));
@@ -175,7 +177,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verify(bulkPrintService, times(1)).sendDocumentForPrint(any(CaseDocument.class), any(CaseDetails.class));
+        verify(bulkPrintService, times(1)).sendDocumentForPrint(any(CaseDocument.class), any(CaseDetails.class), any());
     }
 
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {
