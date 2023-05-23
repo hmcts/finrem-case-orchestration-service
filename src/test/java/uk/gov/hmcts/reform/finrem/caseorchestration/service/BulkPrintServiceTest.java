@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -60,38 +61,40 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     private final CaseDocument caseDocument = TestSetUpUtils.caseDocument();
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;
+    private SendLetterApiResponse response;
 
     @Before
     public void setUp() {
         letterId = UUID.randomUUID();
+        response = SendLetterApiResponse.builder().letterId(letterId).errors(List.of()).build();
         bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);
-        when(genericDocumentService.bulkPrint(any(), any())).thenReturn(letterId);
+        when(genericDocumentService.bulkPrint(any(), any())).thenReturn(response);
     }
 
     @Test
     public void shouldSendDocumentForBulkPrint() {
-        UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(
+        SendLetterApiResponse response = bulkPrintService.sendDocumentForPrint(
             new CaseDocument(), caseDetails(), APPLICANT
         );
 
-        assertThat(bulkPrintLetterId, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
     }
 
 
     @Test
     public void shouldSendDocumentForBulkPrintFinRem() {
-        UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(
+        SendLetterApiResponse response = bulkPrintService.sendDocumentForPrint(
             new CaseDocument(), finremCaseDetails(), RESPONDENT);
 
-        assertThat(bulkPrintLetterId, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
     }
 
     @Test
     public void whenPrintingDocument_thenDocumentIsSentToPrinting() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
-        UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(caseDocument(), caseDetails, APPLICANT);
+        SendLetterApiResponse response = bulkPrintService.sendDocumentForPrint(caseDocument(), caseDetails, APPLICANT);
 
-        assertThat(bulkPrintLetterId, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
     }
 
     @Test
@@ -103,9 +106,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     @Test
     public void whenPrintingDocument_thenDocumentIsSentToPrintingFinrem() {
         FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
-        UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(caseDocument(), caseDetails, APPLICANT);
+        SendLetterApiResponse response = bulkPrintService.sendDocumentForPrint(caseDocument(), caseDetails, APPLICANT);
 
-        assertThat(bulkPrintLetterId, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
     }
 
     @Test
@@ -116,11 +119,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
-        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(letterId);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(response);
 
-        UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        SendLetterApiResponse response = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
 
         verify(coverSheetService).generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any());
@@ -139,11 +142,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
-        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(letterId);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(response);
 
-        UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        SendLetterApiResponse response = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
 
         verify(coverSheetService).generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any());
@@ -162,11 +165,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
-        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(letterId);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(response);
 
-        UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        SendLetterApiResponse response = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
 
         verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any());
@@ -185,11 +188,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
-        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(letterId);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(response);
 
-        UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        SendLetterApiResponse response = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
 
         verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any());
@@ -225,11 +228,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
-        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(letterId);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(response);
 
-        UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        SendLetterApiResponse response = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL), is(true));
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP), is(false));
     }
@@ -244,11 +247,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
-        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(letterId);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(response);
 
-        UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        SendLetterApiResponse response = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
         assertThat(caseDetails.getData().getBulkPrintCoverSheetAppConfidential(), is(caseDocument));
         assertNull(caseDetails.getData().getBulkPrintCoverSheetApp());
     }
@@ -262,11 +265,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
-        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(letterId);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(response);
 
-        UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        SendLetterApiResponse response = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
         assertThat(caseDetails.getData().getBulkPrintCoverSheetResConfidential(), is(caseDocument));
         assertNull(caseDetails.getData().getBulkPrintCoverSheetRes());
     }
@@ -280,11 +283,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
-        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(letterId);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any())).thenReturn(response);
 
-        UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        SendLetterApiResponse response = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(response.getLetterId(), is(letterId));
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL), is(true));
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES), is(false));
     }

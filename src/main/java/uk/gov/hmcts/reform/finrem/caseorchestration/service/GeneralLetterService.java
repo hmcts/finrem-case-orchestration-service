@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
@@ -158,7 +158,7 @@ public class GeneralLetterService {
         }
     }
 
-    private UUID printLatestGeneralLetter(CaseDetails caseDetails, String recipient) {
+    private SendLetterApiResponse printLatestGeneralLetter(CaseDetails caseDetails, String recipient) {
         List<GeneralLetterData> generalLettersData = documentHelper.convertToGeneralLetterData(caseDetails.getData().get(GENERAL_LETTER));
         GeneralLetterData latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
         return bulkPrintService.sendDocumentForPrint(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter(),

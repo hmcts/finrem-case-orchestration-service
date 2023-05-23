@@ -8,11 +8,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +41,7 @@ public class GenericDocumentService {
         return toCaseDocument(generatedPdf);
     }
 
-    public UUID bulkPrint(BulkPrintRequest bulkPrintRequest, String recipient) {
+    public SendLetterApiResponse bulkPrint(BulkPrintRequest bulkPrintRequest, String recipient) {
         final List<byte[]> documents = bulkPrintDocumentService.downloadDocuments(bulkPrintRequest);
         return bulkPrintDocumentGeneratorService.send(bulkPrintRequest, recipient, documents);
     }

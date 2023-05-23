@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -117,8 +119,12 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(any(), any()))
             .thenReturn(BulkPrintDocument.builder().build());
 
+        when(bulkPrintService.printApplicantDocuments(any(CaseDetails.class), any(), any()))
+            .thenReturn(SendLetterApiResponse.builder().letterId(UUID.randomUUID()).errors(List.of()).build());
+
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
+
         sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
@@ -165,6 +171,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
+        when(bulkPrintService.printApplicantDocuments(any(CaseDetails.class), any(), any()))
+            .thenReturn(SendLetterApiResponse.builder().letterId(UUID.randomUUID()).errors(List.of()).build());
 
         sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
@@ -184,6 +192,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(false);
+        when(bulkPrintService.printApplicantDocuments(any(CaseDetails.class), any(), any()))
+            .thenReturn(SendLetterApiResponse.builder().letterId(UUID.randomUUID()).errors(List.of()).build());
 
         sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 

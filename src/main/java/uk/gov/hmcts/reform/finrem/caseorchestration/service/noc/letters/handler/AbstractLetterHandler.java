@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
@@ -23,7 +24,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.LINE_1;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.POSTCODE;
@@ -54,15 +54,16 @@ public abstract class AbstractLetterHandler implements LetterHandler {
     }
 
     public void handle(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authToken) {
-        log.info("In the LetterHandler for Recipient {} and Notice Type {} ", recipient, noticeType);
+        String caseId = String.valueOf(caseDetails.getId());
+        log.info("In the LetterHandler for Recipient {} and Notice Type {} for caseId {} ", recipient, noticeType, caseId);
         Optional<NoticeOfChangeLetterDetails> noticeOfChangeLetterDetails = getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore);
         noticeOfChangeLetterDetails.ifPresent(letter -> {
-            log.info("Got the letter details now call the document service to generate the Case Document ");
+            log.info("Got the letter details now call the document service to generate the Case Document for caseId {}", caseId);
             CaseDocument caseDocument = nocDocumentService.generateNoticeOfChangeLetter(authToken, letter);
-            log.info("Generated the case document now send to bulk print");
-            UUID uuid = bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails,
+            log.info("Generated the case document now send to bulk printfor caseId {}", caseId);
+            SendLetterApiResponse response = bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails,
                 bulkPrintService.getRecipient(recipient.toString()));
-            log.info("Document sent to bulkprint with UUID {}", uuid);
+            log.info("Document sent to bulkprint with letter response {} for caseId {}", response, caseId);
         });
     }
 

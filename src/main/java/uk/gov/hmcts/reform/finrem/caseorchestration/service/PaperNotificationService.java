@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
 import java.util.Map;
-import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -43,10 +43,10 @@ public class PaperNotificationService {
         }
 
         if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
-            UUID respondentLetterId = bulkPrintService.sendDocumentForPrint(
+            SendLetterApiResponse response = bulkPrintService.sendDocumentForPrint(
                 assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT),
                 caseDetails, CCDConfigConstant.RESPONDENT);
-            log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", respondentLetterId, caseDetails.getId());
+            log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", response.getLetterId(), caseDetails.getId());
         }
     }
 

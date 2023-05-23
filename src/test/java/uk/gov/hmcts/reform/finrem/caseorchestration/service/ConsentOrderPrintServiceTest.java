@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
 
 import java.time.LocalDateTime;
@@ -68,10 +69,12 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     private GenericDocumentService genericDocumentService;
     @MockBean
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    private SendLetterApiResponse response;
 
     @Before
     public void init() {
-        when(genericDocumentService.bulkPrint(any(), any())).thenReturn(LETTER_ID);
+        response = SendLetterApiResponse.builder().letterId(LETTER_ID).errors(List.of()).build();
+        when(genericDocumentService.bulkPrint(any(), any())).thenReturn(response);
     }
 
     @Test
@@ -154,7 +157,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldPrintRespondentOrdersIfNotApprovedOrderMissing() {
+    public void shouldNotPrintRespondentOrdersIfNotApprovedOrderMissing() {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);

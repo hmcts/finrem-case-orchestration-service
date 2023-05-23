@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static java.util.Base64.getEncoder;
 
@@ -39,23 +39,32 @@ public class BulkPrintDocumentGeneratorService {
      */
 
 
-    public UUID send(final BulkPrintRequest bulkPrintRequest, final String recipient,
-                     final List<byte[]> listOfDocumentsAsByteArray) {
+    public SendLetterApiResponse send(final BulkPrintRequest bulkPrintRequest, final String recipient,
+                                      final List<byte[]> listOfDocumentsAsByteArray) {
 
         String letterType = bulkPrintRequest.getLetterType();
         String caseId = bulkPrintRequest.getCaseId();
+        SendLetterApiResponse response = new SendLetterApiResponse();
 
-        log.info("Sending {} for case {}", letterType, caseId);
+        log.info("Sending to bulk print {} for case {}", letterType, caseId);
+        SendLetterResponse sendLetterResponse;
+        try {
+            final List<String> documents = listOfDocumentsAsByteArray.stream()
+                .map(getEncoder()::encodeToString)
+                .toList();
+            sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
+                new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER,
+                    getAdditionalData(caseId, recipient, letterType, bulkPrintRequest)));
 
-        final List<String> documents = listOfDocumentsAsByteArray.stream()
-            .map(getEncoder()::encodeToString)
-            .toList();
-
-        SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
-            new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, recipient, letterType, bulkPrintRequest)));
-
-        log.info("Letter service produced the following letter Id {} for party {} and  case {}", sendLetterResponse.letterId, recipient, caseId);
-        return sendLetterResponse.letterId;
+            response.setLetterId(sendLetterResponse.letterId);
+            response.setErrors(List.of());
+            log.info("Letter service produced the following letter Id {} for party {} and  case {}",
+                sendLetterResponse.letterId, recipient, caseId);
+        } catch (RuntimeException rte) {
+            log.error("Error occured {} in send letter for party {} for case {}", rte.getMessage(), recipient, caseId);
+            response.setErrors(List.of(rte.getMessage()));
+        }
+        return response;
     }
 
 
@@ -66,11 +75,9 @@ public class BulkPrintDocumentGeneratorService {
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
         additionalData.put(FILE_NAMES, getFileNames(bulkPrintRequest));
-
-        log.info("isSendLetterDuplicateCheckEnabled {} for caseId {}", featureToggleService.isSendLetterDuplicateCheckEnabled(), caseId);
+        log.info("Send letter duplicate check {} for caseId {}", featureToggleService.isSendLetterDuplicateCheckEnabled(), caseId);
         additionalData.put(RECIPIENTS, featureToggleService.isSendLetterDuplicateCheckEnabled() ? recipient
             : "%s:%d".formatted(recipient, System.nanoTime()));
-
         return additionalData;
     }
 

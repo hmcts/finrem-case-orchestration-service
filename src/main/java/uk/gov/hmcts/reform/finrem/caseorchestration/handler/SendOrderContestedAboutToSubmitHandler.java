@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
@@ -61,13 +61,15 @@ public class SendOrderContestedAboutToSubmitHandler
                                                                                    String userAuthorisation) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        List<String> errors  = new ArrayList<>();
 
         try {
-            printAndMailGeneralOrderToParties(caseDetails, userAuthorisation);
-            printAndMailHearingDocuments(caseDetails, userAuthorisation);
+            printAndMailGeneralOrderToParties(caseDetails, errors, userAuthorisation);
+            printAndMailHearingDocuments(caseDetails, errors, userAuthorisation);
             stampFinalOrder(caseDetails, userAuthorisation);
-        } catch (InvalidCaseDataException e) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().errors(List.of(e.getMessage())).build();
+        } catch (RuntimeException e) {
+            errors.add(e.getMessage());
+            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().errors(errors).build();
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
@@ -99,23 +101,27 @@ public class SendOrderContestedAboutToSubmitHandler
         }
     }
 
-    private void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
+    private void printAndMailGeneralOrderToParties(CaseDetails caseDetails, List<String> errors, String authorisationToken) {
         if (contestedGeneralOrderPresent(caseDetails)) {
             BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData(), authorisationToken);
 
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 log.info("Sending Applicant Order for Contested Case ID: {}", caseDetails.getId());
-                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
+                SendLetterApiResponse response
+                    = bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
+                errors.addAll(response.getErrors());
             }
 
             if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
                 log.info("Sending Respondent Order for Contested Case ID: {}", caseDetails.getId());
-                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
+                SendLetterApiResponse response
+                    = bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
+                errors.addAll(response.getErrors());
             }
         }
     }
 
-    private void printAndMailHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
+    private void printAndMailHearingDocuments(CaseDetails caseDetails, List<String> errors, String authorisationToken) {
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
             Map<String, Object> caseData = caseDetails.getData();
 
@@ -123,12 +129,16 @@ public class SendOrderContestedAboutToSubmitHandler
 
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 log.info("Received request to send hearing pack for applicant for case {}:", caseDetails.getId());
-                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, hearingDocumentPack);
+                SendLetterApiResponse response
+                    = bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, hearingDocumentPack);
+                errors.addAll(response.getErrors());
             }
 
             if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
                 log.info("Received request to send hearing pack for respondent for case {}:", caseDetails.getId());
-                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
+                SendLetterApiResponse response
+                    = bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
+                errors.addAll(response.getErrors());
             }
         }
     }

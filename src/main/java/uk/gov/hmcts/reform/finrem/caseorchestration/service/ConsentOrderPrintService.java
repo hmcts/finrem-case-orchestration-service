@@ -7,11 +7,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
@@ -40,10 +40,12 @@ public class ConsentOrderPrintService {
 
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
             log.info("Sending approved order for applicant to bulk print for case {}", caseDetails.getId());
-            UUID applicantLetterId = shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)
+            SendLetterApiResponse response = shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
-            caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
+            if (response.getErrors().isEmpty()) {
+                caseData.put(BULK_PRINT_LETTER_ID_APP, response.getLetterId());
+            }
         }
 
         if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
@@ -54,7 +56,7 @@ public class ConsentOrderPrintService {
 
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
-        UUID respondentLetterId = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails, authorisationToken);
+        SendLetterApiResponse response = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails, authorisationToken);
         Map<String, Object> caseData = caseDetails.getData();
 
         if (caseDataService.isRespondentAddressConfidential(caseData)) {
@@ -63,30 +65,32 @@ public class ConsentOrderPrintService {
             caseData.put(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL, respondentCoverSheet);
         } else {
             caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
-            caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
+            caseData.put(BULK_PRINT_LETTER_ID_RES, response.getLetterId());
         }
 
         log.info("Generated Respondent CoverSheet for bulk print, case {}. coversheet: {}, letterId : {}", caseDetails.getId(),
-            respondentCoverSheet, respondentLetterId);
+            respondentCoverSheet, response.getLetterId());
     }
 
-    private UUID printApplicantConsentOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
+    private SendLetterApiResponse printApplicantConsentOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
         return bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, applicantDocuments);
     }
 
-    private UUID printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
+    private SendLetterApiResponse printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
 
         if (applicantDocuments.isEmpty()) {
-            return null;
+            return SendLetterApiResponse.builder().letterId(null)
+                .errors(List.of("Applicant document missing for casd Id " + caseDetails.getId())).build();
         }
         return bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, applicantDocuments);
     }
 
-    private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet, CaseDetails caseDetails, String authorisationToken) {
+    private SendLetterApiResponse sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet,
+                                                                         CaseDetails caseDetails, String authorisationToken) {
         log.info("Sending order documents to recipient / solicitor for Bulk Print, case {}", caseDetails.getId());
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();

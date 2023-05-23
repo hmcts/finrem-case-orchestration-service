@@ -12,11 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
@@ -45,7 +45,7 @@ public class BulkPrintService {
      * @deprecated deprecated since 15-Feb-2023
      */
     @Deprecated(since = "15-Feb-2023")
-    public UUID sendDocumentForPrint(final CaseDocument document, CaseDetails caseDetails, final String recipient) {
+    public SendLetterApiResponse sendDocumentForPrint(final CaseDocument document, CaseDetails caseDetails, final String recipient) {
         List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl())
                 .fileName(document.getDocumentFilename())
@@ -54,7 +54,7 @@ public class BulkPrintService {
         return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, recipient, bulkPrintDocument);
     }
 
-    public UUID sendDocumentForPrint(final CaseDocument document, FinremCaseDetails caseDetails, final String recipient) {
+    public SendLetterApiResponse sendDocumentForPrint(final CaseDocument document, FinremCaseDetails caseDetails, final String recipient) {
         List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl())
                 .fileName(document.getDocumentFilename()).build());
@@ -62,7 +62,7 @@ public class BulkPrintService {
         return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, recipient, bulkPrintDocument);
     }
 
-    public UUID bulkPrintFinancialRemedyLetterPack(Long caseId, String recipient, List<BulkPrintDocument> documents) {
+    public SendLetterApiResponse bulkPrintFinancialRemedyLetterPack(Long caseId, String recipient, List<BulkPrintDocument> documents) {
         log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseId);
         return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents);
     }
@@ -75,7 +75,7 @@ public class BulkPrintService {
      * @deprecated deprecated since 15-Feb-2023
      */
     @Deprecated(since = "15-Feb-2023")
-    public UUID printApplicantDocuments(CaseDetails caseDetails, String authorisationToken,
+    public SendLetterApiResponse printApplicantDocuments(CaseDetails caseDetails, String authorisationToken,
                                         List<BulkPrintDocument> caseDocuments) {
         return printDocumentsWithCoversheet(caseDetails,
             generateApplicantCoverSheet(caseDetails, authorisationToken),
@@ -83,7 +83,7 @@ public class BulkPrintService {
             APPLICANT);
     }
 
-    public UUID printApplicantDocuments(FinremCaseDetails caseDetails, String authorisationToken,
+    public SendLetterApiResponse printApplicantDocuments(FinremCaseDetails caseDetails, String authorisationToken,
                                         List<BulkPrintDocument> caseDocuments) {
         return printDocumentsWithCoversheet(caseDetails,
             generateApplicantCoverSheet(caseDetails, authorisationToken),
@@ -100,7 +100,7 @@ public class BulkPrintService {
      * @deprecated deprecated since 15-Feb-2023
      */
     @Deprecated(since = "15-Feb-2023")
-    public UUID printRespondentDocuments(CaseDetails caseDetails, String authorisationToken,
+    public SendLetterApiResponse printRespondentDocuments(CaseDetails caseDetails, String authorisationToken,
                                          List<BulkPrintDocument> caseDocuments) {
         return printDocumentsWithCoversheet(caseDetails,
             generateRespondentCoverSheet(caseDetails, authorisationToken),
@@ -108,7 +108,7 @@ public class BulkPrintService {
             RESPONDENT);
     }
 
-    public UUID printRespondentDocuments(FinremCaseDetails caseDetails, String authorisationToken,
+    public SendLetterApiResponse printRespondentDocuments(FinremCaseDetails caseDetails, String authorisationToken,
                                          List<BulkPrintDocument> caseDocuments) {
         return printDocumentsWithCoversheet(caseDetails,
             generateRespondentCoverSheet(caseDetails, authorisationToken),
@@ -116,8 +116,8 @@ public class BulkPrintService {
             RESPONDENT);
     }
 
-    private UUID bulkPrintDocuments(Long caseId, String letterType, String recipient, List<BulkPrintDocument> documents) {
-        UUID letterId = genericDocumentService.bulkPrint(
+    private SendLetterApiResponse bulkPrintDocuments(Long caseId, String letterType, String recipient, List<BulkPrintDocument> documents) {
+        SendLetterApiResponse response = genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(String.valueOf(caseId))
                 .letterType(letterType)
@@ -125,9 +125,8 @@ public class BulkPrintService {
                 .build(), recipient);
 
         log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {} and recipient is {}",
-            caseId, letterId, documents.size(), letterType, documents, recipient);
-
-        return letterId;
+            caseId, response.getLetterId(), documents.size(), letterType, documents, recipient);
+        return response;
     }
 
     /**
@@ -138,7 +137,7 @@ public class BulkPrintService {
      * @deprecated deprecated since 15-Feb-2023
      */
     @Deprecated(since = "15-Feb-2023")
-    private UUID printDocumentsWithCoversheet(CaseDetails caseDetails,
+    private SendLetterApiResponse printDocumentsWithCoversheet(CaseDetails caseDetails,
                                               BulkPrintDocument coverSheet,
                                               List<BulkPrintDocument> caseDocuments,
                                               String recipient) {
@@ -149,7 +148,7 @@ public class BulkPrintService {
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents);
     }
 
-    private UUID printDocumentsWithCoversheet(FinremCaseDetails caseDetails,
+    private SendLetterApiResponse printDocumentsWithCoversheet(FinremCaseDetails caseDetails,
                                               BulkPrintDocument coverSheet,
                                               List<BulkPrintDocument> caseDocuments,
                                               String recipient) {

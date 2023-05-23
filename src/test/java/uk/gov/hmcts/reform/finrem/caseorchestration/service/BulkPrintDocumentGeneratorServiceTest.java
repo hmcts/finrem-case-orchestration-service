@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.sendletter.SendLetterApiResponse;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
@@ -53,8 +54,9 @@ public class BulkPrintDocumentGeneratorServiceTest {
         when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
             .thenReturn(new SendLetterResponse(randomId));
 
-        UUID letterId = service.send(getBulkPrintRequest(), APPLICANT, singletonList("abc".getBytes()));
-        assertThat(letterId, is(equalTo(randomId)));
+        SendLetterApiResponse apiResponse
+            = service.send(getBulkPrintRequest(), APPLICANT, singletonList("abc".getBytes()));
+        assertThat(apiResponse.getLetterId(), is(equalTo(randomId)));
     }
 
 
