@@ -63,7 +63,7 @@ public class EvidenceManagementAuditService {
                 .orElseThrow(() -> new IllegalStateException("self rel link not found"))
                 .getHref())
             .fileName(document.get("originalDocumentName").asText())
-            .createdBy(document.get("createdBy").asText())
+            .createdBy(document.get("createdBy") != null ? document.get("createdBy").asText() : "")
             .createdOn(document.get("createdOn").asText())
             .lastModifiedBy(document.get("lastModifiedBy") != null ? document.get("lastModifiedBy").asText() : "")
             .modifiedOn(document.get("modifiedOn").asText())

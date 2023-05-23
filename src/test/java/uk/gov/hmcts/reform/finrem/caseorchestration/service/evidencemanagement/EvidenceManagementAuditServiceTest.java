@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.List;
@@ -61,17 +60,33 @@ public class EvidenceManagementAuditServiceTest {
     @Test
     public void whenAuditRequested_thenDocumentManagementResponseIsProcessedEvenLastupdatedByNotPresent() {
         when(idamAuthService.getUserDetails(any())).thenReturn(UserDetails.builder().build());
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(JsonNode.class))).thenReturn(jsonNodeV2());
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(JsonNode.class)))
+            .thenReturn(jsonNodePayload("/fileauditresponseV2.txt"));
 
         List<FileUploadResponse> response = evidenceManagementAuditService.audit(singletonList("mockFileUrl"), "mockToken");
 
         assertThat(response, hasSize(1));
         assertThat(response.get(0).getFileName(), is("PNGFile.png"));
+        assertThat(response.get(0).getLastModifiedBy(), is(""));
+    }
+
+    @Test
+    public void whenAuditRequested_thenDocumentManagementResponseIsProcessedEvenCreatedByNotPresent() {
+        when(idamAuthService.getUserDetails(any())).thenReturn(UserDetails.builder().build());
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(JsonNode.class)))
+            .thenReturn(jsonNodePayload("/fileauditresponseV3.txt"));
+
+        List<FileUploadResponse> response = evidenceManagementAuditService.audit(singletonList("mockFileUrl"), "mockToken");
+
+        assertThat(response, hasSize(1));
+        assertThat(response.get(0).getFileName(), is("PNGFile.png"));
+        assertThat(response.get(0).getCreatedBy(), is(""));
+        assertThat(response.get(0).getLastModifiedBy(), is(""));
     }
 
     @SneakyThrows
-    private ResponseEntity<JsonNode> jsonNodeV2() {
+    private ResponseEntity<JsonNode> jsonNodePayload(String payload) {
         return ResponseEntity.ok().body(new ObjectMapper().readTree(new String(readAllBytes(get("src/test/resources"
-            + "/fileauditresponseV2.txt")))));
+            + payload)))));
     }
 }
