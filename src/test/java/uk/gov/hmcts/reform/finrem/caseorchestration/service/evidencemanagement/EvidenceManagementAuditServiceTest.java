@@ -60,7 +60,21 @@ public class EvidenceManagementAuditServiceTest {
     @Test
     public void whenAuditRequested_thenDocumentManagementResponseIsProcessedEvenLastupdatedByNotPresent() {
         when(idamAuthService.getUserDetails(any())).thenReturn(UserDetails.builder().build());
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(JsonNode.class))).thenReturn(jsonNodeV2());
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(JsonNode.class)))
+            .thenReturn(jsonNodePayload("/fileauditresponseV2.txt"));
+
+        List<FileUploadResponse> response = evidenceManagementAuditService.audit(singletonList("mockFileUrl"), "mockToken");
+
+        assertThat(response, hasSize(1));
+        assertThat(response.get(0).getFileName(), is("PNGFile.png"));
+        assertThat(response.get(0).getLastModifiedBy(), is(""));
+    }
+
+    @Test
+    public void whenAuditRequested_thenDocumentManagementResponseIsProcessedEvenCreatedByNotPresent() {
+        when(idamAuthService.getUserDetails(any())).thenReturn(UserDetails.builder().build());
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(JsonNode.class)))
+            .thenReturn(jsonNodePayload("/fileauditresponseV3.txt"));
 
         List<FileUploadResponse> response = evidenceManagementAuditService.audit(singletonList("mockFileUrl"), "mockToken");
 
@@ -71,8 +85,8 @@ public class EvidenceManagementAuditServiceTest {
     }
 
     @SneakyThrows
-    private ResponseEntity<JsonNode> jsonNodeV2() {
+    private ResponseEntity<JsonNode> jsonNodePayload(String payload) {
         return ResponseEntity.ok().body(new ObjectMapper().readTree(new String(readAllBytes(get("src/test/resources"
-            + "/fileauditresponseV2.txt")))));
+            + payload)))));
     }
 }
