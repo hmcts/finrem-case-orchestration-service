@@ -198,7 +198,6 @@ public class IntervenerAddedCorresponderTest {
     @Test
     public void shouldSendEmailIfIntervenerOneIsRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        IntervenerOneWrapper intervenerOneWrapper = new IntervenerOneWrapper();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
@@ -210,6 +209,7 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        IntervenerOneWrapper intervenerOneWrapper = new IntervenerOneWrapper();
         when(intervenerOneDetailsMapper.mapToIntervenerDetails(intervenerOneWrapper)).thenReturn(intervenerDetails);
         when(intervenerAddedCorresponder.shouldSendIntervenerOneSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
@@ -221,7 +221,6 @@ public class IntervenerAddedCorresponderTest {
     @Test
     public void shouldSendEmailIfIntervenerTwoIsRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        IntervenerTwoWrapper intervenerTwoWrapper = new IntervenerTwoWrapper();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
@@ -234,6 +233,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
+        IntervenerTwoWrapper intervenerTwoWrapper = new IntervenerTwoWrapper();
         when(intervenerTwoDetailsMapper.mapToIntervenerDetails(intervenerTwoWrapper)).thenReturn(intervenerDetails);
         when(intervenerAddedCorresponder.shouldSendIntervenerTwoSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
@@ -245,7 +245,6 @@ public class IntervenerAddedCorresponderTest {
     @Test
     public void shouldSendEmailIfIntervenerThreeIsRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        IntervenerThreeWrapper intervenerThreeWrapper = new IntervenerThreeWrapper();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
@@ -258,6 +257,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
+        IntervenerThreeWrapper intervenerThreeWrapper = new IntervenerThreeWrapper();
         when(intervenerThreeDetailsMapper.mapToIntervenerDetails(intervenerThreeWrapper)).thenReturn(intervenerDetails);
         when(intervenerAddedCorresponder.shouldSendIntervenerThreeSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
@@ -269,7 +269,6 @@ public class IntervenerAddedCorresponderTest {
     @Test
     public void shouldSendEmailIfIntervenerFourIsRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        IntervenerFourWrapper intervenerFourWrapper = new IntervenerFourWrapper();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
@@ -282,6 +281,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
+        IntervenerFourWrapper intervenerFourWrapper = new IntervenerFourWrapper();
         when(intervenerFourDetailsMapper.mapToIntervenerDetails(intervenerFourWrapper)).thenReturn(intervenerDetails);
         when(intervenerAddedCorresponder.shouldSendIntervenerFourSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
