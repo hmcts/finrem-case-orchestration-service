@@ -1,5 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
-
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
@@ -99,7 +99,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).updateIntervenerOneDetails(any());
+        verify(service).updateIntervenerOneDetails(finremCallbackRequest);
     }
 
     @Test
@@ -122,7 +122,6 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_ONE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
-
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).removeIntervenerOneDetails(any(), any());
@@ -174,7 +173,6 @@ public class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_TWO_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).removeIntervenerTwoDetails(any(), any());
     }
@@ -196,7 +194,6 @@ public class IntervenersAboutToSubmitHandlerTest {
         handleResp.getData().getIntervenersList().setValue(option3);
         midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_THREE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
@@ -208,6 +205,7 @@ public class IntervenersAboutToSubmitHandlerTest {
     public void givenContestedCase_whenSelectionMadeToRemoveIntervener3_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
             .builder().intervener3Name("Three name").intervener3Email("test@test.com").build();
 
@@ -219,7 +217,6 @@ public class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement option3 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         handleResp.getData().getIntervenersList().setValue(option3);
         midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
-
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_THREE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
@@ -245,7 +242,6 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_FOUR_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
@@ -257,6 +253,8 @@ public class IntervenersAboutToSubmitHandlerTest {
     public void givenContestedCase_whenSelectionMadeToRemoveIntervener4_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
+
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
             .builder().intervener4Name("Four name").intervener4Email("test@test.com").build();
 
@@ -269,7 +267,6 @@ public class IntervenersAboutToSubmitHandlerTest {
         handleResp.getData().getIntervenersList().setValue(option4);
 
         midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
-
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_FOUR_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);

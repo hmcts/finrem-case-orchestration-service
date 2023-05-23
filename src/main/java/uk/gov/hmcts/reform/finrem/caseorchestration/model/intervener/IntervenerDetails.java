@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -21,19 +21,18 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class IntervenerOneWrapper {
-    private String intervener1Name;
-    private Address intervener1Address;
-    private String intervener1Email;
-    private String intervener1Phone;
-    private YesOrNo intervener1Represented;
+public class IntervenerDetails {
+    private String intervenerName;
+    private Address intervenerAddress;
+    private String intervenerEmail;
+    private String intervenerPhone;
+    private YesOrNo intervenerRepresented;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate intervener1DateAdded;
-    private String intervener1SolName;
-    private String intervener1SolEmail;
-    private String intervener1SolPhone;
-    private String intervener1SolicitorFirm;
-    private String intervener1SolicitorReference;
-    private OrganisationPolicy intervener1Organisation;
+    private LocalDate intervenerDateAdded;
+    private String intervenerSolName;
+    private String intervenerSolEmail;
+    private String intervenerSolPhone;
+    private OrganisationPolicy intervenerOrganisation;
+
 }
