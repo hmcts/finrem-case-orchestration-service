@@ -119,7 +119,7 @@ public class FinremNotificationRequestMapper {
     }
 
     public NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
-    String recipientName, String recipientEmail, String referenceNumber) {
+                                                        String recipientName, String recipientEmail, String referenceNumber) {
         return NotificationRequest.builder()
             .caseReferenceNumber(caseDetails.getId().toString())
             .intervenerFullName(intervenerDetails.getIntervenerName())

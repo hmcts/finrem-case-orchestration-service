@@ -120,7 +120,9 @@ public class EmailService {
         }
 
         if (INTERVENER_SOLICITOR_ADDED_EMAIL.equals(templateName)) {
-
+            templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
+            templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
+            templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
         }
 
         templateVars.putAll(emailTemplateVars.get(templateName));
