@@ -28,7 +28,7 @@ public class BulkPrintDocumentGeneratorService {
     private static final String CASE_IDENTIFIER_KEY = "caseIdentifier";
 
     private static final String FILE_NAMES = "fileNames";
-    private static final String RECIPIENTS = "recipients";
+    private static final String RECIPIENTS = "party";
 
     private final AuthTokenGenerator authTokenGenerator;
     private final FeatureToggleService featureToggleService;
@@ -66,11 +66,10 @@ public class BulkPrintDocumentGeneratorService {
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
         additionalData.put(FILE_NAMES, getFileNames(bulkPrintRequest));
-        log.info("recipient {} for caseId {}", recipient, caseId);
 
-
-        //additionalData.put(RECIPIENTS, featureToggleService.isSendLetterDuplicateCheckEnabled() ? recipient
-        //: "%s:%d".formatted(recipient, System.nanoTime()));
+        log.info("isSendLetterDuplicateCheckEnabled {} for caseId {}", featureToggleService.isSendLetterDuplicateCheckEnabled(), caseId);
+        additionalData.put(RECIPIENTS, featureToggleService.isSendLetterDuplicateCheckEnabled() ? recipient
+            : "%s:%d".formatted(recipient, System.nanoTime()));
 
         return additionalData;
     }

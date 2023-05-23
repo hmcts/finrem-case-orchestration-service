@@ -48,7 +48,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
 
         UUID randomId = UUID.randomUUID();
         when(authTokenGenerator.generate()).thenReturn("random-string");
-        //when(featureToggleService.isSendLetterDuplicateCheckEnabled()).thenReturn(false);
+        when(featureToggleService.isSendLetterDuplicateCheckEnabled()).thenReturn(false);
 
         when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
             .thenReturn(new SendLetterResponse(randomId));
