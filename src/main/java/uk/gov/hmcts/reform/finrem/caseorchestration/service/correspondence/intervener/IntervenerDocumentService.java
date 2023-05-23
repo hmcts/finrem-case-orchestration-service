@@ -96,7 +96,8 @@ public class IntervenerDocumentService {
             authToken,
             convertLetterDetailsToMap(intervenerAddedLetterDetails),
             template,
-            filename);
+            filename,
+            intervenerAddedLetterDetails.getCaseNumber());
     }
 
     private CaseDocument generateDocument(String authToken,
@@ -107,7 +108,8 @@ public class IntervenerDocumentService {
             authToken,
             convertLetterDetailsToMap(intervenerAddedSolicitorLetterDetails),
             template,
-            filename);
+            filename,
+            intervenerAddedSolicitorLetterDetails.getCaseNumber());
     }
 
     private IntervenerAddedLetterDetails generateAddedLetterDetails(FinremCaseDetails caseDetails) {
