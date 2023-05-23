@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.List;
@@ -67,6 +66,8 @@ public class EvidenceManagementAuditServiceTest {
 
         assertThat(response, hasSize(1));
         assertThat(response.get(0).getFileName(), is("PNGFile.png"));
+        assertThat(response.get(0).getCreatedBy(), is(""));
+        assertThat(response.get(0).getLastModifiedBy(), is(""));
     }
 
     @SneakyThrows
