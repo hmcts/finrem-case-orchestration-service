@@ -64,7 +64,7 @@ public class EvidenceManagementUploadService {
         }
     }
 
-    private List<FileUploadResponse> uploadToDmStore(@NonNull final List<MultipartFile> files, String caseTypeId, final String auth) {
+    private List<FileUploadResponse> uploadToDmStore(@NonNull final List<MultipartFile> files, final String caseTypeId, final String auth) {
         UserDetails userDetails = idamAuthService.getUserDetails(auth);
         IdamToken idamTokens = idamAuthService.getIdamToken(auth);
         log.info("DMStore Upload files: {} with user: {} and case id: {}", files.toString(), idamTokens.getEmail(), caseTypeId);
