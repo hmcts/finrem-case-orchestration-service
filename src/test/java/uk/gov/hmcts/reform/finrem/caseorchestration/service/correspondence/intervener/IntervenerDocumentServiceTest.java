@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_DATA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_DETAILS;
@@ -105,7 +106,7 @@ public class IntervenerDocumentServiceTest {
             AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
 
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
-            placeholdersMapCaptor.capture(), eq(INTERVENER_ADDED_TEMPLATE), eq(INTERVENER_ADDED_FILENAME), eq(CASE_NUMBER));
+            placeholdersMapCaptor.capture(), eq(INTERVENER_ADDED_TEMPLATE), eq(INTERVENER_ADDED_FILENAME), eq("123"));
 
         Map<String, Object> letterData = getPlaceholdersMap(placeholdersMapCaptor);
         assertThat(letterData.get("intervenerFullName"), is(INTERVENER_NAME));
@@ -126,7 +127,7 @@ public class IntervenerDocumentServiceTest {
 
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(), eq(INTERVENER_ADDED_SOLICITOR_TEMPLATE), eq(INTERVENER_ADDED_SOLICITOR_FILENAME),
-            eq(CASE_NUMBER));
+            eq("123"));
 
         Map<String, Object> letterData = getPlaceholdersMap(placeholdersMapCaptor);
         assertThat(letterData.get("intervenerFullName"), is(INTERVENER_NAME));
