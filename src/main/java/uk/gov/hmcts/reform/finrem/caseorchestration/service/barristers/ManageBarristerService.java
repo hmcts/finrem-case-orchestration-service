@@ -44,6 +44,23 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_1_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_1_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_2_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_2_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_3_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_3_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_4_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_4_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_1_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_2_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_3_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_4_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANAGE_BARRISTERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANAGE_BARRISTER_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
@@ -123,13 +140,30 @@ public class ManageBarristerService {
             ? CASEWORKER_ROLE
             : caseRoleResource.getCaseAssignedUserRoles().get(0).getCaseRole();
 
-        if (!List.of(APP_SOLICITOR_POLICY, RESP_SOLICITOR_POLICY).contains(caseRole)) {
+        if (!List.of(APP_SOLICITOR_POLICY, RESP_SOLICITOR_POLICY, INTVR_SOLICITOR_1_POLICY, INTVR_SOLICITOR_2_POLICY,
+            INTVR_SOLICITOR_3_POLICY, INTVR_SOLICITOR_4_POLICY).contains(caseRole)) {
             String caseworkerParty = Objects.toString(caseDetails.getData().get(MANAGE_BARRISTER_PARTY), StringUtils.EMPTY);
             log.info("caseWorker party is {}", caseworkerParty);
-            caseRole = APPLICANT.equalsIgnoreCase(caseworkerParty) ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY;
+            if (APPLICANT.equalsIgnoreCase(caseworkerParty)) {
+                caseRole = APP_SOLICITOR_POLICY;
+            } else if (
+                RESPONDENT.equalsIgnoreCase(caseworkerParty)) {
+                caseRole = RESP_SOLICITOR_POLICY;
+            } else if (
+                INTERVENER1.equalsIgnoreCase(caseworkerParty)) {
+                caseRole = INTVR_SOLICITOR_1_POLICY;
+            } else if (
+                INTERVENER2.equalsIgnoreCase(caseworkerParty)) {
+                caseRole = INTVR_SOLICITOR_2_POLICY;
+            } else if (
+                INTERVENER3.equalsIgnoreCase(caseworkerParty)) {
+                caseRole = INTVR_SOLICITOR_3_POLICY;
+            } else if (
+                INTERVENER4.equalsIgnoreCase(caseworkerParty)) {
+                caseRole = INTVR_SOLICITOR_4_POLICY;
+            }
         }
         log.info("Case role is {}", caseRole);
-
         return caseRole;
     }
 
@@ -196,11 +230,35 @@ public class ManageBarristerService {
     }
 
     private String getBarristerCaseRole(CaseDetails caseDetails, String authToken) {
-        return APP_SOLICITOR_POLICY.equals(getCaseRole(caseDetails, authToken)) ? APPLICANT_BARRISTER_ROLE : RESPONDENT_BARRISTER_ROLE;
+        if (APP_SOLICITOR_POLICY.equals(getCaseRole(caseDetails, authToken))) {
+            return APPLICANT_BARRISTER_ROLE;
+        } else if (RESP_SOLICITOR_POLICY.equals(getCaseRole(caseDetails, authToken))) {
+            return RESPONDENT_BARRISTER_ROLE;
+        } else if (INTVR_SOLICITOR_1_POLICY.equals(getCaseRole(caseDetails, authToken))) {
+            return INTERVENER_BARRISTER_1_ROLE;
+        } else if (INTVR_SOLICITOR_2_POLICY.equals(getCaseRole(caseDetails, authToken))) {
+            return INTERVENER_BARRISTER_2_ROLE;
+        } else if (INTVR_SOLICITOR_3_POLICY.equals(getCaseRole(caseDetails, authToken))) {
+            return INTERVENER_BARRISTER_3_ROLE;
+        } else {
+            return INTERVENER_BARRISTER_4_ROLE;
+        }
     }
 
     private String getBarristerCollectionKey(String caseRole) {
-        return APP_SOLICITOR_POLICY.equals(caseRole) ? APPLICANT_BARRISTER_COLLECTION : RESPONDENT_BARRISTER_COLLECTION;
+        if (APP_SOLICITOR_POLICY.equals(caseRole)) {
+            return APPLICANT_BARRISTER_COLLECTION;
+        } else if (RESP_SOLICITOR_POLICY.equals(caseRole)) {
+            return RESPONDENT_BARRISTER_COLLECTION;
+        } else if (INTVR_SOLICITOR_1_POLICY.equals(caseRole)) {
+            return INTERVENER_BARRISTER_1_COLLECTION;
+        } else if (INTVR_SOLICITOR_2_POLICY.equals(caseRole)) {
+            return INTERVENER_BARRISTER_2_COLLECTION;
+        } else if (INTVR_SOLICITOR_3_POLICY.equals(caseRole)) {
+            return INTERVENER_BARRISTER_3_COLLECTION;
+        } else {
+            return INTERVENER_BARRISTER_4_COLLECTION;
+        }
     }
 
     private ChangedRepresentative convertToChangedRepresentative(Barrister barrister) {
@@ -221,7 +279,13 @@ public class ManageBarristerService {
     }
 
     private String getManageBarristerParty(CaseDetails caseDetails, String authToken) {
-        return APP_SOLICITOR_POLICY.equals(getCaseRole(caseDetails, authToken)) ? APPLICANT : RESPONDENT;
+        if (APP_SOLICITOR_POLICY.equals(getCaseRole(caseDetails, authToken))) {
+            return APPLICANT;
+        } else if (RESP_SOLICITOR_POLICY.equals(getCaseRole(caseDetails, authToken))) {
+            return RESPONDENT;
+        } else {
+            return INTERVENER;
+        }
     }
 
     private DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient(CaseDetails caseDetails,

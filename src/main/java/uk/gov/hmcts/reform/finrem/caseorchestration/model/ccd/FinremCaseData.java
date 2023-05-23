@@ -349,8 +349,15 @@ public class FinremCaseData {
     private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")
     private List<BarristerCollectionItem> respondentBarristers;
+    @JsonProperty("intvr1BarristerCollection")
+    private List<BarristerCollectionItem> intvr1Barristers;
+    @JsonProperty("intvr2BarristerCollection")
+    private List<BarristerCollectionItem> intvr2Barristers;
+    @JsonProperty("intvr3BarristerCollection")
+    private List<BarristerCollectionItem> intvr3Barristers;
+    @JsonProperty("intvr4BarristerCollection")
+    private List<BarristerCollectionItem> intvr4Barristers;
     private BarristerParty barristerParty;
-
     private YesOrNo benefitForChildrenDecisionSchedule;
     private List<BenefitPaymentChecklist> benefitPaymentChecklistSchedule;
     private CaseDocument variationOrderDocument;
