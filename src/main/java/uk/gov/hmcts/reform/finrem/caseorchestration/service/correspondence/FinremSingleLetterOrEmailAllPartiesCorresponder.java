@@ -60,7 +60,6 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
     public abstract CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                                     DocumentHelper.PaperNotificationRecipient recipient);
 
-
     protected abstract void emailApplicantSolicitor(FinremCaseDetails caseDetails);
 
     protected abstract void emailRespondentSolicitor(FinremCaseDetails caseDetails);

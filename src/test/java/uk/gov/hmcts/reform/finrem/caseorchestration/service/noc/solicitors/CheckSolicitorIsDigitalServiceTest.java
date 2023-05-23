@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 
 import java.util.Collections;
@@ -56,6 +57,20 @@ public class CheckSolicitorIsDigitalServiceTest {
         when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(APP_SOLICITOR_POLICY));
 
         assertFalse(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(CASE_ID));
+    }
+
+    @Test
+    public void givenIntervenerSolicitorIsDigital_whenIsIntervenerSolicitorDigital_thenReturnTrue() {
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(CaseRole.INTVR_SOLICITOR_1.getValue()));
+
+        assertTrue(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(CASE_ID, CaseRole.INTVR_SOLICITOR_1.getValue()));
+    }
+
+    @Test
+    public void givenIntervenerSolicitorIsNotDigital_whenIsRespondentSolicitorDigital_thenReturnFalse() {
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(APP_SOLICITOR_POLICY));
+
+        assertFalse(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(CASE_ID, CaseRole.INTVR_SOLICITOR_1.getValue()));
     }
 
     @Test
