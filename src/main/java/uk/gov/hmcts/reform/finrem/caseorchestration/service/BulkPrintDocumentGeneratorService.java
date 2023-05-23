@@ -66,10 +66,11 @@ public class BulkPrintDocumentGeneratorService {
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
         additionalData.put(FILE_NAMES, getFileNames(bulkPrintRequest));
+        log.info("recipient {} for caseId {}", recipient, caseId);
 
-        log.info("isSendLetterDuplicateCheckEnabled {} for caseId {}", featureToggleService.isSendLetterDuplicateCheckEnabled(), caseId);
-        additionalData.put(RECIPIENTS, featureToggleService.isSendLetterDuplicateCheckEnabled() ? recipient
-            : "%s:%d".formatted(recipient, System.nanoTime()));
+
+        //additionalData.put(RECIPIENTS, featureToggleService.isSendLetterDuplicateCheckEnabled() ? recipient
+        //: "%s:%d".formatted(recipient, System.nanoTime()));
 
         return additionalData;
     }
