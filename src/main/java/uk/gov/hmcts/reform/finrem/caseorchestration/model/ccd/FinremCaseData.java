@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -37,6 +38,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJud
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -356,14 +358,26 @@ public class FinremCaseData {
     private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")
     private List<BarristerCollectionItem> respondentBarristers;
+    @JsonProperty("intvr1BarristerCollection")
+    private List<BarristerCollectionItem> intvr1Barristers;
+    @JsonProperty("intvr2BarristerCollection")
+    private List<BarristerCollectionItem> intvr2Barristers;
+    @JsonProperty("intvr3BarristerCollection")
+    private List<BarristerCollectionItem> intvr3Barristers;
+    @JsonProperty("intvr4BarristerCollection")
+    private List<BarristerCollectionItem> intvr4Barristers;
     private BarristerParty barristerParty;
-
     private YesOrNo benefitForChildrenDecisionSchedule;
     private List<BenefitPaymentChecklist> benefitPaymentChecklistSchedule;
     private CaseDocument variationOrderDocument;
     private CaseDocument consentVariationOrderDocument;
 
     private YesOrNo isNocRejected;
+
+    @JsonIgnore
+    private IntervenerChangeDetails currentIntervenerChangeDetails;
+    @JsonIgnore
+    private Addressee currentAddressee;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -612,6 +626,26 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public boolean isIntervenerOneRepresentedByASolicitor() {
+        return YesOrNo.YES.equals(getIntervenerOneWrapper().getIntervener1Represented());
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerTwoRepresentedByASolicitor() {
+        return YesOrNo.YES.equals(getIntervenerTwoWrapper().getIntervener2Represented());
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerThreeRepresentedByASolicitor() {
+        return YesOrNo.YES.equals(getIntervenerThreeWrapper().getIntervener3Represented());
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerFourRepresentedByASolicitor() {
+        return YesOrNo.YES.equals(getIntervenerFourWrapper().getIntervener4Represented());
+    }
+
+    @JsonIgnore
     public boolean isPaperCase() {
         return YesOrNo.YES.equals(paperApplication);
     }
@@ -682,6 +716,26 @@ public class FinremCaseData {
     @JsonIgnore
     public boolean isRespondentSolicitorPopulated() {
         return StringUtils.isNotEmpty(nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail()));
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerSolOnePopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerOneWrapper().getIntervener1SolEmail()));
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerSolTwoPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerTwoWrapper().getIntervener2SolEmail()));
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerSolThreePopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerThreeWrapper().getIntervener3SolEmail()));
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerSolFourPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerFourWrapper().getIntervener4SolEmail()));
     }
 
     @JsonIgnore

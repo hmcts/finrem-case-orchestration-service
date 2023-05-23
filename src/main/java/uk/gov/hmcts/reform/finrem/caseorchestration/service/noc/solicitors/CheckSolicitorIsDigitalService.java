@@ -25,7 +25,11 @@ public class CheckSolicitorIsDigitalService {
         return isSolicitorDigital(caseId, RESP_SOLICITOR_POLICY);
     }
 
-    public boolean isSolicitorDigital(String caseId, String caseRole) {
+    public boolean isIntervenerSolicitorDigital(String caseId, String caseRole) {
+        return isSolicitorDigital(caseId, caseRole);
+    }
+
+    private boolean isSolicitorDigital(String caseId, String caseRole) {
         log.info("Checking if solicitor is digital for case: {} and role: {}", caseId, caseRole);
         CaseAssignmentUserRolesResource rolesResource = assignCaseAccessService.searchUserRoles(caseId);
         if (rolesResource == null || rolesResource.getCaseAssignmentUserRoles() == null) {
