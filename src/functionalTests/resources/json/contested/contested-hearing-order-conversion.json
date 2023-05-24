@@ -1,7 +1,7 @@
 {
   "event_id": "someEventid",
   "case_details": {
-    "id": "1234",
+    "id": "123",
     "jurisdiction": "DIVORCE",
     "state": "reviewOrder",
     "case_type_id": "FinancialRemedyContested",
@@ -95,8 +95,8 @@
       "latestDraftDirectionOrder": {
         "purposeOfDocument": "Draft order",
         "uploadDraftDocument": {
-          "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/13a203b6-6c33-4c71-aabe-66701808f63e",
-          "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/13a203b6-6c33-4c71-aabe-66701808f63e/binary",
+          "document_url": "http://document-management-store:8080/documents/0fa425c8-7603-4687-adfe-b4c97c69fdb7",
+          "document_binary_url": "http://document-management-store:8080/documents/0fa425c8-7603-4687-adfe-b4c97c69fdb7/binary",
           "document_filename": "approvedConvertedHearingOrder.docx"
         }
       },
