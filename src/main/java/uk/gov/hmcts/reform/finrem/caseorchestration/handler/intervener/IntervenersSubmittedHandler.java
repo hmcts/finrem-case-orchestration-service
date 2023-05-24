@@ -72,8 +72,6 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
             intervenerAddedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails(), userAuthorisation);
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).build();
-        //} else if (intervenerChangeDetails.getIntervenerAction().equals(IntervenerChangeDetails.IntervenerAction.REMOVED)) {
-            //intervenerRemovedCorresponder
         } else {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).build();
