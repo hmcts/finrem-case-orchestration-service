@@ -117,12 +117,14 @@ public class EmailService {
         if (INTERVENER_ADDED_EMAIL.equals(templateName)) {
             templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
+            templateVars.put("phoneOpeningHours", notificationRequest.getPhoneOpeningHours());
         }
 
         if (INTERVENER_SOLICITOR_ADDED_EMAIL.equals(templateName)) {
             templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
             templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
+            templateVars.put("phoneOpeningHours", notificationRequest.getPhoneOpeningHours());
         }
 
         templateVars.putAll(emailTemplateVars.get(templateName));
