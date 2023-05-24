@@ -87,6 +87,7 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
                     DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails, recipient);
         }
     }
+
     @Override
     public CaseDocument getAppRepDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                            DocumentHelper.PaperNotificationRecipient recipient) {
