@@ -10,18 +10,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 
 @Slf4j
 @Component
-public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
-
-    private final IntervenerDocumentService intervenerDocumentService;
+public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
 
     public IntervenerRemovedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
                                          IntervenerDocumentService intervenerDocumentService) {
-        super(notificationService, bulkPrintService);
-        this.intervenerDocumentService = intervenerDocumentService;
+        super(notificationService, bulkPrintService, intervenerDocumentService);
     }
 
     @Override
@@ -37,34 +33,6 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
             sendIntervenerThreeCorrespondence(caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_FOUR) {
             sendIntervenerFourCorrespondence(caseDetails, authToken);
-        }
-    }
-
-    @Override
-    protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
-            this.emailApplicantSolicitor(caseDetails);
-        } else {
-            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-            String recipient = DocumentHelper.PaperNotificationRecipient.APPLICANT.toString();
-            bulkPrintService.sendDocumentForPrint(
-                getAppRepDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, recipient);
-        }
-    }
-
-    @Override
-    protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        if (shouldSendRespondentSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
-            this.emailRespondentSolicitor(caseDetails);
-        } else {
-            log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
-            String recipient = DocumentHelper.PaperNotificationRecipient.RESPONDENT.toString();
-            bulkPrintService.sendDocumentForPrint(
-                getAppRepDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, recipient);
         }
     }
 
@@ -119,7 +87,7 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
                     DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails, recipient);
         }
     }
-
+    @Override
     public CaseDocument getAppRepDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                            DocumentHelper.PaperNotificationRecipient recipient) {
         if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
@@ -135,6 +103,7 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
         return intervenerDocumentService.generateIntervenerRemovedNotificationLetter(caseDetails, authorisationToken, recipient);
     }
 
+    @Override
     protected boolean shouldSendIntervenerSolicitorEmail(FinremCaseDetails caseDetails) {
         return notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails);
     }
