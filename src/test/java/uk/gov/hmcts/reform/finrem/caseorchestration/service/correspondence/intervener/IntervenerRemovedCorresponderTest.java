@@ -144,35 +144,8 @@ public class IntervenerRemovedCorresponderTest {
     }
 
     @Test
-    public void shouldSendEmailIfIntervenerOneIsRepresented() {
+    public void shouldSendEmailIfIntervenerIsRepresented() {
         finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_ONE);
-        when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(true);
-        intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
-
-        verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
-    }
-
-    @Test
-    public void shouldSendEmailIfIntervenerTwoIsRepresented() {
-        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_TWO);
-        when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(true);
-        intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
-
-        verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
-    }
-
-    @Test
-    public void shouldSendEmailIfIntervenerThreeIsRepresented() {
-        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_THREE);
-        when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(true);
-        intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
-
-        verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
-    }
-
-    @Test
-    public void shouldSendEmailIfIntervenerFourIsRepresented() {
-        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_FOUR);
         when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
