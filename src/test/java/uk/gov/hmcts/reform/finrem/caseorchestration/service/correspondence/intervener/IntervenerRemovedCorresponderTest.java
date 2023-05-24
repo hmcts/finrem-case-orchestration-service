@@ -75,7 +75,6 @@ public class IntervenerRemovedCorresponderTest {
     @Test
     public void shouldAlwaysSendLetterCorrespondenceToAppAndRespIfNotRepresented() {
         finremCaseDetails = getFinremCaseDetailsWhenNotRepresented(IntervenerType.INTERVENER_ONE);
-        when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(false);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -102,7 +101,6 @@ public class IntervenerRemovedCorresponderTest {
     @Test
     public void shouldSendIntervenerOneLetterCorrespondenceIfNotRepresented() {
         finremCaseDetails = getFinremCaseDetailsWhenNotRepresented(IntervenerType.INTERVENER_ONE);
-        when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(false);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -113,7 +111,6 @@ public class IntervenerRemovedCorresponderTest {
     @Test
     public void shouldSendIntervenerTwoLetterCorrespondenceIfNotRepresented() {
         finremCaseDetails = getFinremCaseDetailsWhenNotRepresented(IntervenerType.INTERVENER_TWO);
-        when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(false);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -124,7 +121,6 @@ public class IntervenerRemovedCorresponderTest {
     @Test
     public void shouldSendIntervenerThreeLetterCorrespondenceIfNotRepresented() {
         finremCaseDetails = getFinremCaseDetailsWhenNotRepresented(IntervenerType.INTERVENER_THREE);
-        when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(false);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -135,7 +131,6 @@ public class IntervenerRemovedCorresponderTest {
     @Test
     public void shouldSendIntervenerFourLetterCorrespondenceIfNotRepresented() {
         finremCaseDetails = getFinremCaseDetailsWhenNotRepresented(IntervenerType.INTERVENER_FOUR);
-        when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(false);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -144,9 +139,32 @@ public class IntervenerRemovedCorresponderTest {
     }
 
     @Test
-    public void shouldSendEmailIfIntervenerIsRepresented() {
+    public void shouldSendEmailIfIntervenerOneIsRepresented() {
         finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_ONE);
-        when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(true);
+        intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+    }
+
+    @Test
+    public void shouldSendEmailIfIntervenerTwoIsRepresented() {
+        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_TWO);
+        intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+    }
+
+    @Test
+    public void shouldSendEmailIfIntervenerThreeIsRepresented() {
+        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_THREE);
+        intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+    }
+
+    @Test
+    public void shouldSendEmailIfIntervenerFourIsRepresented() {
+        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_FOUR);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
