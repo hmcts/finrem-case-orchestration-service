@@ -49,6 +49,7 @@ public class IntervenerDocumentServiceTest {
     private static final String INTERVENER_REMOVED_SOLICITOR_TEMPLATE = "intervener_removed_solicitor_template";
     private static final String INTERVENER_REMOVED_SOLICITOR_FILENAME = "intervener_removed_solicitor_filename";
 
+
     private static final String INTERVENER_NAME = "intervenerName";
     private static final String INTERVENER_SOLICITOR_FIRM = "intervenerSolicitorFirm";
 
@@ -75,6 +76,7 @@ public class IntervenerDocumentServiceTest {
             documentConfiguration, documentHelper, objectMapper);
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+
         Organisation organisation = Organisation.builder()
             .organisationName(INTERVENER_SOLICITOR_FIRM).build();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
@@ -98,6 +100,7 @@ public class IntervenerDocumentServiceTest {
     @Test
     public void shouldGenerateIntervenerAddedLetter() {
         finremCaseData.getCurrentIntervenerChangeDetails().setIntervenerAction(IntervenerAction.ADDED);
+
         when(documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
             .thenReturn(caseDetails);
 

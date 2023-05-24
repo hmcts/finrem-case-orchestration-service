@@ -163,6 +163,7 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerFourChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_FOUR_CODE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -188,6 +189,7 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerOneChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_ONE_CODE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -240,6 +242,7 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerThreeChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_THREE_CODE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -266,6 +269,7 @@ class IntervenersSubmittedHandlerTest {
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerFourChangeDetails);
         finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_FOUR_CODE).build();
         List<DynamicRadioListElement> list = List.of(option);
