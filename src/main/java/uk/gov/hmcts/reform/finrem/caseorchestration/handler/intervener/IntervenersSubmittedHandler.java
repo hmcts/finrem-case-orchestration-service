@@ -39,7 +39,7 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
                                        IntervenerService service, IntervenerAddedCorresponder intervenerAddedCorresponder,
                                        IntervenerRemovedCorresponder intervenerRemovedCorresponder) {
         super(finremCaseDetailsMapper);
-        this.service =  service;
+        this.service = service;
         this.intervenerAddedCorresponder = intervenerAddedCorresponder;
         this.intervenerRemovedCorresponder = intervenerRemovedCorresponder;
     }
@@ -85,10 +85,10 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
             case ADD_INTERVENER_FOUR_CODE -> caseData.setCurrentIntervenerChangeDetails(service.setIntervenerFourAddedChangeDetails(caseData));
             case DEL_INTERVENER_ONE_CODE -> caseData.setCurrentIntervenerChangeDetails(service.setIntervenerOneRemovedChangeDetails(caseDataBefore));
             case DEL_INTERVENER_TWO_CODE -> caseData.setCurrentIntervenerChangeDetails(service.setIntervenerTwoRemovedChangeDetails(caseDataBefore));
-            case DEL_INTERVENER_THREE_CODE -> caseData.setCurrentIntervenerChangeDetails(
-                service.setIntervenerThreeRemovedChangeDetails(caseDataBefore));
-            case DEL_INTERVENER_FOUR_CODE -> caseData.setCurrentIntervenerChangeDetails(
-                service.setIntervenerFourRemovedChangeDetails(caseDataBefore));
+            case DEL_INTERVENER_THREE_CODE ->
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerThreeRemovedChangeDetails(caseDataBefore));
+            case DEL_INTERVENER_FOUR_CODE ->
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerFourRemovedChangeDetails(caseDataBefore));
             default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
         }
 
@@ -99,8 +99,6 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
             log.info("sending Removed Intervener Correspondence for case id: {}", caseId);
             intervenerRemovedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails(), userAuthorisation);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).build();
-        } 
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 }
