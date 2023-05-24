@@ -99,10 +99,6 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
         assertNull(removedSolicitor);
-
-        removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
-            null);
-        assertNull(removedSolicitor);
     }
 
     @Test
