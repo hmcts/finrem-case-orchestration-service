@@ -74,15 +74,7 @@ public class IntervenerRemovedCorresponderTest {
 
     @Test
     public void shouldAlwaysSendLetterCorrespondenceToAppAndRespIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerRepresented(YesOrNo.NO)
-            .build();
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = getFinremCaseDetailsWhenNotRepresented(IntervenerType.INTERVENER_ONE);
         when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(false);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -96,16 +88,7 @@ public class IntervenerRemovedCorresponderTest {
 
     @Test
     public void shouldSendLetterCorrespondenceIfIntervenerIsRepresentedToAppAndRespIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerRepresented(YesOrNo.YES)
-            .build();
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-
-        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_ONE);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -118,15 +101,7 @@ public class IntervenerRemovedCorresponderTest {
 
     @Test
     public void shouldSendIntervenerOneLetterCorrespondenceIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerRepresented(YesOrNo.NO)
-            .build();
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = getFinremCaseDetailsWhenNotRepresented(IntervenerType.INTERVENER_ONE);
         when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(false);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -137,15 +112,7 @@ public class IntervenerRemovedCorresponderTest {
 
     @Test
     public void shouldSendIntervenerTwoLetterCorrespondenceIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerRepresented(YesOrNo.NO)
-            .build();
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = getFinremCaseDetailsWhenNotRepresented(IntervenerType.INTERVENER_TWO);
         when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(false);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -156,15 +123,7 @@ public class IntervenerRemovedCorresponderTest {
 
     @Test
     public void shouldSendIntervenerThreeLetterCorrespondenceIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerRepresented(YesOrNo.NO)
-            .build();
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = getFinremCaseDetailsWhenNotRepresented(IntervenerType.INTERVENER_THREE);
         when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(false);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -175,15 +134,7 @@ public class IntervenerRemovedCorresponderTest {
 
     @Test
     public void shouldSendIntervenerFourLetterCorrespondenceIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerRepresented(YesOrNo.NO)
-            .build();
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = getFinremCaseDetailsWhenNotRepresented(IntervenerType.INTERVENER_FOUR);
         when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(false);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -194,16 +145,7 @@ public class IntervenerRemovedCorresponderTest {
 
     @Test
     public void shouldSendEmailIfIntervenerOneIsRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerRepresented(YesOrNo.YES)
-            .build();
-        intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_ONE);
         when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -212,17 +154,7 @@ public class IntervenerRemovedCorresponderTest {
 
     @Test
     public void shouldSendEmailIfIntervenerTwoIsRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerRepresented(YesOrNo.YES)
-            .build();
-        intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder()
-            .data(finremCaseData).build();
+        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_ONE);
         when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -231,17 +163,7 @@ public class IntervenerRemovedCorresponderTest {
 
     @Test
     public void shouldSendEmailIfIntervenerThreeIsRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerRepresented(YesOrNo.YES)
-            .build();
-        intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder()
-            .data(finremCaseData).build();
+        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_ONE);
         when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -250,20 +172,37 @@ public class IntervenerRemovedCorresponderTest {
 
     @Test
     public void shouldSendEmailIfIntervenerFourIsRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerRepresented(YesOrNo.YES)
-            .build();
-        intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder()
-            .data(finremCaseData).build();
+        finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_ONE);
         when(intervenerRemovedCorresponder.shouldSendIntervenerSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
     }
+
+
+    private FinremCaseDetails getFinremCaseDetailsWhenRepresented(IntervenerType intervenerType) {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(intervenerType);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.YES)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
+        return FinremCaseDetails.builder().data(finremCaseData).build();
+    }
+
+    private FinremCaseDetails getFinremCaseDetailsWhenNotRepresented(IntervenerType intervenerType) {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(intervenerType);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.NO)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
+        return FinremCaseDetails.builder().data(finremCaseData).build();
+    }
+
+
 }
