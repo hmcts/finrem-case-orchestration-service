@@ -52,7 +52,7 @@ public class DocumentManagementService {
             authorizationToken);
     }
 
-    public Document storeDocument(byte[] document, String fileName, String caseId, String authorizationToken) {
+    public Document storeDocument(byte[] document, String fileName, String authorizationToken, String caseId) {
         log.info("Store document requested with document of size [{}]", document.length);
 
         FinremMultipartFile multipartFile = FinremMultipartFile.builder()
