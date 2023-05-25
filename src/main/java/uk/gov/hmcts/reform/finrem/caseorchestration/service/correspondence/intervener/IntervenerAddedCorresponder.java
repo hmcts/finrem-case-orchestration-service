@@ -44,10 +44,10 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
 
     @Override
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
-        sendApplicantCorrespondence(caseDetails, authToken);
-        sendRespondentCorrespondence(caseDetails, authToken);
         IntervenerChangeDetails intervenerChangeDetails = caseDetails.getData().getCurrentIntervenerChangeDetails();
         log.info("intervener type: {}", intervenerChangeDetails.getIntervenerType());
+        sendApplicantCorrespondence(caseDetails, authToken);
+        sendRespondentCorrespondence(caseDetails, authToken);
         if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_ONE) {
             sendIntervenerOneCorrespondence(caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_TWO) {
