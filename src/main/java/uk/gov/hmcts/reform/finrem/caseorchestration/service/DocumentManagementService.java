@@ -48,8 +48,7 @@ public class DocumentManagementService {
 
         return storeDocument(
             generateDocumentFrom(templateName, placeholders),
-            fileName, caseId,
-            authorizationToken);
+            fileName, authorizationToken, caseId);
     }
 
     public Document storeDocument(byte[] document, String fileName, String authorizationToken, String caseId) {
