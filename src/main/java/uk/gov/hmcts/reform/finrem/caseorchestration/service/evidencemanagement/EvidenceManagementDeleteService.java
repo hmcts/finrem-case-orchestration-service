@@ -46,8 +46,8 @@ public class EvidenceManagementDeleteService {
 
     private void deleteOnSecDoc(String fileUrl, String auth) throws HttpClientErrorException {
         IdamToken idamTokens = idamAuthService.getIdamToken(auth);
-        log.info("EMSDocStore Delete file: {} with user: {} and docId: {}",
-            fileUrl, idamTokens.getEmail(), getDocumentIdFromFileUrl(fileUrl));
+        log.info("EMSDocStore Delete file: {} and docId: {}",
+            fileUrl, getDocumentIdFromFileUrl(fileUrl));
 
         caseDocumentClient.deleteDocument(idamTokens.getIdamOauth2Token(), idamTokens.getServiceAuthorization(),
             getDocumentIdFromFileUrl(fileUrl), Boolean.TRUE);
