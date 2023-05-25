@@ -46,6 +46,8 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
         IntervenerChangeDetails intervenerChangeDetails = caseDetails.getData().getCurrentIntervenerChangeDetails();
         log.info("intervener type: {}", intervenerChangeDetails.getIntervenerType());
+        sendApplicantCorrespondence(caseDetails, authToken);
+        sendRespondentCorrespondence(caseDetails, authToken);
         if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_ONE) {
             sendIntervenerOneCorrespondence(caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_TWO) {
@@ -55,8 +57,6 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_FOUR) {
             sendIntervenerFourCorrespondence(caseDetails, authToken);
         }
-        sendApplicantCorrespondence(caseDetails, authToken);
-        sendRespondentCorrespondence(caseDetails, authToken);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             IntervenerDetails intervenerDetails =
                 intervenerOneDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerOneWrapper());
             String recipientName = intervenerDetails.getIntervenerSolName();
-            String recipientEmail = intervenerDetails.getIntervenerEmail();
+            String recipientEmail = intervenerDetails.getIntervenerSolEmail();
             String referenceNumber = intervenerDetails.getIntervenerSolicitorReference();
             notificationService.sendIntervenerSolicitorAddedEmail(caseDetails, intervenerDetails,
                 recipientName, recipientEmail, referenceNumber);
@@ -115,7 +115,7 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             IntervenerDetails intervenerDetails =
                 intervenerTwoDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerTwoWrapper());
             String recipientName = intervenerDetails.getIntervenerSolName();
-            String recipientEmail = intervenerDetails.getIntervenerEmail();
+            String recipientEmail = intervenerDetails.getIntervenerSolEmail();
             String referenceNumber = intervenerDetails.getIntervenerSolicitorReference();
             notificationService.sendIntervenerSolicitorAddedEmail(caseDetails, intervenerDetails,
                 recipientName, recipientEmail, referenceNumber);
@@ -137,7 +137,7 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             IntervenerDetails intervenerDetails =
                 intervenerThreeDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerThreeWrapper());
             String recipientName = intervenerDetails.getIntervenerSolName();
-            String recipientEmail = intervenerDetails.getIntervenerEmail();
+            String recipientEmail = intervenerDetails.getIntervenerSolEmail();
             String referenceNumber = intervenerDetails.getIntervenerSolicitorReference();
             notificationService.sendIntervenerSolicitorAddedEmail(caseDetails, intervenerDetails,
                 recipientName, recipientEmail, referenceNumber);
@@ -159,7 +159,7 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             IntervenerDetails intervenerDetails =
                 intervenerFourDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerFourWrapper());
             String recipientName = intervenerDetails.getIntervenerSolName();
-            String recipientEmail = intervenerDetails.getIntervenerEmail();
+            String recipientEmail = intervenerDetails.getIntervenerSolEmail();
             String referenceNumber = intervenerDetails.getIntervenerSolicitorReference();
             notificationService.sendIntervenerSolicitorAddedEmail(caseDetails, intervenerDetails,
                 recipientName, recipientEmail, referenceNumber);

@@ -202,7 +202,7 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerSolName("intervener sol")
-            .intervenerEmail("intervener@intervener.com")
+            .intervenerSolEmail("intervener@intervener.com")
             .intervenerSolicitorReference("123456789")
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -225,7 +225,7 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerSolName("intervener sol")
-            .intervenerEmail("intervener@intervener.com")
+            .intervenerSolEmail("intervener@intervener.com")
             .intervenerSolicitorReference("123456789")
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -249,7 +249,7 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerSolName("intervener sol")
-            .intervenerEmail("intervener@intervener.com")
+            .intervenerSolEmail("intervener@intervener.com")
             .intervenerSolicitorReference("123456789")
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -273,7 +273,7 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerSolName("intervener sol")
-            .intervenerEmail("intervener@intervener.com")
+            .intervenerSolEmail("intervener@intervener.com")
             .intervenerSolicitorReference("123456789")
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -322,7 +322,7 @@ public class IntervenerAddedCorresponderTest {
             .solicitorReference("123456789").applicantSolicitorEmail("test@test.com").applicantSolicitorName("test name").build();
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerSolName("intervener sol")
-            .intervenerEmail("intervener@intervener.com")
+            .intervenerSolEmail("intervener@intervener.com")
             .intervenerSolicitorReference("123456789")
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -370,7 +370,7 @@ public class IntervenerAddedCorresponderTest {
             .respondentSolicitorReference("123456789").respondentSolicitorEmail("test@test.com").respondentSolicitorName("test name").build();
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerSolName("intervener sol")
-            .intervenerEmail("intervener@intervener.com")
+            .intervenerSolEmail("intervener@intervener.com")
             .intervenerSolicitorReference("123456789")
             .intervenerRepresented(YesOrNo.YES)
             .build();
