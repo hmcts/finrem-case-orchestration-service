@@ -46,8 +46,6 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
         IntervenerChangeDetails intervenerChangeDetails = caseDetails.getData().getCurrentIntervenerChangeDetails();
         log.info("intervener type: {}", intervenerChangeDetails.getIntervenerType());
-        sendApplicantCorrespondence(caseDetails, authToken);
-        sendRespondentCorrespondence(caseDetails, authToken);
         if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_ONE) {
             sendIntervenerOneCorrespondence(caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_TWO) {
@@ -57,6 +55,8 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_FOUR) {
             sendIntervenerFourCorrespondence(caseDetails, authToken);
         }
+        sendApplicantCorrespondence(caseDetails, authToken);
+        sendRespondentCorrespondence(caseDetails, authToken);
     }
 
     @Override
