@@ -76,10 +76,11 @@ public class HearingDocumentController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) throws IOException {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
-
         validateCaseData(callbackRequest);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        String caseId = caseDetails.getId().toString();
+        log.info("Received request for validating a hearing for Case ID: {}", caseId);
+
 
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
@@ -91,7 +92,8 @@ public class HearingDocumentController extends BaseController {
         if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
             CaseDocument caseDocument = objectMapper.convertValue(caseDetails.getData().get(HEARING_ADDITIONAL_DOC),
                 CaseDocument.class);
-            CaseDocument pdfDocument = additionalHearingDocumentService.convertToPdf(caseDocument, authorisationToken);
+            CaseDocument pdfDocument =
+                additionalHearingDocumentService.convertToPdf(caseDocument, authorisationToken, caseId);
             callbackRequest.getCaseDetails().getData().put(HEARING_ADDITIONAL_DOC, pdfDocument);
         }
 

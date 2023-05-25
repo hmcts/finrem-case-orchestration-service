@@ -86,8 +86,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Before
     public void setup() {
         caseDetails = caseDetailsFromResource("/fixtures/general-application-directions.json", objectMapper);
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument(DOC_URL, FILE_NAME,
-            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+            .thenReturn(caseDocument(DOC_URL, FILE_NAME, GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
     }
 
     @Test
@@ -190,7 +190,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(),
             eq(documentConfiguration.getAdditionalHearingTemplate()),
-            eq(documentConfiguration.getAdditionalHearingFileName()));
+            eq(documentConfiguration.getAdditionalHearingFileName()), eq(caseId));
     }
 
     private void assertBulkPrintServiceInteraction() {
@@ -216,7 +216,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
     private void assertCaseData(Map<String, Object> data) {
         assertThat(data, allOf(
-            Matchers.<String, Object>hasEntry("CCDCaseNumber", 1234567890L),
+            Matchers.<String, Object>hasEntry("CCDCaseNumber", 123123123L),
             Matchers.hasEntry("CourtName", "Hastings County Court And Family Court Hearing Centre"),
             Matchers.hasEntry("CourtAddress", "The Law Courts, Bohemia Road, Hastings, TN34 1QX"),
             Matchers.hasEntry("CourtPhone", "0300 1235577"),

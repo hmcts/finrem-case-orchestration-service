@@ -306,7 +306,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(jsonPath("$.warnings").isEmpty());
     }
-    
+
     @Test
     public void generateHearingDocumentDirectionOrderMostRecentEnteredAtTheTop() throws Exception {
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()

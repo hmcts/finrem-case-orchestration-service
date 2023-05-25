@@ -37,7 +37,7 @@ public class PaperNotificationService {
                 caseDetails, authToken, APPLICANT);
 
             // Send notification letter to Bulk Print
-            bulkPrintService.sendDocumentForPrint(assignedToJudgeNotificationLetter, caseDetails, CCDConfigConstant.APPLICANT);
+            bulkPrintService.sendDocumentForPrint(assignedToJudgeNotificationLetter, caseDetails, CCDConfigConstant.APPLICANT, authToken);
             log.info("Applicant notification letter sent to Bulk Print: {} for Case ID: {}", assignedToJudgeNotificationLetter,
                 caseDetails.getId());
         }
@@ -45,7 +45,7 @@ public class PaperNotificationService {
         if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
             UUID respondentLetterId = bulkPrintService.sendDocumentForPrint(
                 assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT),
-                caseDetails, CCDConfigConstant.RESPONDENT);
+                caseDetails, CCDConfigConstant.RESPONDENT, authToken);
             log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", respondentLetterId, caseDetails.getId());
         }
     }
@@ -69,12 +69,12 @@ public class PaperNotificationService {
     public void printApplicantRejectionGeneralApplication(CaseDetails caseDetails, String authToken) {
         CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
             caseDetails, authToken, APPLICANT);
-        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, CCDConfigConstant.APPLICANT);
+        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, CCDConfigConstant.APPLICANT, authToken);
     }
 
     public void printRespondentRejectionGeneralApplication(CaseDetails caseDetails, String authToken) {
         CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
             caseDetails, authToken, RESPONDENT);
-        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, CCDConfigConstant.RESPONDENT);
+        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, CCDConfigConstant.RESPONDENT, authToken);
     }
 }

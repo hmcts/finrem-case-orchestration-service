@@ -26,9 +26,7 @@ public abstract class FinremSingleLetterOrEmailApplicantCorresponder extends Sin
             this.emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-            bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authToken),
-                caseDetails,
-                APPLICANT);
+            bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authToken), caseDetails, APPLICANT, authToken);
         }
     }
 

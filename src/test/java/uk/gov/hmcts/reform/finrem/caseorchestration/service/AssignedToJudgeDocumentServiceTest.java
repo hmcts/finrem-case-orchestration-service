@@ -72,11 +72,11 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
         when(idamAuthService.getUserDetails(any())).thenReturn(UserDetails.builder().id("ID").build());
         when(docmosisPdfGenerationServiceMock.generateDocFrom(any(), any()))
             .thenReturn("".getBytes(StandardCharsets.UTF_8));
-        when(evidenceManagementUploadService.upload(any(), any()))
+        when(evidenceManagementUploadService.upload(any(), any(), any()))
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
                     .fileName("app_docs.pdf")
-                    .fileUrl("http://dm-store/lhjbyuivu87y989hijbb")
+                    .fileUrl("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64")
                     .build()));
         DocumentConfiguration config = new DocumentConfiguration();
         config.setAssignedToJudgeNotificationTemplate("FL-FRM-LET-ENG-00318.docx");

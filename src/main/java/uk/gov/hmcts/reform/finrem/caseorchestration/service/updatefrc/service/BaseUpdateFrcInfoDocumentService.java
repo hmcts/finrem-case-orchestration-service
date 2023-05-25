@@ -66,7 +66,8 @@ public abstract class BaseUpdateFrcInfoDocumentService {
                                                      String template, String filename) {
         UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, recipient, null);
         Map letterDetailsMap = convertUpdateFrcInfoLetterDetailsToMap(letterDetails);
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, letterDetailsMap, template, filename);
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken,
+            letterDetailsMap, template, filename, caseDetails.getId().toString());
     }
 
     private Map convertUpdateFrcInfoLetterDetailsToMap(UpdateFrcInfoLetterDetails letterDetails) {

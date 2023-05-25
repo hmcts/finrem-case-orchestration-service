@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASEWORKER_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SOLICITOR_NOTICE_OF_CHANGE;
@@ -92,6 +93,10 @@ public class FeatureToggleService {
 
     public boolean isSendLetterDuplicateCheckEnabled() {
         return isFeatureEnabled(SEND_LETTER_RECIPIENT_CHECK);
+    }
+
+    public boolean isSecureDocEnabled() {
+        return isFeatureEnabled(SECURE_DOC_ENABLED);
     }
 
     /**

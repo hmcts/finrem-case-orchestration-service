@@ -45,13 +45,14 @@ public class RejectGeneralApplicationAboutToStartHandler
         CallbackRequest callbackRequest,
         String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received on start request to reject general application for Case ID: {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Received on start request to reject general application for Case ID: {}", caseId);
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getReadyForRejectOrReadyForReferList(caseData);
         AtomicInteger index = new AtomicInteger(0);
         if (existingGeneralApplicationList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
-            setNonCollectionGeneralApplication(caseData, index, userAuthorisation);
+            setNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
         } else {
             List<DynamicListElement> dynamicListElements = existingGeneralApplicationList.stream()
                 .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
@@ -63,7 +64,7 @@ public class RejectGeneralApplicationAboutToStartHandler
             }
 
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
-            log.info("collection dynamicList {} for case id {}", dynamicList, caseDetails.getId());
+            log.info("collection dynamicList {} for case id {}", dynamicList, caseId);
             caseData.put(GENERAL_APPLICATION_LIST, dynamicList);
         }
 
@@ -73,8 +74,9 @@ public class RejectGeneralApplicationAboutToStartHandler
 
     private void setNonCollectionGeneralApplication(Map<String, Object> caseData,
                                                     AtomicInteger index,
-                                                    String userAuthorisation) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation);
+                                                    String userAuthorisation,
+                                                    String caseId) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 

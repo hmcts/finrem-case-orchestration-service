@@ -31,9 +31,10 @@ public class LitigantSolicitorRemovedDocumentServiceTest extends NocDocumentServ
         when(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()).thenReturn(DOC_FILENAME);
         when(
             genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), notiicationLettersDetailsMapCaptor.capture(), eq(DOC_TEMPLATE),
-                eq(DOC_FILENAME))).thenReturn(new CaseDocument());
+                eq(DOC_FILENAME), eq("1234"))).thenReturn(new CaseDocument());
         CaseDocument caseDocument =
-            litigantSolicitorRemovedNocDocumentService.generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails);
+            litigantSolicitorRemovedNocDocumentService.generateNoticeOfChangeLetter(
+                AUTH_TOKEN, noticeOfChangeLetterDetails, "1234");
 
         Map placeholdersMap = notiicationLettersDetailsMapCaptor.getValue();
         assertPlaceHoldersMap(placeholdersMap);

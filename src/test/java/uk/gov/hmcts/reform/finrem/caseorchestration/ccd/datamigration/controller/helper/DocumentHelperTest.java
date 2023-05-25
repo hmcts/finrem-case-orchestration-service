@@ -46,6 +46,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -82,9 +83,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class DocumentHelperTest {
 
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
-    private static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
+    private static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
     private static final String BINARY_URL = DOC_URL + "/binary";
     private static final String FILE_NAME = "app_docs.docx";
+    private static final String TEST_CASE_ID = "123123";
     private ObjectMapper objectMapper;
     private DocumentHelper documentHelper;
     @Mock
@@ -210,12 +212,13 @@ public class DocumentHelperTest {
         documentCollections.add(dc);
         caseData.put(HEARING_ORDER_OTHER_COLLECTION, documentCollections);
 
-        when(service.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
-        List<BulkPrintDocument> hearingDocuments = documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER);
+        when(service.convertDocumentIfNotPdfAlready(any(), any(), anyString())).thenReturn(caseDocument());
+        List<BulkPrintDocument> hearingDocuments =
+            documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER, TEST_CASE_ID);
         assertEquals(hearingDocuments.get(0).getFileName(), "app_docs.pdf");
         assertEquals(hearingDocuments.get(0).getBinaryFileUrl(), BINARY_URL);
 
-        verify(service).convertDocumentIfNotPdfAlready(any(), any());
+        verify(service).convertDocumentIfNotPdfAlready(any(), any(), anyString());
     }
 
 

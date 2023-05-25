@@ -531,14 +531,16 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
-    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data, String authorisationToken) {
+    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data,
+                                                                           String authorisationToken,
+                                                                           String caseId) {
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<DocumentCollection> pdfDocuments = new ArrayList<>();
         List<DocumentCollection> documentCollections = covertDocumentCollections(data.get(HEARING_ORDER_OTHER_COLLECTION));
         documentCollections.forEach(doc -> {
             CaseDocument caseDocument = doc.getValue();
-            CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+            CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
             pdfDocuments.add(DocumentCollection
                 .builder()
                 .value(pdfDocument)

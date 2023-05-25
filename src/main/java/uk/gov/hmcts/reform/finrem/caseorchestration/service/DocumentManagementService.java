@@ -36,29 +36,29 @@ public class DocumentManagementService {
     }
 
     public void deleteDocument(String fileUrl, String authToken) {
-        evidenceManagementDeleteService.deleteFile(fileUrl, authToken);
+        evidenceManagementDeleteService.delete(fileUrl, authToken);
     }
 
     public Document storeDocument(String templateName,
                                   String fileName,
                                   Map<String, Object> placeholders,
-                                  String authorizationToken) {
+                                  String authorizationToken, String caseId) {
         log.info("Generate and Store Document requested with templateName [{}], placeholders of size [{}]",
             templateName, placeholders.size());
 
         return storeDocument(
             generateDocumentFrom(templateName, placeholders),
-            fileName,
+            fileName, caseId,
             authorizationToken);
     }
 
-    public Document storeDocument(byte[] document, String fileName, String authorizationToken) {
+    public Document storeDocument(byte[] document, String fileName, String caseId, String authorizationToken) {
         log.info("Store document requested with document of size [{}]", document.length);
 
         FinremMultipartFile multipartFile = FinremMultipartFile.builder()
             .content(document).name(fileName).contentType(CONTENT_TYPE_APPLICATION_PDF).build();
         FileUploadResponse response = evidenceManagementUploadService
-            .upload(Collections.singletonList(multipartFile), authorizationToken).get(0);
+            .upload(Collections.singletonList(multipartFile), caseId, authorizationToken).get(0);
 
         return CONVERTER.apply(response);
     }

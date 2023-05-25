@@ -85,23 +85,27 @@ public class SendOrderContestedAboutToSubmitHandler
                 .getHearingOrderDocuments().getUploadDraftDocument();
 
             List<HearingOrderCollectionData> hearings =  new ArrayList<>(hearingOrderCollectionData);
-            CaseDocument latestHearingOrderPdf = genericDocumentService.convertDocumentIfNotPdfAlready(latestHearingOrder, authToken);
+            String caseId = caseDetails.getId().toString();
+            CaseDocument latestHearingOrderPdf =
+                genericDocumentService.convertDocumentIfNotPdfAlready(latestHearingOrder, authToken, caseId);
             HearingOrderDocument document = HearingOrderDocument.builder().uploadDraftDocument(latestHearingOrderPdf).build();
             hearings.remove(index);
             hearings.add(index, HearingOrderCollectionData.builder().hearingOrderDocuments(document).build());
             caseData.put(HEARING_ORDER_COLLECTION, hearings);
 
             log.info("Received request to stampFinalOrder called with Case ID = {},"
-                    + " latestHearingOrder = {}, latestHearingOrderPdf {}", caseDetails.getId(),
+                    + " latestHearingOrder = {}, latestHearingOrderPdf {}", caseId,
                 latestHearingOrder, latestHearingOrderPdf);
 
-            stampAndAddToCollection(caseData, latestHearingOrderPdf, authToken);
+            stampAndAddToCollection(caseData, latestHearingOrderPdf, authToken, caseId);
         }
     }
 
     private void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
         if (contestedGeneralOrderPresent(caseDetails)) {
-            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData(), authorisationToken);
+            BulkPrintDocument generalOrder =
+                generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(
+                    caseDetails.getData(), authorisationToken, caseDetails.getId().toString());
 
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 log.info("Sending Applicant Order for Contested Case ID: {}", caseDetails.getId());
@@ -119,21 +123,23 @@ public class SendOrderContestedAboutToSubmitHandler
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
             Map<String, Object> caseData = caseDetails.getData();
 
-            List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData, authorisationToken);
+            String caseId = caseDetails.getId().toString();
+            List<BulkPrintDocument> hearingDocumentPack =
+                createHearingDocumentPack(caseData, authorisationToken, caseId);
 
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
-                log.info("Received request to send hearing pack for applicant for case {}:", caseDetails.getId());
+                log.info("Received request to send hearing pack for applicant for case {}:", caseId);
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, hearingDocumentPack);
             }
 
             if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
-                log.info("Received request to send hearing pack for respondent for case {}:", caseDetails.getId());
+                log.info("Received request to send hearing pack for respondent for case {}:", caseId);
                 bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
             }
         }
     }
 
-    private List<BulkPrintDocument> createHearingDocumentPack(Map<String, Object> caseData, String authorisationToken) {
+    private List<BulkPrintDocument> createHearingDocumentPack(Map<String, Object> caseData, String authorisationToken, String caseId) {
         List<BulkPrintDocument> hearingDocumentPack = new ArrayList<>();
 
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, CONTESTED_ORDER_APPROVED_COVER_LETTER).ifPresent(hearingDocumentPack::add);
@@ -146,7 +152,7 @@ public class SendOrderContestedAboutToSubmitHandler
         }
 
         List<BulkPrintDocument> otherHearingDocuments = documentHelper.getHearingDocumentsAsBulkPrintDocuments(
-            caseData, authorisationToken);
+            caseData, authorisationToken, caseId);
 
         if (otherHearingDocuments != null) {
             hearingDocumentPack.addAll(otherHearingDocuments);
@@ -159,13 +165,18 @@ public class SendOrderContestedAboutToSubmitHandler
         return !isNull(caseDetails.getData().get(GENERAL_ORDER_LATEST_DOCUMENT));
     }
 
-    private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder, String authToken) {
+    private void stampAndAddToCollection(Map<String, Object> caseData,
+                                         CaseDocument latestHearingOrder,
+                                         String authToken,
+                                         String caseId) {
         if (!isEmpty(latestHearingOrder)) {
             StampType stampType = documentHelper.getStampType(caseData);
-            CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType);
+            CaseDocument stampedDocs =
+                genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, caseId);
             log.info("Stamped Documents = {}", stampedDocs);
 
-            List<HearingOrderCollectionData> finalOrderCollection = Optional.ofNullable(documentHelper.getFinalOrderDocuments(caseData))
+            List<HearingOrderCollectionData> finalOrderCollection =
+                Optional.ofNullable(documentHelper.getFinalOrderDocuments(caseData))
                 .orElse(new ArrayList<>());
             log.info("Existing final order collection = {}", finalOrderCollection);
 

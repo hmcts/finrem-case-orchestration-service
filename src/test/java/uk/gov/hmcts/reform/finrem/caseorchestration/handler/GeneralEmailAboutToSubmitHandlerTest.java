@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
@@ -65,7 +66,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     public void givenACcdCallbackCallbackGeneralEmailAboutToSubmitHandler_WhenHandle_thenSendEmail() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(notificationService).sendConsentGeneralEmail(any(FinremCaseDetails.class));
+        verify(notificationService).sendConsentGeneralEmail(any(FinremCaseDetails.class), anyString());
         verify(generalEmailService).storeGeneralEmail(any(FinremCaseDetails.class));
     }
 
