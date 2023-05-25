@@ -22,7 +22,7 @@ public class CcdService {
     private static final String JURISDICTION = "DIVORCE";
     private final CaseEventsApi caseEventsApi;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final SystemUserService systemUserService;
+    private final IdamAuthService idamAuthService;
 
     public void executeCcdEventOnCase(String authorisation, CaseDetails caseDetails,
                                       String eventType) {
@@ -32,7 +32,7 @@ public class CcdService {
 
         log.info("Executing eventType {} on caseId {}", eventType, caseId);
 
-        IdamToken idamToken = systemUserService.getIdamToken(authorisation);
+        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
 
         StartEventResponse startEventResponse = coreCaseDataApi
             .startEventForCaseWorker(idamToken.getIdamOauth2Token(),
@@ -72,7 +72,7 @@ public class CcdService {
 
         log.info("Executing eventType {} on caseId {}", eventType, caseId);
 
-        IdamToken idamToken = systemUserService.getIdamToken(authorisation);
+        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
 
         return caseEventsApi.findEventDetailsForCase(idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(),

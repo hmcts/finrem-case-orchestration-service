@@ -7,8 +7,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
@@ -26,6 +24,7 @@ import static org.mockito.Mockito.when;
 public class BulkPrintDocumentServiceTest {
 
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
+    public static final String AUTH = "auth";
     private final byte[] someBytes = "ainhsdcnoih".getBytes();
 
     @Rule
@@ -37,37 +36,13 @@ public class BulkPrintDocumentServiceTest {
 
     @Test
     public void downloadDocuments() {
-        when(evidenceManagementService.download(FILE_URL)).thenReturn(ResponseEntity.ok(someBytes));
+        when(evidenceManagementService.download(FILE_URL, AUTH)).thenReturn(someBytes);
 
         BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()
             .bulkPrintDocuments(singletonList(BulkPrintDocument.builder().binaryFileUrl(FILE_URL).build()))
             .build();
 
-        List<byte[]> result = service.downloadDocuments(bulkPrintRequest);
+        List<byte[]> result = service.downloadDocuments(bulkPrintRequest, AUTH);
         assertThat(result.get(0), is(equalTo(someBytes)));
-    }
-
-    @Test
-    public void throwsExceptionOnBadRequest() {
-        when(evidenceManagementService.download(FILE_URL)).thenReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(someBytes));
-
-        BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()
-            .bulkPrintDocuments(singletonList(BulkPrintDocument.builder().binaryFileUrl(FILE_URL).build()))
-            .build();
-
-        thrown.expect(RuntimeException.class);
-        service.downloadDocuments(bulkPrintRequest);
-    }
-
-    @Test
-    public void throwsExceptionOnAnyException() {
-        when(evidenceManagementService.download(FILE_URL)).thenThrow(new RuntimeException());
-
-        BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()
-            .bulkPrintDocuments(singletonList(BulkPrintDocument.builder().binaryFileUrl(FILE_URL).build()))
-            .build();
-
-        thrown.expect(RuntimeException.class);
-        service.downloadDocuments(bulkPrintRequest);
     }
 }

@@ -60,7 +60,7 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     }
 
     @Override
-    protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String auth) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
@@ -68,13 +68,13 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
             String recipient = DocumentHelper.PaperNotificationRecipient.APPLICANT.toString();
             bulkPrintService.sendDocumentForPrint(
-                getAppRepDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, recipient);
+                getAppRepDocumentToPrint(caseDetails, auth,
+                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, recipient, auth);
         }
     }
 
     @Override
-    protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String auth) {
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
@@ -82,12 +82,12 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
             String recipient = DocumentHelper.PaperNotificationRecipient.RESPONDENT.toString();
             bulkPrintService.sendDocumentForPrint(
-                getAppRepDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, recipient);
+                getAppRepDocumentToPrint(caseDetails, auth,
+                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, recipient, auth);
         }
     }
 
-    protected void sendIntervenerOneCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendIntervenerOneCorrespondence(FinremCaseDetails caseDetails, String auth) {
         if (shouldSendIntervenerOneSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener One for case: {}", caseDetails.getId());
             IntervenerDetails intervenerDetails =
@@ -104,12 +104,12 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
                 intervenerOneDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerOneWrapper()));
 
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails, recipient);
+                getDocumentToPrint(caseDetails, auth,
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails, recipient, auth);
         }
     }
 
-    protected void sendIntervenerTwoCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendIntervenerTwoCorrespondence(FinremCaseDetails caseDetails, String auth) {
         if (shouldSendIntervenerTwoSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Two for case: {}", caseDetails.getId());
             IntervenerDetails intervenerDetails =
@@ -126,12 +126,12 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
                 intervenerTwoDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerTwoWrapper()));
 
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails, recipient);
+                getDocumentToPrint(caseDetails, auth,
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails, recipient, auth);
         }
     }
 
-    protected void sendIntervenerThreeCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendIntervenerThreeCorrespondence(FinremCaseDetails caseDetails, String auth) {
         if (shouldSendIntervenerThreeSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Three for case: {}", caseDetails.getId());
             IntervenerDetails intervenerDetails =
@@ -148,12 +148,12 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
                 intervenerThreeDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerThreeWrapper()));
 
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails, recipient);
+                getDocumentToPrint(caseDetails, auth,
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails, recipient, auth);
         }
     }
 
-    protected void sendIntervenerFourCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendIntervenerFourCorrespondence(FinremCaseDetails caseDetails, String auth) {
         if (shouldSendIntervenerFourSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Four for case: {}", caseDetails.getId());
             IntervenerDetails intervenerDetails =
@@ -170,8 +170,8 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
                 intervenerFourDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerFourWrapper()));
 
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails, recipient);
+                getDocumentToPrint(caseDetails, auth,
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails, recipient, auth);
         }
     }
 

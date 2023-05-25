@@ -47,6 +47,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
@@ -64,6 +65,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(MockitoJUnitRunner.class)
 public class SendOrderContestedAboutToSubmitHandlerTest {
 
+    public static final String CASE_ID = "123";
     @InjectMocks
     private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
     @Mock
@@ -114,7 +116,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     public void givenShouldPrintAppAndResp_whenPrintAndMailGeneralOrderTriggered_thenBothAppAndRespPacksPrinted() {
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
-        when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(any(), any()))
+        when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(any(), any(), any()))
             .thenReturn(BulkPrintDocument.builder().build());
 
         CallbackRequest callbackRequest =
@@ -175,7 +177,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(BulkPrintDocument::getBinaryFileUrl).collect(Collectors.toList()),
             containsInAnyOrder(expectedBulkPrintDocuments.toArray()));
-        verify(documentHelper).getHearingDocumentsAsBulkPrintDocuments(any(), any());
+        verify(documentHelper).getHearingDocumentsAsBulkPrintDocuments(any(), any(), any());
     }
 
     @Test
@@ -260,14 +262,16 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     @Test
     public void givenFinalOrderSuccess_WhenHandle_ThenStampFinalOrder() {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
-        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN), any()))
+            .thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(
+            isA(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any()))
             .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP);
+        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, CASE_ID);
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);
@@ -288,28 +292,33 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     @Test
     public void givenFinalOrderSuccessWithFinalOrder_WhenHandle_ThenStampDocument() {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
-        when(documentHelper.getFinalOrderDocuments(any())).thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
-        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
+        when(documentHelper.getFinalOrderDocuments(any()))
+            .thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN), anyString()))
+            .thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(
+            isA(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(eq(caseDocument()), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP));
+        verify(genericDocumentService).stampDocument(
+            eq(caseDocument()), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq(CASE_ID));
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);
 
         assertThat(expectedFinalOrderCollection, hasSize(2));
-        assertThat(expectedFinalOrderCollection.get(1).getHearingOrderDocuments().getUploadDraftDocument(), is(caseDocument()));
+        assertThat(expectedFinalOrderCollection.get(1).getHearingOrderDocuments().getUploadDraftDocument(),
+            is(caseDocument()));
     }
 
     private void mockDocumentHelperToReturnDefaultExpectedDocuments() {
         when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(
             Optional.of(BulkPrintDocument.builder().binaryFileUrl("HearingOrderBinaryURL").build()));
-        when(documentHelper.getHearingDocumentsAsBulkPrintDocuments(any(), any())).thenReturn(
+        when(documentHelper.getHearingDocumentsAsBulkPrintDocuments(any(), any(), anyString())).thenReturn(
             singletonList(BulkPrintDocument.builder().binaryFileUrl("OtherHearingOrderDocumentsURL").build()));
 
         CaseDocument additionalHearingDocument = CaseDocument.builder().documentBinaryUrl("AdditionalHearingDocumentURL").build();
@@ -335,7 +344,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     private CallbackRequest getEmptyCallbackRequest() {
         return CallbackRequest
             .builder()
-            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build())
+            .caseDetails(CaseDetails.builder().id(123L).data(new HashMap<>()).build())
             .build();
 
     }

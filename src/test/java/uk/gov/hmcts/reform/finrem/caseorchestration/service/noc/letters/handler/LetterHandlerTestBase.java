@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDe
 public abstract class LetterHandlerTestBase {
 
     protected static final String AUTH_TOKEN = "AUTH_TOKEN";
-    protected static final String DOCUMENT_UUID = "dd153d4c-d2bd-11ec-9d64-0242ac120002";
+    public static final String CASE_ID = "1234";
 
     private AbstractLetterDetailsGenerator letterDetailsGenerator;
     protected final NocDocumentService nocDocumentService;
@@ -82,9 +82,9 @@ public abstract class LetterHandlerTestBase {
                 is(recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT ? "Applicant" : "Respondent"));
         }
 
-        verify(nocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails);
+        verify(nocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails, CASE_ID);
         verify(bulkPrintService).sendDocumentForPrint(caseDocumentApplicant, caseDetails,
-            bulkPrintService.getRecipient(recipient.toString()));
+            bulkPrintService.getRecipient(recipient.toString()), AUTH_TOKEN);
     }
 
 
@@ -103,7 +103,7 @@ public abstract class LetterHandlerTestBase {
     protected CaseDocument setUpCaseDocumentInteraction(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
                                                         NocDocumentService nocDocumentService, String docFileName) {
         CaseDocument caseDocument = CaseDocument.builder().documentFilename(docFileName).build();
-        when(nocDocumentService.generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails)).thenReturn(caseDocument);
+        when(nocDocumentService.generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails, CASE_ID)).thenReturn(caseDocument);
         return caseDocument;
     }
 

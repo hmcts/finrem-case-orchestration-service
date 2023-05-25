@@ -80,7 +80,7 @@ public class NocDocumentServiceBaseTest {
     protected void assertAndVerifyDocumentsAreGenerated(CaseDocument caseDocument) {
         assertNotNull(caseDocument);
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), notiicationLettersDetailsMapCaptor.capture(),
-            eq(DOC_TEMPLATE), eq(DOC_FILENAME));
+            eq(DOC_TEMPLATE), eq(DOC_FILENAME), eq("1234"));
     }
 
     protected void assertPlaceHoldersMap(Map placeholdersMap) {
