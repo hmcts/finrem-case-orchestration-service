@@ -108,15 +108,4 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
     protected boolean shouldSendIntervenerSolicitorEmail(FinremCaseDetails caseDetails) {
         return notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails);
     }
-
-    @Override
-    protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-        // TODO document why this method is empty
-    }
-
-    @Override
-    protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
-        // TODO document why this method is empty
-    }
-
 }

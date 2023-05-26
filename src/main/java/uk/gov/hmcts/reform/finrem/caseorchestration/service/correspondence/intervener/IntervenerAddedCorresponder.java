@@ -119,15 +119,4 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
     protected boolean shouldSendIntervenerFourSolicitorEmail(FinremCaseDetails caseDetails) {
         return notificationService.isIntervenerFourSolicitorDigitalAndEmailPopulated(caseDetails);
     }
-
-    @Override
-    protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-        // TODO document why this method is empty
-    }
-
-    @Override
-    protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
-        // TODO document why this method is empty
-    }
-
 }
