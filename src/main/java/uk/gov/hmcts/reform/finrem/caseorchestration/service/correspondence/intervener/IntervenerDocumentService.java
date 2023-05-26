@@ -164,7 +164,8 @@ public class IntervenerDocumentService {
             authToken,
             convertLetterDetailsToMap(intervenerRemovedLetterDetails),
             template,
-            filename);
+            filename,
+            intervenerRemovedLetterDetails.getCaseNumber());
     }
 
     private CaseDocument generateDocument(String authToken,
@@ -187,7 +188,8 @@ public class IntervenerDocumentService {
             authToken,
             convertLetterDetailsToMap(intervenerRemovedSolicitorLetterDetails),
             template,
-            filename);
+            filename,
+            intervenerRemovedSolicitorLetterDetails.getCaseNumber());
     }
   
     private IntervenerAddedLetterDetails generateAddedLetterDetails(FinremCaseDetails caseDetails) {
