@@ -44,12 +44,12 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
             log.info("Sending letter correspondence to Intervener One for case: {}", caseDetails.getId());
             String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE.toString();
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, auth,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails, recipient, auth);
+                getDocumentToPrint(caseDetails, authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails, recipient, authorisationToken);
         }
     }
 
-    protected void sendIntervenerTwoCorrespondence(FinremCaseDetails caseDetails, String auth) {
+    protected void sendIntervenerTwoCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         if (shouldSendIntervenerTwoSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Two for case: {}", caseDetails.getId());
             //send email
@@ -57,12 +57,12 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
             log.info("Sending letter correspondence to Intervener Two for case: {}", caseDetails.getId());
             String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO.toString();
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, auth,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails, recipient, auth);
+                getDocumentToPrint(caseDetails, authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails, recipient, authorisationToken);
         }
     }
 
-    protected void sendIntervenerThreeCorrespondence(FinremCaseDetails caseDetails, String auth) {
+    protected void sendIntervenerThreeCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         if (shouldSendIntervenerThreeSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Three for case: {}", caseDetails.getId());
             //send email
@@ -70,12 +70,12 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
             log.info("Sending letter correspondence to Intervener Three for case: {}", caseDetails.getId());
             String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE.toString();
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, auth,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails, recipient, auth);
+                getDocumentToPrint(caseDetails, authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails, recipient, authorisationToken);
         }
     }
 
-    protected void sendIntervenerFourCorrespondence(FinremCaseDetails caseDetails, String auth) {
+    protected void sendIntervenerFourCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         if (shouldSendIntervenerFourSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Four for case: {}", caseDetails.getId());
             //send email
@@ -83,8 +83,8 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
             log.info("Sending letter correspondence to Intervener Four for case: {}", caseDetails.getId());
             String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR.toString();
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, auth,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails, recipient, auth);
+                getDocumentToPrint(caseDetails, authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails, recipient, authorisationToken);
         }
     }
 

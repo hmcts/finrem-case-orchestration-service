@@ -365,26 +365,26 @@ public class IntervenerService {
 
     private boolean checkIfIntervenerOneSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         return YesOrNo.YES.equals(caseDataBefore.getIntervenerOneWrapper().getIntervener1Represented())
-            && (caseData.getIntervenerOneWrapper().getIntervener1Represented() == null ||
-            YesOrNo.NO.equals(caseData.getIntervenerOneWrapper().getIntervener1Represented()));
+            && (caseData.getIntervenerOneWrapper().getIntervener1Represented() == null
+            || YesOrNo.NO.equals(caseData.getIntervenerOneWrapper().getIntervener1Represented()));
     }
 
     private boolean checkIfIntervenerTwoSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         return YesOrNo.YES.equals(caseDataBefore.getIntervenerTwoWrapper().getIntervener2Represented())
-            && (caseData.getIntervenerTwoWrapper().getIntervener2Represented() == null ||
-            YesOrNo.NO.equals(caseData.getIntervenerTwoWrapper().getIntervener2Represented()));
+            && (caseData.getIntervenerTwoWrapper().getIntervener2Represented() == null
+            || YesOrNo.NO.equals(caseData.getIntervenerTwoWrapper().getIntervener2Represented()));
     }
 
     private boolean checkIfIntervenerThreeSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         return YesOrNo.YES.equals(caseDataBefore.getIntervenerThreeWrapper().getIntervener3Represented())
-            && (caseData.getIntervenerThreeWrapper().getIntervener3Represented() == null ||
-            YesOrNo.NO.equals(caseData.getIntervenerThreeWrapper().getIntervener3Represented()));
+            && (caseData.getIntervenerThreeWrapper().getIntervener3Represented() == null
+            || YesOrNo.NO.equals(caseData.getIntervenerThreeWrapper().getIntervener3Represented()));
     }
 
     private boolean checkIfIntervenerFourSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         return YesOrNo.YES.equals(caseDataBefore.getIntervenerFourWrapper().getIntervener4Represented())
-            && (caseData.getIntervenerFourWrapper().getIntervener4Represented() == null ||
-            YesOrNo.NO.equals(caseData.getIntervenerFourWrapper().getIntervener4Represented()));
+            && (caseData.getIntervenerFourWrapper().getIntervener4Represented() == null
+            || YesOrNo.NO.equals(caseData.getIntervenerFourWrapper().getIntervener4Represented()));
     }
 
     public boolean checkIfAnyIntervenerSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {

@@ -45,7 +45,7 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
             String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE.toString();
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails, recipient);
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails, recipient, authorisationToken);
         }
     }
 
@@ -58,7 +58,7 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
             String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO.toString();
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails, recipient);
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails, recipient, authorisationToken);
         }
     }
 
@@ -71,7 +71,7 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
             String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE.toString();
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails, recipient);
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails, recipient, authorisationToken);
         }
     }
 
@@ -84,7 +84,7 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
             String recipient = DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR.toString();
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails, recipient);
+                    DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails, recipient, authorisationToken);
         }
     }
 

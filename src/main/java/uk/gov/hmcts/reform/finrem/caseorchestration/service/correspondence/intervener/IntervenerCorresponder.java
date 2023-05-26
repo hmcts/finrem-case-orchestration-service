@@ -32,7 +32,7 @@ public class IntervenerCorresponder extends FinremSingleLetterOrEmailAllPartiesC
             String recipient = DocumentHelper.PaperNotificationRecipient.APPLICANT.toString();
             bulkPrintService.sendDocumentForPrint(
                 getAppRepDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, recipient);
+                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, recipient, authorisationToken);
         }
     }
 
@@ -46,7 +46,7 @@ public class IntervenerCorresponder extends FinremSingleLetterOrEmailAllPartiesC
             String recipient = DocumentHelper.PaperNotificationRecipient.RESPONDENT.toString();
             bulkPrintService.sendDocumentForPrint(
                 getAppRepDocumentToPrint(caseDetails, authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, recipient);
+                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, recipient, authorisationToken);
         }
     }
 
