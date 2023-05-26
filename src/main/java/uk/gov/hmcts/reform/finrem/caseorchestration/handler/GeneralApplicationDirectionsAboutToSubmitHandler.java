@@ -86,12 +86,14 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
                                             String userAuthorisation) {
         Map<String, Object> caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
-        log.info("Migrating existing general application to collection for case id {}", caseDetails.getId());
-        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
+        String caseId = caseDetails.getId().toString();
+        log.info("Migrating existing general application to collection for case id {}", caseId);
+        GeneralApplicationCollectionData data =
+            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
         if (data != null) {
             String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
-                status, caseDetails.getId(), EventType.GENERAL_APPLICATION_DIRECTIONS);
+                status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
             setStatusForNonCollAndBulkPrintDouments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
@@ -144,8 +146,9 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         items.setGeneralApplicationOutcomeOther(Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
+        String caseId = caseDetails.getId().toString();
         log.info("status {} for general application for Case ID: {} Event type {}",
-            status, caseDetails.getId(), EventType.GENERAL_APPLICATION_DIRECTIONS);
+            status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
 
         switch (gaElementStatus) {
             case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
@@ -160,21 +163,23 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
             .build();
         bulkPrintDocuments.add(bpDoc);
 
-        log.info("items getGeneralApplicationDocument {}, for caseId {}", items.getGeneralApplicationDocument(), caseDetails.getId());
+        log.info("items getGeneralApplicationDocument {}, for caseId {}", items.getGeneralApplicationDocument(), caseId);
 
         if (items.getGeneralApplicationDocument() != null) {
-            items.setGeneralApplicationDocument(helper.getPdfDocument(items.getGeneralApplicationDocument(), userAuthorisation));
+            items.setGeneralApplicationDocument(
+                helper.getPdfDocument(items.getGeneralApplicationDocument(), userAuthorisation, caseId));
             final BulkPrintDocument genDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
                 .fileName(items.getGeneralApplicationDocument().getDocumentFilename())
                 .build();
             log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for caseId {}",
-                items.getGeneralApplicationDocument(), genDoc, caseDetails.getId());
+                items.getGeneralApplicationDocument(), genDoc, caseId);
             bulkPrintDocuments.add(genDoc);
         }
 
         if (items.getGeneralApplicationDraftOrder() != null) {
-            items.setGeneralApplicationDraftOrder(helper.getPdfDocument(items.getGeneralApplicationDraftOrder(), userAuthorisation));
+            items.setGeneralApplicationDraftOrder(
+                helper.getPdfDocument(items.getGeneralApplicationDraftOrder(), userAuthorisation, caseId));
             final BulkPrintDocument draftDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDraftOrder().getDocumentBinaryUrl())
                 .fileName(items.getGeneralApplicationDraftOrder().getDocumentFilename())
