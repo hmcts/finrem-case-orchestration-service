@@ -112,7 +112,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     @Test
     public void givenShouldPrintAppAndResp_whenPrintAndMailGeneralOrderTriggered_thenBothAppAndRespPacksPrinted() {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
-        when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(any(), any()))
+        when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(any(), any(), any()))
             .thenReturn(BulkPrintDocument.builder().build());
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();

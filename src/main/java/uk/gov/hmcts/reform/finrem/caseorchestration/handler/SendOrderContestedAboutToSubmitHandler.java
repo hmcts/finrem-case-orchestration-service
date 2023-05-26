@@ -100,15 +100,12 @@ public class SendOrderContestedAboutToSubmitHandler
     }
 
     private void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
-        log.info("In request to send general order for case {}:", caseDetails.getId());
+        String caseId = String.valueOf(caseDetails.getId());
+        log.info("In request to send general order for case {}:", caseId);
         if (contestedGeneralOrderPresent(caseDetails)) {
-            BulkPrintDocument generalOrder =
-                generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(
-                    caseDetails.getData(), authorisationToken, caseDetails.getId().toString());
-
-            if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
             log.info("General order found for case {}:", caseDetails.getId());
-            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData(), authorisationToken);
+            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData(),
+                authorisationToken, caseId);
             if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
                 log.info("Sending Applicant Order for Contested Case ID: {}", caseDetails.getId());
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
@@ -127,7 +124,7 @@ public class SendOrderContestedAboutToSubmitHandler
         log.info("In request to send hearing pack for case {}:", caseId);
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData, authorisationToken);
+        List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData, authorisationToken, caseId);
         if (!hearingDocumentPack.isEmpty()) {
             if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
                 log.info("Received request to send hearing pack for applicant for case {}:", caseId);
