@@ -77,13 +77,16 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler
     }
 
     private void migrateExistingApplication(CaseDetails caseDetails, String userAuthorisation) {
+        String caseId = caseDetails.getId().toString();
         Map<String, Object> caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
-        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
+        GeneralApplicationCollectionData data =
+            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
         if (data != null) {
             String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
-                status, caseDetails.getId(), EventType.GENERAL_APPLICATION_OUTCOME);
+                status, caseId, EventType.GENERAL_APPLICATION_OUTCOME);
             updateStatus(caseData, data, status);
             existingGeneralApplication.add(data);
             caseData.put(GENERAL_APPLICATION_COLLECTION, existingGeneralApplication);

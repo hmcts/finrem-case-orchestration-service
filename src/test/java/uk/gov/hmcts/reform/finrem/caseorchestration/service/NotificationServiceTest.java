@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -174,8 +175,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class))).thenReturn(notificationRequest);
         when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
             .thenReturn(notificationRequest);
-        when(evidenceManagementDownloadService.download(anyString()))
-            .thenReturn(ResponseEntity.status(HttpStatus.OK).body(new byte[2048]));
+        when(evidenceManagementDownloadService.downloadInResponseEntity(anyString(), anyString()))
+            .thenReturn(ResponseEntity.status(HttpStatus.OK).body(new ByteArrayResource(new byte[2048])));
     }
 
     @Test
@@ -715,20 +716,20 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldSendGeneralEmailWithAttachmentConsented() {
         FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONSENTED);
-        notificationService.sendConsentGeneralEmail(finremCaseDetails);
+        notificationService.sendConsentGeneralEmail(finremCaseDetails, anyString());
 
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
-        verify(evidenceManagementDownloadService).download(anyString());
+        verify(evidenceManagementDownloadService).downloadInResponseEntity(anyString(), anyString());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT);
     }
 
     @Test
     public void shouldSendGeneralEmailWithAttachmentContested() {
         FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONTESTED);
-        notificationService.sendContestedGeneralEmail(finremCaseDetails);
+        notificationService.sendContestedGeneralEmail(finremCaseDetails, anyString());
 
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
-        verify(evidenceManagementDownloadService).download(anyString());
+        verify(evidenceManagementDownloadService).downloadInResponseEntity(anyString(), anyString());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT);
     }
 

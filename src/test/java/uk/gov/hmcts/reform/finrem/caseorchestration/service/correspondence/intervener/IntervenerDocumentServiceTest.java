@@ -111,7 +111,7 @@ public class IntervenerDocumentServiceTest {
             AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
 
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
-            placeholdersMapCaptor.capture(), eq(INTERVENER_ADDED_TEMPLATE), eq(INTERVENER_ADDED_FILENAME));
+            placeholdersMapCaptor.capture(), eq(INTERVENER_ADDED_TEMPLATE), eq(INTERVENER_ADDED_FILENAME), eq("123"));
 
         Map<String, Object> letterData = getPlaceholdersMap(placeholdersMapCaptor);
         assertThat(letterData.get("intervenerFullName"), is(INTERVENER_NAME));
@@ -153,7 +153,8 @@ public class IntervenerDocumentServiceTest {
             AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
 
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
-            placeholdersMapCaptor.capture(), eq(INTERVENER_ADDED_SOLICITOR_TEMPLATE), eq(INTERVENER_ADDED_SOLICITOR_FILENAME));
+            placeholdersMapCaptor.capture(), eq(INTERVENER_ADDED_SOLICITOR_TEMPLATE), eq(INTERVENER_ADDED_SOLICITOR_FILENAME),
+            eq("123"));
 
         Map<String, Object> letterData = getPlaceholdersMap(placeholdersMapCaptor);
         assertThat(letterData.get("intervenerFullName"), is(INTERVENER_NAME));

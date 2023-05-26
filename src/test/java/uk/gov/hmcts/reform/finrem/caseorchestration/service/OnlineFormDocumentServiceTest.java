@@ -73,7 +73,8 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+            .thenReturn(caseDocument());
     }
 
     @Test
@@ -94,9 +95,12 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN,
             emptyCaseDetails()));
-        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), eq(placeholdersMap),
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            eq(AUTH_TOKEN),
+            eq(placeholdersMap),
             eq(documentConfiguration.getContestedMiniFormTemplate(emptyCaseDetails())),
-            eq(documentConfiguration.getContestedMiniFormFileName()));
+            eq(documentConfiguration.getContestedMiniFormFileName()),
+            eq("1234"));
     }
 
     @Test
@@ -107,9 +111,12 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder()
             .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, finremCaseDetails));
-        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), eq(placeholdersMap),
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            eq(AUTH_TOKEN),
+            eq(placeholdersMap),
             eq(documentConfiguration.getContestedMiniFormScheduleTemplate(finremCaseDetails)),
-            eq(documentConfiguration.getContestedMiniFormFileName()));
+            eq(documentConfiguration.getContestedMiniFormFileName()),
+            eq("1234"));
     }
 
     @Test
@@ -120,9 +127,12 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder()
             .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, finremCaseDetails));
-        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), eq(placeholdersMap),
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            eq(AUTH_TOKEN),
+            eq(placeholdersMap),
             eq(documentConfiguration.getContestedMiniFormTemplate(finremCaseDetails)),
-            eq(documentConfiguration.getContestedMiniFormFileName()));
+            eq(documentConfiguration.getContestedMiniFormFileName()),
+            eq("1234"));
     }
 
     @Test
@@ -237,6 +247,6 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
 
     private FinremCaseDetails emptyCaseDetails() {
-        return FinremCaseDetails.builder().data(new FinremCaseData()).build();
+        return FinremCaseDetails.builder().id(1234L).data(new FinremCaseData()).build();
     }
 }

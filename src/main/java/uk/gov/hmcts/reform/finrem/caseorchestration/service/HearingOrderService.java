@@ -44,11 +44,12 @@ public class HearingOrderService {
         Optional<DraftDirectionOrder> judgeApprovedHearingOrder = getJudgeApprovedHearingOrder(caseDetails, authorisationToken);
 
         if (judgeApprovedHearingOrder.isPresent()) {
+            String caseId = caseDetails.getId().toString();
             CaseDocument latestDraftDirectionOrderDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
                 judgeApprovedHearingOrder.get().getUploadDraftDocument(),
-                authorisationToken);
+                authorisationToken, caseId);
             CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument,
-                authorisationToken, documentHelper.getStampType(caseDetails.getData()));
+                authorisationToken, documentHelper.getStampType(caseDetails.getData()), caseId);
             updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
             updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder);
             appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder);
@@ -98,8 +99,12 @@ public class HearingOrderService {
 
         if (draftDirectionOrder.isPresent()) {
             DraftDirectionOrder draftOrder = draftDirectionOrder.get();
+            String caseId = caseDetails.getId().toString();
             return Optional.of(DraftDirectionOrder.builder().purposeOfDocument(draftOrder.getPurposeOfDocument())
-                .uploadDraftDocument(genericDocumentService.convertDocumentIfNotPdfAlready(draftOrder.getUploadDraftDocument(), authorisationToken))
+                .uploadDraftDocument(
+                    genericDocumentService.convertDocumentIfNotPdfAlready(
+                        draftOrder.getUploadDraftDocument(),
+                        authorisationToken, caseId))
                 .build());
 
         }

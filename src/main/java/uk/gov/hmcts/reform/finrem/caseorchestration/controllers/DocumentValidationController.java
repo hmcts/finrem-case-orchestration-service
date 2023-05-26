@@ -17,23 +17,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static java.util.Objects.nonNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.builder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @RestController
@@ -66,17 +61,11 @@ public class DocumentValidationController extends BaseController {
         if (Boolean.TRUE.equals(isConsentedApplication(callbackRequest.getCaseDetails()))) {
             helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
         }
-        return ResponseEntity.ok(response(callbackRequest, field, authorisationToken));
-    }
-
-    private AboutToStartOrSubmitCallbackResponse response(CallbackRequest callbackRequest, String field, String authorisationToken) {
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        AboutToStartOrSubmitCallbackResponseBuilder builder = builder().data(caseData);
-        if (nonNull(caseData.get(field))) {
-            DocumentValidationResponse response = service.validateDocument(callbackRequest, field, authorisationToken);
-            return builder.errors(response.getErrors()).build();
-        }
-        return builder.build();
+        return ResponseEntity.ok(
+            AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(callbackRequest.getCaseDetails().getData())
+                .build());
     }
 
     private Boolean isConsentedApplication(CaseDetails caseDetails) {

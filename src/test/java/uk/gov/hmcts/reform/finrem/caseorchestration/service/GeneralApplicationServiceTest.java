@@ -76,6 +76,7 @@ public class GeneralApplicationServiceTest {
     private ObjectMapper objectMapper;
     private CaseDetails caseDetails;
     private CaseDetails caseDetailsBefore;
+    private String caseId = "123123123";
 
     @Before
     public void setUp() {
@@ -88,7 +89,7 @@ public class GeneralApplicationServiceTest {
 
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString()))
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
             .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
     }
 
@@ -122,7 +123,7 @@ public class GeneralApplicationServiceTest {
 
         CaseDocument caseDocument = getCaseDocument(WORD_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(documentMapInWordFormat)).thenReturn(caseDocument);
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
         String convertedDocumentName =
             ((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST)).getDocumentFilename();
@@ -131,7 +132,7 @@ public class GeneralApplicationServiceTest {
 
     @Test
     public void whenDraftOrderNotUploaded() {
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
         assertNull(caseDetails.getData().get(GENERAL_APPLICATION_DRAFT_ORDER));
     }
 
@@ -143,7 +144,7 @@ public class GeneralApplicationServiceTest {
 
         CaseDocument caseDocument = getCaseDocument(WORD_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(documentMapInWordFormat)).thenReturn(caseDocument);
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
         String convertedDocumentName =
             ((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DRAFT_ORDER)).getDocumentFilename();
@@ -153,7 +154,7 @@ public class GeneralApplicationServiceTest {
     @Test
     public void givenGeneralApplication_whenUpdateCaseDataSubmit_thenStateIsIssued() {
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
         assertThat(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), is("applicationIssued"));
     }
@@ -161,7 +162,7 @@ public class GeneralApplicationServiceTest {
     @Test
     public void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocumentLatestDateIsNow() {
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
         assertThat(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE), is(LocalDate.now()));
     }
@@ -169,7 +170,7 @@ public class GeneralApplicationServiceTest {
     @Test
     public void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDataListHasUploadedDoc() {
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
         List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
             .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {});
@@ -183,7 +184,7 @@ public class GeneralApplicationServiceTest {
     @Test
     public void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocLatestIsUploadedDoc() {
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
         CaseDocument generalApplicationLatest =
             (CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST);
@@ -194,7 +195,7 @@ public class GeneralApplicationServiceTest {
     public void givenGeneralApplicationWithPreviousDocs_whenUpdateCaseDataSubmit_thenGenAppDocIsAddedToCollection() {
 
         caseDetails.getData().put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, getGeneralApplicationDataList());
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
         List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
             .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {});
