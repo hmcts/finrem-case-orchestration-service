@@ -72,6 +72,20 @@ public class CheckSolicitorIsDigitalServiceTest {
     }
 
     @Test
+    public void givenIntervenerSolicitorIsDigital_whenIsIntervenerSolicitorDigital_thenReturnTrue() {
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(CaseRole.INTVR_SOLICITOR_1.getValue()));
+
+        assertTrue(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(CASE_ID, CaseRole.INTVR_SOLICITOR_1.getValue()));
+    }
+
+    @Test
+    public void givenIntervenerSolicitorIsNotDigital_whenIsRespondentSolicitorDigital_thenReturnFalse() {
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(APP_SOLICITOR_POLICY));
+
+        assertFalse(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(CASE_ID, CaseRole.INTVR_SOLICITOR_1.getValue()));
+    }
+
+    @Test
     public void givenDataStoreResponseIsEmpty_whenIsSolicitorDigital_thenReturnFalse() {
         when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(CaseAssignmentUserRolesResource.builder()
             .caseAssignmentUserRoles(Collections.emptyList()).build());

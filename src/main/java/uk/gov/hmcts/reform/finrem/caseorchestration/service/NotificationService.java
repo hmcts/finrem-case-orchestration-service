@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -1156,6 +1158,30 @@ public class NotificationService {
             .build();
     }
 
+    public boolean isIntervenerOneSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerSolOnePopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_1.getValue());
+    }
+
+    public boolean isIntervenerTwoSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerSolTwoPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_2.getValue());
+    }
+
+    public boolean isIntervenerThreeSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerSolThreePopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_3.getValue());
+    }
+
+    public boolean isIntervenerFourSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerSolFourPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_4.getValue());
+    }
+
     @Deprecated
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return shouldEmailRespondentSolicitor(caseDetails.getData())
@@ -1167,7 +1193,6 @@ public class NotificationService {
             && (!isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
             || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }
-
 
     public boolean shouldPrintForApplicantSolicitor(CaseDetails caseDetails) {
         return caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
@@ -1206,36 +1231,6 @@ public class NotificationService {
         NotificationRequest notificationRequest = finremNotificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
         sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
-    }
-
-    @Deprecated
-    public boolean isApplicantSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
-        return APPLICANT_SOLICITOR.equals(nullToEmpty(caseData.get(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER)));
-    }
-
-    public boolean isApplicantSolicitorResponsibleToDraftOrder(FinremCaseData caseData) {
-        return APPLICANT_SOLICITOR.equals(nullToEmpty(caseData.getSolicitorResponsibleForDraftingOrder()));
-    }
-
-    @Deprecated
-    public boolean isRespondentSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
-        return RESPONDENT_SOLICITOR.equals(nullToEmpty(caseData.get(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER)));
-    }
-
-    public boolean isRespondentSolicitorResponsibleToDraftOrder(FinremCaseData caseData) {
-        return RESPONDENT_SOLICITOR.equals(nullToEmpty(caseData.getSolicitorResponsibleForDraftingOrder()));
-    }
-
-    @Deprecated
-    public boolean isApplicantSolicitorAgreeToReceiveEmails(CaseDetails caseDetails) {
-        boolean isContestedApplication = caseDataService.isContestedApplication(caseDetails);
-        Map<String, Object> caseData = caseDetails.getData();
-        return (isContestedApplication && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED))))
-            || (!isContestedApplication && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED))));
-    }
-
-    public boolean isApplicantSolicitorAgreeToReceiveEmails(FinremCaseDetails caseDetails) {
-        return caseDetails.isApplicantSolicitorAgreeToReceiveEmails();
     }
 
     @Deprecated

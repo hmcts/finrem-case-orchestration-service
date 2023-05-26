@@ -41,9 +41,10 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT),
-                caseDetails,
-                CCDConfigConstant.APPLICANT);
+                getDocumentToPrint(
+                    caseDetails,
+                    authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, CCDConfigConstant.APPLICANT, authorisationToken);
         }
     }
 
@@ -54,9 +55,10 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         } else {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT),
-                caseDetails,
-                CCDConfigConstant.RESPONDENT);
+                getDocumentToPrint(
+                    caseDetails,
+                    authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, CCDConfigConstant.RESPONDENT, authorisationToken);
         }
     }
 
@@ -98,7 +100,6 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
 
     public abstract CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                                     DocumentHelper.PaperNotificationRecipient recipient);
-
 
     protected abstract void emailApplicantSolicitor(FinremCaseDetails caseDetails);
 

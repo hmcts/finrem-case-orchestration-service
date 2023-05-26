@@ -39,11 +39,12 @@ public class BarristerLetterService {
 
     public void sendBarristerLetter(CaseDetails caseDetails,
                                     Barrister barrister,
-                                    BarristerLetterTuple barristerLetterTuple) {
+                                    BarristerLetterTuple barristerLetterTuple,
+                                    String authToken) {
         log.info("About to start sending barrister access letter for case {}", caseDetails.getId());
         Optional<CaseDocument> barristerLetter = getBarristerLetter(caseDetails, barrister, barristerLetterTuple);
         barristerLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails,
-            bulkPrintService.getRecipient(barristerLetterTuple.getRecipient().toString())));
+            bulkPrintService.getRecipient(barristerLetterTuple.getRecipient().toString()), authToken));
     }
 
     private Optional<CaseDocument> getBarristerLetter(CaseDetails caseDetails,
@@ -64,18 +65,18 @@ public class BarristerLetterService {
         log.info("Sending {} letter for case {}", documentData.getRight(), caseDetails.getId());
 
         return generateDocument(barristerLetterTuple.getAuthToken(), barristerLetterDetails,
-            documentData.getLeft(), documentData.getRight());
+            documentData.getLeft(), documentData.getRight(), caseDetails.getId().toString());
     }
 
     private Optional<CaseDocument> generateDocument(String authToken,
                                                     BarristerLetterDetails barristerLetterDetails,
                                                     String template,
-                                                    String filename) {
+                                                    String filename, String caseId) {
         return Optional.of(genericDocumentService.generateDocumentFromPlaceholdersMap(
             authToken,
             convertLetterDetailsToMap(barristerLetterDetails),
             template,
-            filename));
+            filename, caseId));
     }
 
     private boolean letterShouldNotBeSent(DocumentHelper.PaperNotificationRecipient recipient,

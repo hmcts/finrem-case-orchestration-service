@@ -55,7 +55,7 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Before
     public void setup() {
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any())).thenReturn(newDocument());
     }
 
     @Test
@@ -188,7 +188,7 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
     private void assertCoversheetAddress(String formattedAddress) {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
             generateDocumentCaseDetailsCaptor.capture(),
-            any(), any());
+            any(), any(), any());
         Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptor);
         Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
         MatcherAssert.assertThat(addressee.getFormattedAddress(), is(formattedAddress));
@@ -198,7 +198,7 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
     private void assertAddresseeName(int invocation, String name) {
         verify(genericDocumentService, times(invocation)).generateDocumentFromPlaceholdersMap(any(),
             generateDocumentCaseDetailsCaptor.capture(),
-            any(), any());
+            any(), any(), any());
         Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptor);
         Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
         MatcherAssert.assertThat(addressee.getName(), is(name));
@@ -208,7 +208,7 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
             generateDocumentCaseDetailsCaptor.capture(),
             any(),
-            any());
+            any(), any());
         Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptor);
 
         String expectedCourtContactDetails =

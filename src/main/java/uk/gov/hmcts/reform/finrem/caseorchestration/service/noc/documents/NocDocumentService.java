@@ -23,14 +23,16 @@ public abstract class NocDocumentService {
         this.objectMapper = objectMapper;
     }
 
-    public CaseDocument generateNoticeOfChangeLetter(String authToken, NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
+    public CaseDocument generateNoticeOfChangeLetter(String authToken,
+                                                     NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
+                                                     String caseId) {
 
         log.info("Calling the GenericDocumentService with template {} and filename {}",
             getNocDocumentTemplate().getTemplateName(), getNocDocumentTemplate().getDocumentFileName());
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken,
             convertNoticeOfChangeLetterDetailsToMap(noticeOfChangeLetterDetails),
             getNocDocumentTemplate().getTemplateName(),
-            getNocDocumentTemplate().getDocumentFileName());
+            getNocDocumentTemplate().getDocumentFileName(), caseId);
     }
 
     private Map convertNoticeOfChangeLetterDetailsToMap(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {

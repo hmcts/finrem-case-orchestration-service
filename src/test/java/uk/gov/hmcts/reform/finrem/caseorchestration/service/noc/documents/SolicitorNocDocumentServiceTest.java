@@ -29,10 +29,14 @@ public class SolicitorNocDocumentServiceTest extends NocDocumentServiceBaseTest 
     public void shouldGenerateLitigantSolicitorAddedDocuments() {
         when(documentConfiguration.getNocLetterNotificationSolicitorTemplate()).thenReturn(DOC_TEMPLATE);
         when(documentConfiguration.getNocLetterNotificationSolicitorFileName()).thenReturn(DOC_FILENAME);
-        when(
-            genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), notiicationLettersDetailsMapCaptor.capture(), eq(DOC_TEMPLATE),
-                eq(DOC_FILENAME))).thenReturn(new CaseDocument());
-        CaseDocument caseDocument = solicitorNocDocumentService.generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
+            eq(AUTH_TOKEN),
+            notiicationLettersDetailsMapCaptor.capture(),
+            eq(DOC_TEMPLATE),
+            eq(DOC_FILENAME),
+            eq("1234"))).thenReturn(new CaseDocument());
+        CaseDocument caseDocument = solicitorNocDocumentService.generateNoticeOfChangeLetter(
+            AUTH_TOKEN, noticeOfChangeLetterDetails, "1234");
 
         Map placeholdersMap = notiicationLettersDetailsMapCaptor.getValue();
         assertPlaceHoldersMap(placeholdersMap);
