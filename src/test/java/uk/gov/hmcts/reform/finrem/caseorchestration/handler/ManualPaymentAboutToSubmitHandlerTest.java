@@ -25,6 +25,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -62,8 +63,10 @@ public class ManualPaymentAboutToSubmitHandlerTest {
     @Test
     public void givenContestedCase_whenUseIssueApplicationAndIssueDateEnteredManually_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        when(service.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        when(service.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN), anyString()))
+            .thenReturn(caseDocument());
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
         List<PaymentDocumentCollection> copyOfPaperFormA = response.getData().getCopyOfPaperFormA();
         assertEquals(FILE_NAME, copyOfPaperFormA.get(0).getValue().getUploadedDocument().getDocumentFilename());
     }

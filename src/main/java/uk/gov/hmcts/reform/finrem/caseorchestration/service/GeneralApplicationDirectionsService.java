@@ -183,6 +183,7 @@ public class GeneralApplicationDirectionsService {
 
     private List<BulkPrintDocument> prepareInterimHearingDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
+        String caseId = caseDetails.getId().toString();
         List<BulkPrintDocument> documents = new ArrayList<>();
         CaseDocument interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails, authorisationToken);
         documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(interimDocument));
@@ -190,7 +191,8 @@ public class GeneralApplicationDirectionsService {
         if (!isNull(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT))) {
             log.warn("Additional uploaded interim document found for printing for case");
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
-            CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+            CaseDocument additionalUploadedDocuments =
+                genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
             documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
             caseData.put(INTERIM_HEARING_UPLOADED_DOCUMENT, additionalUploadedDocuments);
         }

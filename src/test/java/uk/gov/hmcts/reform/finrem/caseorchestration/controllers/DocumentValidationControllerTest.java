@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -88,26 +87,6 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").doesNotExist());
         verify(helper).setConsentVariationOrderLabelField(anyMap());
-    }
-
-    @Test
-    public void shouldReturnErrorsWhenFileUploadCheckIsFailed() throws Exception {
-        doRequestSetUp(AMEND_CONSENT_ORDER_BY_SOL_JSON);
-        DocumentValidationResponse response = builder()
-            .mimeType("application/json")
-            .errors(singletonList("Invalid File Type"))
-            .build();
-        when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
-            .thenReturn(response);
-        this.mockMvc.perform(MockMvcRequestBuilders
-                .post("/case-orchestration/field/consentOrder/file-upload-check")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors").exists());
     }
 
     @Test

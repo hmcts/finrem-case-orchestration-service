@@ -48,22 +48,28 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldStampDocument() throws Exception {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
+            .thenReturn(document());
 
-        CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP);
+        CaseDocument stampDocument =
+            genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, caseId);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP);
+        verify(pdfStampingServiceMock, times(1))
+            .stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId);
     }
 
     @Test
     public void shouldAnnexStampDocument() {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, caseId))
+            .thenReturn(document());
 
-        CaseDocument stampDocument = genericDocumentService.annexStampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP);
+        CaseDocument stampDocument = genericDocumentService
+            .annexStampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, caseId);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP);
+        verify(pdfStampingServiceMock, times(1))
+            .stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, caseId);
     }
 
     @Test
@@ -71,11 +77,11 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
         final String templateName = "template name";
         final String fileName = "file name";
 
-        when(evidenceManagementUploadService.upload(any(), any()))
+        when(evidenceManagementUploadService.upload(any(), any(), any()))
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
                     .fileName("app_docs.pdf")
-                    .fileUrl("http://dm-store/lhjbyuivu87y989hijbb")
+                    .fileUrl("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64")
                     .build()));
         when(docmosisPdfGenerationServiceMock
             .generateDocFrom(any(), any())).thenReturn("".getBytes(StandardCharsets.UTF_8));
@@ -96,12 +102,12 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     public void shouldDeleteDocument() {
         genericDocumentService.deleteDocument(caseDocument().getDocumentUrl(), AUTH_TOKEN);
 
-        verify(evidenceManagementDeleteService, times(1)).deleteFile(caseDocument().getDocumentUrl(), AUTH_TOKEN);
+        verify(evidenceManagementDeleteService, times(1)).delete(caseDocument().getDocumentUrl(), AUTH_TOKEN);
     }
 
     @Test
     public void shouldBulkPrintDocument() {
-        genericDocumentService.bulkPrint(BulkPrintRequest.builder().build(), any());
+        genericDocumentService.bulkPrint(BulkPrintRequest.builder().build(), "recipient", AUTH_TOKEN);
 
         verify(bulkPrintDocumentGeneratorService, times(1)).send(any(), any(), any());
     }

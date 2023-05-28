@@ -586,7 +586,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_GENERAL_EMAIL_CONSENT))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendConsentGeneralEmail(callbackRequest.getCaseDetails());
+        notificationService.sendConsentGeneralEmail(callbackRequest.getCaseDetails(), anyString());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL));
@@ -597,7 +597,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_GENERAL_EMAIL_CONTESTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedGeneralEmail(callbackRequest.getCaseDetails());
+        notificationService.sendContestedGeneralEmail(callbackRequest.getCaseDetails(), anyString());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_EMAIL));
@@ -609,7 +609,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendConsentGeneralEmail(callbackRequest.getCaseDetails());
+            notificationService.sendConsentGeneralEmail(callbackRequest.getCaseDetails(), anyString());
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }

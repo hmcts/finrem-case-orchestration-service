@@ -45,7 +45,7 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
     public void submitGeneralApplication500Error() throws Exception {
         doValidCaseDataSetUp();
         doThrow(feignError()).when(generalApplicationService).updateCaseDataSubmit(
-            isA(Map.class), isA(CaseDetails.class), isA(String.class));
+            isA(Map.class), isA(CaseDetails.class), isA(String.class), isA(String.class));
 
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
                 .content(requestContent.toString())
@@ -62,7 +62,8 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(generalApplicationService, times(1)).updateCaseDataSubmit(any(), any(), any());
+        verify(generalApplicationService, times(1))
+            .updateCaseDataSubmit(any(), any(), any(), any());
     }
 
     @Test

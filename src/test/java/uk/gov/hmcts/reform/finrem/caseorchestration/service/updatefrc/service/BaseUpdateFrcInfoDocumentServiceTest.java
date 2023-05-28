@@ -91,7 +91,7 @@ public class BaseUpdateFrcInfoDocumentServiceTest {
             .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
                 updateFrcInfoLetterDetailsCaptor.capture(),
                 any(),
-                any());
+                any(), eq("1234"));
     }
 
     protected void assertPlaceHoldersMap(Map placeholdersMap) {

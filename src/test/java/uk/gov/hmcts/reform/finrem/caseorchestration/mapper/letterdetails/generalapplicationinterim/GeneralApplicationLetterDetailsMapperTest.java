@@ -65,7 +65,7 @@ public class GeneralApplicationLetterDetailsMapperTest extends AbstractLetterDet
         return GeneralApplicationLetterDetails.builder()
             .applicantName("Poor Guy")
             .respondentName("test Korivi")
-            .ccdCaseNumber("1234567890")
+            .ccdCaseNumber("123123123")
             .divorceCaseNumber("DD12D12345")
             .generalApplicationDirectionsHearingTimeEstimate("30 minutes")
             .generalApplicationDirectionsHearingTime("2:00 pm")
