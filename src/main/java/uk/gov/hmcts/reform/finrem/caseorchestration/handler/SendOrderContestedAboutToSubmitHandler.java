@@ -67,7 +67,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Long caseId = caseDetails.getId();
+        String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {}, callback {} callback for case id: {}",
             EventType.SEND_ORDER, CallbackType.ABOUT_TO_SUBMIT, caseId);
 
@@ -82,7 +82,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             CaseDocument document = caseData.getAdditionalDocument();
             if (document != null) {
                 log.info("additional uploaded document with send order {} for caseId {}", document, caseId);
-                caseData.setAdditionalDocument(genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation));
+                caseData.setAdditionalDocument(genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseId));
             }
 
             log.info("Share and print general with for case {}", caseDetails.getId());
@@ -185,7 +185,8 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                                          List<CaseDocument> hearingOrders,
                                                          String authorisationToken) {
 
-        log.info("Creating hearing document pack for caseId {}", caseDetails.getId());
+        String caseId = String.valueOf(caseDetails.getId());
+        log.info("Creating hearing document pack for caseId {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
         List<CaseDocument> orders = new ArrayList<>(hearingOrders);
         orders.add(caseData.getOrderApprovedCoverLetter());
@@ -200,7 +201,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 orders::add);
         }
 
-        List<CaseDocument> otherHearingDocuments = documentHelper.getHearingDocumentsAsPdfDocuments(caseData, authorisationToken);
+        List<CaseDocument> otherHearingDocuments = documentHelper.getHearingDocumentsAsPdfDocuments(caseDetails, authorisationToken);
         if (!otherHearingDocuments.isEmpty()) {
             orders.addAll(otherHearingDocuments);
         }
@@ -348,11 +349,11 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void stampAndAddToCollection(FinremCaseDetails caseDetails, CaseDocument latestHearingOrder,
                                          String authToken) {
-        Long caseId = caseDetails.getId();
+        String caseId = String.valueOf(caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 
         StampType stampType = documentHelper.getStampType(caseData);
-        CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType);
+        CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, caseId);
         log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
 
         List<DirectionOrderCollection> finalOrderCollection = Optional.ofNullable(caseData.getFinalOrderCollection())

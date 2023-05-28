@@ -528,10 +528,8 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
-    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data,
-                                                                           String authorisationToken,
-                                                                           String caseId) {
-
+    public List<CaseDocument> getHearingDocumentsAsPdfDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
+        FinremCaseData data = caseDetails.getData();
         List<CaseDocument> documents = new ArrayList<>();
         List<DocumentCollection> pdfDocuments = new ArrayList<>();
         List<DocumentCollection> documentCollections
@@ -539,7 +537,8 @@ public class DocumentHelper {
         if (!documentCollections.isEmpty()) {
             documentCollections.forEach(doc -> {
                 CaseDocument caseDocument = doc.getValue();
-                CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
+                CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken,
+                    String.valueOf(caseDetails.getId()));
                 pdfDocuments.add(DocumentCollection.builder().value(pdfDocument).build());
                 documents.add(pdfDocument);
             });

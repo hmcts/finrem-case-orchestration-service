@@ -35,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -100,7 +101,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         verify(generalOrderService).getParties(callbackRequest.getCaseDetails());
         verify(generalOrderService).hearingOrdersToShare(callbackRequest.getCaseDetails(), null);
 
-        verify(genericDocumentService, never()).stampDocument(any(), any(), any());
+        verify(genericDocumentService, never()).stampDocument(any(), any(), any(), any());
         verify(documentHelper, never()).getStampType(caseData);
     }
 
@@ -149,7 +150,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
         when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(caseDocuments);
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
             .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
@@ -162,7 +163,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getAppOrderCollection());
         assertNull(caseData.getRespOrderCollection());
 
-        verify(genericDocumentService).stampDocument(any(), any(), any());
+        verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verifyNoInteractions(bulkPrintService);
         verifyNoInteractions(notificationService);
         verify(documentHelper).getStampType(caseData);
@@ -200,7 +201,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(caseDocuments);
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
@@ -213,7 +214,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(3, caseData.getAppOrderCollection().size());
         assertEquals(3, caseData.getRespOrderCollection().size());
 
-        verify(genericDocumentService).stampDocument(any(), any(), any());
+        verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(bulkPrintService, times(2)).printApplicantDocuments(any(FinremCaseDetails.class), any(), anyList());
         verify(bulkPrintService, times(2)).printRespondentDocuments(any(FinremCaseDetails.class), any(), anyList());
         verify(notificationService, times(2)).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
@@ -245,7 +246,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
@@ -260,7 +261,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         verify(bulkPrintService).printRespondentDocuments(any(FinremCaseDetails.class), any(), anyList());
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
-        verify(genericDocumentService).stampDocument(any(), any(), any());
+        verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
 
     }
