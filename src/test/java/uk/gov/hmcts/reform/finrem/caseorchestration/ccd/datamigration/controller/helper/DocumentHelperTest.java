@@ -219,7 +219,7 @@ public class DocumentHelperTest {
     public void getHearingDocumentsAsBulkPrintDocuments() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseData caseData = caseDetails.getData();
 
         DocumentCollection dc = DocumentCollection
             .builder()
