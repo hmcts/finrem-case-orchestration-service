@@ -480,9 +480,8 @@ public class DocumentHelper {
                 : caseDetails.getData().getRespondentFullName();
             addressToSendTo = recipient == APPLICANT ? caseData.getContactDetailsWrapper().getApplicantAddress() :
                 caseData.getContactDetailsWrapper().getRespondentAddress();
-            log.info("The address to send to is {} and the addressee is {}", addressToSendTo, addresseeName);
         }
-
+        log.info("The address that will be sent to is {} and the addressee is {} on case {}", addressToSendTo, addresseeName, caseId);
         return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
     }
 
