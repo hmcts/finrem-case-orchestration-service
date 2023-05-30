@@ -47,14 +47,15 @@ public class HearingOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void convertPdfDocument() {
-        when(genericDocumentService.stampDocument(any(), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP))).thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(any(), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any()))
+            .thenReturn(caseDocument());
 
         Map<String, Object> caseData = prepareCaseData(makeDraftDirectionOrderCollectionWithOneElement());
-        CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP));
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any());
 
         CaseDocument latestDraftHearingOrder = (CaseDocument) caseData.get(LATEST_DRAFT_HEARING_ORDER);
         assertThat(latestDraftHearingOrder, is(notNullValue()));
@@ -83,7 +84,8 @@ public class HearingOrderServiceTest extends BaseServiceTest {
             .purposeOfDocument(draftDirectionOrders.get(0).getValue().getPurposeOfDocument())
             .build());
 
-        assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails.builder()
+        assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(
+            CaseDetails.builder().id(123L)
                 .data(caseData).build(), AUTH_TOKEN), is(true));
     }
 
@@ -95,7 +97,8 @@ public class HearingOrderServiceTest extends BaseServiceTest {
             .purposeOfDocument("some other purpose")
             .build());
 
-        assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails.builder()
+        assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(
+            CaseDetails.builder().id(123L)
                 .data(caseData).build(), AUTH_TOKEN), is(true));
     }
 

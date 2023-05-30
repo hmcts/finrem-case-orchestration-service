@@ -64,8 +64,9 @@ public class FinremAssignToJudgeConsentInContestedCorresponderTest {
         CaseDocument result = corresponder.getDocumentToPrint(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
         assertEquals(caseDocument, result);
-        verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
-            DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+        verify(assignedToJudgeDocumentService)
+            .generateConsentInContestedAssignedToJudgeNotificationLetter(
+                caseDetails, AUTHORISATION_TOKEN, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 
     @Test
@@ -74,12 +75,14 @@ public class FinremAssignToJudgeConsentInContestedCorresponderTest {
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         corresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
-        verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
-            DocumentHelper.PaperNotificationRecipient.RESPONDENT);
-        verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
-            DocumentHelper.PaperNotificationRecipient.APPLICANT);
+        verify(assignedToJudgeDocumentService)
+            .generateConsentInContestedAssignedToJudgeNotificationLetter(
+                caseDetails, AUTHORISATION_TOKEN, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+        verify(assignedToJudgeDocumentService)
+            .generateConsentInContestedAssignedToJudgeNotificationLetter(
+                caseDetails, AUTHORISATION_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
 
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, APPLICANT);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, RESPONDENT);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, APPLICANT, AUTHORISATION_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, RESPONDENT, AUTHORISATION_TOKEN);
     }
 }

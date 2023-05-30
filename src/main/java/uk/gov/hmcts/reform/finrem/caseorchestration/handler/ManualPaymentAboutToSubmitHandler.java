@@ -37,25 +37,28 @@ public class ManualPaymentAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        String caseId = callbackRequest.getCaseDetails().getId().toString();
         log.info("Invoking contested event {} about to start callback for case id: {}",
-            EventType.MANUAL_PAYMENT, callbackRequest.getCaseDetails().getId());
+            EventType.MANUAL_PAYMENT, caseId);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         List<PaymentDocumentCollection> paymentDocuments = caseData.getCopyOfPaperFormA();
+
         List<PaymentDocumentCollection> paymentList
-            = paymentDocuments.stream().map(payment -> covertToPdf(payment.getValue(), userAuthorisation)).toList();
+            = paymentDocuments.stream().map(payment -> covertToPdf(payment.getValue(), userAuthorisation, caseId))
+            .toList();
         caseData.setCopyOfPaperFormA(paymentList);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
     }
 
-    private PaymentDocumentCollection covertToPdf(PaymentDocument paymentDocument, String userAuthorisation) {
+    private PaymentDocumentCollection covertToPdf(PaymentDocument paymentDocument, String userAuthorisation, String caseId) {
 
         return PaymentDocumentCollection.builder()
             .value(PaymentDocument.builder().typeOfDocument(paymentDocument.getTypeOfDocument())
                 .uploadedDocument(service.convertDocumentIfNotPdfAlready(paymentDocument
-                    .getUploadedDocument(),userAuthorisation)).build())
+                    .getUploadedDocument(),userAuthorisation, caseId)).build())
             .build();
     }
 }

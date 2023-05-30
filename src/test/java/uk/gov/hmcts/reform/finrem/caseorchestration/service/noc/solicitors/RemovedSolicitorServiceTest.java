@@ -90,6 +90,18 @@ public class RemovedSolicitorServiceTest {
     }
 
     @Test
+    public void givenRemovedNotRepresented_whenGetRemovedSolicitorAsSolicitorButCaseRoleIdIsNull_thenReturnCorrectRemovedSolicitorAsNull() {
+        ChangeOrganisationRequest changeRequest = getApplicantChangeRequest(null);
+        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, getApplicantOrgPolicyWithOrganisation());
+        caseDetails.getData().put(CONTESTED_SOLICITOR_NAME, APP_SOL_NAME);
+        caseDetails.getData().put(CONTESTED_SOLICITOR_EMAIL, APP_SOL_EMAIL);
+
+        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
+            changeRequest);
+        assertNull(removedSolicitor);
+    }
+
+    @Test
     public void givenRemovedAppSolicitorContested_whenGetRemovedSolicitorAsSolicitor_thenReturnCorrectRemovedSolicitor() {
         ChangeOrganisationRequest changeRequest = getApplicantChangeRequest(getApplicantCaseRole());
         caseDetails.getData().put(APPLICANT_REPRESENTED, YES_VALUE);
