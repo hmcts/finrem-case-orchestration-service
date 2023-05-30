@@ -16,10 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.util.ArrayList;
@@ -45,8 +44,7 @@ public class SendOrderContestedAboutToSubmitHandler
     private final BulkPrintService bulkPrintService;
     private final GeneralOrderService generalOrderService;
     private final GenericDocumentService genericDocumentService;
-    private final PaperNotificationService paperNotificationService;
-    private final CaseDataService caseDataService;
+    private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
 
     @Override
@@ -102,17 +100,18 @@ public class SendOrderContestedAboutToSubmitHandler
     }
 
     private void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
+        String caseId = String.valueOf(caseDetails.getId());
+        log.info("In request to send general order for case {}:", caseId);
         if (contestedGeneralOrderPresent(caseDetails)) {
-            BulkPrintDocument generalOrder =
-                generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(
-                    caseDetails.getData(), authorisationToken, caseDetails.getId().toString());
-
-            if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
+            log.info("General order found for case {}:", caseDetails.getId());
+            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData(),
+                authorisationToken, caseId);
+            if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
                 log.info("Sending Applicant Order for Contested Case ID: {}", caseDetails.getId());
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
             }
 
-            if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+            if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
                 log.info("Sending Respondent Order for Contested Case ID: {}", caseDetails.getId());
                 bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
             }
@@ -120,19 +119,19 @@ public class SendOrderContestedAboutToSubmitHandler
     }
 
     private void printAndMailHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
-        if (caseDataService.isContestedPaperApplication(caseDetails)) {
-            Map<String, Object> caseData = caseDetails.getData();
 
-            String caseId = caseDetails.getId().toString();
-            List<BulkPrintDocument> hearingDocumentPack =
-                createHearingDocumentPack(caseData, authorisationToken, caseId);
+        String caseId = String.valueOf(caseDetails.getId());
+        log.info("In request to send hearing pack for case {}:", caseId);
+        Map<String, Object> caseData = caseDetails.getData();
 
-            if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
+        List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData, authorisationToken, caseId);
+        if (!hearingDocumentPack.isEmpty()) {
+            if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
                 log.info("Received request to send hearing pack for applicant for case {}:", caseId);
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, hearingDocumentPack);
             }
 
-            if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+            if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
                 log.info("Received request to send hearing pack for respondent for case {}:", caseId);
                 bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
             }
