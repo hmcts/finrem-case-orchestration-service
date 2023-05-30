@@ -6,6 +6,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerOneToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerTwoToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerThreeToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerFourToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -33,6 +37,14 @@ public class IntervenerAddedCorresponderTest {
 
     IntervenerAddedCorresponder intervenerAddedCorresponder;
     @Mock
+    private IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper;
+    @Mock
+    private IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper;
+    @Mock
+    private IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper;
+    @Mock
+    private IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper;
+    @Mock
     private IntervenerDocumentService intervenerDocumentService;
     @Mock
     private NotificationService notificationService;
@@ -46,7 +58,9 @@ public class IntervenerAddedCorresponderTest {
     @Before
     public void setup() {
         intervenerAddedCorresponder = new IntervenerAddedCorresponder(notificationService, bulkPrintService,
-            intervenerDocumentService);
+                                                                      intervenerDocumentService, intervenerOneDetailsMapper,
+                                                                      intervenerTwoDetailsMapper, intervenerThreeDetailsMapper,
+                                                                      intervenerFourDetailsMapper);
         finremCaseData = FinremCaseData.builder()
             .build();
         caseDocument = CaseDocument.builder().build();

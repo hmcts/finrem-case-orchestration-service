@@ -3,6 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.inte
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerFourToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerOneToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerThreeToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerTwoToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -16,9 +20,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 @Component
 public class IntervenerAddedCorresponder extends IntervenerCorresponder {
 
+    private final IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper;
+    private final IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper;
+    private final IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper;
+    private final IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper;
+
     public IntervenerAddedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
-                                       IntervenerDocumentService intervenerDocumentService) {
+                                       IntervenerDocumentService intervenerDocumentService,
+                                       IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper,
+                                       IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper,
+                                       IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper,
+                                       IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper) {
         super(notificationService, bulkPrintService, intervenerDocumentService);
+        this.intervenerOneDetailsMapper = intervenerOneDetailsMapper;
+        this.intervenerTwoDetailsMapper = intervenerTwoDetailsMapper;
+        this.intervenerThreeDetailsMapper = intervenerThreeDetailsMapper;
+        this.intervenerFourDetailsMapper = intervenerFourDetailsMapper;
     }
 
     @Override
