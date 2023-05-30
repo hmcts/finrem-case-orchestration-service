@@ -11,8 +11,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
 import java.time.LocalDateTime;
@@ -181,6 +183,31 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
 
         assertThat(interimHearingList.isEmpty(), is(false));
 
+    }
+
+    @Test
+    public void shouldCreateNotificationRequestForIntervenerNotification() {
+        Organisation org = Organisation.builder().organisationName("test org").organisationID("1").build();
+        OrganisationPolicy intervenerOrg = OrganisationPolicy.builder().organisation(org).build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerName("intervener name")
+            .intervenerOrganisation(intervenerOrg)
+            .intervenerSolicitorReference(TEST_SOLICITOR_REFERENCE).build();
+        String recipient = TEST_SOLICITOR_NAME;
+        String email = TEST_SOLICITOR_EMAIL;
+        String referenceNumber = TEST_SOLICITOR_REFERENCE;
+        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(
+            caseDetails, intervenerDetails, recipient, email, referenceNumber);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+        assertEquals("intervener name", notificationRequest.getIntervenerFullName());
+        assertEquals("test org", notificationRequest.getIntervenerSolicitorFirm());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getIntervenerSolicitorReferenceNumber());
     }
 
 

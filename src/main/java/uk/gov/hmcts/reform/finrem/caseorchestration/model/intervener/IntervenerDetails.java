@@ -33,6 +33,6 @@ public class IntervenerDetails {
     private String intervenerSolName;
     private String intervenerSolEmail;
     private String intervenerSolPhone;
+    private String intervenerSolicitorReference;
     private OrganisationPolicy intervenerOrganisation;
-
 }
