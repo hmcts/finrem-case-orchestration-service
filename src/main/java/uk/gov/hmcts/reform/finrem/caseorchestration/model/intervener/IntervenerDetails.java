@@ -36,5 +36,4 @@ public class IntervenerDetails {
     private String intervenerSolicitorFirm;
     private String intervenerSolicitorReference;
     private OrganisationPolicy intervenerOrganisation;
-
 }

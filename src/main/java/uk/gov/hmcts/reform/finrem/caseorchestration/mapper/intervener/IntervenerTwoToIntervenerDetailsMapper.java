@@ -22,6 +22,7 @@ public class IntervenerTwoToIntervenerDetailsMapper {
             .intervenerSolName(intervenerTwoWrapper.getIntervener2SolName())
             .intervenerSolEmail(intervenerTwoWrapper.getIntervener2SolEmail())
             .intervenerSolPhone(intervenerTwoWrapper.getIntervener2SolPhone())
+            .intervenerSolicitorReference(intervenerTwoWrapper.getIntervener2SolicitorReference())
             .intervenerOrganisation(intervenerTwoWrapper.getIntervener2Organisation())
             .intervenerSolicitorFirm(intervenerTwoWrapper.getIntervener2SolicitorFirm())
             .intervenerSolicitorReference(intervenerTwoWrapper.getIntervener2SolicitorReference())
