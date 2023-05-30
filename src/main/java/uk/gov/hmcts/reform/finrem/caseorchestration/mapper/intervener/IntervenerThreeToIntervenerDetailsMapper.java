@@ -22,6 +22,7 @@ public class IntervenerThreeToIntervenerDetailsMapper {
             .intervenerSolName(intervenerThreeWrapper.getIntervener3SolName())
             .intervenerSolEmail(intervenerThreeWrapper.getIntervener3SolEmail())
             .intervenerSolPhone(intervenerThreeWrapper.getIntervener3SolPhone())
+            .intervenerSolicitorReference(intervenerThreeWrapper.getIntervener3SolicitorReference())
             .intervenerOrganisation(intervenerThreeWrapper.getIntervener3Organisation())
             .build();
     }

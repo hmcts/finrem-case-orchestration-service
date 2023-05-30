@@ -37,6 +37,7 @@ public class IntervenerDocumentService {
     public CaseDocument generateIntervenerAddedNotificationLetter(FinremCaseDetails finremCaseDetails, String authToken,
                                                                   DocumentHelper.PaperNotificationRecipient recipient) {
 
+
         log.info("Generating Intervener Added Notification Letter {} from {} for bulk print for {}, case id: {}",
             documentConfiguration.getIntervenerAddedTemplate(),
             documentConfiguration.getIntervenerAddedFilename(),
