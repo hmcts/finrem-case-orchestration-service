@@ -461,6 +461,7 @@ public class DocumentHelper {
             log.info("Intervener One is not represented by a solicitor on case {}", caseId);
             addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
             addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
+            log.info("Intervener One address to send to is {} on case {}", addressToSendTo, caseId);
         } else if (recipient == INTERVENER_TWO && !caseData.isIntervenerRepresentedByASolicitor()) {
             log.info("Intervener Two is not represented by a solicitor on case {}", caseId);
             addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();

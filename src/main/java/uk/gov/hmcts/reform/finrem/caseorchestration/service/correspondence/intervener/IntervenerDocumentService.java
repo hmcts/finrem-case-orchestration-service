@@ -58,7 +58,10 @@ public class IntervenerDocumentService {
             documentConfiguration.getIntervenerAddedSolicitorTemplate(),
             documentConfiguration.getIntervenerAddedSolicitorFilename(),
             recipient, finremCaseDetails.getId());
-
+        log.info("The current respondent address is {} on case {}", finremCaseDetails.getData().getContactDetailsWrapper().getRespondentAddress(),
+            finremCaseDetails.getId());
+        log.info("The current applicant address is {} on case {}", finremCaseDetails.getData().getContactDetailsWrapper().getApplicantAddress(),
+            finremCaseDetails.getId());
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, recipient);
         finremCaseDetails.getData().setCurrentAddressee((Addressee) caseDetailsForBulkPrint.getData().get(ADDRESSEE));
         IntervenerAddedSolicitorLetterDetails intervenerAddedSolicitorLetterDetails = generateSolAddedLetterDetails(finremCaseDetails);
