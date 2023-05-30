@@ -73,10 +73,13 @@ public class IntervenerDocumentService {
     public CaseDocument generateIntervenerSolicitorRemovedLetter(FinremCaseDetails finremCaseDetails, String authToken,
                                                                  DocumentHelper.PaperNotificationRecipient recipient) {
 
-        log.info("Generating Intervener Removed Solicitor Notification Letter {} from {} for bulk print for {}, case id: {}",
+        log.info("Generating Intervener Removed Solicitor Notification Letter {}" +
+                " from {} for bulk print for {} with respondent address: {} applicant address: {} and case id: {}",
             documentConfiguration.getIntervenerRemovedSolicitorTemplate(),
             documentConfiguration.getIntervenerRemovedSolicitorFilename(),
-            recipient, finremCaseDetails.getId());
+            recipient, finremCaseDetails.getData().getContactDetailsWrapper().getRespondentAddress(),
+            finremCaseDetails.getData().getContactDetailsWrapper().getApplicantAddress(),
+            finremCaseDetails.getId());
         log.info("The current respondent address is {} on case {}", finremCaseDetails.getData().getContactDetailsWrapper().getRespondentAddress(),
             finremCaseDetails.getId());
         log.info("The current applicant address is {} on case {}", finremCaseDetails.getData().getContactDetailsWrapper().getApplicantAddress(),
