@@ -378,7 +378,7 @@ public class DocumentHelper {
             addressToSendTo = recipient == APPLICANT ? caseData.getContactDetailsWrapper().getApplicantAddress() :
                 caseData.getContactDetailsWrapper().getRespondentAddress();
         }
-
+        log.info("The address to send to is {}", addressToSendTo);
         return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
     }
 
@@ -480,17 +480,18 @@ public class DocumentHelper {
                 : caseDetails.getData().getRespondentFullName();
             addressToSendTo = recipient == APPLICANT ? caseData.getContactDetailsWrapper().getApplicantAddress() :
                 caseData.getContactDetailsWrapper().getRespondentAddress();
+            log.info("The address to send to is {} and the addressee is {}", addressToSendTo, addresseeName);
         }
 
         return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
     }
 
     private boolean addressLineOneAndPostCodeAreBothNotEmpty(Address address) {
+        log.info("The address is {}, the first line is {} and the postcode is {}", address, address.getAddressLine1(), address.getPostCode());
         return ObjectUtils.isNotEmpty(address)
             && StringUtils.isNotEmpty(address.getAddressLine1())
             && StringUtils.isNotEmpty(address.getPostCode());
     }
-
 
     public <T> T deepCopy(T object, Class<T> objectClass) {
         try {
