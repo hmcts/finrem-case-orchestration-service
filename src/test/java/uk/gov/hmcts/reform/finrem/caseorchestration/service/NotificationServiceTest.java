@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -961,6 +962,35 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void whenIntervenerSolicitorDigitalAndEmailPopulated_shouldReturnTrue() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().build();
+        intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
+        intervenerDetails.setIntervenerSolEmail("janice149@gmail.com");
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        caseDetails.getData().setCurrentIntervenerChangeDetails((intervenerChangeDetails));
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(any(), any())).thenReturn(true);
+        assertTrue(notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails));
+    }
+
+    @Test
+    public void whenIntervenerSolicitorDigitalAndEmailNotPopulated_shouldReturnFalse() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder().build();
+        intervenerDetails.setIntervenerRepresented(YesOrNo.NO);
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        caseDetails.getData().setCurrentIntervenerChangeDetails((intervenerChangeDetails));
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(any(), any())).thenReturn(false);
+        assertFalse(notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails));
+    }
+
+
+    @Test
     public void shouldNotEmailRespondentSolicitorWhenRespondentSolicitorIsDigitalAndEmailIsNotPopulatedFinrem() {
         FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder().respondentSolicitorEmail(null).build()).build();
@@ -1118,28 +1148,6 @@ public class NotificationServiceTest extends BaseServiceTest {
                 verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_LIST_FOR_HEARING);
             }
         });
-    }
-
-    @Test
-    public void whenIntervenerSolicitorDigitalAndEmailPopulated_shouldReturnTrue() {
-        FinremCaseDetails caseDetails = getFinremCaseDetails(CaseType.CONTESTED);
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder().build();
-        intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        caseDetails.getData().setCurrentIntervenerChangeDetails((intervenerChangeDetails));
-        assertTrue(notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails));
-    }
-
-    @Test
-    public void whenIntervenerSolicitorDigitalAndEmailNotPopulated_shouldReturnFalse() {
-        FinremCaseDetails caseDetails = getFinremCaseDetails(CaseType.CONTESTED);
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder().build();
-        intervenerDetails.setIntervenerRepresented(YesOrNo.NO);
-        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
-        caseDetails.getData().setCurrentIntervenerChangeDetails((intervenerChangeDetails));
-        assertFalse(notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails));
     }
 
     private static FinremCaseDetails getFinremCaseDetails(CaseType caseType) {
