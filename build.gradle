@@ -37,6 +37,7 @@ def versions = [
         jaxbOsgi             : '2.3.3',
         springHateoas        : '1.5.1',
         tika                 : '2.4.1',
+        amClient             : '1.7.3',
         sendLetterClient     : '3.0.16',
 ]
 
@@ -361,6 +362,8 @@ dependencies {
     implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
+    implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
+
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }

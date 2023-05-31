@@ -60,9 +60,9 @@ public enum EventType {
     MANAGE_INTERVENERS("manageInterveners"),
     CREATE_GENERAL_EMAIL("FR_generalEmail"),
     SHARE_SELECTED_DOCUMENTS("shareSelectedDocuments"),
+
     @JsonEnumDefaultValue
     NONE("");
-
     private final String ccdType;
 
     @JsonValue

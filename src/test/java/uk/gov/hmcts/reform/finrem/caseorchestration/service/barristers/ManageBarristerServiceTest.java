@@ -432,8 +432,8 @@ public class ManageBarristerServiceTest {
         BarristerLetterTuple removedTuple = BarristerLetterTuple
             .of(DocumentHelper.PaperNotificationRecipient.APPLICANT, AUTH_TOKEN, BarristerChangeType.REMOVED);
 
-        verify(barristerLetterService).sendBarristerLetter(eq(caseDetails), eq(expectedAdded), eq(addedTuple));
-        verify(barristerLetterService).sendBarristerLetter(eq(caseDetails), eq(expectedRemoved), eq(removedTuple));
+        verify(barristerLetterService).sendBarristerLetter(eq(caseDetails), eq(expectedAdded), eq(addedTuple), eq(AUTH_TOKEN));
+        verify(barristerLetterService).sendBarristerLetter(eq(caseDetails), eq(expectedRemoved), eq(removedTuple), eq(AUTH_TOKEN));
     }
 
     @Test

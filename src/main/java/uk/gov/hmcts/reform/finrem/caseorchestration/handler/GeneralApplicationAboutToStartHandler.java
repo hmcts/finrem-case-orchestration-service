@@ -35,11 +35,13 @@ public class GeneralApplicationAboutToStartHandler implements CallbackHandler<Ma
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseId);
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
-        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
+        GeneralApplicationCollectionData data =
+            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
 
         if (data != null) {
             existingGeneralApplication.add(data);

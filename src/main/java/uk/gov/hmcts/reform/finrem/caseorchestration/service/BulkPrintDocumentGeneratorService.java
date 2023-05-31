@@ -28,7 +28,7 @@ public class BulkPrintDocumentGeneratorService {
     private static final String CASE_IDENTIFIER_KEY = "caseIdentifier";
 
     private static final String FILE_NAMES = "fileNames";
-    private static final String RECIPIENTS = "recipients";
+    private static final String RECIPIENTS = "party";
 
     private final AuthTokenGenerator authTokenGenerator;
     private final FeatureToggleService featureToggleService;

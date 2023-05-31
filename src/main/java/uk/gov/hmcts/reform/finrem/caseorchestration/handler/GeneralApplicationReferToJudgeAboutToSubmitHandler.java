@@ -43,14 +43,17 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler
         CallbackRequest callbackRequest,
         String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received on start request to {} for Case ID: {}", EventType.GENERAL_APPLICATION_REFER_TO_JUDGE, caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Received on start request to {} for Case ID: {}",
+            EventType.GENERAL_APPLICATION_REFER_TO_JUDGE,
+            caseId);
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_REFER_LIST));
 
         if (existingList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
-            migrateExistingApplication(caseData, userAuthorisation);
+            migrateExistingApplication(caseData, userAuthorisation, caseId);
 
         } else {
             if (dynamicList == null) {
@@ -76,9 +79,10 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
     }
 
-    private void migrateExistingApplication(Map<String, Object> caseData, String userAuthorisation) {
+    private void migrateExistingApplication(Map<String, Object> caseData, String userAuthorisation, String caseId) {
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
-        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
+        GeneralApplicationCollectionData data =
+            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
         if (data != null) {
             data.getGeneralApplicationItems().setGeneralApplicationStatus(REFERRED.getId());
             existingGeneralApplication.add(data);

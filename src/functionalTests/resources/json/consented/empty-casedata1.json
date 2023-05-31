@@ -1,6 +1,7 @@
 {
   "event_id": "FR_issueApplication",
   "case_details": {
+    "ïd": "123",
     "jurisdiction": "DIVORCE",
     "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2"
