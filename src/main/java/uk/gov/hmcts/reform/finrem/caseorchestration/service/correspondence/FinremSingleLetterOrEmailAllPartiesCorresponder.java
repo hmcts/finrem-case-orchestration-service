@@ -66,23 +66,19 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         FinremCaseData caseData = caseDetails.getData();
         if (shouldSendIntervenerSolicitorEmail(caseDetails, caseData.getIntervenerOneWrapper().getIntervener1SolEmail(), INTVR_SOLICITOR_1)) {
             log.info("Sending email correspondence to intervener 1 for case: {}", caseDetails.getId());
-            SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getFinremCaseDataKeysForIntervenerOneSolicitor(caseData);
-            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
+            this.emailIntervenerSolicitor(caseDetails, notificationService.getFinremCaseDataKeysForIntervenerOneSolicitor(caseData));
         }
         if (shouldSendIntervenerSolicitorEmail(caseDetails,caseData.getIntervenerTwoWrapper().getIntervener2SolEmail(), INTVR_SOLICITOR_2)) {
             log.info("Sending email correspondence to intervener 2 for case: {}", caseDetails.getId());
-            final SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getFinremCaseDataKeysForIntervenerTwoSolicitor(caseData);
-            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
+            this.emailIntervenerSolicitor(caseDetails, notificationService.getFinremCaseDataKeysForIntervenerTwoSolicitor(caseData));
         }
         if (shouldSendIntervenerSolicitorEmail(caseDetails,caseData.getIntervenerThreeWrapper().getIntervener3SolEmail(), INTVR_SOLICITOR_3)) {
             log.info("Sending email correspondence to intervener 3 for case: {}", caseDetails.getId());
-            final SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getFinremCaseDataKeysForIntervenerThreeSolicitor(caseData);
-            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
+            this.emailIntervenerSolicitor(caseDetails, notificationService.getFinremCaseDataKeysForIntervenerThreeSolicitor(caseData));
         }
         if (shouldSendIntervenerSolicitorEmail(caseDetails,caseData.getIntervenerFourWrapper().getIntervener4SolEmail(), INTVR_SOLICITOR_4)) {
             log.info("Sending email correspondence to intervener 4 for case: {}", caseDetails.getId());
-            final SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getFinremCaseDataKeysForIntervenerFourSolicitor(caseData);
-            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
+            this.emailIntervenerSolicitor(caseDetails, notificationService.getFinremCaseDataKeysForIntervenerFourSolicitor(caseData));
         }
     }
 

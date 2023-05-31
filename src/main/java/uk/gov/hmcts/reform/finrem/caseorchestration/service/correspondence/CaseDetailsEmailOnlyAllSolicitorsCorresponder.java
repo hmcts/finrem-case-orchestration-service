@@ -40,23 +40,19 @@ public abstract class CaseDetailsEmailOnlyAllSolicitorsCorresponder extends Emai
     private void sendIntervenerCorrespondence(CaseDetails caseDetails) {
         if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener1SolEmail", CaseRole.INTVR_SOLICITOR_1)) {
             log.info("Sending email correspondence to intervener 1 for case: {}", caseDetails.getId());
-            SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerOneSolicitor();
-            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
+            this.emailIntervenerSolicitor(caseDetails, notificationService.getCaseDataKeysForIntervenerOneSolicitor());
         }
         if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener2SolEmail", CaseRole.INTVR_SOLICITOR_2)) {
             log.info("Sending email correspondence to intervener 2 for case: {}", caseDetails.getId());
-            final SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerTwoSolicitor();
-            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
+            this.emailIntervenerSolicitor(caseDetails, notificationService.getCaseDataKeysForIntervenerTwoSolicitor());
         }
         if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener3SolEmail", CaseRole.INTVR_SOLICITOR_3)) {
             log.info("Sending email correspondence to intervener 3 for case: {}", caseDetails.getId());
-            final SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerThreeSolicitor();
-            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
+            this.emailIntervenerSolicitor(caseDetails, notificationService.getCaseDataKeysForIntervenerThreeSolicitor());
         }
         if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener4SolEmail", CaseRole.INTVR_SOLICITOR_4)) {
             log.info("Sending email correspondence to intervener 4 for case: {}", caseDetails.getId());
-            final SolicitorCaseDataKeysWrapper caseDataKeysWrapper = notificationService.getCaseDataKeysForIntervenerFourSolicitor();
-            this.emailIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
+            this.emailIntervenerSolicitor(caseDetails, notificationService.getCaseDataKeysForIntervenerFourSolicitor());
         }
     }
 
