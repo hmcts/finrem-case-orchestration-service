@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
@@ -930,7 +930,21 @@ public class NotificationService {
     }
 
     public boolean wasIntervenerSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented().isYes();
+        boolean isEmailPopulated = caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerSolEmail() != null;
+        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType() == IntervenerType.INTERVENER_ONE) {
+            return isEmailPopulated && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+                CaseRole.INTVR_SOLICITOR_1.getValue());
+        } else if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType() == IntervenerType.INTERVENER_TWO) {
+            return isEmailPopulated && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+                CaseRole.INTVR_SOLICITOR_2.getValue());
+        } else if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType() == IntervenerType.INTERVENER_THREE) {
+            return isEmailPopulated && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+                CaseRole.INTVR_SOLICITOR_3.getValue());
+        } else if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType() == IntervenerType.INTERVENER_FOUR) {
+            return isEmailPopulated && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+                CaseRole.INTVR_SOLICITOR_4.getValue());
+        }
+        return false;
     }
 
     @Deprecated
