@@ -55,7 +55,6 @@ public class BulkPrintService {
     }
 
     public UUID sendDocumentForPrint(final CaseDocument document, FinremCaseDetails caseDetails, final String recipient, String auth) {
-        log.info("These are the case data {} on case {}", caseDetails.getData(), caseDetails.getId());
         List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl())
                 .fileName(document.getDocumentFilename()).build());

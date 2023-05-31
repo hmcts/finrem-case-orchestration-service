@@ -48,7 +48,6 @@ public class IntervenerService {
             log.info("revoke case role for intervener1 for case {}", caseId);
             String orgId = intervenerOneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID();
             String email = intervenerOneWrapper.getIntervener1SolEmail();
-            log.info("intervener1 has org id {} and email {} for case {}", orgId, email, caseId);
             remokeIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_1.getValue());
         }
         caseData.setIntervenerOneWrapper(null);

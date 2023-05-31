@@ -5,14 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ParentLetterDetails;
-
-import java.util.Map;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
 @Data
 @Builder(toBuilder = true)
 @JsonIgnoreProperties
 public class IntervenerRemovedSolicitorLetterDetails implements ParentLetterDetails {
-    private Map<String, Object> courtDetails;
+    private FrcCourtDetails courtDetails;
     private Addressee addressee;
     private String caseNumber;
     private String reference;

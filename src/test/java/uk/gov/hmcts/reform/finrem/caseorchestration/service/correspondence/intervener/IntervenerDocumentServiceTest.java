@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -54,6 +55,8 @@ public class IntervenerDocumentServiceTest {
     private static final String INTERVENER_SOLICITOR_FIRM = "intervenerSolicitorFirm";
 
     @Mock
+    private CourtDetailsMapper courtDetailsMapper;
+    @Mock
     private DocumentConfiguration documentConfiguration;
     @Mock
     private GenericDocumentService genericDocumentService;
@@ -73,7 +76,7 @@ public class IntervenerDocumentServiceTest {
     @Before
     public void setUp() {
         intervenerDocumentService = new IntervenerDocumentService(genericDocumentService,
-            documentConfiguration, documentHelper, objectMapper);
+            documentConfiguration, documentHelper, objectMapper, courtDetailsMapper);
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
 

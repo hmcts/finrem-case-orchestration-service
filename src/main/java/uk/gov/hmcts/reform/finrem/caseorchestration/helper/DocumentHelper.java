@@ -475,13 +475,18 @@ public class DocumentHelper {
             addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
             addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
         } else {
-            log.info("{} is not represented by a solicitor on case {}", recipient, caseId);
             ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
             addresseeName = recipient == APPLICANT
                 ? caseDetails.getData().getFullApplicantName()
                 : caseDetails.getData().getRespondentFullName();
             addressToSendTo = recipient == APPLICANT ? getApplicantCorrespondenceAddress(wrapper) :
                 getRespondentCorrespondenceAddress(wrapper);
+            if (recipient == APPLICANT && caseData.isApplicantRepresentedByASolicitor()) {
+                reference = caseData.getContactDetailsWrapper().getSolicitorReference();
+            }
+            if (recipient == RESPONDENT && caseData.isRespondentRepresentedByASolicitor()) {
+                reference = caseData.getContactDetailsWrapper().getRespondentSolicitorReference();
+            }
         }
         return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
     }
