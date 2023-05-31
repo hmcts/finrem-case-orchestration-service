@@ -963,14 +963,14 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void whenIntervenerSolicitorDigitalAndEmailPopulated_shouldReturnTrue() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         IntervenerDetails intervenerDetails = IntervenerDetails.builder().build();
         intervenerDetails.setIntervenerRepresented(YesOrNo.YES);
         intervenerDetails.setIntervenerSolEmail("janice149@gmail.com");
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
         caseDetails.getData().setCurrentIntervenerChangeDetails((intervenerChangeDetails));
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(any(), any())).thenReturn(true);
         assertTrue(notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails));
@@ -978,17 +978,16 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void whenIntervenerSolicitorDigitalAndEmailNotPopulated_shouldReturnFalse() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         IntervenerDetails intervenerDetails = IntervenerDetails.builder().build();
         intervenerDetails.setIntervenerRepresented(YesOrNo.NO);
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
         caseDetails.getData().setCurrentIntervenerChangeDetails((intervenerChangeDetails));
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(any(), any())).thenReturn(false);
         assertFalse(notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails));
     }
-
 
     @Test
     public void shouldNotEmailRespondentSolicitorWhenRespondentSolicitorIsDigitalAndEmailIsNotPopulatedFinrem() {
