@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
@@ -25,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -198,15 +201,21 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerSolName("intervener sol")
+            .intervenerSolEmail("intervener@intervener.com")
+            .intervenerSolicitorReference("123456789")
             .intervenerRepresented(YesOrNo.YES)
             .build();
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        IntervenerOneWrapper intervenerOneWrapper = new IntervenerOneWrapper();
+        when(intervenerOneDetailsMapper.mapToIntervenerDetails(intervenerOneWrapper)).thenReturn(intervenerDetails);
         when(intervenerAddedCorresponder.shouldSendIntervenerOneSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerOneSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
+            anyString(), anyString(), anyString());
     }
 
     @Test
@@ -215,16 +224,22 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerSolName("intervener sol")
+            .intervenerSolEmail("intervener@intervener.com")
+            .intervenerSolicitorReference("123456789")
             .intervenerRepresented(YesOrNo.YES)
             .build();
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
+        IntervenerTwoWrapper intervenerTwoWrapper = new IntervenerTwoWrapper();
+        when(intervenerTwoDetailsMapper.mapToIntervenerDetails(intervenerTwoWrapper)).thenReturn(intervenerDetails);
         when(intervenerAddedCorresponder.shouldSendIntervenerTwoSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerTwoSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
+            anyString(), anyString(), anyString());
     }
 
     @Test
@@ -233,16 +248,22 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerSolName("intervener sol")
+            .intervenerSolEmail("intervener@intervener.com")
+            .intervenerSolicitorReference("123456789")
             .intervenerRepresented(YesOrNo.YES)
             .build();
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
+        IntervenerThreeWrapper intervenerThreeWrapper = new IntervenerThreeWrapper();
+        when(intervenerThreeDetailsMapper.mapToIntervenerDetails(intervenerThreeWrapper)).thenReturn(intervenerDetails);
         when(intervenerAddedCorresponder.shouldSendIntervenerThreeSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerThreeSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
+            anyString(), anyString(), anyString());
     }
 
     @Test
@@ -251,15 +272,117 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerSolName("intervener sol")
+            .intervenerSolEmail("intervener@intervener.com")
+            .intervenerSolicitorReference("123456789")
             .intervenerRepresented(YesOrNo.YES)
             .build();
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
+        IntervenerFourWrapper intervenerFourWrapper = new IntervenerFourWrapper();
+        when(intervenerFourDetailsMapper.mapToIntervenerDetails(intervenerFourWrapper)).thenReturn(intervenerDetails);
         when(intervenerAddedCorresponder.shouldSendIntervenerFourSolicitorEmail(finremCaseDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerFourSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
+            anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void shouldSendEmailIfApplicantIsRepresented() {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .solicitorReference("123456789").applicantSolicitorEmail("test@test.com").applicantSolicitorName("test name").build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerName("intervener citizen")
+            .intervenerRepresented(YesOrNo.NO)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
+        finremCaseData.setContactDetailsWrapper(contactDetailsWrapper);
+        finremCaseDetails = FinremCaseDetails.builder()
+            .data(finremCaseData).build();
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(finremCaseDetails)).thenReturn(true);
+        intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).sendIntervenerAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
+            anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void shouldSendSolEmailIfApplicantIsRepresentedAndIntervenerIsRepresented() {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .solicitorReference("123456789").applicantSolicitorEmail("test@test.com").applicantSolicitorName("test name").build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerSolName("intervener sol")
+            .intervenerSolEmail("intervener@intervener.com")
+            .intervenerSolicitorReference("123456789")
+            .intervenerRepresented(YesOrNo.YES)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
+        finremCaseData.setContactDetailsWrapper(contactDetailsWrapper);
+        finremCaseDetails = FinremCaseDetails.builder()
+            .data(finremCaseData).build();
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(finremCaseDetails)).thenReturn(true);
+        intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
+            anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void shouldSendEmailIfRespondentIsRepresented() {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .respondentSolicitorReference("123456789").respondentSolicitorEmail("test@test.com").respondentSolicitorName("test name").build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerName("intervener citizen")
+            .intervenerRepresented(YesOrNo.NO)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
+        finremCaseData.setContactDetailsWrapper(contactDetailsWrapper);
+        finremCaseDetails = FinremCaseDetails.builder()
+            .data(finremCaseData).build();
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(finremCaseDetails)).thenReturn(true);
+        intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).sendIntervenerAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
+            anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void shouldSendSolEmailIfRespondentIsRepresentedAndIntervenerIsRepresented() {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .respondentSolicitorReference("123456789").respondentSolicitorEmail("test@test.com").respondentSolicitorName("test name").build();
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerSolName("intervener sol")
+            .intervenerSolEmail("intervener@intervener.com")
+            .intervenerSolicitorReference("123456789")
+            .intervenerRepresented(YesOrNo.YES)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
+        finremCaseData.setContactDetailsWrapper(contactDetailsWrapper);
+        finremCaseDetails = FinremCaseDetails.builder()
+            .data(finremCaseData).build();
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(finremCaseDetails)).thenReturn(true);
+        intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
+
+        verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
+            anyString(), anyString(), anyString());
     }
 }
