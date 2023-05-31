@@ -478,6 +478,7 @@ public class FinremCaseData {
         return regionWrapper;
     }
 
+    @JsonIgnore
     public List<IntervenerWrapper> getInterveners() {
         return List.of(getIntervenerOneWrapper(), getIntervenerTwoWrapper(), getIntervenerThreeWrapper(), getIntervenerFourWrapper());
     }
@@ -548,25 +549,36 @@ public class FinremCaseData {
 
     @JsonIgnore
     public String getFullApplicantName() {
-        return (nullToEmpty(getContactDetailsWrapper().getApplicantFmName()).trim() + " "
-            + nullToEmpty(getContactDetailsWrapper().getApplicantLname()).trim()).trim();
+        return (
+            nullToEmpty(getContactDetailsWrapper().getApplicantFmName()).trim()
+                + " "
+                + nullToEmpty(getContactDetailsWrapper().getApplicantLname()).trim()
+        ).trim();
     }
 
     @JsonIgnore
     public String getFullRespondentNameContested() {
-        return (nullToEmpty(getContactDetailsWrapper().getRespondentFmName()).trim() + " "
-            + nullToEmpty(getContactDetailsWrapper().getRespondentLname()).trim()).trim();
+        return (
+            nullToEmpty(getContactDetailsWrapper().getRespondentFmName()).trim()
+                + " "
+                + nullToEmpty(getContactDetailsWrapper().getRespondentLname()).trim()
+        ).trim();
     }
 
     @JsonIgnore
     public String getFullRespondentNameConsented() {
-        return (nullToEmpty(getContactDetailsWrapper().getAppRespondentFmName()).trim() + " "
-            + nullToEmpty(getContactDetailsWrapper().getAppRespondentLName()).trim()).trim();
+        return (
+            nullToEmpty(getContactDetailsWrapper().getAppRespondentFmName()).trim()
+                + " "
+                + nullToEmpty(getContactDetailsWrapper().getAppRespondentLName()).trim()
+        ).trim();
     }
 
     @JsonIgnore
     public String getRespondentFullName() {
-        return CaseType.CONTESTED.equals(ccdCaseType) ? getFullRespondentNameContested() : getFullRespondentNameConsented();
+        return CaseType.CONTESTED.equals(ccdCaseType)
+            ? getFullRespondentNameContested()
+            : getFullRespondentNameConsented();
     }
 
     @JsonIgnore
@@ -654,18 +666,23 @@ public class FinremCaseData {
 
     @JsonIgnore
     public String getAppSolicitorName() {
-        return isConsentedApplication() ? getContactDetailsWrapper().getSolicitorName() : getContactDetailsWrapper().getApplicantSolicitorName();
+        return isConsentedApplication()
+            ? getContactDetailsWrapper().getSolicitorName()
+            : getContactDetailsWrapper().getApplicantSolicitorName();
     }
 
     @JsonIgnore
     public Address getAppSolicitorAddress() {
-        return isConsentedApplication() ? getContactDetailsWrapper().getSolicitorAddress() :
-            getContactDetailsWrapper().getApplicantSolicitorAddress();
+        return isConsentedApplication()
+            ? getContactDetailsWrapper().getSolicitorAddress()
+            : getContactDetailsWrapper().getApplicantSolicitorAddress();
     }
 
     @JsonIgnore
     public String getAppSolicitorEmail() {
-        return isConsentedApplication() ? getContactDetailsWrapper().getSolicitorEmail() : getContactDetailsWrapper().getApplicantSolicitorEmail();
+        return isConsentedApplication()
+            ? getContactDetailsWrapper().getSolicitorEmail()
+            : getContactDetailsWrapper().getApplicantSolicitorEmail();
     }
 
     @JsonIgnore
@@ -675,12 +692,16 @@ public class FinremCaseData {
 
     @JsonIgnore
     public String getAppSolicitorFirm() {
-        return isConsentedApplication() ? getContactDetailsWrapper().getSolicitorFirm() : getContactDetailsWrapper().getApplicantSolicitorFirm();
+        return isConsentedApplication()
+            ? getContactDetailsWrapper().getSolicitorFirm()
+            : getContactDetailsWrapper().getApplicantSolicitorFirm();
     }
 
     @JsonIgnore
     public boolean isRespondentSolicitorEmailCommunicationEnabled() {
-        return !isPaperCase() && isRespondentRepresentedByASolicitor() && Objects.nonNull(getContactDetailsWrapper().getSolicitorEmail())
+        return !isPaperCase()
+            && isRespondentRepresentedByASolicitor()
+            && Objects.nonNull(getContactDetailsWrapper().getSolicitorEmail())
             && isRespondentSolicitorAgreeToReceiveEmails();
     }
 
@@ -693,26 +714,6 @@ public class FinremCaseData {
     @JsonIgnore
     public boolean isRespondentSolicitorPopulated() {
         return StringUtils.isNotEmpty(nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail()));
-    }
-
-    @JsonIgnore
-    public boolean isIntervenerSolOnePopulated() {
-        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerOneWrapper().getIntervenerSolEmail()));
-    }
-
-    @JsonIgnore
-    public boolean isIntervenerSolTwoPopulated() {
-        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerTwoWrapper().getIntervenerSolEmail()));
-    }
-
-    @JsonIgnore
-    public boolean isIntervenerSolThreePopulated() {
-        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerThreeWrapper().getIntervenerSolEmail()));
-    }
-
-    @JsonIgnore
-    public boolean isIntervenerSolFourPopulated() {
-        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerFourWrapper().getIntervenerSolEmail()));
     }
 
     @JsonIgnore
