@@ -61,13 +61,16 @@ public class IntervenersMidHandler extends FinremCallbackHandler implements Inte
     }
 
     private void showIntervenerOption(IntervenerWrapper intervenerWrapper, List<DynamicRadioListElement> dynamicListElements) {
-        if (intervenerWrapper != null && intervenerWrapper.getIntervenerName() != null) {
-            dynamicListElements.add(getDynamicRadioListElements(intervenerWrapper.getAddIntervenerCode(),
-                intervenerWrapper.getUpdateIntervenerValue()));
-            dynamicListElements.add(getDynamicRadioListElements(intervenerWrapper.getDeleteIntervenerCode(),
-                intervenerWrapper.getDeleteIntervenerValue()));
-        } else {
-            dynamicListElements.add(getDynamicRadioListElements(intervenerWrapper.getAddIntervenerCode(), intervenerWrapper.getAddIntervenerValue()));
+        if (intervenerWrapper != null) {
+            if (intervenerWrapper.getIntervenerName() != null) {
+                dynamicListElements.add(getDynamicRadioListElements(intervenerWrapper.getAddIntervenerCode(),
+                    intervenerWrapper.getUpdateIntervenerValue()));
+                dynamicListElements.add(getDynamicRadioListElements(intervenerWrapper.getDeleteIntervenerCode(),
+                    intervenerWrapper.getDeleteIntervenerValue()));
+            } else {
+                dynamicListElements.add(
+                    getDynamicRadioListElements(intervenerWrapper.getAddIntervenerCode(), intervenerWrapper.getAddIntervenerValue()));
+            }
         }
     }
 }

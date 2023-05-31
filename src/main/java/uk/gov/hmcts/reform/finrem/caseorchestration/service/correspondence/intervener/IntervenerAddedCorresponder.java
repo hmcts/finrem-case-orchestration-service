@@ -84,7 +84,7 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             log.info("Sending letter correspondence to {} for case: {}", intervenerWrapper.getIntervenerType(), caseDetails.getId());
             String recipient = intervenerWrapper.getPaperNotificationRecipient().toString();
             caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(
-                caseDetails.getData().getIntervenerOneWrapper());
+                intervenerWrapper);
 
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, auth,

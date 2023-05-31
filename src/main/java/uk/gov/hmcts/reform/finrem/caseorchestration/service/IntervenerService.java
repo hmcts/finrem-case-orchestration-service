@@ -43,7 +43,6 @@ public class IntervenerService {
     }
 
     public IntervenerChangeDetails updateIntervenerDetails(IntervenerWrapper intervenerWrapper, FinremCallbackRequest callbackRequest) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         Long caseId = callbackRequest.getCaseDetails().getId();
 
