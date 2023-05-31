@@ -12,11 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAddedLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAddedSolicitorLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerRemovedLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerRemovedSolicitorLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
@@ -87,7 +87,8 @@ public class IntervenerDocumentService {
             finremCaseDetails.getId());
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, recipient);
         finremCaseDetails.getData().setCurrentAddressee((Addressee) caseDetailsForBulkPrint.getData().get(ADDRESSEE));
-        IntervenerRemovedSolicitorLetterDetails intervenerRemovedSolicitorLetterDetails = generateSolRemovedLetterDetails(finremCaseDetails, recipient);
+        IntervenerRemovedSolicitorLetterDetails intervenerRemovedSolicitorLetterDetails = generateSolRemovedLetterDetails(
+            finremCaseDetails, recipient);
 
         return getCaseDocument(authToken, intervenerRemovedSolicitorLetterDetails);
     }
@@ -203,10 +204,12 @@ public class IntervenerDocumentService {
             intervenerRemovedSolicitorLetterDetails.getCaseNumber());
     }
   
-    private IntervenerAddedLetterDetails generateAddedLetterDetails(FinremCaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
+    private IntervenerAddedLetterDetails generateAddedLetterDetails(FinremCaseDetails caseDetails,
+                                                                    DocumentHelper.PaperNotificationRecipient recipient) {
 
         return IntervenerAddedLetterDetails.builder()
-            .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
+            .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData()
+                .getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
@@ -218,10 +221,12 @@ public class IntervenerDocumentService {
             .build();
     }
 
-    private IntervenerRemovedLetterDetails generateRemovedLetterDetails(FinremCaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
+    private IntervenerRemovedLetterDetails generateRemovedLetterDetails(FinremCaseDetails caseDetails,
+                                                                        DocumentHelper.PaperNotificationRecipient recipient) {
 
         return IntervenerRemovedLetterDetails.builder()
-            .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
+            .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData()
+                .getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .reference(getSolicitorReference(caseDetails, recipient))
@@ -233,10 +238,12 @@ public class IntervenerDocumentService {
             .build();
     }
 
-    private IntervenerAddedSolicitorLetterDetails generateSolAddedLetterDetails(FinremCaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
+    private IntervenerAddedSolicitorLetterDetails generateSolAddedLetterDetails(FinremCaseDetails caseDetails,
+                                                                                DocumentHelper.PaperNotificationRecipient recipient) {
 
         return IntervenerAddedSolicitorLetterDetails.builder()
-            .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
+            .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData()
+                .getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
@@ -250,10 +257,12 @@ public class IntervenerDocumentService {
             .build();
     }
 
-    private IntervenerRemovedSolicitorLetterDetails generateSolRemovedLetterDetails(FinremCaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
+    private IntervenerRemovedSolicitorLetterDetails generateSolRemovedLetterDetails(FinremCaseDetails caseDetails,
+                                                                                    DocumentHelper.PaperNotificationRecipient recipient) {
 
         return IntervenerRemovedSolicitorLetterDetails.builder()
-            .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
+            .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData()
+                .getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
@@ -269,13 +278,13 @@ public class IntervenerDocumentService {
 
     private String getSolicitorReference(FinremCaseDetails caseDetails,
                                          DocumentHelper.PaperNotificationRecipient recipient) {
-    ContactDetailsWrapper contactDetailsWrapper = caseDetails.getData().getContactDetailsWrapper();
-    if (recipient == APPLICANT && YesOrNo.YES.equals(contactDetailsWrapper.getApplicantRepresented())) {
-        return contactDetailsWrapper.getSolicitorReference();
-    } else if (recipient == RESPONDENT && YesOrNo.YES.equals(contactDetailsWrapper.getContestedRespondentRepresented())) {
-        return contactDetailsWrapper.getRespondentSolicitorReference();
-    }
-    return null;
+        ContactDetailsWrapper contactDetailsWrapper = caseDetails.getData().getContactDetailsWrapper();
+        if (recipient == APPLICANT && YesOrNo.YES.equals(contactDetailsWrapper.getApplicantRepresented())) {
+            return contactDetailsWrapper.getSolicitorReference();
+        } else if (recipient == RESPONDENT && YesOrNo.YES.equals(contactDetailsWrapper.getContestedRespondentRepresented())) {
+            return contactDetailsWrapper.getRespondentSolicitorReference();
+        }
+        return null;
     }
 
     private Map<String, Object> convertLetterDetailsToMap(IntervenerAddedLetterDetails letterDetails) {
