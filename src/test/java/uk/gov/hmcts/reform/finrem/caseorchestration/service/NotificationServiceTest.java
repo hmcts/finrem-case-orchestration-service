@@ -141,6 +141,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
     private static final String NOTTINGHAM_FRC_EMAIL = "FRCNottingham@justice.gov.uk";
+    private static final String INTERVENER_SOL_EMAIL = "intervenerSol@email.com";
 
     private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
     private static final String CONSENTED_HEARING_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
@@ -187,8 +188,6 @@ public class NotificationServiceTest extends BaseServiceTest {
             .thenReturn(notificationRequest);
         when(finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(FinremCaseDetails.class),
                 any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
-        when(evidenceManagementDownloadService.download(anyString()))
-            .thenReturn(ResponseEntity.status(HttpStatus.OK).body(new byte[2048]));
         when(evidenceManagementDownloadService.downloadInResponseEntity(anyString(), anyString()))
             .thenReturn(ResponseEntity.status(HttpStatus.OK).body(new ByteArrayResource(new byte[2048])));
     }

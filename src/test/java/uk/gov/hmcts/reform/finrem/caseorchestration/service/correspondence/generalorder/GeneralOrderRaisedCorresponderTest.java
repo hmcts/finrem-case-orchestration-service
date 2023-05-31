@@ -65,7 +65,8 @@ public class GeneralOrderRaisedCorresponderTest {
     public void shouldNotSendGeneralOrderEmail() {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(CaseDetails.class), anyString(), any(CaseRole.class) )).thenReturn(false);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(CaseDetails.class), anyString(),
+            any(CaseRole.class))).thenReturn(false);
 
         generalOrderRaisedCorresponder.sendCorrespondence(caseDetails);
 
