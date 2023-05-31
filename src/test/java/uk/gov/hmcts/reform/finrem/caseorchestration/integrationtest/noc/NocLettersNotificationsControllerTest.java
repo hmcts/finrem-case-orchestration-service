@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerFourToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerOneToIntervenerDetailsMapper;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
 import java.util.Map;
@@ -67,8 +69,12 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     @Autowired
     private DocumentConfiguration documentConfiguration;
+    @Autowired
+    private IntervenerDocumentService intervenerDocumentService;
     @MockBean
     private EmailService emailService;
+    @MockBean
+    private CourtDetailsMapper courtDetailsMapper;
 
     @Captor
     ArgumentCaptor<Map> placeholdersMapArgumentCaptor;
