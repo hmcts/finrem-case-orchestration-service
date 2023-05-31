@@ -13,6 +13,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
@@ -82,8 +86,10 @@ class IntervenersSubmittedHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_ONE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
-
-        when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerOneChangeDetails);
+        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+            .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
+        finremCaseData.setIntervenerOneWrapper(oneWrapper);
+        when(service.setIntervenerAddedChangeDetails(oneWrapper)).thenReturn(intervenerOneChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
@@ -103,8 +109,11 @@ class IntervenersSubmittedHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_TWO_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
+        IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
+            .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
+        finremCaseData.setIntervenerTwoWrapper(twoWrapper);
 
-        when(service.setIntervenerTwoAddedChangeDetails(finremCaseData)).thenReturn(intervenerTwoChangeDetails);
+        when(service.setIntervenerAddedChangeDetails(twoWrapper)).thenReturn(intervenerTwoChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
@@ -125,7 +134,11 @@ class IntervenersSubmittedHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_THREE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        when(service.setIntervenerThreeAddedChangeDetails(finremCaseData)).thenReturn(intervenerThreeChangeDetails);
+        IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
+            .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
+        finremCaseData.setIntervenerThreeWrapper(threeWrapper);
+
+        when(service.setIntervenerAddedChangeDetails(threeWrapper)).thenReturn(intervenerThreeChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
@@ -146,7 +159,11 @@ class IntervenersSubmittedHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_FOUR_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        when(service.setIntervenerFourAddedChangeDetails(finremCaseData)).thenReturn(intervenerFourChangeDetails);
+        IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
+            .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
+        finremCaseData.setIntervenerFourWrapper(fourWrapper);
+
+        when(service.setIntervenerAddedChangeDetails(fourWrapper)).thenReturn(intervenerFourChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);

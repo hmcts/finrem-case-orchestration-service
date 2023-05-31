@@ -11,38 +11,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_FOUR_CODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_FOUR_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_ONE_CODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_ONE_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_THREE_CODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_THREE_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_TWO_CODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_TWO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_FOUR_CODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_FOUR_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_ONE_CODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_ONE_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_THREE_CODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_THREE_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_TWO_CODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_TWO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.UPDATE_INTERVENER_FOUR_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.UPDATE_INTERVENER_ONE_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.UPDATE_INTERVENER_THREE_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.UPDATE_INTERVENER_TWO_VALUE;
 
 @Slf4j
 @Service
@@ -71,10 +48,10 @@ public class IntervenersMidHandler extends FinremCallbackHandler implements Inte
         String valueCode = caseData.getIntervenersList().getValueCode();
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         switch (valueCode) {
-            case INTERVENER_ONE -> showIntervenerOneOption(caseDataBefore, dynamicListElements);
-            case INTERVENER_TWO -> showIntervenerTwoOption(caseDataBefore, dynamicListElements);
-            case INTERVENER_THREE -> showIntervenerThreeOption(caseDataBefore, dynamicListElements);
-            case INTERVENER_FOUR -> showIntervenerFourOption(caseDataBefore, dynamicListElements);
+            case INTERVENER_ONE -> showIntervenerOption(caseDataBefore.getIntervenerOneWrapper(), dynamicListElements);
+            case INTERVENER_TWO -> showIntervenerOption(caseDataBefore.getIntervenerTwoWrapper(), dynamicListElements);
+            case INTERVENER_THREE -> showIntervenerOption(caseDataBefore.getIntervenerThreeWrapper(), dynamicListElements);
+            case INTERVENER_FOUR -> showIntervenerOption(caseDataBefore.getIntervenerFourWrapper(), dynamicListElements);
             default -> throw new IllegalArgumentException("Invalid intervener selected for caseId " + caseId);
         }
 
@@ -83,44 +60,14 @@ public class IntervenersMidHandler extends FinremCallbackHandler implements Inte
             .data(caseData).build();
     }
 
-    private void showIntervenerFourOption(FinremCaseData caseData, List<DynamicRadioListElement> dynamicListElements) {
-        IntervenerFourWrapper intervenerFourWrapper = caseData.getIntervenerFourWrapper();
-        if (intervenerFourWrapper != null && intervenerFourWrapper.getIntervener4Name() != null) {
-            dynamicListElements.add(getDynamicRadioListElements(ADD_INTERVENER_FOUR_CODE, UPDATE_INTERVENER_FOUR_VALUE));
-            dynamicListElements.add(getDynamicRadioListElements(DEL_INTERVENER_FOUR_CODE, DEL_INTERVENER_FOUR_VALUE));
+    private void showIntervenerOption(IntervenerWrapper intervenerWrapper, List<DynamicRadioListElement> dynamicListElements) {
+        if (intervenerWrapper != null && intervenerWrapper.getIntervenerName() != null) {
+            dynamicListElements.add(getDynamicRadioListElements(intervenerWrapper.getAddIntervenerCode(),
+                intervenerWrapper.getUpdateIntervenerValue()));
+            dynamicListElements.add(getDynamicRadioListElements(intervenerWrapper.getDeleteIntervenerCode(),
+                intervenerWrapper.getDeleteIntervenerValue()));
         } else {
-            dynamicListElements.add(getDynamicRadioListElements(ADD_INTERVENER_FOUR_CODE, ADD_INTERVENER_FOUR_VALUE));
+            dynamicListElements.add(getDynamicRadioListElements(intervenerWrapper.getAddIntervenerCode(), intervenerWrapper.getAddIntervenerValue()));
         }
     }
-
-    private void showIntervenerThreeOption(FinremCaseData caseData, List<DynamicRadioListElement> dynamicListElements) {
-        IntervenerThreeWrapper intervenerThreeWrapper = caseData.getIntervenerThreeWrapper();
-        if (intervenerThreeWrapper != null && intervenerThreeWrapper.getIntervener3Name() != null) {
-            dynamicListElements.add(getDynamicRadioListElements(ADD_INTERVENER_THREE_CODE, UPDATE_INTERVENER_THREE_VALUE));
-            dynamicListElements.add(getDynamicRadioListElements(DEL_INTERVENER_THREE_CODE, DEL_INTERVENER_THREE_VALUE));
-        } else {
-            dynamicListElements.add(getDynamicRadioListElements(ADD_INTERVENER_THREE_CODE, ADD_INTERVENER_THREE_VALUE));
-        }
-    }
-
-    private void showIntervenerTwoOption(FinremCaseData caseData, List<DynamicRadioListElement> dynamicListElements) {
-        IntervenerTwoWrapper intervenerTwoWrapper = caseData.getIntervenerTwoWrapper();
-        if (intervenerTwoWrapper != null && intervenerTwoWrapper.getIntervener2Name() != null) {
-            dynamicListElements.add(getDynamicRadioListElements(ADD_INTERVENER_TWO_CODE, UPDATE_INTERVENER_TWO_VALUE));
-            dynamicListElements.add(getDynamicRadioListElements(DEL_INTERVENER_TWO_CODE, DEL_INTERVENER_TWO_VALUE));
-        } else {
-            dynamicListElements.add(getDynamicRadioListElements(ADD_INTERVENER_TWO_CODE, ADD_INTERVENER_TWO_VALUE));
-        }
-    }
-
-    private void showIntervenerOneOption(FinremCaseData caseData, List<DynamicRadioListElement> dynamicListElements) {
-        IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
-        if (intervenerOneWrapper != null && intervenerOneWrapper.getIntervener1Name() != null) {
-            dynamicListElements.add(getDynamicRadioListElements(ADD_INTERVENER_ONE_CODE, UPDATE_INTERVENER_ONE_VALUE));
-            dynamicListElements.add(getDynamicRadioListElements(DEL_INTERVENER_ONE_CODE, DEL_INTERVENER_ONE_VALUE));
-        } else {
-            dynamicListElements.add(getDynamicRadioListElements(ADD_INTERVENER_ONE_CODE, ADD_INTERVENER_ONE_VALUE));
-        }
-    }
-
 }
