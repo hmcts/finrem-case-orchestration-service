@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -378,7 +379,6 @@ public class DocumentHelper {
             addressToSendTo = recipient == APPLICANT ? caseData.getContactDetailsWrapper().getApplicantAddress() :
                 caseData.getContactDetailsWrapper().getRespondentAddress();
         }
-        log.info("The address to send to is {}", addressToSendTo);
         return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
     }
 
@@ -476,13 +476,13 @@ public class DocumentHelper {
             addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
         } else {
             log.info("{} is not represented by a solicitor on case {}", recipient, caseId);
+            ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
             addresseeName = recipient == APPLICANT
                 ? caseDetails.getData().getFullApplicantName()
                 : caseDetails.getData().getRespondentFullName();
-            addressToSendTo = recipient == APPLICANT ? caseData.getContactDetailsWrapper().getApplicantAddress() :
-                caseData.getContactDetailsWrapper().getRespondentAddress();
+            addressToSendTo = recipient == APPLICANT ? getApplicantCorrespondenceAddress(wrapper) :
+                getRespondentCorrespondenceAddress(wrapper);
         }
-        log.info("The address that will be sent to is {} and the addressee is {} on case {}", addressToSendTo, addresseeName, caseId);
         return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
     }
 
@@ -601,6 +601,14 @@ public class DocumentHelper {
     private String getRespondentFullName(CaseDetails caseDetails, boolean isConsentedApplication) {
         return isConsentedApplication
             ? getRespondentFullNameConsented(caseDetails) : getRespondentFullNameContested(caseDetails);
+    }
+
+    private static Address getRespondentCorrespondenceAddress(ContactDetailsWrapper wrapper) {
+        return wrapper.getContestedRespondentRepresented().isYes() ? wrapper.getRespondentSolicitorAddress() : wrapper.getRespondentAddress();
+    }
+
+    private static Address getApplicantCorrespondenceAddress(ContactDetailsWrapper wrapper) {
+        return wrapper.getApplicantRepresented().isYes() ? wrapper.getApplicantSolicitorAddress() : wrapper.getApplicantAddress();
     }
 
     public String getRespondentFullNameConsented(CaseDetails caseDetails) {
