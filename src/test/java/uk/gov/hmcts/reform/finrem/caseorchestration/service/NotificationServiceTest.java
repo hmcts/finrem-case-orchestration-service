@@ -933,28 +933,28 @@ public class NotificationServiceTest extends BaseServiceTest {
         verifyNoMoreInteractions(emailService);
     }
 
-    public void ShouldReturnTrueWhenApplicantSolicitorResponsibleToDraftOrder() {
+    public void shouldReturnTrueWhenApplicantSolicitorResponsibleToDraftOrder() {
         when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData()))
             .thenReturn(true);
         boolean result = notificationService.isApplicantSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData());
         assertTrue(result);
     }
 
-    public void ShouldReturnFalseWhenApplicantSolicitorResponsibleToDraftOrder() {
+    public void shouldReturnFalseWhenApplicantSolicitorResponsibleToDraftOrder() {
         when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData()))
             .thenReturn(false);
         boolean result = notificationService.isApplicantSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData());
         assertFalse(result);
     }
 
-    public void ShouldReturnTrueWhenRespondentSolicitorResponsibleToDraftOrder() {
+    public void shouldReturnTrueWhenRespondentSolicitorResponsibleToDraftOrder() {
         when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData()))
             .thenReturn(true);
         boolean result = notificationService.isRespondentSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData());
         assertTrue(result);
     }
 
-    public void ShouldReturnFalseWhenRespondentSolicitorResponsibleToDraftOrder() {
+    public void shouldReturnFalseWhenRespondentSolicitorResponsibleToDraftOrder() {
         when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData()))
             .thenReturn(false);
         boolean result = notificationService.isRespondentSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData());
