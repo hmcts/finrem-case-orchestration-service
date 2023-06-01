@@ -929,12 +929,8 @@ public class NotificationService {
             CaseRole.INTVR_SOLICITOR_4.getValue());
     }
 
-    public boolean wasIntervenerSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerSolEmail() != null
-            && caseDetails.getData().getIntervenerOneWrapper().getIntervener1SolEmail() == null
-            && caseDetails.getData().getIntervenerTwoWrapper().getIntervener2SolEmail() == null
-            && caseDetails.getData().getIntervenerThreeWrapper().getIntervener3SolEmail() == null
-            && caseDetails.getData().getIntervenerFourWrapper().getIntervener4SolEmail() == null;
+    public boolean wasIntervenerSolicitorEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerSolEmail() != null;
     }
 
     @Deprecated

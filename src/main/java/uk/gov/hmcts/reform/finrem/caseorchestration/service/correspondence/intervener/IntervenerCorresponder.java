@@ -66,7 +66,7 @@ public class IntervenerCorresponder extends FinremSingleLetterOrEmailAllPartiesC
     }
 
     protected boolean shouldSendIntervenerSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails);
+        return notificationService.wasIntervenerSolicitorEmailPopulated(caseDetails);
     }
 
     @Override

@@ -114,7 +114,7 @@ public class IntervenerRemovedCorresponderTest {
         finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_ONE);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).wasIntervenerSolicitorEmailPopulated(finremCaseDetails);
     }
 
     @Test
@@ -122,7 +122,7 @@ public class IntervenerRemovedCorresponderTest {
         finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_TWO);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).wasIntervenerSolicitorEmailPopulated(finremCaseDetails);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class IntervenerRemovedCorresponderTest {
         finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_THREE);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).wasIntervenerSolicitorEmailPopulated(finremCaseDetails);
     }
 
     @Test
@@ -138,7 +138,7 @@ public class IntervenerRemovedCorresponderTest {
         finremCaseDetails = getFinremCaseDetailsWhenRepresented(IntervenerType.INTERVENER_FOUR);
         intervenerRemovedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).wasIntervenerSolicitorDigitalAndEmailPopulated(finremCaseDetails);
+        verify(notificationService).wasIntervenerSolicitorEmailPopulated(finremCaseDetails);
     }
 
     private FinremCaseDetails getFinremCaseDetailsWhenRepresented(IntervenerType intervenerType) {

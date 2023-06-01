@@ -973,7 +973,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
         caseDetails.getData().setCurrentIntervenerChangeDetails((intervenerChangeDetails));
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(any(), any())).thenReturn(true);
-        assertTrue(notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails));
+        assertTrue(notificationService.wasIntervenerSolicitorEmailPopulated(caseDetails));
     }
 
     @Test
@@ -986,7 +986,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
         caseDetails.getData().setCurrentIntervenerChangeDetails((intervenerChangeDetails));
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(any(), any())).thenReturn(false);
-        assertFalse(notificationService.wasIntervenerSolicitorDigitalAndEmailPopulated(caseDetails));
+        assertFalse(notificationService.wasIntervenerSolicitorEmailPopulated(caseDetails));
     }
 
     @Test
