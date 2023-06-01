@@ -52,7 +52,7 @@ public class IntervenerService {
 
         if (intervenerWrapper != null) {
             if (intervenerWrapper.getIntervenerDateAdded() == null) {
-                log.info("Intervener1 date intervener added to case {}", caseId);
+                log.info("{} date intervener added to case {}", intervenerWrapper.getIntervenerType(), caseId);
                 intervenerWrapper.setIntervenerDateAdded(LocalDate.now());
             }
 
