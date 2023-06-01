@@ -931,21 +931,11 @@ public class NotificationService {
     }
 
     public boolean wasIntervenerSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        boolean isEmailPopulated = caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerSolEmail() != null;
-        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType() == IntervenerType.INTERVENER_ONE) {
-            return isEmailPopulated && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-                CaseRole.INTVR_SOLICITOR_1.getValue());
-        } else if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType() == IntervenerType.INTERVENER_TWO) {
-            return isEmailPopulated && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-                CaseRole.INTVR_SOLICITOR_2.getValue());
-        } else if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType() == IntervenerType.INTERVENER_THREE) {
-            return isEmailPopulated && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-                CaseRole.INTVR_SOLICITOR_3.getValue());
-        } else if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType() == IntervenerType.INTERVENER_FOUR) {
-            return isEmailPopulated && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-                CaseRole.INTVR_SOLICITOR_4.getValue());
-        }
-        return false;
+        return caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerSolEmail() != null
+            && caseDetails.getData().getIntervenerOneWrapper().getIntervener1SolEmail() == null
+            && caseDetails.getData().getIntervenerTwoWrapper().getIntervener2SolEmail() == null
+            && caseDetails.getData().getIntervenerThreeWrapper().getIntervener3SolEmail() == null
+            && caseDetails.getData().getIntervenerFourWrapper().getIntervener4SolEmail() == null;
     }
 
     @Deprecated
