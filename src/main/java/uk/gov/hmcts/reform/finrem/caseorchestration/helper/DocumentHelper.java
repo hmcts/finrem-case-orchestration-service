@@ -492,7 +492,6 @@ public class DocumentHelper {
     }
 
     private boolean addressLineOneAndPostCodeAreBothNotEmpty(Address address) {
-        log.info("The address is {}, the first line is {} and the postcode is {}", address, address.getAddressLine1(), address.getPostCode());
         return ObjectUtils.isNotEmpty(address)
             && StringUtils.isNotEmpty(address.getAddressLine1())
             && StringUtils.isNotEmpty(address.getPostCode());
