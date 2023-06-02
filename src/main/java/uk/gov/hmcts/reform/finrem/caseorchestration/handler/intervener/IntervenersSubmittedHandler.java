@@ -33,7 +33,7 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
     public IntervenersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                        IntervenerService service, IntervenerAddedCorresponder intervenerAddedCorresponder) {
         super(finremCaseDetailsMapper);
-        this.service =  service;
+        this.service = service;
         this.intervenerAddedCorresponder = intervenerAddedCorresponder;
     }
 
@@ -56,10 +56,14 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
 
         switch (selectedOperationCode) {
-            case ADD_INTERVENER_ONE_CODE -> caseData.setCurrentIntervenerChangeDetails(service.setIntervenerOneAddedChangeDetails(caseData));
-            case ADD_INTERVENER_TWO_CODE -> caseData.setCurrentIntervenerChangeDetails(service.setIntervenerTwoAddedChangeDetails(caseData));
-            case ADD_INTERVENER_THREE_CODE -> caseData.setCurrentIntervenerChangeDetails(service.setIntervenerThreeAddedChangeDetails(caseData));
-            case ADD_INTERVENER_FOUR_CODE -> caseData.setCurrentIntervenerChangeDetails(service.setIntervenerFourAddedChangeDetails(caseData));
+            case ADD_INTERVENER_ONE_CODE ->
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerOneWrapper()));
+            case ADD_INTERVENER_TWO_CODE ->
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerTwoWrapper()));
+            case ADD_INTERVENER_THREE_CODE ->
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerThreeWrapper()));
+            case ADD_INTERVENER_FOUR_CODE ->
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerFourWrapper()));
             case DEL_INTERVENER_ONE_CODE -> caseData.setCurrentIntervenerChangeDetails(service.setIntervenerOneRemovedChangeDetails());
             case DEL_INTERVENER_TWO_CODE -> caseData.setCurrentIntervenerChangeDetails(service.setIntervenerTwoRemovedChangeDetails());
             case DEL_INTERVENER_THREE_CODE -> caseData.setCurrentIntervenerChangeDetails(service.setIntervenerThreeRemovedChangeDetails());
@@ -78,7 +82,6 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
         }
 
     }
-
 
 
 }

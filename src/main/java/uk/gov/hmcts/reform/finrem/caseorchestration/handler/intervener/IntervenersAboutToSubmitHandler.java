@@ -29,7 +29,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                            IntervenerService service) {
         super(finremCaseDetailsMapper);
-        this.service =  service;
+        this.service = service;
     }
 
     @Override
@@ -38,7 +38,6 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             && CaseType.CONTESTED.equals(caseType)
             && (EventType.MANAGE_INTERVENERS.equals(eventType));
     }
-
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
@@ -51,23 +50,21 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
         log.info("selected operation choice {} for intervener {} for case id: {}",
             selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
-
         switch (selectedOperationCode) {
-            case ADD_INTERVENER_ONE_CODE -> service.updateIntervenerOneDetails(callbackRequest);
-            case ADD_INTERVENER_TWO_CODE -> service.updateIntervenerTwoDetails(callbackRequest);
-            case ADD_INTERVENER_THREE_CODE -> service.updateIntervenerThreeDetails(callbackRequest);
-            case ADD_INTERVENER_FOUR_CODE -> service.updateIntervenerFourDetails(callbackRequest);
-            case DEL_INTERVENER_ONE_CODE -> service.removeIntervenerOneDetails(caseData, caseId);
-            case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerTwoDetails(caseData, caseId);
-            case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerThreeDetails(caseData, caseId);
-            case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerFourDetails(caseData, caseId);
+            case ADD_INTERVENER_ONE_CODE -> service.updateIntervenerDetails(caseData.getIntervenerOneWrapper(), callbackRequest);
+            case ADD_INTERVENER_TWO_CODE -> service.updateIntervenerDetails(caseData.getIntervenerTwoWrapper(), callbackRequest);
+            case ADD_INTERVENER_THREE_CODE -> service.updateIntervenerDetails(caseData.getIntervenerThreeWrapper(), callbackRequest);
+            case ADD_INTERVENER_FOUR_CODE -> service.updateIntervenerDetails(caseData.getIntervenerFourWrapper(), callbackRequest);
+            case DEL_INTERVENER_ONE_CODE -> service.removeIntervenerDetails(caseData.getIntervenerOneWrapper(), caseData, caseId);
+            case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerDetails(caseData.getIntervenerTwoWrapper(), caseData, caseId);
+            case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerDetails(caseData.getIntervenerThreeWrapper(), caseData, caseId);
+            case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerDetails(caseData.getIntervenerFourWrapper(), caseData, caseId);
             default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
     }
-
 
 
 }

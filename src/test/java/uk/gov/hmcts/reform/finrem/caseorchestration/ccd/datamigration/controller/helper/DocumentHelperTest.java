@@ -452,8 +452,8 @@ public class DocumentHelperTest {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
-            .intervener1Name("Name")
-            .intervener1Address(address).build();
+            .intervenerName("Name")
+            .intervenerAddress(address).build();
         caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
@@ -468,8 +468,8 @@ public class DocumentHelperTest {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
         IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder()
-            .intervener2Name("Name")
-            .intervener2Address(address).build();
+            .intervenerName("Name")
+            .intervenerAddress(address).build();
         caseDetails.getData().setIntervenerTwoWrapper(intervenerTwoWrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
@@ -484,8 +484,8 @@ public class DocumentHelperTest {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
         IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder()
-            .intervener3Name("Name")
-            .intervener3Address(address).build();
+            .intervenerName("Name")
+            .intervenerAddress(address).build();
         caseDetails.getData().setIntervenerThreeWrapper(intervenerThreeWrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
@@ -500,8 +500,8 @@ public class DocumentHelperTest {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
         IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder()
-            .intervener4Name("Name")
-            .intervener4Address(address).build();
+            .intervenerName("Name")
+            .intervenerAddress(address).build();
         caseDetails.getData().setIntervenerFourWrapper(intervenerFourWrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
