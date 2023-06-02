@@ -15,16 +15,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Slf4j
 @Component
-public class IntervenerAddedCorresponder extends IntervenerCorresponder {
+public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
 
-    public IntervenerAddedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
-                                       IntervenerDocumentService intervenerDocumentService) {
+    public IntervenerRemovedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
+                                         IntervenerDocumentService intervenerDocumentService) {
         super(notificationService, bulkPrintService, intervenerDocumentService);
 
     }
 
     @Override
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
+
         IntervenerChangeDetails intervenerChangeDetails = caseDetails.getData().getCurrentIntervenerChangeDetails();
         log.info("intervener type: {}", intervenerChangeDetails.getIntervenerType());
         sendApplicantCorrespondence(caseDetails, authToken);
@@ -41,6 +42,7 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
     }
 
     protected void sendIntervenerCorrespondence(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails, String auth) {
+
         if (shouldSendIntervenerSolicitorEmail(intervenerWrapper)) {
             log.info("Sending email correspondence to {} for case: {}", intervenerWrapper.getIntervenerType(), caseDetails.getId());
             String recipientName = intervenerWrapper.getIntervenerSolName();
@@ -51,6 +53,8 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
         } else {
             log.info("Sending letter correspondence to {} for case: {}", intervenerWrapper.getIntervenerType(), caseDetails.getId());
             String recipient = intervenerWrapper.getPaperNotificationRecipient().toString();
+            caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(
+                intervenerWrapper);
 
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, auth,

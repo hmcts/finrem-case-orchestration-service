@@ -872,7 +872,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_1.getValue())).thenReturn(true);
-        assertTrue(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerOneWrapper(), caseDetails));
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOneWrapper()));
     }
 
     @Test
@@ -883,7 +883,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_1.getValue())).thenReturn(false);
-        assertFalse(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerOneWrapper(), caseDetails));
+        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOneWrapper()));
     }
 
     @Test
@@ -896,7 +896,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_2.getValue())).thenReturn(true);
-        assertTrue(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerTwoWrapper(), caseDetails));
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerTwoWrapper()));
     }
 
     @Test
@@ -907,7 +907,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_2.getValue())).thenReturn(false);
-        assertFalse(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerTwoWrapper(), caseDetails));
+        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerTwoWrapper()));
     }
 
     @Test
@@ -920,7 +920,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_3.getValue())).thenReturn(true);
-        assertTrue(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerThreeWrapper(), caseDetails));
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThreeWrapper()));
     }
 
     @Test
@@ -931,7 +931,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_3.getValue())).thenReturn(false);
-        assertFalse(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerThreeWrapper(), caseDetails));
+        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThreeWrapper()));
     }
 
     @Test
@@ -944,7 +944,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_4.getValue())).thenReturn(true);
-        assertTrue(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerFourWrapper(), caseDetails));
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerFourWrapper()));
     }
 
     @Test
@@ -955,7 +955,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_4.getValue())).thenReturn(false);
-        assertFalse(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerFourWrapper(), caseDetails));
+        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerFourWrapper()));
     }
 
     @Test

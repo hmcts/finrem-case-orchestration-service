@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -56,13 +57,13 @@ public class IntervenerDocumentServiceTest {
     private GenericDocumentService genericDocumentService;
     @Mock
     private DocumentHelper documentHelper;
-
+    @Mock
+    private CourtDetailsMapper courtDetailsMapper;
     private CaseDetails caseDetails;
     private FinremCaseDetails finremCaseDetails;
     private FinremCaseData finremCaseData;
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
-
     @Captor
     ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor;
 
@@ -70,7 +71,7 @@ public class IntervenerDocumentServiceTest {
     @Before
     public void setUp() {
         intervenerDocumentService = new IntervenerDocumentService(genericDocumentService,
-            documentConfiguration, documentHelper, objectMapper);
+            documentConfiguration, documentHelper, objectMapper, courtDetailsMapper);
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);

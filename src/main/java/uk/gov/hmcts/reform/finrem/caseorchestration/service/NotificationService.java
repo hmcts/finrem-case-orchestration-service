@@ -905,10 +905,12 @@ public class NotificationService {
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
 
-    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
-        return intervenerWrapper.isIntervenerSolicitorPopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
+    public boolean isIntervenerSolicitorEmailPopulated(IntervenerWrapper intervenerWrapper) {
+        return intervenerWrapper.isIntervenerSolicitorPopulated();
+    }
+
+    public boolean wasIntervenerSolicitorEmailPopulated(IntervenerWrapper intervenerWrapper) {
+        return intervenerWrapper.isIntervenerSolicitorPopulated();
     }
 
     @Deprecated
