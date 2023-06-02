@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
 import java.time.LocalDateTime;
@@ -189,7 +189,7 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     public void shouldCreateNotificationRequestForIntervenerNotification() {
         Organisation org = Organisation.builder().organisationName("test org").organisationID("1").build();
         OrganisationPolicy intervenerOrg = OrganisationPolicy.builder().organisation(org).build();
-        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+        IntervenerOneWrapper intervenerDetails = IntervenerOneWrapper.builder()
             .intervenerName("intervener name")
             .intervenerOrganisation(intervenerOrg)
             .intervenerSolicitorReference(TEST_SOLICITOR_REFERENCE).build();

@@ -455,20 +455,20 @@ public class DocumentHelper {
 
         if (recipient == INTERVENER_ONE && !caseData.isIntervenerOneRepresentedByASolicitor()) {
             log.info("Intervener One is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerOneWrapper().getIntervener1Name();
-            addressToSendTo = caseData.getIntervenerOneWrapper().getIntervener1Address();
+            addresseeName = caseData.getIntervenerOneWrapper().getIntervenerName();
+            addressToSendTo = caseData.getIntervenerOneWrapper().getIntervenerAddress();
         } else if (recipient == INTERVENER_TWO && !caseData.isIntervenerTwoRepresentedByASolicitor()) {
             log.info("Intervener Two is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerTwoWrapper().getIntervener2Name();
-            addressToSendTo = caseData.getIntervenerTwoWrapper().getIntervener2Address();
+            addresseeName = caseData.getIntervenerTwoWrapper().getIntervenerName();
+            addressToSendTo = caseData.getIntervenerTwoWrapper().getIntervenerAddress();
         } else if (recipient == INTERVENER_THREE && !caseData.isIntervenerThreeRepresentedByASolicitor()) {
             log.info("Intervener Three is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerThreeWrapper().getIntervener3Name();
-            addressToSendTo = caseData.getIntervenerThreeWrapper().getIntervener3Address();
+            addresseeName = caseData.getIntervenerThreeWrapper().getIntervenerName();
+            addressToSendTo = caseData.getIntervenerThreeWrapper().getIntervenerAddress();
         } else if (recipient == INTERVENER_FOUR && !caseData.isIntervenerFourRepresentedByASolicitor()) {
             log.info("Intervener Four is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerFourWrapper().getIntervener4Name();
-            addressToSendTo = caseData.getIntervenerFourWrapper().getIntervener4Address();
+            addresseeName = caseData.getIntervenerFourWrapper().getIntervenerName();
+            addressToSendTo = caseData.getIntervenerFourWrapper().getIntervenerAddress();
         } else {
             log.info("{} is not represented by a solicitor", recipient);
             addresseeName = recipient == APPLICANT
