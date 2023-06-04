@@ -59,32 +59,4 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
     protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper) {
         return notificationService.isIntervenerSolicitorEmailPopulated(intervenerWrapper);
     }
-
-    @Override
-    protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-        IntervenerDetails intervenerDetails = caseDetails.getData()
-            .getCurrentIntervenerChangeDetails().getIntervenerDetails();
-        String recipientName = caseDetails.getData().getAppSolicitorName();
-        String recipientEmail = caseDetails.getData().getAppSolicitorEmail();
-        String referenceNumber = caseDetails.getData().getContactDetailsWrapper().getSolicitorReference();
-        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
-            notificationService.sendIntervenerSolicitorAddedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
-        } else {
-            notificationService.sendIntervenerAddedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
-        }
-    }
-
-    @Override
-    protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
-        IntervenerDetails intervenerDetails = caseDetails.getData()
-            .getCurrentIntervenerChangeDetails().getIntervenerDetails();
-        String recipientName = caseDetails.getData().getRespondentSolicitorName();
-        String recipientEmail = caseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorEmail();
-        String referenceNumber = caseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorReference();
-        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
-            notificationService.sendIntervenerSolicitorAddedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
-        } else {
-            notificationService.sendIntervenerAddedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
-        }
-    }
 }
