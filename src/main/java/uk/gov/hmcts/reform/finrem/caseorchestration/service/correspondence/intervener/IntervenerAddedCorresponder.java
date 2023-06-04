@@ -40,24 +40,6 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
         }
     }
 
-    protected void sendIntervenerCorrespondence(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails, String auth) {
-        if (shouldSendIntervenerSolicitorEmail(intervenerWrapper)) {
-            log.info("Sending email correspondence to {} for case: {}", intervenerWrapper.getIntervenerType(), caseDetails.getId());
-            String recipientName = intervenerWrapper.getIntervenerSolName();
-            String recipientEmail = intervenerWrapper.getIntervenerSolEmail();
-            String referenceNumber = intervenerWrapper.getIntervenerSolicitorReference();
-            notificationService.sendIntervenerSolicitorAddedEmail(caseDetails, intervenerWrapper,
-                recipientName, recipientEmail, referenceNumber);
-        } else {
-            log.info("Sending letter correspondence to {} for case: {}", intervenerWrapper.getIntervenerType(), caseDetails.getId());
-            String recipient = intervenerWrapper.getPaperNotificationRecipient().toString();
-
-            bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, auth,
-                    intervenerWrapper.getPaperNotificationRecipient()), caseDetails, recipient, auth);
-        }
-    }
-
     public CaseDocument getAppRepDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                                  DocumentHelper.PaperNotificationRecipient recipient) {
         if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
@@ -73,6 +55,7 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
         return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken, recipient);
     }
 
+    @Override
     protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper) {
         return notificationService.isIntervenerSolicitorEmailPopulated(intervenerWrapper);
     }
