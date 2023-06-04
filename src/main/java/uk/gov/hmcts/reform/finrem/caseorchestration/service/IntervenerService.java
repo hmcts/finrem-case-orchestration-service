@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.time.LocalDate;
 
@@ -143,45 +142,21 @@ public class IntervenerService {
 
 
     public IntervenerChangeDetails setIntervenerAddedChangeDetails(IntervenerWrapper intervenerWrapper) {
-        IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails();
-        intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
-        intervenerOneChangeDetails.setIntervenerType(intervenerWrapper.getIntervenerType());
-        intervenerOneChangeDetails.setIntervenerDetails(
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerChangeDetails.setIntervenerType(intervenerWrapper.getIntervenerType());
+        intervenerChangeDetails.setIntervenerDetails(
             intervenerWrapper);
 
-        return intervenerOneChangeDetails;
+        return intervenerChangeDetails;
     }
 
     public IntervenerChangeDetails setIntervenerRemovedChangeDetails(IntervenerWrapper intervenerWrapper) {
-        IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails();
-        intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        intervenerOneChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerOneChangeDetails.setIntervenerDetails(
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        intervenerChangeDetails.setIntervenerType(intervenerWrapper.getIntervenerType());
+        intervenerChangeDetails.setIntervenerDetails(
             intervenerWrapper);
-        return intervenerOneChangeDetails;
-    }
-
-    public IntervenerChangeDetails setIntervenerTwoRemovedChangeDetails() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
-
-        return intervenerChangeDetails;
-    }
-
-    public IntervenerChangeDetails setIntervenerThreeRemovedChangeDetails() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
-
-        return intervenerChangeDetails;
-    }
-
-    public IntervenerChangeDetails setIntervenerFourRemovedChangeDetails() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
-        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
-        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
-
         return intervenerChangeDetails;
     }
 

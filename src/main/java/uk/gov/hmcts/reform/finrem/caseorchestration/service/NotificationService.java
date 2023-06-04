@@ -909,8 +909,8 @@ public class NotificationService {
         return intervenerWrapper.isIntervenerSolicitorPopulated();
     }
 
-    public boolean wasIntervenerSolicitorEmailPopulated(IntervenerWrapper intervenerWrapper) {
-        return intervenerWrapper.isIntervenerSolicitorPopulated();
+    public boolean wasIntervenerSolicitorEmailPopulated(IntervenerDetails intervenerDetails) {
+        return intervenerDetails.getIntervenerSolEmail() != null;
     }
 
     @Deprecated
