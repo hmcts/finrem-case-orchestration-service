@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
@@ -82,6 +83,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
     ConsentOrderNotApprovedSentCorresponder.class,
     ContestedIntermHearingCorresponder.class,
     ContestedDraftOrderCorresponder.class,
+    FinremCaseDetailsMapper.class,
     DocumentHelper.class})
 public class NotificationsControllerTest extends BaseControllerTest {
 
@@ -121,6 +123,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private ContestedIntermHearingCorresponder contestedIntermHearingCorresponder;
     @MockBean
     private ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
+    @MockBean
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
