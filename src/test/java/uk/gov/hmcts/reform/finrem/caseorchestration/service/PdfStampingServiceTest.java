@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.StampDocumentException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -34,14 +33,16 @@ public class PdfStampingServiceTest {
     @Mock private EvidenceManagementUploadService evidenceManagementUploadServiceService;
     @Mock private EvidenceManagementDownloadService evidenceManagementDownloadService;
 
+    private String caseId = "123123123";
+
     @Test(expected = StampDocumentException.class)
     public void shouldThrowExceptionWhenDocumentIsNotPdf() throws Exception {
         Document document = document();
         byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_IMAGE);
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl()))
-            .thenReturn(ResponseEntity.ok(imageAsBytes));
+        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
+            .thenReturn(imageAsBytes);
 
-        service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP);
+        service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP, caseId);
     }
 
     @Test
@@ -49,13 +50,13 @@ public class PdfStampingServiceTest {
         Document document = document();
         byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_PDF);
 
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl()))
-            .thenReturn(ResponseEntity.ok(imageAsBytes));
+        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
+            .thenReturn(imageAsBytes);
 
-        when(evidenceManagementUploadServiceService.upload(any(), anyString()))
+        when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", true, StampType.FAMILY_COURT_STAMP);
+        Document stampDocument = service.stampDocument(document, "auth", true, StampType.FAMILY_COURT_STAMP, caseId);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));
@@ -68,13 +69,13 @@ public class PdfStampingServiceTest {
         Document document = document();
         byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_PDF);
 
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl()))
-            .thenReturn(ResponseEntity.ok(imageAsBytes));
+        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
+            .thenReturn(imageAsBytes);
 
-        when(evidenceManagementUploadServiceService.upload(any(), anyString()))
+        when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP);
+        Document stampDocument = service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP, caseId);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));
@@ -87,13 +88,13 @@ public class PdfStampingServiceTest {
         Document document = document();
         byte[] imageAsBytes = service.imageAsBytes(HIGH_COURT_SEAL_PDF);
 
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl()))
-            .thenReturn(ResponseEntity.ok(imageAsBytes));
+        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
+            .thenReturn(imageAsBytes);
 
-        when(evidenceManagementUploadServiceService.upload(any(), anyString()))
+        when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", false, StampType.HIGH_COURT_STAMP);
+        Document stampDocument = service.stampDocument(document, "auth", false, StampType.HIGH_COURT_STAMP, caseId);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));

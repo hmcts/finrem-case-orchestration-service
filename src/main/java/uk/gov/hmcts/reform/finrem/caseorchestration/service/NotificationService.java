@@ -4,16 +4,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.io.IOException;
@@ -44,6 +52,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
@@ -56,6 +65,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
@@ -69,6 +79,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_SOLICITOR_ADDED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
@@ -88,6 +100,7 @@ public class NotificationService {
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
     private final CaseDataService caseDataService;
     private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
+    private final EvidenceManagementDownloadService evidenceManagementDownloadService;
 
     @Deprecated
     public void sendConsentedHWFSuccessfulConfirmationEmail(CaseDetails caseDetails) {
@@ -366,12 +379,34 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL);
     }
 
-    public void sendConsentGeneralEmail(FinremCaseDetails caseDetails) {
+    public void sendConsentGeneralEmail(FinremCaseDetails caseDetails, String auth) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailRecipient());
+        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
+        final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest, auth);
         log.info("Received request for notification email for consented general email Notification request : {}",
             notificationRequest);
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL);
+        final EmailTemplateNames templateName = (hasAttachment) ? FR_CONSENT_GENERAL_EMAIL_ATTACHMENT : FR_CONSENT_GENERAL_EMAIL;
+        emailService.sendConfirmationEmail(notificationRequest, templateName);
+
+    }
+
+    private boolean downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails,
+                                                         NotificationRequest notificationRequest,
+                                                         String auth) {
+        CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
+        if (caseDocument != null) {
+            ResponseEntity<Resource> response = evidenceManagementDownloadService.downloadInResponseEntity(caseDocument.getDocumentBinaryUrl(),
+                auth);
+            if (response.getStatusCode() != HttpStatus.OK) {
+                log.error("Download failed for url {}, filename {} and Case ID: {}", caseDocument.getDocumentBinaryUrl(),
+                    caseDocument.getDocumentFilename(), caseDetails.getId());
+                throw new RuntimeException(String.format("Unexpected error DM store: %s ", response.getStatusCode()));
+            }
+            ByteArrayResource resource = (ByteArrayResource) response.getBody();
+            notificationRequest.setDocumentContents((resource != null) ? resource.getByteArray() : new byte[0]);
+            return true;
+        }
+        return false;
     }
 
     @Deprecated
@@ -384,12 +419,14 @@ public class NotificationService {
     }
 
 
-    public void sendContestedGeneralEmail(FinremCaseDetails caseDetails) {
+    public void sendContestedGeneralEmail(FinremCaseDetails caseDetails, String auth) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().getGeneralEmailRecipient()));
+        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
+        final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest, auth);
         log.info("Received request for notification email for contested general email Notification request : {}",
             notificationRequest);
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL);
+        final EmailTemplateNames templateName = (hasAttachment) ? FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT : FR_CONTESTED_GENERAL_EMAIL;
+        emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 
     @Deprecated
@@ -807,6 +844,24 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_BARRISTER_ACCESS_REMOVED);
     }
 
+    public void sendIntervenerAddedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
+                                         String recipientName, String recipientEmail, String referenceNumber) {
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(
+            caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
+        log.info("Received request for notification email for Intervener Added event. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_INTERVENER_ADDED_EMAIL);
+    }
+
+    public void sendIntervenerSolicitorAddedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
+                                                  String recipientName, String recipientEmail, String referenceNumber) {
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(
+            caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
+        log.info("Received request for notification email for Intervener Solicitor Added event. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_INTERVENER_SOLICITOR_ADDED_EMAIL);
+    }
+
     private void sendNotificationEmail(NotificationRequest notificationRequest, EmailTemplateNames emailTemplateName) {
         emailService.sendConfirmationEmail(notificationRequest, emailTemplateName);
     }
@@ -830,7 +885,6 @@ public class NotificationService {
             && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
-    @Deprecated
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
@@ -841,7 +895,6 @@ public class NotificationService {
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
     }
 
-    @Deprecated
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
@@ -850,6 +903,12 @@ public class NotificationService {
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isRespondentSolicitorPopulated()
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        return intervenerWrapper.isIntervenerSolicitorPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
     }
 
     @Deprecated
@@ -863,7 +922,6 @@ public class NotificationService {
             && (!isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
             || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }
-
 
     public boolean shouldPrintForApplicantSolicitor(CaseDetails caseDetails) {
         return caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())

@@ -89,7 +89,7 @@ public class ApprovedOrderNoticeOfHearingService {
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, mapOfLetterDetails,
             documentConfiguration.getAdditionalHearingTemplate(),
-            documentConfiguration.getAdditionalHearingFileName());
+            documentConfiguration.getAdditionalHearingFileName(), caseDetails.getId().toString());
     }
 
     private Map<String, Object> getCourtDetails(AdditionalHearingDirectionsCollection latestAdditionalHearingDirection) {

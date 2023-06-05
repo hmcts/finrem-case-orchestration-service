@@ -158,7 +158,9 @@ public class AdditionalHearingDocumentService {
     private void populateLatestDraftHearingOrderWithLatestEntry(CaseDetails caseDetails,
                                                                 List<HearingOrderCollectionData> hearingOrderCollectionData,
                                                                 String authorisationToken) {
-        hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
+        String caseId = caseDetails.getId().toString();
+        hearingOrderCollectionData.forEach(element ->
+            convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken, caseId));
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
         caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
             hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
@@ -173,7 +175,9 @@ public class AdditionalHearingDocumentService {
         if (hearingOrderCollectionData != null
             && !hearingOrderCollectionData.isEmpty()
             && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments() != null) {
-            hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
+            String caseId = caseDetails.getId().toString();
+            hearingOrderCollectionData.forEach(element ->
+                convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken, caseId));
             caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
             caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
                 hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
@@ -279,14 +283,14 @@ public class AdditionalHearingDocumentService {
     }
 
     private void convertHearingOrderCollectionDocumentsToPdf(HearingOrderCollectionData element,
-                                                             String authorisationToken) {
+                                                             String authorisationToken, String caseId) {
         CaseDocument pdfApprovedOrder = convertToPdf(element.getHearingOrderDocuments().getUploadDraftDocument(),
-            authorisationToken);
+            authorisationToken, caseId);
         element.getHearingOrderDocuments().setUploadDraftDocument(pdfApprovedOrder);
     }
 
-    public CaseDocument convertToPdf(CaseDocument document, String authorisationToken) {
-        return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken);
+    public CaseDocument convertToPdf(CaseDocument document, String authorisationToken, String caseId) {
+        return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
     }
 
     private CaseDocument  generateAdditionalHearingDocument(Map<String, Object> placeholdersMap, String authorisationToken) {

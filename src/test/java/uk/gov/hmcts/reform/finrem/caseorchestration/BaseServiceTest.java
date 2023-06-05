@@ -92,6 +92,8 @@ public abstract class BaseServiceTest extends BaseTest {
 
     private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
 
+    protected String caseId = "123123123";
+
     protected String formattedNowDate = DateTimeFormatter.ofPattern(CCDConfigConstant.LETTER_DATE_FORMAT).format(LocalDate.now());
 
     protected CaseDetails buildCaseDetails() {

@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseExcep
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -21,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Objects;
 
 import static org.hamcrest.Matchers.is;
@@ -66,6 +66,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @MockBean
     private NotificationService notificationService;
     @MockBean
+    private GenerateCoverSheetService coverSheetService;
+    @MockBean
     private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
 
@@ -79,7 +81,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         }
 
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class), isA(List.class), isA(List.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
@@ -149,15 +151,58 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         when(hearingDocumentService.alreadyHadFirstHearing(any(CaseDetails.class))).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantAddressConfidential(any())).thenReturn(false);
+        when(caseDataService.isRespondentAddressConfidential(any())).thenReturn(false);
+        when(coverSheetService.generateApplicantCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
+        when(coverSheetService.generateRespondentCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetApp.document_url", is(DOC_URL)))
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes.document_url", is(DOC_URL)));
 
         verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
-        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any(CaseDetails.class));
+        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(coverSheetService).generateApplicantCoverSheet(any(CaseDetails.class), any());
+        verify(coverSheetService).generateRespondentCoverSheet(any(CaseDetails.class), any());
+    }
+
+    @Test
+    public void generateAdditionalHearingDocumentAndConfidentialCoversheet() throws Exception {
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/bulkprint/bulk-print-additional-hearing-confidential.json")).toURI()));
+
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantAddressConfidential(any())).thenReturn(true);
+        when(caseDataService.isRespondentAddressConfidential(any())).thenReturn(true);
+        when(coverSheetService.generateApplicantCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
+        when(coverSheetService.generateRespondentCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
+
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetAppConfidential.document_url", is(DOC_URL)))
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetResConfidential.document_url", is(DOC_URL)));
+
+
+
+        verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
+
+        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(coverSheetService).generateApplicantCoverSheet(any(CaseDetails.class), any());
+        verify(coverSheetService).generateRespondentCoverSheet(any(CaseDetails.class), any());
     }
 
     @Test
@@ -214,7 +259,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void shouldThrowWarningsWhenNotFastTrackDecision() throws Exception {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class), isA(List.class), isA(List.class)))
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
             .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
@@ -232,7 +277,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void shouldThrowWarningsWhenFastTrackDecision() throws Exception {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class), isA(List.class), isA(List.class)))
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
             .thenReturn(ImmutableList.of("Date of the Fast Track hearing must be between 6 and 10 weeks."));
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
@@ -250,7 +295,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullyValidate() throws Exception {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class), isA(List.class), isA(List.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener;
 
 
 import org.junit.Test;
@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -198,7 +199,7 @@ public class IntervenersMidHandlerTest {
     public void givenContestedCase_whenMidEventCalled_thenPrepareOptionListForIntvOneBasedOnIntervenersList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
-            .builder().intervener1Name("One name").intervener1Email("test@test.com").build();
+            .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerOneWrapper(oneWrapper);
         finremCallbackRequest.getCaseDetailsBefore().getData().setIntervenerOneWrapper(oneWrapper);
@@ -227,7 +228,7 @@ public class IntervenersMidHandlerTest {
     public void givenContestedCase_whenMidEventCalled_thenPrepareOptionListForIntvTwoBasedOnIntervenersList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
-            .builder().intervener2Name("Two name").intervener2Email("test@test.com").build();
+            .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerTwoWrapper(twoWrapper);
         finremCallbackRequest.getCaseDetailsBefore().getData().setIntervenerTwoWrapper(twoWrapper);
@@ -252,7 +253,7 @@ public class IntervenersMidHandlerTest {
     public void givenContestedCase_whenMidEventCalled_thenPrepareOptionListForIntvThreeBasedOnIntervenersList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
-            .builder().intervener3Name("Three name").intervener3Email("test@test.com").build();
+            .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerThreeWrapper(threeWrapper);
         finremCallbackRequest.getCaseDetailsBefore().getData().setIntervenerThreeWrapper(threeWrapper);
@@ -276,7 +277,7 @@ public class IntervenersMidHandlerTest {
     public void givenContestedCase_whenMidEventCalled_thenPrepareOptionListForIntvFourBasedOnIntervenersList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
-            .builder().intervener4Name("Four name").intervener4Email("test@test.com").build();
+            .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerFourWrapper(fourWrapper);
         finremCallbackRequest.getCaseDetailsBefore().getData().setIntervenerFourWrapper(fourWrapper);
@@ -300,7 +301,7 @@ public class IntervenersMidHandlerTest {
     public void givenContestedCase_whenMidEventCalledWithInvalidOption_thenHandlerThrowError() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
-            .builder().intervener4Name("Four name").intervener4Email("test@test.com").build();
+            .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerFourWrapper(fourWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);

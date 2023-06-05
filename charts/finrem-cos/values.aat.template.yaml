@@ -2,3 +2,6 @@
 java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
+  environment:
+    FEATURE_SEND_LETTER_RECIPIENT_CHECK: false
+    SECURE_DOC_ENABLED: true

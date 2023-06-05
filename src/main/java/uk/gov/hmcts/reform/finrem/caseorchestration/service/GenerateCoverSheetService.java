@@ -109,7 +109,8 @@ public class GenerateCoverSheetService {
             .getLetterDetailsAsMap(caseDetails, recipient, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, placeholdersMap,
-            documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName());
+            documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName(),
+            caseDetails.getId().toString());
     }
 
     @Deprecated

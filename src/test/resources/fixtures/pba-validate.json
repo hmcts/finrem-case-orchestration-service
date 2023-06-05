@@ -4,7 +4,7 @@
     "state": "applicationIssued"
   },
   "case_details": {
-    "id": "123",
+    "id": "1234",
     "jurisdiction": "DIVORCE",
     "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",

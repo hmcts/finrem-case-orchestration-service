@@ -157,8 +157,10 @@ public class InterimHearingService {
         String isDocUploaded = nullToEmpty(interimData.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
         if ("Yes".equalsIgnoreCase(isDocUploaded)) {
             log.warn("Additional uploaded interim document found for printing for case id {}", caseId);
-            CaseDocument caseDocument = documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
-            CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+            CaseDocument caseDocument =
+                documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
+            CaseDocument additionalUploadedDocuments =
+                genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
             documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
         }
     }

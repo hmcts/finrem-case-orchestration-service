@@ -62,6 +62,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
@@ -448,6 +452,41 @@ public class DocumentHelper {
         return caseDetails;
     }
 
+    public CaseDetails prepareIntervenerLetterTemplateData(FinremCaseDetails caseDetails, PaperNotificationRecipient recipient) {
+        FinremCaseData caseData = caseDetails.getData();
+
+        String reference = "";
+        String addresseeName;
+        Address addressToSendTo;
+
+        if (recipient == INTERVENER_ONE && !caseData.isIntervenerOneRepresentedByASolicitor()) {
+            log.info("Intervener One is not represented by a solicitor");
+            addresseeName = caseData.getIntervenerOneWrapper().getIntervenerName();
+            addressToSendTo = caseData.getIntervenerOneWrapper().getIntervenerAddress();
+        } else if (recipient == INTERVENER_TWO && !caseData.isIntervenerTwoRepresentedByASolicitor()) {
+            log.info("Intervener Two is not represented by a solicitor");
+            addresseeName = caseData.getIntervenerTwoWrapper().getIntervenerName();
+            addressToSendTo = caseData.getIntervenerTwoWrapper().getIntervenerAddress();
+        } else if (recipient == INTERVENER_THREE && !caseData.isIntervenerThreeRepresentedByASolicitor()) {
+            log.info("Intervener Three is not represented by a solicitor");
+            addresseeName = caseData.getIntervenerThreeWrapper().getIntervenerName();
+            addressToSendTo = caseData.getIntervenerThreeWrapper().getIntervenerAddress();
+        } else if (recipient == INTERVENER_FOUR && !caseData.isIntervenerFourRepresentedByASolicitor()) {
+            log.info("Intervener Four is not represented by a solicitor");
+            addresseeName = caseData.getIntervenerFourWrapper().getIntervenerName();
+            addressToSendTo = caseData.getIntervenerFourWrapper().getIntervenerAddress();
+        } else {
+            log.info("{} is not represented by a solicitor", recipient);
+            addresseeName = recipient == APPLICANT
+                ? caseDetails.getData().getFullApplicantName()
+                : caseDetails.getData().getRespondentFullName();
+            addressToSendTo = recipient == APPLICANT ? caseData.getContactDetailsWrapper().getApplicantAddress() :
+                caseData.getContactDetailsWrapper().getRespondentAddress();
+        }
+
+        return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
+    }
+
     private boolean addressLineOneAndPostCodeAreBothNotEmpty(Address address) {
         return ObjectUtils.isNotEmpty(address)
             && StringUtils.isNotEmpty(address.getAddressLine1())
@@ -465,7 +504,7 @@ public class DocumentHelper {
 
     public String formatAddressForLetterPrinting(Map<String, Object> address) {
         if (address != null) {
-            return Stream.of("AddressLine1", "AddressLine2", "County", "PostTown", "PostCode")
+            return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")
                 .map(address::get)
                 .filter(Objects::nonNull)
                 .map(Object::toString)
@@ -498,14 +537,16 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
-    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data, String authorisationToken) {
+    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data,
+                                                                           String authorisationToken,
+                                                                           String caseId) {
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<DocumentCollection> pdfDocuments = new ArrayList<>();
         List<DocumentCollection> documentCollections = covertDocumentCollections(data.get(HEARING_ORDER_OTHER_COLLECTION));
         documentCollections.forEach(doc -> {
             CaseDocument caseDocument = doc.getValue();
-            CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+            CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
             pdfDocuments.add(DocumentCollection
                 .builder()
                 .value(pdfDocument)
@@ -600,7 +641,8 @@ public class DocumentHelper {
     }
 
     public enum PaperNotificationRecipient {
-        APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR
+        APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR,
+        INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR
     }
 
     public CaseDocument nullCheckAndConvertToCaseDocument(Object object) {

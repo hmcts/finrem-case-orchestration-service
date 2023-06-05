@@ -9,6 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -29,7 +32,9 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails);
+                getDocumentToPrint(caseDetails,
+                    authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, APPLICANT, authorisationToken);
         }
     }
 
@@ -40,7 +45,10 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
         } else {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
+                getDocumentToPrint(
+                    caseDetails,
+                    authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, RESPONDENT, authorisationToken);
         }
     }
 
