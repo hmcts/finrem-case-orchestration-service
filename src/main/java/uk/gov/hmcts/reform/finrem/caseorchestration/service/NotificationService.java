@@ -19,7 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -1104,6 +1105,8 @@ public class NotificationService {
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
 
+    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        return intervenerWrapper.isIntervenerSolicitorPopulated()
     public boolean isIntervenerSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails,
                                                                  String intervenerEmail,
                                                                  CaseRole caseRole) {
@@ -1193,19 +1196,7 @@ public class NotificationService {
     public boolean isIntervenerTwoSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isIntervenerSolTwoPopulated()
             && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_2.getValue());
-    }
-
-    public boolean isIntervenerThreeSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerSolThreePopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_3.getValue());
-    }
-
-    public boolean isIntervenerFourSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerSolFourPopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_4.getValue());
+            intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
     }
 
     @Deprecated

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener;
 
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 
 @RequiredArgsConstructor
 public class IntervenerChangeDetails {
