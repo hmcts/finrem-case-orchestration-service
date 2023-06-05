@@ -26,6 +26,7 @@ public class AdditionalHearingCorresponderTest extends HearingCorrespondenceBase
     public void setUpTest() {
         applicantAndRespondentMultiLetterCorresponder = new AdditionalHearingCorresponder(bulkPrintService,
             notificationService,
+            finremCaseDetailsMapper,
             documentHelper);
         caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
 

@@ -42,7 +42,8 @@ public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAl
 
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
-        notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(intervenerWrapper, caseDetails);
+        notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails,
+            notificationService.getFinremCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
 
 }

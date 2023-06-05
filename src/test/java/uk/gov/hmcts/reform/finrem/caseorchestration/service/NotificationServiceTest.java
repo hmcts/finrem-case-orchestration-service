@@ -1451,8 +1451,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(caseDataService.isNotEmpty(anyString(), anyMap())).thenReturn(true);
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), any(CaseRole.class))).thenReturn(true);
 
-        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(callbackRequest.getCaseDetails(),
-            "intervener1SolEmail", CaseRole.INTVR_SOLICITOR_1);
+        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerOneWrapper.builder().build(),
+            callbackRequest.getCaseDetails());
 
         assertTrue(actual);
         verify(caseDataService).isContestedApplication(callbackRequest.getCaseDetails());
@@ -1465,11 +1465,11 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void checkFinremIsIntervenerSolicitorDigitalAndEmailPopulated() {
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-        caseData.getIntervenerOneWrapper().setIntervener1Email(TEST_SOLICITOR_EMAIL);
+        caseData.getIntervenerOneWrapper().setIntervenerEmail(TEST_SOLICITOR_EMAIL);
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), any(CaseRole.class))).thenReturn(true);
 
-        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(finremCallbackRequest.getCaseDetails(),
-            "intervener1SolEmail", CaseRole.INTVR_SOLICITOR_1);
+        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerOneWrapper.builder().build(),
+            finremCallbackRequest.getCaseDetails());
         assertTrue(actual);
         verify(checkSolicitorIsDigitalService).isIntervenerSolicitorDigital(finremCallbackRequest.getCaseDetails().getId().toString(),
             CaseRole.INTVR_SOLICITOR_1);
@@ -1478,25 +1478,29 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldReturnCaseDataKeysForIntervenersSolicitor() {
-        SolicitorCaseDataKeysWrapper intervener1DataKey = notificationService.getCaseDataKeysForIntervenerOneSolicitor();
+        SolicitorCaseDataKeysWrapper intervener1DataKey = notificationService
+            .getCaseDataKeysForIntervenerSolicitor(IntervenerOneWrapper.builder().build());
 
         assertEquals("intervener1SolEmail", intervener1DataKey.getSolicitorEmailKey());
         assertEquals("intervener1SolName", intervener1DataKey.getSolicitorNameKey());
         assertEquals("intervener1SolicitorReference", intervener1DataKey.getSolicitorReferenceKey());
 
-        SolicitorCaseDataKeysWrapper intervener2DataKey = notificationService.getCaseDataKeysForIntervenerTwoSolicitor();
+        SolicitorCaseDataKeysWrapper intervener2DataKey = notificationService
+            .getCaseDataKeysForIntervenerSolicitor(IntervenerTwoWrapper.builder().build());
 
         assertEquals("intervener2SolEmail", intervener2DataKey.getSolicitorEmailKey());
         assertEquals("intervener2SolName", intervener2DataKey.getSolicitorNameKey());
         assertEquals("intervener2SolicitorReference", intervener2DataKey.getSolicitorReferenceKey());
 
-        SolicitorCaseDataKeysWrapper intervener3DataKey = notificationService.getCaseDataKeysForIntervenerThreeSolicitor();
+        SolicitorCaseDataKeysWrapper intervener3DataKey = notificationService
+            .getCaseDataKeysForIntervenerSolicitor(IntervenerThreeWrapper.builder().build());
 
         assertEquals("intervener3SolEmail", intervener3DataKey.getSolicitorEmailKey());
         assertEquals("intervener3SolName", intervener3DataKey.getSolicitorNameKey());
         assertEquals("intervener3SolicitorReference", intervener3DataKey.getSolicitorReferenceKey());
 
-        SolicitorCaseDataKeysWrapper intervener4DataKey = notificationService.getCaseDataKeysForIntervenerFourSolicitor();
+        SolicitorCaseDataKeysWrapper intervener4DataKey = notificationService
+            .getCaseDataKeysForIntervenerSolicitor(IntervenerFourWrapper.builder().build());
 
         assertEquals("intervener4SolEmail", intervener4DataKey.getSolicitorEmailKey());
         assertEquals("intervener4SolName", intervener4DataKey.getSolicitorNameKey());
@@ -1507,42 +1511,46 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void shouldReturnFinremCaseDataKeysForIntervenersSolicitor() {
         FinremCaseData caseData = FinremCaseData.builder()
             .intervenerOneWrapper(IntervenerOneWrapper.builder()
-                .intervener1SolName("1Name")
-                .intervener1SolEmail("1Email")
-                .intervener1SolicitorReference("1Ref").build())
+                .intervenerSolName("1Name")
+                .intervenerSolEmail("1Email")
+                .intervenerSolicitorReference("1Ref").build())
             .intervenerTwoWrapper(IntervenerTwoWrapper.builder()
-                .intervener2SolName("2Name")
-                .intervener2SolEmail("2Email")
-                .intervener2SolicitorReference("2Ref").build())
+                .intervenerSolName("2Name")
+                .intervenerSolEmail("2Email")
+                .intervenerSolicitorReference("2Ref").build())
             .intervenerThreeWrapper(IntervenerThreeWrapper.builder()
-                .intervener3SolName("3Name")
-                .intervener3SolEmail("3Email")
-                .intervener3SolicitorReference("3Ref").build())
+                .intervenerSolName("3Name")
+                .intervenerSolEmail("3Email")
+                .intervenerSolicitorReference("3Ref").build())
             .intervenerFourWrapper(IntervenerFourWrapper.builder()
-                .intervener4SolName("4Name")
-                .intervener4SolEmail("4Email")
-                .intervener4SolicitorReference("4Ref").build())
+                .intervenerSolName("4Name")
+                .intervenerSolEmail("4Email")
+                .intervenerSolicitorReference("4Ref").build())
             .build();
 
-        SolicitorCaseDataKeysWrapper oneDataKey = notificationService.getFinremCaseDataKeysForIntervenerOneSolicitor(caseData);
+        SolicitorCaseDataKeysWrapper oneDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+            .getInterveners().get(0));
 
         assertEquals("1Email", oneDataKey.getSolicitorEmailKey());
         assertEquals("1Name", oneDataKey.getSolicitorNameKey());
         assertEquals("1Ref", oneDataKey.getSolicitorReferenceKey());
 
-        SolicitorCaseDataKeysWrapper twoDataKey = notificationService.getFinremCaseDataKeysForIntervenerTwoSolicitor(caseData);
+        SolicitorCaseDataKeysWrapper twoDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+            .getInterveners().get(1));
 
         assertEquals("2Email", twoDataKey.getSolicitorEmailKey());
         assertEquals("2Name", twoDataKey.getSolicitorNameKey());
         assertEquals("2Ref", twoDataKey.getSolicitorReferenceKey());
 
-        SolicitorCaseDataKeysWrapper threeDataKey = notificationService.getFinremCaseDataKeysForIntervenerThreeSolicitor(caseData);
+        SolicitorCaseDataKeysWrapper threeDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+            .getInterveners().get(2));
 
         assertEquals("3Email", threeDataKey.getSolicitorEmailKey());
         assertEquals("3Name", threeDataKey.getSolicitorNameKey());
         assertEquals("3Ref", threeDataKey.getSolicitorReferenceKey());
 
-        SolicitorCaseDataKeysWrapper fourDataKey = notificationService.getFinremCaseDataKeysForIntervenerFourSolicitor(caseData);
+        SolicitorCaseDataKeysWrapper fourDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+            .getInterveners().get(3));
 
         assertEquals("4Email", fourDataKey.getSolicitorEmailKey());
         assertEquals("4Name", fourDataKey.getSolicitorNameKey());

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsEmailOnlyAllSolicitorsCorresponder;
 
@@ -35,7 +34,8 @@ public class ConsentOrderMadeCorresponder extends CaseDetailsEmailOnlyAllSolicit
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made' for case: {}", caseDetails.getId());
-        notificationService.sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(intervenerWrapper, caseDetails);
+        notificationService.sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(caseDetails,
+            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
 }
 

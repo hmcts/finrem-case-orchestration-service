@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -16,8 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationReq
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -152,9 +149,8 @@ public class NotificationService {
         sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
     }
 
-    public void sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(IntervenerWrapper intervenerWrapper,
-                                                                        FinremCaseDetails finremCaseDetails) {
-        SolicitorCaseDataKeysWrapper dataKeysWrapper = getFinremCaseDataKeysForIntervenerSolicitor(intervenerWrapper);
+    public void sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails finremCaseDetails,
+                                                                        SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         NotificationRequest notificationRequestForRespondentSolicitor =
             finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(finremCaseDetails, dataKeysWrapper);
         sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
@@ -187,10 +183,10 @@ public class NotificationService {
     }
 
     @Deprecated
-    public void sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(IntervenerWrapper intervenerWrapper,
-                                                                           CaseDetails caseDetails) {
+    public void sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(CaseDetails caseDetails,
+                                                                           SolicitorCaseDataKeysWrapper dataKeysWrappe) {
         sendConsentOrderMadeConfirmationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)));
+            dataKeysWrappe));
     }
 
     public void sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails caseDetails,
@@ -254,10 +250,10 @@ public class NotificationService {
     }
 
     @Deprecated
-    public void sendConsentOrderAvailableEmailToIntervenerSolicitor(IntervenerWrapper intervenerWrapper,
-                                                                    CaseDetails caseDetails) {
+    public void sendConsentOrderAvailableEmailToIntervenerSolicitor(CaseDetails caseDetails,
+                                                                    SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)));
+            dataKeysWrapper));
     }
 
     public void sendConsentOrderAvailableEmailToIntervenerSolicitor(FinremCaseDetails caseDetails,
@@ -389,13 +385,14 @@ public class NotificationService {
     }
 
     @Deprecated
-    public void sendPrepareForHearingEmailIntervener(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
+    public void sendPrepareForHearingEmailIntervener(CaseDetails caseDetails,
+                                                     SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendPrepareForHearingEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)));
+            dataKeysWrapper));
     }
 
-    public void sendPrepareForHearingEmailIntervener(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
-        SolicitorCaseDataKeysWrapper dataKeysWrapper = getFinremCaseDataKeysForIntervenerSolicitor(intervenerWrapper);
+    public void sendPrepareForHearingEmailIntervener(FinremCaseDetails caseDetails,
+                                                     SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendPrepareForHearingEmail(finremNotificationRequestMapper
             .getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
     }
@@ -544,10 +541,10 @@ public class NotificationService {
     }
 
     @Deprecated
-    public void sendContestOrderNotApprovedEmailIntervener(IntervenerWrapper intervenerWrapper,
-                                                           CaseDetails caseDetails) {
+    public void sendContestOrderNotApprovedEmailIntervener(CaseDetails caseDetails,
+                                                           SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         sendContestOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)));
+            caseDataKeysWrapper));
     }
 
     public void sendContestOrderNotApprovedEmailIntervener(FinremCaseDetails caseDetails,

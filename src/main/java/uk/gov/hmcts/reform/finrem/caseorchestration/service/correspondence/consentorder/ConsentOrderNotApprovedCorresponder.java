@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsEmailOnlyAllSolicitorsCorresponder;
@@ -51,7 +50,8 @@ public class ConsentOrderNotApprovedCorresponder extends CaseDetailsEmailOnlyAll
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         if (caseDataService.isContestedApplication(caseDetails)) {
             log.info("Sending email notification to Intervener Solicitor for 'Contest Order Not Approved' for case: {}", caseDetails.getId());
-            notificationService.sendContestOrderNotApprovedEmailIntervener(intervenerWrapper, caseDetails);
+            notificationService.sendContestOrderNotApprovedEmailIntervener(caseDetails,
+                notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
         }
     }
 }

@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import static org.mockito.Mockito.verify;
@@ -18,12 +19,14 @@ public class ContestedDraftOrderCorresponderTest {
 
     @Mock
     NotificationService notificationService;
+    @Mock
+    FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private CaseDetails caseDetails;
 
     @Before
     public void setUp() throws Exception {
-        contestedDraftOrderCorresponder = new ContestedDraftOrderCorresponder(notificationService);
+        contestedDraftOrderCorresponder = new ContestedDraftOrderCorresponder(notificationService, finremCaseDetailsMapper);
         caseDetails = CaseDetails.builder().build();
     }
 
