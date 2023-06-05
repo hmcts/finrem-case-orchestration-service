@@ -45,6 +45,11 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
         IntervenerChangeDetails intervenerChangeDetails = caseDetails.getData().getCurrentIntervenerChangeDetails();
         if (shouldSendIntervenerSolicitorEmail(intervenerChangeDetails.getIntervenerDetails())) {
             log.info("Sending email correspondence to {} for case: {}", intervenerChangeDetails.getIntervenerType(), caseDetails.getId());
+            String recipientName = intervenerWrapper.getIntervenerSolName();
+            String recipientEmail = intervenerWrapper.getIntervenerSolEmail();
+            String referenceNumber = intervenerWrapper.getIntervenerSolicitorReference();
+            notificationService.sendIntervenerSolicitorRemovedEmail(caseDetails, intervenerWrapper,
+                recipientName, recipientEmail, referenceNumber);
         } else {
             log.info("Sending letter correspondence to {} for case: {}", intervenerChangeDetails.getIntervenerType(), caseDetails.getId());
             String recipient = intervenerWrapper.getPaperNotificationRecipient().toString();
@@ -72,5 +77,33 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
 
     protected boolean shouldSendIntervenerSolicitorEmail(IntervenerDetails intervenerDetails) {
         return notificationService.wasIntervenerSolicitorEmailPopulated(intervenerDetails);
+    }
+
+    @Override
+    protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
+        IntervenerDetails intervenerDetails = caseDetails.getData()
+            .getCurrentIntervenerChangeDetails().getIntervenerDetails();
+        String recipientName = caseDetails.getData().getAppSolicitorName();
+        String recipientEmail = caseDetails.getData().getAppSolicitorEmail();
+        String referenceNumber = caseDetails.getData().getContactDetailsWrapper().getSolicitorReference();
+        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
+            notificationService.sendIntervenerSolicitorRemovedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
+        } else {
+            notificationService.sendIntervenerRemovedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
+        }
+    }
+
+    @Override
+    protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
+        IntervenerDetails intervenerDetails = caseDetails.getData()
+            .getCurrentIntervenerChangeDetails().getIntervenerDetails();
+        String recipientName = caseDetails.getData().getRespondentSolicitorName();
+        String recipientEmail = caseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorEmail();
+        String referenceNumber = caseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorReference();
+        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
+            notificationService.sendIntervenerSolicitorRemovedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
+        } else {
+            notificationService.sendIntervenerRemovedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
+        }
     }
 }

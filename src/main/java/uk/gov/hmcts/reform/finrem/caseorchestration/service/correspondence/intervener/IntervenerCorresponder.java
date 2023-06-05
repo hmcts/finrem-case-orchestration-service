@@ -47,7 +47,7 @@ public class IntervenerCorresponder extends FinremSingleLetterOrEmailAllPartiesC
     protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String auth) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
-            this.emailApplicantSolicitor(caseDetails);
+            emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
             String recipient = DocumentHelper.PaperNotificationRecipient.APPLICANT.toString();
@@ -61,7 +61,7 @@ public class IntervenerCorresponder extends FinremSingleLetterOrEmailAllPartiesC
     protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String auth) {
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
-            this.emailRespondentSolicitor(caseDetails);
+            emailRespondentSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
             String recipient = DocumentHelper.PaperNotificationRecipient.RESPONDENT.toString();

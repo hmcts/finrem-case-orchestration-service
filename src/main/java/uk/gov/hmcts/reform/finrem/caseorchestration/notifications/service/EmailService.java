@@ -48,6 +48,9 @@ public class EmailService {
     public static final String CONSENTED_LIST_FOR_HEARING = "FR_CONSENTED_LIST_FOR_HEARING";
     public static final String INTERVENER_ADDED_EMAIL = "FR_INTERVENER_ADDED_EMAIL";
     public static final String INTERVENER_SOLICITOR_ADDED_EMAIL = "FR_INTERVENER_SOLICITOR_ADDED_EMAIL";
+    public static final String INTERVENER_REMOVED_EMAIL = "FR_INTERVENER_REMOVED_EMAIL";
+    public static final String INTERVENER_SOLICITOR_REMOVED_EMAIL = "FR_INTERVENER_SOLICITOR_REMOVED_EMAIL";
+
 
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
@@ -114,13 +117,13 @@ public class EmailService {
             templateVars.put("BarristerReferenceNumber", notificationRequest.getBarristerReferenceNumber());
             templateVars.put("phoneOpeningHours", notificationRequest.getPhoneOpeningHours());
         }
-        if (INTERVENER_ADDED_EMAIL.equals(templateName)) {
+        if (INTERVENER_ADDED_EMAIL.equals(templateName) || INTERVENER_REMOVED_EMAIL.equals(templateName)) {
             templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
             templateVars.put("phoneOpeningHours", notificationRequest.getPhoneOpeningHours());
         }
 
-        if (INTERVENER_SOLICITOR_ADDED_EMAIL.equals(templateName)) {
+        if (INTERVENER_SOLICITOR_ADDED_EMAIL.equals(templateName) || INTERVENER_SOLICITOR_REMOVED_EMAIL.equals(templateName)) {
             templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
             templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
