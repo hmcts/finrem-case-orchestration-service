@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -20,8 +22,9 @@ public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends CaseDetails
 
     @Autowired
     public UpdateFrcLetterOrEmailAllSolicitorsCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
+                                                           FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService) {
-        super(notificationService, bulkPrintService);
+        super(notificationService, bulkPrintService, finremCaseDetailsMapper);
         this.updateFrcInfoRespondentDocumentService = updateFrcInfoRespondentDocumentService;
     }
 
@@ -44,9 +47,10 @@ public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends CaseDetails
     }
 
     @Override
-    public void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+    public void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         log.info("Sending email notification to Intervener Solicitor for 'Update Frc information' for case: {}", caseDetails.getId());
-        notificationService.sendUpdateFrcInformationEmailToIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
+        notificationService.sendUpdateFrcInformationEmailToIntervenerSolicitor(caseDetails,
+            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
 
 }

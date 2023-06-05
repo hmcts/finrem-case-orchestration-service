@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsEmailOnlyAllSolicitorsCorresponder;
@@ -13,8 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseD
 public class ContestedIntermHearingCorresponder extends CaseDetailsEmailOnlyAllSolicitorsCorresponder {
 
     @Autowired
-    public ContestedIntermHearingCorresponder(NotificationService notificationService) {
-        super(notificationService);
+    public ContestedIntermHearingCorresponder(NotificationService notificationService,
+                                              FinremCaseDetailsMapper firemCaseDetailsMapper) {
+        super(notificationService, firemCaseDetailsMapper);
     }
 
     @Override
@@ -34,8 +37,9 @@ public class ContestedIntermHearingCorresponder extends CaseDetailsEmailOnlyAllS
     }
 
     @Override
-    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         log.info("Sending email notification to Intervener Solicitor for 'interim hearing' for case: {}", caseDetails.getId());
-        notificationService.sendInterimNotificationEmailToIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
+        notificationService.sendInterimNotificationEmailToIntervenerSolicitor(caseDetails,
+            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
 }

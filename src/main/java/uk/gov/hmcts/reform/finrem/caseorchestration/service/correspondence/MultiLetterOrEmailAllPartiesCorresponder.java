@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
@@ -24,7 +25,7 @@ public abstract class MultiLetterOrEmailAllPartiesCorresponder<D> extends EmailA
 
     protected abstract void emailRespondentSolicitor(D caseDetails);
 
-    protected abstract void emailIntervenerSolicitor(D caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper);
+    protected abstract void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, D caseDetails);
 
     public abstract List<BulkPrintDocument> getDocumentsToPrint(D caseDetails);
 }

@@ -3,16 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -44,22 +41,15 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
 
     public void sendIntervenerCorrespondence(String authorisationToken, FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
-        if (shouldSendIntervenerSolicitorEmail(caseDetails, caseData.getIntervenerOneWrapper().getIntervener1SolEmail(), INTVR_SOLICITOR_1)) {
-            log.info("Sending email correspondence to intervener 1 for case: {}", caseDetails.getId());
-            this.emailIntervenerSolicitor(caseDetails, notificationService.getFinremCaseDataKeysForIntervenerOneSolicitor(caseData));
-        }
-        if (shouldSendIntervenerSolicitorEmail(caseDetails,caseData.getIntervenerTwoWrapper().getIntervener2SolEmail(), INTVR_SOLICITOR_2)) {
-            log.info("Sending email correspondence to intervener 2 for case: {}", caseDetails.getId());
-            this.emailIntervenerSolicitor(caseDetails, notificationService.getFinremCaseDataKeysForIntervenerTwoSolicitor(caseData));
-        }
-        if (shouldSendIntervenerSolicitorEmail(caseDetails,caseData.getIntervenerThreeWrapper().getIntervener3SolEmail(), INTVR_SOLICITOR_3)) {
-            log.info("Sending email correspondence to intervener 3 for case: {}", caseDetails.getId());
-            this.emailIntervenerSolicitor(caseDetails, notificationService.getFinremCaseDataKeysForIntervenerThreeSolicitor(caseData));
-        }
-        if (shouldSendIntervenerSolicitorEmail(caseDetails,caseData.getIntervenerFourWrapper().getIntervener4SolEmail(), INTVR_SOLICITOR_4)) {
-            log.info("Sending email correspondence to intervener 4 for case: {}", caseDetails.getId());
-            this.emailIntervenerSolicitor(caseDetails, notificationService.getFinremCaseDataKeysForIntervenerFourSolicitor(caseData));
-        }
+        List<IntervenerWrapper> interveners = caseData.getInterveners();
+        interveners.forEach(intervenerWrapper -> {
+            if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
+                log.info("Sending email correspondence to {} for case: {}",
+                    intervenerWrapper.getIntervenerType().getTypeValue(),
+                    caseDetails.getId());
+                this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
+            }
+        });
     }
 
     protected boolean shouldSendApplicantSolicitorEmail(FinremCaseDetails caseDetails) {
@@ -70,9 +60,8 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
-    protected boolean shouldSendIntervenerSolicitorEmail(FinremCaseDetails caseDetails, String intervenerEmail, CaseRole caseRole) {
-        return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails, intervenerEmail, caseRole);
+    protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
-
 
 }

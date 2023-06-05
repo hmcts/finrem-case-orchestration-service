@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -22,8 +24,9 @@ public class AssignToJudgeCorresponder extends CaseDetailsSingleLetterOrEmailAll
     @Autowired
     public AssignToJudgeCorresponder(NotificationService notificationService,
                                      BulkPrintService bulkPrintService,
+                                     FinremCaseDetailsMapper finremCaseDetailsMapper,
                                      AssignedToJudgeDocumentService assignedToJudgeDocumentService) {
-        super(notificationService, bulkPrintService);
+        super(notificationService, bulkPrintService, finremCaseDetailsMapper);
         this.assignedToJudgeDocumentService = assignedToJudgeDocumentService;
     }
 
@@ -44,7 +47,8 @@ public class AssignToJudgeCorresponder extends CaseDetailsSingleLetterOrEmailAll
     }
 
     @Override
-    protected void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper) {
-        notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
+    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
+        notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails,
+            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
 }

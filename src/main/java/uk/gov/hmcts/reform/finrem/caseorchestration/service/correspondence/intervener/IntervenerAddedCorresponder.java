@@ -141,7 +141,7 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     }
 
     @Override
-    protected void emailIntervenerSolicitor(FinremCaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
         log.info("Not sending email correspondence to Intervener for case: {}", caseDetails.getId());
     }
 }

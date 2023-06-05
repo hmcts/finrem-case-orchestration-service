@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -15,8 +17,9 @@ public abstract class HearingCorresponder extends CaseDetailsMultiLetterOrEmailA
 
     @Autowired
     public HearingCorresponder(BulkPrintService bulkPrintService,
-                               NotificationService notificationService) {
-        super(bulkPrintService, notificationService);
+                               NotificationService notificationService,
+                               FinremCaseDetailsMapper finremCaseDetailsMapper) {
+        super(bulkPrintService, notificationService, finremCaseDetailsMapper);
     }
 
     @Override
@@ -30,8 +33,8 @@ public abstract class HearingCorresponder extends CaseDetailsMultiLetterOrEmailA
     }
 
     @Override
-    public void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        notificationService.sendPrepareForHearingEmailIntervener(caseDetails, caseDataKeysWrapper);
+    public void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
+        notificationService.sendPrepareForHearingEmailIntervener(intervenerWrapper, caseDetails);
     }
 
 

@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -151,8 +152,9 @@ public class NotificationService {
         sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
     }
 
-    public void sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails finremCaseDetails,
-                                                                        SolicitorCaseDataKeysWrapper dataKeysWrapper) {
+    public void sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(IntervenerWrapper intervenerWrapper,
+                                                                        FinremCaseDetails finremCaseDetails) {
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = getFinremCaseDataKeysForIntervenerSolicitor(intervenerWrapper);
         NotificationRequest notificationRequestForRespondentSolicitor =
             finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(finremCaseDetails, dataKeysWrapper);
         sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
@@ -185,10 +187,10 @@ public class NotificationService {
     }
 
     @Deprecated
-    public void sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(CaseDetails caseDetails,
-                                                                           SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+    public void sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(IntervenerWrapper intervenerWrapper,
+                                                                           CaseDetails caseDetails) {
         sendConsentOrderMadeConfirmationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            caseDataKeysWrapper));
+            getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)));
     }
 
     public void sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails caseDetails,
@@ -252,10 +254,10 @@ public class NotificationService {
     }
 
     @Deprecated
-    public void sendConsentOrderAvailableEmailToIntervenerSolicitor(CaseDetails caseDetails,
-                                                                    SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+    public void sendConsentOrderAvailableEmailToIntervenerSolicitor(IntervenerWrapper intervenerWrapper,
+                                                                    CaseDetails caseDetails) {
         sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            caseDataKeysWrapper));
+            getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)));
     }
 
     public void sendConsentOrderAvailableEmailToIntervenerSolicitor(FinremCaseDetails caseDetails,
@@ -387,14 +389,15 @@ public class NotificationService {
     }
 
     @Deprecated
-    public void sendPrepareForHearingEmailIntervener(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+    public void sendPrepareForHearingEmailIntervener(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         sendPrepareForHearingEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            caseDataKeysWrapper));
+            getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)));
     }
 
-    public void sendPrepareForHearingEmailIntervener(FinremCaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+    public void sendPrepareForHearingEmailIntervener(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = getFinremCaseDataKeysForIntervenerSolicitor(intervenerWrapper);
         sendPrepareForHearingEmail(finremNotificationRequestMapper
-            .getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper));
+            .getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
     }
 
     private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
@@ -541,10 +544,10 @@ public class NotificationService {
     }
 
     @Deprecated
-    public void sendContestOrderNotApprovedEmailIntervener(CaseDetails caseDetails,
-                                                           SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+    public void sendContestOrderNotApprovedEmailIntervener(IntervenerWrapper intervenerWrapper,
+                                                           CaseDetails caseDetails) {
         sendContestOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            caseDataKeysWrapper));
+            getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)));
     }
 
     public void sendContestOrderNotApprovedEmailIntervener(FinremCaseDetails caseDetails,
@@ -1107,23 +1110,17 @@ public class NotificationService {
 
     public boolean isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
         return intervenerWrapper.isIntervenerSolicitorPopulated()
-    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails,
-                                                                 String intervenerEmail,
-                                                                 CaseRole caseRole) {
-        return caseDataService.isContestedApplication(caseDetails)
-            && caseDataService.isNotEmpty(intervenerEmail, caseDetails.getData())
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(), caseRole);
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
     }
 
-    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails,
-                                                                 String intervenerEmail,
-                                                                 CaseRole caseRole) {
-        return caseDetails.isContestedApplication()
-            && StringUtils.isNotEmpty(intervenerEmail)
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(), caseRole);
+    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
+        return intervenerWrapper.isIntervenerSolicitorPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
     }
 
-    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerOneSolicitor() {
+    private SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerOneSolicitor() {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey("intervener1SolEmail")
             .solicitorNameKey("intervener1SolName")
@@ -1131,7 +1128,7 @@ public class NotificationService {
             .build();
     }
 
-    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerTwoSolicitor() {
+    private SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerTwoSolicitor() {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey("intervener2SolEmail")
             .solicitorNameKey("intervener2SolName")
@@ -1139,7 +1136,7 @@ public class NotificationService {
             .build();
     }
 
-    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerThreeSolicitor() {
+    private SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerThreeSolicitor() {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey("intervener3SolEmail")
             .solicitorNameKey("intervener3SolName")
@@ -1147,7 +1144,7 @@ public class NotificationService {
             .build();
     }
 
-    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerFourSolicitor() {
+    private SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerFourSolicitor() {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey("intervener4SolEmail")
             .solicitorNameKey("intervener4SolName")
@@ -1155,48 +1152,25 @@ public class NotificationService {
             .build();
     }
 
-    public SolicitorCaseDataKeysWrapper getFinremCaseDataKeysForIntervenerOneSolicitor(FinremCaseData caseData) {
+    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerSolicitor(IntervenerWrapper intervenerWrapper) {
+        if (IntervenerType.INTERVENER_ONE.equals(intervenerWrapper.getIntervenerType())) {
+            return getCaseDataKeysForIntervenerOneSolicitor();
+        } else if (IntervenerType.INTERVENER_TWO.equals(intervenerWrapper.getIntervenerType())) {
+            return getCaseDataKeysForIntervenerTwoSolicitor();
+        } else if (IntervenerType.INTERVENER_THREE.equals(intervenerWrapper.getIntervenerType())) {
+            return getCaseDataKeysForIntervenerThreeSolicitor();
+        } else if (IntervenerType.INTERVENER_FOUR.equals(intervenerWrapper.getIntervenerType())) {
+            return getCaseDataKeysForIntervenerFourSolicitor();
+        }
+        return SolicitorCaseDataKeysWrapper.builder().build();
+    }
+
+    public SolicitorCaseDataKeysWrapper getFinremCaseDataKeysForIntervenerSolicitor(IntervenerWrapper intervenerWrapper) {
         return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(caseData.getIntervenerOneWrapper().getIntervener1SolEmail())
-            .solicitorNameKey(caseData.getIntervenerOneWrapper().getIntervener1SolName())
-            .solicitorReferenceKey(caseData.getIntervenerOneWrapper().getIntervener1SolicitorReference())
+            .solicitorEmailKey(intervenerWrapper.getIntervenerSolEmail())
+            .solicitorNameKey(intervenerWrapper.getIntervenerSolName())
+            .solicitorReferenceKey(intervenerWrapper.getIntervenerSolicitorReference())
             .build();
-    }
-
-    public SolicitorCaseDataKeysWrapper getFinremCaseDataKeysForIntervenerTwoSolicitor(FinremCaseData caseData) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(caseData.getIntervenerTwoWrapper().getIntervener2SolEmail())
-            .solicitorNameKey(caseData.getIntervenerTwoWrapper().getIntervener2SolName())
-            .solicitorReferenceKey(caseData.getIntervenerTwoWrapper().getIntervener2SolicitorReference())
-            .build();
-    }
-
-    public SolicitorCaseDataKeysWrapper getFinremCaseDataKeysForIntervenerThreeSolicitor(FinremCaseData caseData) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(caseData.getIntervenerThreeWrapper().getIntervener3SolEmail())
-            .solicitorNameKey(caseData.getIntervenerThreeWrapper().getIntervener3SolName())
-            .solicitorReferenceKey(caseData.getIntervenerThreeWrapper().getIntervener3SolicitorReference())
-            .build();
-    }
-
-    public SolicitorCaseDataKeysWrapper getFinremCaseDataKeysForIntervenerFourSolicitor(FinremCaseData caseData) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(caseData.getIntervenerFourWrapper().getIntervener4SolEmail())
-            .solicitorNameKey(caseData.getIntervenerFourWrapper().getIntervener4SolName())
-            .solicitorReferenceKey(caseData.getIntervenerFourWrapper().getIntervener4SolicitorReference())
-            .build();
-    }
-
-    public boolean isIntervenerOneSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerSolOnePopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1.getValue());
-    }
-
-    public boolean isIntervenerTwoSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerSolTwoPopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
     }
 
     @Deprecated

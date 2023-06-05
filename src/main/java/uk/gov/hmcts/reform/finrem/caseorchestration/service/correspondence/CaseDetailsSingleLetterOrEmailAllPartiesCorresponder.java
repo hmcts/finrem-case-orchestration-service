@@ -5,11 +5,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+
+import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
@@ -21,6 +27,7 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
 
     protected final NotificationService notificationService;
     protected final BulkPrintService bulkPrintService;
+    protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public void sendCorrespondence(CaseDetails caseDetails, String authToken) {
         sendApplicantCorrespondence(caseDetails, authToken);
@@ -56,22 +63,16 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
     }
 
     protected void sendIntervenerCorrespondence(CaseDetails caseDetails, String authorisationToken) {
-        if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener1SolEmail", CaseRole.INTVR_SOLICITOR_1)) {
-            log.info("Sending email correspondence to intervener 1 for case: {}", caseDetails.getId());
-            this.emailIntervenerSolicitor(caseDetails, notificationService.getCaseDataKeysForIntervenerOneSolicitor());
-        }
-        if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener2SolEmail", CaseRole.INTVR_SOLICITOR_2)) {
-            log.info("Sending email correspondence to intervener 2 for case: {}", caseDetails.getId());
-            this.emailIntervenerSolicitor(caseDetails, notificationService.getCaseDataKeysForIntervenerTwoSolicitor());
-        }
-        if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener3SolEmail", CaseRole.INTVR_SOLICITOR_3)) {
-            log.info("Sending email correspondence to intervener 3 for case: {}", caseDetails.getId());
-            this.emailIntervenerSolicitor(caseDetails, notificationService.getCaseDataKeysForIntervenerThreeSolicitor());
-        }
-        if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener4SolEmail", CaseRole.INTVR_SOLICITOR_4)) {
-            log.info("Sending email correspondence to intervener 4 for case: {}", caseDetails.getId());
-            this.emailIntervenerSolicitor(caseDetails, notificationService.getCaseDataKeysForIntervenerFourSolicitor());
-        }
+        final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        final List<IntervenerWrapper> interveners =  finremCaseDetails.getData().getInterveners();
+        interveners.forEach(intervenerWrapper -> {
+            if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
+                log.info("Sending email correspondence to {} for case: {}",
+                    intervenerWrapper.getIntervenerType().getTypeValue(),
+                    caseDetails.getId());
+                this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
+            }
+        });
     }
 
     protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {
@@ -82,8 +83,8 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
         return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
-    protected boolean shouldSendIntervenerSolicitorEmail(CaseDetails caseDetails, String intervenerField, CaseRole caseRole) {
-        return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails, intervenerField, caseRole);
+    protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
+        return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
 
     public abstract CaseDocument getDocumentToPrint(CaseDetails caseDetails, String authorisationToken,
@@ -94,5 +95,5 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
 
     protected abstract void emailRespondentSolicitor(CaseDetails caseDetails);
 
-    protected abstract void emailIntervenerSolicitor(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper);
+    protected abstract void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails);
 }
