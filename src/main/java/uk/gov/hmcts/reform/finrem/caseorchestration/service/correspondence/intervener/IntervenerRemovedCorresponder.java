@@ -48,7 +48,7 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
             String recipientName = intervenerChangeDetails.getIntervenerDetails().getIntervenerSolName();
             String recipientEmail = intervenerChangeDetails.getIntervenerDetails().getIntervenerSolEmail();
             String referenceNumber = intervenerChangeDetails.getIntervenerDetails().getIntervenerSolicitorReference();
-            notificationService.sendIntervenerSolicitorRemovedEmail(caseDetails, intervenerWrapper,
+            notificationService.sendIntervenerSolicitorRemovedEmail(caseDetails, intervenerChangeDetails.getIntervenerDetails(),
                 recipientName, recipientEmail, referenceNumber);
         } else {
             log.info("Sending letter correspondence to {} for case: {}", intervenerChangeDetails.getIntervenerType(), caseDetails.getId());
