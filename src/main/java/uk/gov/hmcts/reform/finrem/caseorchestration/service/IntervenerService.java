@@ -29,6 +29,7 @@ public class IntervenerService {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         intervenerChangeDetails.setIntervenerType(intervenerWrapper.getIntervenerType());
+        intervenerChangeDetails.setIntervenerDetails(intervenerWrapper);
 
         if (intervenerWrapper.getIntervenerRepresented().equals(YesOrNo.YES)) {
             log.info("revoke case role for {} for case {}", intervenerWrapper.getIntervenerSolicitorCaseRole(), caseId);

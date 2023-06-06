@@ -45,9 +45,9 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
         IntervenerChangeDetails intervenerChangeDetails = caseDetails.getData().getCurrentIntervenerChangeDetails();
         if (shouldSendIntervenerSolicitorEmail(intervenerChangeDetails.getIntervenerDetails())) {
             log.info("Sending email correspondence to {} for case: {}", intervenerChangeDetails.getIntervenerType(), caseDetails.getId());
-            String recipientName = intervenerWrapper.getIntervenerSolName();
-            String recipientEmail = intervenerWrapper.getIntervenerSolEmail();
-            String referenceNumber = intervenerWrapper.getIntervenerSolicitorReference();
+            String recipientName = intervenerChangeDetails.getIntervenerDetails().getIntervenerSolName();
+            String recipientEmail = intervenerChangeDetails.getIntervenerDetails().getIntervenerSolEmail();
+            String referenceNumber = intervenerChangeDetails.getIntervenerDetails().getIntervenerSolicitorReference();
             notificationService.sendIntervenerSolicitorRemovedEmail(caseDetails, intervenerWrapper,
                 recipientName, recipientEmail, referenceNumber);
         } else {
