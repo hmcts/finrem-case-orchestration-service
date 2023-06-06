@@ -1229,6 +1229,10 @@ public class NotificationService {
         return caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData);
     }
 
+    public boolean isContestedApplication(CaseDetails caseDetails) {
+        return caseDataService.isContestedApplication(caseDetails);
+    }
+
     @Deprecated
     private void sendEmailIfSolicitorIsDigital(
         CaseDetails caseDetails,

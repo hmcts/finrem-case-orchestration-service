@@ -29,7 +29,9 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
     public void sendCorrespondence(CaseDetails caseDetails, String authToken) {
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
-        sendIntervenerCorrespondence(caseDetails, authToken);
+        if (notificationService.isContestedApplication(caseDetails)) {
+            sendIntervenerCorrespondence(caseDetails, authToken);
+        }
     }
 
     protected void sendApplicantCorrespondence(CaseDetails caseDetails, String authorisationToken) {

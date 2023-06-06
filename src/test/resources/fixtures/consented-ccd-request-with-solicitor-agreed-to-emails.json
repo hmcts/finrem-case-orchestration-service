@@ -118,13 +118,13 @@
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
-        "item1",
-        "item2"
+        "periodicalPaymentOrder",
+        "Maintenance Pending Suit"
       ],
       "natureOfApplication5": "No",
       "natureOfApplication6": [
-        "item1",
-        "item2"
+        "training",
+        "Other"
       ],
       "natureOfApplication7": "test",
       "natureOfApplication3a": "test",
@@ -230,7 +230,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Other",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -247,7 +247,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Other",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -270,7 +270,7 @@
               "document_filename": "doc1",
               "document_binary_url": "http://doc1.binary"
             },
-            "generalOrder_judgeList": "district judge",
+            "generalOrder_judgeList": "District Judge",
             "generalOrder_judgeName": "judge1",
             "generalOrder_dateOfOrder": "2010-01-02",
             "generalOrder_comments": "comment1"
@@ -281,7 +281,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Other",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -453,13 +453,13 @@
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
-        "item1",
-        "item2"
+        "periodicalPaymentOrder",
+        "Maintenance Pending Suit"
       ],
       "natureOfApplication5": "No",
       "natureOfApplication6": [
-        "item1",
-        "item2"
+        "training",
+        "Other"
       ],
       "natureOfApplication7": "test",
       "natureOfApplication3a": "test",
@@ -558,7 +558,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Other",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -575,7 +575,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Other",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -598,7 +598,7 @@
               "document_filename": "doc1",
               "document_binary_url": "http://doc1.binary"
             },
-            "generalOrder_judgeList": "district judge",
+            "generalOrder_judgeList": "District Judge",
             "generalOrder_judgeName": "judge1",
             "generalOrder_dateOfOrder": "2010-01-02",
             "generalOrder_comments": "comment1"
@@ -609,7 +609,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Other",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",

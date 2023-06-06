@@ -24,7 +24,9 @@ public abstract class CaseDetailsEmailOnlyAllSolicitorsCorresponder extends Emai
         log.info("Determine whether to send email notifications to all solicitors for case: {}", caseDetails.getId());
         sendApplicantCorrespondence(caseDetails);
         sendRespondentCorrespondence(caseDetails);
-        sendIntervenerCorrespondence(caseDetails);
+        if (notificationService.isContestedApplication(caseDetails)) {
+            sendIntervenerCorrespondence(caseDetails);
+        }
     }
 
     private void sendApplicantCorrespondence(CaseDetails caseDetails) {
