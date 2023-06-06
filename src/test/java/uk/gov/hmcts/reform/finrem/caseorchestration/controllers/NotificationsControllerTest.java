@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
@@ -125,6 +128,13 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
     @MockBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Override
+    @Before
+    public void setUp() {
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
+            .thenReturn(getFinremCaseDetailsFromCaseDetails());
+    }
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
@@ -629,5 +639,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
         callbackRequest.getCaseDetails().getData().put(FINAL_ORDER_COLLECTION, finalOrderCollection);
 
         return callbackRequest;
+    }
+
+    private FinremCaseDetails getFinremCaseDetailsFromCaseDetails() {
+        return FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
     }
 }
