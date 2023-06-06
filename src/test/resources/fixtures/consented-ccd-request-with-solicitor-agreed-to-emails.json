@@ -50,7 +50,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "Other",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -84,7 +84,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "Form P1",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -151,21 +151,21 @@
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
       "RespSolNotificationsEmailConsent": "Yes",
-      "orderDirection": "test",
+      "orderDirection": "Order Accepted as drafted",
       "orderDirectionOpt1": {
         "document_url": "http://file1",
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
-      "orderDirectionAbsolute": "test",
-      "orderDirectionJudge": "test",
+      "orderDirectionAbsolute": "No",
+      "orderDirectionJudge": "District Judge",
       "orderDirectionJudgeName": "test",
       "orderDirectionDate": "2010-01-01",
       "dueDate": "2010-01-01",
       "issueDate": "2010-01-01",
       "orderDirectionAddComments": "test",
       "orderDirectionOpt2": "test",
-      "assignedToJudgeReason": "test",
+      "assignedToJudgeReason": "Draft consent order",
       "assignedToJudge": "judge1",
       "referToJudgeDate": "2010-01-01",
       "referToJudgeText": "test",
@@ -186,7 +186,7 @@
           "id": "1",
           "value": {
             "orderRefusal": [
-              "Other"
+              "Other (please specify)"
             ],
             "orderRefusalDate": "2003-02-01",
             "orderRefusalDocs": {
@@ -213,7 +213,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Other",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -385,7 +385,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "Other",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -419,7 +419,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "Form P1",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -479,21 +479,21 @@
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
       "RespSolNotificationsEmailConsent": "Yes",
-      "orderDirection": "test",
+      "orderDirection": "Order Accepted as drafted",
       "orderDirectionOpt1": {
         "document_url": "http://file1",
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
-      "orderDirectionAbsolute": "test",
-      "orderDirectionJudge": "test",
+      "orderDirectionAbsolute": "No",
+      "orderDirectionJudge": "District Judge",
       "orderDirectionJudgeName": "test",
       "orderDirectionDate": "2010-01-01",
       "dueDate": "2010-01-01",
       "issueDate": "2010-01-01",
       "orderDirectionAddComments": "test",
       "orderDirectionOpt2": "test",
-      "assignedToJudgeReason": "test",
+      "assignedToJudgeReason": "Draft consent order",
       "assignedToJudge": "judge1",
       "referToJudgeDate": "2010-01-01",
       "referToJudgeText": "test",
@@ -514,7 +514,7 @@
           "id": "1",
           "value": {
             "orderRefusal": [
-              "Other"
+              "Other (please specify)"
             ],
             "orderRefusalDate": "2003-02-01",
             "orderRefusalDocs": {
@@ -541,7 +541,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Other",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
