@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.List;
@@ -42,16 +43,17 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
     private GenericDocumentService service;
     private ObjectMapper objectMapper;
     private GeneralApplicationHelper helper;
+    @Mock
+    private GeneralApplicationService generalApplicationService;
 
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application.json";
-
 
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
-        handler = new GeneralApplicationAboutToStartHandler(helper);
+        handler = new GeneralApplicationAboutToStartHandler(helper, generalApplicationService);
         when(service.convertDocumentIfNotPdfAlready(ArgumentMatchers.any(), ArgumentMatchers.any(), anyString()))
             .thenReturn(
             CaseDocument.builder()

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -46,6 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TRACKING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_USER_ROLE;
 
 @Component
 @RequiredArgsConstructor
@@ -58,7 +60,6 @@ public class GeneralApplicationHelper {
     public List<GeneralApplicationCollectionData> getGeneralApplicationList(Map<String, Object> caseData) {
         return Optional.ofNullable(caseData.get(GENERAL_APPLICATION_COLLECTION))
             .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
-
     }
 
     public List<GeneralApplicationCollectionData> getReadyForRejectOrReadyForReferList(Map<String, Object> caseData) {
@@ -141,6 +142,7 @@ public class GeneralApplicationHelper {
             GeneralApplicationItems.builder();
         builder.generalApplicationReceivedFrom(Objects.toString(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM), null));
         builder.generalApplicationCreatedBy(Objects.toString(caseData.get(GENERAL_APPLICATION_CREATED_BY), null));
+        builder.generalApplicationUserRole(Objects.toString(caseData.get(GENERAL_APPLICATION_USER_ROLE), null));
         builder.generalApplicationHearingRequired(Objects.toString(caseData.get(GENERAL_APPLICATION_HEARING_REQUIRED), null));
         builder.generalApplicationTimeEstimate(Objects.toString(caseData.get(GENERAL_APPLICATION_TIME_ESTIMATE), null));
         builder.generalApplicationSpecialMeasures(Objects.toString(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES), null));

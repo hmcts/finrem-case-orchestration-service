@@ -391,6 +391,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_PRE_STATE = "generalApplicationPreState";
     public static final String GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL = "generalApplicationReferToJudgeEmail";
     public static final String GENERAL_APPLICATION_OUTCOME_OTHER = "generalApplicationOutcomeOther";
+    public static final String GENERAL_APPLICATION_USER_ROLE = "generalApplicationUserRole";
 
     // General application directions
     public static final String GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION = "generalApplicationDirectionsAdditionalInformation";

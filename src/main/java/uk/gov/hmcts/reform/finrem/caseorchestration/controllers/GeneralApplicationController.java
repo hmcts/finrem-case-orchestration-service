@@ -74,7 +74,7 @@ public class GeneralApplicationController extends BaseController {
         log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        generalApplicationService.updateCaseDataStart(caseDetails.getData(), authorisationToken);
+        generalApplicationService.updateCaseDataStart(caseDetails, authorisationToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
