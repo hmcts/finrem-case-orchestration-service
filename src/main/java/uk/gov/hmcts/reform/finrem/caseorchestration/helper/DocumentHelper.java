@@ -33,7 +33,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -354,23 +357,24 @@ public class DocumentHelper {
 
     public CaseDetails prepareLetterTemplateData(FinremCaseDetails caseDetails, PaperNotificationRecipient recipient) {
         FinremCaseData caseData = caseDetails.getData();
+        Long caseId = caseDetails.getId();
 
         String reference = "";
         String addresseeName;
         Address addressToSendTo;
 
         if (recipient == APPLICANT && caseData.isApplicantRepresentedByASolicitor()) {
-            log.info("Applicant is represented by a solicitor");
+            log.info("Applicant is represented by a solicitor on case {}", caseId);
             reference = nullToEmpty((caseData.getContactDetailsWrapper().getSolicitorReference()));
             addresseeName = nullToEmpty(caseData.getAppSolicitorName());
             addressToSendTo = caseData.getAppSolicitorAddress();
         } else if (recipient == RESPONDENT && caseData.isRespondentRepresentedByASolicitor()) {
-            log.info("Respondent is represented by a solicitor");
+            log.info("Respondent is represented by a solicitor on case {}", caseId);
             reference = nullToEmpty((caseData.getContactDetailsWrapper().getRespondentSolicitorReference()));
             addresseeName = nullToEmpty((caseData.getRespondentSolicitorName()));
             addressToSendTo = caseData.getContactDetailsWrapper().getRespondentSolicitorAddress();
         } else {
-            log.info("{} is not represented by a solicitor", recipient);
+            log.info("{} is not represented by a solicitor on case {}", recipient, caseId);
             addresseeName = recipient == APPLICANT
                 ? caseDetails.getData().getFullApplicantName()
                 : caseDetails.getData().getRespondentFullName();
@@ -417,7 +421,7 @@ public class DocumentHelper {
 
     private CaseDetails prepareLetterTemplateData(FinremCaseDetails finremCaseDetails, String reference, String addresseeName,
                                                   Address addressToSendTo) {
-
+        Long caseId = finremCaseDetails.getId();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         Map<String, Object> caseData = caseDetails.getData();
         String ccdNumber = nullToEmpty((finremCaseDetails.getId()));
@@ -439,7 +443,7 @@ public class DocumentHelper {
             caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
             caseData.put("courtDetails", buildFrcCourtDetails(finremCaseDetails.getData()));
         } else {
-            log.info("Failed to prepare template data as not all required address details were present");
+            log.info("Failed to prepare template data as not all required address details were present on case {}", caseId);
             throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
         }
 
@@ -448,34 +452,44 @@ public class DocumentHelper {
 
     public CaseDetails prepareIntervenerLetterTemplateData(FinremCaseDetails caseDetails, PaperNotificationRecipient recipient) {
         FinremCaseData caseData = caseDetails.getData();
+        long caseId = caseDetails.getId();
 
         String reference = "";
         String addresseeName;
         Address addressToSendTo;
 
-        if (recipient == INTERVENER_ONE && !caseData.isIntervenerOneRepresentedByASolicitor()) {
-            log.info("Intervener One is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerOneWrapper().getIntervener1Name();
-            addressToSendTo = caseData.getIntervenerOneWrapper().getIntervener1Address();
-        } else if (recipient == INTERVENER_TWO && !caseData.isIntervenerTwoRepresentedByASolicitor()) {
-            log.info("Intervener Two is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerTwoWrapper().getIntervener2Name();
-            addressToSendTo = caseData.getIntervenerTwoWrapper().getIntervener2Address();
-        } else if (recipient == INTERVENER_THREE && !caseData.isIntervenerThreeRepresentedByASolicitor()) {
-            log.info("Intervener Three is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerThreeWrapper().getIntervener3Name();
-            addressToSendTo = caseData.getIntervenerThreeWrapper().getIntervener3Address();
-        } else if (recipient == INTERVENER_FOUR && !caseData.isIntervenerFourRepresentedByASolicitor()) {
-            log.info("Intervener Four is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerFourWrapper().getIntervener4Name();
-            addressToSendTo = caseData.getIntervenerFourWrapper().getIntervener4Address();
+        boolean isIntervenerRepresented = checkIfIntervenerRepresentedBySolicitor(caseData.getCurrentIntervenerChangeDetails());
+
+        if (recipient == INTERVENER_ONE && !isIntervenerRepresented) {
+            log.info("Intervener One is not represented by a solicitor on case {}", caseId);
+            addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
+            addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
+        } else if (recipient == INTERVENER_TWO && !isIntervenerRepresented) {
+            log.info("Intervener Two is not represented by a solicitor on case {}", caseId);
+            addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
+            addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
+        } else if (recipient == INTERVENER_THREE && !isIntervenerRepresented) {
+            log.info("Intervener Three is not represented by a solicitor on case {}", caseId);
+            addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
+            addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
+        } else if (recipient == INTERVENER_FOUR && !isIntervenerRepresented) {
+            log.info("Intervener Four is not represented by a solicitor on case {}", caseId);
+            addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
+            addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
         } else {
-            log.info("{} is not represented by a solicitor", recipient);
+            log.info("{} is not represented by a digital solicitor on case {}", recipient, caseId);
+            ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
             addresseeName = recipient == APPLICANT
                 ? caseDetails.getData().getFullApplicantName()
                 : caseDetails.getData().getRespondentFullName();
-            addressToSendTo = recipient == APPLICANT ? caseData.getContactDetailsWrapper().getApplicantAddress() :
-                caseData.getContactDetailsWrapper().getRespondentAddress();
+            addressToSendTo = recipient == APPLICANT ? getApplicantCorrespondenceAddress(wrapper) :
+                getRespondentCorrespondenceAddress(wrapper);
+            if (recipient == APPLICANT && caseData.isApplicantRepresentedByASolicitor()) {
+                reference = caseData.getContactDetailsWrapper().getSolicitorReference();
+            }
+            if (recipient == RESPONDENT && caseData.isRespondentRepresentedByASolicitor()) {
+                reference = caseData.getContactDetailsWrapper().getRespondentSolicitorReference();
+            }
         }
 
         return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
@@ -604,6 +618,18 @@ public class DocumentHelper {
 
     public String getRespondentFullNameContested(CaseDetails caseDetails) {
         return caseDataService.buildFullName(caseDetails.getData(), CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, CONTESTED_RESPONDENT_LAST_NAME);
+    }
+
+    private static Address getRespondentCorrespondenceAddress(ContactDetailsWrapper wrapper) {
+        return wrapper.getContestedRespondentRepresented().isYes() ? wrapper.getRespondentSolicitorAddress() : wrapper.getRespondentAddress();
+    }
+
+    private static Address getApplicantCorrespondenceAddress(ContactDetailsWrapper wrapper) {
+        return wrapper.getApplicantRepresented().isYes() ? wrapper.getApplicantSolicitorAddress() : wrapper.getApplicantAddress();
+    }
+
+    private boolean checkIfIntervenerRepresentedBySolicitor(IntervenerChangeDetails intervenerChangeDetails) {
+        return YesOrNo.YES.equals(intervenerChangeDetails.getIntervenerDetails().getIntervenerRepresented());
     }
 
     public List<ContestedConsentOrderData> convertToContestedConsentOrderData(Object object) {

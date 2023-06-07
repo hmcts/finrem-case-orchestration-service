@@ -40,5 +40,5 @@ public class IntervenerConstant {
     public static final String DEL_INTERVENER_ONE_VALUE = "Remove Intervener 1";
     public static final String DEL_INTERVENER_TWO_VALUE = "Remove Intervener 2";
     public static final String DEL_INTERVENER_THREE_VALUE = "Remove Intervener 3";
-    public static final String DEL_INTERVENER_FOUR_VALUE = "Remove delIntervener 4";
+    public static final String DEL_INTERVENER_FOUR_VALUE = "Remove Intervener 4";
 }

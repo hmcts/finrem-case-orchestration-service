@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 @Data
 @Builder(toBuilder = true)
 @JsonIgnoreProperties
-public class IntervenerAddedLetterDetails implements ParentLetterDetails {
+public class IntervenerRemovedLetterDetails implements ParentLetterDetails {
     private FrcCourtDetails courtDetails;
     private Addressee addressee;
     private String caseNumber;

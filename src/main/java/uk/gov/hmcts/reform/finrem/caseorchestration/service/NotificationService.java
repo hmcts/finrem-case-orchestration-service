@@ -15,8 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationReq
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -78,6 +79,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_SOLICITOR_ADDED_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
@@ -841,6 +846,42 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_BARRISTER_ACCESS_REMOVED);
     }
 
+    public void sendIntervenerAddedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
+                                         String recipientName, String recipientEmail, String referenceNumber) {
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(
+            caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
+        log.info("Received request for notification email for Intervener Added event. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_INTERVENER_ADDED_EMAIL);
+    }
+
+    public void sendIntervenerSolicitorAddedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
+                                                  String recipientName, String recipientEmail, String referenceNumber) {
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(
+            caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
+        log.info("Received request for notification email for Intervener Solicitor Added event. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_INTERVENER_SOLICITOR_ADDED_EMAIL);
+    }
+
+    public void sendIntervenerRemovedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
+                                           String recipientName, String recipientEmail, String referenceNumber) {
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(
+            caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
+        log.info("Received request for notification email for Intervener Removed event. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_INTERVENER_REMOVED_EMAIL);
+    }
+
+    public void sendIntervenerSolicitorRemovedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
+                                                    String recipientName, String recipientEmail, String referenceNumber) {
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(
+            caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
+        log.info("Received request for notification email for Intervener Solicitor removed event. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_INTERVENER_SOLICITOR_REMOVED_EMAIL);
+    }
+
     private void sendNotificationEmail(NotificationRequest notificationRequest, EmailTemplateNames emailTemplateName) {
         emailService.sendConfirmationEmail(notificationRequest, emailTemplateName);
     }
@@ -884,28 +925,12 @@ public class NotificationService {
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
 
-    public boolean isIntervenerOneSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerSolOnePopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1.getValue());
+    public boolean isIntervenerSolicitorEmailPopulated(IntervenerWrapper intervenerWrapper) {
+        return intervenerWrapper.isIntervenerSolicitorPopulated();
     }
 
-    public boolean isIntervenerTwoSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerSolTwoPopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_2.getValue());
-    }
-
-    public boolean isIntervenerThreeSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerSolThreePopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_3.getValue());
-    }
-
-    public boolean isIntervenerFourSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isIntervenerSolFourPopulated()
-            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_4.getValue());
+    public boolean wasIntervenerSolicitorEmailPopulated(IntervenerDetails intervenerDetails) {
+        return intervenerDetails.getIntervenerSolEmail() != null;
     }
 
     @Deprecated
