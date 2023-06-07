@@ -42,16 +42,18 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
     }
 
     public void sendIntervenerCorrespondence(String authorisationToken, CaseDetails caseDetails) {
-        final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        final List<IntervenerWrapper> interveners =  finremCaseDetails.getData().getInterveners();
-        interveners.forEach(intervenerWrapper -> {
-            if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, finremCaseDetails)) {
-                log.info("Sending email correspondence to {} for case: {}",
-                    intervenerWrapper.getIntervenerType().getTypeValue(),
-                    caseDetails.getId());
-                this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
-            }
-        });
+        if (notificationService.isContestedApplication(caseDetails)) {
+            final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+            final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
+            interveners.forEach(intervenerWrapper -> {
+                if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, finremCaseDetails)) {
+                    log.info("Sending email correspondence to {} for case: {}",
+                        intervenerWrapper.getIntervenerType().getTypeValue(),
+                        caseDetails.getId());
+                    this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
+                }
+            });
+        }
     }
 
     protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {

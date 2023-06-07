@@ -1446,34 +1446,32 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void checkIsIntervenerSolicitorDigitalAndEmailPopulated() {
         callbackRequest.getCaseDetails().getData().put("intervener1SolEmail", TEST_SOLICITOR_EMAIL);
-
+        IntervenerOneWrapper intervenerWrapper = IntervenerOneWrapper.builder()
+            .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build();
         when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
         when(caseDataService.isNotEmpty(anyString(), anyMap())).thenReturn(true);
-        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), any(CaseRole.class))).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), anyString())).thenReturn(true);
 
-        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerOneWrapper.builder().build(),
+        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper,
             callbackRequest.getCaseDetails());
 
         assertTrue(actual);
-        verify(caseDataService).isContestedApplication(callbackRequest.getCaseDetails());
-        verify(caseDataService).isNotEmpty("intervener1SolEmail", callbackRequest.getCaseDetails().getData());
         verify(checkSolicitorIsDigitalService).isIntervenerSolicitorDigital(callbackRequest.getCaseDetails().getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1);
+            CaseRole.INTVR_SOLICITOR_1.getValue());
 
     }
 
     @Test
     public void checkFinremIsIntervenerSolicitorDigitalAndEmailPopulated() {
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-        caseData.getIntervenerOneWrapper().setIntervenerEmail(TEST_SOLICITOR_EMAIL);
-        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), any(CaseRole.class))).thenReturn(true);
+        caseData.getIntervenerOneWrapper().setIntervenerSolEmail(TEST_SOLICITOR_EMAIL);
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), anyString())).thenReturn(true);
 
-        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerOneWrapper.builder().build(),
+        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerOneWrapper(),
             finremCallbackRequest.getCaseDetails());
         assertTrue(actual);
         verify(checkSolicitorIsDigitalService).isIntervenerSolicitorDigital(finremCallbackRequest.getCaseDetails().getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1);
-        assertTrue(actual);
+            CaseRole.INTVR_SOLICITOR_1.getValue());
     }
 
     @Test
