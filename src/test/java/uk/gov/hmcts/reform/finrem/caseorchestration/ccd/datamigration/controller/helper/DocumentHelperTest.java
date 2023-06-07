@@ -22,11 +22,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -448,13 +450,107 @@ public class DocumentHelperTest {
     }
 
     @Test
-    public void whenRecipientIsIntervenerOne_AndIntervenerNotRepresented_setAddressee() {
+    public void whenRecipientIsNondigitallyRepresentedApplicant_AndIntervenerRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+
+        Address address = Address.builder().addressLine1("Applicant Sol Address").postCode("SW11 6HL").build();
+        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorAddress(address);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantFmName("Tracy");
+        caseDetails.getData().getContactDetailsWrapper().setApplicantLname("Applicant");
+
+        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
+        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        wrapper.setIntervenerName("name");
+        wrapper.setIntervenerRepresented(YesOrNo.YES);
+        wrapper.setIntervenerAddress(otherAddress);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, APPLICANT);
+        Addressee expected = Addressee.builder().name("Tracy Applicant").formattedAddress("Applicant Sol Address" + "\nSW11 6HL").build();
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsNondigitallyRepresentedRespondent_AndIntervenerRepresented_setAddressee() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+
+        Address address = Address.builder().addressLine1("Respondent Sol Address").postCode("SW11 6HL").build();
+        caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorAddress(address);
+        caseDetails.getData().getContactDetailsWrapper().setRespondentFmName("Tracy");
+        caseDetails.getData().getContactDetailsWrapper().setRespondentLname("Respondent");
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+
+        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
+        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        wrapper.setIntervenerName("name");
+        wrapper.setIntervenerRepresented(YesOrNo.YES);
+        wrapper.setIntervenerAddress(otherAddress);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, RESPONDENT);
+        Addressee expected = Addressee.builder().name("Tracy Respondent").formattedAddress("Respondent Sol Address" + "\nSW11 6HL").build();
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsUnrepresentedApplicant_AndIntervenerRepresented_setAddressee() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+
+        Address address = Address.builder().addressLine1("Applicant Address").postCode("SW11 6HL").build();
+        caseDetails.getData().getContactDetailsWrapper().setApplicantAddress(address);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantFmName("Tracy");
+        caseDetails.getData().getContactDetailsWrapper().setApplicantLname("Applicant");
+
+        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
+        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        wrapper.setIntervenerName("name");
+        wrapper.setIntervenerRepresented(YesOrNo.YES);
+        wrapper.setIntervenerAddress(otherAddress);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, APPLICANT);
+        Addressee expected = Addressee.builder().name("Tracy Applicant").formattedAddress("Applicant Address" + "\nSW11 6HL").build();
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsUnrepresentedRespondent_AndIntervenerRepresented_setAddressee() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+
+        Address address = Address.builder().addressLine1("Respondent Address").postCode("SW11 6HL").build();
+        caseDetails.getData().getContactDetailsWrapper().setRespondentAddress(address);
+        caseDetails.getData().getContactDetailsWrapper().setRespondentFmName("Tracy");
+        caseDetails.getData().getContactDetailsWrapper().setRespondentLname("Respondent");
+
+        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
+        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        wrapper.setIntervenerName("name");
+        wrapper.setIntervenerRepresented(YesOrNo.YES);
+        wrapper.setIntervenerAddress(otherAddress);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, RESPONDENT);
+        Addressee expected = Addressee.builder().name("Tracy Respondent").formattedAddress("Respondent Address" + "\nSW11 6HL").build();
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsIntervenerOne_AndIntervenerNotRepresented_setAddressee() {
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
-            .intervenerName("Name")
-            .intervenerAddress(address).build();
-        caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
+        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        wrapper.setIntervenerAddress(address);
+        wrapper.setIntervenerName("Name");
+        wrapper.setIntervenerRepresented(YesOrNo.NO);
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
@@ -465,12 +561,14 @@ public class DocumentHelperTest {
 
     @Test
     public void whenRecipientIsIntervenerTwo_AndIntervenerNotRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder()
-            .intervenerName("Name")
-            .intervenerAddress(address).build();
-        caseDetails.getData().setIntervenerTwoWrapper(intervenerTwoWrapper);
+        IntervenerTwoWrapper wrapper = new IntervenerTwoWrapper();
+        wrapper.setIntervenerAddress(address);
+        wrapper.setIntervenerName("Name");
+        wrapper.setIntervenerRepresented(YesOrNo.NO);
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
@@ -481,12 +579,14 @@ public class DocumentHelperTest {
 
     @Test
     public void whenRecipientIsIntervenerThree_AndIntervenerNotRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder()
-            .intervenerName("Name")
-            .intervenerAddress(address).build();
-        caseDetails.getData().setIntervenerThreeWrapper(intervenerThreeWrapper);
+        IntervenerThreeWrapper wrapper = new IntervenerThreeWrapper();
+        wrapper.setIntervenerAddress(address);
+        wrapper.setIntervenerName("Name");
+        wrapper.setIntervenerRepresented(YesOrNo.NO);
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
@@ -497,12 +597,14 @@ public class DocumentHelperTest {
 
     @Test
     public void whenRecipientIsIntervenerFour_AndIntervenerNotRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder()
-            .intervenerName("Name")
-            .intervenerAddress(address).build();
-        caseDetails.getData().setIntervenerFourWrapper(intervenerFourWrapper);
+        IntervenerFourWrapper wrapper = new IntervenerFourWrapper();
+        wrapper.setIntervenerAddress(address);
+        wrapper.setIntervenerName("Name");
+        wrapper.setIntervenerRepresented(YesOrNo.NO);
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
