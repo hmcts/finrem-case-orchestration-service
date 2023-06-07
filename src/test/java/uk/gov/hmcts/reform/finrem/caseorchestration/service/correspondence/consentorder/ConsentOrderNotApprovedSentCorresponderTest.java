@@ -7,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
@@ -57,9 +59,17 @@ public class ConsentOrderNotApprovedSentCorresponderTest {
         String intervenerEmailKey = "intervener1SolEmail";
         caseDetails.getData().put(intervenerEmailKey, TEST_SOLICITOR_EMAIL);
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
+        when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .intervenerOneWrapper(IntervenerOneWrapper.builder()
+                    .intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                    .build())
+                .build())
+            .build());
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerOneWrapper.builder().build(),
-            caseDetails)).thenReturn(true);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerOneWrapper.builder()
+            .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build(), caseDetails)).thenReturn(true);
         consentOrderNotApprovedSentCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(caseDetails,
             dataKeysWrapper);

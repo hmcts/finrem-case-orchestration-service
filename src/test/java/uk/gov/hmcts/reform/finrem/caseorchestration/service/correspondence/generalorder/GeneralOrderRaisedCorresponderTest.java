@@ -66,21 +66,15 @@ public class GeneralOrderRaisedCorresponderTest {
 
     @Test
     public void shouldNotSendGeneralOrderEmail() {
+        when(notificationService.isContestedApplication(caseDetails)).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
-            any(CaseDetails.class))).thenReturn(false);
 
         generalOrderRaisedCorresponder.sendCorrespondence(caseDetails);
 
         verify(notificationService, never()).sendConsentedGeneralOrderEmailToRespondentSolicitor(caseDetails);
         verify(notificationService, never()).sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(caseDetails);
-
-        verify(notificationService, never()).sendContestedConsentGeneralOrderEmailIntervenerSolicitor(any(CaseDetails.class),
-            any(SolicitorCaseDataKeysWrapper.class));
-        verify(notificationService, never()).sendContestedGeneralOrderEmailIntervener(any(CaseDetails.class),
-            any(SolicitorCaseDataKeysWrapper.class));
     }
 
     @Test
@@ -119,13 +113,10 @@ public class GeneralOrderRaisedCorresponderTest {
 
     @Test
     public void shouldNotSendContestedGeneralOrderEmailToIntervener_ThenTheEmailIsNotIssued() {
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
-            any(CaseDetails.class))).thenReturn(false);
+        when(notificationService.isContestedApplication(caseDetails)).thenReturn(false);
 
         generalOrderRaisedCorresponder.sendCorrespondence(caseDetails);
 
-        verify(notificationService, never()).sendContestedConsentGeneralOrderEmailIntervenerSolicitor(any(CaseDetails.class),
-            any(SolicitorCaseDataKeysWrapper.class));
         verify(notificationService, never()).sendContestedGeneralOrderEmailIntervener(any(CaseDetails.class),
             any(SolicitorCaseDataKeysWrapper.class));
     }
