@@ -1404,6 +1404,33 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void sendInterimHearingNotificationEmailToIntervenerSolicitor() {
+        CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
+            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
+
+        List<InterimHearingItem> interimHearingItems
+            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+
+        List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
+            .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
+            })).toList();
+
+        when(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(CaseDetails.class), anyMap(),
+            any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
+
+        interimDataMap.forEach(data -> {
+            notificationService.sendInterimHearingNotificationEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(), data,
+                SolicitorCaseDataKeysWrapper.builder().build());
+            verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), data,
+                SolicitorCaseDataKeysWrapper.builder().build());
+        });
+        verify(emailService, times(2)).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
+    }
+
+    @Test
     public void sendConsentedHearingNotificationEmailToApplicantSolicitor() {
         CallbackRequest callbackRequest = buildHearingCallbackRequest(CONSENTED_HEARING_JSON);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();

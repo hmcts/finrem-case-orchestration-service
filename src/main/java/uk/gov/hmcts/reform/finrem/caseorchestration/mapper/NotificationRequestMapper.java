@@ -77,6 +77,12 @@ public class NotificationRequestMapper {
         return buildInterimHearingNotificationRequest(caseDetails, caseDataKeysWrapper);
     }
 
+    public NotificationRequest getNotificationRequestForIntervenerSolicitor(CaseDetails caseDetails,
+                                                                            Map<String, Object> interimHearingData,
+                                                                            SolicitorCaseDataKeysWrapper dataKeysWrapper) {
+        return buildInterimHearingNotificationRequest(caseDetails, dataKeysWrapper, interimHearingData);
+    }
+
     @Deprecated
     public NotificationRequest getNotificationRequestForConsentApplicantSolicitor(CaseDetails caseDetails,
                                                                            Map<String, Object> hearingData) {

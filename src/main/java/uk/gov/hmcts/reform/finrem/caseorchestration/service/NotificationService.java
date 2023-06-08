@@ -874,6 +874,13 @@ public class NotificationService {
             interimHearingData));
     }
 
+    public void sendInterimHearingNotificationEmailToIntervenerSolicitor(CaseDetails caseDetails,
+                                                                         Map<String, Object> interimHearingData,
+                                                                         SolicitorCaseDataKeysWrapper dataKeysWrapper) {
+        sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
+            interimHearingData, dataKeysWrapper));
+    }
+
     @Deprecated
     public void sendInterimNotificationEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
