@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -63,6 +64,8 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     private DocumentConfiguration documentConfiguration;
     @MockBean
     private EmailService emailService;
+    @MockBean
+    private CourtDetailsMapper courtDetailsMapper;
 
     @Captor
     ArgumentCaptor<Map> placeholdersMapArgumentCaptor;

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener;
 
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -25,6 +26,8 @@ public interface IntervenerDetails {
 
     OrganisationPolicy getIntervenerOrganisation();
 
+    Address getIntervenerAddress();
+
     YesOrNo getIntervenerRepresented();
 
     LocalDate getIntervenerDateAdded();
@@ -46,6 +49,8 @@ public interface IntervenerDetails {
     void setIntervenerSolicitorReference(String intervenerSolicitorReference);
 
     void setIntervenerOrganisation(OrganisationPolicy intervenerOrganisation);
+
+    void setIntervenerAddress(Address intervenerAddress);
 
     void setIntervenerRepresented(YesOrNo intervenerRepresented);
 

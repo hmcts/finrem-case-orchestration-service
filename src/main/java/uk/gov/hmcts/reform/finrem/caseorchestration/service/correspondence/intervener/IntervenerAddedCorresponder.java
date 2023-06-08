@@ -6,24 +6,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 
 @Slf4j
 @Component
-public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
-
-    private final IntervenerDocumentService intervenerDocumentService;
+public class IntervenerAddedCorresponder extends IntervenerCorresponder {
 
     public IntervenerAddedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
                                        IntervenerDocumentService intervenerDocumentService) {
-        super(notificationService, bulkPrintService);
-        this.intervenerDocumentService = intervenerDocumentService;
+        super(notificationService, bulkPrintService, intervenerDocumentService);
 
     }
 
@@ -44,54 +39,6 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         }
     }
 
-    @Override
-    protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String auth) {
-        if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
-            this.emailApplicantSolicitor(caseDetails);
-        } else {
-            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-            String recipient = DocumentHelper.PaperNotificationRecipient.APPLICANT.toString();
-            bulkPrintService.sendDocumentForPrint(
-                getAppRepDocumentToPrint(caseDetails, auth,
-                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, recipient, auth);
-        }
-    }
-
-    @Override
-    protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String auth) {
-        if (shouldSendRespondentSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
-            this.emailRespondentSolicitor(caseDetails);
-        } else {
-            log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
-            String recipient = DocumentHelper.PaperNotificationRecipient.RESPONDENT.toString();
-            bulkPrintService.sendDocumentForPrint(
-                getAppRepDocumentToPrint(caseDetails, auth,
-                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, recipient, auth);
-        }
-    }
-
-    protected void sendIntervenerCorrespondence(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails, String auth) {
-        if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
-            log.info("Sending email correspondence to {} for case: {}", intervenerWrapper.getIntervenerType(), caseDetails.getId());
-            String recipientName = intervenerWrapper.getIntervenerSolName();
-            String recipientEmail = intervenerWrapper.getIntervenerSolEmail();
-            String referenceNumber = intervenerWrapper.getIntervenerSolicitorReference();
-            notificationService.sendIntervenerSolicitorAddedEmail(caseDetails, intervenerWrapper,
-                recipientName, recipientEmail, referenceNumber);
-        } else {
-            log.info("Sending letter correspondence to {} for case: {}", intervenerWrapper.getIntervenerType(), caseDetails.getId());
-            String recipient = intervenerWrapper.getPaperNotificationRecipient().toString();
-            caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(
-                intervenerWrapper);
-
-            bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, auth,
-                    intervenerWrapper.getPaperNotificationRecipient()), caseDetails, recipient, auth);
-        }
-    }
-
     public CaseDocument getAppRepDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                                  DocumentHelper.PaperNotificationRecipient recipient) {
         if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
@@ -107,35 +54,8 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken, recipient);
     }
 
-    protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
-        return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
-    }
-
     @Override
-    protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-        IntervenerDetails intervenerDetails = caseDetails.getData()
-            .getCurrentIntervenerChangeDetails().getIntervenerDetails();
-        String recipientName = caseDetails.getData().getAppSolicitorName();
-        String recipientEmail = caseDetails.getData().getAppSolicitorEmail();
-        String referenceNumber = caseDetails.getData().getContactDetailsWrapper().getSolicitorReference();
-        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
-            notificationService.sendIntervenerSolicitorAddedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
-        } else {
-            notificationService.sendIntervenerAddedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
-        }
-    }
-
-    @Override
-    protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
-        IntervenerDetails intervenerDetails = caseDetails.getData()
-            .getCurrentIntervenerChangeDetails().getIntervenerDetails();
-        String recipientName = caseDetails.getData().getRespondentSolicitorName();
-        String recipientEmail = caseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorEmail();
-        String referenceNumber = caseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorReference();
-        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
-            notificationService.sendIntervenerSolicitorAddedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
-        } else {
-            notificationService.sendIntervenerAddedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
-        }
+    protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper) {
+        return notificationService.isIntervenerSolicitorEmailPopulated(intervenerWrapper);
     }
 }
