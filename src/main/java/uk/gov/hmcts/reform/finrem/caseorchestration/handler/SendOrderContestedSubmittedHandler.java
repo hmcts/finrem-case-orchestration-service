@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderCorresponder;
 
 import java.util.Map;
 import java.util.Objects;
@@ -32,6 +33,7 @@ public class SendOrderContestedSubmittedHandler
     private final FeatureToggleService featureToggleService;
     private final NotificationService notificationService;
     private final CcdService ccdService;
+    private final ContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -81,15 +83,7 @@ public class SendOrderContestedSubmittedHandler
         Map<String, Object> caseData = caseDetails.getData();
         if (!caseDataService.isPaperApplication(caseData) && Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
             log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-            if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-                log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
-                notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
-            }
-
-            if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-                log.info("Sending 'Contest Order Approved' email notification to Respondent Solicitor");
-                notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
-            }
+            contestedSendOrderCorresponder.sendCorrespondence(caseDetails);
         }
     }
 }

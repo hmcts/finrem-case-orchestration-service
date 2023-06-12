@@ -137,4 +137,9 @@ public class IntervenerCorresponder extends FinremSingleLetterOrEmailAllPartiesC
             notificationService.sendIntervenerAddedEmail(caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
         }
     }
+
+    @Override
+    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        log.info("require refactor to use this method");
+    }
 }
