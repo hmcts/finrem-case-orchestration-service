@@ -624,26 +624,6 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
-    public boolean isIntervenerOneRepresentedByASolicitor() {
-        return YesOrNo.YES.equals(getIntervenerOneWrapper().getIntervenerRepresented());
-    }
-
-    @JsonIgnore
-    public boolean isIntervenerTwoRepresentedByASolicitor() {
-        return YesOrNo.YES.equals(getIntervenerTwoWrapper().getIntervenerRepresented());
-    }
-
-    @JsonIgnore
-    public boolean isIntervenerThreeRepresentedByASolicitor() {
-        return YesOrNo.YES.equals(getIntervenerThreeWrapper().getIntervenerRepresented());
-    }
-
-    @JsonIgnore
-    public boolean isIntervenerFourRepresentedByASolicitor() {
-        return YesOrNo.YES.equals(getIntervenerFourWrapper().getIntervenerRepresented());
-    }
-
-    @JsonIgnore
     public boolean isPaperCase() {
         return YesOrNo.YES.equals(paperApplication);
     }

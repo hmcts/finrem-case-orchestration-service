@@ -73,7 +73,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setIntervenerOneWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
-        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails, finremCaseDetails)).thenReturn(false);
+        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(false);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -118,7 +118,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setIntervenerOneWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
-        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails, finremCaseDetails)).thenReturn(false);
+        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(false);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -138,7 +138,7 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
-        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails, finremCaseDetails)).thenReturn(false);
+        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(false);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -158,7 +158,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setIntervenerThreeWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
-        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails, finremCaseDetails)).thenReturn(false);
+        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(false);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -178,7 +178,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setIntervenerFourWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
-        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails, finremCaseDetails)).thenReturn(false);
+        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(false);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(intervenerDocumentService, times(1))
@@ -201,7 +201,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setIntervenerOneWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
-        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails, finremCaseDetails)).thenReturn(true);
+        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
@@ -226,7 +226,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
-        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails, finremCaseDetails)).thenReturn(true);
+        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
@@ -249,7 +249,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
-        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails, finremCaseDetails)).thenReturn(true);
+        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
@@ -272,7 +272,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
-        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails, finremCaseDetails)).thenReturn(true);
+        when(intervenerAddedCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(true);
         intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
