@@ -33,7 +33,7 @@ public class ApprovedOrderNoticeOfHearingCorresponderTest extends HearingCorresp
     public void setUp() throws Exception {
         objectMapper = new ObjectMapper();
         applicantAndRespondentMultiLetterCorresponder =
-            new ApprovedOrderNoticeOfHearingCorresponder(bulkPrintService, notificationService,
+            new ApprovedOrderNoticeOfHearingCorresponder(bulkPrintService, notificationService, finremCaseDetailsMapper,
                 objectMapper, documentHelper);
         caseDetails = caseDetailsFromResource("/fixtures/general-application-directions.json", objectMapper);
         caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());

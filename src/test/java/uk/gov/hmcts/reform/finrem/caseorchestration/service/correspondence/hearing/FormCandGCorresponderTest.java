@@ -45,7 +45,7 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         caseDetails = caseDetails(NO_VALUE);
         applicantAndRespondentMultiLetterCorresponder =
-            new FormCandGCorresponder(bulkPrintService, notificationService,
+            new FormCandGCorresponder(bulkPrintService, notificationService, finremCaseDetailsMapper,
                 new DocumentHelper(objectMapper, new CaseDataService(objectMapper), service,finremCaseDetailsMapper), objectMapper);
     }
 

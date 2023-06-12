@@ -11,30 +11,34 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseD
 
 @Component
 @Slf4j
-public class ConsentOrderNotApprovedSentCorresponder extends CaseDetailsEmailOnlyAllSolicitorsCorresponder {
+public class ContestedIntermHearingCorresponder extends CaseDetailsEmailOnlyAllSolicitorsCorresponder {
 
     @Autowired
-    public ConsentOrderNotApprovedSentCorresponder(NotificationService notificationService,
-                                                   FinremCaseDetailsMapper firemCaseDetailsMapper) {
+    public ContestedIntermHearingCorresponder(NotificationService notificationService,
+                                              FinremCaseDetailsMapper firemCaseDetailsMapper) {
         super(notificationService, firemCaseDetailsMapper);
     }
 
     @Override
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
-        log.info("Sending email notification to Applicant Solicitor about consent order not approved being sent for case: {}", caseDetails.getId());
-        notificationService.sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(caseDetails);
+        if (notificationService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            log.info("Sending email notification to Applicant Solicitor for 'interim hearing' for case: {}", caseDetails.getId());
+            notificationService.sendInterimNotificationEmailToApplicantSolicitor(caseDetails);
+        }
     }
 
     @Override
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
-        log.info("Sending email notification to Respondent Solicitor about consent order not approved being sent for case: {}", caseDetails.getId());
-        notificationService.sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(caseDetails);
+        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+            log.info("Sending email notification to Respondent Solicitor for 'interim hearing' for case: {}", caseDetails.getId());
+            notificationService.sendInterimNotificationEmailToRespondentSolicitor(caseDetails);
+        }
     }
 
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
-        log.info("Sending email notification to Intervener Solicitor about consent order not approved being sent for case: {}", caseDetails.getId());
-        notificationService.sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(caseDetails,
+        log.info("Sending email notification to Intervener Solicitor for 'interim hearing' for case: {}", caseDetails.getId());
+        notificationService.sendInterimNotificationEmailToIntervenerSolicitor(caseDetails,
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
 }

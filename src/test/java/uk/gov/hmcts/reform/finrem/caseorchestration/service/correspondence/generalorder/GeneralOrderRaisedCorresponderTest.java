@@ -6,9 +6,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,11 +26,14 @@ public class GeneralOrderRaisedCorresponderTest {
     @Mock
     CaseDataService caseDataService;
 
+    @Mock
+    FinremCaseDetailsMapper finremCaseDetailsMapper;
+
     private CaseDetails caseDetails;
 
     @Before
     public void setUp() throws Exception {
-        generalOrderRaisedCorresponder = new GeneralOrderRaisedCorresponder(notificationService, caseDataService);
+        generalOrderRaisedCorresponder = new GeneralOrderRaisedCorresponder(notificationService, finremCaseDetailsMapper, caseDataService);
         caseDetails = CaseDetails.builder().build();
     }
 
@@ -59,6 +65,7 @@ public class GeneralOrderRaisedCorresponderTest {
 
     @Test
     public void shouldNotSendGeneralOrderEmail() {
+        when(notificationService.isContestedApplication(caseDetails)).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
 
@@ -101,6 +108,16 @@ public class GeneralOrderRaisedCorresponderTest {
 
         verify(notificationService, never()).sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(caseDetails);
+    }
+
+    @Test
+    public void shouldNotSendContestedGeneralOrderEmailToIntervener_ThenTheEmailIsNotIssued() {
+        when(notificationService.isContestedApplication(caseDetails)).thenReturn(false);
+
+        generalOrderRaisedCorresponder.sendCorrespondence(caseDetails);
+
+        verify(notificationService, never()).sendContestedGeneralOrderEmailIntervener(any(CaseDetails.class),
+            any(SolicitorCaseDataKeysWrapper.class));
     }
 
 }
