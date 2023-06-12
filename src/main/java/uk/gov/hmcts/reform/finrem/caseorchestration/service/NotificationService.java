@@ -1140,6 +1140,12 @@ public class NotificationService {
         return intervenerDetails.getIntervenerSolEmail() != null;
     }
 
+    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        return intervenerWrapper.isIntervenerSolicitorPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
+    }
+
     public boolean isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         return intervenerWrapper.isIntervenerSolicitorPopulated()
             && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
