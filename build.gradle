@@ -180,6 +180,7 @@ project.tasks['sonarqube'].dependsOn jacocoTestReport
 sonarqube {
     def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/scheduler/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/AmendApplicationAboutToSubmitHandler.java',

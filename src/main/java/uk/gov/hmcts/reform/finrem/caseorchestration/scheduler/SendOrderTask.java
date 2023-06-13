@@ -51,7 +51,7 @@ public class SendOrderTask implements Runnable {
         log.info("Scheduled task SendOrderTask isEnabled {}", isSendOrderTaskEnabled);
         if (isSendOrderTaskEnabled) {
             log.info("Scheduled task SendOrderTask started to run for selected cases");
-            List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList("printAosPackCaseReferenceList.csv");
+            List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList("sendOrderCaseReferenceList.csv");
             int count = 0;
             int batchCount = 1;
             for (CaseReference caseReference : caseReferences) {
