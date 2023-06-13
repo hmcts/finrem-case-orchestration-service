@@ -58,4 +58,9 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
     protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper) {
         return notificationService.isIntervenerSolicitorEmailPopulated(intervenerWrapper);
     }
+
+    @Override
+    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        log.info("Not sending email correspondence to Intervener for case: {}", caseDetails.getId());
+    }
 }

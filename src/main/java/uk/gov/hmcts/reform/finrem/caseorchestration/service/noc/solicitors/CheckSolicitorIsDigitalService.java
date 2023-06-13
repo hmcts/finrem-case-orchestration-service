@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
@@ -23,6 +24,10 @@ public class CheckSolicitorIsDigitalService {
 
     public boolean isRespondentSolicitorDigital(String caseId) {
         return isSolicitorDigital(caseId, RESP_SOLICITOR_POLICY);
+    }
+
+    public boolean isIntervenerSolicitorDigital(String caseId, CaseRole caseRole) {
+        return isSolicitorDigital(caseId, caseRole.getValue());
     }
 
     public boolean isIntervenerSolicitorDigital(String caseId, String caseRole) {

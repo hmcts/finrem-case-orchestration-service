@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderCorresponder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +30,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEND_ORDER_POST_STATE_OPTION_FIELD;
 
@@ -45,6 +45,8 @@ public class SendOrderContestedSubmittedHandlerTest {
     private FeatureToggleService featureToggleService;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private ContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
     @Mock
     private CcdService ccdService;
@@ -113,11 +115,10 @@ public class SendOrderContestedSubmittedHandlerTest {
 
     @Test
     public void givenAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmail() {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
-        verify(notificationService).sendContestOrderApprovedEmailApplicant(any(CaseDetails.class));
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
@@ -126,24 +127,15 @@ public class SendOrderContestedSubmittedHandlerTest {
         sendOrderContestedSubmittedHandler.handle(buildCallbackRequest(), AUTH_TOKEN);
 
         verifyNoInteractions(notificationService);
+        verifyNoInteractions(contestedSendOrderCorresponder);
     }
 
     @Test
     public void givenRespAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmailToRespondent() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
-        verify(notificationService).sendContestOrderApprovedEmailRespondent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void givenRespNotAgreedToReceiveEmails_WhenHandle_ThenDoNotSendContestOrderApprovedEmailToRespondent() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
-        sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
-
-        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(CaseDetails.class));
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     private CallbackRequest buildCallbackRequest() {
