@@ -40,7 +40,7 @@ def versions = [
         amClient             : '1.7.3',
         sendLetterClient     : '3.0.16',
         elasticSearch        : '7.17.9',
-        jacksonDatabind      : '2.15.2'
+        jacksonDatabind      : '2.13.2'
 ]
 
 project.ext {
