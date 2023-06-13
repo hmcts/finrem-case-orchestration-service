@@ -39,7 +39,8 @@ def versions = [
         tika                 : '2.4.1',
         amClient             : '1.7.3',
         sendLetterClient     : '3.0.16',
-        elasticSearch        : '7.17.9'
+        elasticSearch        : '7.17.9',
+        jacksonDatabind      : '2.15.2'
 ]
 
 project.ext {
@@ -364,6 +365,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
     implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
     implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
 
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
