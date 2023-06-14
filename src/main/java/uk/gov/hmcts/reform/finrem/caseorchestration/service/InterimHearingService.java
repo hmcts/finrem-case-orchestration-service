@@ -10,12 +10,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.IOException;
@@ -90,6 +93,7 @@ public class InterimHearingService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final InterimHearingHelper interimHearingHelper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public void submitInterimHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
         log.info("In submitInterimHearing for case id {}", caseDetails.getId());
@@ -382,6 +386,19 @@ public class InterimHearingService {
         if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
             log.info("Sending email notification to Respondent Solicitor about interim hearing for case id {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(caseDetails, interimHearingData);
+        }
+        if (notificationService.isContestedApplication(caseDetails)) {
+            final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+            final List<IntervenerWrapper> interveners =  finremCaseDetails.getData().getInterveners();
+            interveners.forEach(intervenerWrapper -> {
+                if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)) {
+                    log.info("Sending email notification to {} Solicitor about interim hearing for case id {}",
+                        intervenerWrapper.getIntervenerType().getTypeValue(),
+                        caseDetails.getId());
+                    notificationService.sendInterimHearingNotificationEmailToIntervenerSolicitor(caseDetails, interimHearingData,
+                        notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
+                }
+            });
         }
     }
 }

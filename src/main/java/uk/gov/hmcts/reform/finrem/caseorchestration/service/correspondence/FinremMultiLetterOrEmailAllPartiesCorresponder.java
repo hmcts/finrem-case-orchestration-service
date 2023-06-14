@@ -3,9 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+
+import java.util.List;
 
 @Component
 @Slf4j
@@ -35,6 +39,19 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         }
     }
 
+    public void sendIntervenerCorrespondence(String authorisationToken, FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        List<IntervenerWrapper> interveners = caseData.getInterveners();
+        interveners.forEach(intervenerWrapper -> {
+            if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
+                log.info("Sending email correspondence to {} for case: {}",
+                    intervenerWrapper.getIntervenerType().getTypeValue(),
+                    caseDetails.getId());
+                this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
+            }
+        });
+    }
+
     protected boolean shouldSendApplicantSolicitorEmail(FinremCaseDetails caseDetails) {
         return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
     }
@@ -43,5 +60,8 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
+    protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
+    }
 
 }
