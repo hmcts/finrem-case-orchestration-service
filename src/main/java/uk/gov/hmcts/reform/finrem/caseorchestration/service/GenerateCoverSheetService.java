@@ -87,6 +87,34 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 
+    public CaseDocument generateIntervener1CoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
+        log.info("Generating Intervener One cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
+    }
+
+    public CaseDocument generateIntervener2CoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
+        log.info("Generating Intervener Two cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO);
+    }
+
+    public CaseDocument generateIntervener3CoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
+        log.info("Generating Intervener Three cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE);
+    }
+
+    public CaseDocument generateIntervener4CoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
+        log.info("Generating Intervener Four cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR);
+    }
+
     @Deprecated
     private CaseDocument generateCoverSheet(CaseDetails caseDetails, String authorisationToken, String partyAddressCcdFieldName,
                                             String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,

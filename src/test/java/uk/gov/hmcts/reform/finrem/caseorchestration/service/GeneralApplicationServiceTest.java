@@ -7,16 +7,22 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 
-import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -36,7 +42,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
@@ -62,8 +67,6 @@ public class GeneralApplicationServiceTest {
     public static final String DOC_IN_EXISTING_COLLECTION_URL =
         "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee";
     public static final String USER_NAME = "Tony";
-    private static final String GA_SINGLE_JSON = "/fixtures/contested/general-application-single.json";
-    private static final String GA_DOUBLE_JSON = "/fixtures/contested/general-application-double.json";
 
     private GeneralApplicationService generalApplicationService;
     @Mock
@@ -72,6 +75,8 @@ public class GeneralApplicationServiceTest {
     private DocumentHelper documentHelper;
     @Mock
     private GenericDocumentService genericDocumentService;
+    @Mock
+    private AssignCaseAccessService accessService;
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
     private CaseDetails caseDetails;
@@ -85,7 +90,7 @@ public class GeneralApplicationServiceTest {
         caseDetails = CaseDetails.builder().data(new LinkedHashMap<>()).build();
         helper = new GeneralApplicationHelper(objectMapper, genericDocumentService);
         generalApplicationService = new GeneralApplicationService(documentHelper,
-            objectMapper, idamService, genericDocumentService, helper);
+            objectMapper, idamService, genericDocumentService, accessService, helper);
 
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
@@ -95,16 +100,15 @@ public class GeneralApplicationServiceTest {
 
     @Test
     public void updateAndSortGeneralApplications() {
-        CaseDetails caseDetails = buildCaseDetails(GA_DOUBLE_JSON);
-        CaseDetails caseDetailsBefore = buildCaseDetails(GA_SINGLE_JSON);
 
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetailsBefore).build();
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
-        Map<String, Object> caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
+        when(accessService.getActiveUserCaseRole(any(), any())).thenReturn("Case");
+
+        FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
 
         List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
-            = helper.covertToGeneralApplicationData(caseData.get(GENERAL_APPLICATION_COLLECTION));
+            = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
         assertEquals(2, generalApplicationCollectionDataList.size());
         assertEquals(LocalDate.now(),
@@ -277,12 +281,52 @@ public class GeneralApplicationServiceTest {
         return CaseDetails.builder().state("applicationIssued").build();
     }
 
-    private CaseDetails buildCaseDetails(String path) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return CallbackRequest.builder().caseDetails(caseDetails).build().getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    protected FinremCallbackRequest buildCallbackRequest() {
+        GeneralApplicationItems generalApplicationItems =
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom("Applicant").generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+                .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
+                    LocalDate.of(2022, 8, 2)).build();
+        GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder().build();
+        GeneralApplicationsCollection generalApplicationsBefore = GeneralApplicationsCollection.builder().build();
+        generalApplications.setValue(generalApplicationItems);
+        generalApplicationsBefore.setId(UUID.randomUUID());
+        generalApplications.setId(UUID.randomUUID());
+        GeneralApplicationItems generalApplicationItemsAdded =
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom("Intervener").generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours")
+                .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(LocalDate.now()).build();
+        generalApplicationsBefore.setValue(generalApplicationItemsAdded);
+        List<GeneralApplicationsCollection> generalApplicationsCollection = new ArrayList<>();
+        List<GeneralApplicationsCollection> generalApplicationsCollectionBefore = new ArrayList<>();
+        generalApplicationsCollectionBefore.add(generalApplications);
+        generalApplicationsCollection.add(generalApplications);
+        generalApplicationsCollection.add(generalApplicationsBefore);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                .generalApplicationCreatedBy("Claire Mumford").generalApplicationPreState("applicationIssued")
+                .generalApplications(generalApplicationsCollection)
+                .build()).build();
+        FinremCaseData caseDataBefore = FinremCaseData.builder()
+            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                .generalApplicationCreatedBy("Claire Mumford").generalApplicationPreState("applicationIssued")
+                .generalApplications(generalApplicationsCollectionBefore)
+                .build()).build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(12345L)
+            .state(State.CASE_ADDED)
+            .data(caseData)
+            .build();
+        FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(12345L)
+            .state(State.CASE_ADDED)
+            .data(caseDataBefore)
+            .build();
+        return FinremCallbackRequest.builder()
+            .caseDetails(finremCaseDetails)
+            .caseDetailsBefore(finremCaseDetailsBefore)
+            .build();
     }
 }

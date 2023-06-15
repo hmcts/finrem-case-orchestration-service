@@ -3,12 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.webjars.NotFoundException;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.Map;
 import java.util.Objects;
@@ -32,9 +34,29 @@ public class AddresseeGeneratorHelper {
 
     private static Addressee getAddressee(FinremCaseData caseData,
                                           DocumentHelper.PaperNotificationRecipient recipient) {
-        return recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT
-            ? getApplicantAddressee(caseData)
-            : getRespondentAddressee(caseData);
+        switch (recipient) {
+            case APPLICANT -> {
+                return getApplicantAddressee(caseData);
+            }
+            case RESPONDENT -> {
+                return getRespondentAddressee(caseData);
+            }
+            case INTERVENER_ONE -> {
+                return getIntvrAddressee(caseData.getIntervenerOneWrapper());
+            }
+            case INTERVENER_TWO -> {
+                return getIntvrAddressee(caseData.getIntervenerTwoWrapper());
+            }
+            case INTERVENER_THREE -> {
+                return getIntvrAddressee(caseData.getIntervenerThreeWrapper());
+            }
+            case INTERVENER_FOUR -> {
+                return getIntvrAddressee(caseData.getIntervenerFourWrapper());
+            }
+            default -> {
+                throw new NotFoundException("The addressee was not recognised as a valid recipient");
+            }
+        }
     }
 
     private static Addressee getApplicantAddressee(FinremCaseData caseData) {
@@ -48,7 +70,6 @@ public class AddresseeGeneratorHelper {
         return caseData.isApplicantRepresentedByASolicitor()
             ? caseData.getAppSolicitorName()
             : caseData.getFullApplicantName();
-
     }
 
     private static Address getAppAddress(FinremCaseData caseData) {
@@ -75,7 +96,23 @@ public class AddresseeGeneratorHelper {
         return caseData.isRespondentRepresentedByASolicitor()
             ? caseData.getContactDetailsWrapper().getRespondentSolicitorAddress()
             : caseData.getContactDetailsWrapper().getRespondentAddress();
+    }
 
+    private static Addressee getIntvrAddressee(IntervenerWrapper wrapper) {
+        return Addressee.builder()
+            .name(getIntvrName(wrapper))
+            .formattedAddress(formatAddressForLetterPrinting(getIntvrAddress(wrapper)))
+            .build();
+    }
+
+    private static String getIntvrName(IntervenerWrapper wrapper) {
+        return wrapper.isIntervenerSolicitorPopulated()
+            ? wrapper.getIntervenerSolName()
+            : wrapper.getIntervenerName();
+    }
+
+    private static Address getIntvrAddress(IntervenerWrapper wrapper) {
+        return wrapper.getIntervenerAddress();
     }
 
     public static String formatAddressForLetterPrinting(Address address) {

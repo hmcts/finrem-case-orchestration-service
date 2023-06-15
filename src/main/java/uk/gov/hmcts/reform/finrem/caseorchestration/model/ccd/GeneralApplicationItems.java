@@ -26,20 +26,6 @@ public class GeneralApplicationItems {
     private CaseDocument generalApplicationDraftOrder;
     @JsonProperty("generalApplicationReceivedFrom")
     private String generalApplicationReceivedFrom;
-    @JsonProperty("applicantGeneralApplicationReceivedFrom")
-    private String applicantGeneralApplicationReceivedFrom;
-    @JsonProperty("respondentGeneralApplicationReceivedFrom")
-    private String respondentGeneralApplicationReceivedFrom;
-    @JsonProperty("intervener1GeneralApplicationReceivedFrom")
-    private String intervener1GeneralApplicationReceivedFrom;
-    @JsonProperty("intervener2GeneralApplicationReceivedFrom")
-    private String intervener2GeneralApplicationReceivedFrom;
-    @JsonProperty("intervener3GeneralApplicationReceivedFrom")
-    private String intervener3GeneralApplicationReceivedFrom;
-    @JsonProperty("intervener4GeneralApplicationReceivedFrom")
-    private String intervener4GeneralApplicationReceivedFrom;
-    @JsonProperty("generalApplicationUserRole")
-    private String generalApplicationUserRole;
     @JsonProperty("generalApplicationTimeEstimate")
     private String generalApplicationTimeEstimate;
     @JsonProperty("generalApplicationHearingRequired")

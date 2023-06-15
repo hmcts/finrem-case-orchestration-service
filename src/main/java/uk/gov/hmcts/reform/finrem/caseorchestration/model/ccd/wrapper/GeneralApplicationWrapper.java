@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
@@ -30,6 +31,7 @@ import java.util.List;
 public class GeneralApplicationWrapper {
     private YesOrNo generalApplicationDirectionsHearingRequired;
     private EvidenceParty generalApplicationReceivedFrom;
+    private ApplicantAndRespondentEvidenceParty appRespGeneralApplicationReceivedFrom;
     private String generalApplicationDirectionsHearingTime;
     private String generalApplicationDirectionsHearingTimeEstimate;
     private String generalApplicationDirectionsAdditionalInformation;
@@ -54,7 +56,6 @@ public class GeneralApplicationWrapper {
     private CaseDocument generalApplicationDocument;
     private CaseDocument generalApplicationLatestDocument;
     private CaseDocument generalApplicationDraftOrder;
-    private String generalApplicationUserRole;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate generalApplicationLatestDocumentDate;
@@ -63,6 +64,11 @@ public class GeneralApplicationWrapper {
     private String generalApplicationOutcomeOther;
     private GeneralApplicationOutcome generalApplicationOutcome;
     private List<GeneralApplicationsCollection> generalApplications;
+    private List<GeneralApplicationsCollection> appRespGeneralApplications;
+    private List<GeneralApplicationsCollection> intervener1GeneralApplications;
+    private List<GeneralApplicationsCollection> intervener2GeneralApplications;
+    private List<GeneralApplicationsCollection> intervener3GeneralApplications;
+    private List<GeneralApplicationsCollection> intervener4GeneralApplications;
     private String generalApplicationTracking;
     private String generalApplicationRejectReason;
     private DynamicList generalApplicationList;

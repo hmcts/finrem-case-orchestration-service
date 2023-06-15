@@ -19,12 +19,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESP_GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_GENERAL_APPLICATION_COLLECTION;
 
 @Slf4j
 @Component
@@ -86,9 +93,19 @@ public class RejectGeneralApplicationSubmittedHandler
         DynamicList dynamicList = generalApplicationHelper.objectToDynamicList(caseDetails.getData().get(GENERAL_APPLICATION_LIST));
         String valueCode = dynamicList.getValueCode();
 
-        List<GeneralApplicationCollectionData> applicationCollectionDataList =
-            objectMapper.convertValue(caseDetailsBefore.getData().get(GENERAL_APPLICATION_COLLECTION), new TypeReference<>() {
-            });
+        List<String> generalApplicationCollections = Arrays.asList(
+            GENERAL_APPLICATION_COLLECTION, INTERVENER1_GENERAL_APPLICATION_COLLECTION, INTERVENER2_GENERAL_APPLICATION_COLLECTION,
+            INTERVENER3_GENERAL_APPLICATION_COLLECTION, INTERVENER4_GENERAL_APPLICATION_COLLECTION, APP_RESP_GENERAL_APPLICATION_COLLECTION
+        );
+
+        List<GeneralApplicationCollectionData> applicationCollectionDataList = new ArrayList<>();
+
+        generalApplicationCollections.forEach(x -> {
+            if (caseDetailsBefore.getData().get(x) != null) {
+                applicationCollectionDataList.addAll(objectMapper.convertValue(caseDetailsBefore.getData().get(x), new TypeReference<>() {
+                }));
+            }
+        });
 
         Optional<GeneralApplicationCollectionData> rejectedApplication = applicationCollectionDataList.stream()
             .filter(document -> document.getId().equals(valueCode))

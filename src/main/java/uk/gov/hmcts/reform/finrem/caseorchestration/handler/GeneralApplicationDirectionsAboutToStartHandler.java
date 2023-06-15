@@ -1,37 +1,42 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
-
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class GeneralApplicationDirectionsAboutToStartHandler implements CallbackHandler<Map<String, Object>>, GeneralApplicationHandler {
+public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallbackHandler implements GeneralApplicationHandler {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    public GeneralApplicationDirectionsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
+                                                           GeneralApplicationDirectionsService service) {
+        super(finremCaseDetailsMapper);
+        this.helper = helper;
+        this.service = service;
+        this.finremCaseDetailsMapper = finremCaseDetailsMapper;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -41,23 +46,25 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = caseDetails.getId().toString();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails());
+        String caseId = finremCaseDetails.getId().toString();
         log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
 
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = finremCaseDetails.getData();
+        
         service.startGeneralApplicationDirections(caseDetails);
 
         List<GeneralApplicationCollectionData> outcomeList = helper.getOutcomeList(caseData);
         AtomicInteger index = new AtomicInteger(0);
-        if (outcomeList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
+        if (outcomeList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             log.info("setting direction list if existing ga not moved to collection for Case ID: {}", caseId);
             setDirectionListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
         } else {
             if (outcomeList.isEmpty()) {
-                return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of("There are no general application available for issue direction.")).build();
             }
             List<DynamicListElement> dynamicListElements = outcomeList.stream()
@@ -66,12 +73,12 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
                 .collect(Collectors.toList());
 
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
-            caseData.put(GENERAL_APPLICATION_DIRECTIONS_LIST, dynamicList);
+            caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicList);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void setDirectionListForNonCollectionGeneralApplication(Map<String, Object> caseData,
+    private void setDirectionListForNonCollectionGeneralApplication(FinremCaseData caseData,
                                                                     AtomicInteger index,
                                                                     String userAuthorisation, String caseId) {
         GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);
@@ -82,7 +89,7 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
         dynamicListElementsList.add(dynamicListElements);
 
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
-        caseData.put(GENERAL_APPLICATION_DIRECTIONS_LIST, dynamicList);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicList);
     }
 
 }

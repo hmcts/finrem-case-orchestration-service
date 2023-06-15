@@ -9,8 +9,9 @@ import java.util.Arrays;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
-public enum ApplicantEvidenceParty {
-    APPLICANT("applicant");
+public enum ApplicantAndRespondentEvidenceParty {
+    APPLICANT("applicant"),
+    RESPONDENT("respondent");
 
     private final String value;
 
@@ -19,8 +20,8 @@ public enum ApplicantEvidenceParty {
         return value;
     }
 
-    public static EvidenceParty forValue(String value) {
-        return Arrays.stream(EvidenceParty.values())
+    public static ApplicantAndRespondentEvidenceParty forValue(String value) {
+        return Arrays.stream(ApplicantAndRespondentEvidenceParty.values())
             .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }

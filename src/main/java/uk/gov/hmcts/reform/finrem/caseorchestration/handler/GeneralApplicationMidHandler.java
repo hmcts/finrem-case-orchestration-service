@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -13,14 +11,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Slf4j
 @Service
@@ -28,14 +29,12 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationService service;
-    private final ObjectMapper objectMapper;
 
     public GeneralApplicationMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-                                        GeneralApplicationService service, ObjectMapper objectMapper) {
+                                        GeneralApplicationService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
-        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -54,37 +53,110 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
-        List<GeneralApplicationsCollection> generalApplications = caseData.getGeneralApplicationWrapper().getGeneralApplications();
-        if (generalApplications == null || generalApplications.isEmpty()) {
-            log.info("Please complete the general application for case Id {}", caseDetails.getId());
-            errors.add("Please complete the General Application. No information has been entered for this application.");
-        }
-
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
-
         String loggedInUserCaseRole = service.getActiveUser(caseDetails.getId().toString(), userAuthorisation);
+        caseData.setCurrentUserCaseRoleLabel(loggedInUserCaseRole);
         log.info("Logged in user case role {}", loggedInUserCaseRole);
 
-        List<GeneralApplicationsCollection> generalApplicationsBefore = caseDataBefore.getGeneralApplicationWrapper().getGeneralApplications();
+        List<GeneralApplicationsCollection> generalApplications =
+            caseData.getGeneralApplicationWrapper().getGeneralApplications();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+        List<GeneralApplicationsCollection> generalApplicationsBefore =
+            caseDataBefore.getGeneralApplicationWrapper().getGeneralApplications();
+        List<GeneralApplicationsCollection> intervener1GeneralApplications =
+            caseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications();
+        List<GeneralApplicationsCollection> intervener1GeneralApplicationsBefore =
+            caseDataBefore.getGeneralApplicationWrapper().getIntervener1GeneralApplications();
+        List<GeneralApplicationsCollection> intervener2GeneralApplications =
+            caseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications();
+        List<GeneralApplicationsCollection> intervener2GeneralApplicationsBefore =
+            caseDataBefore.getGeneralApplicationWrapper().getIntervener2GeneralApplications();
+        List<GeneralApplicationsCollection> intervener3GeneralApplications =
+            caseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications();
+        List<GeneralApplicationsCollection> intervener3GeneralApplicationsBefore =
+            caseDataBefore.getGeneralApplicationWrapper().getIntervener3GeneralApplications();
+        List<GeneralApplicationsCollection> intervener4GeneralApplications =
+            caseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications();
+        List<GeneralApplicationsCollection> intervener4GeneralApplicationsBefore =
+            caseDataBefore.getGeneralApplicationWrapper().getIntervener4GeneralApplications();
+        List<GeneralApplicationsCollection> appRespGeneralApplications =
+            caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications();
+        List<GeneralApplicationsCollection> appRespGeneralApplicationsBefore =
+            caseDataBefore.getGeneralApplicationWrapper().getAppRespGeneralApplications();
 
-        List<GeneralApplicationCollectionData> applicationCollectionDataListBefore =
-            objectMapper.convertValue(generalApplicationsBefore, new TypeReference<>() {
-            });
-
-        List<GeneralApplicationCollectionData> applicationCollectionDataList =
-            objectMapper.convertValue(generalApplications, new TypeReference<>() {
-            });
-
-        List<GeneralApplicationCollectionData> generalApplicationDataBefore = service.getGeneralApplicationsForUserRole(loggedInUserCaseRole,
-            applicationCollectionDataList);
-        List<GeneralApplicationCollectionData> generalApplicationData = service.getGeneralApplicationsForUserRole(loggedInUserCaseRole,
-            applicationCollectionDataListBefore);
-
-        if (generalApplicationDataBefore != null && generalApplicationData != null && (generalApplicationDataBefore.size() == generalApplicationData.size())) {
-            log.info("Please complete the general application for case Id {}", caseDetails.getId());
-            errors.add("Any changes to an existing General Applications will not be saved. "
-                + "Please add a new General Application in order to progress.");
+        switch (loggedInUserCaseRole) {
+            case INTERVENER1 -> {
+                if (intervener1GeneralApplicationsBefore != null && intervener1GeneralApplications != null
+                    && (intervener1GeneralApplicationsBefore.size() == intervener1GeneralApplications.size())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Any changes to an existing General Applications will not be saved. "
+                        + "Please add a new General Application in order to progress.");
+                }
+                if ((intervener1GeneralApplications == null || intervener1GeneralApplications.isEmpty())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Please complete the General Application. No information has been entered for this application.");
+                }
+            }
+            case INTERVENER2 -> {
+                if (intervener2GeneralApplicationsBefore != null && intervener2GeneralApplications != null
+                    && (intervener2GeneralApplicationsBefore.size() == intervener2GeneralApplications.size())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Any changes to an existing General Applications will not be saved. "
+                        + "Please add a new General Application in order to progress.");
+                }
+                if ((intervener2GeneralApplications == null || intervener2GeneralApplications.isEmpty())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Please complete the General Application. No information has been entered for this application.");
+                }
+            }
+            case INTERVENER3 -> {
+                if (intervener3GeneralApplicationsBefore != null && intervener3GeneralApplications != null
+                    && (intervener3GeneralApplicationsBefore.size() == intervener3GeneralApplications.size())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Any changes to an existing General Applications will not be saved. "
+                        + "Please add a new General Application in order to progress.");
+                }
+                if ((intervener3GeneralApplications == null || intervener3GeneralApplications.isEmpty())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Please complete the General Application. No information has been entered for this application.");
+                }
+            }
+            case INTERVENER4 -> {
+                if (intervener4GeneralApplicationsBefore != null && intervener4GeneralApplications
+                    != null && (intervener4GeneralApplicationsBefore.size() == intervener4GeneralApplications.size())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Any changes to an existing General Applications will not be saved. "
+                        + "Please add a new General Application in order to progress.");
+                }
+                if ((intervener4GeneralApplications == null || intervener4GeneralApplications.isEmpty())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Please complete the General Application. No information has been entered for this application.");
+                }
+            }
+            case APPLICANT, RESPONDENT -> {
+                if (appRespGeneralApplicationsBefore != null && appRespGeneralApplications
+                    != null && (appRespGeneralApplicationsBefore.size() == appRespGeneralApplications.size())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Any changes to an existing General Applications will not be saved. "
+                        + "Please add a new General Application in order to progress.");
+                }
+                if ((appRespGeneralApplications == null || appRespGeneralApplications.isEmpty())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Please complete the General Application. No information has been entered for this application.");
+                }
+            }
+            default -> {
+                if (generalApplicationsBefore != null && generalApplications
+                    != null && (generalApplicationsBefore.size() == generalApplications.size())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Any changes to an existing General Applications will not be saved. "
+                        + "Please add a new General Application in order to progress.");
+                }
+                if ((generalApplications == null || generalApplications.isEmpty())) {
+                    log.info("Please complete the general application for case Id {}", caseDetails.getId());
+                    errors.add("Please complete the General Application. No information has been entered for this application.");
+                }
+            }
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

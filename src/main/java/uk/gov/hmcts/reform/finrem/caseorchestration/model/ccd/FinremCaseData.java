@@ -148,6 +148,10 @@ public class FinremCaseData {
     private YesOrNo evidenceHandled;
     private CaseDocument approvedConsentOrderLetter;
     private CaseDocument bulkPrintCoverSheetRes;
+    private CaseDocument bulkPrintCoverSheetIntervener1;
+    private CaseDocument bulkPrintCoverSheetIntervener2;
+    private CaseDocument bulkPrintCoverSheetIntervener3;
+    private CaseDocument bulkPrintCoverSheetIntervener4;
     private String bulkPrintLetterIdRes;
     private CaseDocument bulkPrintCoverSheetApp;
     private String bulkPrintLetterIdApp;
