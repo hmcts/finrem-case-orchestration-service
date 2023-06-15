@@ -3,33 +3,22 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonRootName;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Data
 @Builder
 @EqualsAndHashCode
 @JsonPropertyOrder(value = {"caseReference"})
-@JsonRootName("idamUser")
+@AllArgsConstructor
+@NoArgsConstructor
 public class CaseReference {
 
     @JsonProperty
     private String caseReference;
-
-    public CaseReference() {
-    }
-
-    public CaseReference(String caseReference) {
-        this.caseReference = caseReference;
-    }
-
-    public String getCaseReference() {
-        return caseReference;
-    }
-
-    public void setCaseReference(String caseReference) {
-        this.caseReference = caseReference;
-    }
 
 }
