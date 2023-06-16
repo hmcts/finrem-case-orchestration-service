@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -24,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 public class ListForHearingTask implements Runnable {
 
     private final HearingDocumentService hearingDocumentService;
-    private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final CaseReferenceCsvLoader csvLoader;
     private final CcdService ccdService;
     private final SystemUserService systemUserService;
@@ -59,11 +57,7 @@ public class ListForHearingTask implements Runnable {
                         ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, systemUserService.getSysUserToken());
                     if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
                         CaseDetails caseDetails = searchResult.getCases().get(0);
-                        if (caseDetails != null && hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
-                            log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
-                            additionalHearingDocumentService.sendAdditionalHearingDocuments(systemUserService.getSysUserToken(), caseDetails);
-                            log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
-                        } else {
+                        if (caseDetails != null) {
                             log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
                             hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, systemUserService.getSysUserToken());
                             log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());

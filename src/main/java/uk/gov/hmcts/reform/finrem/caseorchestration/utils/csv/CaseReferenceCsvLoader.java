@@ -20,7 +20,7 @@ public class CaseReferenceCsvLoader {
             CsvSchema csvSchema = csvMapper.typedSchemaFor(CaseReference.class).withHeader();
             List list = new CsvMapper().readerFor(CaseReference.class)
                 .with(csvSchema)
-                .readValues(CaseReferenceCsvLoader.class.getClassLoader().getResource(fileName))
+                .readValues(getClass().getClassLoader().getResource(fileName))
                 .readAll();
 
             return list;
