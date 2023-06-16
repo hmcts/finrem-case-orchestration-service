@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -39,7 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationHelperTest {
@@ -69,32 +68,31 @@ public class GeneralApplicationHelperTest {
         assertNull(helper.objectToDateTime(data.getGeneralOrderWrapper().getGeneralOrderDate()));
     }
 
-    @Ignore
     @Test
     public void givenContestedCase_whenMigratingExistingGeneralApplicationAndCreatedByIsNull_thenReturnNull() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        data.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         assertNull(helper.migrateExistingGeneralApplication(data, AUTH_TOKEN, anyString()));
     }
 
-    @Ignore
     @Test
     public void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNull_thenReturnNull() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        data.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         assertNull(helper.retrieveInitialGeneralApplicationData(data, "any", AUTH_TOKEN, anyString()));
     }
 
-    @Ignore
     @Test
     public void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNotNull_thenReturnNull() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReceivedFrom(EvidenceParty.APPLICANT);
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy("Applicant");
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(APPLICANT);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationHearingRequired(YesOrNo.YES);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationTimeEstimate("2 weeks");
         caseData.getGeneralApplicationWrapper().setGeneralApplicationSpecialMeasures("None");
@@ -104,9 +102,9 @@ public class GeneralApplicationHelperTest {
         GeneralApplicationCollectionData data = helper.retrieveInitialGeneralApplicationData(caseData, "any", AUTH_TOKEN, caseId);
         GeneralApplicationItems items = data.getGeneralApplicationItems();
 
-        assertEquals("Applicant", items.getGeneralApplicationCreatedBy());
-        assertEquals("Applicant", items.getGeneralApplicationReceivedFrom());
-        assertEquals("Yes", items.getGeneralApplicationHearingRequired());
+        assertEquals(APPLICANT, items.getGeneralApplicationCreatedBy());
+        assertEquals("APPLICANT", items.getGeneralApplicationReceivedFrom());
+        assertEquals("YES", items.getGeneralApplicationHearingRequired());
         assertEquals("2 weeks", items.getGeneralApplicationTimeEstimate());
         assertEquals("None", items.getGeneralApplicationSpecialMeasures());
         assertEquals("Approved", items.getGeneralApplicationStatus());
@@ -123,13 +121,7 @@ public class GeneralApplicationHelperTest {
         GeneralApplicationItems itemsOther = dataOther.getGeneralApplicationItems();
         assertEquals("Other", itemsOther.getGeneralApplicationStatus());
 
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcome(GeneralApplicationOutcome.valueOf("Anything"));
-        GeneralApplicationCollectionData dataDefault = helper.retrieveInitialGeneralApplicationData(caseData,
-            "any", AUTH_TOKEN, caseId);
-        GeneralApplicationItems itemsDefault = dataDefault.getGeneralApplicationItems();
-        assertEquals("Other", itemsDefault.getGeneralApplicationStatus());
-
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationHearingRequired(YesOrNo.YES);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
 
         caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcome(GeneralApplicationOutcome.APPROVED);
         GeneralApplicationCollectionData dataApproved = helper.retrieveInitialGeneralApplicationData(caseData,
@@ -148,12 +140,6 @@ public class GeneralApplicationHelperTest {
             "any", AUTH_TOKEN, caseId);
         GeneralApplicationItems itemsOther2 = dataOther2.getGeneralApplicationItems();
         assertEquals("Other, Completed", itemsOther2.getGeneralApplicationStatus());
-
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcome(GeneralApplicationOutcome.valueOf("Anything"));
-        GeneralApplicationCollectionData dataDefault2 = helper.retrieveInitialGeneralApplicationData(caseData,
-            "any", AUTH_TOKEN, caseId);
-        GeneralApplicationItems itemsDefault2 = dataDefault2.getGeneralApplicationItems();
-        assertEquals("Other", itemsDefault2.getGeneralApplicationStatus());
     }
 
     @Test

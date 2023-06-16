@@ -11,13 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -72,8 +72,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         FinremCaseData caseData = caseDetails.getData();
 
         List<BulkPrintDocument> documents = new ArrayList<>();
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
-        if (existingList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
+        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData,
+            GENERAL_APPLICATION_COLLECTION);
+        if (existingList.isEmpty()
+            && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             migrateExistingApplication(caseDetails, documents, userAuthorisation);
 
         } else {
@@ -105,9 +107,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         String caseId = caseDetails.getId().toString();
         log.info("Migrating existing general application to collection for case id {}", caseId);
-        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
+        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(
+            caseData, userAuthorisation, caseId);
         if (data != null) {
-            String status = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome(), null);
+            String status = Objects.toString(caseData.getGeneralApplicationWrapper()
+                .getGeneralApplicationOutcome(), null);
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
                 status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
             setStatusForNonCollAndBulkPrintDouments(caseDetails,
@@ -119,10 +123,14 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
     }
 
-    private void updateApplications(FinremCaseDetails caseDetails, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation) {
+    private void updateApplications(FinremCaseDetails caseDetails,
+                                    List<BulkPrintDocument> bulkPrintDocuments,
+                                    String userAuthorisation) {
         FinremCaseData caseData = caseDetails.getData();
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
+        List<GeneralApplicationCollectionData> existingList =
+            helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper()
+            .getGeneralApplicationDirectionsList());
 
         String[] choice = dynamicList.getValueCode().split("#");
         final String status = choice[1];
@@ -138,7 +146,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
     }
 
-    private GeneralApplicationCollectionData setStatusAndBulkPrintDouments(FinremCaseDetails caseDetails, GeneralApplicationCollectionData data, String code, String status, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation) {
+    private GeneralApplicationCollectionData setStatusAndBulkPrintDouments(FinremCaseDetails caseDetails,
+                                                                           GeneralApplicationCollectionData data,
+                                                                           String code, String status,
+                                                                           List<BulkPrintDocument> bulkPrintDocuments,
+                                                                           String userAuthorisation) {
         if (code.equals(data.getId())) {
             return setStatusForNonCollAndBulkPrintDouments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
         }
@@ -160,16 +172,16 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             IntervenerCaseDocument gaCaseDocument = IntervenerCaseDocument.builder().build();
             IntervenerCaseDocumentCollection gaCaseDocumentCollection = IntervenerCaseDocumentCollection.builder().build();
             List<IntervenerCaseDocumentCollection> gaDocumentCollectionList = new ArrayList<>();
-            List<IntervenerCaseDocumentCollection> existingGADocuments = wrapper.getGeneralApplicationIntvrDocuments();
-            if (existingGADocuments != null && existingGADocuments.size() > 0) {
+            List<IntervenerCaseDocumentCollection> existingGeneralApplicationDocuments = wrapper.getGeneralApplicationIntvrDocuments();
+            if (existingGeneralApplicationDocuments != null && existingGeneralApplicationDocuments.size() > 0) {
                 gaCaseDocument.setDocument(caseDocument);
                 gaCaseDocumentCollection.setValue(gaCaseDocument);
-                if (existingGADocuments.stream().filter(
-                    x -> x.getValue().getDocument().getDocumentUrl() ==
-                        caseDocument.getDocumentUrl()).collect(Collectors.toList()).size() < 1) {
-                    existingGADocuments.add(gaCaseDocumentCollection);
-                };
-                wrapper.setGeneralApplicationIntvrDocuments(existingGADocuments);
+                if (existingGeneralApplicationDocuments.stream().filter(
+                    x -> x.getValue().getDocument().getDocumentUrl()
+                        == caseDocument.getDocumentUrl()).collect(Collectors.toList()).size() < 1) {
+                    existingGeneralApplicationDocuments.add(gaCaseDocumentCollection);
+                }
+                wrapper.setGeneralApplicationIntvrDocuments(existingGeneralApplicationDocuments);
             } else {
                 gaCaseDocument.setDocument(caseDocument);
                 gaCaseDocumentCollection.setValue(gaCaseDocument);

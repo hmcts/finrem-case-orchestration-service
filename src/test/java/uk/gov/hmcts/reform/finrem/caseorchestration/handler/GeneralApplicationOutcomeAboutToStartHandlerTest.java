@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -40,14 +39,13 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
     private GenericDocumentService service;
     @Mock
     private GeneralApplicationService gaService;
-    
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application-referred-finrem.json";
-    private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application-finrem.json";
+    private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application.json";
 
 
     @Before
@@ -97,11 +95,9 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
     }
 
     @Test
-    @Ignore
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_NON_COLL_JSON))
             .caseDetailsBefore(buildCaseDetailsWithPath(GA_NON_COLL_JSON)).build();
-        FinremCaseData data = callbackRequest.getCaseDetails().getData();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
@@ -138,13 +134,6 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for decision."));
-    }
-
-    private GeneralApplicationCollectionData updateStatus(GeneralApplicationCollectionData obj) {
-        if (obj.getId().equals("b0bfb0af-4f07-4628-a677-1de904b6ea1c")) {
-            obj.getGeneralApplicationItems().setGeneralApplicationStatus(APPROVED.getId());
-        }
-        return obj;
     }
 
     private FinremCaseDetails buildCaseDetailsWithPath(String path) {

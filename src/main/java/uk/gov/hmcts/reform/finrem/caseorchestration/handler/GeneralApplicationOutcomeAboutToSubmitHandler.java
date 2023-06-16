@@ -81,7 +81,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation) {
+    private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation)  {
         String caseId = caseDetails.getId().toString();
         FinremCaseData caseData = caseDetails.getData();
         GeneralApplicationCollectionData data =
@@ -98,7 +98,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
             service.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcome(null);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeList(null);
     }
 
     private GeneralApplicationCollectionData setStatusForElement(FinremCaseData caseData,
