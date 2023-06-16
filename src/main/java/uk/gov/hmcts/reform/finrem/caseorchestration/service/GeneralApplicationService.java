@@ -370,7 +370,8 @@ public class GeneralApplicationService {
                 x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(APPLICANT)
                 || x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(RESPONDENT)
             ).collect(Collectors.toList());
-        caseData.getGeneralApplicationWrapper().setGeneralApplications(helper.convertToGeneralApplicationsCollection(generalApplications));
+        caseData.getGeneralApplicationWrapper().setGeneralApplications(
+            helper.convertToGeneralApplicationsCollection(generalApplications));
         caseData.getGeneralApplicationWrapper().setIntervener1GeneralApplications(
             helper.convertToGeneralApplicationsCollection(intervener1GeneralApplications));
         caseData.getGeneralApplicationWrapper().setIntervener2GeneralApplications(

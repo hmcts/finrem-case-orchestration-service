@@ -11,12 +11,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -28,6 +31,10 @@ import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_OTHER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 
 @Slf4j
 @Service
@@ -38,9 +45,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     private final GeneralApplicationService gaService;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public GeneralApplicationDirectionsAboutToSubmitHandler(
-        FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-        GeneralApplicationDirectionsService service, GeneralApplicationService gaService) {
+    public GeneralApplicationDirectionsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                            GeneralApplicationHelper helper,
+                                                            GeneralApplicationDirectionsService service,
+                                                            GeneralApplicationService gaService) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
@@ -50,14 +58,13 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType) && CaseType.CONTESTED.equals(caseType)
             && EventType.GENERAL_APPLICATION_DIRECTIONS.equals(eventType);
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
+        FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Processing About to Submit callback for event {} with Case ID : {}",
             EventType.GENERAL_APPLICATION_DIRECTIONS, callbackRequest.getCaseDetails().getId());
@@ -98,8 +105,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         String caseId = caseDetails.getId().toString();
         log.info("Migrating existing general application to collection for case id {}", caseId);
-        GeneralApplicationCollectionData data =
-            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
+        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
         if (data != null) {
             String status = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome(), null);
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
@@ -115,7 +121,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
 
     private void updateApplications(FinremCaseDetails caseDetails, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation) {
         FinremCaseData caseData = caseDetails.getData();
-        String caseId = caseDetails.getId().toString();
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
 
@@ -131,41 +136,60 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
         gaService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
-        bulkPrintDocuments.forEach(x -> System.out.println(x.getBinaryFileUrl()));
     }
 
-    private GeneralApplicationCollectionData setStatusAndBulkPrintDouments(FinremCaseDetails caseDetails,
-                                                                           GeneralApplicationCollectionData data,
-                                                                           String code,
-                                                                           String status,
-                                                                           List<BulkPrintDocument> bulkPrintDocuments,
-                                                                           String userAuthorisation) {
+    private GeneralApplicationCollectionData setStatusAndBulkPrintDouments(FinremCaseDetails caseDetails, GeneralApplicationCollectionData data, String code, String status, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation) {
         if (code.equals(data.getId())) {
             return setStatusForNonCollAndBulkPrintDouments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
         }
         return data;
     }
 
-    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDouments(FinremCaseDetails finremCaseDetails,
-                                                                                     GeneralApplicationCollectionData data,
-                                                                                     List<BulkPrintDocument> bulkPrintDocuments,
-                                                                                     String status,
-                                                                                     String userAuthorisation) {
+    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDouments(
+        FinremCaseDetails finremCaseDetails, GeneralApplicationCollectionData data,
+        List<BulkPrintDocument> bulkPrintDocuments, String status, String userAuthorisation) {
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
+        if (items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER1)
+            || items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER2)
+            || items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER3)
+            || items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER4)) {
+            GeneralApplicationWrapper wrapper = finremCaseDetails.getData().getGeneralApplicationWrapper();
+            IntervenerCaseDocument gaCaseDocument = IntervenerCaseDocument.builder().build();
+            IntervenerCaseDocumentCollection gaCaseDocumentCollection = IntervenerCaseDocumentCollection.builder().build();
+            List<IntervenerCaseDocumentCollection> gaDocumentCollectionList = new ArrayList<>();
+            List<IntervenerCaseDocumentCollection> existingGADocuments = wrapper.getGeneralApplicationIntvrDocuments();
+            if (existingGADocuments != null && existingGADocuments.size() > 0) {
+                gaCaseDocument.setDocument(caseDocument);
+                gaCaseDocumentCollection.setValue(gaCaseDocument);
+                if (existingGADocuments.stream().filter(
+                    x -> x.getValue().getDocument().getDocumentUrl() ==
+                        caseDocument.getDocumentUrl()).collect(Collectors.toList()).size() < 1) {
+                    existingGADocuments.add(gaCaseDocumentCollection);
+                };
+                wrapper.setGeneralApplicationIntvrDocuments(existingGADocuments);
+            } else {
+                gaCaseDocument.setDocument(caseDocument);
+                gaCaseDocumentCollection.setValue(gaCaseDocument);
+                gaDocumentCollectionList.add(gaCaseDocumentCollection);
+                wrapper.setGeneralApplicationIntvrDocuments(gaDocumentCollectionList);
+            }
+        }
         items.setGeneralApplicationDirectionsDocument(caseDocument);
-        items.setGeneralApplicationOutcomeOther(Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
+        items.setGeneralApplicationOutcomeOther(Objects.toString(
+            caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         String caseId = caseDetails.getId().toString();
-        log.info("status {} for general application for Case ID: {} Event type {}",
-            status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
+        log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
+            EventType.GENERAL_APPLICATION_DIRECTIONS);
 
         switch (gaElementStatus) {
             case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
-            case "Not Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
+            case "Not Approved" ->
+                items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
             case "Other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
             default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
         }
@@ -176,7 +200,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             .build();
         bulkPrintDocuments.add(bpDoc);
 
-        log.info("items getGeneralApplicationDocument {}, for caseId {}", items.getGeneralApplicationDocument(), caseId);
+        log.info("items getGeneralApplicationDocument {}, for caseId {}",
+            items.getGeneralApplicationDocument(), caseId);
 
         if (items.getGeneralApplicationDocument() != null) {
             items.setGeneralApplicationDocument(
