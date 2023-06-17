@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
@@ -45,6 +46,8 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
 
     private GeneralApplicationAboutToStartHandler handler;
     @Mock
+    private AssignCaseAccessService assignCaseAccessService;
+    @Mock
     private GenericDocumentService service;
     private ObjectMapper objectMapper;
     @Mock
@@ -54,13 +57,13 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
     private GeneralApplicationService generalApplicationService;
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private static final String GA_JSON = "/fixtures/contested/general-application.json";
 
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
-        handler = new GeneralApplicationAboutToStartHandler(finremCaseDetailsMapper, helper, generalApplicationService);
+        handler = new GeneralApplicationAboutToStartHandler(finremCaseDetailsMapper, helper,
+            generalApplicationService, assignCaseAccessService);
     }
 
     @Test

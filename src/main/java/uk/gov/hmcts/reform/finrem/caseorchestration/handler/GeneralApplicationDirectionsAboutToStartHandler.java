@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 
 import java.util.ArrayList;
@@ -26,15 +27,19 @@ import java.util.stream.Collectors;
 @Service
 public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallbackHandler implements GeneralApplicationHandler {
 
+    private final AssignCaseAccessService assignCaseAccessService;
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public GeneralApplicationDirectionsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
+    public GeneralApplicationDirectionsAboutToStartHandler(AssignCaseAccessService assignCaseAccessService,
+                                                           FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                           GeneralApplicationHelper helper,
                                                            GeneralApplicationDirectionsService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
+        this.assignCaseAccessService = assignCaseAccessService;
         this.finremCaseDetailsMapper = finremCaseDetailsMapper;
     }
 
@@ -49,12 +54,17 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails());
+
         String caseId = finremCaseDetails.getId().toString();
         log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
 
         FinremCaseData caseData = finremCaseDetails.getData();
-        
+
+        String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
+        log.info("Logged in user case role type {}", loggedInUserCaseRole);
+        caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails());
+
         service.startGeneralApplicationDirections(caseDetails);
 
         List<GeneralApplicationCollectionData> outcomeList = helper.getOutcomeList(caseData);

@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -21,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -56,10 +56,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_ONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
 
 @Service
 @RequiredArgsConstructor
@@ -83,20 +79,21 @@ public class GeneralApplicationService {
         List<GeneralApplicationCollectionData> generalApplicationList =
             helper.getGeneralApplicationList(caseDetails.getData(), GENERAL_APPLICATION_COLLECTION);
 
-        String initialCollectionId = Objects.toString(caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationTracking(), null);
+        String initialCollectionId = Objects.toString(caseDetails.getData().getGeneralApplicationWrapper()
+            .getGeneralApplicationTracking(), null);
 
-        String loggedInUserCaseRole = getActiveUser(caseDetails.getId().toString(), userAuthorisation);
+        String loggedInUserCaseRole = accessService.getActiveUser(caseDetails.getId().toString(), userAuthorisation);
         log.info("Logged in user case role {}", loggedInUserCaseRole);
 
         List<GeneralApplicationCollectionData> interimGeneralApplicationList = generalApplicationList.stream()
             .filter(f -> generalApplicationListBefore.stream().map(GeneralApplicationCollectionData::getId)
-                .noneMatch(i -> i.equals(f.getId()))).collect(Collectors.toList());
+                .noneMatch(i -> i.equals(f.getId()))).toList();
 
         List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType = new ArrayList<>();
         List<GeneralApplicationCollectionData> applicationsForRoleType;
 
         final List<GeneralApplicationCollectionData> processableList = interimGeneralApplicationList.stream()
-            .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).collect(Collectors.toList());
+            .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).toList();
 
         FinremCaseData caseData = caseDetails.getData();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
@@ -154,20 +151,20 @@ public class GeneralApplicationService {
             generalApplicationCollectionDataList.add(originalGeneralApplicationList);
         }
 
-        if (loggedInUserCaseRole != "Case") {
+        if (!loggedInUserCaseRole.equalsIgnoreCase("Case")) {
             List<GeneralApplicationCollectionData> processableListForRoleType = interimGeneralApplicationListForRoleType.stream()
-                .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).collect(Collectors.toList());
+                .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).toList();
             List<GeneralApplicationCollectionData> generalApplicationCollectionDataListForRoleType =
                 processableListForRoleType.stream().map(items -> setUserAndDate(caseDetails, items, userAuthorisation))
-                    .collect(Collectors.toList());
+                    .toList();
             generalApplicationCollectionDataList.addAll(generalApplicationCollectionDataListForRoleType);
-            if (loggedInUserCaseRole != APPLICANT && loggedInUserCaseRole != RESPONDENT) {
+            if (!loggedInUserCaseRole.equalsIgnoreCase(APPLICANT) && !loggedInUserCaseRole.equalsIgnoreCase(RESPONDENT)) {
                 applicationsForRoleType = generalApplicationCollectionDataList.stream()
                     .filter(x -> x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(loggedInUserCaseRole))
                     .collect(Collectors.toList());
             } else {
-                applicationsForRoleType = generalApplicationCollectionDataList.stream().filter(
-                    x -> x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(APPLICANT)
+                applicationsForRoleType = generalApplicationCollectionDataList.stream()
+                    .filter(x -> x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(APPLICANT)
                          || x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(RESPONDENT))
                          .collect(Collectors.toList());
             }
@@ -176,21 +173,19 @@ public class GeneralApplicationService {
                 .sorted(helper::getCompareTo)
                 .collect(Collectors.toList());
 
-            if (loggedInUserCaseRole == INTERVENER1) {
-                caseData.getGeneralApplicationWrapper().setIntervener1GeneralApplications(
-                    helper.convertToGeneralApplicationsCollection(applicationCollectionDataListForRoleType));
-            } else if (loggedInUserCaseRole == INTERVENER2) {
-                caseData.getGeneralApplicationWrapper().setIntervener2GeneralApplications(
-                    helper.convertToGeneralApplicationsCollection(applicationCollectionDataListForRoleType));
-            } else if (loggedInUserCaseRole == INTERVENER3) {
-                caseData.getGeneralApplicationWrapper().setIntervener3GeneralApplications(
-                    helper.convertToGeneralApplicationsCollection(applicationCollectionDataListForRoleType));
-            } else if (loggedInUserCaseRole == INTERVENER4) {
-                caseData.getGeneralApplicationWrapper().setIntervener4GeneralApplications(
-                    helper.convertToGeneralApplicationsCollection(applicationCollectionDataListForRoleType));
-            } else if (loggedInUserCaseRole == APPLICANT || loggedInUserCaseRole == RESPONDENT) {
-                caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(
-                    helper.convertToGeneralApplicationsCollection(applicationCollectionDataListForRoleType));
+            List<GeneralApplicationsCollection> applicationCollection = helper.convertToGeneralApplicationsCollection(
+                applicationCollectionDataListForRoleType);
+
+            if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER1)) {
+                caseData.getGeneralApplicationWrapper().setIntervener1GeneralApplications(applicationCollection);
+            } else if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER2)) {
+                caseData.getGeneralApplicationWrapper().setIntervener2GeneralApplications(applicationCollection);
+            } else if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER3)) {
+                caseData.getGeneralApplicationWrapper().setIntervener3GeneralApplications(applicationCollection);
+            } else if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER4)) {
+                caseData.getGeneralApplicationWrapper().setIntervener4GeneralApplications(applicationCollection);
+            } else if (loggedInUserCaseRole.equalsIgnoreCase(APPLICANT) || loggedInUserCaseRole.equalsIgnoreCase(RESPONDENT)) {
+                caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(applicationCollection);
             }
         }
         List<GeneralApplicationCollectionData> applicationCollectionDataList = generalApplicationCollectionDataList.stream()
@@ -210,35 +205,6 @@ public class GeneralApplicationService {
         return generalApplicationListForRoleType.stream()
             .filter(f -> generalApplicationListBeforeForRoleType.stream().map(GeneralApplicationCollectionData::getId)
                 .noneMatch(i -> i.equals(f.getId()))).collect(Collectors.toList());
-    }
-
-    public String getActiveUser(String caseId, String userAuthorisation) {
-        String logMessage = "Logged in user role {} caseId {}";
-        String activeUserCaseRole =  accessService.getActiveUserCaseRole(caseId, userAuthorisation);
-        if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getValue())) {
-            log.info(logMessage, APPLICANT, caseId);
-            return APPLICANT;
-        } else if (activeUserCaseRole.contains(CaseRole.RESP_SOLICITOR.getValue())) {
-            log.info(logMessage, RESPONDENT, caseId);
-            return RESPONDENT;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_1.getValue())
-            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_1.getValue())) {
-            log.info(logMessage, INTERVENER_ONE, caseId);
-            return INTERVENER1;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_2.getValue())
-            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_2.getValue())) {
-            log.info(logMessage, INTERVENER_TWO, caseId);
-            return INTERVENER2;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_3.getValue())
-            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_3.getValue())) {
-            log.info(logMessage, INTERVENER_THREE, caseId);
-            return INTERVENER3;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_4.getValue())
-            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_4.getValue())) {
-            log.info(logMessage, INTERVENER_FOUR, caseId);
-            return INTERVENER4;
-        }
-        return activeUserCaseRole;
     }
 
     private GeneralApplicationCollectionData setUserAndDate(FinremCaseDetails caseDetails,
@@ -382,5 +348,20 @@ public class GeneralApplicationService {
             helper.convertToGeneralApplicationsCollection(intervener4GeneralApplications));
         caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(
             helper.convertToGeneralApplicationsCollection(appRespGeneralApplications));
+    }
+
+    public void checkIfApplicationCompleted(FinremCaseDetails caseDetails, List<String> errors,
+                                            List<GeneralApplicationsCollection> generalApplications,
+                                            List<GeneralApplicationsCollection> generalApplicationsBefore) {
+        if (generalApplicationsBefore != null && generalApplications != null
+            && (generalApplicationsBefore.size() == generalApplications.size())) {
+            log.info("Please complete the general application for case Id {}", caseDetails.getId());
+            errors.add("Any changes to an existing General Applications will not be saved. "
+                + "Please add a new General Application in order to progress.");
+        }
+        if ((generalApplications == null || generalApplications.isEmpty())) {
+            log.info("Please complete the general application for case Id {}", caseDetails.getId());
+            errors.add("Please complete the General Application. No information has been entered for this application.");
+        }
     }
 }

@@ -103,7 +103,7 @@ public class GeneralApplicationServiceTest {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
-        when(accessService.getActiveUserCaseRole(any(), any())).thenReturn("Case");
+        when(accessService.getActiveUser(any(), any())).thenReturn("Case");
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
 

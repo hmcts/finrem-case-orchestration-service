@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -23,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -50,7 +50,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     private GeneralApplicationDirectionsAboutToStartHandler startHandler;
     private GeneralApplicationDirectionsAboutToSubmitHandler submitHandler;
     private GeneralApplicationHelper helper;
-    private final CaseDocument caseDocument = TestSetUpUtils.caseDocument();
+    @Mock
+    private AssignCaseAccessService assignCaseAccessService;
     @Mock
     private GeneralApplicationDirectionsService service;
     @Mock
@@ -69,8 +70,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         objectMapper = new ObjectMapper();
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
         helper = new GeneralApplicationHelper(objectMapper, documentService);
-        startHandler = new GeneralApplicationDirectionsAboutToStartHandler(finremCaseDetailsMapper, helper, service);
-        submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(finremCaseDetailsMapper, helper, service, gaService);
+        startHandler = new GeneralApplicationDirectionsAboutToStartHandler(
+            assignCaseAccessService, finremCaseDetailsMapper, helper, service);
+        submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
+            finremCaseDetailsMapper, helper, service, gaService);
     }
 
     @Test
@@ -168,9 +171,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         assertEquals(1, dynamicList.getListItems().size());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
-            = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getGeneralApplications());
+            = helper.covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
         assertEquals(2, list.size());
 
         assertEquals(DIRECTION_APPROVED.getId(),

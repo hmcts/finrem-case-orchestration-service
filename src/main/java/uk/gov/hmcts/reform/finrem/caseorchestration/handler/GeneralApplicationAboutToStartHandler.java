@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.List;
@@ -23,13 +24,16 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationService generalApplicationService;
+    private final AssignCaseAccessService assignCaseAccessService;
 
     public GeneralApplicationAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                  GeneralApplicationHelper helper,
-                                                 GeneralApplicationService generalApplicationService) {
+                                                 GeneralApplicationService generalApplicationService,
+                                                 AssignCaseAccessService assignCaseAccessService) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.generalApplicationService = generalApplicationService;
+        this.assignCaseAccessService = assignCaseAccessService;
     }
 
     @Override
@@ -52,9 +56,9 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
         GeneralApplicationCollectionData data =
             helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
 
-        String loggedInUserCaseRole = generalApplicationService.getActiveUser(caseId, userAuthorisation);
-        log.info("Logged in user case role {}", loggedInUserCaseRole);
-        caseData.setCurrentUserCaseRoleLabel(loggedInUserCaseRole);
+        String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
+        log.info("Logged in user case role type {}", loggedInUserCaseRole);
+        caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         if (data != null) {
             existingGeneralApplication.add(data);

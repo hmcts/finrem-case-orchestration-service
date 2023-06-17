@@ -19,7 +19,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.InputStream;
@@ -44,6 +46,10 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     private GeneralApplicationDirectionsAboutToStartHandler handler;
     private GeneralApplicationHelper helper;
     @Mock
+    private AssignCaseAccessService assignCaseAccessService;
+    @Mock
+    private GeneralApplicationService generalApplicationService;
+    @Mock
     private GeneralApplicationDirectionsService service;
     @Mock
     private GenericDocumentService documentService;
@@ -59,7 +65,8 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
-        handler = new GeneralApplicationDirectionsAboutToStartHandler(finremCaseDetailsMapper, helper, service);
+        handler = new GeneralApplicationDirectionsAboutToStartHandler(assignCaseAccessService,
+            finremCaseDetailsMapper, helper, service);
     }
 
     @Test
