@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -341,9 +342,9 @@ public class GeneralApplicationService {
             ).collect(Collectors.toList());
         appRespGeneralApplications.stream().forEach(x -> {
             if (x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(APPLICANT)) {
-                x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(APPLICANT);
+                x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(ApplicantAndRespondentEvidenceParty.APPLICANT.getValue());
             } else {
-                x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(RESPONDENT);
+                x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue());
             }
         });
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
