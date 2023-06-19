@@ -361,10 +361,12 @@ public class GeneralApplicationService {
             log.info("Please complete the general application for case Id {}", caseDetails.getId());
             errors.add("Any changes to an existing General Applications will not be saved. "
                 + "Please add a new General Application in order to progress.");
+            log.info("ERROR1");//rmv
         }
         if ((generalApplications == null || generalApplications.isEmpty())) {
             log.info("Please complete the general application for case Id {}", caseDetails.getId());
             errors.add("Please complete the General Application. No information has been entered for this application.");
+            log.info("ERROR2");//rmv
         }
     }
 

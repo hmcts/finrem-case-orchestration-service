@@ -59,11 +59,13 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
 
         List<GeneralApplicationsCollection> generalApplicationsBefore;
         List<GeneralApplicationsCollection> generalApplications;
-
+        log.info(loggedInUserCaseRole); //rmv
         switch (loggedInUserCaseRole) {
             case APPLICANT, RESPONDENT -> {
                 generalApplications = wrapper.getAppRespGeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getAppRespGeneralApplications();
+                log.info("Here are GeneralApplications: {}, here are generalApplicationsBefore {}",
+                    generalApplications, generalApplicationsBefore);
             }
             case INTERVENER1 -> {
                 generalApplications = wrapper.getIntervener1GeneralApplications();
@@ -84,10 +86,14 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
             default -> {
                 generalApplications = wrapper.getGeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getGeneralApplications();
+                log.info("default hit");
             }
         }
 
         service.checkIfApplicationCompleted(caseDetails, errors, generalApplications, generalApplicationsBefore);
+
+        log.info("CAse details {} errors {} gas {} gasbefore {}",
+            caseDetails, errors, generalApplications, generalApplicationsBefore);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
