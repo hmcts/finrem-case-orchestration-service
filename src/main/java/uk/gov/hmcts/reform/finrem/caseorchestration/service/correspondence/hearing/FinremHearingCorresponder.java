@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremMultiLetterOrEmailAllPartiesCorresponder;
@@ -26,6 +27,12 @@ public abstract class FinremHearingCorresponder extends FinremMultiLetterOrEmail
     @Override
     public void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
         notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
+    }
+
+    @Override
+    public void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        notificationService.sendPrepareForHearingEmailIntervener(caseDetails,
+            notificationService.getFinremCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
 
 }

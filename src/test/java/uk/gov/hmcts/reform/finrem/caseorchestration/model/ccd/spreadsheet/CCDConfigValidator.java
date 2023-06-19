@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 @Slf4j
 @SuppressWarnings("unchecked")
@@ -40,13 +41,15 @@ public class CCDConfigValidator {
     protected static final String MULTI_SELECT_LIST = "MultiSelectList";
     protected static final String FIXED_RADIO_LIST = "FixedRadioList";
     protected static final String FIXED_LIST = "FixedList";
+
+    protected static final String INTERVENER_CT = "FR_intervener";
     protected static final int ROW_HEADERS = 2;
     private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer", "FlagLauncher");
     protected static final String STATE_SHEET = "State";
     protected static final String DYNAMIC_LIST = "DynamicList";      
     protected static final String DYNAMIC_RADIO_LIST = "DynamicRadioList";
     private List<String> finremCaseDataFieldsToIgnore = Arrays.asList("ccdCaseId");
-    private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST);
+    private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST, INTERVENER_CT);
     private List<String> alreadyProcessedCcdFields = new ArrayList<>();
 
     private Map<String, String> fieldTypesMap = Map.ofEntries(
@@ -302,7 +305,7 @@ public class CCDConfigValidator {
         }
         complexTypeFields.stream().forEach(c -> {
             log.info("Matching on field in complex type: {} with type: {}", c.getListElementCode(), c.getFieldType());
-            Arrays.stream(frClass.getDeclaredFields())
+            Arrays.stream(getAllDeclaredFields(frClass))
                 .filter(vf -> c.getListElementCode().equals(vf.getName()) || hasMatchingAnnotationForField(vf, c.getListElementCode())).findFirst()
                 .ifPresentOrElse(vf -> {
                     log.info("Matching on {} complex type field: {}", frClass.getName(), vf.getName());
@@ -325,6 +328,15 @@ public class CCDConfigValidator {
                 });
         });
         return complexTypeErrors;
+    }
+
+    private static Field[] getAllDeclaredFields(Class<?> frClass) {
+        if (frClass.getSuperclass() != null) {
+            return Stream.of(frClass.getDeclaredFields(), getAllDeclaredFields(frClass.getSuperclass()))
+                .flatMap(Stream::of)
+                .toArray(Field[]::new);
+        }
+        return frClass.getDeclaredFields();
     }
 
 
@@ -434,7 +446,7 @@ public class CCDConfigValidator {
                 CcdFieldAttributes fieldAttributes = new CcdFieldAttributes();
                 fieldAttributes.setFieldId(row.getCell(3).getStringCellValue());
                 fieldAttributes.setFieldType(row.getCell(6).getStringCellValue());
-                fieldAttributes.setFieldTypeParameter(row.getCell(7).getStringCellValue());
+                fieldAttributes.setFieldTypeParameter(row.getCell(8).getStringCellValue());
                 if (!ccdFieldsToIgnore.contains(fieldAttributes.getFieldType())) {
                     caseFields.add(fieldAttributes);
                 }
