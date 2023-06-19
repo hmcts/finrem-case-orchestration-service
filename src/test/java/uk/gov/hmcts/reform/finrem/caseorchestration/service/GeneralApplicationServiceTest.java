@@ -38,6 +38,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
@@ -55,6 +56,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty.INTERVENER4;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationServiceTest {
@@ -101,11 +104,95 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void updateAndSortGeneralApplications() {
+    public void updateAndSortGeneralApplicationsForCaseworker() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
         when(accessService.getActiveUser(any(), any())).thenReturn("Case");
+
+        FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
+            = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getGeneralApplications());
+
+        assertEquals(2, generalApplicationCollectionDataList.size());
+        assertEquals(LocalDate.now(),
+            generalApplicationCollectionDataList.get(0).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+        assertEquals(LocalDate.of(2022, 8, 2),
+            generalApplicationCollectionDataList.get(1).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+
+        verify(idamService).getIdamFullName(any());
+    }
+
+    @Test
+    public void updateAndSortGeneralApplicationsForIntervener1() {
+
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+
+        when(accessService.getActiveUser(any(), any())).thenReturn("Intervener1");
+
+        FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
+            = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getGeneralApplications());
+
+        assertEquals(2, generalApplicationCollectionDataList.size());
+        assertEquals(LocalDate.now(),
+            generalApplicationCollectionDataList.get(0).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+        assertEquals(LocalDate.of(2022, 8, 2),
+            generalApplicationCollectionDataList.get(1).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+
+        verify(idamService).getIdamFullName(any());
+    }
+
+    @Test
+    public void updateAndSortGeneralApplicationsForIntervener2() {
+
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+
+        when(accessService.getActiveUser(any(), any())).thenReturn("Intervener2");
+
+        FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
+            = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getGeneralApplications());
+
+        assertEquals(2, generalApplicationCollectionDataList.size());
+        assertEquals(LocalDate.now(),
+            generalApplicationCollectionDataList.get(0).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+        assertEquals(LocalDate.of(2022, 8, 2),
+            generalApplicationCollectionDataList.get(1).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+
+        verify(idamService).getIdamFullName(any());
+    }
+
+    @Test
+    public void updateAndSortGeneralApplicationsForIntervener3() {
+
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+
+        when(accessService.getActiveUser(any(), any())).thenReturn("Intervener3");
+
+        FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
+            = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getGeneralApplications());
+
+        assertEquals(2, generalApplicationCollectionDataList.size());
+        assertEquals(LocalDate.now(),
+            generalApplicationCollectionDataList.get(0).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+        assertEquals(LocalDate.of(2022, 8, 2),
+            generalApplicationCollectionDataList.get(1).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+
+        verify(idamService).getIdamFullName(any());
+    }
+
+    @Test
+    public void updateAndSortGeneralApplicationsForIntervener4() {
+
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+
+        when(accessService.getActiveUser(any(), any())).thenReturn("Intervener4");
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
 
