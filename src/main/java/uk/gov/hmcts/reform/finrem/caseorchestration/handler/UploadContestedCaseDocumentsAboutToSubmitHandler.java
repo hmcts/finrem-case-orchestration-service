@@ -98,10 +98,12 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
     private String getActiveUser(Long caseId, String userAuthorisation) {
         String logMessage = "Logged in user role {} caseId {}";
         String activeUserCaseRole = accessService.getActiveUserCaseRole(String.valueOf(caseId), userAuthorisation);
-        if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getValue())) {
+        if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getValue())
+            || activeUserCaseRole.contains(CaseRole.APP_BARRISTER.getValue())) {
             log.info(logMessage, APPLICANT, caseId);
             return APPLICANT;
-        } else if (activeUserCaseRole.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+        } else if (activeUserCaseRole.contains(CaseRole.RESP_SOLICITOR.getValue())
+            || activeUserCaseRole.contains(CaseRole.RESP_BARRISTER.getValue())) {
             log.info(logMessage, RESPONDENT, caseId);
             return RESPONDENT;
         } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_1.getValue())
