@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.List;
@@ -25,6 +27,8 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,13 +36,15 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     private GeneralApplicationMidHandler handler;
     @InjectMocks
     private GeneralApplicationService gaService;
+    @Mock
+    private AssignCaseAccessService assignCaseAccessService;
 
     public static final String AUTH_TOKEN = "tokien:)";
 
     @Before
     public void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler = new GeneralApplicationMidHandler(finremCaseDetailsMapper, gaService);
+        handler = new GeneralApplicationMidHandler(finremCaseDetailsMapper, gaService, assignCaseAccessService);
     }
 
     @Test
@@ -72,7 +78,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartButNotAddedDetailsAsCaseworker_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Case");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Case");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertTrue(handle.getErrors().get(0)
             .contains("Please complete the General Application. No information has been entered for this application."));
@@ -81,7 +87,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartButNotAddedDetailsAsIntervenerOne_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Intervener1");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Intervener1");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertTrue(handle.getErrors().get(0)
             .contains("Please complete the General Application. No information has been entered for this application."));
@@ -90,7 +96,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartButNotAddedDetailsAsIntervenerTwo_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Intervener2");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Intervener2");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertTrue(handle.getErrors().get(0)
             .contains("Please complete the General Application. No information has been entered for this application."));
@@ -99,7 +105,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartButNotAddedDetailsAsIntervenerThree_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Intervener3");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Intervener3");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertTrue(handle.getErrors().get(0)
             .contains("Please complete the General Application. No information has been entered for this application."));
@@ -108,7 +114,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartButNotAddedDetailsAsIntervenerFour_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Intervener4");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Intervener4");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertTrue(handle.getErrors().get(0)
             .contains("Please complete the General Application. No information has been entered for this application."));
@@ -117,7 +123,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartButNotAddedDetailsAsApplicant_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Applicant");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Applicant");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertTrue(handle.getErrors().get(0)
             .contains("Please complete the General Application. No information has been entered for this application."));
@@ -126,7 +132,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplicationAsCaseworker_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequestWithCaseDetailsBefore();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Case");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Case");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().get(0)
@@ -137,7 +143,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplicationAsApplicant_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequestWithCaseDetailsBefore();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Applicant");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Applicant");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().get(0)
@@ -148,7 +154,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplicationAsIntervenerOne_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequestWithCaseDetailsBefore();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Intervener1");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Intervener1");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().get(0)
@@ -159,7 +165,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplicationAsIntervenerTwo_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequestWithCaseDetailsBefore();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Intervener2");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Intervener2");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().get(0)
@@ -170,7 +176,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplicationAsIntervenerThree_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequestWithCaseDetailsBefore();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Intervener3");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Intervener3");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().get(0)
@@ -181,7 +187,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplicationAsIntervenerFour_thenThrowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequestWithCaseDetailsBefore();
-        finremCallbackRequest.getCaseDetails().getData().setCurrentUserCaseRoleType("Intervener4");
+        when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn("Intervener4");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().get(0)

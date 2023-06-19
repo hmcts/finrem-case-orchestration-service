@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.ArrayList;
@@ -28,11 +29,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralApplicationMidHandler extends FinremCallbackHandler {
 
     private final GeneralApplicationService service;
+    private final AssignCaseAccessService assignCaseAccessService;
 
     public GeneralApplicationMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                        GeneralApplicationService service) {
+                                        GeneralApplicationService service, AssignCaseAccessService assignCaseAccessService) {
         super(finremCaseDetailsMapper);
         this.service = service;
+        this.assignCaseAccessService = assignCaseAccessService;
     }
 
     @Override
@@ -51,7 +54,11 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
-        String loggedInUserCaseRole = caseData.getCurrentUserCaseRoleType();
+        String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(
+            caseDetails.getId().toString(), userAuthorisation);
+        log.info("Logged in user case role type {}", loggedInUserCaseRole);
+        caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
+
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
         GeneralApplicationWrapper wrapper = caseData.getGeneralApplicationWrapper();
