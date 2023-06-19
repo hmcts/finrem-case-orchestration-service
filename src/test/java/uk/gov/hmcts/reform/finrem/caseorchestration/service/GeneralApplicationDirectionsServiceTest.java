@@ -158,6 +158,81 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener2() {
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        documents.add(getCaseDocumentAsBulkPrintDocument(
+            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
+        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
+            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener2-referdetails").build();
+        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .data(data).build();
+        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
+
+        verify(bulkPrintService, times(1)).printIntervener2Documents(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+    }
+
+    @Test
+    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener3() {
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        documents.add(getCaseDocumentAsBulkPrintDocument(
+            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
+        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
+            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener3-referdetails").build();
+        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .data(data).build();
+        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
+
+        verify(bulkPrintService, times(1)).printIntervener3Documents(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+    }
+
+    @Test
+    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener4() {
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        documents.add(getCaseDocumentAsBulkPrintDocument(
+            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
+        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
+            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener4-referdetails").build();
+        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .data(data).build();
+        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
+
+        verify(bulkPrintService, times(1)).printIntervener4Documents(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+    }
+
+    @Test
+    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForApplicant() {
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        documents.add(getCaseDocumentAsBulkPrintDocument(
+            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
+        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
+            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("applicant-referdetails").build();
+        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .data(data).build();
+        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
+
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+    }
+
+    @Test
+    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForRespondent() {
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        documents.add(getCaseDocumentAsBulkPrintDocument(
+            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
+        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
+            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("respondent-referdetails").build();
+        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .data(data).build();
+        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
+
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+    }
+
+    @Test
     public void givenNoHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenGeneralOrderIsPrinted() {
         caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
         generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, AUTH_TOKEN);

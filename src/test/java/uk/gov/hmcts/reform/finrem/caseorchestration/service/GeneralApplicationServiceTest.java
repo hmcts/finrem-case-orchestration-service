@@ -42,6 +42,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
@@ -77,6 +78,7 @@ public class GeneralApplicationServiceTest {
     private GenericDocumentService genericDocumentService;
     @Mock
     private AssignCaseAccessService accessService;
+    @Mock
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
     private CaseDetails caseDetails;
@@ -239,6 +241,27 @@ public class GeneralApplicationServiceTest {
         assertThat(caseDetails.getData().get(GENERAL_APPLICATION_CREATED_BY), is(USER_NAME));
     }
 
+    @Test
+    public void givenGeneralApplication_shouldGetInterimGeneralApplicationList() {
+        String generalApplicationCollection = GENERAL_APPLICATION_COLLECTION;
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+
+        List<GeneralApplicationCollectionData> col =
+            generalApplicationService.getInterimGeneralApplicationList(
+                generalApplicationCollection, caseData, caseDataBefore);
+        List<GeneralApplicationItems> itemsActual = new ArrayList<>();
+
+        col.forEach(x -> itemsActual.add(x.getGeneralApplicationItems()));
+
+        assertEquals("No", itemsActual.get(0).getGeneralApplicationHearingRequired());
+        assertEquals("Special measure", itemsActual.get(0).getGeneralApplicationSpecialMeasures());
+        assertEquals("48 hours", itemsActual.get(0).getGeneralApplicationTimeEstimate());
+        assertEquals("Claire Mumford", itemsActual.get(0).getGeneralApplicationCreatedBy());
+        assertEquals("Intervener", itemsActual.get(0).getGeneralApplicationReceivedFrom());
+
+    }
 
     private List<GeneralApplicationData> getGeneralApplicationDataList() {
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
@@ -282,21 +305,21 @@ public class GeneralApplicationServiceTest {
     }
 
     protected FinremCallbackRequest buildCallbackRequest() {
-        GeneralApplicationItems generalApplicationItems =
+        GeneralApplicationItems generalApplicationItemsAdded =
             GeneralApplicationItems.builder().generalApplicationReceivedFrom("Applicant").generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
                     LocalDate.of(2022, 8, 2)).build();
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder().build();
         GeneralApplicationsCollection generalApplicationsBefore = GeneralApplicationsCollection.builder().build();
-        generalApplications.setValue(generalApplicationItems);
+        generalApplications.setValue(generalApplicationItemsAdded);
         generalApplicationsBefore.setId(UUID.randomUUID());
         generalApplications.setId(UUID.randomUUID());
-        GeneralApplicationItems generalApplicationItemsAdded =
+        GeneralApplicationItems generalApplicationItems =
             GeneralApplicationItems.builder().generalApplicationReceivedFrom("Intervener").generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(LocalDate.now()).build();
-        generalApplicationsBefore.setValue(generalApplicationItemsAdded);
+        generalApplicationsBefore.setValue(generalApplicationItems);
         List<GeneralApplicationsCollection> generalApplicationsCollection = new ArrayList<>();
         List<GeneralApplicationsCollection> generalApplicationsCollectionBefore = new ArrayList<>();
         generalApplicationsCollectionBefore.add(generalApplications);

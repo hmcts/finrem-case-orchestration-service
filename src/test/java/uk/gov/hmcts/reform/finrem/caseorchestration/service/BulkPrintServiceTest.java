@@ -201,6 +201,102 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldPrintIntervenerOneDocumentsFinrem() {
+        final String consentedBulkPrintConsentOrderNotApprovedJson
+            = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+
+        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
+
+        when(coverSheetService.generateIntervener1CoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN))).thenReturn(letterId);
+
+        UUID uuid = bulkPrintService.printIntervener1Documents(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+
+        assertThat(uuid, is(letterId));
+
+        verify(coverSheetService).generateIntervener1CoverSheet(caseDetails, AUTH_TOKEN);
+        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
+
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
+        assertThat(caseDetails.getData().getBulkPrintCoverSheetIntervener1(), is(caseDocument));
+    }
+
+    @Test
+    public void shouldPrintIntervenerTwoDocumentsFinrem() {
+        final String consentedBulkPrintConsentOrderNotApprovedJson
+            = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+
+        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
+
+        when(coverSheetService.generateIntervener2CoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN))).thenReturn(letterId);
+
+        UUID uuid = bulkPrintService.printIntervener2Documents(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+
+        assertThat(uuid, is(letterId));
+
+        verify(coverSheetService).generateIntervener2CoverSheet(caseDetails, AUTH_TOKEN);
+        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
+
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
+        assertThat(caseDetails.getData().getBulkPrintCoverSheetIntervener2(), is(caseDocument));
+    }
+
+    @Test
+    public void shouldPrintIntervenerThreeDocumentsFinrem() {
+        final String consentedBulkPrintConsentOrderNotApprovedJson
+            = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+
+        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
+
+        when(coverSheetService.generateIntervener3CoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN))).thenReturn(letterId);
+
+        UUID uuid = bulkPrintService.printIntervener3Documents(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+
+        assertThat(uuid, is(letterId));
+
+        verify(coverSheetService).generateIntervener3CoverSheet(caseDetails, AUTH_TOKEN);
+        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
+
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
+        assertThat(caseDetails.getData().getBulkPrintCoverSheetIntervener3(), is(caseDocument));
+    }
+
+    @Test
+    public void shouldPrintIntervenerFourDocumentsFinrem() {
+        final String consentedBulkPrintConsentOrderNotApprovedJson
+            = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+
+        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
+
+        when(coverSheetService.generateIntervener4CoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN))).thenReturn(letterId);
+
+        UUID uuid = bulkPrintService.printIntervener4Documents(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+
+        assertThat(uuid, is(letterId));
+
+        verify(coverSheetService).generateIntervener4CoverSheet(caseDetails, AUTH_TOKEN);
+        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
+
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
+        assertThat(caseDetails.getData().getBulkPrintCoverSheetIntervener4(), is(caseDocument));
+    }
+
+    @Test
     public void shouldConvertCaseDocumentToBulkPrintDocument() {
         BulkPrintDocument bulkPrintDoc = documentHelper.getBulkPrintDocumentFromCaseDocument(caseDocument());
         assertThat(bulkPrintDoc.getBinaryFileUrl(), is(BINARY_URL));

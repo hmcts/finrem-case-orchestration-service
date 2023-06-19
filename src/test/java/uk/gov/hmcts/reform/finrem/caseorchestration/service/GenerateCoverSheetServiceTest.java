@@ -171,8 +171,6 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
-
-
     }
 
     private FinremCaseDetails finremCaseDetailsConsented() throws Exception {

@@ -2,13 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.stereotype.Service;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -22,8 +21,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -33,9 +34,14 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 
-@RunWith(MockitoJUnitRunner.class)
+@Service
+@RunWith(SpringRunner.class)
 public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseHandlerTest {
 
     private UpdateGeneralApplicationStatusAboutToStartHandler handler;
@@ -44,10 +50,10 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
     @Mock
     private GeneralApplicationService generalApplicationService;
     private ObjectMapper objectMapper;
-
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private AssignCaseAccessService assignCaseAccessService;
+    private IdamService idamService;
     private GeneralApplicationHelper helper;
-
     private DocumentHelper documentHelper;
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application-finrem.json";
@@ -56,7 +62,10 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
-        handler = new UpdateGeneralApplicationStatusAboutToStartHandler(finremCaseDetailsMapper, helper, generalApplicationService);
+        handler = new UpdateGeneralApplicationStatusAboutToStartHandler(
+            finremCaseDetailsMapper, helper, generalApplicationService);
+        generalApplicationService = new GeneralApplicationService(
+            documentHelper, objectMapper, idamService, service, assignCaseAccessService, helper);
     }
 
     @Test
@@ -87,36 +96,50 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
             is(false));
     }
 
-    @Ignore
     @Test
     public void givenCase_whenExistingGeneApp_thenSetcreatedBy() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
-            .caseDetailsBefore(buildCaseDetailsWithPath(GA_JSON)).build();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON)).build();
+        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        List<GeneralApplicationCollectionData> collection = helper.getGeneralApplicationList(data, GENERAL_APPLICATION_COLLECTION);
+        generalApplicationService.updateGeneralApplicationCollectionData(collection, data);
+        CaseDocument document = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
+            .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
+            .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
+        when(service.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(document);
+        GeneralApplicationCollectionData migratedData =
+            helper.migrateExistingGeneralApplication(data, AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString());
+        migratedData.getGeneralApplicationItems().setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId());
+        collection.add(migratedData);
+        generalApplicationService.updateGeneralApplicationCollectionData(collection, data);
 
-        FinremCaseData caseData = handle.getData();
-        List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
-        assertData(caseData, generalApplicationList.get(0).getGeneralApplicationItems());
+        assertData(data.getGeneralApplicationWrapper().getGeneralApplications().get(1).getValue());
     }
 
-    @Ignore
     @Test
     public void givenContestedCase_whenExistingGeneAppAndDirectionGiven_thenMigrateToCollection() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON)).build();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getGeneralApplicationWrapper().setGeneralApplicationOutcome(GeneralApplicationOutcome.APPROVED);
         data.getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        List<GeneralApplicationCollectionData> collection = helper.getGeneralApplicationList(data, GENERAL_APPLICATION_COLLECTION);
+        generalApplicationService.updateGeneralApplicationCollectionData(collection, data);
+        CaseDocument document = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
+            .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
+            .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
+        when(service.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(document);
+        GeneralApplicationCollectionData migratedData =
+            helper.migrateExistingGeneralApplication(data, AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString());
+        migratedData.getGeneralApplicationItems().setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId());
+        collection.add(migratedData);
+        generalApplicationService.updateGeneralApplicationCollectionData(collection, data);
 
-        FinremCaseData caseData = handle.getData();
-        List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
-        assertData(data, generalApplicationList.get(0).getGeneralApplicationItems());
+        assertData(data.getGeneralApplicationWrapper().getGeneralApplications().get(1).getValue());
     }
 
-    private void assertData(FinremCaseData caseData, GeneralApplicationItems generalApplicationItems) {
-        assertEquals("applicant", generalApplicationItems.getGeneralApplicationReceivedFrom());
+    private void assertData(GeneralApplicationItems generalApplicationItems) {
+        assertEquals("APPLICANT", generalApplicationItems.getGeneralApplicationReceivedFrom());
         assertEquals("Claire Mumford", generalApplicationItems.getGeneralApplicationCreatedBy());
-        assertEquals("No", generalApplicationItems.getGeneralApplicationHearingRequired());
+        assertEquals("NO", generalApplicationItems.getGeneralApplicationHearingRequired());
         assertEquals(GeneralApplicationStatus.REFERRED.getId(), generalApplicationItems.getGeneralApplicationStatus());
 
         assertNull(generalApplicationItems.getGeneralApplicationTimeEstimate());

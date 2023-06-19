@@ -18,11 +18,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -47,6 +49,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application-referred-finrem.json";
     private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application-finrem.json";
+    private static final String NO_GA_JSON = "/fixtures/contested/no-general-application-finrem.json";
     private CaseDetails caseDetails;
 
     @Before
@@ -184,5 +187,35 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
         assertEquals(GeneralApplicationStatus.OTHER.getId(),
             generalApplicationCollectionData.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationOutcomeList());
+    }
+
+    @Test
+    public void whenGeneralApplicationListIsEmptyAndThereIsACreator_thenShouldMigrateExistingApplication() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(NO_GA_JSON);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler
+            .handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseData caseData = startHandle.getData();
+        GeneralApplicationWrapper wrapper = caseData.getGeneralApplicationWrapper();
+        wrapper.setGeneralApplicationCreatedBy("Claire Mumford");
+        String collectionId = UUID.randomUUID().toString();
+        wrapper.setGeneralApplicationTracking(collectionId);
+        wrapper.setGeneralApplicationSpecialMeasures("There will be special measures");
+        wrapper.setGeneralApplicationOutcome(GeneralApplicationOutcome.APPROVED);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler
+            .handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData data = submitHandle.getData();
+
+        assertEquals(wrapper.getGeneralApplicationOutcomeList(), null);
+        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy(), null);
+        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom(), null);
+        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationHearingRequired(), null);
+        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationTimeEstimate(), null);
+        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationSpecialMeasures(), null);
+        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationDocument(), null);
+        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationDraftOrder(), null);
+        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationTracking(), null);
     }
 }

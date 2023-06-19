@@ -39,6 +39,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESP_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_GENERAL_APPLICATION_COLLECTION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationHelperTest {
@@ -153,6 +158,106 @@ public class GeneralApplicationHelperTest {
         assertEquals(FILE_NAME, caseDocument.getDocumentFilename());
     }
 
+    @Test
+    public void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener1Role() {
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
+        List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
+            .getGeneralApplications();
+        caseData.getGeneralApplicationWrapper().setIntervener1GeneralApplications(collection);
+        List<GeneralApplicationItems> resultingList = new ArrayList<>();
+        helper.getGeneralApplicationList(caseData, INTERVENER1_GENERAL_APPLICATION_COLLECTION).forEach(
+            x -> resultingList.add(x.getGeneralApplicationItems()));
+        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom(), "Applicant");
+        assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
+        assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
+        assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
+        assertEquals(resultingList.get(0).getGeneralApplicationSpecialMeasures(), "Special measure");
+        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
+            LocalDate.of(2022, 8, 2));
+    }
+
+    @Test
+    public void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener2Role() {
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
+        List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
+            .getGeneralApplications();
+        caseData.getGeneralApplicationWrapper().setIntervener2GeneralApplications(collection);
+        List<GeneralApplicationItems> resultingList = new ArrayList<>();
+        helper.getGeneralApplicationList(caseData, INTERVENER2_GENERAL_APPLICATION_COLLECTION).forEach(
+            x -> resultingList.add(x.getGeneralApplicationItems()));
+        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom(), "Applicant");
+        assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
+        assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
+        assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
+        assertEquals(resultingList.get(0).getGeneralApplicationSpecialMeasures(), "Special measure");
+        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
+            LocalDate.of(2022, 8, 2));
+    }
+
+    @Test
+    public void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener3Role() {
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
+        List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
+            .getGeneralApplications();
+        caseData.getGeneralApplicationWrapper().setIntervener3GeneralApplications(collection);
+        List<GeneralApplicationItems> resultingList = new ArrayList<>();
+        helper.getGeneralApplicationList(caseData, INTERVENER3_GENERAL_APPLICATION_COLLECTION).forEach(
+            x -> resultingList.add(x.getGeneralApplicationItems()));
+        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom(), "Applicant");
+        assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
+        assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
+        assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
+        assertEquals(resultingList.get(0).getGeneralApplicationSpecialMeasures(), "Special measure");
+        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
+            LocalDate.of(2022, 8, 2));
+    }
+
+    @Test
+    public void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener4Role() {
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
+        List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
+            .getGeneralApplications();
+        caseData.getGeneralApplicationWrapper().setIntervener4GeneralApplications(collection);
+        List<GeneralApplicationItems> resultingList = new ArrayList<>();
+        helper.getGeneralApplicationList(caseData, INTERVENER4_GENERAL_APPLICATION_COLLECTION).forEach(
+            x -> resultingList.add(x.getGeneralApplicationItems()));
+        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom(), "Applicant");
+        assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
+        assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
+        assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
+        assertEquals(resultingList.get(0).getGeneralApplicationSpecialMeasures(), "Special measure");
+        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
+            LocalDate.of(2022, 8, 2));
+    }
+
+    @Test
+    public void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnApplicantRole() {
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
+        List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
+            .getGeneralApplications();
+        caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(collection);
+        List<GeneralApplicationItems> resultingList = new ArrayList<>();
+        helper.getGeneralApplicationList(caseData, APP_RESP_GENERAL_APPLICATION_COLLECTION).forEach(
+            x -> resultingList.add(x.getGeneralApplicationItems()));
+        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom(), "Applicant");
+        assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
+        assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
+        assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
+        assertEquals(resultingList.get(0).getGeneralApplicationSpecialMeasures(), "Special measure");
+        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
+            LocalDate.of(2022, 8, 2));
+    }
+
     private CallbackRequest callbackRequestForCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("caseDocument", caseDocument(DOC_URL,"app_docs.docx", BINARY_URL));
@@ -187,7 +292,7 @@ public class GeneralApplicationHelperTest {
         FinremCaseData caseData = FinremCaseData.builder()
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
                 .generalApplicationCreatedBy("Claire Mumford").generalApplicationPreState("applicationIssued")
-                .generalApplications(generalApplicationsCollection)
+                .generalApplications(generalApplicationsCollection).intervener1GeneralApplications(generalApplicationsCollection)
                 .build()).build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()

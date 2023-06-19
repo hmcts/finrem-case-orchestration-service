@@ -20,6 +20,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 
 import java.time.LocalDate;
@@ -362,6 +365,30 @@ public class GeneralApplicationService {
         if ((generalApplications == null || generalApplications.isEmpty())) {
             log.info("Please complete the general application for case Id {}", caseDetails.getId());
             errors.add("Please complete the General Application. No information has been entered for this application.");
+        }
+    }
+
+    public void updateIntervenerDirectionsDocumentCollection(GeneralApplicationWrapper wrapper,
+                                                             CaseDocument caseDocument) {
+        IntervenerCaseDocument gaCaseDocument = IntervenerCaseDocument.builder().build();
+        IntervenerCaseDocumentCollection gaCaseDocumentCollection = IntervenerCaseDocumentCollection.builder().build();
+        List<IntervenerCaseDocumentCollection> gaDocumentCollectionList = new ArrayList<>();
+        List<IntervenerCaseDocumentCollection> existingGeneralApplicationDocuments =
+            wrapper.getGeneralApplicationIntvrDocuments();
+        if (existingGeneralApplicationDocuments != null && existingGeneralApplicationDocuments.size() > 0) {
+            gaCaseDocument.setDocument(caseDocument);
+            gaCaseDocumentCollection.setValue(gaCaseDocument);
+            if (existingGeneralApplicationDocuments.stream().filter(
+                x -> x.getValue().getDocument().getDocumentUrl().equals(
+                    caseDocument.getDocumentUrl())).count() < 1) {
+                existingGeneralApplicationDocuments.add(gaCaseDocumentCollection);
+            }
+            wrapper.setGeneralApplicationIntvrDocuments(existingGeneralApplicationDocuments);
+        } else {
+            gaCaseDocument.setDocument(caseDocument);
+            gaCaseDocumentCollection.setValue(gaCaseDocument);
+            gaDocumentCollectionList.add(gaCaseDocumentCollection);
+            wrapper.setGeneralApplicationIntvrDocuments(gaDocumentCollectionList);
         }
     }
 }

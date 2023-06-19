@@ -3,12 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -32,13 +30,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationDirectionsAboutToStartHandlerTest {
@@ -115,25 +109,25 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
+        DynamicList dynamicList = helper.objectToDynamicList(
+            caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList()
+        );
 
         assertEquals(1, dynamicList.getListItems().size());
         verify(service).startGeneralApplicationDirections(any());
     }
 
-    @Ignore
     @Test
     public void givenCase_whenNoApplicationAvailable_thenShowErrorMessage() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
-        CaseDetails caseDetails = caseDetailsFromResource(GA_JSON, objectMapper);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(
-            callbackRequest.getCaseDetails().getData(), GENERAL_APPLICATION_COLLECTION);
+            caseData, GENERAL_APPLICATION_COLLECTION);
         List<GeneralApplicationCollectionData> updatedList
             = existingList.stream().map(obj -> updateStatus(obj)).collect(Collectors.toList());
-        caseDetails.getData().put(GENERAL_APPLICATION_COLLECTION, helper.convertToGeneralApplicationsCollection(updatedList));
-        caseDetails.getData().put(GENERAL_APPLICATION_CREATED_BY, null);
-        when(finremCaseDetailsMapper.mapToCaseDetails(eq(callbackRequest.getCaseDetails())))
-            .thenReturn(caseDetails);
+        caseData.getGeneralApplicationWrapper().setGeneralApplications(
+            helper.convertToGeneralApplicationsCollection(updatedList));
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for issue direction."));
         verify(service).startGeneralApplicationDirections(any());

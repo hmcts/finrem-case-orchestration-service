@@ -17,8 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
@@ -164,30 +162,12 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         GeneralApplicationItems items = data.getGeneralApplicationItems();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
+        GeneralApplicationWrapper wrapper = finremCaseDetails.getData().getGeneralApplicationWrapper();
         if (items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER1)
             || items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER2)
             || items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER3)
             || items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER4)) {
-            GeneralApplicationWrapper wrapper = finremCaseDetails.getData().getGeneralApplicationWrapper();
-            IntervenerCaseDocument gaCaseDocument = IntervenerCaseDocument.builder().build();
-            IntervenerCaseDocumentCollection gaCaseDocumentCollection = IntervenerCaseDocumentCollection.builder().build();
-            List<IntervenerCaseDocumentCollection> gaDocumentCollectionList = new ArrayList<>();
-            List<IntervenerCaseDocumentCollection> existingGeneralApplicationDocuments = wrapper.getGeneralApplicationIntvrDocuments();
-            if (existingGeneralApplicationDocuments != null && existingGeneralApplicationDocuments.size() > 0) {
-                gaCaseDocument.setDocument(caseDocument);
-                gaCaseDocumentCollection.setValue(gaCaseDocument);
-                if (existingGeneralApplicationDocuments.stream().filter(
-                    x -> x.getValue().getDocument().getDocumentUrl()
-                        == caseDocument.getDocumentUrl()).collect(Collectors.toList()).size() < 1) {
-                    existingGeneralApplicationDocuments.add(gaCaseDocumentCollection);
-                }
-                wrapper.setGeneralApplicationIntvrDocuments(existingGeneralApplicationDocuments);
-            } else {
-                gaCaseDocument.setDocument(caseDocument);
-                gaCaseDocumentCollection.setValue(gaCaseDocument);
-                gaDocumentCollectionList.add(gaCaseDocumentCollection);
-                wrapper.setGeneralApplicationIntvrDocuments(gaDocumentCollectionList);
-            }
+            gaService.updateIntervenerDirectionsDocumentCollection(wrapper, caseDocument);
         }
         items.setGeneralApplicationDirectionsDocument(caseDocument);
         items.setGeneralApplicationOutcomeOther(Objects.toString(
