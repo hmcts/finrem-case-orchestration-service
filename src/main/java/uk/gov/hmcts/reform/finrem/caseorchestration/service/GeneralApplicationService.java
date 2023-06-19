@@ -346,6 +346,7 @@ public class GeneralApplicationService {
             } else {
                 x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(RESPONDENT);
             }
+            x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(null);
         });
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(generalApplications));
