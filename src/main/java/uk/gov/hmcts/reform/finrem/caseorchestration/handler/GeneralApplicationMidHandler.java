@@ -52,7 +52,6 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
 
         log.info("Mid callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
-        List<String> errors = new ArrayList<>();
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(
             caseDetails.getId().toString(), userAuthorisation);
@@ -96,7 +95,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                 log.info("default hit");
             }
         }
-
+        List<String> errors = new ArrayList<>();
         service.checkIfApplicationCompleted(caseDetails, errors, generalApplications, generalApplicationsBefore);
 
         log.info("CAse details {} errors {} gas {} gasbefore {}",
