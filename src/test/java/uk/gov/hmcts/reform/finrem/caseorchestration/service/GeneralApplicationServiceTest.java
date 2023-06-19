@@ -131,8 +131,6 @@ public class GeneralApplicationServiceTest {
 
         wrapper.setIntervener1GeneralApplications(wrapper.getGeneralApplications());
 
-        GeneralApplicationCollectionData data = GeneralApplicationCollectionData.builder().generalApplicationItems(wrapper.getGeneralApplications().get(0).getValue()).build();
-
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
 
         List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
@@ -154,8 +152,6 @@ public class GeneralApplicationServiceTest {
 
         wrapper.setIntervener2GeneralApplications(wrapper.getGeneralApplications());
 
-        GeneralApplicationCollectionData data = GeneralApplicationCollectionData.builder().generalApplicationItems(wrapper.getGeneralApplications().get(0).getValue()).build();
-
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
 
         List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
@@ -176,8 +172,6 @@ public class GeneralApplicationServiceTest {
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
 
         wrapper.setIntervener3GeneralApplications(wrapper.getGeneralApplications());
-
-        GeneralApplicationCollectionData data = GeneralApplicationCollectionData.builder().generalApplicationItems(wrapper.getGeneralApplications().get(0).getValue()).build();
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
 
@@ -222,8 +216,6 @@ public class GeneralApplicationServiceTest {
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
 
         wrapper.setAppRespGeneralApplications(wrapper.getGeneralApplications());
-
-        GeneralApplicationCollectionData data = GeneralApplicationCollectionData.builder().generalApplicationItems(wrapper.getGeneralApplications().get(0).getValue()).build();
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
 
