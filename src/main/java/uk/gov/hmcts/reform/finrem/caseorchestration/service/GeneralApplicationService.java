@@ -342,9 +342,11 @@ public class GeneralApplicationService {
             ).collect(Collectors.toList());
         appRespGeneralApplications.stream().forEach(x -> {
             if (x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(APPLICANT)) {
-                x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(ApplicantAndRespondentEvidenceParty.APPLICANT.getValue());
+                x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(
+                    ApplicantAndRespondentEvidenceParty.APPLICANT.getValue());
             } else {
-                x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue());
+                x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(
+                    ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue());
             }
         });
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
