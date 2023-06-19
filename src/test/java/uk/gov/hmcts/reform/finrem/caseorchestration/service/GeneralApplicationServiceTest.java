@@ -194,8 +194,6 @@ public class GeneralApplicationServiceTest {
 
         wrapper.setIntervener4GeneralApplications(wrapper.getGeneralApplications());
 
-        GeneralApplicationCollectionData data = GeneralApplicationCollectionData.builder().generalApplicationItems(wrapper.getGeneralApplications().get(0).getValue()).build();
-
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
 
         List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
