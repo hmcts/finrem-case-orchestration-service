@@ -26,6 +26,8 @@ public class GeneralApplicationItems {
     private CaseDocument generalApplicationDraftOrder;
     @JsonProperty("generalApplicationReceivedFrom")
     private String generalApplicationReceivedFrom;
+    @JsonProperty("appRespGeneralApplicationReceivedFrom")
+    private String appRespGeneralApplicationReceivedFrom;
     @JsonProperty("generalApplicationTimeEstimate")
     private String generalApplicationTimeEstimate;
     @JsonProperty("generalApplicationHearingRequired")
