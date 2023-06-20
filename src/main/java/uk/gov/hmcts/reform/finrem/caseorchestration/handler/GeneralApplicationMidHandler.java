@@ -92,14 +92,10 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
             default -> {
                 generalApplications = wrapper.getGeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getGeneralApplications();
-                log.info("default hit");
             }
         }
         List<String> errors = new ArrayList<>();
         service.checkIfApplicationCompleted(caseDetails, errors, generalApplications, generalApplicationsBefore);
-
-        log.info("CAse details {} errors {} gas {} gasbefore {}",
-            caseDetails, errors, generalApplications, generalApplicationsBefore);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
