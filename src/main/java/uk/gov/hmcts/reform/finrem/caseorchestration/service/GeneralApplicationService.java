@@ -131,19 +131,20 @@ public class GeneralApplicationService {
                 interimGeneralApplicationListForRoleType.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
                     EvidenceParty.INTERVENER4.getValue()));
             }
-            case APPLICANT -> {
+            case APPLICANT, RESPONDENT -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
                     APP_RESP_GENERAL_APPLICATION_COLLECTION, caseData, caseDataBefore);
-                interimGeneralApplicationListForRoleType.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
-                    EvidenceParty.APPLICANT.getValue()));
+                interimGeneralApplicationListForRoleType.forEach(x -> {
+                    String receivedFrom = x.getGeneralApplicationItems().getAppRespGeneralApplicationReceivedFrom();
+                    if (ApplicantAndRespondentEvidenceParty.APPLICANT.getValue().equals(receivedFrom)) {
+                        x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
+                            EvidenceParty.APPLICANT.getValue());
+                    } else if (ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue().equals(receivedFrom)){
+                        x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
+                            EvidenceParty.RESPONDENT.getValue());
+                    }
+                });
             }
-            case RESPONDENT -> {
-                interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(APP_RESP_GENERAL_APPLICATION_COLLECTION,
-                    caseData, caseDataBefore);
-                interimGeneralApplicationListForRoleType.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
-                    EvidenceParty.RESPONDENT.getValue()));
-            }
-
             default -> log.info("The current user is a caseworker on case {}", caseDetails.getId());
         }
 
