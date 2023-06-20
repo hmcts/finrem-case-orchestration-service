@@ -93,7 +93,7 @@ public class CcdService {
         SearchSourceBuilder searchBuilder = new SearchSourceBuilder();
         String escapeValue = StringEscapeUtils.escapeJava(StringEscapeUtils.escapeJson(caseId));
         searchBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("data.caseReference", escapeValue).operator(Operator.AND)));
-
+        log.info("Elasticsearch query {}", searchBuilder);
         return coreCaseDataApi.searchCases(idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(), caseType.getCcdType(), searchBuilder.toString());
     }
