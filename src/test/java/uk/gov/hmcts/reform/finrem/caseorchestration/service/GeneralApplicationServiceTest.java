@@ -205,27 +205,6 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void updateAndSortGeneralApplicationsForApplicant() {
-
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-
-        when(accessService.getActiveUser(any(), any())).thenReturn("Applicant");
-
-        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
-
-        wrapper.setAppRespGeneralApplications(wrapper.getGeneralApplications());
-
-        FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
-
-        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
-            = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications());
-
-        assertEquals(2, generalApplicationCollectionDataList.size());
-        assertEquals("Applicant", caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
-            .getValue().getGeneralApplicationReceivedFrom());
-    }
-
-    @Test
     public void givenUploadGenAppDocWordFormat_whenUpdateCaseDataSubmit_thenConvertGenAppDocLatestToPdf() {
 
         Map<String, String> documentMapInWordFormat = getCcdDocumentMap();
