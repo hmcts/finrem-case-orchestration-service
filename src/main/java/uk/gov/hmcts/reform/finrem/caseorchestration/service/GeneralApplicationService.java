@@ -132,8 +132,8 @@ public class GeneralApplicationService {
                     EvidenceParty.INTERVENER4.getValue()));
             }
             case APPLICANT -> {
-                interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(APP_RESP_GENERAL_APPLICATION_COLLECTION,
-                    caseData, caseDataBefore);
+                interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
+                    APP_RESP_GENERAL_APPLICATION_COLLECTION, caseData, caseDataBefore);
                 interimGeneralApplicationListForRoleType.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
                     EvidenceParty.APPLICANT.getValue()));
             }
@@ -178,9 +178,10 @@ public class GeneralApplicationService {
                     .collect(Collectors.toList());
             } else {
                 applicationsForRoleType = generalApplicationCollectionDataList.stream()
-                    .filter(x -> x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(APPLICANT)
-                         || x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(RESPONDENT))
-                         .collect(Collectors.toList());
+                    .filter(x -> (!x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().isEmpty()
+                        && (x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(APPLICANT))
+                        || x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(RESPONDENT)))
+                    .collect(Collectors.toList());
             }
 
             List<GeneralApplicationCollectionData> applicationCollectionDataListForRoleType = applicationsForRoleType.stream()
