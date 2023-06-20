@@ -43,7 +43,7 @@ public class SendOrderTask implements Runnable {
     @Value("${cron.wait-time-mins:10}")
     private int bulkPrintWaitTime;
 
-    @Value("${cron.sendorder.enabled}")
+    @Value("${cron.sendorder.enabled:false}")
     private boolean isSendOrderTaskEnabled;
 
     @Override
