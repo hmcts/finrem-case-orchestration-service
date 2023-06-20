@@ -131,9 +131,19 @@ public class GeneralApplicationService {
                 interimGeneralApplicationListForRoleType.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
                     EvidenceParty.INTERVENER4.getValue()));
             }
-            case APPLICANT, RESPONDENT ->
+            case APPLICANT -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(APP_RESP_GENERAL_APPLICATION_COLLECTION,
                     caseData, caseDataBefore);
+                interimGeneralApplicationListForRoleType.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
+                    EvidenceParty.APPLICANT.getValue()));
+            }
+            case RESPONDENT -> {
+                interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(APP_RESP_GENERAL_APPLICATION_COLLECTION,
+                    caseData, caseDataBefore);
+                interimGeneralApplicationListForRoleType.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
+                    EvidenceParty.RESPONDENT.getValue()));
+            }
+
             default -> log.info("The current user is a caseworker on case {}", caseDetails.getId());
         }
 
