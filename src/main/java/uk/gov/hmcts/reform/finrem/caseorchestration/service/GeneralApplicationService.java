@@ -178,9 +178,10 @@ public class GeneralApplicationService {
                     .collect(Collectors.toList());
             } else {
                 applicationsForRoleType = generalApplicationCollectionDataList.stream()
-                    .filter(x -> (!x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().isEmpty()
-                        && (x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(APPLICANT))
-                        || x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().equalsIgnoreCase(RESPONDENT)))
+                    .filter(x -> EvidenceParty.APPLICANT.getValue().equalsIgnoreCase(
+                        x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom())
+                        || EvidenceParty.RESPONDENT.getValue().equalsIgnoreCase(
+                        x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom()))
                     .collect(Collectors.toList());
             }
 
