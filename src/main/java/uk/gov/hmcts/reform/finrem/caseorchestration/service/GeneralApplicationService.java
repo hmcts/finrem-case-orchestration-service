@@ -139,7 +139,7 @@ public class GeneralApplicationService {
                     if (ApplicantAndRespondentEvidenceParty.APPLICANT.getValue().equals(receivedFrom)) {
                         x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
                             EvidenceParty.APPLICANT.getValue());
-                    } else if (ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue().equals(receivedFrom)){
+                    } else if (ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue().equals(receivedFrom)) {
                         x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(
                             EvidenceParty.RESPONDENT.getValue());
                     }
