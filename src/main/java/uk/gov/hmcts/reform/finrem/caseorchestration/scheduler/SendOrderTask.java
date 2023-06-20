@@ -73,7 +73,7 @@ public class SendOrderTask implements Runnable {
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
-                    log.error("Error processing caseRef {} ", caseReference.getCaseReference());
+                    log.error("Error processing caseRef {} and exception is {}", caseReference.getCaseReference(), e);
                 }
             }
         }
