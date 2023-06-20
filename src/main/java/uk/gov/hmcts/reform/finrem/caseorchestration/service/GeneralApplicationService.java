@@ -208,8 +208,11 @@ public class GeneralApplicationService {
         List<GeneralApplicationCollectionData> applicationCollectionDataList = generalApplicationCollectionDataList.stream()
             .sorted(helper::getCompareTo)
             .collect(Collectors.toList());
-        caseData.getGeneralApplicationWrapper().setGeneralApplications(helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
-
+        if (loggedInUserCaseRole.equalsIgnoreCase("Case")) {
+            updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
+        }
+        caseData.getGeneralApplicationWrapper().setGeneralApplications(
+            helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
         return caseData;
     }
 
