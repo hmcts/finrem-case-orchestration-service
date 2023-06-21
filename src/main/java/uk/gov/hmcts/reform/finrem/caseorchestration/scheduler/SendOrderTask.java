@@ -71,6 +71,7 @@ public class SendOrderTask implements Runnable {
                     log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
                     SearchResult searchResult =
                         ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, authToken);
+                    log.info("SearchResult count {}", searchResult.getTotal());
                     if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
                         CaseDetails caseDetails = searchResult.getCases().get(0);
                         printAndMailHearingDocuments(caseDetails, authToken);
