@@ -503,6 +503,54 @@ public class CCDConfigConstant {
     public static final String CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION = "manageCaseDocumentCollection";
 
     public static final String AMEND_CONSENT_ORDER = "AmendedConsentOrder";
+    public static final String INTV_ONE_CASE_SUMMARIES_COLLECTION = "intv1Summaries";
+    public static final String INTV_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv1Chronologies";
+    public static final String INTV_ONE_CORRESPONDENCE_COLLECTION = "intv1CorrespDocs";
+    public static final String INTV_ONE_EVIDENCE_COLLECTION = "intv1ExpertEvidence";
+    public static final String INTV_ONE_FORM_E_EXHIBITS_COLLECTION = "intv1FormEsExhibits";
+    public static final String INTV_ONE_FORMS_H_COLLECTION = "intv1FormHs";
+    public static final String INTV_ONE_HEARING_BUNDLES_COLLECTION = "intv1HearingBundles";
+    public static final String INTV_ONE_OTHER_COLLECTION = "intv1Other";
+    public static final String INTV_ONE_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv1Qa";
+    public static final String INTV_ONE_STATEMENTS_EXHIBITS_COLLECTION = "intv1StmtsExhibits";
+
+    public static final String INTV_TWO_CASE_SUMMARIES_COLLECTION = "intv2Summaries";
+    public static final String INTV_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv2Chronologies";
+    public static final String INTV_TWO_CORRESPONDENCE_COLLECTION = "intv2CorrespDocs";
+    public static final String INTV_TWO_EVIDENCE_COLLECTION = "intv2ExpertEvidence";
+    public static final String INTV_TWO_FORM_E_EXHIBITS_COLLECTION = "intv2FormEsExhibits";
+    public static final String INTV_TWO_FORMS_H_COLLECTION = "intv2FormHs";
+    public static final String INTV_TWO_HEARING_BUNDLES_COLLECTION = "intv2HearingBundles";
+    public static final String INTV_TWO_OTHER_COLLECTION = "intv2Other";
+    public static final String INTV_TWO_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv2Qa";
+    public static final String INTV_TWO_STATEMENTS_EXHIBITS_COLLECTION = "intv2StmtsExhibits";
+
+    public static final String INTV_THREE_CASE_SUMMARIES_COLLECTION = "intv3Summaries";
+    public static final String INTV_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv3Chronologies";
+    public static final String INTV_THREE_CORRESPONDENCE_COLLECTION = "intv3CorrespDocs";
+    public static final String INTV_THREE_EVIDENCE_COLLECTION = "intv3ExpertEvidence";
+    public static final String INTV_THREE_FORM_E_EXHIBITS_COLLECTION = "intv3FormEsExhibits";
+    public static final String INTV_THREE_FORMS_H_COLLECTION = "intv3FormHs";
+    public static final String INTV_THREE_HEARING_BUNDLES_COLLECTION = "intv3HearingBundles";
+    public static final String INTV_THREE_OTHER_COLLECTION = "intv3Other";
+    public static final String INTV_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv3Qa";
+    public static final String INTV_THREE_STATEMENTS_EXHIBITS_COLLECTION = "intv3StmtsExhibits";
+
+    public static final String INTV_FOUR_CASE_SUMMARIES_COLLECTION = "intv4Summaries";
+    public static final String INTV_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv4Chronologies";
+    public static final String INTV_FOUR_CORRESPONDENCE_COLLECTION = "intv4CorrespDocs";
+    public static final String INTV_FOUR_EVIDENCE_COLLECTION = "intv4ExpertEvidence";
+    public static final String INTV_FOUR_FORM_E_EXHIBITS_COLLECTION = "intv4FormEsExhibits";
+    public static final String INTV_FOUR_FORMS_H_COLLECTION = "intv4FormHs";
+    public static final String INTV_FOUR_HEARING_BUNDLES_COLLECTION = "intv4HearingBundles";
+    public static final String INTV_FOUR_OTHER_COLLECTION = "intv4Other";
+    public static final String INTV_FOUR_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv4Qa";
+    public static final String INTV_FOUR_STATEMENTS_EXHIBITS_COLLECTION = "intv4StmtsExhibits";
+
+    public static final String INTV_ONE_FDR_DOCS_COLLECTION = "intv1FdrCaseDocuments";
+    public static final String INTV_TWO_FDR_DOCS_COLLECTION = "intv2FdrCaseDocuments";
+    public static final String INTV_THREE_FDR_DOCS_COLLECTION = "intv3FdrCaseDocuments";
+    public static final String INTV_FOUR_FDR_DOCS_COLLECTION = "intv4FdrCaseDocuments";
 
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";

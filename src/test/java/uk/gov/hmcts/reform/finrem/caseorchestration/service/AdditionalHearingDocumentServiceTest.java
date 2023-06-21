@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.AdditionalHearingCorresponder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,6 +77,8 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     BulkPrintService bulkPrintService;
     @MockBean
     NotificationService notificationService;
+    @MockBean
+    AdditionalHearingCorresponder additionalHearingCorresponder;
 
     @Before
     public void setUp() {

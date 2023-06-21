@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -192,6 +193,30 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
             callbackRequest.getCaseDetails());
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("contested", notificationRequest.getCaseType());
+        assertEquals("nottingham", notificationRequest.getSelectedCourt());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+    }
+
+    @Test
+    public void shouldCreateNotificationRequestForIntervenerSolicitorForContestedJourney() {
+        CallbackRequest callbackRequest = getContestedCallbackRequest();
+        callbackRequest.getCaseDetails().getData().put("intervener1SolEmail", TEST_RESP_SOLICITOR_EMAIL);
+        callbackRequest.getCaseDetails().getData().put("intervener1SolName", TEST_RESP_SOLICITOR_NAME);
+        callbackRequest.getCaseDetails().getData().put("intervener1SolicitorReference", TEST_RESP_SOLICITOR_REFERENCE);
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey("intervener1SolEmail")
+            .solicitorNameKey("intervener1SolName")
+            .solicitorReferenceKey("intervener1SolicitorReference").build();
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
+            callbackRequest.getCaseDetails(), dataKeysWrapper);
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());

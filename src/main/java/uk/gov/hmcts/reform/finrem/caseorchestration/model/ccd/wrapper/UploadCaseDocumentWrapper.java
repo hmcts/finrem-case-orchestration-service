@@ -78,60 +78,50 @@ public class UploadCaseDocumentWrapper {
     private List<UploadCaseDocumentCollection> respOtherCollectionShared;
     private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 
+    private List<UploadCaseDocumentCollection> intv1Summaries;
+    private List<UploadCaseDocumentCollection> intv1Chronologies;
+    private List<UploadCaseDocumentCollection> intv1CorrespDocs;
+    private List<UploadCaseDocumentCollection> intv1ExpertEvidence;
+    private List<UploadCaseDocumentCollection> intv1FormEsExhibits;
+    private List<UploadCaseDocumentCollection> intv1FormHs;
+    private List<UploadCaseDocumentCollection> intv1HearingBundles;
+    private List<UploadCaseDocumentCollection> intv1Other;
+    private List<UploadCaseDocumentCollection> intv1Qa;
+    private List<UploadCaseDocumentCollection> intv1StmtsExhibits;
 
-    private List<UploadCaseDocumentCollection> intv1HearingBundlesShared;
-    @JsonProperty("intv1FormEExhibitsShared")
-    private List<UploadCaseDocumentCollection> intv1FormEsExhibitsShared;
-    private List<UploadCaseDocumentCollection> intv1ChronologiesShared;
-    @JsonProperty("intv1QAShared")
-    private List<UploadCaseDocumentCollection> intv1QaShared;
-    private List<UploadCaseDocumentCollection> intv1StmtsExhibitsShared;
-    private List<UploadCaseDocumentCollection> intv1SummariesShared;
-    @JsonProperty("intv1FormsHShared")
-    private List<UploadCaseDocumentCollection> intv1FormHsShared;
-    private List<UploadCaseDocumentCollection> intv1ExpertEvidenceShared;
-    private List<UploadCaseDocumentCollection> intv1CorrespDocsShared;
-    private List<UploadCaseDocumentCollection> intv1OtherShared;
+    private List<UploadCaseDocumentCollection> intv2Summaries;
+    private List<UploadCaseDocumentCollection> intv2Chronologies;
+    private List<UploadCaseDocumentCollection> intv2CorrespDocs;
+    private List<UploadCaseDocumentCollection> intv2ExpertEvidence;
+    private List<UploadCaseDocumentCollection> intv2FormEsExhibits;
+    private List<UploadCaseDocumentCollection> intv2FormHs;
+    private List<UploadCaseDocumentCollection> intv2HearingBundles;
+    private List<UploadCaseDocumentCollection> intv2Other;
+    private List<UploadCaseDocumentCollection> intv2Qa;
+    private List<UploadCaseDocumentCollection> intv2StmtsExhibits;
+    private List<UploadCaseDocumentCollection> intv3Summaries;
+    private List<UploadCaseDocumentCollection> intv3Chronologies;
+    private List<UploadCaseDocumentCollection> intv3CorrespDocs;
+    private List<UploadCaseDocumentCollection> intv3ExpertEvidence;
+    private List<UploadCaseDocumentCollection> intv3FormEsExhibits;
+    private List<UploadCaseDocumentCollection> intv3FormHs;
+    private List<UploadCaseDocumentCollection> intv3HearingBundles;
+    private List<UploadCaseDocumentCollection> intv3Other;
+    private List<UploadCaseDocumentCollection> intv3Qa;
+    private List<UploadCaseDocumentCollection> intv3StmtsExhibits;
+    private List<UploadCaseDocumentCollection> intv4Summaries;
+    private List<UploadCaseDocumentCollection> intv4Chronologies;
+    private List<UploadCaseDocumentCollection> intv4CorrespDocs;
+    private List<UploadCaseDocumentCollection> intv4ExpertEvidence;
+    private List<UploadCaseDocumentCollection> intv4FormEsExhibits;
+    private List<UploadCaseDocumentCollection> intv4FormHs;
+    private List<UploadCaseDocumentCollection> intv4HearingBundles;
+    private List<UploadCaseDocumentCollection> intv4Other;
+    private List<UploadCaseDocumentCollection> intv4Qa;
+    private List<UploadCaseDocumentCollection> intv4StmtsExhibits;
 
-    private List<UploadCaseDocumentCollection> intv2HearingBundlesShared;
-    @JsonProperty("intv2FormEExhibitsShared")
-    private List<UploadCaseDocumentCollection> intv2FormEsExhibitsShared;
-    private List<UploadCaseDocumentCollection> intv2ChronologiesShared;
-    @JsonProperty("intv2QAShared")
-    private List<UploadCaseDocumentCollection> intv2QaShared;
-    private List<UploadCaseDocumentCollection> intv2StmtsExhibitsShared;
-    private List<UploadCaseDocumentCollection> intv2SummariesShared;
-    @JsonProperty("intv2FormsHShared")
-    private List<UploadCaseDocumentCollection> intv2FormHsShared;
-    private List<UploadCaseDocumentCollection> intv2ExpertEvidenceShared;
-    private List<UploadCaseDocumentCollection> intv2CorrespDocsShared;
-    private List<UploadCaseDocumentCollection> intv2OtherShared;
-
-    private List<UploadCaseDocumentCollection> intv3HearingBundlesShared;
-    @JsonProperty("intv3FormEExhibitsShared")
-    private List<UploadCaseDocumentCollection> intv3FormEsExhibitsShared;
-    private List<UploadCaseDocumentCollection> intv3ChronologiesShared;
-    @JsonProperty("intv3QAShared")
-    private List<UploadCaseDocumentCollection> intv3QaShared;
-    private List<UploadCaseDocumentCollection> intv3StmtsExhibitsShared;
-    private List<UploadCaseDocumentCollection> intv3SummariesShared;
-    @JsonProperty("intv3FormsHShared")
-    private List<UploadCaseDocumentCollection> intv3FormHsShared;
-    private List<UploadCaseDocumentCollection> intv3ExpertEvidenceShared;
-    private List<UploadCaseDocumentCollection> intv3CorrespDocsShared;
-    private List<UploadCaseDocumentCollection> intv3OtherShared;
-
-    private List<UploadCaseDocumentCollection> intv4HearingBundlesShared;
-    @JsonProperty("intv4FormEExhibitsShared")
-    private List<UploadCaseDocumentCollection> intv4FormEsExhibitsShared;
-    private List<UploadCaseDocumentCollection> intv4ChronologiesShared;
-    @JsonProperty("intv4QAShared")
-    private List<UploadCaseDocumentCollection> intv4QaShared;
-    private List<UploadCaseDocumentCollection> intv4StmtsExhibitsShared;
-    private List<UploadCaseDocumentCollection> intv4SummariesShared;
-    @JsonProperty("intv4FormsHShared")
-    private List<UploadCaseDocumentCollection> intv4FormHsShared;
-    private List<UploadCaseDocumentCollection> intv4ExpertEvidenceShared;
-    private List<UploadCaseDocumentCollection> intv4CorrespDocsShared;
-    private List<UploadCaseDocumentCollection> intv4OtherShared;
+    private List<UploadCaseDocumentCollection> intv1FdrCaseDocuments;
+    private List<UploadCaseDocumentCollection> intv2FdrCaseDocuments;
+    private List<UploadCaseDocumentCollection> intv3FdrCaseDocuments;
+    private List<UploadCaseDocumentCollection> intv4FdrCaseDocuments;
 }

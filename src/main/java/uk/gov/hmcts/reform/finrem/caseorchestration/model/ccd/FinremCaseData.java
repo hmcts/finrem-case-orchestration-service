@@ -289,17 +289,21 @@ public class FinremCaseData {
     private DynamicMultiSelectList solicitorRoleList;
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
-    @JsonUnwrapped
+
     @Getter(AccessLevel.NONE)
+    @JsonProperty("intervener1")
     private IntervenerOneWrapper intervenerOneWrapper;
-    @JsonUnwrapped
+
     @Getter(AccessLevel.NONE)
+    @JsonProperty("intervener2")
     private IntervenerTwoWrapper intervenerTwoWrapper;
-    @JsonUnwrapped
+
     @Getter(AccessLevel.NONE)
+    @JsonProperty("intervener3")
     private IntervenerThreeWrapper intervenerThreeWrapper;
-    @JsonUnwrapped
+
     @Getter(AccessLevel.NONE)
+    @JsonProperty("intervener4")
     private IntervenerFourWrapper intervenerFourWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -489,7 +493,7 @@ public class FinremCaseData {
     @JsonIgnore
     public IntervenerOneWrapper getIntervenerOneWrapper() {
         if (intervenerOneWrapper == null) {
-            this.intervenerOneWrapper = new IntervenerOneWrapper();
+            this.intervenerOneWrapper = IntervenerOneWrapper.builder().build();
         }
         return intervenerOneWrapper;
     }
@@ -497,7 +501,7 @@ public class FinremCaseData {
     @JsonIgnore
     public IntervenerTwoWrapper getIntervenerTwoWrapper() {
         if (intervenerTwoWrapper == null) {
-            this.intervenerTwoWrapper = new IntervenerTwoWrapper();
+            this.intervenerTwoWrapper = IntervenerTwoWrapper.builder().build();
         }
         return intervenerTwoWrapper;
     }
@@ -505,7 +509,7 @@ public class FinremCaseData {
     @JsonIgnore
     public IntervenerThreeWrapper getIntervenerThreeWrapper() {
         if (intervenerThreeWrapper == null) {
-            this.intervenerThreeWrapper = new IntervenerThreeWrapper();
+            this.intervenerThreeWrapper =  IntervenerThreeWrapper.builder().build();
         }
         return intervenerThreeWrapper;
     }
@@ -513,7 +517,7 @@ public class FinremCaseData {
     @JsonIgnore
     public IntervenerFourWrapper getIntervenerFourWrapper() {
         if (intervenerFourWrapper == null) {
-            this.intervenerFourWrapper = new IntervenerFourWrapper();
+            this.intervenerFourWrapper = IntervenerFourWrapper.builder().build();
         }
         return intervenerFourWrapper;
     }

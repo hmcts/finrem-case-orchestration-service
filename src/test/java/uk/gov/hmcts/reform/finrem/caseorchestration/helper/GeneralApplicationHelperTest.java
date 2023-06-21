@@ -69,10 +69,8 @@ public class GeneralApplicationHelperTest {
 
     @Test
     public void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNull_thenReturnNull() {
-        CallbackRequest callbackRequest = callbackRequest();
-        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
-        assertNull(helper.retrieveInitialGeneralApplicationData(data, "any", AUTH_TOKEN, anyString()));
+        assertNull(helper.retrieveInitialGeneralApplicationData(new HashMap<>(), "any", AUTH_TOKEN, anyString()));
     }
 
     @Test
