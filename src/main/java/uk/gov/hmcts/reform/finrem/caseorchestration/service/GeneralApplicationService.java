@@ -184,7 +184,12 @@ public class GeneralApplicationService {
                         || EvidenceParty.RESPONDENT.getValue().equals(
                         x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom()))
                     .collect(Collectors.toList());
+                applicationsForRoleType.forEach(
+                    x -> x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(null));
             }
+
+            generalApplicationCollectionDataList.forEach(
+                x -> x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(null));
 
             List<GeneralApplicationCollectionData> applicationCollectionDataListForRoleType = applicationsForRoleType.stream()
                 .sorted(helper::getCompareTo)
