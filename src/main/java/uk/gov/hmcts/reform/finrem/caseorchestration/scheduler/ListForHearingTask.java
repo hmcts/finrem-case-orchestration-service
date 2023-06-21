@@ -2,15 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
@@ -25,7 +24,8 @@ public class ListForHearingTask implements Runnable {
     private final HearingDocumentService hearingDocumentService;
     private final CaseReferenceCsvLoader csvLoader;
     private final CcdService ccdService;
-    private final SystemUserService systemUserService;
+    private final SystemUpdateUserConfiguration systemUpdateUserConfiguration;
+    private final IdamAuthService idamAuthService;
     @Value("${cron.batchsize:500}")
     private int bulkPrintBatchSize;
     @Value("${cron.wait-time-mins:10}")
@@ -40,6 +40,8 @@ public class ListForHearingTask implements Runnable {
         if (isListForHearingTaskEnabled) {
             log.info("Scheduled task ListForHearingTask started to run for selected cases");
             List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList("listForHearingCaseReferenceList.csv");
+            final String authToken = idamAuthService.getAccessToken(systemUpdateUserConfiguration.getUserName(),
+                systemUpdateUserConfiguration.getPassword());
             int count = 0;
             int batchCount = 1;
             for (CaseReference caseReference : caseReferences) {
@@ -53,15 +55,13 @@ public class ListForHearingTask implements Runnable {
                     }
 
                     log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
-                    SearchResult searchResult =
-                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, systemUserService.getSysUserToken());
-                    if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
-                        CaseDetails caseDetails = searchResult.getCases().get(0);
-                        if (caseDetails != null) {
-                            log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
-                            hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, systemUserService.getSysUserToken());
-                            log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
-                        }
+                    CaseDetails caseDetails =
+                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, authToken);
+                    if (caseDetails != null) {
+                        log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
+                        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authToken);
+                        log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
+
                     }
 
                 } catch (InterruptedException | RuntimeException e) {

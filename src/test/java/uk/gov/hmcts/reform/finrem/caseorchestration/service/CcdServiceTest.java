@@ -8,14 +8,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CaseEventsApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -63,13 +61,12 @@ public class CcdServiceTest {
     @Test
     public void shouldReturnCaseDetailsByCaseId() {
         CaseDetails caseDetails = buildCaseDetails();
-        when(coreCaseDataApi.searchCases(any(), any(), any(), any())).thenReturn(SearchResult.builder()
-            .cases(List.of(caseDetails)).build());
+        when(coreCaseDataApi.readForCaseWorker(any(), any(), any(), any(), any(), any())).thenReturn(caseDetails);
         when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
 
-        SearchResult result = ccdService.getCaseByCaseId("123", CaseType.CONTESTED, AUTH_TOKEN);
+        CaseDetails result = ccdService.getCaseByCaseId("123", CaseType.CONTESTED, AUTH_TOKEN);
 
-        verify(coreCaseDataApi).searchCases(any(), any(), any(), any());
+        verify(coreCaseDataApi).readForCaseWorker(any(), any(), any(), any(), any(), any());
     }
 
     private CaseDetails buildCaseDetails() {
