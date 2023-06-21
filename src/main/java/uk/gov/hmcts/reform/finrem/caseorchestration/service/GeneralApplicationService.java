@@ -188,9 +188,6 @@ public class GeneralApplicationService {
                     x -> x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(null));
             }
 
-            generalApplicationCollectionDataList.forEach(
-                x -> x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(null));
-
             List<GeneralApplicationCollectionData> applicationCollectionDataListForRoleType = applicationsForRoleType.stream()
                 .sorted(helper::getCompareTo)
                 .collect(Collectors.toList());
@@ -213,6 +210,10 @@ public class GeneralApplicationService {
         List<GeneralApplicationCollectionData> applicationCollectionDataList = generalApplicationCollectionDataList.stream()
             .sorted(helper::getCompareTo)
             .collect(Collectors.toList());
+
+        applicationCollectionDataList.forEach(
+            x -> x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(null));
+
         if (loggedInUserCaseRole.equalsIgnoreCase("Case")) {
             updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
         }
