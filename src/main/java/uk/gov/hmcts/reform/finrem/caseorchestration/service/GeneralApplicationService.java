@@ -211,12 +211,13 @@ public class GeneralApplicationService {
             .sorted(helper::getCompareTo)
             .collect(Collectors.toList());
 
-        applicationCollectionDataList.forEach(
-            x -> x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(null));
-
         if (loggedInUserCaseRole.equalsIgnoreCase("Case")) {
             updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
         }
+
+        applicationCollectionDataList.forEach(
+            x -> x.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(null));
+
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
         return caseData;
