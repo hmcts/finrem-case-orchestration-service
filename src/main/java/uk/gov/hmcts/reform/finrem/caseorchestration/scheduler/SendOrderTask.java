@@ -2,11 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -69,11 +67,10 @@ public class SendOrderTask implements Runnable {
                     }
 
                     log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
-                    SearchResult searchResult =
+                    CaseDetails caseDetails =
                         ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, authToken);
-                    log.info("SearchResult count {}", searchResult.getTotal());
-                    if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
-                        CaseDetails caseDetails = searchResult.getCases().get(0);
+                    if (caseDetails != null) {
+                        log.info("Found case details for case Id: {}", caseDetails.getId());
                         printAndMailHearingDocuments(caseDetails, authToken);
                     }
 
