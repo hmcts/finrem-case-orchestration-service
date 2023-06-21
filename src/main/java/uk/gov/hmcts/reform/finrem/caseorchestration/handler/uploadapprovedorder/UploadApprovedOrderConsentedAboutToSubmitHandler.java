@@ -42,7 +42,6 @@ public class UploadApprovedOrderConsentedAboutToSubmitHandler extends FinremCall
         log.info("Received request to set nature of application for consented case with Case ID: {}", 
             finremCaseDetails.getId());
         FinremCaseData caseData = finremCaseDetails.getData();
-        log.info("caseData ={}= for case id {}", caseData, finremCaseDetails.getId());
 
         caseData.setLatestConsentOrder(caseData.getConsentOrderWrapper().getUploadApprovedConsentOrder());
         consentOrderApprovedDocumentService
