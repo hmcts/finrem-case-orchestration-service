@@ -129,6 +129,8 @@ public class GeneralApplicationServiceTest {
 
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
 
+        wrapper.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom("Intervener1"));
+
         wrapper.setIntervener1GeneralApplications(wrapper.getGeneralApplications());
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
@@ -137,7 +139,7 @@ public class GeneralApplicationServiceTest {
             = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications());
 
         assertEquals(2, generalApplicationCollectionDataList.size());
-        assertEquals("intervener1", caseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications().get(0)
+        assertEquals("Intervener1", caseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications().get(0)
             .getValue().getGeneralApplicationReceivedFrom());
     }
 
@@ -150,6 +152,8 @@ public class GeneralApplicationServiceTest {
 
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
 
+        wrapper.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom("Intervener2"));
+
         wrapper.setIntervener2GeneralApplications(wrapper.getGeneralApplications());
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
@@ -158,7 +162,7 @@ public class GeneralApplicationServiceTest {
             = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications());
 
         assertEquals(2, generalApplicationCollectionDataList.size());
-        assertEquals("intervener2", caseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications().get(0)
+        assertEquals("Intervener2", caseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications().get(0)
             .getValue().getGeneralApplicationReceivedFrom());
     }
 
@@ -171,6 +175,8 @@ public class GeneralApplicationServiceTest {
 
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
 
+        wrapper.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom("Intervener3"));
+
         wrapper.setIntervener3GeneralApplications(wrapper.getGeneralApplications());
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
@@ -179,7 +185,7 @@ public class GeneralApplicationServiceTest {
             = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications());
 
         assertEquals(2, generalApplicationCollectionDataList.size());
-        assertEquals("intervener3", caseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications().get(0)
+        assertEquals("Intervener3", caseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications().get(0)
             .getValue().getGeneralApplicationReceivedFrom());
     }
 
@@ -192,6 +198,8 @@ public class GeneralApplicationServiceTest {
 
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
 
+        wrapper.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom("Intervener4"));
+
         wrapper.setIntervener4GeneralApplications(wrapper.getGeneralApplications());
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
@@ -200,7 +208,7 @@ public class GeneralApplicationServiceTest {
             = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications());
 
         assertEquals(2, generalApplicationCollectionDataList.size());
-        assertEquals("intervener4", caseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications().get(0)
+        assertEquals("Intervener4", caseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications().get(0)
             .getValue().getGeneralApplicationReceivedFrom());
     }
 
