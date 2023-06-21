@@ -276,7 +276,7 @@ public class AssignCaseAccessService {
             .build());
     }
 
-    private String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
+    public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
         log.info("retrieve active user case role for caseId {}", caseId);
         String idamUserId = idamService.getIdamUserId(userAuthorisation);
         CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
