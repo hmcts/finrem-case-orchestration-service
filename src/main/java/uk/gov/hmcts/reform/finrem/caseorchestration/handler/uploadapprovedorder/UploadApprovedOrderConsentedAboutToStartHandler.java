@@ -41,7 +41,7 @@ public class UploadApprovedOrderConsentedAboutToStartHandler extends FinremCallb
             callbackRequest.getCaseDetails().getId());
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        log.info("caseData ={}= for case id {}", caseData, caseDetails.getId());
+        log.info("caseData for case id {}", caseDetails.getId());
 
         caseData.setOrderDirectionJudgeName(idamService.getIdamSurname(userAuthorisation));
         caseData.setOrderDirectionDate(LocalDate.now());
