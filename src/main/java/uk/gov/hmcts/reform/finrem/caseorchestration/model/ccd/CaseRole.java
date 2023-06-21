@@ -8,7 +8,9 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum CaseRole {
     APP_SOLICITOR("[APPSOLICITOR]"),
+    APP_BARRISTER("[APPBARRISTER]"),
     RESP_SOLICITOR("[RESPSOLICITOR]"),
+    RESP_BARRISTER("[RESPBARRISTER]"),
     CASEWORKER("[CASEWORKER]"),
     CREATOR("[CREATOR]"),
     INTVR_SOLICITOR_1("[INTVRSOLICITOR1]"),

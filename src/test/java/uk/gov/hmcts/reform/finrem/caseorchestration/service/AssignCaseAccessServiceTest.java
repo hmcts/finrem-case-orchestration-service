@@ -116,6 +116,28 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void getActiveUserCaseRole() throws JsonProcessingException {
+
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
+
+        caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
+                SearchCaseAssignedUserRolesRequest.builder()
+                    .caseIds(List.of(TEST_CASE_ID))
+                    .build())))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(mapper.writeValueAsString(generateResourceWhenAppSolOnCase()))));
+
+        List<CaseAssignmentUserRole> caseAssignmentUserRoles = assignCaseAccessService.searchUserRoles(TEST_CASE_ID).getCaseAssignmentUserRoles();
+        assertEquals(1, caseAssignmentUserRoles.size());
+        assertTrue(caseAssignmentUserRoles.stream().anyMatch(role -> role.getCaseRole().equals(APP_SOLICITOR_POLICY)));
+
+        String activeUserCaseRole = assignCaseAccessService.getActiveUserCaseRole(TEST_CASE_ID, AUTH_TOKEN);
+        assertEquals(APP_SOLICITOR_POLICY, activeUserCaseRole);
+    }
+
+    @Test
     public void assignCaseAccess() {
         CaseDetails caseDetails = buildCaseDetails();
 
