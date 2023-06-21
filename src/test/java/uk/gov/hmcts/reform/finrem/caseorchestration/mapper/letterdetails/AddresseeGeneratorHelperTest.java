@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.Map;
 
@@ -60,6 +61,27 @@ public class AddresseeGeneratorHelperTest {
     public void givenRespondentRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONTESTED);
+        caseData.getContactDetailsWrapper().setRespondentFmName("Respondent");
+        caseData.getContactDetailsWrapper().setRespondentLname("Name");
+        caseData.getContactDetailsWrapper().setRespondentAddress(Address.builder()
+            .addressLine1("1 Respondent Street")
+            .addressLine2("Address Line 2")
+            .build());
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
+
+        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+
+        assertEquals("Respondent Name", addressee.getName());
+        assertEquals("1 Respondent Street\nAddress Line 2", addressee.getFormattedAddress());
+    }
+
+
+    @Test
+    public void givenIntervenerRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+        IntervenerWrapper.
         caseData.getContactDetailsWrapper().setRespondentFmName("Respondent");
         caseData.getContactDetailsWrapper().setRespondentLname("Name");
         caseData.getContactDetailsWrapper().setRespondentAddress(Address.builder()

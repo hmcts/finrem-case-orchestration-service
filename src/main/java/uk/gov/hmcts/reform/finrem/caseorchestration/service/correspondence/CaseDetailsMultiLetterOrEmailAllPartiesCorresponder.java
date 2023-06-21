@@ -52,6 +52,12 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
                         caseDetails.getId());
                     this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
                 }
+                else{
+                    log.info("Sending letter correspondence to {} for case: {}",
+                        intervenerWrapper.getIntervenerType().getTypeValue(),
+                        caseDetails.getId());
+                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+                }
             });
         }
     }
