@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assume.assumeTrue;
 
-@Ignore
 @Slf4j
 @Ignore
 public class FinremCaseDataTest {
