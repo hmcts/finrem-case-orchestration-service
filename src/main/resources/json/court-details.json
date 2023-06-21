@@ -344,7 +344,7 @@
   "FR_kent_surrey_hc_list_1": {
     "courtName": "Canterbury Family Court Hearing Centre",
     "courtAddress": "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
-    "phoneNumber": "01634 887900",
+    "phoneNumber": "0300 123 5577",
     "email": "Family.canterbury.countycourt@justice.gov.uk"
   },
   "FR_kent_surrey_hc_list_2": {
@@ -356,7 +356,7 @@
   "FR_kent_surrey_hc_list_3": {
     "courtName": "Dartford County Court And Family Court",
     "courtAddress": "Home Gardens, Dartford, DA1 1DX",
-    "phoneNumber": "01634 887900",
+    "phoneNumber": "0300 123 5577",
     "email": "family.dartford.countycourt@justice.gov.uk"
   },
   "FR_kent_surrey_hc_list_4": {
@@ -608,7 +608,7 @@
   "FR_thamesvalleyList_1": {
     "courtName": "Oxford Combined Court Centre",
     "courtAddress": "St Aldates, Oxford, OX1 1TL",
-    "phoneNumber": "01865 264 225",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCThamesValley@justice.gov.uk"
   },
   "FR_thamesvalleyList_2": {
