@@ -14,7 +14,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
@@ -44,6 +43,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerC
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -485,7 +487,10 @@ public class FinremCaseData {
 
     @JsonIgnore
     public List<IntervenerWrapper> getInterveners() {
-        return List.of(getIntervenerOneWrapper(), getIntervenerTwoWrapper(), getIntervenerThreeWrapper(), getIntervenerFourWrapper());
+        List<IntervenerWrapper> intervenerList =
+            new ArrayList<>(Arrays. asList(intervenerOneWrapper, intervenerTwoWrapper, intervenerThreeWrapper, intervenerFourWrapper));
+        intervenerList.removeAll(Collections.singleton(null));
+        return intervenerList;
     }
 
 
@@ -508,7 +513,7 @@ public class FinremCaseData {
     @JsonIgnore
     public IntervenerThreeWrapper getIntervenerThreeWrapper() {
         if (intervenerThreeWrapper == null) {
-            this.intervenerThreeWrapper =  IntervenerThreeWrapper.builder().build();
+            this.intervenerThreeWrapper = IntervenerThreeWrapper.builder().build();
         }
         return intervenerThreeWrapper;
     }

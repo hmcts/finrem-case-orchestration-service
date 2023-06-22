@@ -10,9 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -44,7 +41,7 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     *
      * @return letterId to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -74,7 +71,7 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     *
      * @return letterId to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -95,7 +92,7 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     *
      * @return letterId to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -132,7 +129,7 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     *
      * @return sendLetterResponse response to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -178,7 +175,7 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     *
      * @return BulkPrintDocument to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -200,7 +197,7 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     *
      * @return BulkPrintDocument to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -235,14 +232,18 @@ public class BulkPrintService {
     }
 
     @Deprecated(since = "15-Feb-2023")
-    private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken, DocumentHelper.PaperNotificationRecipient recipient) {
+    private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken,
+                                                           DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
-        log.info("Intervener cover sheet generated {}, for case Id {}", intervenerCoverSheet, caseDetails.getId());
+        log.info("Intervener cover sheet generated {}, for case Id {}",
+            intervenerCoverSheet, caseDetails.getId());
         return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
     }
 
-    private BulkPrintDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails, String authorisationToken, DocumentHelper.PaperNotificationRecipient recipient) {
-        CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
+    private BulkPrintDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails, String authorisationToken,
+                                                           DocumentHelper.PaperNotificationRecipient recipient) {
+        CaseDocument intervenerCoverSheet =
+            coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
         log.info("Intervener cover sheet generated {}, for case Id {}", intervenerCoverSheet, caseDetails.getId());
         return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
     }
@@ -252,16 +253,24 @@ public class BulkPrintService {
     }
 
     @Deprecated(since = "15-Feb-2023")
-    public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails, String authorisationToken, List<BulkPrintDocument> caseDocuments) {
+    public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails,
+                                         String authorisationToken,
+                                         List<BulkPrintDocument> caseDocuments) {
 
         return printDocumentsWithCoversheet(caseDetails,
-            generateIntervenerCoverSheet(caseDetails, authorisationToken, intervenerWrapper.getPaperNotificationRecipient()), caseDocuments, intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
+            generateIntervenerCoverSheet(caseDetails, authorisationToken,
+                intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
+            intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
     }
 
-    public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails, String authorisationToken, List<BulkPrintDocument> caseDocuments) {
+    public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper,
+                                         FinremCaseDetails caseDetails,
+                                         String authorisationToken,
+                                         List<BulkPrintDocument> caseDocuments) {
 
         return printDocumentsWithCoversheet(caseDetails,
-            generateIntervenerCoverSheet(caseDetails, authorisationToken, intervenerWrapper.getPaperNotificationRecipient()), caseDocuments, intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
+            generateIntervenerCoverSheet(caseDetails, authorisationToken, intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
+            intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
     }
 
 }

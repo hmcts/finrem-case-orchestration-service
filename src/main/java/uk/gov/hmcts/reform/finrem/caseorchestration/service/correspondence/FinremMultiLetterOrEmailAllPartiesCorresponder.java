@@ -48,8 +48,7 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
                 this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
-            }
-            else{
+            } else {
                 log.info("Sending letter correspondence to {} for case: {}",
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());

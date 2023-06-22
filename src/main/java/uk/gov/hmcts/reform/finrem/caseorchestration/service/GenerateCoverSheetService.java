@@ -91,7 +91,9 @@ public class GenerateCoverSheetService {
     }
 
     @Deprecated
-    public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails, final String authorisationToken,  DocumentHelper.PaperNotificationRecipient recipient) {
+    public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails,
+                                                     final String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
@@ -99,7 +101,9 @@ public class GenerateCoverSheetService {
 
     }
 
-    public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken, DocumentHelper.PaperNotificationRecipient recipient) {
+    public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
+                                                     final String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
 
@@ -159,8 +163,8 @@ public class GenerateCoverSheetService {
     }
 
     private Addressee buildAddressee(String partyAddressCcdFieldName, String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
-                                   String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName, Map<String, Object> caseData,
-                                   boolean sendToSolicitor) {
+                                     String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName, Map<String, Object> caseData,
+                                     boolean sendToSolicitor) {
         Addressee addressee = Addressee.builder()
             .name(sendToSolicitor
                 ? (String) caseData.get(solicitorNameCcdFieldName)

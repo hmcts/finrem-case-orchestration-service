@@ -33,20 +33,21 @@ public class AddresseeGeneratorHelper {
 
     private static Addressee getAddressee(FinremCaseData caseData,
                                           DocumentHelper.PaperNotificationRecipient recipient) {
-        if(recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT)
+        if (recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT) {
             return getApplicantAddressee(caseData);
-        else if(recipient == DocumentHelper.PaperNotificationRecipient.RESPONDENT)
+        } else if (recipient == DocumentHelper.PaperNotificationRecipient.RESPONDENT) {
             return getRespondentAddressee(caseData);
-        else if(recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE)
+        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE) {
             return getIntervenerAddressee(caseData.getIntervenerOneWrapper());
-        else if(recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO)
+        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO) {
             return getIntervenerAddressee(caseData.getIntervenerTwoWrapper());
-        else if(recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE)
+        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE) {
             return getIntervenerAddressee(caseData.getIntervenerThreeWrapper());
-        else if(recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR)
+        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR) {
             return getIntervenerAddressee(caseData.getIntervenerFourWrapper());
-        else
+        } else {
             return null;
+        }
     }
 
     private static Addressee getApplicantAddressee(FinremCaseData caseData) {
