@@ -6,11 +6,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,36 +72,36 @@ public interface SharedService {
 
     default List<DynamicMultiSelectListElement> intervenerCaseRoleList(FinremCaseData caseData, List<String> roleList) {
         //intervener1
-        IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapper();
+        IntervenerWrapper oneWrapper = caseData.getIntervenerOneWrapper();
         if (ObjectUtils.isNotEmpty(oneWrapper)
-            && ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Organisation())
-            && ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID())) {
-            roleList.add(oneWrapper.getIntervener1Organisation().getOrgPolicyCaseAssignedRole());
+            && ObjectUtils.isNotEmpty(oneWrapper.getIntervenerOrganisation())
+            && ObjectUtils.isNotEmpty(oneWrapper.getIntervenerOrganisation().getOrganisation())
+            && ObjectUtils.isNotEmpty(oneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID())) {
+            roleList.add(oneWrapper.getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
         }
         //intervener2
-        IntervenerTwoWrapper twoWrapper = caseData.getIntervenerTwoWrapper();
+        IntervenerWrapper twoWrapper = caseData.getIntervenerTwoWrapper();
         if (ObjectUtils.isNotEmpty(twoWrapper)
-            && ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Organisation())
-            && ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Organisation().getOrganisation().getOrganisationID())) {
-            roleList.add(twoWrapper.getIntervener2Organisation().getOrgPolicyCaseAssignedRole());
+            && ObjectUtils.isNotEmpty(twoWrapper.getIntervenerOrganisation())
+            && ObjectUtils.isNotEmpty(twoWrapper.getIntervenerOrganisation().getOrganisation())
+            && ObjectUtils.isNotEmpty(twoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID())) {
+            roleList.add(twoWrapper.getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
         }
         //intervener3
-        IntervenerThreeWrapper threeWrapper = caseData.getIntervenerThreeWrapper();
+        IntervenerWrapper threeWrapper = caseData.getIntervenerThreeWrapper();
         if (ObjectUtils.isNotEmpty(threeWrapper)
-            && ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Organisation())
-            && ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Organisation().getOrganisation().getOrganisationID())) {
-            roleList.add(threeWrapper.getIntervener3Organisation().getOrgPolicyCaseAssignedRole());
+            && ObjectUtils.isNotEmpty(threeWrapper.getIntervenerOrganisation())
+            && ObjectUtils.isNotEmpty(threeWrapper.getIntervenerOrganisation().getOrganisation())
+            && ObjectUtils.isNotEmpty(threeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID())) {
+            roleList.add(threeWrapper.getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
         }
         //intervener4
-        IntervenerFourWrapper fourWrapper = caseData.getIntervenerFourWrapper();
+        IntervenerWrapper fourWrapper = caseData.getIntervenerFourWrapper();
         if (ObjectUtils.isNotEmpty(fourWrapper)
-            && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation())
-            && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation().getOrganisation().getOrganisationID())) {
-            roleList.add(fourWrapper.getIntervener4Organisation().getOrgPolicyCaseAssignedRole());
+            && ObjectUtils.isNotEmpty(fourWrapper.getIntervenerOrganisation())
+            && ObjectUtils.isNotEmpty(fourWrapper.getIntervenerOrganisation().getOrganisation())
+            && ObjectUtils.isNotEmpty(fourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID())) {
+            roleList.add(fourWrapper.getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
         }
 
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
