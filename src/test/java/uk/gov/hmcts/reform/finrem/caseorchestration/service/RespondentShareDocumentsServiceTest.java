@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 
 import java.time.LocalDateTime;
@@ -302,13 +303,13 @@ class RespondentShareDocumentsServiceTest {
         Organisation testOrg = Organisation.builder().organisationID(TEST_ORG).build();
         caseData.setApplicantOrganisationPolicy(OrganisationPolicy.builder()
             .organisation(testOrg).orgPolicyCaseAssignedRole(APP_SOLICITOR.getValue()).build());
-        caseData.setIntervenerOneWrapper(IntervenerOneWrapper.builder().intervener1Organisation(OrganisationPolicy.builder()
+        caseData.setIntervenerOneWrapper(IntervenerOneWrapper.builder().intervenerOrganisation(OrganisationPolicy.builder()
             .organisation(testOrg).orgPolicyCaseAssignedRole(INTVR_SOLICITOR_1.getValue()).build()).build());
-        caseData.setIntervenerTwoWrapper(IntervenerTwoWrapper.builder().intervener2Organisation(OrganisationPolicy.builder()
+        caseData.setIntervenerTwoWrapper(IntervenerTwoWrapper.builder().intervenerOrganisation(OrganisationPolicy.builder()
             .organisation(testOrg).orgPolicyCaseAssignedRole(INTVR_SOLICITOR_2.getValue()).build()).build());
-        caseData.setIntervenerThreeWrapper(IntervenerThreeWrapper.builder().intervener3Organisation(OrganisationPolicy.builder()
+        caseData.setIntervenerThreeWrapper(IntervenerThreeWrapper.builder().intervenerOrganisation(OrganisationPolicy.builder()
             .organisation(testOrg).orgPolicyCaseAssignedRole(INTVR_SOLICITOR_3.getValue()).build()).build());
-        caseData.setIntervenerFourWrapper(IntervenerFourWrapper.builder().intervener4Organisation(OrganisationPolicy.builder()
+        caseData.setIntervenerFourWrapper(IntervenerFourWrapper.builder().intervenerOrganisation(OrganisationPolicy.builder()
             .organisation(testOrg).orgPolicyCaseAssignedRole(INTVR_SOLICITOR_4.getValue()).build()).build());
     }
 }
