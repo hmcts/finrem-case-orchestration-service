@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -32,14 +31,14 @@ public class DocumentGeneratorValidationService {
     @Value("${document.validation.fileUploadErrorMessage}")
     private String fileUploadErrorMessage;
 
-    public DocumentValidationResponse validateFileType(String fileBinaryUrl) {
-        ResponseEntity<byte[]> responseEntity = evidenceManagementDownloadService.download(fileBinaryUrl);
+    public DocumentValidationResponse validateFileType(String fileBinaryUrl, String auth) {
+        byte[] file = evidenceManagementDownloadService.download(fileBinaryUrl, auth);
         DocumentValidationResponse.DocumentValidationResponseBuilder builder =
             DocumentValidationResponse.builder();
-        if (Objects.isNull(responseEntity.getBody())) {
+        if (Objects.isNull(file)) {
             builder.errors(singletonList("Downloaded document is empty"));
         } else {
-            try (InputStream targetStream = new ByteArrayInputStream(responseEntity.getBody())) {
+            try (InputStream targetStream = new ByteArrayInputStream(file)) {
                 String detect = tika.detect(targetStream, new Metadata());
                 if (mimeTypes.contains(detect)) {
                     builder.mimeType(detect);

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.ResourceUtils;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,12 +82,17 @@ public abstract class BaseServiceTest extends BaseTest {
     @Autowired
     protected FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    @MockBean
+    protected EmailService emailService;
+
     public static final String CASE_DETAILS = "caseDetails";
     public static final String CASE_DATA = "case_data";
 
     public static final byte[] SOME_BYTES = "ainhsdcnoih".getBytes();
 
     private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
+
+    protected String caseId = "123123123";
 
     protected String formattedNowDate = DateTimeFormatter.ofPattern(CCDConfigConstant.LETTER_DATE_FORMAT).format(LocalDate.now());
 

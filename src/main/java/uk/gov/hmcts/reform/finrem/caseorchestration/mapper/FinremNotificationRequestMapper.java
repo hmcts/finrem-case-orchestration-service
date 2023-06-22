@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
@@ -38,6 +39,11 @@ public class FinremNotificationRequestMapper {
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData()));
+    }
+
+    public NotificationRequest getNotificationRequestForIntervenerSolicitor(FinremCaseDetails caseDetails,
+                                                                            SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+        return buildNotificationRequest(caseDetails, caseDataKeysWrapper);
     }
 
     public NotificationRequest getNotificationRequestForNoticeOfChange(FinremCaseDetails caseDetails) {
@@ -74,19 +80,19 @@ public class FinremNotificationRequestMapper {
     }
 
     private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
-                                                         SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+                                                         SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         FinremCaseData caseData = caseDetails.getData();
         notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
-        notificationRequest.setSolicitorReferenceNumber(Objects.toString(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));
+        notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));
         notificationRequest.setDivorceCaseNumber(Objects.toString(caseData.getDivorceCaseNumber(), EMPTY_STRING));
-        notificationRequest.setName(solicitorCaseDataKeysWrapper.getSolicitorNameKey());
-        notificationRequest.setNotificationEmail(solicitorCaseDataKeysWrapper.getSolicitorEmailKey());
+        notificationRequest.setName(caseDataKeysWrapper.getSolicitorNameKey());
+        notificationRequest.setNotificationEmail(caseDataKeysWrapper.getSolicitorEmailKey());
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
         notificationRequest.setGeneralApplicationRejectionReason(
             Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason(), EMPTY_STRING));
-        notificationRequest.setGeneralEmailBody(Objects.toString(caseData.getGeneralEmailBody(), EMPTY_STRING));
+        notificationRequest.setGeneralEmailBody(Objects.toString(caseData.getGeneralEmailWrapper().getGeneralEmailBody(), EMPTY_STRING));
         notificationRequest.setApplicantName(Objects.toString(caseData.getFullApplicantName()));
         if (caseData.isConsentedApplication()) {
             notificationRequest.setRespondentName(Objects.toString(caseData.getFullRespondentNameConsented()));
@@ -111,6 +117,21 @@ public class FinremNotificationRequestMapper {
             .barristerReferenceNumber(barrister.getOrganisation().getOrganisationID())
             .caseReferenceNumber(caseDetails.getId().toString())
             .notificationEmail(barrister.getEmail())
+            .applicantName(caseDetails.getData().getFullApplicantName())
+            .respondentName(caseDetails.getData().getRespondentFullName())
+            .phoneOpeningHours(CTSC_OPENING_HOURS)
+            .build();
+    }
+
+    public NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
+                                                        String recipientName, String recipientEmail, String referenceNumber) {
+        return NotificationRequest.builder()
+            .caseReferenceNumber(caseDetails.getId().toString())
+            .intervenerFullName(intervenerDetails.getIntervenerName())
+            .intervenerSolicitorFirm(intervenerDetails.getIntervenerOrganisation().getOrganisation().getOrganisationName())
+            .intervenerSolicitorReferenceNumber(referenceNumber)
+            .name(recipientName)
+            .notificationEmail(recipientEmail)
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
             .phoneOpeningHours(CTSC_OPENING_HOURS)

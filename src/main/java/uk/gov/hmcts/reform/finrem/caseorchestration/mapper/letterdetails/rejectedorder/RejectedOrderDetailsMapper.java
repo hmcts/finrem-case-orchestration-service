@@ -79,7 +79,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
                     .orderRefusal(getReasonsAsStringAndTranslate(refusalOrder))
                     .orderRefusalAddComments(refusalOrder.getValue().getOrderRefusalAddComments())
                     .orderRefusalAfterText(refusalOrder.getValue().getOrderRefusalAfterText())
-                    .orderRefusalDate(String.valueOf(refusalOrder.getValue().getOrderRefusalDate()))
+                    .orderRefusalDate(refusalOrder.getValue().getOrderRefusalDate())
                     .orderRefusalJudge(getOrderRefusalJudge(refusalOrder))
                     .orderRefusalJudgeName(refusalOrder.getValue().getOrderRefusalJudgeName())
                     .orderRefusalDocs(refusalOrder.getValue().getOrderRefusalDocs())
@@ -93,10 +93,10 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
         List<String> orderRefusalStrings = refusalOrder.getValue().getOrderRefusal().stream()
             .map(OrderRefusalOption::getId).collect(toList());
 
-        if (orderRefusalStrings.contains("Transferred to Applicant’s home Court")) {
+        if (orderRefusalStrings.contains(OrderRefusalOption.TRANSFERRED_TO_APPLICANTS_HOME_COURT_OLD.getId())) {
             orderRefusalStrings.addAll(List.of("Transferred to Applicant home Court - A",
                 "Transferred to Applicant home Court - B"));
-            orderRefusalStrings.remove("Transferred to Applicant’s home Court");
+            orderRefusalStrings.remove(OrderRefusalOption.TRANSFERRED_TO_APPLICANTS_HOME_COURT_OLD.getId());
         }
         return orderRefusalStrings;
     }

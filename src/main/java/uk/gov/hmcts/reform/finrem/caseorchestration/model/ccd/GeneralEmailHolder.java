@@ -18,4 +18,5 @@ public class GeneralEmailHolder {
     private String generalEmailRecipient;
     private String generalEmailCreatedBy;
     private String generalEmailBody;
+    private CaseDocument generalEmailUploadedDocument;
 }

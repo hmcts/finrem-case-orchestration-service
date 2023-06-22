@@ -77,4 +77,51 @@ public class UploadCaseDocumentWrapper {
     private List<UploadCaseDocumentCollection> respCorrespondenceDocsCollShared;
     private List<UploadCaseDocumentCollection> respOtherCollectionShared;
     private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
+
+    private List<UploadCaseDocumentCollection> intv1Summaries;
+    private List<UploadCaseDocumentCollection> intv1Chronologies;
+    private List<UploadCaseDocumentCollection> intv1CorrespDocs;
+    private List<UploadCaseDocumentCollection> intv1ExpertEvidence;
+    private List<UploadCaseDocumentCollection> intv1FormEsExhibits;
+    private List<UploadCaseDocumentCollection> intv1FormHs;
+    private List<UploadCaseDocumentCollection> intv1HearingBundles;
+    private List<UploadCaseDocumentCollection> intv1Other;
+    private List<UploadCaseDocumentCollection> intv1Qa;
+    private List<UploadCaseDocumentCollection> intv1StmtsExhibits;
+
+    private List<UploadCaseDocumentCollection> intv2Summaries;
+    private List<UploadCaseDocumentCollection> intv2Chronologies;
+    private List<UploadCaseDocumentCollection> intv2CorrespDocs;
+    private List<UploadCaseDocumentCollection> intv2ExpertEvidence;
+    private List<UploadCaseDocumentCollection> intv2FormEsExhibits;
+    private List<UploadCaseDocumentCollection> intv2FormHs;
+    private List<UploadCaseDocumentCollection> intv2HearingBundles;
+    private List<UploadCaseDocumentCollection> intv2Other;
+    private List<UploadCaseDocumentCollection> intv2Qa;
+    private List<UploadCaseDocumentCollection> intv2StmtsExhibits;
+    private List<UploadCaseDocumentCollection> intv3Summaries;
+    private List<UploadCaseDocumentCollection> intv3Chronologies;
+    private List<UploadCaseDocumentCollection> intv3CorrespDocs;
+    private List<UploadCaseDocumentCollection> intv3ExpertEvidence;
+    private List<UploadCaseDocumentCollection> intv3FormEsExhibits;
+    private List<UploadCaseDocumentCollection> intv3FormHs;
+    private List<UploadCaseDocumentCollection> intv3HearingBundles;
+    private List<UploadCaseDocumentCollection> intv3Other;
+    private List<UploadCaseDocumentCollection> intv3Qa;
+    private List<UploadCaseDocumentCollection> intv3StmtsExhibits;
+    private List<UploadCaseDocumentCollection> intv4Summaries;
+    private List<UploadCaseDocumentCollection> intv4Chronologies;
+    private List<UploadCaseDocumentCollection> intv4CorrespDocs;
+    private List<UploadCaseDocumentCollection> intv4ExpertEvidence;
+    private List<UploadCaseDocumentCollection> intv4FormEsExhibits;
+    private List<UploadCaseDocumentCollection> intv4FormHs;
+    private List<UploadCaseDocumentCollection> intv4HearingBundles;
+    private List<UploadCaseDocumentCollection> intv4Other;
+    private List<UploadCaseDocumentCollection> intv4Qa;
+    private List<UploadCaseDocumentCollection> intv4StmtsExhibits;
+
+    private List<UploadCaseDocumentCollection> intv1FdrCaseDocuments;
+    private List<UploadCaseDocumentCollection> intv2FdrCaseDocuments;
+    private List<UploadCaseDocumentCollection> intv3FdrCaseDocuments;
+    private List<UploadCaseDocumentCollection> intv4FdrCaseDocuments;
 }

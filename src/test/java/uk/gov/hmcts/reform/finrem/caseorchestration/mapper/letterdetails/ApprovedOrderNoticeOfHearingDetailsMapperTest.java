@@ -51,7 +51,7 @@ public class ApprovedOrderNoticeOfHearingDetailsMapperTest extends AbstractLette
 
     private ApprovedOrderNoticeOfHearingDetails getExpectedApprovedOrderNoticeOfHearingDetails(String additionalHearingDated) {
         return ApprovedOrderNoticeOfHearingDetails.builder()
-            .ccdCaseNumber(1234567890L)
+            .ccdCaseNumber(123123123L)
             .hearingVenue("Hastings County Court And Family Court Hearing Centre, The Law Courts, Bohemia Road, Hastings, TN34 1QX")
             .divorceCaseNumber("DD12D12345")
             .hearingType("Final Hearing (FH)")

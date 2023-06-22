@@ -45,11 +45,13 @@ public class GeneralApplicationController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Received request to submit general application for Case ID: {}", caseId);
         validateCaseData(callback);
 
         CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, authorisationToken);
+        generalApplicationService.updateCaseDataSubmit(
+            caseDetails.getData(), caseDetailsBefore, authorisationToken, caseId);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()

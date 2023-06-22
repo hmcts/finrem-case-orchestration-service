@@ -34,6 +34,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMEND_CONSENT_ORDER;
@@ -50,6 +51,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_CFC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
@@ -556,6 +565,50 @@ public class CaseDataServiceTest extends BaseServiceTest {
         Map<String, Object> data = new HashMap<>();
 
         assertThat(caseDataService.isRespondentAddressConfidential(data), is(false));
+    }
+
+    @Test
+    public void shouldBuildFullIntervener1Name() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(INTERVENER1_FIRST_MIDDLE_NAME, "Sarah John");
+        data.put(INTERVENER1_LAST_NAME, "Smith");
+        CaseDetails caseDetails = CaseDetails.builder().data(data).build();
+        assertEquals(
+            caseDataService.buildFullIntervener1Name(caseDetails), "Sarah John Smith"
+        );
+    }
+
+    @Test
+    public void shouldBuildFullIntervener2Name() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(INTERVENER2_FIRST_MIDDLE_NAME, "John Taylor");
+        data.put(INTERVENER2_LAST_NAME, "Fitzgerald");
+        CaseDetails caseDetails = CaseDetails.builder().data(data).build();
+        assertEquals(
+            caseDataService.buildFullIntervener2Name(caseDetails), "John Taylor Fitzgerald"
+        );
+    }
+
+    @Test
+    public void shouldBuildFullIntervener3Name() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(INTERVENER3_FIRST_MIDDLE_NAME, "Sam Tyler");
+        data.put(INTERVENER3_LAST_NAME, "Peters");
+        CaseDetails caseDetails = CaseDetails.builder().data(data).build();
+        assertEquals(
+            caseDataService.buildFullIntervener3Name(caseDetails), "Sam Tyler Peters"
+        );
+    }
+
+    @Test
+    public void shouldBuildFullIntervener4Name() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(INTERVENER4_FIRST_MIDDLE_NAME, "Yousef Luke");
+        data.put(INTERVENER4_LAST_NAME, "Brown");
+        CaseDetails caseDetails = CaseDetails.builder().data(data).build();
+        assertEquals(
+            caseDataService.buildFullIntervener4Name(caseDetails), "Yousef Luke Brown"
+        );
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {

@@ -165,7 +165,7 @@ public class FinremCaseDetailMapperTest {
     private static final String BASIC_REQUEST = "/fixtures/deserialisation/basic-request.json";
 
     private static final String GA_REQUEST = "/fixtures/deserialisation/ccd-request-with-general-application.json";
-
+    private static final String CASE_FLAGS_REQUEST = "/fixtures/case-flags.json";
 
     private CaseDetails caseDetails;
     private ObjectMapper objectMapper;
@@ -240,6 +240,13 @@ public class FinremCaseDetailMapperTest {
         assertNotNull(finremCaseDetails);
     }
 
+
+    @Test
+    public void givenCaseFlagsFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
+        caseDetails = buildCaseDetailsOnlyFromJson(CASE_FLAGS_REQUEST);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        assertNotNull(finremCaseDetails);
+    }
 
     @Test
     public void givenCcdRequestAppIssued_whenDeserializeFromString_thenSuccessfullyDeserialize() throws IOException {
@@ -469,8 +476,8 @@ public class FinremCaseDetailMapperTest {
     }
 
     private void assertGeneralEmail(FinremCaseData caseData) {
-        assertEquals(caseData.getGeneralEmailRecipient(), "recipient");
-        assertEquals(caseData.getGeneralEmailCreatedBy(), "sender");
+        assertEquals(caseData.getGeneralEmailWrapper().getGeneralEmailRecipient(), "recipient");
+        assertEquals(caseData.getGeneralEmailWrapper().getGeneralEmailCreatedBy(), "sender");
         List<GeneralEmailCollection> expected = List.of(
             GeneralEmailCollection.builder()
                 .value(GeneralEmailHolder.builder()
@@ -480,7 +487,7 @@ public class FinremCaseDetailMapperTest {
                     .build())
                 .build()
         );
-        assertTrue(caseData.getGeneralEmailCollection().containsAll(expected));
+        assertTrue(caseData.getGeneralEmailWrapper().getGeneralEmailCollection().containsAll(expected));
     }
 
     private void assertRepresentationUpdateHistory(FinremCaseData caseData) {
@@ -1011,6 +1018,16 @@ public class FinremCaseDetailMapperTest {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
             CaseDetails caseDetails =
                 objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return caseDetails;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CaseDetails buildCaseDetailsOnlyFromJson(String testJson) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
+            CaseDetails caseDetails =
+                objectMapper.readValue(resourceAsStream, CaseDetails.class);
             return caseDetails;
         } catch (Exception e) {
             throw new RuntimeException(e);

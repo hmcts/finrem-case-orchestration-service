@@ -60,7 +60,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     @Before
     public void setupDocumentGenerationMocks() {
 
-        when(evidenceManagementUploadService.upload(any(), any()))
+        when(evidenceManagementUploadService.upload(any(), any(), any()))
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
                     .fileName("app_docs.pdf")

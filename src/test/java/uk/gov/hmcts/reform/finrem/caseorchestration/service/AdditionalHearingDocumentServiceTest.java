@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.AdditionalHearingCorresponder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,6 +77,8 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     BulkPrintService bulkPrintService;
     @MockBean
     NotificationService notificationService;
+    @MockBean
+    AdditionalHearingCorresponder additionalHearingCorresponder;
 
     @Before
     public void setUp() {
@@ -84,9 +87,9 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void convertToPdf() {
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), any())).thenReturn(caseDocument());
         CaseDocument caseDocument = caseDocument(DOC_URL, "app_docs.docx", BINARY_URL);
-        CaseDocument toPdf = additionalHearingDocumentService.convertToPdf(caseDocument, AUTH_TOKEN);
+        CaseDocument toPdf = additionalHearingDocumentService.convertToPdf(caseDocument, AUTH_TOKEN, caseId);
         assertEquals("app_docs.pdf", toPdf.getDocumentFilename());
     }
 
@@ -238,7 +241,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void createAndStoreAdditionalHearingDocuments_caseworkerUploadsOrder() throws JsonProcessingException {
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(
             CaseDocument.builder().documentBinaryUrl("docBin")
                 .documentFilename("docFilename.pdf")
                 .documentUrl("docUrl").build()
@@ -315,7 +318,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     public void givenAdditionalDocumentsToBeStored_whenCreateAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
         CaseDocument expectedDocument = CaseDocument.builder().documentBinaryUrl("docBin").documentFilename("docFilename")
             .documentUrl("docUrl").build();
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(expectedDocument);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(expectedDocument);
         Map<String, Object> caseData = baseCaseData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
         caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);

@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement;
 
-import feign.FeignException;
-import feign.Request;
-import feign.RequestTemplate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,21 +13,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
-import java.util.HashMap;
+import java.util.UUID;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,52 +36,44 @@ public class EvidenceManagementDeleteServiceTest {
 
     private static final String EVIDENCE_MANAGEMENT_SERVICE_URL = "http://localhost:8080/documents/";
 
-    @Mock
-    IdamAuthService idamAuthService;
-    @Mock private RestTemplate restTemplate;
-    @Mock private AuthTokenGenerator authTokenGenerator;
+    public static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
+    public static final String AUTH = "auth";
+    public static final String IDAM_OAUTH_TOKEN = "idamOauthToken";
+    public static final String SERVICE_AUTH = "serviceAuth";
+    public static final String DOC_UUID = "d607c045-878e-475f-ab8e-b2f667d8af64";
 
+    @Mock
+    private RestTemplate restTemplate;
+    @Mock
+    private CaseDocumentClient caseDocumentClient;
+    @Mock
+    private IdamAuthService idamAuthService;
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+    @Mock
+    private FeatureToggleService featureToggleService;
     @InjectMocks
-    private EvidenceManagementDeleteService deleteService;
+    private EvidenceManagementDeleteService emDeleteService;
+    private IdamToken idamToken;
 
     @Before
     public void setUp() {
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
+        idamToken = IdamToken.builder()
+            .idamOauth2Token(IDAM_OAUTH_TOKEN)
+            .serviceAuthorization(SERVICE_AUTH)
+            .build();
+        when(idamAuthService.getIdamToken(any())).thenReturn(idamToken);
         when(idamAuthService.getUserDetails(anyString())).thenReturn(UserDetails.builder().id("19").build());
     }
 
-    /**
-     * This test issues a document delete request that is expected to succeed. It ensures that the OK response from
-     * the EM document store service passes cleanly through the evidence management client api to the caller
-     * without any issues or exceptions occurring.
-     * <p/>
-     */
     @Test
     public void shouldPassThruDocumentDeletedSuccessfullyState() {
-        String fileUrl = EVIDENCE_MANAGEMENT_SERVICE_URL.concat("56");
-        setupMockEvidenceManagementService(fileUrl, HttpStatus.OK);
+        setupMockEvidenceManagementService(DOC_URL, HttpStatus.OK);
 
-        ResponseEntity<?> response = deleteService.deleteFile(fileUrl, "AAAABBBB");
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
-
-
-    /**
-     * This test issues a document delete request that is expected to do nothing. It ensures that the NO_CONTENT
-     * response from the EM document store service passes cleanly through the evidence management client api to
-     * the caller without any issues or exceptions occurring.
-     * <p/>
-     */
-    @Test
-    public void shouldPassThruNoDocumentIdIsPassedState() {
-        String fileUrl = EVIDENCE_MANAGEMENT_SERVICE_URL.concat("");
-        setupMockEvidenceManagementService(fileUrl, HttpStatus.NO_CONTENT);
-
-        ResponseEntity<?> response = deleteService.deleteFile(fileUrl, "AAAABBBB");
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        emDeleteService.delete(DOC_URL, "AAAABBBB");
+        verify(idamAuthService).getUserDetails(anyString());
+        verify(restTemplate).exchange(eq(DOC_URL), eq(HttpMethod.DELETE), any(), eq(String.class));
     }
 
 
@@ -95,13 +85,12 @@ public class EvidenceManagementDeleteServiceTest {
      */
     @Test
     public void shouldPassThruNotAuthorisedAuthTokenState() {
-        String fileUrl = EVIDENCE_MANAGEMENT_SERVICE_URL.concat("56");
-        setupMockEvidenceManagementService(fileUrl, HttpStatus.UNAUTHORIZED);
+        setupMockEvidenceManagementService(DOC_URL, HttpStatus.UNAUTHORIZED);
 
-        ResponseEntity<?> response = deleteService.deleteFile(fileUrl, "CCCCDDDD");
+        emDeleteService.delete(DOC_URL, "CCCCDDDD");
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        verify(idamAuthService).getUserDetails(anyString());
+        verify(restTemplate).exchange(eq(DOC_URL), eq(HttpMethod.DELETE), any(), eq(String.class));
     }
 
 
@@ -113,13 +102,12 @@ public class EvidenceManagementDeleteServiceTest {
      */
     @Test
     public void shouldPassThruNotAuthenticatedAuthTokenState() {
-        String fileUrl = EVIDENCE_MANAGEMENT_SERVICE_URL.concat("56");
-        setupMockEvidenceManagementService(fileUrl, HttpStatus.FORBIDDEN);
+        setupMockEvidenceManagementService(DOC_URL, HttpStatus.FORBIDDEN);
 
-        ResponseEntity<?> response = deleteService.deleteFile(fileUrl, "");
+        emDeleteService.delete(DOC_URL, "");
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(idamAuthService).getUserDetails(anyString());
+        verify(restTemplate).exchange(eq(DOC_URL), eq(HttpMethod.DELETE), any(), eq(String.class));
     }
 
     /**
@@ -129,34 +117,17 @@ public class EvidenceManagementDeleteServiceTest {
      */
     @Test(expected = ResourceAccessException.class)
     public void shouldPassThruExceptionThrownWhenEvidenceManagementServiceNotFound() {
-        String fileUrl = EVIDENCE_MANAGEMENT_SERVICE_URL.concat("25");
 
         doThrow(ResourceAccessException.class)
             .when(restTemplate)
-            .exchange(Mockito.eq(fileUrl),
+            .exchange(Mockito.eq(DOC_URL),
                 Mockito.eq(HttpMethod.DELETE),
                 any(),
                 any(Class.class));
 
-        deleteService.deleteFile(fileUrl, "AAAABBBB");
+        emDeleteService.delete(DOC_URL, "AAAABBBB");
 
         fail("Failed to receive exception resulting from non-running EM service");
-    }
-
-    @Test
-    public void shouldCatchExceptionFromUserServiceAndReturnResponseWithSameHttpStatus() {
-        Request requestForExceptionInstance = Request.create(Request.HttpMethod.POST, "",
-            new HashMap<>(), Request.Body.empty(), new RequestTemplate());
-        doThrow(new FeignException.InternalServerError("does not compute",
-            requestForExceptionInstance, new byte[] {}, new HashMap()))
-            .when(idamAuthService)
-            .getUserDetails(anyString());
-
-        String fileUrl = EVIDENCE_MANAGEMENT_SERVICE_URL.concat("25");
-        ResponseEntity<String> responseEntity =
-            deleteService.deleteFile(fileUrl, "AAAABBBB");
-
-        assertThat(responseEntity.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     /**
@@ -175,5 +146,15 @@ public class EvidenceManagementDeleteServiceTest {
                 Mockito.eq(HttpMethod.DELETE),
                 any(),
                 any(Class.class));
+    }
+
+    @Test
+    public void givenUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToSucceed() {
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
+        emDeleteService.delete(DOC_URL, AUTH);
+
+        verify(idamAuthService, times(1)).getIdamToken(AUTH);
+        verify(caseDocumentClient, times(1))
+            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID),true);
     }
 }

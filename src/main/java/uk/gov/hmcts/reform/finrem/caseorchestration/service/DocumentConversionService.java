@@ -42,7 +42,7 @@ public class DocumentConversionService {
     private final EvidenceManagementDownloadService evidenceManagementService;
 
 
-    public byte[] convertDocumentToPdf(Document sourceDocument) {
+    public byte[] convertDocumentToPdf(Document sourceDocument, String auth) {
         if (PDF_MIME_TYPE.equalsIgnoreCase(tika.detect(sourceDocument.getFileName()))) {
             throw new DocumentConversionException(
                 "Document already is a pdf",
@@ -50,17 +50,17 @@ public class DocumentConversionService {
             );
         }
 
-        return convert(sourceDocument);
+        return convert(sourceDocument, auth);
     }
 
     public String getConvertedFilename(String filename) {
         return FilenameUtils.getBaseName(filename) + ".pdf";
     }
 
-    private byte[] convert(Document sourceDocument) {
+    private byte[] convert(Document sourceDocument, String auth) {
         try {
             String filename = getConvertedFilename(sourceDocument.getFileName());
-            byte[] docInBytes = evidenceManagementService.download(sourceDocument.getBinaryUrl()).getBody();
+            byte[] docInBytes = evidenceManagementService.download(sourceDocument.getBinaryUrl(), auth);
             File file = new File(filename);
             Files.write(docInBytes, file);
 

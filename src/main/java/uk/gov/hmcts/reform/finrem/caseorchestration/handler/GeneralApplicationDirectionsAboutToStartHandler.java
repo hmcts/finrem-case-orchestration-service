@@ -44,7 +44,8 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
 
         Map<String, Object> caseData = caseDetails.getData();
         service.startGeneralApplicationDirections(caseDetails);
@@ -52,8 +53,8 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
         List<GeneralApplicationCollectionData> outcomeList = helper.getOutcomeList(caseData);
         AtomicInteger index = new AtomicInteger(0);
         if (outcomeList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
-            log.info("setting direction list if existing ga not moved to collection for Case ID: {}", caseDetails.getId());
-            setDirectionListForNonCollectionGeneralApplication(caseData, index, userAuthorisation);
+            log.info("setting direction list if existing ga not moved to collection for Case ID: {}", caseId);
+            setDirectionListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
         } else {
             if (outcomeList.isEmpty()) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
@@ -72,8 +73,8 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
 
     private void setDirectionListForNonCollectionGeneralApplication(Map<String, Object> caseData,
                                                                     AtomicInteger index,
-                                                                    String userAuthorisation) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation);
+                                                                    String userAuthorisation, String caseId) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 

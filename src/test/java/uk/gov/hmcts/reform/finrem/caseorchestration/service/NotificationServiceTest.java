@@ -3,32 +3,42 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.http.HttpMethod;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.match.MockRestRequestMatchers;
-import org.springframework.test.web.client.response.MockRestResponseCreators;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.io.IOException;
@@ -38,25 +48,60 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFERRED_DETAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_GENERAL_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOC_CASEWORKER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_APPLICATION_ISSUED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER_CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOTICE_OF_CHANGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_SOL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 
 public class NotificationServiceTest extends BaseServiceTest {
 
@@ -98,6 +143,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
     private static final String NOTTINGHAM_FRC_EMAIL = "FRCNottingham@justice.gov.uk";
+    private static final String INTERVENER_SOL_EMAIL = "intervenerSol@email.com";
 
     private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
     private static final String CONSENTED_HEARING_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
@@ -105,570 +151,428 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Autowired
     private NotificationService notificationService;
     @Autowired
-    private RestTemplate restTemplate;
-    @Autowired private ConsentedHearingHelper helper;
+    private EmailService emailService;
+    @Autowired
+    private ConsentedHearingHelper helper;
 
     @MockBean
     private FeatureToggleService featureToggleService;
     @MockBean
-    private RestTemplate mockRestTemplate;
-    @MockBean
     private NotificationRequestMapper notificationRequestMapper;
+    @MockBean
+    private FinremNotificationRequestMapper finremNotificationRequestMapper;
     @MockBean
     private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     @MockBean
+    private EvidenceManagementDownloadService evidenceManagementDownloadService;
+    @MockBean
     private CaseDataService caseDataService;
-    @SpyBean
-    private NotificationServiceConfiguration notificationServiceConfiguration;
 
     private CallbackRequest callbackRequest;
+    private FinremCallbackRequest finremCallbackRequest;
+    private NotificationRequest notificationRequest;
+    private SolicitorCaseDataKeysWrapper dataKeysWrapper;
 
-    private MockRestServiceServer mockServer;
 
     @Before
     public void setUp() {
-        mockServer = MockRestServiceServer.createServer(restTemplate);
         callbackRequest = getConsentedCallbackRequest();
-
-        NotificationRequest notificationRequest = new NotificationRequest();
+        finremCallbackRequest = getContestedNewCallbackRequest();
+        notificationRequest = new NotificationRequest();
+        dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
         when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(CaseDetails.class))).thenReturn(notificationRequest);
         when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class))).thenReturn(notificationRequest);
+        when(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(CaseDetails.class),
+            any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
+        when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
+            .thenReturn(notificationRequest);
+        when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
+            .thenReturn(notificationRequest);
+        when(finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(FinremCaseDetails.class),
+                any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
+        when(evidenceManagementDownloadService.downloadInResponseEntity(anyString(), anyString()))
+            .thenReturn(ResponseEntity.status(HttpStatus.OK).body(new ByteArrayResource(new byte[2048])));
     }
 
     @Test
     public void sendHwfSuccessfulNotificationEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest.getCaseDetails());
-
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_HWF_SUCCESSFUL);
     }
 
-    @Test
-    public void throwExceptionWhenHwfSuccessfulNotificationEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
 
     @Test
     public void sendAssignToJudgeNotificationEmailToApplicantSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_ASSIGNED_TO_JUDGE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
-
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_ASSIGNED_TO_JUDGE);
     }
 
     @Test
     public void sendAssignToJudgeNotificationEmailToRespondentSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_ASSIGNED_TO_JUDGE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
-
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_ASSIGNED_TO_JUDGE);
     }
 
     @Test
-    public void throwExceptionWhenAssignToJudgeNotificationEmailToAppSolicitorIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_ASSIGNED_TO_JUDGE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-
-        try {
-            notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(getConsentedCallbackRequest().getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+    public void sendAssignToJudgeNotificationEmailToIntervenerSolicitor() {
+        notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_ASSIGNED_TO_JUDGE);
     }
 
     @Test
-    public void throwExceptionWhenAssignToJudgeNotificationEmailToRespSolicitorIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_ASSIGNED_TO_JUDGE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-
-        try {
-            notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(getConsentedCallbackRequest().getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+    public void sendFinremAssignToJudgeNotificationEmailToIntervenerSolicitor() {
+        notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_ASSIGNED_TO_JUDGE);
     }
 
     @Test
     public void sendConsentOrderMadeConfirmationEmailToApplicantSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_MADE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
-
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_MADE);
     }
 
     @Test
     public void sendConsentOrderMadeConfirmationEmailToRespondentSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_MADE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
-
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_MADE);
     }
 
     @Test
-    public void throwExceptionWhenConsentOrderMadeNotificationEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_MADE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
+    public void sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor() {
+        notificationService.sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_MADE);
+    }
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+    @Test
+    public void sendFinremConsentOrderMadeConfirmationEmailToIntervenerSolicitor() {
+        notificationService.sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_MADE);
     }
 
     @Test
     public void sendPrepareForHearingNotificationEmailToApplicantSolicitor() {
         callbackRequest = getContestedCallbackRequest();
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendPrepareForHearingEmailApplicant(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING);
     }
 
     @Test
     public void sendPrepareForHearingNotificationEmailToRespondentSolicitor() {
         callbackRequest = getContestedCallbackRequest();
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendPrepareForHearingEmailRespondent(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING);
     }
 
     @Test
-    public void throwExceptionWhenPrepareForHearingNotificationEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendPrepareForHearingEmailApplicant(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
+    public void sendPrepareForHearingNotificationEmailToIntervenerSolicitor() {
+        callbackRequest = getContestedCallbackRequest();
+        notificationService.sendPrepareForHearingEmailIntervener(callbackRequest.getCaseDetails(), dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING);
+    }
+
+    @Test
+    public void sendFinremPrepareForHearingNotificationEmailToIntervenerSolicitor() {
+        callbackRequest = getContestedCallbackRequest();
+        notificationService.sendPrepareForHearingEmailIntervener(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING);
+    }
+
+
+    @Test
+    public void sendPrepareForHearingAfterSentNotificationEmailApplicant() {
+        callbackRequest = getContestedCallbackRequest();
+        notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT);
+    }
+
+    @Test
+    public void sendPrepareForHearingAfterSentNotificationEmailRespondent() {
+        callbackRequest = getContestedCallbackRequest();
+        notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT);
     }
 
     @Test
     public void sendConsentOrderNotApprovedNotificationEmailToApplicantSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderNotApprovedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED);
     }
 
     @Test
     public void sendConsentOrderNotApprovedNotificationEmailToRespondentSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderNotApprovedEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED);
     }
 
     @Test
-    public void throwExceptionWhenConsentOrderNotApprovedNotificationEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendConsentOrderNotApprovedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void sendConsentOrderAvailableNotificationEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_AVAILABLE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
+    public void sendConsentOrderAvailableApplicantSolNotificationEmail() {
         notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
     }
 
     @Test
-    public void throwExceptionWhenConsentOrderAvailableNotificationEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_AVAILABLE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
+    public void sendConsentOrderAvailableRespondentSolNotificationEmail() {
+        notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
+    }
+
+    @Test
+    public void sendConsentOrderAvailableIntervenerSolNotificationEmail() {
+        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
+    }
+
+    @Test
+    public void sendFinremConsentOrderAvailableIntervenerSolNotificationEmail() {
+        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
     }
 
     @Test
     public void sendConsentOrderAvailableNotificationCtscEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_AVAILABLE_CTSC))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderAvailableCtscEmail(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE_CTSC);
     }
 
-    @Test
-    public void throwExceptionWhenConsentOrderAvailableCtscNotificationEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_AVAILABLE_CTSC))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendConsentOrderAvailableCtscEmail(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenConsentOrderAvailableEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_AVAILABLE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-
-        try {
-            notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(getConsentedCallbackRequest().getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-    }
 
     @Test
     public void sendContestedApplicationIssuedEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-
         notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_APPLICATION_ISSUED);
     }
 
-    @Test
-    public void throwExceptionWhenContestedApplicationIssuedEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
 
     @Test
     public void sendContestOrderApprovedEmailApplicantSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper, timeout(100).times(1))
             .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
     }
 
-    @Test
-    public void throwExceptionWhenContestOrderApprovedEmailForApplicantSolicitorIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
 
     @Test
     public void sendContestOrderApprovedEmailRespondentSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestOrderApprovedEmailRespondent(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper, timeout(100).times(1))
             .getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
     }
 
     @Test
-    public void throwExceptionWhenContestOrderApprovedEmailForRespondentSolicitorIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendContestOrderApprovedEmailRespondent(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
+    public void sendContestOrderApprovedEmailIntervenerSolicitor() {
+        notificationService.sendContestOrderApprovedEmailIntervener(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
 
-        verify(notificationRequestMapper, timeout(100).times(1)).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
+    }
+
+    @Test
+    public void sendFinremContestOrderApprovedEmailIntervenerSolicitor() {
+        notificationService.sendContestOrderApprovedEmailIntervener(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
     }
 
     @Test
     public void sendSolicitorToDraftOrderEmailRespondent() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
     }
 
-    @Test
-    public void throwExceptionWhenSendSolicitorToDraftOrderEmailRespondentIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-    }
 
     @Test
     public void sendSolicitorToDraftOrderEmailApplicant() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendSolicitorToDraftOrderEmailApplicant(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
     }
 
     @Test
-    public void throwExceptionWhenSendSolicitorToDraftOrderEmailApplicant() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendSolicitorToDraftOrderEmailApplicant(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
+    public void sendSolicitorToDraftOrderEmailIntervener() {
+        notificationService.sendSolicitorToDraftOrderEmailIntervener(callbackRequest.getCaseDetails(), dataKeysWrapper);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
+    }
+
+    @Test
+    public void sendFinremSolicitorToDraftOrderEmailIntervener() {
+        notificationService.sendSolicitorToDraftOrderEmailIntervener(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
     }
 
     @Test
     public void sendContestOrderApprovedEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper, timeout(100).times(1))
             .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenContestOrderApprovedEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
     }
 
     @Test
     public void sendContestedHwfSuccessfulNotificationEmail() {
         callbackRequest = getContestedCallbackRequest();
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenContestedHwfSuccessfulNotificationEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL);
     }
 
     @Test
     public void sendGeneralEmailConsented() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_GENERAL_EMAIL_CONSENT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentGeneralEmail(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL);
     }
 
     @Test
     public void sendGeneralEmailContested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_GENERAL_EMAIL_CONTESTED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralEmail(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenGeneralEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_GENERAL_EMAIL_CONSENT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendConsentGeneralEmail(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL);
     }
 
     @Test
     public void sendContestOrderNotApprovedNotificationEmailApplicant() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_NOT_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
 
         notificationService.sendContestOrderNotApprovedEmailApplicant(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenContestOrderNotApprovedNotificationEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_NOT_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendContestOrderNotApprovedEmailApplicant(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_NOT_APPROVED);
     }
 
     @Test
     public void sendContestOrderNotApprovedNotificationEmailRespondent() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_NOT_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestOrderNotApprovedEmailRespondent(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_NOT_APPROVED);
+    }
+
+    @Test
+    public void sendContestOrderNotApprovedNotificationEmailIntervener() {
+        notificationService.sendContestOrderNotApprovedEmailIntervener(callbackRequest.getCaseDetails(), dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_NOT_APPROVED);
+    }
+
+    @Test
+    public void sendFinremContestOrderNotApprovedNotificationEmailIntervener() {
+        notificationService.sendContestOrderNotApprovedEmailIntervener(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_NOT_APPROVED);
     }
 
     @Test
     public void sendContestedConsentOrderApprovedNotificationEmailToApplicantSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_ORDER_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_CONSENT_ORDER_APPROVED);
     }
 
     @Test
     public void sendContestedConsentOrderApprovedNotificationEmailToRespondentSolicitor() {
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_ORDER_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_CONSENT_ORDER_APPROVED);
     }
 
     @Test
-    public void sendContestedGeneralApplicationReferToJudgeNotificationEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail").value(TEST_JUDGE_EMAIL))
-            .andExpect(MockRestRequestMatchers.jsonPath("generalEmailBody").value("Application 1 - Received From - Applicant"))
-            .andRespond(MockRestResponseCreators.withNoContent());
+    public void sendContestedConsentOrderApprovedNotificationEmailToIntervenerSolicitor() {
 
-        callbackRequest = getContestedCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_REFERRED_DETAIL,
-            "Application 1 - Received From - Applicant");
+        notificationService.sendContestedConsentOrderApprovedEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
 
-        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_CONSENT_ORDER_APPROVED);
     }
 
     @Test
-    public void throwExceptionWhenContestedGeneralApplicationReferToJudgeEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+    public void sendFinremContestedConsentOrderApprovedNotificationEmailToIntervenerSolicitor() {
 
-        callbackRequest = getContestedCallbackRequest();
+        notificationService.sendContestedConsentOrderApprovedEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
 
-        try {
-            notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_CONSENT_ORDER_APPROVED);
     }
 
     @Test
@@ -676,157 +580,168 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
 
         callbackRequest = getContestedCallbackRequest();
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail")
-                .value(NOTTINGHAM_FRC_EMAIL))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void sendContestedGeneralApplicationOutcomeNotificationEmailToTestAccountWhenSendToFRCToggleFalse() throws IOException {
-        when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
-
-        callbackRequest = getContestedCallbackRequest();
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail")
-                .value("fr_applicant_solicitor1@mailinator.com"))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_APPLICATION_OUTCOME);
     }
 
     @Test
     public void sendContestedConsentGeneralOrderNotificationEmailApplicantSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_GENERAL_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER_CONSENT);
     }
 
     @Test
     public void sendContestedConsentGeneralOrderNotificationEmailRespondentSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_GENERAL_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER_CONSENT);
+    }
+
+    @Test
+    public void sendContestedConsentGeneralOrderNotificationEmailIntervenerSolicitor() {
+        notificationService.sendContestedConsentGeneralOrderEmailIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER_CONSENT);
+    }
+
+    @Test
+    public void sendFinremContestedConsentGeneralOrderNotificationEmailIntervenerSolicitor() {
+        notificationService.sendContestedConsentGeneralOrderEmailIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER_CONSENT);
     }
 
     @Test
     public void sendContestedGeneralOrderNotificationEmailApplicant() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralOrderEmailApplicant(callbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER);
     }
 
     @Test
     public void sendContestedGeneralOrderNotificationEmailRespondent() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralOrderEmailRespondent(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER);
+    }
+
+    @Test
+    public void sendContestedGeneralOrderNotificationEmailIntervener() {
+        notificationService.sendContestedGeneralOrderEmailIntervener(callbackRequest.getCaseDetails(), dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER);
+    }
+
+    @Test
+    public void sendFinremContestedGeneralOrderNotificationEmailIntervener() {
+        notificationService.sendContestedGeneralOrderEmailIntervener(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER);
     }
 
     @Test
     public void sendConsentedGeneralOrderNotificationEmailApplicant() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENTED_GENERAL_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_GENERAL_ORDER);
     }
 
     @Test
     public void sendConsentedGeneralOrderNotificationEmailRespondent() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENTED_GENERAL_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenContestedConsentOrderApprovedNotificationEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_ORDER_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_GENERAL_ORDER);
     }
 
     @Test
     public void sendContestedConsentOrderNotApprovedNotificationEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenContestedConsentOrderNotApprovedNotificationEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED);
     }
 
     @Test
     public void sendContestedConsentOrderNotApprovedNotificationEmailToRespondentSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED);
+    }
+
+    @Test
+    public void sendContestedConsentOrderNotApprovedNotificationEmailToIntervenerSolicitor() {
+        notificationService.sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED);
+    }
+
+    @Test
+    public void sendFinremContestedConsentOrderNotApprovedNotificationEmailToIntervenerSolicitor() {
+        notificationService.sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED);
     }
 
     @Test
     public void sendConsentOrderNotApprovedSentEmailToApplicantSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED_SENT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT);
     }
 
     @Test
     public void sendConsentOrderNotApprovedSentEmailToRespondentSolicitor() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED_SENT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT);
+    }
+
+    @Test
+    public void sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor() {
+        notificationService.sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT);
+    }
+
+    @Test
+    public void sendFinremConsentOrderNotApprovedSentEmailToIntervenerSolicitor() {
+        notificationService.sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT);
     }
 
     @Test
@@ -887,48 +802,50 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendTransferToCourtEmailConsented() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_TRANSFER_TO_LOCAL_COURT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendTransferToLocalCourtEmail(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenTransferToCourtEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_TRANSFER_TO_LOCAL_COURT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendTransferToLocalCourtEmail(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_TRANSFER_TO_LOCAL_COURT);
     }
 
     @Test
     public void sendInterimNotificationEmailToApplicantSolicitor() {
         callbackRequest = getContestedCallbackRequest();
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendInterimNotificationEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
     }
 
     @Test
     public void sendInterimNotificationEmailToRespondentSolicitor() {
         callbackRequest = getContestedCallbackRequest();
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendInterimNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
+    }
+
+    @Test
+    public void sendInterimNotificationEmailToIntervenerSolicitor() {
+        callbackRequest = getContestedCallbackRequest();
+        notificationService.sendInterimNotificationEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
+    }
+
+    @Test
+    public void sendFinremInterimNotificationEmailToIntervenerSolicitor() {
+        finremCallbackRequest = getContestedNewCallbackRequest();
+        notificationService.sendInterimNotificationEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
     }
 
     @Test
@@ -938,14 +855,12 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONTESTED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
 
         notificationService.sendNoticeOfChangeEmail(getContestedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
-        verify(notificationServiceConfiguration).getContestedNoticeOfChange();
+        //  verify(notificationServiceConfiguration).getContestedNoticeOfChange();
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_NOTICE_OF_CHANGE);
     }
 
     @Test
@@ -956,14 +871,10 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONSENTED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-
         notificationService.sendNoticeOfChangeEmail(getConsentedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequest().getCaseDetails());
-        verify(notificationServiceConfiguration).getConsentedNoticeOfChange();
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOTICE_OF_CHANGE);
     }
 
     @Test
@@ -973,14 +884,11 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONTESTED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
 
         notificationService.sendNoticeOfChangeEmail(getContestedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
-        verify(notificationServiceConfiguration).getContestedNoticeOfChange();
+        verifyNoMoreInteractions(emailService);
     }
 
     @Test
@@ -990,16 +898,12 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONTESTED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-
         notificationService.sendNoticeOfChangeEmailCaseworker(getContestedCallbackRequestUpdateDetails()
             .getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequestUpdateDetails()
             .getCaseDetails());
-        verify(notificationServiceConfiguration).getContestedNoCCaseworker();
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_NOC_CASEWORKER);
     }
 
     @Test
@@ -1010,16 +914,12 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONSENTED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-
         notificationService.sendNoticeOfChangeEmailCaseworker(getConsentedCallbackRequestUpdateDetails()
             .getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequestUpdateDetails()
             .getCaseDetails());
-        verify(notificationServiceConfiguration).getConsentedNoCCaseworker();
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOC_CASEWORKER);
     }
 
     @Test
@@ -1029,71 +929,104 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONTESTED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-
         notificationService.sendNoticeOfChangeEmailCaseworker(getContestedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
-        verify(notificationServiceConfiguration).getContestedNoCCaseworker();
-        verify(mockRestTemplate, never()).exchange(any(), eq(HttpMethod.POST), any(), eq(String.class));
+        verifyNoMoreInteractions(emailService);
+    }
+
+    public void shouldReturnTrueWhenApplicantSolicitorResponsibleToDraftOrder() {
+        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(true);
+        boolean result = notificationService.isApplicantSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData());
+        assertTrue(result);
+    }
+
+    public void shouldReturnFalseWhenApplicantSolicitorResponsibleToDraftOrder() {
+        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(false);
+        boolean result = notificationService.isApplicantSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData());
+        assertFalse(result);
+    }
+
+    public void shouldReturnTrueWhenRespondentSolicitorResponsibleToDraftOrder() {
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(true);
+        boolean result = notificationService.isRespondentSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData());
+        assertTrue(result);
+    }
+
+    public void shouldReturnFalseWhenRespondentSolicitorResponsibleToDraftOrder() {
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(false);
+        boolean result = notificationService.isRespondentSolicitorResponsibleToDraftOrder(callbackRequest.getCaseDetails().getData());
+        assertFalse(result);
     }
 
     public void sendUpdateFrcInformationEmailToAppSolicitor() {
         callbackRequest = getContestedCallbackRequest();
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_UPDATE_FRC_INFORMATION))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendUpdateFrcInformationEmailToAppSolicitor(callbackRequest.getCaseDetails());
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_UPDATE_FRC_SOL);
     }
 
     @Test
     public void sendUpdateFrcInformationEmailToRespSolicitor() {
         callbackRequest = getContestedCallbackRequest();
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_UPDATE_FRC_INFORMATION))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_UPDATE_FRC_SOL);
+    }
+
+    @Test
+    public void sendUpdateFrcInformationEmailToIntervenerSolicitor() {
+        callbackRequest = getContestedCallbackRequest();
+
+        notificationService.sendUpdateFrcInformationEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_UPDATE_FRC_SOL);
+    }
+
+    @Test
+    public void sendFinremUpdateFrcInformationEmailToIntervenerSolicitor() {
+        finremCallbackRequest = getContestedNewCallbackRequest();
+
+        notificationService.sendUpdateFrcInformationEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_UPDATE_FRC_SOL);
     }
 
     @Test
     public void sendUpdateFrcInformationEmailToCourt() throws JsonProcessingException {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
-
         callbackRequest = getContestedCallbackRequest();
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_UPDATE_FRC_INFO_COURT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
 
         notificationService.sendUpdateFrcInformationEmailToCourt(callbackRequest.getCaseDetails());
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_UPDATE_FRC_COURT);
     }
 
     @Test
     public void sendGeneralApplicationRejectionEmailApplicantSolicitor() {
         callbackRequest = getContestedCallbackRequest();
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_REJECTED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendGeneralApplicationRejectionEmailToAppSolicitor(callbackRequest.getCaseDetails());
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_REJECT_GENERAL_APPLICATION);
     }
 
     @Test
     public void sendGeneralApplicationRejectionEmailRespondentSolicitor() {
         callbackRequest = getContestedCallbackRequest();
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_REJECTED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendGeneralApplicationRejectionEmailToResSolicitor(callbackRequest.getCaseDetails());
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_REJECT_GENERAL_APPLICATION);
     }
 
     @Test
@@ -1103,6 +1036,26 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         assertTrue(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails.builder()
             .id(123450L).build()));
+    }
+
+    @Test
+    public void shouldSendGeneralEmailWithAttachmentConsented() {
+        FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONSENTED);
+        notificationService.sendConsentGeneralEmail(finremCaseDetails, anyString());
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
+        verify(evidenceManagementDownloadService).downloadInResponseEntity(anyString(), anyString());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT);
+    }
+
+    @Test
+    public void shouldSendGeneralEmailWithAttachmentContested() {
+        FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONTESTED);
+        notificationService.sendContestedGeneralEmail(finremCaseDetails, anyString());
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
+        verify(evidenceManagementDownloadService).downloadInResponseEntity(anyString(), anyString());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT);
     }
 
 
@@ -1237,6 +1190,112 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldEmailIfIntervenerOneSolicitorIsPopulated() {
+        FinremCaseData caseData = FinremCaseData.builder().intervenerOneWrapper(
+            IntervenerOneWrapper.builder().intervenerRepresented(YesOrNo.YES)
+                .intervenerSolEmail(INTERVENER_SOL_EMAIL)
+                .intervenerSolName("name").build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_1.getValue())).thenReturn(true);
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOneWrapper()));
+    }
+
+    @Test
+    public void shouldNotEmailIfIntervenerOneSolicitorIsNotPopulated() {
+        FinremCaseData caseData = FinremCaseData.builder().intervenerOneWrapper(
+            IntervenerOneWrapper.builder().intervenerRepresented(YesOrNo.NO).build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_1.getValue())).thenReturn(false);
+        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOneWrapper()));
+    }
+
+    @Test
+    public void shouldEmailIfIntervenerTwoSolicitorIsPopulated() {
+        FinremCaseData caseData = FinremCaseData.builder().intervenerTwoWrapper(
+            IntervenerTwoWrapper.builder().intervenerRepresented(YesOrNo.YES)
+                .intervenerSolEmail(INTERVENER_SOL_EMAIL)
+                .intervenerSolName("name").build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_2.getValue())).thenReturn(true);
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerTwoWrapper()));
+    }
+
+    @Test
+    public void shouldNotEmailIfIntervenerTwoSolicitorIsNotPopulated() {
+        FinremCaseData caseData = FinremCaseData.builder().intervenerTwoWrapper(
+            IntervenerTwoWrapper.builder().intervenerRepresented(YesOrNo.NO).build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_2.getValue())).thenReturn(false);
+        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerTwoWrapper()));
+    }
+
+    @Test
+    public void shouldEmailIfIntervenerThreeSolicitorIsPopulated() {
+        FinremCaseData caseData = FinremCaseData.builder().intervenerThreeWrapper(
+            IntervenerThreeWrapper.builder().intervenerRepresented(YesOrNo.YES)
+                .intervenerSolEmail(INTERVENER_SOL_EMAIL)
+                .intervenerSolName("name").build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_3.getValue())).thenReturn(true);
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThreeWrapper()));
+    }
+
+    @Test
+    public void shouldNotEmailIfIntervenerThreeSolicitorIsNotPopulated() {
+        FinremCaseData caseData = FinremCaseData.builder().intervenerThreeWrapper(
+            IntervenerThreeWrapper.builder().intervenerRepresented(YesOrNo.NO).build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_3.getValue())).thenReturn(false);
+        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThreeWrapper()));
+    }
+
+    @Test
+    public void shouldEmailIfIntervenerFourSolicitorIsPopulated() {
+        FinremCaseData caseData = FinremCaseData.builder().intervenerFourWrapper(
+            IntervenerFourWrapper.builder().intervenerRepresented(YesOrNo.YES)
+                .intervenerSolEmail(INTERVENER_SOL_EMAIL)
+                .intervenerSolName("name").build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_4.getValue())).thenReturn(true);
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerFourWrapper()));
+    }
+
+    @Test
+    public void shouldEmailIntervenerSolicitorIfIntervenerSolicitorWasPopulated() {
+        IntervenerWrapper wrapper = new IntervenerOneWrapper();
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        IntervenerChangeDetails changeDetails = new IntervenerChangeDetails();
+        wrapper.setIntervenerSolEmail("intvrsol@email.com");
+        changeDetails.setIntervenerDetails(wrapper);
+        caseData.setCurrentIntervenerChangeDetails(changeDetails);
+        assertTrue(notificationService.wasIntervenerSolicitorEmailPopulated(caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails()));
+    }
+
+    @Test
+    public void shouldNotEmailIntervenerSolicitorIfIntervenerSolicitorWasNotPopulated() {
+        IntervenerWrapper wrapper = new IntervenerOneWrapper();
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        IntervenerChangeDetails changeDetails = new IntervenerChangeDetails();
+        changeDetails.setIntervenerDetails(wrapper);
+        caseData.setCurrentIntervenerChangeDetails(changeDetails);
+        assertFalse(notificationService.wasIntervenerSolicitorEmailPopulated(caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails()));
+    }
+
+    @Test
     public void shouldNotEmailRespondentSolicitorWhenRespondentSolicitorIsDigitalAndEmailIsNotPopulatedFinrem() {
         FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder().respondentSolicitorEmail(null).build()).build();
@@ -1293,8 +1352,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void givenBarristerAdded_sendAddedEmail() {
         Barrister barrister = new Barrister().toBuilder().build();
         CaseDetails caseDetails = CaseDetails.builder().build();
+        when(notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister)).thenReturn(notificationRequest);
         notificationService.sendBarristerAddedEmail(caseDetails, barrister);
-        verify(notificationServiceConfiguration).getAddedBarrister();
         verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
     }
 
@@ -1302,8 +1361,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void givenBarristerRemoved_sendRemovedEmail() {
         Barrister barrister = new Barrister().toBuilder().build();
         CaseDetails caseDetails = CaseDetails.builder().build();
+        when(notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister)).thenReturn(notificationRequest);
         notificationService.sendBarristerRemovedEmail(caseDetails, barrister);
-        verify(notificationServiceConfiguration).getRemovedBarrister();
         verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
     }
 
@@ -1322,16 +1381,14 @@ public class NotificationServiceTest extends BaseServiceTest {
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
             })).toList();
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
+        when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
 
         interimDataMap.forEach(data -> {
             notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(callbackRequest.getCaseDetails(), data);
             verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails(), data);
+
         });
-
-
+        verify(emailService, times(2)).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
     }
 
     @Test
@@ -1349,15 +1406,40 @@ public class NotificationServiceTest extends BaseServiceTest {
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
             })).toList();
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-
+        when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
 
         interimDataMap.forEach(data -> {
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails(), data);
             verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails(), data);
         });
+        verify(emailService, times(2)).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
+    }
+
+    @Test
+    public void sendInterimHearingNotificationEmailToIntervenerSolicitor() {
+        CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
+            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
+
+        List<InterimHearingItem> interimHearingItems
+            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+
+        List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
+            .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
+            })).toList();
+
+        when(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(CaseDetails.class), anyMap(),
+            any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
+
+        interimDataMap.forEach(data -> {
+            notificationService.sendInterimHearingNotificationEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(), data,
+                SolicitorCaseDataKeysWrapper.builder().build());
+            verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), data,
+                SolicitorCaseDataKeysWrapper.builder().build());
+        });
+        verify(emailService, times(2)).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
     }
 
     @Test
@@ -1367,16 +1449,15 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
         List<String> hearingIdsToProcess = List.of("1f7e210d-87d8-4e98-8c48-db15d1dc0d14");
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_LIST_FOR_HEARING_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
+        when(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(any(CaseDetails.class), any())).thenReturn(
+            notificationRequest);
 
         hearings.forEach(hearingData -> {
             if (hearingIdsToProcess.contains(hearingData.getId())) {
                 Map<String, Object> data = helper.convertToMap(hearingData.getValue());
                 notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(callbackRequest.getCaseDetails(), data);
                 verify(notificationRequestMapper).getNotificationRequestForConsentApplicantSolicitor(callbackRequest.getCaseDetails(), data);
+                verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_LIST_FOR_HEARING);
             }
         });
     }
@@ -1388,18 +1469,144 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
         List<String> hearingIdsToProcess = List.of("1f7e210d-87d8-4e98-8c48-db15d1dc0d14");
+        when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
 
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_LIST_FOR_HEARING_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
 
         hearings.forEach(hearingData -> {
             if (hearingIdsToProcess.contains(hearingData.getId())) {
                 Map<String, Object> data = helper.convertToMap(hearingData.getValue());
                 notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails(), data);
                 verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails(), data);
+                verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_LIST_FOR_HEARING);
             }
         });
+    }
+
+    @Test
+    public void checkIsIntervenerSolicitorDigitalAndEmailPopulated() {
+        callbackRequest.getCaseDetails().getData().put("intervener1SolEmail", TEST_SOLICITOR_EMAIL);
+        IntervenerOneWrapper intervenerWrapper = IntervenerOneWrapper.builder()
+            .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build();
+        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
+        when(caseDataService.isNotEmpty(anyString(), anyMap())).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), anyString())).thenReturn(true);
+
+        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper,
+            callbackRequest.getCaseDetails());
+
+        assertTrue(actual);
+        verify(checkSolicitorIsDigitalService).isIntervenerSolicitorDigital(callbackRequest.getCaseDetails().getId().toString(),
+            CaseRole.INTVR_SOLICITOR_1.getValue());
+
+    }
+
+    @Test
+    public void checkFinremIsIntervenerSolicitorDigitalAndEmailPopulated() {
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        caseData.getIntervenerOneWrapper().setIntervenerSolEmail(TEST_SOLICITOR_EMAIL);
+        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), anyString())).thenReturn(true);
+
+        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerOneWrapper(),
+            finremCallbackRequest.getCaseDetails());
+        assertTrue(actual);
+        verify(checkSolicitorIsDigitalService).isIntervenerSolicitorDigital(finremCallbackRequest.getCaseDetails().getId().toString(),
+            CaseRole.INTVR_SOLICITOR_1.getValue());
+    }
+
+    @Test
+    public void shouldReturnCaseDataKeysForIntervenersSolicitor() {
+        SolicitorCaseDataKeysWrapper intervener1DataKey = notificationService
+            .getCaseDataKeysForIntervenerSolicitor(IntervenerOneWrapper.builder().build());
+
+        assertEquals("intervener1SolEmail", intervener1DataKey.getSolicitorEmailKey());
+        assertEquals("intervener1SolName", intervener1DataKey.getSolicitorNameKey());
+        assertEquals("intervener1SolicitorReference", intervener1DataKey.getSolicitorReferenceKey());
+
+        SolicitorCaseDataKeysWrapper intervener2DataKey = notificationService
+            .getCaseDataKeysForIntervenerSolicitor(IntervenerTwoWrapper.builder().build());
+
+        assertEquals("intervener2SolEmail", intervener2DataKey.getSolicitorEmailKey());
+        assertEquals("intervener2SolName", intervener2DataKey.getSolicitorNameKey());
+        assertEquals("intervener2SolicitorReference", intervener2DataKey.getSolicitorReferenceKey());
+
+        SolicitorCaseDataKeysWrapper intervener3DataKey = notificationService
+            .getCaseDataKeysForIntervenerSolicitor(IntervenerThreeWrapper.builder().build());
+
+        assertEquals("intervener3SolEmail", intervener3DataKey.getSolicitorEmailKey());
+        assertEquals("intervener3SolName", intervener3DataKey.getSolicitorNameKey());
+        assertEquals("intervener3SolicitorReference", intervener3DataKey.getSolicitorReferenceKey());
+
+        SolicitorCaseDataKeysWrapper intervener4DataKey = notificationService
+            .getCaseDataKeysForIntervenerSolicitor(IntervenerFourWrapper.builder().build());
+
+        assertEquals("intervener4SolEmail", intervener4DataKey.getSolicitorEmailKey());
+        assertEquals("intervener4SolName", intervener4DataKey.getSolicitorNameKey());
+        assertEquals("intervener4SolicitorReference", intervener4DataKey.getSolicitorReferenceKey());
+    }
+
+    @Test
+    public void shouldReturnFinremCaseDataKeysForIntervenersSolicitor() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .intervenerOneWrapper(IntervenerOneWrapper.builder()
+                .intervenerSolName("1Name")
+                .intervenerSolEmail("1Email")
+                .intervenerSolicitorReference("1Ref").build())
+            .intervenerTwoWrapper(IntervenerTwoWrapper.builder()
+                .intervenerSolName("2Name")
+                .intervenerSolEmail("2Email")
+                .intervenerSolicitorReference("2Ref").build())
+            .intervenerThreeWrapper(IntervenerThreeWrapper.builder()
+                .intervenerSolName("3Name")
+                .intervenerSolEmail("3Email")
+                .intervenerSolicitorReference("3Ref").build())
+            .intervenerFourWrapper(IntervenerFourWrapper.builder()
+                .intervenerSolName("4Name")
+                .intervenerSolEmail("4Email")
+                .intervenerSolicitorReference("4Ref").build())
+            .build();
+
+        SolicitorCaseDataKeysWrapper oneDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+            .getInterveners().get(0));
+
+        assertEquals("1Email", oneDataKey.getSolicitorEmailKey());
+        assertEquals("1Name", oneDataKey.getSolicitorNameKey());
+        assertEquals("1Ref", oneDataKey.getSolicitorReferenceKey());
+
+        SolicitorCaseDataKeysWrapper twoDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+            .getInterveners().get(1));
+
+        assertEquals("2Email", twoDataKey.getSolicitorEmailKey());
+        assertEquals("2Name", twoDataKey.getSolicitorNameKey());
+        assertEquals("2Ref", twoDataKey.getSolicitorReferenceKey());
+
+        SolicitorCaseDataKeysWrapper threeDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+            .getInterveners().get(2));
+
+        assertEquals("3Email", threeDataKey.getSolicitorEmailKey());
+        assertEquals("3Name", threeDataKey.getSolicitorNameKey());
+        assertEquals("3Ref", threeDataKey.getSolicitorReferenceKey());
+
+        SolicitorCaseDataKeysWrapper fourDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+            .getInterveners().get(3));
+
+        assertEquals("4Email", fourDataKey.getSolicitorEmailKey());
+        assertEquals("4Name", fourDataKey.getSolicitorNameKey());
+        assertEquals("4Ref", fourDataKey.getSolicitorReferenceKey());
+    }
+
+    private static FinremCaseDetails getFinremCaseDetails(CaseType caseType) {
+        return FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .ccdCaseType(caseType)
+                .generalEmailWrapper(GeneralEmailWrapper.builder()
+                    .generalEmailRecipient(APPLICANT_EMAIL)
+                    .generalEmailUploadedDocument(CaseDocument.builder()
+                        .documentBinaryUrl("dummyUrl")
+                        .build())
+                    .build())
+                .build())
+            .caseType(caseType)
+            .build();
     }
 
 }

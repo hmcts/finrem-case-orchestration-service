@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 @Slf4j
 @SuppressWarnings("unchecked")
@@ -38,11 +41,15 @@ public class CCDConfigValidator {
     protected static final String MULTI_SELECT_LIST = "MultiSelectList";
     protected static final String FIXED_RADIO_LIST = "FixedRadioList";
     protected static final String FIXED_LIST = "FixedList";
+
+    protected static final String INTERVENER_CT = "FR_intervener";
     protected static final int ROW_HEADERS = 2;
+    private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer", "FlagLauncher");
     protected static final String STATE_SHEET = "State";
-    protected static final String DYNAMIC_LIST = "DynamicList";
-    private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer");
-    private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST);
+    protected static final String DYNAMIC_LIST = "DynamicList";      
+    protected static final String DYNAMIC_RADIO_LIST = "DynamicRadioList";
+    private List<String> finremCaseDataFieldsToIgnore = Arrays.asList("ccdCaseId");
+    private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST, INTERVENER_CT);
     private List<String> alreadyProcessedCcdFields = new ArrayList<>();
 
     private Map<String, String> fieldTypesMap = Map.ofEntries(
@@ -60,38 +67,49 @@ public class CCDConfigValidator {
         Map.entry("OrganisationPolicy", "OrganisationPolicy"),
         Map.entry(COLLECTION, "List"),
         Map.entry(MULTI_SELECT_LIST, "List"),
-        Map.entry(DYNAMIC_LIST, "DynamicList")
+        Map.entry(DYNAMIC_LIST, "DynamicList"),
+        Map.entry(DYNAMIC_RADIO_LIST, "DynamicRadioList"),
+        Map.entry("FR_ct_draftDirectionOrder", "DraftDirectionOrder"),
+        Map.entry("Flags", "CaseFlag")
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(
         Map.entry("currentUserCaseRole", "CaseRole")
     );
 
-    public List<String> validateCaseFieldsAgainstClassStructure(File configFile, Class baseClassToCompareWith)
+    public List<String> validateCaseFields(List<File> configFiles, Class baseClassToCompareWith)
         throws IOException, InvalidFormatException {
 
-        Workbook workbook = new XSSFWorkbook(configFile);
-        Sheet caseFieldSheet = workbook.getSheet(CASE_FIELD_SHEET);
-        Sheet complexTypeSheet = workbook.getSheet(COMPLEX_TYPES_SHEET);
-        Sheet fixedListSheet = workbook.getSheet(FIXED_LISTS_SHEET);
-        List<CcdFieldAttributes> caseFields = collateCaseFields(caseFieldSheet);
-
-        List<String> validationErrors = validateCaseFields(baseClassToCompareWith, complexTypeSheet, fixedListSheet, caseFields);
+        List<Workbook> workbooks = Arrays.asList(new XSSFWorkbook(configFiles.get(0)), new XSSFWorkbook(configFiles.get(1)));
+        List<Sheet> complexTypeSheets =
+            new ArrayList<>(Arrays.asList(workbooks.get(0).getSheet(COMPLEX_TYPES_SHEET), workbooks.get(1).getSheet(COMPLEX_TYPES_SHEET)));
+        List<Sheet> fixedListSheets =
+            new ArrayList<>(Arrays.asList(workbooks.get(0).getSheet(FIXED_LISTS_SHEET), workbooks.get(1).getSheet(FIXED_LISTS_SHEET)));
+        List<CcdFieldAttributes> caseFields = collateCaseFields(workbooks.get(0).getSheet(CASE_FIELD_SHEET));
+        List<String> validationErrors =
+            validateCaseFieldsAgainstClassStructure(baseClassToCompareWith, complexTypeSheets.get(0), fixedListSheets.get(0), caseFields);
+        caseFields.addAll(collateCaseFields(workbooks.get(1).getSheet(CASE_FIELD_SHEET)));
+        List<String> errors = validateClassStructureAgainstCaseFields(baseClassToCompareWith, complexTypeSheets, fixedListSheets, caseFields);
+        errors.forEach(error -> {
+            if (!validationErrors.contains(error)) {
+                validationErrors.add(error);
+            }
+        });
         return validationErrors;
     }
 
-    public List<String> validateStatesAgainstClassStructure(File configFile)
+    public List<String> validateStates(File configFile)
         throws IOException, InvalidFormatException {
 
         Workbook workbook = new XSSFWorkbook(configFile);
         Sheet stateSheet = workbook.getSheet(STATE_SHEET);
         List<StateAttributes> stateAttributes = collateStates(stateSheet);
 
-        List<String> validationErrors = validateStates(stateAttributes);
+        List<String> validationErrors = validateStatesAgainstClassStructure(stateAttributes);
         return validationErrors;
     }
 
-    private List<String> validateStates(List<StateAttributes> stateAttributes) {
+    private List<String> validateStatesAgainstClassStructure(List<StateAttributes> stateAttributes) {
         List<String> validationErrors = new ArrayList<>();
         for (StateAttributes stateAttribute : stateAttributes) {
             log.info("Validating state: {}", stateAttribute.getId());
@@ -106,8 +124,9 @@ public class CCDConfigValidator {
     }
 
 
-    private List<String> validateCaseFields(Class baseClassToCompareWith, Sheet complexTypeSheet, Sheet fixedListSheet,
-                                            List<CcdFieldAttributes> caseFields) {
+    private List<String> validateCaseFieldsAgainstClassStructure(Class baseClassToCompareWith, Sheet complexTypeSheet,
+                                                                 Sheet fixedListSheet,
+                                                                 List<CcdFieldAttributes> caseFields) {
         Set<Class> finremCaseDataClasses = new HashSet<>(Arrays.asList(baseClassToCompareWith));
         finremCaseDataClasses.addAll(new AccessingAllClassesInPackage().getWrappedClassesForClass(baseClassToCompareWith));
 
@@ -120,7 +139,13 @@ public class CCDConfigValidator {
                     if (field.getName().equals(ccdFieldAttributes.getFieldId())) {
                         found = true;
                         log.info("Found CCD Field Id: {} and Field Type: {}", ccdFieldAttributes.getFieldId(), ccdFieldAttributes.getFieldType());
-                        validationErrors.addAll(validateCCDField(complexTypeSheet, fixedListSheet, ccdFieldAttributes, found, field));
+                        List<String> errors =
+                            validateCCDField(Arrays.asList(complexTypeSheet), Arrays.asList(fixedListSheet), ccdFieldAttributes, found, field);
+                        errors.forEach(error -> {
+                            if (!validationErrors.contains(error)) {
+                                validationErrors.add(error);
+                            }
+                        });
                         break;
                     } else {
                         if (hasMatchingAnnotationForField(field, ccdFieldAttributes.getFieldId())) {
@@ -128,7 +153,13 @@ public class CCDConfigValidator {
                             log.info(
                                 "Found annotation for CCD Field Id: {} and Field Type: {}", ccdFieldAttributes.getFieldId(),
                                 ccdFieldAttributes.getFieldType());
-                            validationErrors.addAll(validateCCDField(complexTypeSheet, fixedListSheet, ccdFieldAttributes, found, field));
+                            List<String> errors =
+                                validateCCDField(Arrays.asList(complexTypeSheet), Arrays.asList(fixedListSheet), ccdFieldAttributes, found, field);
+                            errors.forEach(error -> {
+                                if (!validationErrors.contains(error)) {
+                                    validationErrors.add(error);
+                                }
+                            });
                             break;
                         }
                     }
@@ -142,31 +173,83 @@ public class CCDConfigValidator {
         return validationErrors;
     }
 
+    private List<String> validateClassStructureAgainstCaseFields(Class baseClassToCompareWith, List<Sheet> complexTypeSheets,
+                                                                 List<Sheet> fixedListSheets, List<CcdFieldAttributes> caseFields) {
+        Set<Class> finremCaseDataClasses = new HashSet<>(Arrays.asList(baseClassToCompareWith));
+        finremCaseDataClasses.addAll(new AccessingAllClassesInPackage().getWrappedClassesForClass(baseClassToCompareWith));
+
+        List<String> validationErrors = new ArrayList<>();
+        for (Class clazz : finremCaseDataClasses) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (finremCaseDataFieldsToIgnore.contains(field.getName())) {
+                    break;
+                }
+                log.info("Looking for FinremCaseData Field Id: {} and Field Type: {}", field.getName(), field.getType());
+                boolean found = false;
+                for (CcdFieldAttributes ccdFieldAttributes : caseFields) {
+                    if (field.getAnnotation(JsonUnwrapped.class) != null || field.getAnnotation(JsonIgnore.class) != null) {
+                        found = true;
+                        log.info("FinremCaseData Field Id: {} and Field Type: {} are annotated with JsonUnwrapped or JsonIgnore", field.getName(),
+                            field.getType());
+                        break;
+                    }
+                    if (ccdFieldAttributes.getFieldId().equals(field.getName())) {
+                        found = true;
+                        log.info("Found FinremCaseData Field Id: {} and Field Type: {}", field.getName(), field.getType());
+                        List<String> errors = validateCCDField(complexTypeSheets, fixedListSheets, ccdFieldAttributes, found, field);
+                        errors.forEach(error -> {
+                            if (!validationErrors.contains(error)) {
+                                validationErrors.add(error);
+                            }
+                        });
+                        break;
+                    } else {
+                        if (hasMatchingAnnotationForField(field, ccdFieldAttributes.getFieldId())) {
+                            found = true;
+                            log.info("Found annotation for FinremCaseData Field Id: {} and Field Type: {}", field.getName(), field.getType());
+                            List<String> errors = validateCCDField(complexTypeSheets, fixedListSheets, ccdFieldAttributes, found, field);
+                            errors.forEach(error -> {
+                                if (!validationErrors.contains(error)) {
+                                    validationErrors.add(error);
+                                }
+                            });
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    validationErrors.add("No CCD Field Found for FinremCaseData Field Name: " + field.getName() + " Field Type: " + field.getType());
+                }
+            }
+        }
+        return validationErrors;
+    }
+
     private boolean hasMatchingAnnotationForField(Field field, String ccdFieldId) {
         JsonProperty annotation = field.getAnnotation(JsonProperty.class);
         return annotation != null && annotation.value().equals(ccdFieldId);
     }
 
-    private List<String> validateCCDField(Sheet complexTypeSheet, Sheet fixedListSheet, CcdFieldAttributes ccdFieldAttributes, boolean found,
-                                          Field field) {
+    private List<String> validateCCDField(List<Sheet> complexTypeSheets, List<Sheet> fixedListSheets, CcdFieldAttributes ccdFieldAttributes,
+                                          boolean found, Field field) {
 
         List<String> errors = new ArrayList<>();
 
-        if (isNotASpecialFieldType(ccdFieldAttributes, field) && (isaHighLevelCaseField(complexTypeSheet, ccdFieldAttributes)
+        if (isNotASpecialFieldType(ccdFieldAttributes, field) && (isaHighLevelCaseField(complexTypeSheets, ccdFieldAttributes)
             && fieldDoesNotHaveAValidMapping(ccdFieldAttributes, field))) {
             errors.add("CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: " + ccdFieldAttributes.getFieldType()
                 + " does not match " + field.getType().getSimpleName());
         } else {
-            if (isComplexType(complexTypeSheet, ccdFieldAttributes.getFieldType())) {
+            if (isComplexType(complexTypeSheets, ccdFieldAttributes.getFieldType())) {
                 log.info("Complex Type: {}", ccdFieldAttributes.getFieldType());
                 errors.addAll(
-                    validateComplexField(fixedListSheet, getComplexType(complexTypeSheet, ccdFieldAttributes.getFieldType()),
+                    validateComplexField(fixedListSheets, getComplexType(complexTypeSheets, ccdFieldAttributes.getFieldType()),
                         field.getType()));
             } else if (ccdFieldAttributes.getFieldType().equals(COLLECTION)) {
-                errors.addAll(validateCollectionField(complexTypeSheet, fixedListSheet, ccdFieldAttributes, field));
+                errors.addAll(validateCollectionField(complexTypeSheets, fixedListSheets, ccdFieldAttributes, field));
             } else if (ccdFieldAttributes.getFieldType().equals(MULTI_SELECT_LIST) || ccdFieldAttributes.getFieldType().equals(FIXED_LIST)
                 || ccdFieldAttributes.getFieldType().equals(FIXED_RADIO_LIST)) {
-                errors.addAll(validateFixedListCaseField(fixedListSheet, ccdFieldAttributes, field));
+                errors.addAll(validateFixedListCaseField(fixedListSheets, ccdFieldAttributes, field));
             }
         }
         return errors;
@@ -177,8 +260,8 @@ public class CCDConfigValidator {
             || !fieldTypesMap.get(ccdFieldAttributes.getFieldType()).equals(field.getType().getSimpleName());
     }
 
-    private boolean isaHighLevelCaseField(Sheet complexTypeSheet, CcdFieldAttributes ccdFieldAttributes) {
-        return !isComplexType(complexTypeSheet, ccdFieldAttributes.getFieldType())
+    private boolean isaHighLevelCaseField(List<Sheet> complexTypeSheets, CcdFieldAttributes ccdFieldAttributes) {
+        return isComplexType(complexTypeSheets, ccdFieldAttributes.getFieldType())
             && !fixedListValues.contains(ccdFieldAttributes.getFieldType());
     }
 
@@ -187,11 +270,11 @@ public class CCDConfigValidator {
             && specialFieldTypes.get(ccdFieldAttributes.getFieldId()).equals(field.getType().getSimpleName()));
     }
 
-    private List<String> validateCollectionField(Sheet complexTypeSheet, Sheet fixedListSheet, CcdFieldAttributes ccdFieldAttributes, Field field) {
-
+    private List<String> validateCollectionField(List<Sheet> complexTypeSheets, List<Sheet> fixedListSheets, CcdFieldAttributes ccdFieldAttributes,
+                                                 Field field) {
         log.info("CCD Field Id: {} with Field Type: {} is a collection of type {} with field type parameter of {}", ccdFieldAttributes.getFieldId(),
             ccdFieldAttributes.getFieldType(), field.getGenericType().getTypeName(), ccdFieldAttributes.getFieldTypeParameter());
-        List<CcdFieldAttributes> complexTypeFields = getComplexType(complexTypeSheet, ccdFieldAttributes.getFieldTypeParameter());
+        List<CcdFieldAttributes> complexTypeFields = getComplexType(complexTypeSheets, ccdFieldAttributes.getFieldTypeParameter());
         Type type = field.getGenericType();
         log.info("type: {}", type.getTypeName());
         ParameterizedType stringListType = (ParameterizedType) type;
@@ -203,14 +286,14 @@ public class CCDConfigValidator {
                 || hasMatchingAnnotationForField(f, "value"))
             .findFirst()  // get the value field
             .ifPresentOrElse(f -> {
-                collectionErrors.addAll(validateComplexField(fixedListSheet, complexTypeFields, f.getType()));
+                collectionErrors.addAll(validateComplexField(fixedListSheets, complexTypeFields, f.getType()));
             }, () -> {
                 collectionErrors.add("No value field found for collection field: " + ccdFieldAttributes.getFieldId());
             });
         return collectionErrors;
     }
 
-    private List<String> validateComplexField(Sheet fixedListSheet, List<CcdFieldAttributes> complexTypeFields,
+    private List<String> validateComplexField(List<Sheet> fixedListSheets, List<CcdFieldAttributes> complexTypeFields,
                                               Class<?> frClass) {
 
         log.info("Validate ComplexType - ct collection is : {}", frClass.getName());
@@ -222,7 +305,7 @@ public class CCDConfigValidator {
         }
         complexTypeFields.stream().forEach(c -> {
             log.info("Matching on field in complex type: {} with type: {}", c.getListElementCode(), c.getFieldType());
-            Arrays.stream(frClass.getDeclaredFields())
+            Arrays.stream(getAllDeclaredFields(frClass))
                 .filter(vf -> c.getListElementCode().equals(vf.getName()) || hasMatchingAnnotationForField(vf, c.getListElementCode())).findFirst()
                 .ifPresentOrElse(vf -> {
                     log.info("Matching on {} complex type field: {}", frClass.getName(), vf.getName());
@@ -232,7 +315,7 @@ public class CCDConfigValidator {
                             log.info("In a fixedlist field with ccd parameter type {} and field type {}", c.getFieldTypeParameter(),
                                 vf.getType().getSimpleName());
                             if (!vf.getType().getSimpleName().equals("String")) {
-                                complexTypeErrors.addAll(validateFixedList(fixedListSheet, vf.getType(), c.getFieldTypeParameter()));
+                                complexTypeErrors.addAll(validateFixedList(fixedListSheets, vf.getType(), c.getFieldTypeParameter()));
                             } else {
                                 log.info("Fixed list is a string");
                             }
@@ -247,8 +330,17 @@ public class CCDConfigValidator {
         return complexTypeErrors;
     }
 
+    private static Field[] getAllDeclaredFields(Class<?> frClass) {
+        if (frClass.getSuperclass() != null) {
+            return Stream.of(frClass.getDeclaredFields(), getAllDeclaredFields(frClass.getSuperclass()))
+                .flatMap(Stream::of)
+                .toArray(Field[]::new);
+        }
+        return frClass.getDeclaredFields();
+    }
 
-    private List<String> validateFixedListCaseField(Sheet fixedListSheet, CcdFieldAttributes ccdFieldAttributes, Field field) {
+
+    private List<String> validateFixedListCaseField(List<Sheet> fixedListSheets, CcdFieldAttributes ccdFieldAttributes, Field field) {
 
         log.info("Validate FixedList CCD Field Id: {} Field Type: {} is a collection of type {} with field type parameter of {}",
             ccdFieldAttributes.getFieldId(), ccdFieldAttributes.getFieldType(), field.getGenericType().getTypeName(),
@@ -271,11 +363,11 @@ public class CCDConfigValidator {
         } else {
             log.info("In a fixedlist field with ccd parameter type {} and field type {}", ccdFieldAttributes.getFieldTypeParameter(),
                 valueType.getSimpleName());
-            return validateFixedList(fixedListSheet, valueType, ccdFieldAttributes.getFieldTypeParameter());
+            return validateFixedList(fixedListSheets, valueType, ccdFieldAttributes.getFieldTypeParameter());
         }
     }
 
-    private List<String> validateFixedList(Sheet fixedListSheet, Class fixedListClass, String fixedListParameterName) {
+    private List<String> validateFixedList(List<Sheet> fixedListSheets, Class fixedListClass, String fixedListParameterName) {
 
         List<String> fixedListErrors = new ArrayList<>();
         if (alreadyProcessedCcdFields.contains(fixedListParameterName)) {
@@ -284,7 +376,7 @@ public class CCDConfigValidator {
             alreadyProcessedCcdFields.add(fixedListParameterName);
         }
         log.info("Validating fixed list class {} with parameter name {}", fixedListClass.getName(), fixedListParameterName);
-        List<CcdFieldAttributes> fixedListFields = getFixedList(fixedListSheet, fixedListParameterName);
+        List<CcdFieldAttributes> fixedListFields = getFixedList(fixedListSheets, fixedListParameterName);
         Method method = findAnnotatedMethod(fixedListClass, JsonValue.class);
         AtomicInteger successCounter = new AtomicInteger(0);
         AtomicInteger errorCounter = new AtomicInteger(0);
@@ -354,7 +446,7 @@ public class CCDConfigValidator {
                 CcdFieldAttributes fieldAttributes = new CcdFieldAttributes();
                 fieldAttributes.setFieldId(row.getCell(3).getStringCellValue());
                 fieldAttributes.setFieldType(row.getCell(6).getStringCellValue());
-                fieldAttributes.setFieldTypeParameter(row.getCell(7).getStringCellValue());
+                fieldAttributes.setFieldTypeParameter(row.getCell(8).getStringCellValue());
                 if (!ccdFieldsToIgnore.contains(fieldAttributes.getFieldType())) {
                     caseFields.add(fieldAttributes);
                 }
@@ -379,54 +471,60 @@ public class CCDConfigValidator {
         return stateFields;
     }
 
-    private boolean isComplexType(Sheet complexTypeSheet, String fieldType) {
+    private boolean isComplexType(List<Sheet> complexTypeSheets, String fieldType) {
         int i = 0;
-        for (Row row : complexTypeSheet) {
-            if (i > ROW_HEADERS) {
-                if (row.getCell(2) != null && row.getCell(2).getStringCellValue().equals(fieldType)) {
-                    return true;
+        for (int j = 0; j < complexTypeSheets.size(); j++) {
+            for (Row row : complexTypeSheets.get(j)) {
+                if (i > ROW_HEADERS) {
+                    if (row.getCell(2) != null && row.getCell(2).getStringCellValue().equals(fieldType)) {
+                        return true;
+                    }
                 }
+                i++;
             }
-            i++;
         }
         return false;
     }
 
-    private List<CcdFieldAttributes> getComplexType(Sheet complexTypeSheet, String fieldTypeParameter) {
+    private List<CcdFieldAttributes> getComplexType(List<Sheet> complexTypeSheets, String fieldTypeParameter) {
         List<CcdFieldAttributes> caseFields = new ArrayList<>();
         int i = 0;
-        for (Row row : complexTypeSheet) {
-            if (i > ROW_HEADERS) {
-                if (row.getCell(2).getStringCellValue().equals(fieldTypeParameter)) {
-                    CcdFieldAttributes fieldAttributes = new CcdFieldAttributes();
-                    fieldAttributes.setFieldId(row.getCell(2).getStringCellValue());
-                    fieldAttributes.setListElementCode(row.getCell(3).getStringCellValue());
-                    fieldAttributes.setFieldType(row.getCell(4).getStringCellValue());
-                    fieldAttributes.setFieldTypeParameter(row.getCell(5).getStringCellValue());
-                    if (!ccdFieldsToIgnore.contains(fieldAttributes.getFieldType())) {
-                        caseFields.add(fieldAttributes);
+        for (int j = 0; j < complexTypeSheets.size(); j++) {
+            for (Row row : complexTypeSheets.get(j)) {
+                if (i > ROW_HEADERS) {
+                    if (row.getCell(2).getStringCellValue().equals(fieldTypeParameter)) {
+                        CcdFieldAttributes fieldAttributes = new CcdFieldAttributes();
+                        fieldAttributes.setFieldId(row.getCell(2).getStringCellValue());
+                        fieldAttributes.setListElementCode(row.getCell(3).getStringCellValue());
+                        fieldAttributes.setFieldType(row.getCell(4).getStringCellValue());
+                        fieldAttributes.setFieldTypeParameter(row.getCell(5).getStringCellValue());
+                        if (!ccdFieldsToIgnore.contains(fieldAttributes.getFieldType())) {
+                            caseFields.add(fieldAttributes);
+                        }
                     }
                 }
+                i++;
             }
-            i++;
         }
         return caseFields;
     }
 
-    private List<CcdFieldAttributes> getFixedList(Sheet fixedListSheet, String fieldTypeParameter) {
+    private List<CcdFieldAttributes> getFixedList(List<Sheet> fixedListSheets, String fieldTypeParameter) {
         List<CcdFieldAttributes> caseFields = new ArrayList<>();
         int i = 0;
-        for (Row row : fixedListSheet) {
-            if (i > ROW_HEADERS) {
-                if (row.getCell(2).getStringCellValue().equals(fieldTypeParameter)) {
-                    CcdFieldAttributes fieldAttributes = new CcdFieldAttributes();
-                    fieldAttributes.setFieldId(row.getCell(2).getStringCellValue());
-                    fieldAttributes.setListElementCode(row.getCell(3).getStringCellValue());
-                    fieldAttributes.setListElementLabel(row.getCell(4).getStringCellValue());
-                    caseFields.add(fieldAttributes);
+        for (int j = 0; j < fixedListSheets.size(); j++) {
+            for (Row row : fixedListSheets.get(j)) {
+                if (i > ROW_HEADERS) {
+                    if (row.getCell(2).getStringCellValue().equals(fieldTypeParameter)) {
+                        CcdFieldAttributes fieldAttributes = new CcdFieldAttributes();
+                        fieldAttributes.setFieldId(row.getCell(2).getStringCellValue());
+                        fieldAttributes.setListElementCode(row.getCell(3).getStringCellValue());
+                        fieldAttributes.setListElementLabel(row.getCell(4).getStringCellValue());
+                        caseFields.add(fieldAttributes);
+                    }
                 }
+                i++;
             }
-            i++;
         }
         return caseFields;
     }
