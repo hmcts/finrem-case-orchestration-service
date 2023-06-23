@@ -169,7 +169,7 @@ class ApplicantShareDocumentsServiceTest {
         roleList.setValue(singletonList(getSelectedParty(RESP_SOLICITOR)));
         data.setSolicitorRoleList(roleList);
 
-        service.copyDocumentOnTheirRespectiveCollectionForSelectedSolicitors(data);
+        service.shareSelectedDocumentWithOtherSelectedSolicitors(data);
 
         UploadCaseDocumentWrapper wrapper = data.getUploadCaseDocumentWrapper();
         assertEquals("one document shared with respondent solicitor", 1,
@@ -220,7 +220,7 @@ class ApplicantShareDocumentsServiceTest {
 
         data.setSolicitorRoleList(roleList);
 
-        service.copyDocumentOnTheirRespectiveCollectionForSelectedSolicitors(data);
+        service.shareSelectedDocumentWithOtherSelectedSolicitors(data);
         UploadCaseDocumentWrapper wrapper = data.getUploadCaseDocumentWrapper();
 
         assertEquals("one document shared with respondent solicitor", 1,

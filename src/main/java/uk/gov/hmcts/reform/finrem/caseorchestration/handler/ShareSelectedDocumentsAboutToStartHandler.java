@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApplicantShareDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RespondentShareDocumentsService;
 
 import java.util.List;
@@ -26,15 +27,18 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
     private final CaseAssignedRoleService caseAssignedRoleService;
     private final ApplicantShareDocumentsService selectedDocumentsService;
     private final RespondentShareDocumentsService respondentShareDocumentsService;
+    private final IntervenerShareDocumentsService oneShareDocumentsService;
 
     public ShareSelectedDocumentsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      CaseAssignedRoleService caseAssignedRoleService,
                                                      ApplicantShareDocumentsService selectedDocumentsService,
-                                                     RespondentShareDocumentsService respondentShareDocumentsService) {
+                                                     RespondentShareDocumentsService respondentShareDocumentsService,
+                                                     IntervenerShareDocumentsService oneShareDocumentsService) {
         super(finremCaseDetailsMapper);
         this.caseAssignedRoleService = caseAssignedRoleService;
         this.selectedDocumentsService = selectedDocumentsService;
         this.respondentShareDocumentsService = respondentShareDocumentsService;
+        this.oneShareDocumentsService = oneShareDocumentsService;
     }
 
     @Override
@@ -48,30 +52,45 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Long caseId = caseDetails.getId();
         log.info("Invoking contested {} about to start callback for case id: {}",
-            callbackRequest.getEventType(), caseDetails.getId());
+            callbackRequest.getEventType(), caseId);
 
         CaseAssignedUserRolesResource caseAssignedUserRole
-            = caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), userAuthorisation);
+            = caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseId), userAuthorisation);
         List<CaseAssignedUserRole> caseAssignedUserRoles = caseAssignedUserRole.getCaseAssignedUserRoles();
 
         FinremCaseData caseData = caseDetails.getData();
         AtomicReference<String> caseRole = new AtomicReference<>();
         if (caseAssignedUserRoles != null) {
-            log.info("caseAssignedUserRoles {}", caseAssignedUserRoles);
+            log.info("caseAssignedUserRoles {} caseId {}", caseAssignedUserRoles, caseId);
             caseAssignedUserRoles.forEach(role -> {
                 caseRole.set(role.getCaseRole());
-                log.info("User Role {}", caseRole);
-                if (caseRole.get().equals(CaseRole.APP_SOLICITOR.getValue())) {
+                log.info("User Role {} for caseId {}", caseRole, caseId);
+                if (caseRole.get().equals(CaseRole.APP_SOLICITOR.getValue()) || caseRole.get().equals(CaseRole.APP_BARRISTER.getValue())) {
                     DynamicMultiSelectList sourceDocumentList = selectedDocumentsService.applicantSourceDocumentList(caseDetails);
                     caseData.setSourceDocumentList(sourceDocumentList);
                     DynamicMultiSelectList roleList = selectedDocumentsService.getApplicantToOtherSolicitorRoleList(caseDetails);
                     caseData.setSolicitorRoleList(roleList);
                 }
-                if (caseRole.get().equals(CaseRole.RESP_SOLICITOR.getValue())) {
+                if (caseRole.get().equals(CaseRole.RESP_SOLICITOR.getValue()) || caseRole.get().equals(CaseRole.RESP_BARRISTER.getValue())) {
                     DynamicMultiSelectList sourceDocumentList = respondentShareDocumentsService.respondentSourceDocumentList(caseDetails);
                     caseData.setSourceDocumentList(sourceDocumentList);
                     DynamicMultiSelectList roleList = respondentShareDocumentsService.getRespondentToOtherSolicitorRoleList(caseDetails);
+                    caseData.setSolicitorRoleList(roleList);
+                }
+                if (caseRole.get().equals(CaseRole.INTVR_SOLICITOR_1.getValue())
+                    || caseRole.get().equals(CaseRole.INTVR_SOLICITOR_2.getValue())
+                    || caseRole.get().equals(CaseRole.INTVR_SOLICITOR_3.getValue())
+                    || caseRole.get().equals(CaseRole.INTVR_SOLICITOR_4.getValue())
+                    || caseRole.get().equals(CaseRole.INTVR_BARRISTER_1.getValue())
+                    || caseRole.get().equals(CaseRole.INTVR_BARRISTER_2.getValue())
+                    || caseRole.get().equals(CaseRole.INTVR_BARRISTER_3.getValue())
+                    || caseRole.get().equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
+
+                    DynamicMultiSelectList sourceDocumentList = oneShareDocumentsService.intervenerSourceDocumentList(caseDetails, caseRole.get());
+                    caseData.setSourceDocumentList(sourceDocumentList);
+                    DynamicMultiSelectList roleList = oneShareDocumentsService.getOtherSolicitorRoleList(caseDetails);
                     caseData.setSolicitorRoleList(roleList);
                 }
             });

@@ -172,7 +172,7 @@ public class RespondentShareDocumentsService implements SharedService {
     }
 
 
-    public void copyDocumentOnTheirRespectiveCollectionForSelectedSolicitors(FinremCaseData caseData) {
+    public void shareSelectedDocumentWithOtherSelectedSolicitors(FinremCaseData caseData) {
         DynamicMultiSelectList sourceDocumentList = caseData.getSourceDocumentList();
         DynamicMultiSelectList solicitorRoleList = caseData.getSolicitorRoleList();
 
@@ -181,14 +181,15 @@ public class RespondentShareDocumentsService implements SharedService {
             roleList.forEach(role -> {
                 List<DynamicMultiSelectListElement> documentList = sourceDocumentList.getValue();
                 copySelectedFilesToTargetCollection(caseData, role.getCode(), documentList);
+                copyIntervenersDocuments(caseData, role.getCode(), documentList);
             });
         }
     }
 
 
-    private void copySelectedFilesToTargetCollection(FinremCaseData caseData, String role, List<DynamicMultiSelectListElement> documentList) {
+    public void copySelectedFilesToTargetCollection(FinremCaseData caseData, String role, List<DynamicMultiSelectListElement> documentList) {
 
-        if (role.equals(CaseRole.APP_SOLICITOR.getValue())) {
+        if (role.equals(CaseRole.APP_SOLICITOR.getValue()) || role.equals(CaseRole.APP_BARRISTER.getValue())) {
             documentList.forEach(doc -> {
                 String[] collectionIdAndFilename = doc.getCode().split("#");
                 String collId = collectionIdAndFilename[0];
@@ -206,8 +207,6 @@ public class RespondentShareDocumentsService implements SharedService {
                 copySelectedOtherFilesToApp(caseData, collId, collName);
             });
         }
-
-        copyIntervenersDocuments(caseData, role, documentList);
     }
 
 

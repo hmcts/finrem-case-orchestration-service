@@ -198,6 +198,7 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/correspondence/FinremSingleLetterOrEmailApplicantCorresponder.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReference.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/IntervenerShareDocumentsService.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/ShareSelectedDocumentsAboutToStartHandler.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/ShareSelectedDocumentsAboutToSubmitHandler.java'
     ]

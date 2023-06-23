@@ -23,6 +23,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Contes
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_FORM_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CORRESPONDENCE_COLLECTION;
@@ -163,6 +173,8 @@ public interface SharedService {
             docs = documentWrapper.getAppOtherCollection();
         } else if (collName.equalsIgnoreCase(RESP_OTHER_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespOtherCollection();
+        } else if (collName.equalsIgnoreCase(INTERVENER_ONE_OTHER_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getIntv1Other();
         }
 
         if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
@@ -183,6 +195,8 @@ public interface SharedService {
             docs = documentWrapper.getAppFormEExhibitsCollection();
         } else if (collName.equalsIgnoreCase(RESP_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespFormEExhibitsCollection();
+        } else if (collName.equalsIgnoreCase(INTERVENER_ONE_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getIntv1Other();
         }
 
         if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
@@ -204,6 +218,8 @@ public interface SharedService {
             docs = documentWrapper.getAppFormEExhibitsCollection();
         } else if (collName.equalsIgnoreCase(RESP_CORRESPONDENCE_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespFormEExhibitsCollection();
+        } else if (collName.equalsIgnoreCase(INTERVENER_ONE_CORRESPONDENCE_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getIntv1Other();
         }
 
         if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
@@ -224,6 +240,8 @@ public interface SharedService {
             docs = documentWrapper.getAppExpertEvidenceCollection();
         } else if (collName.equalsIgnoreCase(RESP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespExpertEvidenceCollection();
+        } else if (collName.equalsIgnoreCase(INTERVENER_ONE_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getIntv1Other();
         }
 
 
@@ -245,6 +263,8 @@ public interface SharedService {
             docs = documentWrapper.getAppFormsHCollection();
         } else if (collName.equalsIgnoreCase(RESP_FORM_H_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespFormsHCollection();
+        } else if (collName.equalsIgnoreCase(INTERVENER_ONE_FORM_H_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getIntv1Other();
         }
 
 
@@ -266,6 +286,8 @@ public interface SharedService {
             docs = documentWrapper.getAppHearingBundlesCollection();
         } else if (collName.equalsIgnoreCase(RESP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespHearingBundlesCollection();
+        } else if (collName.equalsIgnoreCase(INTERVENER_ONE_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getIntv1Other();
         }
 
 
@@ -287,6 +309,8 @@ public interface SharedService {
             docs = documentWrapper.getAppCaseSummariesCollection();
         } else if (collName.equalsIgnoreCase(RESP_CASE_SUMMARIES_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespCaseSummariesCollection();
+        } else if (collName.equalsIgnoreCase(INTERVENER_ONE_SUMMARIES_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getIntv1Other();
         }
 
 
@@ -308,6 +332,8 @@ public interface SharedService {
             docs = documentWrapper.getAppStatementsExhibitsCollection();
         } else if (collName.equalsIgnoreCase(RESP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespStatementsExhibitsCollection();
+        } else if (collName.equalsIgnoreCase(INTERVENER_ONE_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getIntv1Other();
         }
 
 
@@ -329,7 +355,10 @@ public interface SharedService {
             docs = documentWrapper.getAppQaCollection();
         } else if (collName.equalsIgnoreCase(RESP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespQaCollection();
+        } else if (collName.equalsIgnoreCase(INTERVENER_ONE_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getIntv1Other();
         }
+
 
 
         if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
@@ -350,7 +379,10 @@ public interface SharedService {
             docs = documentWrapper.getAppChronologiesCollection();
         } else if (collName.equalsIgnoreCase(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespChronologiesCollection();
+        } else if (collName.equalsIgnoreCase(INTERVENER_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getIntv1Other();
         }
+
 
 
         if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
@@ -614,8 +646,8 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2OtherShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appOtherCollection) {
-        appOtherCollection.forEach(d -> {
+    default void setIntv2OtherShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+        coll.forEach(d -> {
             if (String.valueOf(d.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
                     Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2OtherShared())
