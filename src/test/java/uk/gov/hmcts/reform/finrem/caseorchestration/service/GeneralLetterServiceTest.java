@@ -177,7 +177,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() {
         FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any());
+        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), any());
     }
 
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, GeneralLetterAddressToType generalLetterAddressTo, String expectedName) {
