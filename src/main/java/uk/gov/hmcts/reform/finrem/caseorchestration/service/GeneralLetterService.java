@@ -74,13 +74,14 @@ public class GeneralLetterService {
     public void createGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
-        addGeneralLetterToCaseData(caseDetails, document);
         CaseDocument generalLetterUploadedDocument = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterUploadedDocument();
         if (generalLetterUploadedDocument != null) {
-            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalLetterUploadedDocument, authorisationToken);
+            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalLetterUploadedDocument,
+                authorisationToken, caseDetails.getId().toString());
             caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterUploadedDocument(pdfDocument);
         }
-        printLatestGeneralLetter(caseDetails);
+        addGeneralLetterToCaseData(caseDetails, document, generalLetterUploadedDocument);
+        printLatestGeneralLetter(caseDetails, authorisationToken);
     }
 
     private CaseDocument generateGeneralLetterDocument(FinremCaseDetails caseDetails, String authorisationToken) {
@@ -138,15 +139,18 @@ public class GeneralLetterService {
                 .name((String) data.get(GENERAL_LETTER_RECIPIENT))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(GENERAL_LETTER_RECIPIENT_ADDRESS)));
         }
+        data.put("recipient", generalLetterAddressTo);
         data.put(ADDRESSEE, addresseeBuilder.build());
     }
 
-    private void addGeneralLetterToCaseData(FinremCaseDetails caseDetails, CaseDocument document) {
+    private void addGeneralLetterToCaseData(FinremCaseDetails caseDetails, CaseDocument document,
+                                            CaseDocument generalLetterUploadedDocument) {
         List<GeneralLetterCollection> generalLetterCollection = Optional.ofNullable(caseDetails.getData()
             .getGeneralLetterWrapper().getGeneralLetterCollection())
             .orElse(new ArrayList<>(1));
         generalLetterCollection.add(GeneralLetterCollection.builder().value(GeneralLetter.builder()
                 .generatedLetter(document)
+                .generalLetterUploadedDocument(generalLetterUploadedDocument)
                 .build())
             .build());
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterCollection(generalLetterCollection);
@@ -158,7 +162,7 @@ public class GeneralLetterService {
         Address recipientAddress = getRecipientAddress(caseDetails);
 
         if (recipientAddress == null || StringUtils.isEmpty(recipientAddress.getPostCode())) {
-            return asList(String.format("Address is missing for recipient type %s", letterAddressToType.getValue()));
+            return Collections.singletonList(String.format("Address is missing for recipient type %s", letterAddressToType.getValue()));
         } else {
             return emptyList();
         }
@@ -193,7 +197,7 @@ public class GeneralLetterService {
         return recipientAddress;
     }
 
-    private UUID printLatestGeneralLetter(FinremCaseDetails caseDetails) {
+    private UUID printLatestGeneralLetter(FinremCaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         GeneralLetterWrapper generalLetterWrapper = caseDetails.getData().getGeneralLetterWrapper();
         List<GeneralLetterCollection> generalLettersData = generalLetterWrapper.getGeneralLetterCollection();
@@ -203,6 +207,8 @@ public class GeneralLetterService {
         if (generalLetterUploadedDocument != null) {
             bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalLetterUploadedDocument));
         }
-        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
+        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(),
+            generalLetterWrapper.getGeneralLetterRecipient(),
+            bulkPrintDocuments, authorisationToken);
     }
 }
