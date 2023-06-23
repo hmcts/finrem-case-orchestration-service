@@ -71,7 +71,6 @@ public enum EventType {
     }
 
     public static EventType getEventType(String ccdType) {
-        log.info("Event type to process {}", ccdType);
         return Arrays.stream(EventType.values())
             .filter(eventTypeValue -> eventTypeValue.ccdType.equals(ccdType))
             .findFirst().orElseThrow(IllegalArgumentException::new);

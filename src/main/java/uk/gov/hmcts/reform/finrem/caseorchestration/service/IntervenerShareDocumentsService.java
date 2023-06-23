@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION;
@@ -75,127 +76,205 @@ public class IntervenerShareDocumentsService implements SharedService {
 
     public DynamicMultiSelectList intervenerSourceDocumentList(FinremCaseDetails caseDetails, String role) {
 
-        log.info("Setting intervener source document list for case {}", caseDetails.getId());
+        log.info("Setting intervener {}, source document list for case {}", role, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
-        List<UploadCaseDocumentCollection> otherCollection
-            = caseData.getUploadCaseDocumentWrapper().getIntv1Other();
+        List<String>  collectionType =  List.of(OTHER, CHRONOLOGIES, STATEMENTS_EXHIBITS, HEARING_BUNDLES, FORM_E_EXHIBITS,
+            QUESTIONNAIRES_ANSWERS, SUMMARIES, FORM_H, EXPERT_EVIDENCE, CORRESPONDENCE);
 
-        if (ObjectUtils.isNotEmpty(otherCollection)) {
-            otherCollection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
-                String collection = getIntervenerOtherCollection(role, OTHER);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collection,
-                    collection + " -> " + filename));
-            });
-        }
-
-        List<UploadCaseDocumentCollection> chronologiesCollection
-            = caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection();
-        if (ObjectUtils.isNotEmpty(chronologiesCollection)) {
-            chronologiesCollection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
-                String collection = getIntervenerOtherCollection(role, CHRONOLOGIES);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collection,
-                    collection + " -> " + filename));
-            });
-        }
-
-        List<UploadCaseDocumentCollection> statementsExhibitsCollection
-            = caseData.getUploadCaseDocumentWrapper().getAppStatementsExhibitsCollection();
-        if (ObjectUtils.isNotEmpty(statementsExhibitsCollection)) {
-            statementsExhibitsCollection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
-                String collection = getIntervenerOtherCollection(role, STATEMENTS_EXHIBITS);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collection,
-                    collection + " -> " + filename));
-            });
-        }
-
-        List<UploadCaseDocumentCollection> hearingBundlesCollection
-            = caseData.getUploadCaseDocumentWrapper().getAppHearingBundlesCollection();
-        if (ObjectUtils.isNotEmpty(hearingBundlesCollection)) {
-            hearingBundlesCollection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
-                String collection = getIntervenerOtherCollection(role, HEARING_BUNDLES);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collection,
-                    collection + " -> " + filename));
-            });
-        }
-
-
-        List<UploadCaseDocumentCollection> formEExhibitsCollection
-            = caseData.getUploadCaseDocumentWrapper().getAppFormEExhibitsCollection();
-        if (ObjectUtils.isNotEmpty(formEExhibitsCollection)) {
-            formEExhibitsCollection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
-                String collection = getIntervenerOtherCollection(role, FORM_E_EXHIBITS);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collection,
-                    collection + " -> " + filename));
-            });
-        }
-
-        List<UploadCaseDocumentCollection> appQaCollection
-            = caseData.getUploadCaseDocumentWrapper().getAppQaCollection();
-        if (ObjectUtils.isNotEmpty(appQaCollection)) {
-            appQaCollection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
-                String collection = getIntervenerOtherCollection(role, QUESTIONNAIRES_ANSWERS);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collection,
-                    collection + " -> " + filename));
-            });
-        }
-
-        List<UploadCaseDocumentCollection> appCaseSummariesCollection
-            = caseData.getUploadCaseDocumentWrapper().getAppCaseSummariesCollection();
-        if (ObjectUtils.isNotEmpty(appCaseSummariesCollection)) {
-            appCaseSummariesCollection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
-                String collection = getIntervenerOtherCollection(role, SUMMARIES);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collection,
-                    collection + " -> " + filename));
-            });
-        }
-
-        List<UploadCaseDocumentCollection> appFormsHCollection
-            = caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection();
-        if (ObjectUtils.isNotEmpty(appFormsHCollection)) {
-            appFormsHCollection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
-                String collection = getIntervenerOtherCollection(role, FORM_H);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collection,
-                    collection + " -> " + filename));
-            });
-        }
-
-
-        List<UploadCaseDocumentCollection> appExpertEvidenceCollection
-            = caseData.getUploadCaseDocumentWrapper().getAppExpertEvidenceCollection();
-        if (ObjectUtils.isNotEmpty(appExpertEvidenceCollection)) {
-            appExpertEvidenceCollection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
-                String collection = getIntervenerOtherCollection(role, EXPERT_EVIDENCE);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collection,
-                    collection + " -> " + filename));
-            });
-        }
-
-
-        List<UploadCaseDocumentCollection> appCorrespondenceDocsCollection
-            = caseData.getUploadCaseDocumentWrapper().getAppCorrespondenceDocsCollection();
-        if (ObjectUtils.isNotEmpty(appCorrespondenceDocsCollection)) {
-            appCorrespondenceDocsCollection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
-                String collection = getIntervenerOtherCollection(role, CORRESPONDENCE);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collection,
-                    collection + " -> " + filename));
-            });
-        }
+        collectionType.forEach(obj -> {
+            List<UploadCaseDocumentCollection> collection = getIntervenerCollection(caseData, role, obj);
+            setIntervenerDocumentDynamicList(role, dynamicListElements, collection, obj);
+        });
 
         return getSelectedDocumentList(dynamicListElements, caseData.getSourceDocumentList());
     }
 
+    public void setIntervenerDocumentDynamicList(String role, List<DynamicMultiSelectListElement> dynamicListElements,
+                                                 List<UploadCaseDocumentCollection> collection, String other) {
+        if (ObjectUtils.isNotEmpty(collection)) {
+            collection.forEach(doc -> {
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
+                String collectionType = getIntervenerOtherCollection(role, other);
+                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collectionType,
+                    collectionType + " -> " + filename));
+            });
+        }
+    }
+
+    private List<UploadCaseDocumentCollection> getIntervenerCollection(FinremCaseData caseData, String role, String collectionType) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_1.getValue())) {
+            return getIntervenerOneList(caseData, role, collectionType);
+        } else if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
+            return getIntervenerTwoList(caseData, role, collectionType);
+        } else if (role.equals(CaseRole.INTVR_SOLICITOR_3.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_3.getValue())) {
+            return getIntervenerThreeList(caseData, role, collectionType);
+        } else if (role.equals(CaseRole.INTVR_SOLICITOR_4.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
+            return getIntervenerFourList(caseData, role, collectionType);
+        }
+        return Collections.emptyList();
+    }
+
+    private List<UploadCaseDocumentCollection> getIntervenerOneList(FinremCaseData caseData, String role, String collectionType) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_1.getValue())) {
+            switch (collectionType) {
+                case OTHER -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1Other();
+                }
+                case CHRONOLOGIES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1Chronologies();
+                }
+                case STATEMENTS_EXHIBITS -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1StmtsExhibitsShared();
+                }
+                case HEARING_BUNDLES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1HearingBundles();
+                }
+                case FORM_E_EXHIBITS -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1FormEsExhibits();
+                }
+                case QUESTIONNAIRES_ANSWERS -> {
+                    return  caseData.getUploadCaseDocumentWrapper().getIntv1Qa();
+                }
+                case SUMMARIES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1Summaries();
+                }
+                case FORM_H -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1FormHs();
+                }
+                case EXPERT_EVIDENCE -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1ExpertEvidence();
+                }
+                case CORRESPONDENCE -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1CorrespDocs();
+                }
+                default -> log.info("Invalid choice made for intervener one collection");
+            }
+
+        }
+        return Collections.emptyList();
+    }
+
+    private List<UploadCaseDocumentCollection> getIntervenerTwoList(FinremCaseData caseData, String role, String collectionType) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
+            switch (collectionType) {
+                case OTHER -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2Other();
+                }
+                case CHRONOLOGIES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2Chronologies();
+                }
+                case STATEMENTS_EXHIBITS -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2StmtsExhibitsShared();
+                }
+                case HEARING_BUNDLES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2HearingBundles();
+                }
+                case FORM_E_EXHIBITS -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2FormEsExhibits();
+                }
+                case QUESTIONNAIRES_ANSWERS -> {
+                    return  caseData.getUploadCaseDocumentWrapper().getIntv2Qa();
+                }
+                case SUMMARIES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2Summaries();
+                }
+                case FORM_H -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2FormHs();
+                }
+                case EXPERT_EVIDENCE -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2ExpertEvidence();
+                }
+                case CORRESPONDENCE -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2CorrespDocs();
+                }
+                default -> log.info("Invalid choice made for intervener three collection");
+            }
+
+        }
+        return Collections.emptyList();
+    }
+
+    private List<UploadCaseDocumentCollection> getIntervenerThreeList(FinremCaseData caseData, String role, String collectionType) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_3.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_3.getValue())) {
+            switch (collectionType) {
+                case OTHER -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3Other();
+                }
+                case CHRONOLOGIES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3Chronologies();
+                }
+                case STATEMENTS_EXHIBITS -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3StmtsExhibitsShared();
+                }
+                case HEARING_BUNDLES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3HearingBundles();
+                }
+                case FORM_E_EXHIBITS -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3FormEsExhibits();
+                }
+                case QUESTIONNAIRES_ANSWERS -> {
+                    return  caseData.getUploadCaseDocumentWrapper().getIntv3Qa();
+                }
+                case SUMMARIES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3Summaries();
+                }
+                case FORM_H -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3FormHs();
+                }
+                case EXPERT_EVIDENCE -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3ExpertEvidence();
+                }
+                case CORRESPONDENCE -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3CorrespDocs();
+                }
+                default -> log.info("Invalid choice made for intervener four collection");
+            }
+
+        }
+        return Collections.emptyList();
+    }
+
+    private List<UploadCaseDocumentCollection> getIntervenerFourList(FinremCaseData caseData, String role, String collectionType) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_4.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
+            switch (collectionType) {
+                case OTHER -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4Other();
+                }
+                case CHRONOLOGIES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4Chronologies();
+                }
+                case STATEMENTS_EXHIBITS -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4StmtsExhibitsShared();
+                }
+                case HEARING_BUNDLES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4HearingBundles();
+                }
+                case FORM_E_EXHIBITS -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4FormEsExhibits();
+                }
+                case QUESTIONNAIRES_ANSWERS -> {
+                    return  caseData.getUploadCaseDocumentWrapper().getIntv4Qa();
+                }
+                case SUMMARIES -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4Summaries();
+                }
+                case FORM_H -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4FormHs();
+                }
+                case EXPERT_EVIDENCE -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4ExpertEvidence();
+                }
+                case CORRESPONDENCE -> {
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4CorrespDocs();
+                }
+                default -> log.info("Invalid choice made for intervener two collection");
+            }
+
+        }
+        return Collections.emptyList();
+    }
 
     private String getIntervenerOtherCollection(String role, String collectionType) {
         if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_1.getValue())) {
