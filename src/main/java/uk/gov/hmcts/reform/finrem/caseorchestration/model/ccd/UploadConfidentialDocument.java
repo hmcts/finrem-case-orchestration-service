@@ -24,6 +24,8 @@ import java.time.LocalDateTime;
 public class UploadConfidentialDocument {
     @JsonProperty("DocumentType")
     private CaseDocumentType documentType;
+
+    private CaseDocumentParty caseDocumentParty;
     @JsonProperty("DocumentLink")
     private CaseDocument documentLink;
     @JsonProperty("DocumentDateAdded")

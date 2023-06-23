@@ -16,7 +16,6 @@ import java.util.List;
 import static org.junit.Assume.assumeTrue;
 
 @Slf4j
-@Ignore
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
