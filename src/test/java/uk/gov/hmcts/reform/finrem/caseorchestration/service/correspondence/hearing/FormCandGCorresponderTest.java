@@ -36,7 +36,7 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
     private ObjectMapper objectMapper = new ObjectMapper();
     @Mock
     private GenericDocumentService service;
-    private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
+
 
     private static final String DATE_OF_HEARING = "2019-01-01";
 

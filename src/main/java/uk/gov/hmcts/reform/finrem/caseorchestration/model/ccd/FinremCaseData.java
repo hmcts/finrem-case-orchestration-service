@@ -43,9 +43,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerC
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -487,10 +484,7 @@ public class FinremCaseData {
 
     @JsonIgnore
     public List<IntervenerWrapper> getInterveners() {
-        List<IntervenerWrapper> intervenerList =
-            new ArrayList<>(Arrays. asList(intervenerOneWrapper, intervenerTwoWrapper, intervenerThreeWrapper, intervenerFourWrapper));
-        intervenerList.removeAll(Collections.singleton(null));
-        return intervenerList;
+        return List.of(getIntervenerOneWrapper(), getIntervenerTwoWrapper(), getIntervenerThreeWrapper(), getIntervenerFourWrapper());
     }
 
 

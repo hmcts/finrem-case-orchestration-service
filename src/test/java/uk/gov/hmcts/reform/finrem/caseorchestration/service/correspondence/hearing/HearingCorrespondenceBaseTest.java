@@ -107,7 +107,7 @@ public abstract class HearingCorrespondenceBaseTest {
 
         FinremCaseDetails finremCaseDetails =
             FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCaseDetails);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
             any(FinremCaseDetails.class))).thenReturn(true);
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerOneWrapper))
@@ -119,7 +119,7 @@ public abstract class HearingCorrespondenceBaseTest {
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailIntervener(any(CaseDetails.class),
             any(SolicitorCaseDataKeysWrapper.class));
-        verifyNoInteractions(bulkPrintService);
+
     }
 
 

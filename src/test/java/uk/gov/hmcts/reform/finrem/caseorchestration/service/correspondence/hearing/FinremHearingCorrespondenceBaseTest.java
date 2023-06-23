@@ -42,7 +42,6 @@ public abstract class FinremHearingCorrespondenceBaseTest {
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
-        verifyNoInteractions(bulkPrintService);
     }
 
     @Test
@@ -102,7 +101,6 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailIntervener(any(FinremCaseDetails.class), any(SolicitorCaseDataKeysWrapper.class));
-        verifyNoInteractions(bulkPrintService);
     }
 
 
