@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
@@ -13,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+
 import static org.junit.Assume.assumeTrue;
 
 @Slf4j
