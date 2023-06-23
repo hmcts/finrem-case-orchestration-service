@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CustomRequestScopeAttr;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
@@ -45,6 +47,7 @@ public class ListForHearingTask implements Runnable {
             for (CaseReference caseReference : caseReferences) {
                 count++;
                 try {
+                    RequestContextHolder.setRequestAttributes(new CustomRequestScopeAttr());
                     if (count == bulkPrintBatchSize) {
                         log.info("Batch {} limit reached {}, pausing for {} minutes", batchCount, bulkPrintBatchSize, bulkPrintWaitTime);
                         TimeUnit.MINUTES.sleep(bulkPrintWaitTime);
@@ -55,18 +58,21 @@ public class ListForHearingTask implements Runnable {
                     log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
                     SearchResult searchResult =
                         ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, systemUserService.getSysUserToken());
+                    log.info("SearchResult count {}", searchResult.getTotal());
                     if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
                         CaseDetails caseDetails = searchResult.getCases().get(0);
-                        if (caseDetails != null) {
-                            log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
-                            hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, systemUserService.getSysUserToken());
-                            log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
-                        }
+                        log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
+                        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, systemUserService.getSysUserToken());
+                        log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
+
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
                     log.error("Error processing caseRef {} ", caseReference.getCaseReference());
+                } finally {
+                    RequestContextHolder.resetRequestAttributes();
                 }
+
             }
         }
     }

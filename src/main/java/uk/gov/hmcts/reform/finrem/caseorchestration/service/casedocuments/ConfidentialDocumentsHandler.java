@@ -67,6 +67,7 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
                 .documentFileName(uploadedCaseDocument.getCaseDocuments().getDocumentFilename())
                 .documentComment(uploadedCaseDocument.getHearingDetails())
                 .documentLink(uploadedCaseDocument.getCaseDocuments())
+                .caseDocumentParty(uploadedCaseDocument.getCaseDocumentParty())
                 .documentType(uploadedCaseDocument.getCaseDocumentType())
                 .confidentialDocumentUploadDateTime(uploadedCaseDocument.getCaseDocumentUploadDateTime())
                 .build()).build();

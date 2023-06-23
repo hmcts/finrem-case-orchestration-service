@@ -26,6 +26,9 @@ public class ConfidentialUploadedDocument {
     @JsonProperty("DocumentLink")
     private CaseDocument documentLink;
 
+    @JsonProperty("caseDocumentParty")
+    private String caseDocumentParty;
+
     @JsonProperty("DocumentDateAdded")
     private String documentDateAdded;
 

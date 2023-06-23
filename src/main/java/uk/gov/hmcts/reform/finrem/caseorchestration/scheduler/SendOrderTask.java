@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CustomRequestScopeAttr;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -57,6 +59,7 @@ public class SendOrderTask implements Runnable {
             for (CaseReference caseReference : caseReferences) {
                 count++;
                 try {
+                    RequestContextHolder.setRequestAttributes(new CustomRequestScopeAttr());
                     if (count == bulkPrintBatchSize) {
                         log.info("Batch {} limit reached {}, pausing for {} minutes", batchCount, bulkPrintBatchSize, bulkPrintWaitTime);
                         TimeUnit.MINUTES.sleep(bulkPrintWaitTime);
@@ -67,6 +70,7 @@ public class SendOrderTask implements Runnable {
                     log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
                     SearchResult searchResult =
                         ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, systemUserService.getSysUserToken());
+                    log.info("SearchResult count {}", searchResult.getTotal());
                     if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
                         CaseDetails caseDetails = searchResult.getCases().get(0);
                         printAndMailHearingDocuments(caseDetails, systemUserService.getSysUserToken());
@@ -74,6 +78,8 @@ public class SendOrderTask implements Runnable {
 
                 } catch (InterruptedException | RuntimeException e) {
                     log.error("Error processing caseRef {} and exception is {}", caseReference.getCaseReference(), e);
+                } finally {
+                    RequestContextHolder.resetRequestAttributes();
                 }
             }
         }
