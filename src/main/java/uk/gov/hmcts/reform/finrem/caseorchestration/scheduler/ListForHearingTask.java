@@ -2,14 +2,17 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
+import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CustomRequestScopeAttr;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
@@ -24,8 +27,7 @@ public class ListForHearingTask implements Runnable {
     private final HearingDocumentService hearingDocumentService;
     private final CaseReferenceCsvLoader csvLoader;
     private final CcdService ccdService;
-    private final SystemUpdateUserConfiguration systemUpdateUserConfiguration;
-    private final IdamAuthService idamAuthService;
+    private final SystemUserService systemUserService;
     @Value("${cron.batchsize:500}")
     private int bulkPrintBatchSize;
     @Value("${cron.wait-time-mins:10}")
@@ -40,13 +42,12 @@ public class ListForHearingTask implements Runnable {
         if (isListForHearingTaskEnabled) {
             log.info("Scheduled task ListForHearingTask started to run for selected cases");
             List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList("listForHearingCaseReferenceList.csv");
-            final String authToken = idamAuthService.getAccessToken(systemUpdateUserConfiguration.getUserName(),
-                systemUpdateUserConfiguration.getPassword());
             int count = 0;
             int batchCount = 1;
             for (CaseReference caseReference : caseReferences) {
                 count++;
                 try {
+                    RequestContextHolder.setRequestAttributes(new CustomRequestScopeAttr());
                     if (count == bulkPrintBatchSize) {
                         log.info("Batch {} limit reached {}, pausing for {} minutes", batchCount, bulkPrintBatchSize, bulkPrintWaitTime);
                         TimeUnit.MINUTES.sleep(bulkPrintWaitTime);
@@ -55,18 +56,23 @@ public class ListForHearingTask implements Runnable {
                     }
 
                     log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
-                    CaseDetails caseDetails =
-                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, authToken);
-                    if (caseDetails != null) {
+                    SearchResult searchResult =
+                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, systemUserService.getSysUserToken());
+                    log.info("SearchResult count {}", searchResult.getTotal());
+                    if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
+                        CaseDetails caseDetails = searchResult.getCases().get(0);
                         log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
-                        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authToken);
+                        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, systemUserService.getSysUserToken());
                         log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
 
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
                     log.error("Error processing caseRef {} ", caseReference.getCaseReference());
+                } finally {
+                    RequestContextHolder.resetRequestAttributes();
                 }
+
             }
         }
     }

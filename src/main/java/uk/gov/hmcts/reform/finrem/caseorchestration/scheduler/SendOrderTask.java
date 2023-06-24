@@ -2,18 +2,21 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
+import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CustomRequestScopeAttr;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
@@ -36,8 +39,7 @@ public class SendOrderTask implements Runnable {
     private final DocumentHelper documentHelper;
     private final CaseReferenceCsvLoader csvLoader;
     private final CcdService ccdService;
-    private final SystemUpdateUserConfiguration systemUpdateUserConfiguration;
-    private final IdamAuthService idamAuthService;
+    private final SystemUserService systemUserService;
     @Value("${cron.batchsize:500}")
     private int bulkPrintBatchSize;
     @Value("${cron.wait-time-mins:10}")
@@ -52,13 +54,12 @@ public class SendOrderTask implements Runnable {
         if (isSendOrderTaskEnabled) {
             log.info("Scheduled task SendOrderTask started to run for selected cases");
             List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList("sendOrderCaseReferenceList.csv");
-            final String authToken = idamAuthService.getAccessToken(systemUpdateUserConfiguration.getUserName(),
-                systemUpdateUserConfiguration.getPassword());
             int count = 0;
             int batchCount = 1;
             for (CaseReference caseReference : caseReferences) {
                 count++;
                 try {
+                    RequestContextHolder.setRequestAttributes(new CustomRequestScopeAttr());
                     if (count == bulkPrintBatchSize) {
                         log.info("Batch {} limit reached {}, pausing for {} minutes", batchCount, bulkPrintBatchSize, bulkPrintWaitTime);
                         TimeUnit.MINUTES.sleep(bulkPrintWaitTime);
@@ -67,15 +68,18 @@ public class SendOrderTask implements Runnable {
                     }
 
                     log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
-                    CaseDetails caseDetails =
-                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, authToken);
-                    if (caseDetails != null) {
-                        log.info("Found case details for case Id: {}", caseDetails.getId());
-                        printAndMailHearingDocuments(caseDetails, authToken);
+                    SearchResult searchResult =
+                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), CaseType.CONTESTED, systemUserService.getSysUserToken());
+                    log.info("SearchResult count {}", searchResult.getTotal());
+                    if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
+                        CaseDetails caseDetails = searchResult.getCases().get(0);
+                        printAndMailHearingDocuments(caseDetails, systemUserService.getSysUserToken());
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
                     log.error("Error processing caseRef {} and exception is {}", caseReference.getCaseReference(), e);
+                } finally {
+                    RequestContextHolder.resetRequestAttributes();
                 }
             }
         }

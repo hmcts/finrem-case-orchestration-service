@@ -40,7 +40,8 @@ def versions = [
         amClient             : '1.7.3',
         sendLetterClient     : '3.0.16',
         elasticSearch        : '7.17.9',
-        jacksonDatabind      : '2.13.2'
+        jacksonDatabind      : '2.13.2',
+        retry                : '1.3.1'
 ]
 
 project.ext {
@@ -348,6 +349,7 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
+    implementation group: 'org.springframework.retry', name: 'spring-retry', version: versions.retry
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
