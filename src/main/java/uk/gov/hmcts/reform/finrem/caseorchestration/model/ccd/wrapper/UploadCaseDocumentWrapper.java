@@ -42,7 +42,7 @@ public class UploadCaseDocumentWrapper {
     private List<UploadCaseDocumentCollection> appFormsHCollection;
     private List<UploadCaseDocumentCollection> appExpertEvidenceCollection;
     private List<UploadCaseDocumentCollection> appCorrespondenceDocsCollection;
-    private List<UploadCaseDocumentCollection> appOtherCollection;
+    private List<UploadCaseDocumentCollection> otherCollection;
     private List<UploadCaseDocumentCollection> respHearingBundlesCollection;
     private List<UploadCaseDocumentCollection> respFormEExhibitsCollection;
     private List<UploadCaseDocumentCollection> respChronologiesCollection;

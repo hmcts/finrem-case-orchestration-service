@@ -181,7 +181,7 @@ public class RespondentShareDocumentsService implements SharedService {
             roleList.forEach(role -> {
                 List<DynamicMultiSelectListElement> documentList = sourceDocumentList.getValue();
                 copySelectedFilesToTargetCollection(caseData, role.getCode(), documentList);
-                copyIntervenersDocuments(caseData, role.getCode(), documentList);
+                copyIntervenerSharedDocumentsInSharedCollection(caseData, role.getCode(), documentList);
             });
         }
     }

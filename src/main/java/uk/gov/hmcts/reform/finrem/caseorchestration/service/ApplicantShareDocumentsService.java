@@ -39,7 +39,7 @@ public class ApplicantShareDocumentsService implements SharedService {
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
         List<UploadCaseDocumentCollection> appOtherCollection
-            = caseData.getUploadCaseDocumentWrapper().getAppOtherCollection();
+            = caseData.getUploadCaseDocumentWrapper().getOtherCollection();
 
         if (ObjectUtils.isNotEmpty(appOtherCollection)) {
             appOtherCollection.forEach(doc -> {
@@ -171,7 +171,7 @@ public class ApplicantShareDocumentsService implements SharedService {
             roleList.forEach(role -> {
                 List<DynamicMultiSelectListElement> documentList = sourceDocumentList.getValue();
                 copySelectedFilesToTargetCollection(caseData, role.getCode(), documentList);
-                copyIntervenersDocuments(caseData, role.getCode(), documentList);
+                copyIntervenerSharedDocumentsInSharedCollection(caseData, role.getCode(), documentList);
             });
         }
     }
@@ -217,7 +217,7 @@ public class ApplicantShareDocumentsService implements SharedService {
 
     private void copySelectedOtherFilesToResp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> appOtherCollection = caseData.getUploadCaseDocumentWrapper().getAppOtherCollection();
+            List<UploadCaseDocumentCollection> appOtherCollection = caseData.getUploadCaseDocumentWrapper().getOtherCollection();
             appOtherCollection.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =

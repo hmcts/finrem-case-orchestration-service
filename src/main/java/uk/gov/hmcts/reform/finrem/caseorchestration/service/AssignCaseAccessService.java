@@ -267,6 +267,12 @@ public class AssignCaseAccessService {
 
     public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
         log.info("retrieve active user case role for caseId {}", caseId);
+        String loggedInUserCaseRole = getLoggedInUserCaseRole(caseId, userAuthorisation);
+        return loggedInUserCaseRole != null ? loggedInUserCaseRole : CASE_LEVEL_ROLE;
+    }
+
+    public String getLoggedInUserCaseRole(final String caseId, final String userAuthorisation) {
+        log.info("retrieve logged user case role for caseId {}", caseId);
         String idamUserId = idamService.getIdamUserId(userAuthorisation);
         CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
         if (rolesResource != null) {
@@ -280,7 +286,6 @@ public class AssignCaseAccessService {
                 return caseRole;
             }
         }
-        return CASE_LEVEL_ROLE;
+        return null;
     }
-
 }
