@@ -74,13 +74,13 @@ public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHa
                 if (caseRole.get().equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || caseRole.get().equals(CaseRole.INTVR_BARRISTER_1.getValue())) {
                     intervenerShareDocumentsService.shareSelectedDocumentWithOtherSelectedSolicitors(caseData);
                 }
-                if (caseRole.get().equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || caseRole.get().equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
+                if (caseRole.get().equals(CaseRole.INTVR_SOLICITOR_2.getValue()) || caseRole.get().equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
                     intervenerShareDocumentsService.shareSelectedDocumentWithOtherSelectedSolicitors(caseData);
                 }
-                if (caseRole.get().equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || caseRole.get().equals(CaseRole.INTVR_BARRISTER_3.getValue())) {
+                if (caseRole.get().equals(CaseRole.INTVR_SOLICITOR_3.getValue()) || caseRole.get().equals(CaseRole.INTVR_BARRISTER_3.getValue())) {
                     intervenerShareDocumentsService.shareSelectedDocumentWithOtherSelectedSolicitors(caseData);
                 }
-                if (caseRole.get().equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || caseRole.get().equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
+                if (caseRole.get().equals(CaseRole.INTVR_SOLICITOR_4.getValue()) || caseRole.get().equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
                     intervenerShareDocumentsService.shareSelectedDocumentWithOtherSelectedSolicitors(caseData);
                 }
             });
