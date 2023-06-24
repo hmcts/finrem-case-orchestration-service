@@ -106,6 +106,7 @@ public class IntervenerShareDocumentsService implements SharedService {
     }
 
     private List<UploadCaseDocumentCollection> getIntervenerCollection(FinremCaseData caseData, String role, String collectionType) {
+        log.info("role {}, collectionType {} INTVR_SOLICITOR_2 {}", role, collectionType, CaseRole.INTVR_SOLICITOR_2.getValue());
         if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_1.getValue())) {
             return getIntervenerOneList(caseData, role, collectionType);
         } else if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
@@ -159,15 +160,22 @@ public class IntervenerShareDocumentsService implements SharedService {
     }
 
     private List<UploadCaseDocumentCollection> getIntervenerTwoList(FinremCaseData caseData, String role, String collectionType) {
+        log.info("getIntervenerTwoList role {}, collectionType {}", role, collectionType);
         if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
             switch (collectionType) {
                 case OTHER -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv2Other();
                 }
                 case CHRONOLOGIES -> {
+                    List<UploadCaseDocumentCollection> intv2Chronologies
+                        = caseData.getUploadCaseDocumentWrapper().getIntv2Chronologies();
+                    log.info("intv2Chronologies {}", intv2Chronologies);
                     return caseData.getUploadCaseDocumentWrapper().getIntv2Chronologies();
                 }
                 case STATEMENTS_EXHIBITS -> {
+                    List<UploadCaseDocumentCollection> intv2StmtsExhibitsShared
+                        = caseData.getUploadCaseDocumentWrapper().getIntv2StmtsExhibitsShared();
+                    log.info("intv2StmtsExhibitsShared {}", intv2StmtsExhibitsShared);
                     return caseData.getUploadCaseDocumentWrapper().getIntv2StmtsExhibitsShared();
                 }
                 case HEARING_BUNDLES -> {
@@ -191,7 +199,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                 case CORRESPONDENCE -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv2CorrespDocs();
                 }
-                default -> log.info("Invalid choice made for intervener three collection");
+                default -> log.info("Invalid choice made for intervener two collection");
             }
 
         }
@@ -231,7 +239,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                 case CORRESPONDENCE -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv3CorrespDocs();
                 }
-                default -> log.info("Invalid choice made for intervener four collection");
+                default -> log.info("Invalid choice made for intervener three collection");
             }
 
         }
@@ -271,7 +279,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                 case CORRESPONDENCE -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv4CorrespDocs();
                 }
-                default -> log.info("Invalid choice made for intervener two collection");
+                default -> log.info("Invalid choice made for intervener four collection");
             }
 
         }
