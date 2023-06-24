@@ -87,7 +87,9 @@ public class IntervenerShareDocumentsService implements SharedService {
             log.info("setting collection {}", obj);
             List<UploadCaseDocumentCollection> collection = getIntervenerCollection(caseData, role, obj);
             log.info("collection {}", collection);
-            setIntervenerDocumentDynamicList(role, dynamicListElements, collection, obj);
+            if (collection != null) {
+                setIntervenerDocumentDynamicList(role, dynamicListElements, collection, obj);
+            }
         });
 
         return getSelectedDocumentList(dynamicListElements, caseData.getSourceDocumentList());
