@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RespondentShareDocumentsService;
 
-import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -54,45 +54,44 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
             callbackRequest.getEventType(), caseId);
 
         String loggedInUserCaseRole = accessService.getLoggedInUserCaseRole(String.valueOf(caseId), userAuthorisation);
-        String error = "";
-        if (loggedInUserCaseRole == null) {
-            error = "Logged in user do not have sufficient role to execute this event";
-        }
         FinremCaseData caseData = caseDetails.getData();
-        if (loggedInUserCaseRole != null) {
-            log.info("caseAssignedUserRoles {} caseId {}", loggedInUserCaseRole, caseId);
-
-            if (loggedInUserCaseRole.equals(CaseRole.APP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.APP_BARRISTER.getValue())) {
-                DynamicMultiSelectList sourceDocumentList = selectedDocumentsService.applicantSourceDocumentList(caseDetails);
-                caseData.setSourceDocumentList(sourceDocumentList);
-                DynamicMultiSelectList roleList = selectedDocumentsService.getApplicantToOtherSolicitorRoleList(caseDetails);
-                caseData.setSolicitorRoleList(roleList);
-            }
-            if (loggedInUserCaseRole.equals(CaseRole.RESP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.RESP_BARRISTER.getValue())) {
-                DynamicMultiSelectList sourceDocumentList = respondentShareDocumentsService.respondentSourceDocumentList(caseDetails);
-                caseData.setSourceDocumentList(sourceDocumentList);
-                DynamicMultiSelectList roleList = respondentShareDocumentsService.getRespondentToOtherSolicitorRoleList(caseDetails);
-                caseData.setSolicitorRoleList(roleList);
-            }
-            if (loggedInUserCaseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())
-                || loggedInUserCaseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())
-                || loggedInUserCaseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())
-                || loggedInUserCaseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())
-                || loggedInUserCaseRole.equals(CaseRole.INTVR_BARRISTER_1.getValue())
-                || loggedInUserCaseRole.equals(CaseRole.INTVR_BARRISTER_2.getValue())
-                || loggedInUserCaseRole.equals(CaseRole.INTVR_BARRISTER_3.getValue())
-                || loggedInUserCaseRole.equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
-
-                DynamicMultiSelectList sourceDocumentList = oneShareDocumentsService.intervenerSourceDocumentList(caseDetails, loggedInUserCaseRole);
-                log.info("sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
-                caseData.setSourceDocumentList(sourceDocumentList);
-                DynamicMultiSelectList roleList = oneShareDocumentsService.getOtherSolicitorRoleList(caseDetails, loggedInUserCaseRole);
-                log.info("roleList {} caseId {}", roleList, caseId);
-                caseData.setSolicitorRoleList(roleList);
-            }
+        if (loggedInUserCaseRole == null) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                .errors(List.of("Logged in user do not have sufficient role to execute this event")).build();
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(Collections.singletonList(error)).build();
+
+        log.info("caseAssignedUserRoles {} caseId {}", loggedInUserCaseRole, caseId);
+
+        if (loggedInUserCaseRole.equals(CaseRole.APP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.APP_BARRISTER.getValue())) {
+            DynamicMultiSelectList sourceDocumentList = selectedDocumentsService.applicantSourceDocumentList(caseDetails);
+            caseData.setSourceDocumentList(sourceDocumentList);
+            DynamicMultiSelectList roleList = selectedDocumentsService.getApplicantToOtherSolicitorRoleList(caseDetails);
+            caseData.setSolicitorRoleList(roleList);
+        }
+        if (loggedInUserCaseRole.equals(CaseRole.RESP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.RESP_BARRISTER.getValue())) {
+            DynamicMultiSelectList sourceDocumentList = respondentShareDocumentsService.respondentSourceDocumentList(caseDetails);
+            caseData.setSourceDocumentList(sourceDocumentList);
+            DynamicMultiSelectList roleList = respondentShareDocumentsService.getRespondentToOtherSolicitorRoleList(caseDetails);
+            caseData.setSolicitorRoleList(roleList);
+        }
+        if (loggedInUserCaseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())
+            || loggedInUserCaseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())
+            || loggedInUserCaseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())
+            || loggedInUserCaseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())
+            || loggedInUserCaseRole.equals(CaseRole.INTVR_BARRISTER_1.getValue())
+            || loggedInUserCaseRole.equals(CaseRole.INTVR_BARRISTER_2.getValue())
+            || loggedInUserCaseRole.equals(CaseRole.INTVR_BARRISTER_3.getValue())
+            || loggedInUserCaseRole.equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
+
+            DynamicMultiSelectList sourceDocumentList = oneShareDocumentsService.intervenerSourceDocumentList(caseDetails, loggedInUserCaseRole);
+            log.info("sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
+            caseData.setSourceDocumentList(sourceDocumentList);
+            DynamicMultiSelectList roleList = oneShareDocumentsService.getOtherSolicitorRoleList(caseDetails, loggedInUserCaseRole);
+            log.info("roleList {} caseId {}", roleList, caseId);
+            caseData.setSolicitorRoleList(roleList);
+        }
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
 
