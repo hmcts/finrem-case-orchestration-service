@@ -173,10 +173,10 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv2Chronologies();
                 }
                 case STATEMENTS_EXHIBITS -> {
-                    List<UploadCaseDocumentCollection> intv2StmtsExhibitsShared
-                        = caseData.getUploadCaseDocumentWrapper().getIntv2StmtsExhibitsShared();
-                    log.info("intv2StmtsExhibitsShared {}", intv2StmtsExhibitsShared);
-                    return caseData.getUploadCaseDocumentWrapper().getIntv2StmtsExhibitsShared();
+                    List<UploadCaseDocumentCollection> intv2StmtsExhibits
+                        = caseData.getUploadCaseDocumentWrapper().getIntv2StmtsExhibits();
+                    log.info("intv2StmtsExhibitsShared {}", intv2StmtsExhibits);
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2StmtsExhibits();
                 }
                 case HEARING_BUNDLES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv2HearingBundles();
