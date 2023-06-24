@@ -84,7 +84,9 @@ public class IntervenerShareDocumentsService implements SharedService {
             QUESTIONNAIRES_ANSWERS, SUMMARIES, FORM_H, EXPERT_EVIDENCE, CORRESPONDENCE);
 
         collectionType.forEach(obj -> {
+            log.info("setting collection {}", obj);
             List<UploadCaseDocumentCollection> collection = getIntervenerCollection(caseData, role, obj);
+            log.info("collection {}", collection);
             setIntervenerDocumentDynamicList(role, dynamicListElements, collection, obj);
         });
 

@@ -84,8 +84,10 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
                 || loggedInUserCaseRole.equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
 
                 DynamicMultiSelectList sourceDocumentList = oneShareDocumentsService.intervenerSourceDocumentList(caseDetails, loggedInUserCaseRole);
+                log.info("sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
                 caseData.setSourceDocumentList(sourceDocumentList);
                 DynamicMultiSelectList roleList = oneShareDocumentsService.getOtherSolicitorRoleList(caseDetails, loggedInUserCaseRole);
+                log.info("roleList {} caseId {}", roleList, caseId);
                 caseData.setSolicitorRoleList(roleList);
             }
         }
