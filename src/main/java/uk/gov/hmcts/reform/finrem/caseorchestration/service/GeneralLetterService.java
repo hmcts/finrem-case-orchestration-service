@@ -79,7 +79,8 @@ public class GeneralLetterService {
                 authorisationToken, caseDetails.getId().toString());
             caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterUploadedDocument(pdfDocument);
         }
-        addGeneralLetterToCaseData(caseDetails, document, generalLetterUploadedDocument);
+        addGeneralLetterToCaseData(caseDetails, document,
+            caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterUploadedDocument());
         printLatestGeneralLetter(caseDetails, authorisationToken);
     }
 
