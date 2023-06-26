@@ -223,6 +223,30 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
+    public void updateAndSortGeneralApplicationsForApplicant() {
+
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(accessService.getActiveUser(any(), any())).thenReturn("Applicant");
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
+        wrapper.setAppRespGeneralApplications(wrapperBefore.getGeneralApplications());
+        wrapper.setGeneralApplications(wrapperBefore.getGeneralApplications());
+        wrapper.getGeneralApplications().forEach(
+            x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicList(APPLICANT)));
+        wrapperBefore.getGeneralApplications().forEach(
+            x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicList(APPLICANT)));
+
+        FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
+            = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications());
+
+        assertEquals(2, generalApplicationCollectionDataList.size());
+        assertEquals("applicant", caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
+            .getValue().getAppRespGeneralApplicationReceivedFrom());
+    }
+
+    @Test
     public void givenUploadGenAppDocWordFormat_whenUpdateCaseDataSubmit_thenConvertGenAppDocLatestToPdf() {
 
         Map<String, String> documentMapInWordFormat = getCcdDocumentMap();
