@@ -61,8 +61,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Contes
 @RequiredArgsConstructor
 public class IntervenerShareDocumentsService implements SharedService {
 
-    private final ApplicantShareDocumentsService appService;
-    private final RespondentShareDocumentsService respService;
     public static final String SUMMARIES = "SUMMARIES";
     public static final String CHRONOLOGIES = "CHRONOLOGIES";
     public static final String CORRESPONDENCE = "CORRESPONDENCE";
@@ -460,29 +458,6 @@ public class IntervenerShareDocumentsService implements SharedService {
         return null;
     }
 
-    public DynamicMultiSelectList getOtherSolicitorRoleList(FinremCaseDetails caseDetails, String loggedInUserCaseRole) {
-        log.info("fetching all parties solicitor case role for caseId {}", caseDetails.getId());
-
-        FinremCaseData caseData = caseDetails.getData();
-        List<String> roleList = new ArrayList<>();
-        //applicant
-        if (ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy())
-            && ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy().getOrganisation())
-            && ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID())) {
-            roleList.add(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
-        }
-        //respondent
-        if (ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy())
-            && ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy().getOrganisation())
-            && ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID())) {
-            roleList.add(caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
-        }
-        List<DynamicMultiSelectListElement> dynamicMultiSelectListElements = intervenerCaseRoleList(caseData, roleList);
-        List<DynamicMultiSelectListElement> recipientUsers
-            = dynamicMultiSelectListElements.stream().filter(e -> !e.getCode().equals(loggedInUserCaseRole)).toList();
-
-        return getRoleList(recipientUsers, caseData.getSolicitorRoleList());
-    }
 
     public void shareSelectedDocumentWithOtherSelectedSolicitors(FinremCaseData caseData) {
         DynamicMultiSelectList sourceDocumentList = caseData.getSourceDocumentList();
@@ -492,19 +467,8 @@ public class IntervenerShareDocumentsService implements SharedService {
             List<DynamicMultiSelectListElement> roleList = solicitorRoleList.getValue();
             roleList.forEach(role -> {
                 List<DynamicMultiSelectListElement> documentList = sourceDocumentList.getValue();
-                copySelectedFilesToTargetCollection(caseData, role.getCode(), documentList);
-                copyIntervenerSharedDocumentsInSharedCollection(caseData, role.getCode(), documentList);
+                copySharedDocumentsInSharedCollection(caseData, role.getCode(), documentList);
             });
-        }
-    }
-
-
-    private void copySelectedFilesToTargetCollection(FinremCaseData caseData, String role, List<DynamicMultiSelectListElement> documentList) {
-        if (role.equals(CaseRole.APP_SOLICITOR.getValue()) || role.equals(CaseRole.APP_BARRISTER.getValue())) {
-            appService.copySelectedFilesToTargetCollection(caseData, role, documentList);
-        }
-        if (role.equals(CaseRole.RESP_SOLICITOR.getValue()) || role.equals(CaseRole.RESP_BARRISTER.getValue())) {
-            respService.copySelectedFilesToTargetCollection(caseData, role, documentList);
         }
     }
 }
