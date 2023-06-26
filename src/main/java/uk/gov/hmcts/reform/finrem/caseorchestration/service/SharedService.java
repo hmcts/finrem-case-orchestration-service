@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -109,7 +109,7 @@ public interface SharedService {
     }
 
     default DynamicMultiSelectList getOtherSolicitorRoleList(FinremCaseDetails caseDetails,
-                                                             List<CaseAssignedUserRole> caseAssignedUserRoleList,
+                                                             List<CaseAssignmentUserRole> caseAssignedUserRoleList,
                                                              String loggedInUserCaseRole) {
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();

@@ -7,7 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -275,13 +275,14 @@ class ApplicantShareDocumentsServiceTest {
             .build();
     }
 
-    private List<CaseAssignedUserRole>  getCaseRoleList() {
+    private List<CaseAssignmentUserRole>  getCaseRoleList() {
+
         List<String> roleList = List.of("[APPSOLICITOR]", "[APPBARRISTER]", "[RESPSOLICITOR]",
             "[RESPBARRISTER]", "[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]",
             "[INTVRBARRISTER1]", "[INTVRBARRISTER2]", "[INTVRBARRISTER3]", "[INTVRBARRISTER4]");
-        List<CaseAssignedUserRole> caseAssignedUserRoleList = new ArrayList<>();
+        List<CaseAssignmentUserRole> caseAssignedUserRoleList = new ArrayList<>();
         roleList.forEach(role -> {
-            caseAssignedUserRoleList.add(CaseAssignedUserRole.builder().userId(role).caseRole(role).caseDataId(String.valueOf(123L)).build());
+            caseAssignedUserRoleList.add(CaseAssignmentUserRole.builder().userId(role).caseRole(role).caseDataId(String.valueOf(123L)).build());
         });
         return caseAssignedUserRoleList;
     }

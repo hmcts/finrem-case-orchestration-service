@@ -174,18 +174,6 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldReturnFalseIfCaseHasNoCreatorRole() throws JsonProcessingException {
-        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
-
-        caseDataApi.stubFor(get(urlEqualTo("/case-users?case_ids=123"))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(mapper.writeValueAsString(generateResourceWhenAppSolOnCase()))));
-
-    }
-
-    @Test
     public void shouldRevokeCreatorRoleWhenCreatorWasAppSolicitor() throws JsonProcessingException {
         when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
 
@@ -220,7 +208,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withBody(mapper.writeValueAsString(generateResourceWhenCreatorWasNotSolicitor()))));
 
         CaseAssignmentUserRolesResponse response = assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
-        assertThat(response).isEqualTo(null);
+        assertThat(response).isNull();
     }
 
     @Test
@@ -235,7 +223,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withBody(mapper.writeValueAsString(generateResourceWithNoCreatorRole()))));
 
         CaseAssignmentUserRolesResponse response = assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
-        assertThat(response).isEqualTo(null);
+        assertThat(response).isNull();
     }
 
     @Test
@@ -346,7 +334,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withBody(mapper.writeValueAsString(generateResourceWhenCreatorWasSolicitor()))));
 
         List<CaseAssignmentUserRole> caseAssignmentUserRoles = assignCaseAccessService.searchUserRoles(TEST_CASE_ID).getCaseAssignmentUserRoles();
-        assertTrue(caseAssignmentUserRoles.size() == 2);
+        assertEquals(2, caseAssignmentUserRoles.size());
         assertTrue(caseAssignmentUserRoles.stream().anyMatch(role -> role.getCaseRole().equals(APP_SOLICITOR_POLICY)));
     }
 
@@ -417,4 +405,24 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
     }
 
+
+    @Test
+    public void retrieveAllCaseRoles() throws JsonProcessingException {
+
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
+
+        caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
+                SearchCaseAssignedUserRolesRequest.builder()
+                    .caseIds(List.of(TEST_CASE_ID))
+                    .build())))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(mapper.writeValueAsString(generateResourceWhenCreatorWasSolicitor()))));
+
+        List<CaseAssignmentUserRole> caseAssignmentUserRoles = assignCaseAccessService.getAllCaseRole(TEST_CASE_ID);
+        assertEquals(2, caseAssignmentUserRoles.size());
+        assertTrue(caseAssignmentUserRoles.stream().anyMatch(role -> role.getCaseRole().equals(APP_SOLICITOR_POLICY)));
+        assertTrue(caseAssignmentUserRoles.stream().anyMatch(role -> role.getCaseRole().equals(CREATOR_ROLE)));
+    }
 }
