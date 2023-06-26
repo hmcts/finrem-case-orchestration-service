@@ -12,8 +12,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FDR_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV_FOUR_FDR_DOCS_COLLECTION;
@@ -65,10 +63,14 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDo
         String logMessage = "Logged in user role {}";
         fdrFiltered.stream().map(obj -> obj.getUploadedCaseDocument().getCaseDocumentParty()).filter(Objects::nonNull).forEach(role -> {
             switch (role) {
-                case INTERVENER_ONE -> setIntervenerFdrDocuments(fdrFiltered, caseData, INTERVENER_ONE, INTV_ONE_FDR_DOCS_COLLECTION, logMessage);
-                case INTERVENER_TWO -> setIntervenerFdrDocuments(fdrFiltered, caseData, INTERVENER_TWO, INTV_TWO_FDR_DOCS_COLLECTION, logMessage);
-                case INTERVENER_THREE -> setIntervenerFdrDocuments(fdrFiltered, caseData, INTERVENER_THREE, INTV_THREE_FDR_DOCS_COLLECTION, logMessage);
-                case INTERVENER_FOUR -> setIntervenerFdrDocuments(fdrFiltered, caseData, INTERVENER_FOUR, INTV_FOUR_FDR_DOCS_COLLECTION, logMessage);
+                case INTERVENER_ONE -> setIntervenerFdrDocuments(fdrFiltered, caseData,
+                    INTERVENER_ONE, INTV_ONE_FDR_DOCS_COLLECTION, logMessage);
+                case INTERVENER_TWO -> setIntervenerFdrDocuments(fdrFiltered, caseData,
+                    INTERVENER_TWO, INTV_TWO_FDR_DOCS_COLLECTION, logMessage);
+                case INTERVENER_THREE -> setIntervenerFdrDocuments(fdrFiltered, caseData,
+                    INTERVENER_THREE, INTV_THREE_FDR_DOCS_COLLECTION, logMessage);
+                case INTERVENER_FOUR -> setIntervenerFdrDocuments(fdrFiltered, caseData,
+                    INTERVENER_FOUR, INTV_FOUR_FDR_DOCS_COLLECTION, logMessage);
                 default -> log.info(logMessage, role);
             }
         });
