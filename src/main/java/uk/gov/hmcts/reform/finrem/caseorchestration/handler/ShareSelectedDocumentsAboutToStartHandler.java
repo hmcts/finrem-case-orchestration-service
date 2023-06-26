@@ -25,20 +25,20 @@ import java.util.List;
 @Slf4j
 @Service
 public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHandler {
-    private final ApplicantShareDocumentsService selectedDocumentsService;
+    private final ApplicantShareDocumentsService applicantDocumentsService;
     private final RespondentShareDocumentsService respondentShareDocumentsService;
     private final IntervenerShareDocumentsService intervenerShareDocumentsService;
     private final CaseAssignedRoleService caseAssignedRoleService;
     private final AssignCaseAccessService accessService;
 
     public ShareSelectedDocumentsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     ApplicantShareDocumentsService selectedDocumentsService,
+                                                     ApplicantShareDocumentsService applicantDocumentsService,
                                                      RespondentShareDocumentsService respondentShareDocumentsService,
                                                      IntervenerShareDocumentsService intervenerShareDocumentsService,
                                                      CaseAssignedRoleService caseAssignedRoleService,
                                                      AssignCaseAccessService accessService) {
         super(finremCaseDetailsMapper);
-        this.selectedDocumentsService = selectedDocumentsService;
+        this.applicantDocumentsService = applicantDocumentsService;
         this.respondentShareDocumentsService = respondentShareDocumentsService;
         this.intervenerShareDocumentsService = intervenerShareDocumentsService;
         this.caseAssignedRoleService = caseAssignedRoleService;
@@ -75,9 +75,9 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         log.info("caseAssignedUserRoles {} caseId {}", loggedInUserCaseRole, caseId);
 
         if (loggedInUserCaseRole.equals(CaseRole.APP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.APP_BARRISTER.getValue())) {
-            DynamicMultiSelectList sourceDocumentList = selectedDocumentsService.applicantSourceDocumentList(caseDetails);
+            DynamicMultiSelectList sourceDocumentList = applicantDocumentsService.applicantSourceDocumentList(caseDetails);
             caseData.setSourceDocumentList(sourceDocumentList);
-            DynamicMultiSelectList roleList = selectedDocumentsService.getOtherSolicitorRoleList(caseDetails,
+            DynamicMultiSelectList roleList = applicantDocumentsService.getOtherSolicitorRoleList(caseDetails,
                 allCaseRole, loggedInUserCaseRole);
             caseData.setSolicitorRoleList(roleList);
         }
@@ -88,7 +88,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
                 allCaseRole, loggedInUserCaseRole);
             caseData.setSolicitorRoleList(roleList);
         }
-        if (selectedDocumentsService.getIntervenerRoles(loggedInUserCaseRole)) {
+        if (applicantDocumentsService.getIntervenerRoles(loggedInUserCaseRole)) {
             DynamicMultiSelectList sourceDocumentList
                 = intervenerShareDocumentsService.intervenerSourceDocumentList(caseDetails, loggedInUserCaseRole);
             log.info("sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
