@@ -82,7 +82,7 @@ public class RespondentShareDocumentsService implements SharedService {
 
 
         List<UploadCaseDocumentCollection> formEExhibitsCollection
-            = caseData.getUploadCaseDocumentWrapper().getSetFormEExhibitsCollection();
+            = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection();
         if (ObjectUtils.isNotEmpty(formEExhibitsCollection)) {
             formEExhibitsCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
