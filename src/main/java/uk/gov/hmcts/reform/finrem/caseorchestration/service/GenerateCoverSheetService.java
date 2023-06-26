@@ -94,7 +94,7 @@ public class GenerateCoverSheetService {
     public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails,
                                                      final String authorisationToken,
                                                      DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         return generateCoverSheet(finremCaseDetails, authorisationToken, recipient);
@@ -104,7 +104,7 @@ public class GenerateCoverSheetService {
     public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
                                                      final String authorisationToken,
                                                      DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
 
         return generateCoverSheet(caseDetails, authorisationToken, recipient);
