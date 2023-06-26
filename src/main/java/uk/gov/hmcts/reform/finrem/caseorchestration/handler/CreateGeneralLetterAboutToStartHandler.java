@@ -48,6 +48,7 @@ public class CreateGeneralLetterAboutToStartHandler extends FinremCallbackHandle
             caseData.getGeneralLetterWrapper().setGeneralLetterCreatedBy(idamService.getIdamFullName(userAuthorisation));
             caseData.getGeneralLetterWrapper().setGeneralLetterBody(null);
             caseData.getGeneralLetterWrapper().setGeneralLetterPreview(null);
+            caseData.getGeneralLetterWrapper().setGeneralLetterUploadedDocument(null);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();

@@ -73,6 +73,7 @@ public class CreateGeneralLetterAboutToStartHandlerTest {
         assertEquals("UserName", response.getData().getGeneralLetterWrapper().getGeneralLetterCreatedBy());
         assertNull(response.getData().getGeneralLetterWrapper().getGeneralLetterBody());
         assertNull(response.getData().getGeneralLetterWrapper().getGeneralLetterPreview());
+        assertNull(response.getData().getGeneralLetterWrapper().getGeneralLetterUploadedDocument());
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
