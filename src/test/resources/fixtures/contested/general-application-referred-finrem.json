@@ -96,7 +96,6 @@
               "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
               "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1c7a2d0e-c14a-488e-988f-0075ec3a0059/binary"
             },
-            "generalApplicationReceivedFrom": "applicant",
             "generalApplicationTimeEstimate": "24 Hours",
             "generalApplicationHearingRequired": "Yes",
             "generalApplicationStatus": "Referred To Judge",
@@ -134,7 +133,6 @@
               "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/725dcd3e-528d-4675-88f3-64c793b8ded5/binary"
             },
             "generalApplicationCreatedBy": "Claire Mumford",
-            "generalApplicationReceivedFrom": "respondent",
             "generalApplicationTimeEstimate": null,
             "generalApplicationStatus": "Referred To Judge",
             "generalApplicationHearingRequired": "No",
@@ -200,7 +198,6 @@
       "otherReasonForComplexityText": null,
       "uploadAdditionalDocument": [],
       "applicantSolicitorFirm": "MSN Firm",
-      "generalApplicationReceivedFrom": "applicant",
       "applicantLName": "Tok",
       "rSolicitorEmail": "vivcontestedupdatesol@mailinator.com",
       "respondentAddress": {},

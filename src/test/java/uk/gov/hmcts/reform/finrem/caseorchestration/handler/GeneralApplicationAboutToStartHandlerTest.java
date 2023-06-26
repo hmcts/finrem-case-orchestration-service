@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -38,8 +40,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
@@ -97,6 +103,7 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
     @Test
     public void givenCase_whenExistingGeneApp_thenSetcreatedBy() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(assignCaseAccessService.getActiveUser(callbackRequest.getCaseDetails().getId().toString(), AUTH_TOKEN)).thenReturn("Case");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
@@ -110,6 +117,7 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getGeneralApplicationWrapper().setGeneralApplicationOutcome(GeneralApplicationOutcome.APPROVED);
         data.getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
+        when(assignCaseAccessService.getActiveUser(callbackRequest.getCaseDetails().getId().toString(), AUTH_TOKEN)).thenReturn("Case");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
@@ -118,7 +126,8 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
     }
 
     private void assertData(FinremCaseData caseData, GeneralApplicationItems generalApplicationItems) {
-        assertEquals("applicant", generalApplicationItems.getGeneralApplicationReceivedFrom());
+        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationReceivedFrom().getValue().getCode());
+        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationReceivedFrom().getValue().getLabel());
         assertEquals("Claire Mumford", generalApplicationItems.getGeneralApplicationCreatedBy());
         assertEquals("No", generalApplicationItems.getGeneralApplicationHearingRequired());
         String directionGiven = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired(), null);
@@ -154,9 +163,29 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
             generalApplicationDirectionOrderDocument.getDocumentBinaryUrl());
     }
 
+    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+        return DynamicRadioListElement.builder()
+            .code(code)
+            .label(label)
+            .build();
+    }
+
+    public DynamicRadioList buildDynamicIntervenerList() {
+
+        List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
+            getDynamicListElement(RESPONDENT, RESPONDENT),
+            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+        );
+        return DynamicRadioList.builder()
+            .value(dynamicListElements.get(0))
+            .listItems(dynamicListElements)
+            .build();
+    }
+
     protected FinremCallbackRequest buildCallbackRequest() {
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom("intervener").generalApplicationCreatedBy("Claire Mumford")
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom(
+                buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
                     LocalDate.of(2022, 8, 2)).build();
@@ -170,7 +199,7 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
         GeneralApplicationItems generalApplicationItemsAdded =
             GeneralApplicationItems.builder().generalApplicationDocument(caseDocument).generalApplicationDraftOrder(caseDocument)
-                .generalApplicationDirectionsDocument(caseDocument).generalApplicationReceivedFrom("applicant")
+                .generalApplicationDirectionsDocument(caseDocument).generalApplicationReceivedFrom(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationStatus(String.valueOf(DIRECTION_APPROVED)).generalApplicationHearingRequired("No")
                 .generalApplicationCreatedDate(LocalDate.now()).build();

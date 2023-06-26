@@ -163,10 +163,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
         GeneralApplicationWrapper wrapper = finremCaseDetails.getData().getGeneralApplicationWrapper();
-        if (items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER1)
-            || items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER2)
-            || items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER3)
-            || items.getGeneralApplicationReceivedFrom().equalsIgnoreCase(INTERVENER4)) {
+        if (items.getGeneralApplicationReceivedFrom().getValue().getCode().equalsIgnoreCase(INTERVENER1)
+            || items.getGeneralApplicationReceivedFrom().getValue().getCode().equalsIgnoreCase(INTERVENER2)
+            || items.getGeneralApplicationReceivedFrom().getValue().getCode().equalsIgnoreCase(INTERVENER3)
+            || items.getGeneralApplicationReceivedFrom().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
             gaService.updateIntervenerDirectionsDocumentCollection(wrapper, caseDocument);
         }
         items.setGeneralApplicationDirectionsDocument(caseDocument);

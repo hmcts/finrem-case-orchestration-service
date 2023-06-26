@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -33,7 +35,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateGeneralApplicationStatusAboutToSubmitHandlerTest {
@@ -43,7 +48,7 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandlerTest {
     private GenericDocumentService documentService;
     private ObjectMapper objectMapper;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-    
+
     private GeneralApplicationHelper helper;
     @Mock
     private GeneralApplicationService service;
@@ -116,6 +121,8 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandlerTest {
                 .caseDetailsBefore(buildCaseDetailsWithPath(GA_UNSORTED_JSON)).build();
 
         FinremCaseDetails caseDetailsCopy = deepCopy(callbackRequest.getCaseDetails(), FinremCaseDetails.class);
+        caseDetailsCopy.getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(x -> x.getValue()
+            .setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
         List<GeneralApplicationCollectionData> unsortedList =
             helper.getGeneralApplicationList(caseDetailsCopy.getData(), GENERAL_APPLICATION_COLLECTION);
 
@@ -163,11 +170,29 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandlerTest {
             .build();
     }
 
+    public DynamicRadioList buildDynamicIntervenerList() {
+
+        List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
+            getDynamicListElement(RESPONDENT, RESPONDENT),
+            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+        );
+        return DynamicRadioList.builder()
+            .value(dynamicListElements.get(0))
+            .listItems(dynamicListElements)
+            .build();
+    }
+
+    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+        return DynamicRadioListElement.builder()
+            .code(code)
+            .label(label)
+            .build();
+    }
+
     private GeneralApplicationItems getApplicationItems(FinremCaseData caseData) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
-        builder.generalApplicationReceivedFrom(Objects.toString(
-            caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom(), null));
+        builder.generalApplicationReceivedFrom(buildDynamicIntervenerList());
         builder.generalApplicationCreatedBy(Objects.toString(
             caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy(), null));
         builder.generalApplicationHearingRequired(Objects.toString(

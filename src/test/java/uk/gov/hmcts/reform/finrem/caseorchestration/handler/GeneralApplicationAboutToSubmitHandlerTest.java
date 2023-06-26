@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -35,7 +37,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationAboutToSubmitHandlerTest {
@@ -46,7 +51,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     private ObjectMapper objectMapper;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     private GeneralApplicationHelper helper;
-    
+
     @Mock
     private GeneralApplicationService service;
 
@@ -103,7 +108,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
-        List<GeneralApplicationCollectionData> generalApplicationList = 
+        List<GeneralApplicationCollectionData> generalApplicationList =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         assertEquals(1, generalApplicationList.size());
         assertExistingGeneralApplication(caseData);
@@ -153,8 +158,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     private GeneralApplicationItems getApplicationItems(FinremCaseData caseData) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
-        builder.generalApplicationReceivedFrom(Objects.toString(
-            caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom(), null));
+        builder.generalApplicationReceivedFrom(buildDynamicIntervenerList());
         builder.generalApplicationCreatedBy(Objects.toString(
             caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy(), null));
         builder.generalApplicationHearingRequired(Objects.toString(
@@ -173,9 +177,29 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         return builder.build();
     }
 
+    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+        return DynamicRadioListElement.builder()
+            .code(code)
+            .label(label)
+            .build();
+    }
+
+    public DynamicRadioList buildDynamicIntervenerList() {
+
+        List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
+            getDynamicListElement(RESPONDENT, RESPONDENT),
+            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+        );
+        return DynamicRadioList.builder()
+            .value(dynamicListElements.get(0))
+            .listItems(dynamicListElements)
+            .build();
+    }
+
     protected FinremCallbackRequest buildCallbackRequest() {
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom("Applicant").generalApplicationCreatedBy("Claire Mumford")
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+                .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
                     LocalDate.of(2022, 8, 2)).build();
@@ -185,7 +209,8 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         generalApplicationsBefore.setId(UUID.randomUUID());
         generalApplications.setId(UUID.randomUUID());
         GeneralApplicationItems generalApplicationItemsAdded =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom("Intervener").generalApplicationCreatedBy("Claire Mumford")
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+                .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(LocalDate.now()).build();
         generalApplicationsBefore.setValue(generalApplicationItemsAdded);

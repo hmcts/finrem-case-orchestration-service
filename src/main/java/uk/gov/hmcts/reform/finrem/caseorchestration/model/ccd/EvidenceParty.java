@@ -12,10 +12,6 @@ import java.util.Arrays;
 public enum EvidenceParty {
     APPLICANT("applicant"),
     RESPONDENT("respondent"),
-    INTERVENER1("intervener1"),
-    INTERVENER2("intervener2"),
-    INTERVENER3("intervener3"),
-    INTERVENER4("intervener4"),
     CASE("case");
 
     private final String value;

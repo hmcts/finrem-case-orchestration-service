@@ -11,7 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -40,10 +41,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESP_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2_GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3_GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationHelperTest {
@@ -96,7 +99,7 @@ public class GeneralApplicationHelperTest {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationReceivedFrom(EvidenceParty.APPLICANT);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReceivedFrom(APPLICANT);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(APPLICANT);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationHearingRequired(YesOrNo.YES);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationTimeEstimate("2 weeks");
@@ -108,7 +111,8 @@ public class GeneralApplicationHelperTest {
         GeneralApplicationItems items = data.getGeneralApplicationItems();
 
         assertEquals(APPLICANT, items.getGeneralApplicationCreatedBy());
-        assertEquals("APPLICANT", items.getGeneralApplicationReceivedFrom());
+        assertEquals(APPLICANT, items.getGeneralApplicationReceivedFrom().getValue().getCode());
+        assertEquals(APPLICANT, items.getGeneralApplicationReceivedFrom().getValue().getLabel());
         assertEquals("YES", items.getGeneralApplicationHearingRequired());
         assertEquals("2 weeks", items.getGeneralApplicationTimeEstimate());
         assertEquals("None", items.getGeneralApplicationSpecialMeasures());
@@ -169,13 +173,7 @@ public class GeneralApplicationHelperTest {
         List<GeneralApplicationItems> resultingList = new ArrayList<>();
         helper.getGeneralApplicationList(caseData, INTERVENER1_GENERAL_APPLICATION_COLLECTION).forEach(
             x -> resultingList.add(x.getGeneralApplicationItems()));
-        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom(), "Applicant");
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
-        assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
-        assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
-        assertEquals(resultingList.get(0).getGeneralApplicationSpecialMeasures(), "Special measure");
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
-            LocalDate.of(2022, 8, 2));
+        assertData(resultingList);
     }
 
     @Test
@@ -189,13 +187,7 @@ public class GeneralApplicationHelperTest {
         List<GeneralApplicationItems> resultingList = new ArrayList<>();
         helper.getGeneralApplicationList(caseData, INTERVENER2_GENERAL_APPLICATION_COLLECTION).forEach(
             x -> resultingList.add(x.getGeneralApplicationItems()));
-        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom(), "Applicant");
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
-        assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
-        assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
-        assertEquals(resultingList.get(0).getGeneralApplicationSpecialMeasures(), "Special measure");
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
-            LocalDate.of(2022, 8, 2));
+        assertData(resultingList);
     }
 
     @Test
@@ -209,13 +201,7 @@ public class GeneralApplicationHelperTest {
         List<GeneralApplicationItems> resultingList = new ArrayList<>();
         helper.getGeneralApplicationList(caseData, INTERVENER3_GENERAL_APPLICATION_COLLECTION).forEach(
             x -> resultingList.add(x.getGeneralApplicationItems()));
-        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom(), "Applicant");
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
-        assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
-        assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
-        assertEquals(resultingList.get(0).getGeneralApplicationSpecialMeasures(), "Special measure");
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
-            LocalDate.of(2022, 8, 2));
+        assertData(resultingList);
     }
 
     @Test
@@ -229,13 +215,7 @@ public class GeneralApplicationHelperTest {
         List<GeneralApplicationItems> resultingList = new ArrayList<>();
         helper.getGeneralApplicationList(caseData, INTERVENER4_GENERAL_APPLICATION_COLLECTION).forEach(
             x -> resultingList.add(x.getGeneralApplicationItems()));
-        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom(), "Applicant");
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
-        assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
-        assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
-        assertEquals(resultingList.get(0).getGeneralApplicationSpecialMeasures(), "Special measure");
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
-            LocalDate.of(2022, 8, 2));
+        assertData(resultingList);
     }
 
     @Test
@@ -249,7 +229,12 @@ public class GeneralApplicationHelperTest {
         List<GeneralApplicationItems> resultingList = new ArrayList<>();
         helper.getGeneralApplicationList(caseData, APP_RESP_GENERAL_APPLICATION_COLLECTION).forEach(
             x -> resultingList.add(x.getGeneralApplicationItems()));
-        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom(), "Applicant");
+        assertData(resultingList);
+    }
+
+    private void assertData(List<GeneralApplicationItems> resultingList) {
+        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom().getValue().getCode(), APPLICANT);
+        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom().getValue().getLabel(), APPLICANT);
         assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
         assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
         assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
@@ -268,9 +253,29 @@ public class GeneralApplicationHelperTest {
             .build();
     }
 
+    public DynamicRadioList buildDynamicIntervenerList() {
+
+        List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
+            getDynamicListElement(RESPONDENT, RESPONDENT),
+            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+        );
+        return DynamicRadioList.builder()
+            .value(dynamicListElements.get(0))
+            .listItems(dynamicListElements)
+            .build();
+    }
+
+    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+        return DynamicRadioListElement.builder()
+            .code(code)
+            .label(label)
+            .build();
+    }
+
     protected FinremCallbackRequest callbackRequest() {
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom("Applicant").generalApplicationCreatedBy("Claire Mumford")
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom(
+                buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
                     LocalDate.of(2022, 8, 2)).build();
@@ -280,7 +285,8 @@ public class GeneralApplicationHelperTest {
         generalApplicationsBefore.setId(UUID.randomUUID());
         generalApplications.setId(UUID.randomUUID());
         GeneralApplicationItems generalApplicationItemsAdded =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom("Intervener").generalApplicationCreatedBy("Claire Mumford")
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom(
+                buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(LocalDate.now()).build();
         generalApplicationsBefore.setValue(generalApplicationItemsAdded);

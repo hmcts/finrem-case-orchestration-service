@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
@@ -65,7 +67,8 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
 
         List<GeneralApplicationsCollection> generalApplicationsBefore;
         List<GeneralApplicationsCollection> generalApplications;
-        log.info(loggedInUserCaseRole); //rmv
+
+        DynamicRadioListElement listElement = DynamicRadioListElement.builder().build();
         switch (loggedInUserCaseRole) {
             case APPLICANT, RESPONDENT -> {
                 generalApplications = wrapper.getAppRespGeneralApplications();
@@ -76,18 +79,54 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
             case INTERVENER1 -> {
                 generalApplications = wrapper.getIntervener1GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener1GeneralApplications();
+                listElement.setCode(INTERVENER1);
+                listElement.setLabel(INTERVENER1);
+                DynamicRadioList radioList = DynamicRadioList.builder()
+                    .value(listElement)
+                    .listItems(List.of(listElement))
+                    .build();
+                if (generalApplications != null && !generalApplications.isEmpty()) {
+                    generalApplications.forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(radioList));
+                }
             }
             case INTERVENER2 -> {
                 generalApplications = wrapper.getIntervener2GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener2GeneralApplications();
+                listElement.setCode(INTERVENER2);
+                listElement.setLabel(INTERVENER2);
+                DynamicRadioList radioList = DynamicRadioList.builder()
+                    .value(listElement)
+                    .listItems(List.of(listElement))
+                    .build();
+                if (generalApplications != null && !generalApplications.isEmpty()) {
+                    generalApplications.forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(radioList));
+                }
             }
             case INTERVENER3 -> {
                 generalApplications = wrapper.getIntervener3GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener3GeneralApplications();
+                listElement.setCode(INTERVENER3);
+                listElement.setLabel(INTERVENER3);
+                DynamicRadioList radioList = DynamicRadioList.builder()
+                    .value(listElement)
+                    .listItems(List.of(listElement))
+                    .build();
+                if (generalApplications != null && !generalApplications.isEmpty()) {
+                    generalApplications.forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(radioList));
+                }
             }
             case INTERVENER4 -> {
                 generalApplications = wrapper.getIntervener4GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener4GeneralApplications();
+                listElement.setCode(INTERVENER4);
+                listElement.setLabel(INTERVENER4);
+                DynamicRadioList radioList = DynamicRadioList.builder()
+                    .value(listElement)
+                    .listItems(List.of(listElement))
+                    .build();
+                if (generalApplications != null && !generalApplications.isEmpty()) {
+                    generalApplications.forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(radioList));
+                }
             }
             default -> {
                 generalApplications = wrapper.getGeneralApplications();

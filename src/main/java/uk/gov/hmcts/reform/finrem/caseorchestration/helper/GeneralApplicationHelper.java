@@ -5,15 +5,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
@@ -32,12 +40,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicat
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.OTHER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.REFERRED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESP_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Component
 @RequiredArgsConstructor
@@ -160,8 +175,19 @@ public class GeneralApplicationHelper {
     public GeneralApplicationItems getApplicationItems(FinremCaseData caseData, String userAuthorisation, String caseId) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
-        builder.generalApplicationReceivedFrom(Objects.toString(caseData.getGeneralApplicationWrapper()
-            .getGeneralApplicationReceivedFrom(), null));
+        if (caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom() != null
+            && !caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom().isEmpty()) {
+            List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
+            buildDynamicIntervenerList(dynamicListElements, caseData);
+            String existingValue = caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom();
+            DynamicRadioListElement listElement = DynamicRadioListElement.builder()
+                .code(existingValue).label(existingValue).build();
+            DynamicRadioList existingRadioList = DynamicRadioList.builder().value(listElement)
+                .listItems(dynamicListElements).build();
+            builder.generalApplicationReceivedFrom(existingRadioList);
+        } else {
+            builder.generalApplicationReceivedFrom(null);
+        }
         builder.generalApplicationCreatedBy(Objects.toString(caseData.getGeneralApplicationWrapper()
             .getGeneralApplicationCreatedBy(), null));
         builder.generalApplicationHearingRequired(Objects.toString(caseData.getGeneralApplicationWrapper()
@@ -261,5 +287,50 @@ public class GeneralApplicationHelper {
 
     public CaseDocument getPdfDocument(CaseDocument document, String userAuthorisation, String caseId) {
         return service.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseId);
+    }
+
+    public DynamicRadioListElement getDynamicListElements(String code, String label) {
+        return DynamicRadioListElement.builder()
+            .code(code)
+            .label(label)
+            .build();
+    }
+
+    public DynamicRadioList getDynamicRadioList(List<DynamicRadioListElement> dynamicRadioListElement) {
+        return DynamicRadioList.builder()
+            .value(dynamicRadioListElement.get(0))
+            .listItems(dynamicRadioListElement)
+            .build();
+    }
+
+    public boolean getIntervenerPopulated(IntervenerWrapper wrapper) {
+        return (ObjectUtils.isNotEmpty(wrapper.getIntervenerOrganisation())
+            && ObjectUtils.isNotEmpty(wrapper.getIntervenerOrganisation().getOrganisation())
+            && ObjectUtils.isNotEmpty(wrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID()))
+            || ObjectUtils.isNotEmpty(wrapper.getIntervenerName());
+    }
+
+    public void buildDynamicIntervenerList(List<DynamicRadioListElement> dynamicListElements,
+                                            FinremCaseData caseData) {
+        dynamicListElements.addAll(List.of(getDynamicListElements(APPLICANT, APPLICANT),
+            getDynamicListElements(RESPONDENT, RESPONDENT),
+            getDynamicListElements(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+        ));
+        IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapper();
+        if (getIntervenerPopulated(oneWrapper)) {
+            dynamicListElements.add(getDynamicListElements(INTERVENER1, INTERVENER1));
+        }
+        IntervenerTwoWrapper twoWrapper = caseData.getIntervenerTwoWrapper();
+        if (getIntervenerPopulated(twoWrapper)) {
+            dynamicListElements.add(getDynamicListElements(INTERVENER2, INTERVENER2));
+        }
+        IntervenerThreeWrapper threeWrapper = caseData.getIntervenerThreeWrapper();
+        if (getIntervenerPopulated(threeWrapper)) {
+            dynamicListElements.add(getDynamicListElements(INTERVENER3, INTERVENER3));
+        }
+        IntervenerFourWrapper fourWrapper = caseData.getIntervenerFourWrapper();
+        if (getIntervenerPopulated(fourWrapper)) {
+            dynamicListElements.add(getDynamicListElements(INTERVENER4, INTERVENER4));
+        }
     }
 }

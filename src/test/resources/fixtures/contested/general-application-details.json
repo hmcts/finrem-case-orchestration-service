@@ -95,7 +95,6 @@
               "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
               "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1c7a2d0e-c14a-488e-988f-0075ec3a0059/binary"
             },
-            "generalApplicationReceivedFrom": "applicant",
             "generalApplicationTimeEstimate": "24 Hours",
             "generalApplicationHearingRequired": "Yes",
             "generalApplicationStatus": "Created",
@@ -133,7 +132,6 @@
               "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/725dcd3e-528d-4675-88f3-64c793b8ded5/binary"
             },
             "generalApplicationCreatedBy": "Claire Mumford",
-            "generalApplicationReceivedFrom": "respondent",
             "generalApplicationTimeEstimate": null,
             "generalApplicationStatus": "Created",
             "generalApplicationHearingRequired": "No",

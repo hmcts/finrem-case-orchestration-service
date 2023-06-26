@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocumentCollection;
@@ -31,7 +30,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GeneralApplicationWrapper {
     private YesOrNo generalApplicationDirectionsHearingRequired;
-    private EvidenceParty generalApplicationReceivedFrom;
+    private String generalApplicationReceivedFrom;
     private ApplicantAndRespondentEvidenceParty appRespGeneralApplicationReceivedFrom;
     private String generalApplicationDirectionsHearingTime;
     private String generalApplicationDirectionsHearingTimeEstimate;
