@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_ONE;
@@ -43,7 +43,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.TRIAL_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_OTHER_COLLECTION;
 
 @ExtendWith(MockitoExtension.class)
 class IntervenerShareDocumentsServiceTest {
@@ -59,7 +62,7 @@ class IntervenerShareDocumentsServiceTest {
 
 
     @Test
-    void applicantSourceDocumentListWhenDocNotPresent() {
+    void intervenerSourceDocumentListWhenDocNotPresent() {
 
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails details = request.getCaseDetails();
@@ -70,7 +73,7 @@ class IntervenerShareDocumentsServiceTest {
     }
 
     @Test
-    void applicantSourceDocumentListWhenDocPresent() {
+    void intervenerOneSourceDocumentListWhenDocPresent() {
 
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails details = request.getCaseDetails();
@@ -95,7 +98,108 @@ class IntervenerShareDocumentsServiceTest {
 
         DynamicMultiSelectList list = intervenerShareDocumentsService.intervenerSourceDocumentList(details, "[INTVRSOLICITOR1]");
         assertEquals("document size for sharing", 10, list.getListItems().size());
-        Assertions.assertNull(list.getValue());
+        assertNull(list.getValue());
+        list = intervenerShareDocumentsService.intervenerSourceDocumentList(details, "[INTVRBARRISTER1]");
+        assertEquals("document size for sharing", 10, list.getListItems().size());
+        assertNull(list.getValue());
+    }
+
+
+    @Test
+    void intervenerTwoSourceDocumentListWhenDocPresent() {
+
+        FinremCallbackRequest request = buildCallbackRequest();
+        FinremCaseDetails details = request.getCaseDetails();
+        FinremCaseData data = details.getData();
+
+        data.getUploadCaseDocumentWrapper().setIntv2Other(getTestDocument(OTHER));
+        data.getUploadCaseDocumentWrapper().setIntv2Chronologies(getTestDocument(CHRONOLOGY));
+        data.getUploadCaseDocumentWrapper().setIntv2StmtsExhibits(getTestDocument(STATEMENT_AFFIDAVIT));
+        data.getUploadCaseDocumentWrapper().setIntv2HearingBundles(getTestDocument(TRIAL_BUNDLE));
+        data.getUploadCaseDocumentWrapper().setIntv2FormEsExhibits(getTestDocument(APPLICANT_FORM_E));
+        data.getUploadCaseDocumentWrapper().setIntv2Qa(getTestDocument(QUESTIONNAIRE));
+        data.getUploadCaseDocumentWrapper().setIntv2Summaries(getTestDocument(CASE_SUMMARY));
+        data.getUploadCaseDocumentWrapper().setIntv2FormHs(getTestDocument(FORM_H));
+        data.getUploadCaseDocumentWrapper().setIntv2ExpertEvidence(getTestDocument(EXPERT_EVIDENCE));
+        data.getUploadCaseDocumentWrapper().setIntv2CorrespDocs(getTestDocument(CARE_PLAN));
+
+        DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
+        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getIntv2Other();
+        CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
+        sourceDocumentList.setListItems(singletonList(getSelectedDoc(coll, doc, INTERVENER_TWO_OTHER_COLLECTION)));
+        data.setSourceDocumentList(sourceDocumentList);
+
+        DynamicMultiSelectList list = intervenerShareDocumentsService.intervenerSourceDocumentList(details, "[INTVRSOLICITOR2]");
+        assertEquals("document size for sharing", 10, list.getListItems().size());
+        assertNull(list.getValue());
+        list = intervenerShareDocumentsService.intervenerSourceDocumentList(details, "[INTVRBARRISTER2]");
+        assertEquals("document size for sharing", 10, list.getListItems().size());
+        assertNull(list.getValue());
+    }
+
+    @Test
+    void intervenerThreeSourceDocumentListWhenDocPresent() {
+
+        FinremCallbackRequest request = buildCallbackRequest();
+        FinremCaseDetails details = request.getCaseDetails();
+        FinremCaseData data = details.getData();
+
+        data.getUploadCaseDocumentWrapper().setIntv3Other(getTestDocument(OTHER));
+        data.getUploadCaseDocumentWrapper().setIntv3Chronologies(getTestDocument(CHRONOLOGY));
+        data.getUploadCaseDocumentWrapper().setIntv3StmtsExhibits(getTestDocument(STATEMENT_AFFIDAVIT));
+        data.getUploadCaseDocumentWrapper().setIntv3HearingBundles(getTestDocument(TRIAL_BUNDLE));
+        data.getUploadCaseDocumentWrapper().setIntv3FormEsExhibits(getTestDocument(APPLICANT_FORM_E));
+        data.getUploadCaseDocumentWrapper().setIntv3Qa(getTestDocument(QUESTIONNAIRE));
+        data.getUploadCaseDocumentWrapper().setIntv3Summaries(getTestDocument(CASE_SUMMARY));
+        data.getUploadCaseDocumentWrapper().setIntv3FormHs(getTestDocument(FORM_H));
+        data.getUploadCaseDocumentWrapper().setIntv3ExpertEvidence(getTestDocument(EXPERT_EVIDENCE));
+        data.getUploadCaseDocumentWrapper().setIntv3CorrespDocs(getTestDocument(CARE_PLAN));
+
+        DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
+        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getIntv3Other();
+        CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
+        sourceDocumentList.setListItems(singletonList(getSelectedDoc(coll, doc, INTERVENER_THREE_OTHER_COLLECTION)));
+        data.setSourceDocumentList(sourceDocumentList);
+
+        DynamicMultiSelectList list = intervenerShareDocumentsService.intervenerSourceDocumentList(details, "[INTVRSOLICITOR3]");
+        assertEquals("document size for sharing", 10, list.getListItems().size());
+        assertNull(list.getValue());
+        list = intervenerShareDocumentsService.intervenerSourceDocumentList(details, "[INTVRBARRISTER3]");
+        assertEquals("document size for sharing", 10, list.getListItems().size());
+        assertNull(list.getValue());
+    }
+
+
+    @Test
+    void intervenerFourSourceDocumentListWhenDocPresent() {
+
+        FinremCallbackRequest request = buildCallbackRequest();
+        FinremCaseDetails details = request.getCaseDetails();
+        FinremCaseData data = details.getData();
+
+        data.getUploadCaseDocumentWrapper().setIntv4Other(getTestDocument(OTHER));
+        data.getUploadCaseDocumentWrapper().setIntv4Chronologies(getTestDocument(CHRONOLOGY));
+        data.getUploadCaseDocumentWrapper().setIntv4StmtsExhibits(getTestDocument(STATEMENT_AFFIDAVIT));
+        data.getUploadCaseDocumentWrapper().setIntv4HearingBundles(getTestDocument(TRIAL_BUNDLE));
+        data.getUploadCaseDocumentWrapper().setIntv4FormEsExhibits(getTestDocument(APPLICANT_FORM_E));
+        data.getUploadCaseDocumentWrapper().setIntv4Qa(getTestDocument(QUESTIONNAIRE));
+        data.getUploadCaseDocumentWrapper().setIntv4Summaries(getTestDocument(CASE_SUMMARY));
+        data.getUploadCaseDocumentWrapper().setIntv4FormHs(getTestDocument(FORM_H));
+        data.getUploadCaseDocumentWrapper().setIntv4ExpertEvidence(getTestDocument(EXPERT_EVIDENCE));
+        data.getUploadCaseDocumentWrapper().setIntv4CorrespDocs(getTestDocument(CARE_PLAN));
+
+        DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
+        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getIntv4Other();
+        CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
+        sourceDocumentList.setListItems(singletonList(getSelectedDoc(coll, doc, INTERVENER_FOUR_OTHER_COLLECTION)));
+        data.setSourceDocumentList(sourceDocumentList);
+
+        DynamicMultiSelectList list = intervenerShareDocumentsService.intervenerSourceDocumentList(details, "[INTVRSOLICITOR4]");
+        assertEquals("document size for sharing", 10, list.getListItems().size());
+        assertNull(list.getValue());
+        list = intervenerShareDocumentsService.intervenerSourceDocumentList(details, "[INTVRBARRISTER4]");
+        assertEquals("document size for sharing", 10, list.getListItems().size());
+        assertNull(list.getValue());
     }
 
     @Test
