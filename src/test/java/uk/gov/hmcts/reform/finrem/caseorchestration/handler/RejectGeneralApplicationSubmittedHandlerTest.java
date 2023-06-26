@@ -259,16 +259,6 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
         CaseDocument caseDocument = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
-        GeneralApplicationItems generalApplicationItemsAdded =
-            GeneralApplicationItems.builder().generalApplicationDocument(caseDocument).generalApplicationDraftOrder(caseDocument)
-                .generalApplicationDirectionsDocument(caseDocument).generalApplicationReceivedFrom(buildDynamicIntervenerListForApplicant())
-                .generalApplicationCreatedBy("Claire Mumford")
-                .generalApplicationStatus(String.valueOf(DIRECTION_APPROVED)).generalApplicationHearingRequired("No")
-                .generalApplicationCreatedDate(LocalDate.now()).build();
-        GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder().id(
-            UUID.fromString("1fa411d2-3da3-468d-ad8d-3bfb2514203d")).value(generalApplicationItems).build();
-        GeneralApplicationsCollection generalApplicationsBefore = GeneralApplicationsCollection.builder()
-            .id(UUID.fromString("1fa411d2-3da3-468d-ad8d-3bfb2514203d")).build();
         GeneralApplicationsCollection intervener1GeneralApplications = GeneralApplicationsCollection.builder()
             .id(UUID.randomUUID()).value(generalApplicationItems).build();
         GeneralApplicationsCollection intervener2GeneralApplications = GeneralApplicationsCollection.builder()
@@ -285,7 +275,17 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
             buildDynamicListForIntervener(INTERVENER3));
         intervener4GeneralApplications.getValue().setGeneralApplicationReceivedFrom(
             buildDynamicListForIntervener(INTERVENER4));
+        GeneralApplicationsCollection generalApplicationsBefore = GeneralApplicationsCollection.builder()
+            .id(UUID.fromString("1fa411d2-3da3-468d-ad8d-3bfb2514203d")).build();
+        GeneralApplicationItems generalApplicationItemsAdded =
+            GeneralApplicationItems.builder().generalApplicationDocument(caseDocument).generalApplicationDraftOrder(caseDocument)
+                .generalApplicationDirectionsDocument(caseDocument).generalApplicationReceivedFrom(buildDynamicIntervenerListForApplicant())
+                .generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationStatus(String.valueOf(DIRECTION_APPROVED)).generalApplicationHearingRequired("No")
+                .generalApplicationCreatedDate(LocalDate.now()).build();
         generalApplicationsBefore.setValue(generalApplicationItemsAdded);
+        GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder().id(
+            UUID.fromString("1fa411d2-3da3-468d-ad8d-3bfb2514203d")).value(generalApplicationItems).build();
         FinremCaseData caseData = FinremCaseData.builder()
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
                 .generalApplicationDirectionsHearingRequired(YesOrNo.YES)
