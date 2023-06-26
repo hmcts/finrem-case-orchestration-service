@@ -129,7 +129,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv1Chronologies();
                 }
                 case STATEMENTS_EXHIBITS -> {
-                    return caseData.getUploadCaseDocumentWrapper().getIntv1StmtsExhibitsShared();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1StmtsExhibits();
                 }
                 case HEARING_BUNDLES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv1HearingBundles();
@@ -175,7 +175,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                 case STATEMENTS_EXHIBITS -> {
                     List<UploadCaseDocumentCollection> intv2StmtsExhibits
                         = caseData.getUploadCaseDocumentWrapper().getIntv2StmtsExhibits();
-                    log.info("intv2StmtsExhibitsShared {}", intv2StmtsExhibits);
+                    log.info("intv2StmtsExhibits {}", intv2StmtsExhibits);
                     return caseData.getUploadCaseDocumentWrapper().getIntv2StmtsExhibits();
                 }
                 case HEARING_BUNDLES -> {
@@ -216,7 +216,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv3Chronologies();
                 }
                 case STATEMENTS_EXHIBITS -> {
-                    return caseData.getUploadCaseDocumentWrapper().getIntv3StmtsExhibitsShared();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3StmtsExhibits();
                 }
                 case HEARING_BUNDLES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv3HearingBundles();
@@ -256,7 +256,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv4Chronologies();
                 }
                 case STATEMENTS_EXHIBITS -> {
-                    return caseData.getUploadCaseDocumentWrapper().getIntv4StmtsExhibitsShared();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4StmtsExhibits();
                 }
                 case HEARING_BUNDLES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv4HearingBundles();

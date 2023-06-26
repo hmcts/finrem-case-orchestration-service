@@ -1,0 +1,195 @@
+package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import static java.util.Collections.singletonList;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.APPLICANT_FORM_E;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CARE_PLAN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CASE_SUMMARY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CHRONOLOGY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.EXPERT_EVIDENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.FORM_H;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.OTHER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.QUESTIONNAIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.STATEMENT_AFFIDAVIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.TRIAL_BUNDLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_OTHER_COLLECTION;
+
+@ExtendWith(MockitoExtension.class)
+class IntervenerShareDocumentsServiceTest {
+
+    private IntervenerShareDocumentsService intervenerShareDocumentsService;
+    private final ThreadLocal<UUID> uuid = new ThreadLocal<>();
+
+    @BeforeEach
+    void beforeEach() {
+        intervenerShareDocumentsService = new IntervenerShareDocumentsService();
+        uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
+    }
+
+
+    @Test
+    void applicantSourceDocumentListWhenDocNotPresent() {
+
+        FinremCallbackRequest request = buildCallbackRequest();
+        FinremCaseDetails details = request.getCaseDetails();
+
+        DynamicMultiSelectList list = intervenerShareDocumentsService.intervenerSourceDocumentList(details, "[INTVRSOLICITOR1]");
+        assertEquals("document size for sharing", 0, list.getListItems().size());
+        assertNull("no document selected from list", list.getValue());
+    }
+
+    @Test
+    void applicantSourceDocumentListWhenDocPresent() {
+
+        FinremCallbackRequest request = buildCallbackRequest();
+        FinremCaseDetails details = request.getCaseDetails();
+        FinremCaseData data = details.getData();
+
+        data.getUploadCaseDocumentWrapper().setIntv1Other(getTestDocument(OTHER));
+        data.getUploadCaseDocumentWrapper().setIntv1Chronologies(getTestDocument(CHRONOLOGY));
+        data.getUploadCaseDocumentWrapper().setIntv1StmtsExhibits(getTestDocument(STATEMENT_AFFIDAVIT));
+        data.getUploadCaseDocumentWrapper().setIntv1HearingBundles(getTestDocument(TRIAL_BUNDLE));
+        data.getUploadCaseDocumentWrapper().setIntv1FormEsExhibits(getTestDocument(APPLICANT_FORM_E));
+        data.getUploadCaseDocumentWrapper().setIntv1Qa(getTestDocument(QUESTIONNAIRE));
+        data.getUploadCaseDocumentWrapper().setIntv1Summaries(getTestDocument(CASE_SUMMARY));
+        data.getUploadCaseDocumentWrapper().setIntv1FormHs(getTestDocument(FORM_H));
+        data.getUploadCaseDocumentWrapper().setIntv1ExpertEvidence(getTestDocument(EXPERT_EVIDENCE));
+        data.getUploadCaseDocumentWrapper().setIntv1CorrespDocs(getTestDocument(CARE_PLAN));
+
+        DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
+        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getIntv1Other();
+        CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
+        sourceDocumentList.setListItems(singletonList(getSelectedDoc(coll, doc, INTERVENER_ONE_OTHER_COLLECTION)));
+        data.setSourceDocumentList(sourceDocumentList);
+
+        DynamicMultiSelectList list = intervenerShareDocumentsService.intervenerSourceDocumentList(details, "[INTVRSOLICITOR1]");
+        assertEquals("document size for sharing", 10, list.getListItems().size());
+        Assertions.assertNull(list.getValue());
+    }
+
+    @Test
+    void getIntervenerOneToOtherSolicitorRoleList() {
+        FinremCallbackRequest request = buildCallbackRequest();
+        DynamicMultiSelectList list = intervenerShareDocumentsService.getOtherSolicitorRoleList(request.getCaseDetails(),
+            getCaseRoleList(), "[INTVRSOLICITOR1]");
+        assertEquals("role size for sharing", 11, list.getListItems().size());
+    }
+
+    @Test
+    void getIntervenerToOtherSolicitorRoleListButNoCaseRoleAvailable() {
+        FinremCallbackRequest request = buildCallbackRequest();
+        DynamicMultiSelectList list = intervenerShareDocumentsService.getOtherSolicitorRoleList(request.getCaseDetails(),
+            new ArrayList<>(), "[INTVRSOLICITOR1]");
+        assertEquals("role size for sharing", 0, list.getListItems().size());
+        assertNull("no document selected from list", list.getValue());
+    }
+
+
+    @Test
+    void shareOneDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
+        FinremCallbackRequest request = buildCallbackRequest();
+        FinremCaseDetails details = request.getCaseDetails();
+        FinremCaseData data = details.getData();
+
+
+        data.getUploadCaseDocumentWrapper().setIntv1Other(getTestDocument(OTHER));
+        DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
+        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getIntv1Other();
+        CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
+        sourceDocumentList.setValue(singletonList(getSelectedDoc(coll, doc, INTERVENER_ONE_OTHER_COLLECTION)));
+        data.setSourceDocumentList(sourceDocumentList);
+
+        DynamicMultiSelectList roleList = new DynamicMultiSelectList();
+        roleList.setValue(singletonList(getSelectedParty(RESP_SOLICITOR)));
+        data.setSolicitorRoleList(roleList);
+
+        intervenerShareDocumentsService.shareSelectedDocumentWithOtherSelectedSolicitors(data);
+
+        UploadCaseDocumentWrapper wrapper = data.getUploadCaseDocumentWrapper();
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespOtherCollectionShared().size());
+    }
+
+
+    private static DynamicMultiSelectListElement getSelectedDoc(List<UploadCaseDocumentCollection> coll,
+                                                                CaseDocument doc,
+                                                                ContestedUploadCaseFilesCollectionType type) {
+        return DynamicMultiSelectListElement.builder()
+            .label(type.getCcdKey() + " -> " + doc.getDocumentFilename())
+            .code(coll.get(0).getId() + "#" + type.getCcdKey())
+            .build();
+    }
+
+    private DynamicMultiSelectListElement getSelectedParty(CaseRole role) {
+        return DynamicMultiSelectListElement.builder()
+            .label(role.getValue()).code(role.getValue()).build();
+    }
+
+    private List<UploadCaseDocumentCollection> getTestDocument(CaseDocumentType documentType) {
+        UploadCaseDocument document = UploadCaseDocument.builder()
+            .caseDocuments(TestSetUpUtils.caseDocument())
+            .caseDocumentType(documentType)
+            .caseDocumentParty(INTERVENER_ONE)
+            .caseDocumentOther("No")
+            .caseDocumentConfidential(YesOrNo.NO)
+            .hearingDetails("UK 1400 hours")
+            .caseDocumentFdr(YesOrNo.NO)
+            .caseDocumentUploadDateTime(LocalDateTime.now()).build();
+        return List.of(UploadCaseDocumentCollection.builder().id(uuid.get()).value(document).build());
+    }
+
+    private FinremCallbackRequest buildCallbackRequest() {
+        FinremCaseData caseData = new FinremCaseData();
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.SHARE_SELECTED_DOCUMENTS)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(caseData).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(caseData).build())
+            .build();
+    }
+
+    private List<CaseAssignmentUserRole>  getCaseRoleList() {
+
+        List<String> roleList = List.of("[APPSOLICITOR]", "[APPBARRISTER]", "[RESPSOLICITOR]",
+            "[RESPBARRISTER]", "[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]",
+            "[INTVRBARRISTER1]", "[INTVRBARRISTER2]", "[INTVRBARRISTER3]", "[INTVRBARRISTER4]");
+        List<CaseAssignmentUserRole> caseAssignedUserRoleList = new ArrayList<>();
+        roleList.forEach(role -> {
+            caseAssignedUserRoleList.add(CaseAssignmentUserRole.builder().userId(role).caseRole(role).caseDataId(String.valueOf(123L)).build());
+        });
+        return caseAssignedUserRoleList;
+    }
+}
