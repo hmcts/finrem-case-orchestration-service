@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedD
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,7 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDo
                     && uploadedCaseDocument.getCaseDocumentFdr() != null
                     && uploadedCaseDocument.getCaseDocumentFdr().equalsIgnoreCase("Yes");
             })
-            .collect(Collectors.toList());
+            .toList();
 
         List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, FDR_DOCS_COLLECTION);
         addAndSortCollection(fdrFiltered, fdrDocsCollection);
@@ -62,46 +63,27 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDo
     private void copyFdrCollIntoIntervenerDocIfActiveCaseRoleIsIntervener(List<ContestedUploadedDocumentData> fdrFiltered,
                                                                           Map<String, Object> caseData) {
         String logMessage = "Logged in user role {}";
-        Optional<String> activeUserCaseRole =
-            fdrFiltered.stream().map(doc -> doc.getUploadedCaseDocument().getCaseDocumentParty()).findFirst();
-        String role = "";
-        if (activeUserCaseRole.isPresent()) {
-            role = activeUserCaseRole.get();
+        fdrFiltered.stream().map(obj -> obj.getUploadedCaseDocument().getCaseDocumentParty()).filter(Objects::nonNull).forEach(role -> {
             switch (role) {
-                case INTERVENER_ONE -> {
-                    log.info(logMessage, INTERVENER_ONE);
-                    List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, INTV_ONE_FDR_DOCS_COLLECTION);
-                    addAndSortCollection(fdrFiltered, fdrDocsCollection);
-                    if (!fdrDocsCollection.isEmpty()) {
-                        caseData.put(INTV_ONE_FDR_DOCS_COLLECTION, fdrDocsCollection);
-                    }
-                }
-                case INTERVENER_TWO -> {
-                    log.info(logMessage, INTERVENER_TWO);
-                    List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, INTV_TWO_FDR_DOCS_COLLECTION);
-                    addAndSortCollection(fdrFiltered, fdrDocsCollection);
-                    if (!fdrDocsCollection.isEmpty()) {
-                        caseData.put(INTV_TWO_FDR_DOCS_COLLECTION, fdrDocsCollection);
-                    }
-                }
-                case INTERVENER_THREE -> {
-                    log.info(logMessage, INTERVENER_THREE);
-                    List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, INTV_THREE_FDR_DOCS_COLLECTION);
-                    addAndSortCollection(fdrFiltered, fdrDocsCollection);
-                    if (!fdrDocsCollection.isEmpty()) {
-                        caseData.put(INTV_THREE_FDR_DOCS_COLLECTION, fdrDocsCollection);
-                    }
-                }
-                case INTERVENER_FOUR -> {
-                    log.info(logMessage, INTERVENER_FOUR);
-                    List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, INTV_FOUR_FDR_DOCS_COLLECTION);
-                    addAndSortCollection(fdrFiltered, fdrDocsCollection);
-                    if (!fdrDocsCollection.isEmpty()) {
-                        caseData.put(INTV_FOUR_FDR_DOCS_COLLECTION, fdrDocsCollection);
-                    }
-                }
+                case INTERVENER_ONE -> setIntervenerFdrDocuments(fdrFiltered, caseData, INTERVENER_ONE, INTV_ONE_FDR_DOCS_COLLECTION, logMessage);
+                case INTERVENER_TWO -> setIntervenerFdrDocuments(fdrFiltered, caseData, INTERVENER_TWO, INTV_TWO_FDR_DOCS_COLLECTION, logMessage);
+                case INTERVENER_THREE -> setIntervenerFdrDocuments(fdrFiltered, caseData, INTERVENER_THREE, INTV_THREE_FDR_DOCS_COLLECTION, logMessage);
+                case INTERVENER_FOUR -> setIntervenerFdrDocuments(fdrFiltered, caseData, INTERVENER_FOUR, INTV_FOUR_FDR_DOCS_COLLECTION, logMessage);
                 default -> log.info(logMessage, role);
             }
+        });
+    }
+
+    private void setIntervenerFdrDocuments(List<ContestedUploadedDocumentData> fdrFiltered,
+                                           Map<String, Object> caseData,
+                                           String role,
+                                           String collectionName,
+                                           String logMessage) {
+        log.info(logMessage, role);
+        List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, collectionName);
+        addAndSortCollection(fdrFiltered, fdrDocsCollection);
+        if (!fdrDocsCollection.isEmpty()) {
+            caseData.put(collectionName, fdrDocsCollection);
         }
     }
 
