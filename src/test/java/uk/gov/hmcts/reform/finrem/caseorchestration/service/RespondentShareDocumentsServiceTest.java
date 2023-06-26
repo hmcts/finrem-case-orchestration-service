@@ -95,7 +95,7 @@ class RespondentShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setRespChronologiesCollection(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setRespStatementsExhibitsCollection(getTestDocument(STATEMENT_AFFIDAVIT));
         data.getUploadCaseDocumentWrapper().setRespHearingBundlesCollection(getTestDocument(TRIAL_BUNDLE));
-        data.getUploadCaseDocumentWrapper().setSetFormEExhibitsCollection(getTestDocument(APPLICANT_FORM_E));
+        data.getUploadCaseDocumentWrapper().setRespFormEExhibitsCollection(getTestDocument(APPLICANT_FORM_E));
         data.getUploadCaseDocumentWrapper().setRespQaCollection(getTestDocument(QUESTIONNAIRE));
         data.getUploadCaseDocumentWrapper().setRespCaseSummariesCollection(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setRespFormsHCollection(getTestDocument(FORM_H));
@@ -174,7 +174,7 @@ class RespondentShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setRespChronologiesCollection(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setRespStatementsExhibitsCollection(getTestDocument(STATEMENT_AFFIDAVIT));
         data.getUploadCaseDocumentWrapper().setRespHearingBundlesCollection(getTestDocument(TRIAL_BUNDLE));
-        data.getUploadCaseDocumentWrapper().setSetFormEExhibitsCollection(getTestDocument(APPLICANT_FORM_E));
+        data.getUploadCaseDocumentWrapper().setRespFormEExhibitsCollection(getTestDocument(APPLICANT_FORM_E));
         data.getUploadCaseDocumentWrapper().setRespQaCollection(getTestDocument(QUESTIONNAIRE));
         data.getUploadCaseDocumentWrapper().setRespCaseSummariesCollection(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setRespFormsHCollection(getTestDocument(FORM_H));
