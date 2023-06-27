@@ -130,7 +130,7 @@ tasks.withType(JavaExec).configureEach {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
     useJUnitPlatform()
 
     testLogging {
@@ -247,13 +247,13 @@ pact {
     }
 }
 
-task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+tasks.register('smoke', Test) {
     description = "Runs smoke Tests"
     testClassesDirs = sourceSets.testSmoke.output.classesDirs
     classpath = sourceSets.testSmoke.runtimeClasspath
 }
 
-task functional(type: Test) {
+tasks.register('functional', Test) {
     description = "Runs functional Tests"
     setTestClassesDirs(sourceSets.functional.output.classesDirs)
     setClasspath(sourceSets.functional.runtimeClasspath)
@@ -370,6 +370,7 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
     implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jacksonDatabind
 
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
@@ -443,15 +444,15 @@ dependencies {
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
 }
 
-tasks.withType(Jar) {
+tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Tar) {
+tasks.withType(Tar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Zip) {
+tasks.withType(Zip).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
