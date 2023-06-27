@@ -40,7 +40,7 @@ def versions = [
         amClient             : '1.7.3',
         sendLetterClient     : '3.0.16',
         elasticSearch        : '7.17.9',
-        jacksonDatabind      : '2.15.2',
+        jacksonDatabind      : '2.13.2',
         retry                : '1.3.1'
 ]
 
@@ -130,7 +130,7 @@ tasks.withType(JavaExec).configureEach {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
-tasks.withType(Test).configureEach {
+tasks.withType(Test) {
     useJUnitPlatform()
 
     testLogging {
@@ -247,19 +247,19 @@ pact {
     }
 }
 
-tasks.register('smoke', Test) {
+task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
     description = "Runs smoke Tests"
     testClassesDirs = sourceSets.testSmoke.output.classesDirs
     classpath = sourceSets.testSmoke.runtimeClasspath
 }
 
-tasks.register('functional', Test) {
+task functional(type: Test) {
     description = "Runs functional Tests"
     setTestClassesDirs(sourceSets.functional.output.classesDirs)
     setClasspath(sourceSets.functional.runtimeClasspath)
 }
 
-tasks.register('contractTest', Test) {
+task contractTest(type: Test) {
     group = 'Delivery pipeline'
     description = 'Runs the consumer Pact tests'
     setTestClassesDirs(sourceSets.contract.output.classesDirs)
@@ -267,7 +267,7 @@ tasks.register('contractTest', Test) {
     systemProperty 'pact.rootDir', "pacts"
 }
 
-tasks.register('runAndPublishConsumerPactTests', Test) {
+task runAndPublishConsumerPactTests(type: Test) {
     dependsOn(contractTest)
     logger.lifecycle("Runs pact Tests")
     testClassesDirs = sourceSets.contract.output.classesDirs
@@ -280,13 +280,13 @@ static def getCheckedOutGitCommitHash() {
     'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
-tasks.register('fortifyScan', JavaExec) {
+task fortifyScan(type: JavaExec) {
     mainClass.set("uk.gov.hmcts.fortifyclient.FortifyClientMainApp")
     classpath += sourceSets.test.runtimeClasspath
     jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
 
-tasks.register('buildCCDXlsx', Exec) {
+task buildCCDXlsx(type: Exec) {
     group 'ccd tasks'
     commandLine './bin/build-finrem-xlxs-definitions.sh'
 }
@@ -325,7 +325,7 @@ dependencyManagement {
             entry 'tomcat-embed-websocket'
         }
         //VE-2022-31692, CVE-2022-31690
-        dependencySet(group: 'org.springframework.security', version: '6.0.3') {
+        dependencySet(group: 'org.springframework.security', version: '5.7.5') {
             entry 'spring-security-crypto'
         }
         //CVE-2023-20861
@@ -443,15 +443,15 @@ dependencies {
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
 }
 
-tasks.withType(Jar).configureEach {
+tasks.withType(Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Tar).configureEach {
+tasks.withType(Tar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Zip).configureEach {
+tasks.withType(Zip) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
