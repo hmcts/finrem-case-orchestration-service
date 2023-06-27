@@ -280,7 +280,7 @@ public class AssignCaseAccessService {
                 return caseRole;
             }
         }
-        return CASE_LEVEL_ROLE;
+        return "case";
     }
 
 }
