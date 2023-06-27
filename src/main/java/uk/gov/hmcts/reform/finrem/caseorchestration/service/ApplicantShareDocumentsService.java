@@ -36,7 +36,7 @@ public class ApplicantShareDocumentsService implements SharedService {
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
         List<UploadCaseDocumentCollection> appOtherCollection
-            = caseData.getUploadCaseDocumentWrapper().getOtherCollection();
+            = caseData.getUploadCaseDocumentWrapper().getAppOtherCollection();
 
         if (ObjectUtils.isNotEmpty(appOtherCollection)) {
             appOtherCollection.forEach(doc -> {

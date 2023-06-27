@@ -192,7 +192,7 @@ public interface SharedService {
                                                                                             List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
         if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
-            docs = documentWrapper.getOtherCollection();
+            docs = documentWrapper.getAppOtherCollection();
         } else if (collName.equalsIgnoreCase(RESP_OTHER_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getRespOtherCollection();
         } else if (collName.equalsIgnoreCase(INTERVENER_ONE_OTHER_COLLECTION.getCcdKey())) {

@@ -91,7 +91,7 @@ class ApplicantShareDocumentsServiceTest {
         FinremCaseDetails details = request.getCaseDetails();
         FinremCaseData data = details.getData();
 
-        data.getUploadCaseDocumentWrapper().setOtherCollection(getTestDocument(OTHER));
+        data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setAppChronologiesCollection(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setAppStatementsExhibitsCollection(getTestDocument(STATEMENT_AFFIDAVIT));
         data.getUploadCaseDocumentWrapper().setAppHearingBundlesCollection(getTestDocument(TRIAL_BUNDLE));
@@ -103,7 +103,7 @@ class ApplicantShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setAppCorrespondenceDocsCollection(getTestDocument(CARE_PLAN));
 
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
-        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getOtherCollection();
+        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getAppOtherCollection();
         CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
         sourceDocumentList.setValue(singletonList(getSelectedDoc(coll, doc, APP_OTHER_COLLECTION)));
         data.setSourceDocumentList(sourceDocumentList);
@@ -136,9 +136,9 @@ class ApplicantShareDocumentsServiceTest {
         FinremCaseData data = details.getData();
 
 
-        data.getUploadCaseDocumentWrapper().setOtherCollection(getTestDocument(OTHER));
+        data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
-        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getOtherCollection();
+        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getAppOtherCollection();
         CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
         sourceDocumentList.setValue(singletonList(getSelectedDoc(coll, doc, APP_OTHER_COLLECTION)));
         data.setSourceDocumentList(sourceDocumentList);
@@ -162,7 +162,7 @@ class ApplicantShareDocumentsServiceTest {
         FinremCaseData data = details.getData();
 
 
-        data.getUploadCaseDocumentWrapper().setOtherCollection(getTestDocument(OTHER));
+        data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setAppChronologiesCollection(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setAppStatementsExhibitsCollection(getTestDocument(STATEMENT_AFFIDAVIT));
         data.getUploadCaseDocumentWrapper().setAppHearingBundlesCollection(getTestDocument(TRIAL_BUNDLE));
