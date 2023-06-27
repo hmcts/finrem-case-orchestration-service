@@ -228,20 +228,22 @@ public class GeneralApplicationServiceTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(accessService.getActiveUser(any(), any())).thenReturn("Applicant");
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        wrapper.setAppRespGeneralApplications(wrapper.getGeneralApplications());
+        wrapper.setGeneralApplications(List.of(wrapper.getGeneralApplications().get(0)));
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
-        wrapper.setAppRespGeneralApplications(wrapperBefore.getGeneralApplications());
-        wrapper.setGeneralApplications(wrapperBefore.getGeneralApplications());
-        wrapper.getGeneralApplications().forEach(
-            x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicList(APPLICANT)));
+
+        wrapper.getAppRespGeneralApplications().forEach(
+            x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(APPLICANT));
         wrapperBefore.getGeneralApplications().forEach(
             x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicList(APPLICANT)));
+        wrapperBefore.setAppRespGeneralApplications(wrapperBefore.getGeneralApplications());
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
 
         List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
             = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications());
 
-        assertEquals(2, generalApplicationCollectionDataList.size());
+        assertEquals(1, generalApplicationCollectionDataList.size());
         assertEquals("applicant", caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
             .getValue().getAppRespGeneralApplicationReceivedFrom());
     }
@@ -483,7 +485,7 @@ public class GeneralApplicationServiceTest {
         FinremCaseData caseData = FinremCaseData.builder()
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
                 .generalApplicationCreatedBy("Claire Mumford").generalApplicationPreState("applicationIssued")
-                .generalApplications(List.of(GeneralApplicationsCollection.builder().build()))
+                .generalApplications(generalApplicationsCollection)
                 .build()).build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
