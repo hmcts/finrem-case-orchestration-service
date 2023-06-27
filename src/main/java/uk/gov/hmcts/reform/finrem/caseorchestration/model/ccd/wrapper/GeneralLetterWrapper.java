@@ -26,5 +26,6 @@ public class GeneralLetterWrapper {
     private String generalLetterCreatedBy;
     private String generalLetterBody;
     private CaseDocument generalLetterPreview;
+    private CaseDocument generalLetterUploadedDocument;
     private List<GeneralLetterCollection> generalLetterCollection;
 }

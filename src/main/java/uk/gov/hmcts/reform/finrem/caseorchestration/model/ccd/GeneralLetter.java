@@ -15,4 +15,5 @@ import lombok.NoArgsConstructor;
 public class GeneralLetter {
     @JsonProperty("generatedLetter")
     private CaseDocument generatedLetter;
+    private CaseDocument generalLetterUploadedDocument;
 }
