@@ -118,10 +118,9 @@ public class AssignCaseAccessService {
             .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
             .collect(Collectors.toList());
 
-        CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
+        return CaseAssignmentUserRolesRequest.builder()
             .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
             .build();
-        return removeCaseAssignedUserRolesRequest;
     }
 
     public void grantCaseRoleToUser(Long caseId, String userId, String caseRole, String orgId) {
@@ -266,6 +265,10 @@ public class AssignCaseAccessService {
     public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
         log.info("retrieve active user case role for caseId {}", caseId);
         String idamUserId = idamService.getIdamUserId(userAuthorisation);
+        CaseAssignmentUserRolesResource rolesResource1 = getUserRoles(caseId);
+        log.info("idamUserId {} case roles {} for caseId {}",
+            idamUserId, rolesResource1 != null ? rolesResource1 : "empty", caseId);
+
         CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
         if (rolesResource != null) {
             List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
