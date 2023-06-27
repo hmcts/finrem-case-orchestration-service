@@ -259,7 +259,7 @@ tasks.register('functional', Test) {
     setClasspath(sourceSets.functional.runtimeClasspath)
 }
 
-task contractTest(type: Test) {
+tasks.register('contractTest', Test) {
     group = 'Delivery pipeline'
     description = 'Runs the consumer Pact tests'
     setTestClassesDirs(sourceSets.contract.output.classesDirs)
@@ -267,7 +267,7 @@ task contractTest(type: Test) {
     systemProperty 'pact.rootDir', "pacts"
 }
 
-task runAndPublishConsumerPactTests(type: Test) {
+tasks.register('runAndPublishConsumerPactTests', Test) {
     dependsOn(contractTest)
     logger.lifecycle("Runs pact Tests")
     testClassesDirs = sourceSets.contract.output.classesDirs
@@ -280,13 +280,13 @@ static def getCheckedOutGitCommitHash() {
     'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
-task fortifyScan(type: JavaExec) {
+tasks.register('fortifyScan', JavaExec) {
     mainClass.set("uk.gov.hmcts.fortifyclient.FortifyClientMainApp")
     classpath += sourceSets.test.runtimeClasspath
     jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
 
-task buildCCDXlsx(type: Exec) {
+tasks.register('buildCCDXlsx', Exec) {
     group 'ccd tasks'
     commandLine './bin/build-finrem-xlxs-definitions.sh'
 }
@@ -370,7 +370,6 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
     implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jacksonDatabind
 
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
