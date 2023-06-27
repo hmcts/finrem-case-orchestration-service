@@ -113,6 +113,7 @@
         <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
         <cve>CVE-2022-42003</cve>
         <cve>CVE-2022-42004</cve>
+        <cve>CVE-2023-35116</cve>
     </suppress>
     <suppress>
         <notes><![CDATA[file name: spring-web-5.3.21.jar]]></notes>
