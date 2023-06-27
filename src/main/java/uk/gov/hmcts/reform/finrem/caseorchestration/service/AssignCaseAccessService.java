@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.USER_ROLES_CACHE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 
 @Service
 @Slf4j
@@ -120,10 +119,9 @@ public class AssignCaseAccessService {
             .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
             .collect(Collectors.toList());
 
-        CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
+        return CaseAssignmentUserRolesRequest.builder()
             .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
             .build();
-        return removeCaseAssignedUserRolesRequest;
     }
 
     public void grantCaseRoleToUser(Long caseId, String userId, String caseRole, String orgId) {
@@ -268,6 +266,10 @@ public class AssignCaseAccessService {
     public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
         log.info("retrieve active user case role for caseId {}", caseId);
         String idamUserId = idamService.getIdamUserId(userAuthorisation);
+        CaseAssignmentUserRolesResource rolesResource1 = getUserRoles(caseId);
+        log.info("idamUserId {} case roles {} for caseId {}",
+            idamUserId, rolesResource1 != null ? rolesResource1 : "empty", caseId);
+
         CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
         if (rolesResource != null) {
             List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
@@ -280,7 +282,7 @@ public class AssignCaseAccessService {
                 return caseRole;
             }
         }
-        return CASE_LEVEL_ROLE;
+        return "case";
     }
 
     public List<CaseAssignmentUserRole> getAllCaseRole(final String caseId) {

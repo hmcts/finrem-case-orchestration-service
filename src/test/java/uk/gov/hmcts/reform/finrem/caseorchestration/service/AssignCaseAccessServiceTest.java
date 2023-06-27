@@ -120,6 +120,12 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWhenAppSolOnCase()))));
 
+        caseDataApi.stubFor(get(urlEqualTo("/case-users?case_ids=" + TEST_CASE_ID))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(mapper.writeValueAsString(generateResourceWhenCreatorOnCase()))));
+
         List<CaseAssignmentUserRole> caseAssignmentUserRoles = assignCaseAccessService.searchUserRoles(TEST_CASE_ID).getCaseAssignmentUserRoles();
         assertEquals(1, caseAssignmentUserRoles.size());
         assertTrue(caseAssignmentUserRoles.stream().anyMatch(role -> role.getCaseRole().equals(APP_SOLICITOR_POLICY)));
