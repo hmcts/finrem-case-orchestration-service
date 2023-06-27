@@ -73,8 +73,15 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
             case APPLICANT, RESPONDENT -> {
                 generalApplications = wrapper.getAppRespGeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getAppRespGeneralApplications();
-                log.info("Here are GeneralApplications: {}, here are generalApplicationsBefore {}",
-                    generalApplications, generalApplicationsBefore);
+                listElement.setCode(loggedInUserCaseRole);
+                listElement.setLabel(loggedInUserCaseRole);
+                DynamicRadioList radioList = DynamicRadioList.builder()
+                    .value(listElement)
+                    .listItems(List.of(listElement))
+                    .build();
+                if (generalApplications != null && !generalApplications.isEmpty()) {
+                    generalApplications.forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(radioList));
+                }
             }
             case INTERVENER1 -> {
                 generalApplications = wrapper.getIntervener1GeneralApplications();
@@ -131,14 +138,10 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
             default -> {
                 generalApplications = wrapper.getGeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getGeneralApplications();
-                log.info("default hit");
             }
         }
         List<String> errors = new ArrayList<>();
         service.checkIfApplicationCompleted(caseDetails, errors, generalApplications, generalApplicationsBefore);
-
-        log.info("CAse details {} errors {} gas {} gasbefore {}",
-            caseDetails, errors, generalApplications, generalApplicationsBefore);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();

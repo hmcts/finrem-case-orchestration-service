@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHel
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
@@ -135,13 +137,16 @@ public class GeneralApplicationService {
                     APP_RESP_GENERAL_APPLICATION_COLLECTION, caseData, caseDataBefore);
                 interimGeneralApplicationListForRoleType.forEach(x -> {
                     String receivedFrom = x.getGeneralApplicationItems().getAppRespGeneralApplicationReceivedFrom();
+                    DynamicRadioListElement dynamicListElement = DynamicRadioListElement.builder().build();
                     if (ApplicantAndRespondentEvidenceParty.APPLICANT.getValue().equals(receivedFrom)) {
-                        x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom(
-                        ).getValue().setCode(APPLICANT);
+                        dynamicListElement.setCode(APPLICANT);
+                        dynamicListElement.setLabel(APPLICANT);
                     } else if (ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue().equals(receivedFrom)) {
-                        x.getGeneralApplicationItems().getGeneralApplicationReceivedFrom(
-                        ).getValue().setCode(RESPONDENT);
+                        dynamicListElement.setCode(RESPONDENT);
+                        dynamicListElement.setLabel(RESPONDENT);
                     }
+                    x.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(DynamicRadioList.builder()
+                        .value(dynamicListElement).listItems(List.of(dynamicListElement)).build());
                 });
             }
             default -> log.info("The current user is a caseworker on case {}", caseDetails.getId());

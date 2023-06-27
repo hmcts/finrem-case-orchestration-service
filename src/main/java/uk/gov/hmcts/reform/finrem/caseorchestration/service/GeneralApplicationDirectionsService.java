@@ -286,27 +286,27 @@ public class GeneralApplicationDirectionsService {
     private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
                                                                   List<BulkPrintDocument> documents) {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
-        if (referDetail.contains(APPLICANT.toLowerCase())
-            || caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail().contains(RESPONDENT.toLowerCase())) {
+        if (referDetail.contains(APPLICANT) || referDetail.contains(APPLICANT.toLowerCase())
+            || referDetail.contains(RESPONDENT.toLowerCase()) || referDetail.contains(RESPONDENT)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
             log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}", documents.size(), caseDetails.getId(),
                 documents);
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
             log.info("Sending {} document(s) to respondent via bulk print for Case {}, document(s) are {}", documents.size(), caseDetails.getId(),
                 documents);
-        } else if (referDetail.contains(INTERVENER1.toLowerCase())) {
+        } else if (referDetail.contains(INTERVENER1.toLowerCase()) || referDetail.contains(INTERVENER1)) {
             bulkPrintService.printIntervener1Documents(caseDetails, authorisationToken, documents);
             log.info("Sending {} document(s) to intervener1 via bulk print for Case {}, document(s) are {}", documents.size(), caseDetails.getId(),
                 documents);
-        } else if (referDetail.contains(INTERVENER2.toLowerCase())) {
+        } else if (referDetail.contains(INTERVENER2.toLowerCase()) || referDetail.contains(INTERVENER2)) {
             bulkPrintService.printIntervener2Documents(caseDetails, authorisationToken, documents);
             log.info("Sending {} document(s) to intervener2 via bulk print for Case {}, document(s) are {}", documents.size(), caseDetails.getId(),
                 documents);
-        } else if (referDetail.contains(INTERVENER3.toLowerCase())) {
+        } else if (referDetail.contains(INTERVENER3.toLowerCase()) || referDetail.contains(INTERVENER3)) {
             bulkPrintService.printIntervener3Documents(caseDetails, authorisationToken, documents);
             log.info("Sending {} document(s) to intervener3 via bulk print for Case {}, document(s) are {}", documents.size(), caseDetails.getId(),
                 documents);
-        } else if (referDetail.contains(INTERVENER4.toLowerCase())) {
+        } else if (referDetail.contains(INTERVENER4.toLowerCase()) || referDetail.contains(INTERVENER4)) {
             bulkPrintService.printIntervener4Documents(caseDetails, authorisationToken, documents);
             log.info("Sending {} document(s) to intervener4 via bulk print for Case {}, document(s) are {}", documents.size(), caseDetails.getId(),
                 documents);
