@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCase
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
@@ -141,7 +142,7 @@ public interface SharedService {
 
     default UploadCaseDocumentCollection setSharedDocument(UploadCaseDocumentCollection sd) {
         return UploadCaseDocumentCollection.builder()
-            .id(sd.getId())
+            .id(UUID.randomUUID())
             .value(sd.getValue()).build();
     }
 
