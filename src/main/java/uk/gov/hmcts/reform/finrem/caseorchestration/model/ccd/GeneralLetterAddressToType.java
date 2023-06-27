@@ -13,7 +13,8 @@ public enum GeneralLetterAddressToType {
     APPLICANT_SOLICITOR("applicantSolicitor"),
     RESPONDENT_SOLICITOR("respondentSolicitor"),
     RESPONDENT("respondent"),
-    OTHER("other");
+    OTHER("other"),
+    APPLICANT("applicant");
 
     private final String value;
 
