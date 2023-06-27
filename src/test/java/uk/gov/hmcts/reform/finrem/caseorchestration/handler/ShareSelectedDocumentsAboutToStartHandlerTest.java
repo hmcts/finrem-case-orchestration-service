@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -211,11 +210,6 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
             .build();
     }
 
-    private DynamicMultiSelectListElement getSelectedParty(CaseRole role) {
-        return DynamicMultiSelectListElement.builder()
-            .label(role.getValue()).code(role.getValue()).build();
-    }
-
     private List<UploadCaseDocumentCollection> getTestDocument(CaseDocumentType documentType) {
         UploadCaseDocument document = UploadCaseDocument.builder()
             .caseDocuments(TestSetUpUtils.caseDocument())
@@ -230,7 +224,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
     }
 
     private DynamicMultiSelectList getDynamicList(FinremCaseData data) {
-        data.getUploadCaseDocumentWrapper().setOtherCollection(getTestDocument(OTHER));
+        data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setAppChronologiesCollection(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setAppStatementsExhibitsCollection(getTestDocument(STATEMENT_AFFIDAVIT));
         data.getUploadCaseDocumentWrapper().setAppHearingBundlesCollection(getTestDocument(TRIAL_BUNDLE));
