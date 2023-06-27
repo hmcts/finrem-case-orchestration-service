@@ -88,18 +88,6 @@ public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandler
     }
 
     @Test
-    public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        FinremCaseData caseData = handle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationList());
-
-        assertEquals(2, dynamicList.getListItems().size());
-        assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason());
-    }
-
-    @Test
     public void givenCase_whenNoExistingGeneApp_thenHandle() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(NO_GA_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);

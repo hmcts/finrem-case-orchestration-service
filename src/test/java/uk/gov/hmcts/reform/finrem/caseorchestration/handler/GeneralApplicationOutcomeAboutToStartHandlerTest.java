@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -29,7 +31,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandlerTest {
@@ -111,6 +116,8 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
     public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
             .caseDetailsBefore(buildCaseDetailsWithPath(GA_JSON)).build();
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
@@ -124,6 +131,8 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
     public void givenCase_whenNoExistingGeneAppAvailable_thenShowError() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
             .caseDetailsBefore(buildCaseDetailsWithPath(GA_NON_COLL_JSON)).build();
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(data, GENERAL_APPLICATION_COLLECTION);
@@ -144,6 +153,25 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+        return DynamicRadioListElement.builder()
+            .code(code)
+            .label(label)
+            .build();
+    }
+
+    public DynamicRadioList buildDynamicIntervenerList() {
+
+        List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
+            getDynamicListElement(RESPONDENT, RESPONDENT),
+            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+        );
+        return DynamicRadioList.builder()
+            .value(dynamicListElements.get(0))
+            .listItems(dynamicListElements)
+            .build();
     }
 
 }

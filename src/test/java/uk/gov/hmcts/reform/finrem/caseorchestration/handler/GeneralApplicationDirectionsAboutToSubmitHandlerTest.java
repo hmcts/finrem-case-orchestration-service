@@ -1,11 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -29,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -54,6 +59,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
 
     private GeneralApplicationDirectionsAboutToStartHandler startHandler;
     private GeneralApplicationDirectionsAboutToSubmitHandler submitHandler;
+    @Mock
     private GeneralApplicationHelper helper;
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
@@ -63,18 +69,17 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     private GenericDocumentService documentService;
     @Mock
     private GeneralApplicationService gaService;
-
-    private ObjectMapper objectMapper;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    private ObjectMapper objectMapper;
+
     public static final String AUTH_TOKEN = "tokien:)";
+    private static final String GA_JSON = "/fixtures/contested/general-application-details.json";
 
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-        helper = new GeneralApplicationHelper(objectMapper, documentService);
         startHandler = new GeneralApplicationDirectionsAboutToStartHandler(
             assignCaseAccessService, finremCaseDetailsMapper, helper, service);
         submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
@@ -124,18 +129,32 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
+        CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
+        GeneralApplicationItems generalApplicationItems =
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+                .generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+                .generalApplicationSpecialMeasures("Special measure").build();
+        GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
+            .value(generalApplicationItems).build();
+        details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
+        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
+            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+            callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
+                .getGeneralApplications().get(0).getValue());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
+        DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
-            = helper.covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
+            = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
         assertEquals(2, list.size());
 
         assertEquals("InterimHearingNotice.pdf", list.get(1).getGeneralApplicationItems()
@@ -154,12 +173,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     @Test
     public void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompleted() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData(),
-            GENERAL_APPLICATION_COLLECTION);
-        existingList.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
-            .setGeneralApplications(helper.convertToGeneralApplicationsCollection(existingList));
+            .getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
 
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
@@ -169,17 +184,31 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
+        CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
+        GeneralApplicationItems generalApplicationItems =
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+                .generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+                .generalApplicationSpecialMeasures("Special measure").build();
+        GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
+            .value(generalApplicationItems).build();
+        details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
+        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
+            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+            callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
+                .getGeneralApplications().get(0).getValue());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
+        DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
-            = helper.covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
+            = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
         assertEquals(2, list.size());
 
         assertEquals(DIRECTION_APPROVED.getId(),
@@ -190,15 +219,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
-
     @Test
     public void givenCase_whenNotApproveAnApplication_thenUpdateStatusNotApproved() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(finremCallbackRequest.getCaseDetails().getData(),
-            GENERAL_APPLICATION_COLLECTION);
-        existingList.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationStatus(DIRECTION_NOT_APPROVED.getId()));
-        finremCallbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplications(
-            helper.convertToGeneralApplicationsCollection(existingList));
+        finremCallbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(x -> x.getValue().setGeneralApplicationStatus(DIRECTION_NOT_APPROVED.getId()));
 
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
@@ -207,18 +232,35 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         dynamicListForCaseDetails.setValue(listElement);
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
+
         dynamicListForCaseDetails.setListItems(listItems);
+
+        CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
+        GeneralApplicationItems generalApplicationItems =
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+                .generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+                .generalApplicationSpecialMeasures("Special measure").build();
+        GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
+            .value(generalApplicationItems).build();
+        details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
+        when(finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetails())).thenReturn(details);
+        when(helper.getApplicationItems(finremCallbackRequest.getCaseDetails().getData(),
+            AUTH_TOKEN, finremCallbackRequest.getCaseDetails().getId().toString())).thenReturn(
+            finremCallbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
+                .getGeneralApplications().get(0).getValue());
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
-        DynamicList dynamicList = helper.objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
+        DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
-            = helper.covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
+            = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
         assertEquals(2, list.size());
 
         assertEquals(DIRECTION_NOT_APPROVED.getId(),
@@ -230,12 +272,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     @Test
     public void givenCase_whenOtherAnApplication_thenUpdateStatusOther() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(finremCaseDetails.getData(),
-            GENERAL_APPLICATION_COLLECTION);
-        existingList.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationStatus(DIRECTION_OTHER.getId()));
-        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplications(
-            helper.convertToGeneralApplicationsCollection(existingList));
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications(
+        ).forEach(x -> x.getValue().setGeneralApplicationStatus(DIRECTION_OTHER.getId()));
 
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
@@ -245,17 +283,33 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
+
+        CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
+        GeneralApplicationItems generalApplicationItems =
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+                .generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+                .generalApplicationSpecialMeasures("Special measure").build();
+        GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
+            .value(generalApplicationItems).build();
+        details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
+        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
+            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+            callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
+                .getGeneralApplications().get(0).getValue());
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
-        DynamicList dynamicList = helper.objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
+        DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
 
         assertEquals(1, dynamicList.getListItems().size());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
-        List<GeneralApplicationCollectionData> list = helper.covertToGeneralApplicationData(
+        List<GeneralApplicationCollectionData> list = covertToGeneralApplicationData(
             data.getGeneralApplicationWrapper().getGeneralApplications());
         assertEquals(2, list.size());
 
@@ -268,13 +322,9 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     @Test
     public void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompletedAndReturnToPostState() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         when(service.getEventPostState(any(), any())).thenReturn(PREPARE_FOR_HEARING_STATE);
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(finremCaseDetails.getData(),
-            GENERAL_APPLICATION_COLLECTION);
-        existingList.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
-        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplications(
-            helper.convertToGeneralApplicationsCollection(existingList));
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(
+            x -> x.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
             .label("General Application 1 - Received from - applicant - Created Date 2023-06-13 -Hearing Required - No")
@@ -283,17 +333,31 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
+        CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
+        GeneralApplicationItems generalApplicationItems =
+            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+                .generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+                .generalApplicationSpecialMeasures("Special measure").build();
+        GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
+            .value(generalApplicationItems).build();
+        details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
+        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
+            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+            callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
+                .getGeneralApplications().get(0).getValue());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
-        DynamicList dynamicList = helper.objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
+        DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
-            = helper.covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
+            = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
         assertEquals(2, list.size());
 
         assertEquals(DIRECTION_APPROVED.getId(),
@@ -385,4 +449,25 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
             .build();
     }
 
+    public DynamicList objectToDynamicList(Object object) {
+        if (object != null) {
+            return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, DynamicList.class);
+        }
+        return null;
+    }
+
+    public List<GeneralApplicationCollectionData> covertToGeneralApplicationData(Object object) {
+        return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    private CaseDetails buildCaseDetailsFromJson(String testJson) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
+            CaseDetails caseDetails =
+                objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return caseDetails;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

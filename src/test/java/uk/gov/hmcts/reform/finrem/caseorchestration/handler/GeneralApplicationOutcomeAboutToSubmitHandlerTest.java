@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
@@ -30,6 +32,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandlerTest {
@@ -94,6 +99,8 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
     public void givenCase_whenNonCollectionApproveAnApplication_thenMigratedAndUpdateStatusApproved() {
         FinremCallbackRequest callbackRequest =
             buildFinremCallbackRequest(GA_NON_COLL_JSON);
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = startHandle.getData();
@@ -117,6 +124,8 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
     @Test
     public void givenCase_whenApproveAnApplication_thenUpdateStatusApproved() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -140,6 +149,8 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
     @Test
     public void givenCase_whenNotApproveAnApplication_thenUpdateStatusNotApproved() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle =
             startHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -166,6 +177,8 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
     @Test
     public void givenCase_whenOtherAnApplication_thenUpdateStatusOther() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler
             .handle(callbackRequest, AUTH_TOKEN);
@@ -217,5 +230,24 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
         assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationDocument(), null);
         assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationDraftOrder(), null);
         assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationTracking(), null);
+    }
+
+    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+        return DynamicRadioListElement.builder()
+            .code(code)
+            .label(label)
+            .build();
+    }
+
+    public DynamicRadioList buildDynamicIntervenerList() {
+
+        List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
+            getDynamicListElement(RESPONDENT, RESPONDENT),
+            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+        );
+        return DynamicRadioList.builder()
+            .value(dynamicListElements.get(0))
+            .listItems(dynamicListElements)
+            .build();
     }
 }
