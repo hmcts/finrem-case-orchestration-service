@@ -141,6 +141,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
         gaService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
+        caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
+            x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
     }
 
