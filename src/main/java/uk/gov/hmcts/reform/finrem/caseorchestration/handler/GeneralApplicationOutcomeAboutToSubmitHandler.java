@@ -102,7 +102,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler
         if (code.equals(data.getId())) {
             return updateStatus(caseData, data, status);
         }
-        return data;
+        return data;//
     }
 
     private GeneralApplicationCollectionData updateStatus(Map<String, Object> caseData,
