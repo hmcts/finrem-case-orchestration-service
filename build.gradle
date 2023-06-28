@@ -2,7 +2,7 @@ plugins {
     id 'application'
     id 'checkstyle'
     id 'jacoco'
-    id 'org.springframework.boot' version "2.7.11"
+    id 'org.springframework.boot' version "2.7.12"
     id 'io.spring.dependency-management' version '1.0.12.RELEASE'
     id 'au.com.dius.pact' version '4.4.0-beta.2'
     id 'com.github.ben-manes.versions' version '0.42.0'
@@ -37,7 +37,11 @@ def versions = [
         jaxbOsgi             : '2.3.3',
         springHateoas        : '1.5.1',
         tika                 : '2.4.1',
+        amClient             : '1.7.3',
         sendLetterClient     : '3.0.16',
+        elasticSearch        : '7.17.9',
+        jacksonDatabind      : '2.13.2',
+        retry                : '1.3.1'
 ]
 
 project.ext {
@@ -178,6 +182,7 @@ project.tasks['sonarqube'].dependsOn jacocoTestReport
 sonarqube {
     def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/scheduler/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/AmendApplicationAboutToSubmitHandler.java',
@@ -192,7 +197,8 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/GenericDocumentService.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/serialisation/FinremCallbackRequestDeserializer.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/correspondence/FinremSingleLetterOrEmailApplicantCorresponder.java',
-                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java'
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReference.java'
     ]
 
     properties {
@@ -212,7 +218,8 @@ pitest {
                          'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService'])
-    excludedTestClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet.FinremCaseDataTest'])
+    excludedTestClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet.FinremCaseDataTest',
+                             'uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelperTest'])
     threads.set(4)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
@@ -339,6 +346,7 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
+    implementation group: 'org.springframework.retry', name: 'spring-retry', version: versions.retry
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
@@ -358,6 +366,11 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
     implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
+    implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
+    implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
+
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }

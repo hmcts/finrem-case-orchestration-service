@@ -72,6 +72,17 @@ public class NotificationRequestMapper {
         return buildInterimHearingNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor());
     }
 
+    public NotificationRequest getNotificationRequestForIntervenerSolicitor(CaseDetails caseDetails,
+                                                                            SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+        return buildInterimHearingNotificationRequest(caseDetails, caseDataKeysWrapper);
+    }
+
+    public NotificationRequest getNotificationRequestForIntervenerSolicitor(CaseDetails caseDetails,
+                                                                            Map<String, Object> interimHearingData,
+                                                                            SolicitorCaseDataKeysWrapper dataKeysWrapper) {
+        return buildInterimHearingNotificationRequest(caseDetails, dataKeysWrapper, interimHearingData);
+    }
+
     @Deprecated
     public NotificationRequest getNotificationRequestForConsentApplicantSolicitor(CaseDetails caseDetails,
                                                                            Map<String, Object> hearingData) {
@@ -148,9 +159,9 @@ public class NotificationRequestMapper {
     }
 
     private NotificationRequest buildInterimHearingNotificationRequest(CaseDetails caseDetails,
-                                                                       SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+                                                                       SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
 
-        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
 
         if (caseDataService.isContestedApplication(caseDetails)) {
             String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
@@ -162,9 +173,9 @@ public class NotificationRequestMapper {
 
     @Deprecated
     private NotificationRequest buildInterimHearingNotificationRequest(CaseDetails caseDetails,
-                                                                       SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
+                                                                       SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
                                                                        Map<String, Object> interimHearingData) {
-        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
 
         if (caseDataService.isConsentedApplication(caseDetails)) {
             notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedHearingFrc(interimHearingData));
@@ -178,9 +189,9 @@ public class NotificationRequestMapper {
     }
 
     private NotificationRequest buildInterimHearingNotificationRequest(FinremCaseDetails caseDetails,
-                                                                       SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
+                                                                       SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
                                                                        Map<String, Object> interimHearingData) {
-        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
 
         if (caseDetails.isConsentedApplication()) {
             notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedHearingFrc(interimHearingData));
@@ -208,16 +219,16 @@ public class NotificationRequestMapper {
     }
 
     @Deprecated
-    private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+    private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> caseData = caseDetails.getData();
 
         notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
-        notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseData.get(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey()),
+        notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseData.get(caseDataKeysWrapper.getSolicitorReferenceKey()),
             EMPTY_STRING));
         notificationRequest.setDivorceCaseNumber(Objects.toString(caseData.get(DIVORCE_CASE_NUMBER)));
-        notificationRequest.setName(Objects.toString(caseData.get(solicitorCaseDataKeysWrapper.getSolicitorNameKey())));
-        notificationRequest.setNotificationEmail(Objects.toString(caseData.get(solicitorCaseDataKeysWrapper.getSolicitorEmailKey())));
+        notificationRequest.setName(Objects.toString(caseData.get(caseDataKeysWrapper.getSolicitorNameKey())));
+        notificationRequest.setNotificationEmail(Objects.toString(caseData.get(caseDataKeysWrapper.getSolicitorEmailKey())));
         notificationRequest.setGeneralEmailBody(Objects.toString(caseData.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
@@ -250,7 +261,7 @@ public class NotificationRequestMapper {
     }
 
     private NotificationRequest getNotificationCoreData(FinremCaseDetails caseDetails,
-                                                        SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> notificationRequestPayload = null;
         FinremCaseData data = caseDetails.getData();
@@ -258,14 +269,14 @@ public class NotificationRequestMapper {
 
         notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
         notificationRequest.setSolicitorReferenceNumber(
-            Objects.toString(notificationRequestPayload.get(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey()),
+            Objects.toString(notificationRequestPayload.get(caseDataKeysWrapper.getSolicitorReferenceKey()),
             EMPTY_STRING));
         notificationRequest.setDivorceCaseNumber(
             Objects.toString(notificationRequestPayload.get(DIVORCE_CASE_NUMBER)));
         notificationRequest.setName(
-            Objects.toString(notificationRequestPayload.get(solicitorCaseDataKeysWrapper.getSolicitorNameKey())));
+            Objects.toString(notificationRequestPayload.get(caseDataKeysWrapper.getSolicitorNameKey())));
         notificationRequest.setNotificationEmail(
-            Objects.toString(notificationRequestPayload.get(solicitorCaseDataKeysWrapper.getSolicitorEmailKey())));
+            Objects.toString(notificationRequestPayload.get(caseDataKeysWrapper.getSolicitorEmailKey())));
         notificationRequest.setGeneralEmailBody(
             Objects.toString(notificationRequestPayload.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(caseDetails.getCaseType().toString().toLowerCase());

@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.searchuserrole.SearchCaseAssignedUserRolesRequest;
 
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -119,10 +118,9 @@ public class AssignCaseAccessService {
             .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
             .collect(Collectors.toList());
 
-        CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
+        return CaseAssignmentUserRolesRequest.builder()
             .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
             .build();
-        return removeCaseAssignedUserRolesRequest;
     }
 
     public void grantCaseRoleToUser(Long caseId, String userId, String caseRole, String orgId) {
@@ -263,4 +261,27 @@ public class AssignCaseAccessService {
             .userId(userId)
             .build());
     }
+
+    public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
+        log.info("retrieve active user case role for caseId {}", caseId);
+        String idamUserId = idamService.getIdamUserId(userAuthorisation);
+        CaseAssignmentUserRolesResource rolesResource1 = getUserRoles(caseId);
+        log.info("idamUserId {} case roles {} for caseId {}",
+            idamUserId, rolesResource1 != null ? rolesResource1 : "empty", caseId);
+
+        CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
+        if (rolesResource != null) {
+            List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
+            log.info("All roles {} for caseId {}", allRoles, caseId);
+            List<CaseAssignmentUserRole> activeRole = allRoles.stream().filter(role -> role.getUserId().equals(idamUserId)).toList();
+            if (!activeRole.isEmpty()) {
+                log.info("Active Role {} for caseId {}", activeRole, caseId);
+                String caseRole = activeRole.get(0).getCaseRole();
+                log.info("case role found {} for caseId {}", caseRole, caseId);
+                return caseRole;
+            }
+        }
+        return "case";
+    }
+
 }

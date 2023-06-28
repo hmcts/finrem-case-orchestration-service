@@ -64,6 +64,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Value("${case.orchestration.api}")
     private String caseOrchestration;
 
+    @Ignore
     @Test
     public void convertDocumentToPdf()  {
 

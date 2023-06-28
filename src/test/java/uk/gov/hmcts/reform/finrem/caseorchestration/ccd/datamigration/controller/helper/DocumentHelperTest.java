@@ -7,12 +7,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
@@ -20,7 +22,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -40,6 +48,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -56,9 +65,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
@@ -70,9 +85,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class DocumentHelperTest {
 
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
-    private static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
+    private static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
     private static final String BINARY_URL = DOC_URL + "/binary";
     private static final String FILE_NAME = "app_docs.docx";
+    private static final String TEST_CASE_ID = "123123";
     private ObjectMapper objectMapper;
     private DocumentHelper documentHelper;
     @Mock
@@ -198,12 +214,13 @@ public class DocumentHelperTest {
         documentCollections.add(dc);
         caseData.put(HEARING_ORDER_OTHER_COLLECTION, documentCollections);
 
-        when(service.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
-        List<BulkPrintDocument> hearingDocuments = documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER);
+        when(service.convertDocumentIfNotPdfAlready(any(), any(), anyString())).thenReturn(caseDocument());
+        List<BulkPrintDocument> hearingDocuments =
+            documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER, TEST_CASE_ID);
         assertEquals(hearingDocuments.get(0).getFileName(), "app_docs.pdf");
         assertEquals(hearingDocuments.get(0).getBinaryFileUrl(), BINARY_URL);
 
-        verify(service).convertDocumentIfNotPdfAlready(any(), any());
+        verify(service).convertDocumentIfNotPdfAlready(any(), any(), anyString());
     }
 
 
@@ -430,6 +447,170 @@ public class DocumentHelperTest {
             .build();
 
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
+    }
+
+    @Test
+    public void whenRecipientIsNondigitallyRepresentedApplicant_AndIntervenerRepresented_setAddressee() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+
+        Address address = Address.builder().addressLine1("Applicant Sol Address").postCode("SW11 6HL").build();
+        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorAddress(address);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantFmName("Tracy");
+        caseDetails.getData().getContactDetailsWrapper().setApplicantLname("Applicant");
+
+        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
+        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        wrapper.setIntervenerName("name");
+        wrapper.setIntervenerRepresented(YesOrNo.YES);
+        wrapper.setIntervenerAddress(otherAddress);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, APPLICANT);
+        Addressee expected = Addressee.builder().name("Tracy Applicant").formattedAddress("Applicant Sol Address" + "\nSW11 6HL").build();
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsNondigitallyRepresentedRespondent_AndIntervenerRepresented_setAddressee() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+
+        Address address = Address.builder().addressLine1("Respondent Sol Address").postCode("SW11 6HL").build();
+        caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorAddress(address);
+        caseDetails.getData().getContactDetailsWrapper().setRespondentFmName("Tracy");
+        caseDetails.getData().getContactDetailsWrapper().setRespondentLname("Respondent");
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+
+        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
+        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        wrapper.setIntervenerName("name");
+        wrapper.setIntervenerRepresented(YesOrNo.YES);
+        wrapper.setIntervenerAddress(otherAddress);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, RESPONDENT);
+        Addressee expected = Addressee.builder().name("Tracy Respondent").formattedAddress("Respondent Sol Address" + "\nSW11 6HL").build();
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsUnrepresentedApplicant_AndIntervenerRepresented_setAddressee() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+
+        Address address = Address.builder().addressLine1("Applicant Address").postCode("SW11 6HL").build();
+        caseDetails.getData().getContactDetailsWrapper().setApplicantAddress(address);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantFmName("Tracy");
+        caseDetails.getData().getContactDetailsWrapper().setApplicantLname("Applicant");
+
+        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
+        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        wrapper.setIntervenerName("name");
+        wrapper.setIntervenerRepresented(YesOrNo.YES);
+        wrapper.setIntervenerAddress(otherAddress);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, APPLICANT);
+        Addressee expected = Addressee.builder().name("Tracy Applicant").formattedAddress("Applicant Address" + "\nSW11 6HL").build();
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsUnrepresentedRespondent_AndIntervenerRepresented_setAddressee() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+
+        Address address = Address.builder().addressLine1("Respondent Address").postCode("SW11 6HL").build();
+        caseDetails.getData().getContactDetailsWrapper().setRespondentAddress(address);
+        caseDetails.getData().getContactDetailsWrapper().setRespondentFmName("Tracy");
+        caseDetails.getData().getContactDetailsWrapper().setRespondentLname("Respondent");
+
+        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
+        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        wrapper.setIntervenerName("name");
+        wrapper.setIntervenerRepresented(YesOrNo.YES);
+        wrapper.setIntervenerAddress(otherAddress);
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, RESPONDENT);
+        Addressee expected = Addressee.builder().name("Tracy Respondent").formattedAddress("Respondent Address" + "\nSW11 6HL").build();
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsIntervenerOne_AndIntervenerNotRepresented_setAddressee() {
+        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
+        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        wrapper.setIntervenerAddress(address);
+        wrapper.setIntervenerName("Name");
+        wrapper.setIntervenerRepresented(YesOrNo.NO);
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
+            + "\nSW1 1TE").build();
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_ONE);
+
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsIntervenerTwo_AndIntervenerNotRepresented_setAddressee() {
+        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
+        IntervenerTwoWrapper wrapper = new IntervenerTwoWrapper();
+        wrapper.setIntervenerAddress(address);
+        wrapper.setIntervenerName("Name");
+        wrapper.setIntervenerRepresented(YesOrNo.NO);
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
+            + "\nSW1 1TE").build();
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_TWO);
+
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsIntervenerThree_AndIntervenerNotRepresented_setAddressee() {
+        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
+        IntervenerThreeWrapper wrapper = new IntervenerThreeWrapper();
+        wrapper.setIntervenerAddress(address);
+        wrapper.setIntervenerName("Name");
+        wrapper.setIntervenerRepresented(YesOrNo.NO);
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
+            + "\nSW1 1TE").build();
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_THREE);
+
+        assertEquals(result.getData().get(ADDRESSEE), expected);
+    }
+
+    @Test
+    public void whenRecipientIsIntervenerFour_AndIntervenerNotRepresented_setAddressee() {
+        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
+        IntervenerFourWrapper wrapper = new IntervenerFourWrapper();
+        wrapper.setIntervenerAddress(address);
+        wrapper.setIntervenerName("Name");
+        wrapper.setIntervenerRepresented(YesOrNo.NO);
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
+        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
+            + "\nSW1 1TE").build();
+
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_FOUR);
+
+        assertEquals(result.getData().get(ADDRESSEE), expected);
     }
 
     @Test

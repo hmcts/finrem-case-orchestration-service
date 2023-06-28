@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumen
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,14 +72,15 @@ class ManualPaymentSubmittedHandlerTest {
         when(service.generateManualPaymentLetter(finremCallbackRequest.getCaseDetails(),
             AUTH_TOKEN, APPLICANT)).thenReturn(caseDocument());
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(printService).sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class));
+        verify(printService).sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class), any(), anyString());
     }
 
     @Test
     void givenContestedCase_whenManualPaymentEventInvoke_thenDoNotSendToBulkPrint() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(printService, never()).sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class));
+        verify(printService, never())
+            .sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class), any(), anyString());
     }
 
 

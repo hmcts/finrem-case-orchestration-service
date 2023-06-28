@@ -57,7 +57,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             .mimeType(APPLICATION_PDF)
             .build();
 
-        when(documentGeneratorValidationServiceMock.validateFileType("http://file1.binary"))
+        when(documentGeneratorValidationServiceMock.validateFileType("http://file1.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             CONSENT_ORDER, AUTH_TOKEN);
@@ -71,7 +71,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             .errors(singletonList("Invalid file type"))
             .build();
 
-        when(documentGeneratorValidationServiceMock.validateFileType("http://file1.binary"))
+        when(documentGeneratorValidationServiceMock.validateFileType("http://file1.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             CONSENT_ORDER, AUTH_TOKEN);
@@ -84,7 +84,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
 
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
+            "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             AMENDED_CONSENT_ORDER_COLLECTION, AUTH_TOKEN);
@@ -99,7 +99,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             .build();
 
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
+            "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             AMENDED_CONSENT_ORDER_COLLECTION, AUTH_TOKEN);
@@ -112,10 +112,10 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
 
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://file1.binary"))
+            "http://file1.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse);
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://file2.binary"))
+            "http://file2.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             PENSION_DOCS_COLLECTION, AUTH_TOKEN);
@@ -130,10 +130,10 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             .errors(singletonList("Invalid file type")).build();
 
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://file1.binary"))
+            "http://file1.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse1);
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://file2.binary"))
+            "http://file2.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse2);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             PENSION_DOCS_COLLECTION, AUTH_TOKEN);
@@ -154,7 +154,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         setUpCaseDetails(RESPOND_TO_ORDER_SOL_JSON);
         DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://doc2/binary"))
+            "http://doc2/binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse);
 
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
@@ -183,7 +183,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         setUpCaseDetails(CONSENT_IN_CONTESTED);
         DocumentValidationResponse documentValidationResponse1 = builder().mimeType(APPLICATION_PDF).build();
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://file1.binary"))
+            "http://file1.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse1);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             CONSENT_ORDER, AUTH_TOKEN);
@@ -196,7 +196,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         DocumentValidationResponse documentValidationResponse1 = builder()
             .errors(singletonList("Invalid file type")).build();
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://file1.binary"))
+            "http://file1.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse1);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             CONSENT_ORDER, AUTH_TOKEN);
@@ -209,7 +209,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
 
         DocumentValidationResponse documentValidationResponse1 = builder().mimeType(APPLICATION_PDF).build();
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://file1.binary"))
+            "http://file1.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse1);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             CONTESTED_CONSENT_PENSION_COLLECTION, AUTH_TOKEN);
@@ -224,10 +224,10 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         DocumentValidationResponse documentValidationResponse2 = builder().mimeType(APPLICATION_PDF).build();
 
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://file1.binary"))
+            "http://file1.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse1);
         when(documentGeneratorValidationServiceMock.validateFileType(
-            "http://file2.binary"))
+            "http://file2.binary", AUTH_TOKEN))
             .thenReturn(documentValidationResponse2);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             CONTESTED_CONSENT_PENSION_COLLECTION, AUTH_TOKEN);

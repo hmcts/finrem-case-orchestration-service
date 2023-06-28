@@ -12,9 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
 
@@ -25,13 +27,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadContestedCaseDocumentsAboutToSubmitHandler
-    implements CallbackHandler<Map<String, Object>> {
+public class UploadContestedCaseDocumentsAboutToSubmitHandler implements CallbackHandler<Map<String, Object>> {
+
+    private static final String APPLICANT = "applicant";
+    private static final String RESPONDENT = "respondent";
 
     public static final String TRIAL_BUNDLE_SELECTED_ERROR =
         "To upload a hearing bundle please use the Manage hearing "
@@ -42,6 +51,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
     private final List<CaseDocumentHandler> caseDocumentHandlers;
     private final ObjectMapper objectMapper;
     private final UploadedDocumentHelper uploadedDocumentHelper;
+    private final AssignCaseAccessService accessService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -54,6 +64,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
 
+        Long caseId = callbackRequest.getCaseDetails().getId();
+        log.info("Invoking Upload case document file event for case Id {}", caseId);
+
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
             response = validateUploadedDocuments(callbackRequest.getCaseDetails().getData());
         if (!CollectionUtils.isEmpty(response.getErrors())) {
@@ -64,7 +77,15 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
 
+        String loggedInUserCaseRole = getActiveUser(caseId, userAuthorisation);
+        log.info("Loggedin User case role {} for case Id {}", loggedInUserCaseRole, caseId);
+
         List<ContestedUploadedDocumentData> uploadedDocuments = (List<ContestedUploadedDocumentData>) caseData.get(CONTESTED_UPLOADED_DOCUMENTS);
+
+        if (!loggedInUserCaseRole.equals(CASE_LEVEL_ROLE)) {
+            uploadedDocuments.forEach(doc -> doc.getUploadedCaseDocument().setCaseDocumentParty(loggedInUserCaseRole));
+        }
+
         caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
         uploadedDocuments.sort(Comparator.comparing(
             ContestedUploadedDocumentData::getUploadedCaseDocument, Comparator.comparing(
@@ -72,6 +93,37 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
                     Comparator.reverseOrder()))));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
         return response;
+    }
+
+    private String getActiveUser(Long caseId, String userAuthorisation) {
+        String logMessage = "Logged in user role {} caseId {}";
+        String activeUserCaseRole = accessService.getActiveUserCaseRole(String.valueOf(caseId), userAuthorisation);
+        if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getValue())
+            || activeUserCaseRole.contains(CaseRole.APP_BARRISTER.getValue())) {
+            log.info(logMessage, APPLICANT, caseId);
+            return APPLICANT;
+        } else if (activeUserCaseRole.contains(CaseRole.RESP_SOLICITOR.getValue())
+            || activeUserCaseRole.contains(CaseRole.RESP_BARRISTER.getValue())) {
+            log.info(logMessage, RESPONDENT, caseId);
+            return RESPONDENT;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_1.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_1.getValue())) {
+            log.info(logMessage, INTERVENER_ONE, caseId);
+            return INTERVENER_ONE;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_2.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_2.getValue())) {
+            log.info(logMessage, INTERVENER_TWO, caseId);
+            return INTERVENER_TWO;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_3.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_3.getValue())) {
+            log.info(logMessage, INTERVENER_THREE, caseId);
+            return INTERVENER_THREE;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_4.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_4.getValue())) {
+            log.info(logMessage, INTERVENER_FOUR, caseId);
+            return INTERVENER_FOUR;
+        }
+        return activeUserCaseRole;
     }
 
     private GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> validateUploadedDocuments(

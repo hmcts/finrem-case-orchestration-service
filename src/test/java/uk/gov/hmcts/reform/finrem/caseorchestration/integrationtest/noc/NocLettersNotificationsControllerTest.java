@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -35,12 +37,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
 @ContextConfiguration(classes = {NocTestConfig.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class})
 public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
+    public static final String AUTH_TOKEN = "authToken";
+    public static final String CASE_ID = "1234";
     @Autowired
     private NocLetterNotificationService nocLetterNotificationService;
     @Autowired
@@ -59,6 +64,8 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     private DocumentConfiguration documentConfiguration;
     @MockBean
     private EmailService emailService;
+    @MockBean
+    private CourtDetailsMapper courtDetailsMapper;
 
     @Captor
     ArgumentCaptor<Map> placeholdersMapArgumentCaptor;
@@ -69,17 +76,17 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldCallNotificationsServiceCorrectly() {
-
+        when(bulkPrintService.getRecipient(DocumentHelper.PaperNotificationRecipient.APPLICANT.toString())).thenReturn(APPLICANT);
         CaseDocument litigantSolicitorAddedCaseDocument = CaseDocument.builder().documentFilename("docFileNameAdded").build();
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate()),
-            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()))).thenReturn(
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()), eq(CASE_ID))).thenReturn(
             litigantSolicitorAddedCaseDocument);
 
         CaseDocument litigantSolicitorRemovedCaseDocument = CaseDocument.builder().documentFilename("docFileNameRemoved").build();
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedTemplate()),
-            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()))).thenReturn(
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()), eq(CASE_ID))).thenReturn(
             litigantSolicitorRemovedCaseDocument);
 
         notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequest());
@@ -87,27 +94,28 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
         verify(notificationService).sendNoticeOfChangeEmail(caseDetails);
         verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq("authToken"), placeholdersMapArgumentCaptor.capture(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate()),
-            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()));
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()), eq(CASE_ID));
 
         Map letterAddedDetailsMap = placeholdersMapArgumentCaptor.getValue();
 
         assertNotificationLetterDetails(letterAddedDetailsMap);
 
-        verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq("authToken"), placeholdersMapArgumentCaptor.capture(),
+        verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersMapArgumentCaptor.capture(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedTemplate()),
-            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()));
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()), eq(CASE_ID));
 
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails);
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
 
     }
 
     @Test
     public void shouldCallNotificationServiceCorrectlyNonDigitalSolicitorRemoved() {
         CaseDocument litigantSolicitorAddedCaseDocument = CaseDocument.builder().documentFilename("docFileNameAdded").build();
+        when(bulkPrintService.getRecipient(DocumentHelper.PaperNotificationRecipient.APPLICANT.toString())).thenReturn(APPLICANT);
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate()),
-            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()))).thenReturn(
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()), eq(CASE_ID))).thenReturn(
             litigantSolicitorAddedCaseDocument);
 
         notificationsController.sendNoticeOfChangeNotifications("authToken", buildNonDigitalCallbackRequest());
@@ -115,13 +123,13 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
         verify(notificationService).sendNoticeOfChangeEmail(caseDetails);
         verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq("authToken"), placeholdersMapArgumentCaptor.capture(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate()),
-            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()));
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()), eq(CASE_ID));
 
         Map letterAddedDetailsMap = placeholdersMapArgumentCaptor.getValue();
 
         assertNotificationLetterDetails(letterAddedDetailsMap);
 
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
     }
 
     @Override
@@ -139,8 +147,8 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
                 + "noc-letter-notifications-add-and-revoke-non-digital.json",
             new ObjectMapper());
         caseDetailsBefore =
-            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications"
-                    + "-add-and-revoke-non-digital-before.json",
+            caseDetailsFromResource(
+                "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-non-digital-before.json",
                 new ObjectMapper());
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }

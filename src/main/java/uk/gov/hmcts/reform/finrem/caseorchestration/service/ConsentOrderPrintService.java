@@ -19,6 +19,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Slf4j
 @Service
@@ -113,7 +114,11 @@ public class ConsentOrderPrintService {
             bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
         }
 
-        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
+        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            caseDetails.getId(),
+            RESPONDENT,
+            bulkPrintDocuments,
+            authorisationToken);
     }
 
     private boolean shouldPrintOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {

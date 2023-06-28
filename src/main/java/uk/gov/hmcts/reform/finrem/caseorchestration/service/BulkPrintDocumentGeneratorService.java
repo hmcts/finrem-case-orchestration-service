@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Base64.getEncoder;
-import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +28,10 @@ public class BulkPrintDocumentGeneratorService {
     private static final String CASE_IDENTIFIER_KEY = "caseIdentifier";
 
     private static final String FILE_NAMES = "fileNames";
+    private static final String RECIPIENTS = "party";
 
     private final AuthTokenGenerator authTokenGenerator;
+    private final FeatureToggleService featureToggleService;
     private final SendLetterApi sendLetterApi;
 
     /**
@@ -38,7 +39,8 @@ public class BulkPrintDocumentGeneratorService {
      */
 
 
-    public UUID send(final BulkPrintRequest bulkPrintRequest, final List<byte[]> listOfDocumentsAsByteArray) {
+    public UUID send(final BulkPrintRequest bulkPrintRequest, final String recipient,
+                     final List<byte[]> listOfDocumentsAsByteArray) {
 
         String letterType = bulkPrintRequest.getLetterType();
         String caseId = bulkPrintRequest.getCaseId();
@@ -47,26 +49,32 @@ public class BulkPrintDocumentGeneratorService {
 
         final List<String> documents = listOfDocumentsAsByteArray.stream()
             .map(getEncoder()::encodeToString)
-            .collect(toList());
+            .toList();
 
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
-            new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, letterType, bulkPrintRequest)));
+            new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, recipient, letterType, bulkPrintRequest)));
 
-        log.info("Letter service produced the following letter Id {} for case {}", sendLetterResponse.letterId, caseId);
+        log.info("Letter service produced the following letter Id {} for party {} and  case {}", sendLetterResponse.letterId, recipient, caseId);
         return sendLetterResponse.letterId;
     }
 
 
-    private Map<String, Object> getAdditionalData(final String caseId, final String letterType, final BulkPrintRequest bulkPrintRequest) {
+    private Map<String, Object> getAdditionalData(final String caseId, final String recipient, final String letterType,
+                                                  final BulkPrintRequest bulkPrintRequest) {
         final Map<String, Object> additionalData = new HashMap<>();
         additionalData.put(LETTER_TYPE_KEY, letterType);
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
         additionalData.put(FILE_NAMES, getFileNames(bulkPrintRequest));
+
+        log.info("isSendLetterDuplicateCheckEnabled {} for caseId {}", featureToggleService.isSendLetterDuplicateCheckEnabled(), caseId);
+        additionalData.put(RECIPIENTS, featureToggleService.isSendLetterDuplicateCheckEnabled() ? recipient
+            : "%s:%d".formatted(recipient, System.nanoTime()));
+
         return additionalData;
     }
 
     private List<String> getFileNames(BulkPrintRequest bulkPrintRequest) {
-        return bulkPrintRequest.getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName).collect(toList());
+        return bulkPrintRequest.getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName).toList();
     }
 }

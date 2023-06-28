@@ -47,7 +47,8 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler
         CallbackRequest callbackRequest,
         String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received on start request to refer general application for Case ID: {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Received on start request to refer general application for Case ID: {}", caseId);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.remove(GENERAL_APPLICATION_REFER_LIST);
@@ -66,7 +67,8 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler
                 }
             }
             log.info("setting refer list if existing ga not moved to collection for Case ID: {}", caseDetails.getId());
-            setReferListForNonCollectionGeneralApplication(caseData, index, userAuthorisation);
+
+            setReferListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
 
         } else {
             log.info("setting refer list for Case ID: {}", caseDetails.getId());
@@ -92,8 +94,8 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler
 
     private void setReferListForNonCollectionGeneralApplication(Map<String, Object> caseData,
                                                                 AtomicInteger index,
-                                                                String userAuthorisation) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation);
+                                                                String userAuthorisation, String caseId) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 

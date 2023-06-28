@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestCon
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.BARRISTER_REFERENCE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.INTERVENER_SOLICITOR_REFERENCE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.RESPONDENT_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.TEST_CASE_FAMILY_MAN_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.TEST_DIVORCE_CASE_NUMBER;
@@ -57,6 +58,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_SOLICITOR_ADDED_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 
@@ -96,6 +101,7 @@ public class EmailServiceTest {
         notificationRequest.setApplicantName(APPLICANT_NAME);
         notificationRequest.setRespondentName(RESPONDENT_NAME);
         notificationRequest.setBarristerReferenceNumber(BARRISTER_REFERENCE_NUMBER);
+        notificationRequest.setIntervenerSolicitorReferenceNumber(INTERVENER_SOLICITOR_REFERENCE_NUMBER);
     }
 
     private void setConsentedData() {
@@ -562,6 +568,68 @@ public class EmailServiceTest {
         assertEquals(PHONE_OPENING_HOURS, returnedTemplateVars.get("phoneOpeningHours"));
     }
 
+    @Test
+    public void givenIntervenerAddedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+        setContestedData();
+        notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
+        notificationRequest.setIntervenerFullName("test name");
+
+        Map<String, Object> returnedTemplateVars =
+
+            emailService.buildTemplateVars(notificationRequest, FR_INTERVENER_ADDED_EMAIL.name());
+
+        assertEquals("1234567890", returnedTemplateVars.get("intervenerSolicitorReferenceNumber"));
+        assertEquals("test name", returnedTemplateVars.get("intervenerFullName"));
+        assertEquals(PHONE_OPENING_HOURS, returnedTemplateVars.get("phoneOpeningHours"));
+    }
+
+    @Test
+    public void givenIntervenerSolicitorAddedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+        setContestedData();
+        notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
+        notificationRequest.setIntervenerSolicitorFirm("test firm");
+        notificationRequest.setIntervenerFullName("test name");
+
+        Map<String, Object> returnedTemplateVars =
+
+            emailService.buildTemplateVars(notificationRequest, FR_INTERVENER_SOLICITOR_ADDED_EMAIL.name());
+
+        assertEquals("1234567890", returnedTemplateVars.get("intervenerSolicitorReferenceNumber"));
+        assertEquals("test name", returnedTemplateVars.get("intervenerFullName"));
+        assertEquals("test firm", returnedTemplateVars.get("intervenerSolicitorFirm"));
+        assertEquals(PHONE_OPENING_HOURS, returnedTemplateVars.get("phoneOpeningHours"));
+    }
+
+    public void givenIntervenerRemovedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+        setContestedData();
+        notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
+        notificationRequest.setIntervenerFullName("test name");
+
+        Map<String, Object> returnedTemplateVars =
+
+            emailService.buildTemplateVars(notificationRequest, FR_INTERVENER_REMOVED_EMAIL.name());
+
+        assertEquals("1234567890", returnedTemplateVars.get("intervenerSolicitorReferenceNumber"));
+        assertEquals("test name", returnedTemplateVars.get("intervenerFullName"));
+        assertEquals(PHONE_OPENING_HOURS, returnedTemplateVars.get("phoneOpeningHours"));
+    }
+
+    @Test
+    public void givenIntervenerSolicitorRemovedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+        setContestedData();
+        notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
+        notificationRequest.setIntervenerSolicitorFirm("test firm");
+        notificationRequest.setIntervenerFullName("test name");
+
+        Map<String, Object> returnedTemplateVars =
+
+            emailService.buildTemplateVars(notificationRequest, FR_INTERVENER_SOLICITOR_REMOVED_EMAIL.name());
+
+        assertEquals("1234567890", returnedTemplateVars.get("intervenerSolicitorReferenceNumber"));
+        assertEquals("test name", returnedTemplateVars.get("intervenerFullName"));
+        assertEquals("test firm", returnedTemplateVars.get("intervenerSolicitorFirm"));
+        assertEquals(PHONE_OPENING_HOURS, returnedTemplateVars.get("phoneOpeningHours"));
+    }
 
     private void assertContestedTemplateVariablesAreAbsent(Map<String, Object> returnedTemplateVars) {
 
