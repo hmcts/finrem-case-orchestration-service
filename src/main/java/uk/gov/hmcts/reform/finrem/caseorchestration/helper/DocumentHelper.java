@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.AddresseeDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
@@ -123,7 +123,7 @@ public class DocumentHelper {
     private final CaseDataService caseDataService;
     private final GenericDocumentService service;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-    private final LetterAddresseeGenerator letterAddresseeGenerator;
+    private final LetterAddresseeGeneratorMapper letterAddresseeGenerator;
 
     public static CtscContactDetails buildCtscContactDetails() {
         return CtscContactDetails.builder()

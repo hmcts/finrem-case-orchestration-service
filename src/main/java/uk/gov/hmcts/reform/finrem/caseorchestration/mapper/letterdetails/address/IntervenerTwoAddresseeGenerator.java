@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 
 @Component
 @Slf4j
-public class IntervenerTwoAddresseeGenerator extends IntervenerAddresseeGenerator<IntervenerTwoWrapper> {
+public class IntervenerTwoAddresseeGenerator extends IntervenerLetterAddresseeGenerator<IntervenerTwoWrapper> {
 
     @Autowired
     public IntervenerTwoAddresseeGenerator(ObjectMapper objectMapper) {

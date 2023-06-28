@@ -37,14 +37,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicantAddresseeGeneratorTest {
 
-    ApplicantAddresseeGenerator applicantAddresseeGenerator;
+    ApplicantLetterAddresseeGenerator applicantAddresseeGenerator;
 
     @Mock
     CaseDataService caseDataService;
 
     @org.junit.Before
     public void setUp() throws Exception {
-        applicantAddresseeGenerator = new ApplicantAddresseeGenerator(caseDataService);
+        applicantAddresseeGenerator = new ApplicantLetterAddresseeGenerator(caseDataService);
     }
 
     @Test

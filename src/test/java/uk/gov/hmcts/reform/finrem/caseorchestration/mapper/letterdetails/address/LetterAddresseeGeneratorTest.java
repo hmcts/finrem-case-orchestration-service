@@ -12,19 +12,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LetterAddresseeGeneratorTest {
-    LetterAddresseeGenerator letterAddresseeGenerator;
+    LetterAddresseeGeneratorMapper letterAddresseeGenerator;
     @Mock
-    ApplicantAddresseeGenerator applicantAddresseeGenerator;
+    ApplicantLetterAddresseeGenerator applicantAddresseeGenerator;
     @Mock
-    RespondentAddresseeGenerator respondentAddresseeGenerator;
+    RespondentLetterAddresseeGenerator respondentAddresseeGenerator;
     @Mock
-    IntervenerOneAddresseeGenerator intervenerOneAddresseeGenerator;
+    IntervenerOneLetterAddresseeGenerator intervenerOneAddresseeGenerator;
     @Mock
     IntervenerTwoAddresseeGenerator intervenerTwoAddresseeGenerator;
     @Mock
-    IntervenerThreeAddresseeGenerator intervenerThreeAddresseeGenerator;
+    IntervenerThreeLetterAddresseeGenerator intervenerThreeAddresseeGenerator;
     @Mock
-    IntervenerFourAddresseeGenerator intervenerFourAddresseeGenerator;
+    IntervenerFourLetterAddresseeGenerator intervenerFourAddresseeGenerator;
     @Mock
     CaseDetails caseDetails;
     @Mock
@@ -32,7 +32,7 @@ public class LetterAddresseeGeneratorTest {
 
     @Before
     public void setUp() throws Exception {
-        letterAddresseeGenerator = new LetterAddresseeGenerator(applicantAddresseeGenerator, respondentAddresseeGenerator,
+        letterAddresseeGenerator = new LetterAddresseeGeneratorMapper(applicantAddresseeGenerator, respondentAddresseeGenerator,
             intervenerOneAddresseeGenerator, intervenerTwoAddresseeGenerator, intervenerThreeAddresseeGenerator,
             intervenerFourAddresseeGenerator);
     }

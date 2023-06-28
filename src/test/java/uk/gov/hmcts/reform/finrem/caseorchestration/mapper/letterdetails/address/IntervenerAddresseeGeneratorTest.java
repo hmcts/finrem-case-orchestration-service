@@ -22,18 +22,18 @@ import static org.junit.Assert.assertNotNull;
 public class IntervenerAddresseeGeneratorTest {
 
     private ObjectMapper objectMapper;
-    IntervenerOneAddresseeGenerator intervenerOneAddresseeGenerator;
+    IntervenerOneLetterAddresseeGenerator intervenerOneAddresseeGenerator;
     IntervenerTwoAddresseeGenerator intervenerTwoAddresseeGenerator;
-    IntervenerThreeAddresseeGenerator intervenerThreeAddresseeGenerator;
-    IntervenerFourAddresseeGenerator intervenerFourAddresseeGenerator;
+    IntervenerThreeLetterAddresseeGenerator intervenerThreeAddresseeGenerator;
+    IntervenerFourLetterAddresseeGenerator intervenerFourAddresseeGenerator;
 
     @Before
     public void setUp() throws Exception {
         objectMapper = new ObjectMapper();
-        intervenerOneAddresseeGenerator = new IntervenerOneAddresseeGenerator(objectMapper);
+        intervenerOneAddresseeGenerator = new IntervenerOneLetterAddresseeGenerator(objectMapper);
         intervenerTwoAddresseeGenerator = new IntervenerTwoAddresseeGenerator(objectMapper);
-        intervenerThreeAddresseeGenerator = new IntervenerThreeAddresseeGenerator(objectMapper);
-        intervenerFourAddresseeGenerator = new IntervenerFourAddresseeGenerator(objectMapper);
+        intervenerThreeAddresseeGenerator = new IntervenerThreeLetterAddresseeGenerator(objectMapper);
+        intervenerFourAddresseeGenerator = new IntervenerFourLetterAddresseeGenerator(objectMapper);
     }
 
     @Test

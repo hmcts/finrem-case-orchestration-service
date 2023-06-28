@@ -13,7 +13,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public abstract class IntervenerAddresseeGenerator<T extends IntervenerWrapper> implements AddresseeGenerator {
+public abstract class IntervenerLetterAddresseeGenerator<T extends IntervenerWrapper> implements LetterAddresseeGenerator {
 
     protected final ObjectMapper objectMapper;
 

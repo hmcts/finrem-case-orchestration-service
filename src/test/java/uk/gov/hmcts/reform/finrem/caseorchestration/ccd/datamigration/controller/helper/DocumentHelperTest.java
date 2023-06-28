@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.AddresseeDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
@@ -97,7 +97,7 @@ public class DocumentHelperTest {
     private GenericDocumentService service;
 
     @Mock
-    private LetterAddresseeGenerator letterAddresseeGenerator;
+    private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Before

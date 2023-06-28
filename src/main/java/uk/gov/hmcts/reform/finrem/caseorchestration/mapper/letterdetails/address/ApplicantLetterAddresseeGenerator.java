@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Component
 @AllArgsConstructor
 @Slf4j
-public class ApplicantAddresseeGenerator implements AddresseeGenerator {
+public class ApplicantLetterAddresseeGenerator implements LetterAddresseeGenerator {
 
     private final CaseDataService caseDataService;
 
