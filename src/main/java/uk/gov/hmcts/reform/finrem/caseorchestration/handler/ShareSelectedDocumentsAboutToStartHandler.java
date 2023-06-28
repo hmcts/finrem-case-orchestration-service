@@ -77,6 +77,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         log.info("caseAssignedUserRoles {} caseId {}", loggedInUserCaseRole, caseId);
         if (loggedInUserCaseRole.equals(CaseRole.APP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.APP_BARRISTER.getValue())) {
             DynamicMultiSelectList sourceDocumentList = applicantDocumentsService.applicantSourceDocumentList(caseDetails);
+            log.info("Applicant sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
             if (validateSourceDocments(caseData, sourceDocumentList)) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of(DOC_ERROR)).build();
@@ -84,6 +85,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
 
             DynamicMultiSelectList roleList = applicantDocumentsService.getOtherSolicitorRoleList(caseDetails,
                 allCaseRole, loggedInUserCaseRole);
+            log.info("Applicant roleList {} caseId {}", roleList, caseId);
             if (validateSolicitorList(caseData, roleList)) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of(PARTY_ERROR)).build();
@@ -91,6 +93,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         }
         if (loggedInUserCaseRole.equals(CaseRole.RESP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.RESP_BARRISTER.getValue())) {
             DynamicMultiSelectList sourceDocumentList = respondentShareDocumentsService.respondentSourceDocumentList(caseDetails);
+            log.info("Respondent sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
             if (validateSourceDocments(caseData, sourceDocumentList)) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of(DOC_ERROR)).build();
