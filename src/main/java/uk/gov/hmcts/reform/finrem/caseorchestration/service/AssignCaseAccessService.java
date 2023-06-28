@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.searchuserrole.SearchCaseAssignedUserRolesRequest;
 
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -131,10 +130,9 @@ public class AssignCaseAccessService {
             .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
             .collect(Collectors.toList());
 
-        CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
+        return CaseAssignmentUserRolesRequest.builder()
             .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
             .build();
-        return removeCaseAssignedUserRolesRequest;
     }
 
     public void grantCaseRoleToUser(Long caseId, String userId, String caseRole, String orgId) {
@@ -279,6 +277,10 @@ public class AssignCaseAccessService {
     public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
         log.info("retrieve active user case role for caseId {}", caseId);
         String idamUserId = idamService.getIdamUserId(userAuthorisation);
+        CaseAssignmentUserRolesResource rolesResource1 = getUserRoles(caseId);
+        log.info("idamUserId {} case roles {} for caseId {}",
+            idamUserId, rolesResource1 != null ? rolesResource1 : "empty", caseId);
+
         CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
         if (rolesResource != null) {
             List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
@@ -291,7 +293,7 @@ public class AssignCaseAccessService {
                 return caseRole;
             }
         }
-        return CASE_LEVEL_ROLE;
+        return "case";
     }
 
     public String getActiveUser(String caseId, String userAuthorisation) {
