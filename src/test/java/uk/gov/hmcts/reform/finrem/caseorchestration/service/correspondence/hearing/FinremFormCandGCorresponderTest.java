@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
@@ -33,6 +34,8 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
 
     @Mock
     private GenericDocumentService genericDocumentService;
+    @Mock
+    private LetterAddresseeGenerator letterAddresseeGenerator;
 
     private static final String DATE_OF_HEARING = "2019-01-01";
 
@@ -41,7 +44,8 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
         caseDetails = caseDetails(NO_VALUE);
         applicantAndRespondentMultiLetterCorresponder =
             new FinremFormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService(objectMapper), genericDocumentService, finremCaseDetailsMapper), objectMapper);
+                new DocumentHelper(objectMapper, new CaseDataService(objectMapper), genericDocumentService, finremCaseDetailsMapper,
+                    letterAddresseeGenerator), objectMapper);
     }
 
     @Test

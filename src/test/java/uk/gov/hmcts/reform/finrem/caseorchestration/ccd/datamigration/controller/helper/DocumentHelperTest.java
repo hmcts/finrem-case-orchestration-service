@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
@@ -93,6 +94,9 @@ public class DocumentHelperTest {
     private DocumentHelper documentHelper;
     @Mock
     private GenericDocumentService service;
+
+    @Mock
+    private LetterAddresseeGenerator letterAddresseeGenerator;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Before
@@ -101,7 +105,7 @@ public class DocumentHelperTest {
         objectMapper.registerModule(new JavaTimeModule());
         CaseDataService caseDataService = new CaseDataService(objectMapper);
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-        documentHelper = new DocumentHelper(objectMapper, caseDataService, service, finremCaseDetailsMapper);
+        documentHelper = new DocumentHelper(objectMapper, caseDataService, service, finremCaseDetailsMapper, letterAddresseeGenerator);
     }
 
     @Test

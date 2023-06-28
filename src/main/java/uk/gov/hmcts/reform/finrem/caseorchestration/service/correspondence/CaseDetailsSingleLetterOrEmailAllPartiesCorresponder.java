@@ -63,13 +63,23 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
 
     protected void sendIntervenerCorrespondence(CaseDetails caseDetails, String authorisationToken) {
         final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        final List<IntervenerWrapper> interveners =  finremCaseDetails.getData().getInterveners();
+        final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
         interveners.forEach(intervenerWrapper -> {
             if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
                 log.info("Sending email correspondence to {} for case: {}",
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
                 this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
+            } else if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
+                log.info("Sending letter correspondence to {} for case: {}",
+                    intervenerWrapper.getIntervenerType().getTypeValue(),
+                    caseDetails.getId());
+                bulkPrintService.sendDocumentForPrint(
+                    getDocumentToPrint(
+                        caseDetails,
+                        authorisationToken,
+                        intervenerWrapper.getPaperNotificationRecipient()), caseDetails,
+                    intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
             }
         });
     }
