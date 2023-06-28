@@ -13,6 +13,5 @@ public class AddresseeDetails {
     private String addresseeName;
     private Map addressToSendTo;
     private String reference;
-
     private Address finremAddressToSendTo;
 }
