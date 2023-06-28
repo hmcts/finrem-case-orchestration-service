@@ -20,7 +20,7 @@ public class LetterAddresseeGeneratorTest {
     @Mock
     IntervenerOneLetterAddresseeGenerator intervenerOneAddresseeGenerator;
     @Mock
-    IntervenerTwoAddresseeGenerator intervenerTwoAddresseeGenerator;
+    IntervenerTwoLetterAddresseeGenerator intervenerTwoAddresseeGenerator;
     @Mock
     IntervenerThreeLetterAddresseeGenerator intervenerThreeAddresseeGenerator;
     @Mock

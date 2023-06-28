@@ -17,7 +17,7 @@ public class LetterAddresseeGeneratorMapper {
     private final ApplicantLetterAddresseeGenerator applicantAddresseeGenerator;
     private final RespondentLetterAddresseeGenerator respondentAddresseeGenerator;
     private final IntervenerOneLetterAddresseeGenerator intervenerOneAddresseeGenerator;
-    private final IntervenerTwoAddresseeGenerator intervenerTwoAddresseeGenerator;
+    private final IntervenerTwoLetterAddresseeGenerator intervenerTwoAddresseeGenerator;
     private final IntervenerThreeLetterAddresseeGenerator intervenerThreeAddresseeGenerator;
     private final IntervenerFourLetterAddresseeGenerator intervenerFourAddresseeGenerator;
 

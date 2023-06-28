@@ -23,7 +23,7 @@ public class IntervenerAddresseeGeneratorTest {
 
     private ObjectMapper objectMapper;
     IntervenerOneLetterAddresseeGenerator intervenerOneAddresseeGenerator;
-    IntervenerTwoAddresseeGenerator intervenerTwoAddresseeGenerator;
+    IntervenerTwoLetterAddresseeGenerator intervenerTwoAddresseeGenerator;
     IntervenerThreeLetterAddresseeGenerator intervenerThreeAddresseeGenerator;
     IntervenerFourLetterAddresseeGenerator intervenerFourAddresseeGenerator;
 
@@ -31,7 +31,7 @@ public class IntervenerAddresseeGeneratorTest {
     public void setUp() throws Exception {
         objectMapper = new ObjectMapper();
         intervenerOneAddresseeGenerator = new IntervenerOneLetterAddresseeGenerator(objectMapper);
-        intervenerTwoAddresseeGenerator = new IntervenerTwoAddresseeGenerator(objectMapper);
+        intervenerTwoAddresseeGenerator = new IntervenerTwoLetterAddresseeGenerator(objectMapper);
         intervenerThreeAddresseeGenerator = new IntervenerThreeLetterAddresseeGenerator(objectMapper);
         intervenerFourAddresseeGenerator = new IntervenerFourLetterAddresseeGenerator(objectMapper);
     }
