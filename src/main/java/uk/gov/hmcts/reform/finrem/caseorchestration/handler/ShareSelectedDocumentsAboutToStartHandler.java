@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -72,13 +73,12 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                 .errors(List.of("Logged in user do not have sufficient role to execute this event")).build();
         }
-
         List<CaseAssignmentUserRole> allCaseRole = accessService.getAllCaseRole(String.valueOf(caseId));
         log.info("caseAssignedUserRoles {} caseId {}", loggedInUserCaseRole, caseId);
         if (loggedInUserCaseRole.equals(CaseRole.APP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.APP_BARRISTER.getValue())) {
             DynamicMultiSelectList sourceDocumentList = applicantDocumentsService.applicantSourceDocumentList(caseDetails);
             log.info("Applicant sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
-            if (validateSourceDocments(caseData, sourceDocumentList)) {
+            if (validateSourceDocments(caseData, sourceDocumentList, "applicant", caseId)) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of(DOC_ERROR)).build();
             }
@@ -86,7 +86,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
             DynamicMultiSelectList roleList = applicantDocumentsService.getOtherSolicitorRoleList(caseDetails,
                 allCaseRole, loggedInUserCaseRole);
             log.info("Applicant roleList {} caseId {}", roleList, caseId);
-            if (validateSolicitorList(caseData, roleList)) {
+            if (validateSolicitorList(caseData, roleList, "applicant", caseId)) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of(PARTY_ERROR)).build();
             }
@@ -94,7 +94,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         if (loggedInUserCaseRole.equals(CaseRole.RESP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.RESP_BARRISTER.getValue())) {
             DynamicMultiSelectList sourceDocumentList = respondentShareDocumentsService.respondentSourceDocumentList(caseDetails);
             log.info("Respondent sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
-            if (validateSourceDocments(caseData, sourceDocumentList)) {
+            if (validateSourceDocments(caseData, sourceDocumentList, "respondent", caseId)) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of(DOC_ERROR)).build();
             }
@@ -102,7 +102,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
             DynamicMultiSelectList roleList = respondentShareDocumentsService.getOtherSolicitorRoleList(caseDetails,
                 allCaseRole, loggedInUserCaseRole);
             log.info("Respondent roleList {} caseId {}", roleList, caseId);
-            if (validateSolicitorList(caseData, roleList)) {
+            if (validateSolicitorList(caseData, roleList, "respondent", caseId)) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of(PARTY_ERROR)).build();
             }
@@ -111,14 +111,14 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
             DynamicMultiSelectList sourceDocumentList
                 = intervenerShareDocumentsService.intervenerSourceDocumentList(caseDetails, loggedInUserCaseRole);
             log.info("Intervener sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
-            if (validateSourceDocments(caseData, sourceDocumentList)) {
+            if (validateSourceDocments(caseData, sourceDocumentList, "intervener", caseId)) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of(DOC_ERROR)).build();
             }
             DynamicMultiSelectList roleList = intervenerShareDocumentsService.getOtherSolicitorRoleList(caseDetails,
                 allCaseRole, loggedInUserCaseRole);
             log.info("Intervener roleList {} caseId {}", roleList, caseId);
-            if (validateSolicitorList(caseData, roleList)) {
+            if (validateSolicitorList(caseData, roleList, "intervener", caseId)) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of(PARTY_ERROR)).build();
             }
@@ -126,19 +126,31 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private static boolean validateSolicitorList(FinremCaseData caseData, DynamicMultiSelectList roleList) {
-        if (roleList != null && roleList.getListItems() != null) {
+    private boolean validateSolicitorList(FinremCaseData caseData,
+                                                 DynamicMultiSelectList roleList,
+                                                 String party,
+                                                 Long caseId) {
+        String logMessage = "party {} for caseId {}";
+        if (roleList != null && ObjectUtils.isNotEmpty(roleList.getListItems())) {
+            log.info("Doc If" + logMessage, party, caseId);
             caseData.setSolicitorRoleList(roleList);
         } else {
+            log.info("Doc Else" + logMessage, party, caseId);
             return true;
         }
         return false;
     }
 
-    private static boolean validateSourceDocments(FinremCaseData caseData, DynamicMultiSelectList sourceDocumentList) {
-        if (sourceDocumentList != null && sourceDocumentList.getListItems() != null) {
+    private boolean validateSourceDocments(FinremCaseData caseData,
+                                                  DynamicMultiSelectList sourceDocumentList,
+                                                  String party,
+                                                  Long caseId) {
+        String logMessage = "party {} for caseId {}";
+        if (sourceDocumentList != null && ObjectUtils.isNotEmpty(sourceDocumentList.getListItems())) {
+            log.info("Role If" + logMessage, party, caseId);
             caseData.setSourceDocumentList(sourceDocumentList);
         } else {
+            log.info("Role else" + logMessage, party, caseId);
             return true;
         }
         return false;
