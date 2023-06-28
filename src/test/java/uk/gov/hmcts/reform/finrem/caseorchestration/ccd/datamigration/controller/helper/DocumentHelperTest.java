@@ -434,7 +434,16 @@ public class DocumentHelperTest {
 
     @Test
     public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated() {
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), RESPONDENT);
+
+        CaseDetails caseDetails = defaultConsentedCaseDetails();
+
+        when(letterAddresseeGenerator.generate(caseDetails, RESPONDENT)).thenReturn(
+            AddresseeDetails.builder()
+                .addresseeName("addresseeName")
+                .reference("reference")
+                .addressToSendTo(buildAddress("Address line 1")).build());
+
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(caseDetails, RESPONDENT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
