@@ -383,14 +383,14 @@ public class DocumentHelperTest {
 
     @Test
     public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated() {
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), APPLICANT);
+        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
 
         when(letterAddresseeGenerator.generate(preparedCaseDetails, APPLICANT)).thenReturn(
             AddresseeDetails.builder()
                 .addresseeName("addresseeName")
                 .reference("reference")
                 .addressToSendTo(buildAddress("Address line 1")).build());
-
+        preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), APPLICANT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -409,6 +409,12 @@ public class DocumentHelperTest {
     @Test
     public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated_finrem() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
+
+        when(letterAddresseeGenerator.generate(finremCaseDetails, APPLICANT)).thenReturn(
+            AddresseeDetails.builder()
+                .addresseeName("addresseeName")
+                .reference("reference")
+                .finremAddressToSendTo(buildFinremAddress("Address line 1")).build());
 
         when(letterAddresseeGenerator.generate(finremCaseDetails, APPLICANT)).thenReturn(
             AddresseeDetails.builder()
@@ -462,7 +468,16 @@ public class DocumentHelperTest {
 
     @Test
     public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated_finrem() {
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedFinremCaseDetails(), RESPONDENT);
+
+        CaseDetails caseDetails = defaultConsentedCaseDetails();
+
+        when(letterAddresseeGenerator.generate(caseDetails, RESPONDENT)).thenReturn(
+            AddresseeDetails.builder()
+                .addresseeName("addresseeName")
+                .reference("reference")
+                .addressToSendTo(buildAddress("Address line 1")).build());
+
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(caseDetails, RESPONDENT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
