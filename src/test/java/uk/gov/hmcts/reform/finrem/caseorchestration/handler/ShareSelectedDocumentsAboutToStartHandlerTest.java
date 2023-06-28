@@ -37,7 +37,10 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
@@ -165,6 +168,125 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
         verify(intervenerShareDocumentsService).intervenerSourceDocumentList(any(), any());
         verify(intervenerShareDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenInvokedSharedServiceAsIntervenerSolicitorNoOtherPartiesDigital__thenHandlerWillShowMessage() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        when(caseAssignedRoleService.getCaseAssignedUserRole(any(), any())).thenReturn(getCaseAssignedUserRolesResource("[INTVRSOLICITOR1]"));
+        when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
+        when(intervenerShareDocumentsService.intervenerSourceDocumentList(caseDetails, "[INTVRSOLICITOR1]")).thenReturn(getDynamicList(data));
+        when(intervenerShareDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(new DynamicMultiSelectList());
+        when(applicantDocumentsService.getIntervenerRoles(any())).thenReturn(true);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
+        assertNull(handle.getData().getSolicitorRoleList());
+        assertTrue(handle.getErrors().contains("\nThere is/are no party/parties available to share documents."));
+
+        verify(intervenerShareDocumentsService).intervenerSourceDocumentList(any(), any());
+        verify(intervenerShareDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenInvokedSharedServiceAsIntervenerSolicitorNoDocumentAvailableToShare_thenHandlerWillShowMessage() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        when(caseAssignedRoleService.getCaseAssignedUserRole(any(), any())).thenReturn(getCaseAssignedUserRolesResource("[INTVRSOLICITOR1]"));
+        when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
+        when(intervenerShareDocumentsService.intervenerSourceDocumentList(caseDetails, "[INTVRSOLICITOR1]")).thenReturn(new DynamicMultiSelectList());
+        when(applicantDocumentsService.getIntervenerRoles(any())).thenReturn(true);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertNull(handle.getData().getSourceDocumentList());
+        assertNull(handle.getData().getSolicitorRoleList());
+        assertTrue(handle.getErrors().contains("\nThere are no documents available to share."));
+        //assertEquals("\nThere is/are no party/parties available to share documents.", handle.getErrors().get(1));
+
+        verify(intervenerShareDocumentsService).intervenerSourceDocumentList(any(), any());
+        verify(intervenerShareDocumentsService, times(0)).getOtherSolicitorRoleList(any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenInvokedSharedServicAppSolicitorNoDocumentAvailableToShare_thenHandlerWillShowMessage() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        when(caseAssignedRoleService.getCaseAssignedUserRole(any(), any())).thenReturn(getCaseAssignedUserRolesResource("[APPSOLICITOR]"));
+        when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
+        when(applicantDocumentsService.applicantSourceDocumentList(caseDetails)).thenReturn(new DynamicMultiSelectList());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertNull(handle.getData().getSourceDocumentList());
+        assertNull(handle.getData().getSolicitorRoleList());
+
+        assertTrue(handle.getErrors().contains("\nThere are no documents available to share."));
+
+        verify(applicantDocumentsService).applicantSourceDocumentList(any());
+        verify(applicantDocumentsService, times(0)).getOtherSolicitorRoleList(any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenInvokedSharedServiceAsAppSolicitorNoOtherPartiesDigital__thenHandlerWillShowMessage() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        when(caseAssignedRoleService.getCaseAssignedUserRole(any(), any())).thenReturn(getCaseAssignedUserRolesResource("[APPSOLICITOR]"));
+        when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
+        when(applicantDocumentsService.applicantSourceDocumentList(caseDetails)).thenReturn(getDynamicList(data));
+        when(applicantDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(new DynamicMultiSelectList());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
+        assertNull(handle.getData().getSolicitorRoleList());
+        assertTrue(handle.getErrors().contains("\nThere is/are no party/parties available to share documents."));
+
+        verify(applicantDocumentsService).applicantSourceDocumentList(any());
+        verify(applicantDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenInvokedSharedServiceAsRespondentSolicitorNoDocumentsAvailable_thenHandlerWillShowMessage() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        when(caseAssignedRoleService.getCaseAssignedUserRole(any(), any())).thenReturn(getCaseAssignedUserRolesResource("[RESPSOLICITOR]"));
+        when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
+        when(respondentShareDocumentsService.respondentSourceDocumentList(caseDetails)).thenReturn(new DynamicMultiSelectList());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertNull(handle.getData().getSourceDocumentList());
+        assertNull(handle.getData().getSolicitorRoleList());
+
+        assertTrue(handle.getErrors().contains("\nThere are no documents available to share."));
+
+        verify(respondentShareDocumentsService).respondentSourceDocumentList(any());
+        verify(respondentShareDocumentsService, times(0)).getOtherSolicitorRoleList(any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenInvokedSharedServiceAsRespSolicitorNoOtherPartiesDigital__thenHandlerWillShowMessage() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        when(caseAssignedRoleService.getCaseAssignedUserRole(any(), any())).thenReturn(getCaseAssignedUserRolesResource("[RESPSOLICITOR]"));
+        when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
+        when(respondentShareDocumentsService.respondentSourceDocumentList(caseDetails)).thenReturn(getDynamicList(data));
+        when(respondentShareDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(new DynamicMultiSelectList());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
+        assertNull(handle.getData().getSolicitorRoleList());
+        assertTrue(handle.getErrors().contains("\nThere is/are no party/parties available to share documents."));
+
+        verify(respondentShareDocumentsService).respondentSourceDocumentList(any());
+        verify(respondentShareDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

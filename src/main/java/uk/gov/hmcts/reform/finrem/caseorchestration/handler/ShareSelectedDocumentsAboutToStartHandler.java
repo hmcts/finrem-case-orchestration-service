@@ -30,6 +30,8 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
     private final IntervenerShareDocumentsService intervenerShareDocumentsService;
     private final CaseAssignedRoleService caseAssignedRoleService;
     private final AssignCaseAccessService accessService;
+    private static final String DOC_ERROR = "\nThere are no documents available to share.";
+    private static final String PARTY_ERROR = "\nThere is/are no party/parties available to share documents.";
 
     public ShareSelectedDocumentsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      ApplicantShareDocumentsService applicantDocumentsService,
@@ -73,32 +75,70 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
 
         List<CaseAssignmentUserRole> allCaseRole = accessService.getAllCaseRole(String.valueOf(caseId));
         log.info("caseAssignedUserRoles {} caseId {}", loggedInUserCaseRole, caseId);
-
         if (loggedInUserCaseRole.equals(CaseRole.APP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.APP_BARRISTER.getValue())) {
             DynamicMultiSelectList sourceDocumentList = applicantDocumentsService.applicantSourceDocumentList(caseDetails);
-            caseData.setSourceDocumentList(sourceDocumentList);
+            if (validateSourceDocments(caseData, sourceDocumentList)) {
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                    .errors(List.of(DOC_ERROR)).build();
+            }
+
             DynamicMultiSelectList roleList = applicantDocumentsService.getOtherSolicitorRoleList(caseDetails,
                 allCaseRole, loggedInUserCaseRole);
-            caseData.setSolicitorRoleList(roleList);
+            if (validateSolicitorList(caseData, roleList)) {
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                    .errors(List.of(PARTY_ERROR)).build();
+            }
         }
         if (loggedInUserCaseRole.equals(CaseRole.RESP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.RESP_BARRISTER.getValue())) {
             DynamicMultiSelectList sourceDocumentList = respondentShareDocumentsService.respondentSourceDocumentList(caseDetails);
-            caseData.setSourceDocumentList(sourceDocumentList);
+            if (validateSourceDocments(caseData, sourceDocumentList)) {
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                    .errors(List.of(DOC_ERROR)).build();
+            }
+
             DynamicMultiSelectList roleList = respondentShareDocumentsService.getOtherSolicitorRoleList(caseDetails,
                 allCaseRole, loggedInUserCaseRole);
-            caseData.setSolicitorRoleList(roleList);
+            log.info("Respondent roleList {} caseId {}", roleList, caseId);
+            if (validateSolicitorList(caseData, roleList)) {
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                    .errors(List.of(PARTY_ERROR)).build();
+            }
         }
         if (applicantDocumentsService.getIntervenerRoles(loggedInUserCaseRole)) {
             DynamicMultiSelectList sourceDocumentList
                 = intervenerShareDocumentsService.intervenerSourceDocumentList(caseDetails, loggedInUserCaseRole);
-            log.info("sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
-            caseData.setSourceDocumentList(sourceDocumentList);
+            log.info("Intervener sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
+            if (validateSourceDocments(caseData, sourceDocumentList)) {
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                    .errors(List.of(DOC_ERROR)).build();
+            }
             DynamicMultiSelectList roleList = intervenerShareDocumentsService.getOtherSolicitorRoleList(caseDetails,
                 allCaseRole, loggedInUserCaseRole);
-            log.info("roleList {} caseId {}", roleList, caseId);
-            caseData.setSolicitorRoleList(roleList);
+            log.info("Intervener roleList {} caseId {}", roleList, caseId);
+            if (validateSolicitorList(caseData, roleList)) {
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                    .errors(List.of(PARTY_ERROR)).build();
+            }
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+    }
+
+    private static boolean validateSolicitorList(FinremCaseData caseData, DynamicMultiSelectList roleList) {
+        if (roleList != null && roleList.getListItems() != null) {
+            caseData.setSolicitorRoleList(roleList);
+        } else {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean validateSourceDocments(FinremCaseData caseData, DynamicMultiSelectList sourceDocumentList) {
+        if (sourceDocumentList != null && sourceDocumentList.getListItems() != null) {
+            caseData.setSourceDocumentList(sourceDocumentList);
+        } else {
+            return true;
+        }
+        return false;
     }
 
 
