@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.Map;
 import java.util.Objects;
@@ -33,21 +32,9 @@ public class AddresseeGeneratorHelper {
 
     private static Addressee getAddressee(FinremCaseData caseData,
                                           DocumentHelper.PaperNotificationRecipient recipient) {
-        if (recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT) {
-            return getApplicantAddressee(caseData);
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.RESPONDENT) {
-            return getRespondentAddressee(caseData);
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE) {
-            return getIntervenerAddressee(caseData.getIntervenerOneWrapper());
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO) {
-            return getIntervenerAddressee(caseData.getIntervenerTwoWrapper());
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE) {
-            return getIntervenerAddressee(caseData.getIntervenerThreeWrapper());
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR) {
-            return getIntervenerAddressee(caseData.getIntervenerFourWrapper());
-        } else {
-            return null;
-        }
+        return recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT
+            ? getApplicantAddressee(caseData)
+            : getRespondentAddressee(caseData);
     }
 
     private static Addressee getApplicantAddressee(FinremCaseData caseData) {
@@ -70,14 +57,6 @@ public class AddresseeGeneratorHelper {
             : caseData.getContactDetailsWrapper().getApplicantAddress();
 
     }
-
-    public static Addressee getIntervenerAddressee(IntervenerWrapper intervenerWrapper) {
-        return Addressee.builder()
-            .name(intervenerWrapper.getIntervenerName())
-            .formattedAddress(formatAddressForLetterPrinting(intervenerWrapper.getIntervenerAddress()))
-            .build();
-    }
-
 
     private static Addressee getRespondentAddressee(FinremCaseData caseData) {
         return Addressee.builder()

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails;
 
 import lombok.Builder;
 import lombok.Data;
