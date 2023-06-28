@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.webjars.NotFoundException;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -34,28 +33,20 @@ public class AddresseeGeneratorHelper {
 
     private static Addressee getAddressee(FinremCaseData caseData,
                                           DocumentHelper.PaperNotificationRecipient recipient) {
-        switch (recipient) {
-            case APPLICANT -> {
-                return getApplicantAddressee(caseData);
-            }
-            case RESPONDENT -> {
-                return getRespondentAddressee(caseData);
-            }
-            case INTERVENER_ONE -> {
-                return getIntvrAddressee(caseData.getIntervenerOneWrapper());
-            }
-            case INTERVENER_TWO -> {
-                return getIntvrAddressee(caseData.getIntervenerTwoWrapper());
-            }
-            case INTERVENER_THREE -> {
-                return getIntvrAddressee(caseData.getIntervenerThreeWrapper());
-            }
-            case INTERVENER_FOUR -> {
-                return getIntvrAddressee(caseData.getIntervenerFourWrapper());
-            }
-            default -> {
-                throw new NotFoundException("The addressee was not recognised as a valid recipient");
-            }
+        if (recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT) {
+            return getApplicantAddressee(caseData);
+        } else if (recipient == DocumentHelper.PaperNotificationRecipient.RESPONDENT) {
+            return getRespondentAddressee(caseData);
+        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE) {
+            return getIntervenerAddressee(caseData.getIntervenerOneWrapper());
+        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO) {
+            return getIntervenerAddressee(caseData.getIntervenerTwoWrapper());
+        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE) {
+            return getIntervenerAddressee(caseData.getIntervenerThreeWrapper());
+        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR) {
+            return getIntervenerAddressee(caseData.getIntervenerFourWrapper());
+        } else {
+            return null;
         }
     }
 
@@ -98,10 +89,10 @@ public class AddresseeGeneratorHelper {
             : caseData.getContactDetailsWrapper().getRespondentAddress();
     }
 
-    private static Addressee getIntvrAddressee(IntervenerWrapper wrapper) {
+    private static Addressee getIntervenerAddressee(IntervenerWrapper intervenerWrapper) {
         return Addressee.builder()
-            .name(getIntvrName(wrapper))
-            .formattedAddress(formatAddressForLetterPrinting(getIntvrAddress(wrapper)))
+            .name(intervenerWrapper.getIntervenerName())
+            .formattedAddress(formatAddressForLetterPrinting(intervenerWrapper.getIntervenerAddress()))
             .build();
     }
 

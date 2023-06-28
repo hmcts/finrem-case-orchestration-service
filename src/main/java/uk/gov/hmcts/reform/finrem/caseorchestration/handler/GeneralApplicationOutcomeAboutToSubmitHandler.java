@@ -73,8 +73,11 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
             service.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
             caseData.getGeneralApplicationWrapper().setGeneralApplications(
                 helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
-            caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
-                x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+            if (caseData.getGeneralApplicationWrapper().getGeneralApplications() != null
+                && !caseData.getGeneralApplicationWrapper().getGeneralApplications().isEmpty()) {
+                caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
+                    x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+            }
             caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcome(null);
             caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeOther(null);
             caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeList(null);
@@ -97,8 +100,11 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
             updateStatus(caseData, data, status);
             existingGeneralApplication.add(data);
             service.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
-            caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
-                x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+            if (caseData.getGeneralApplicationWrapper().getGeneralApplications() != null
+                && !caseData.getGeneralApplicationWrapper().getGeneralApplications().isEmpty()) {
+                caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
+                    x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+            }
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeList(null);

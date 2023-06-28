@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -49,6 +50,8 @@ public class GenerateCoverSheetService {
     private final CaseDataService caseDataService;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
 
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+
     @Deprecated
     public CaseDocument generateApplicantCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
@@ -87,32 +90,24 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 
-    public CaseDocument generateIntervener1CoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
-        log.info("Generating Intervener One cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+    @Deprecated
+    public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails,
+                                                     final String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        return generateCoverSheet(finremCaseDetails, authorisationToken, recipient);
 
-        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
     }
 
-    public CaseDocument generateIntervener2CoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
-        log.info("Generating Intervener Two cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+    public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
+                                                     final String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
 
-        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO);
-    }
-
-    public CaseDocument generateIntervener3CoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
-        log.info("Generating Intervener Three cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
-
-        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE);
-    }
-
-    public CaseDocument generateIntervener4CoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
-        log.info("Generating Intervener Four cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
-
-        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR);
+        return generateCoverSheet(caseDetails, authorisationToken, recipient);
     }
 
     @Deprecated
@@ -141,7 +136,6 @@ public class GenerateCoverSheetService {
             caseDetails.getId().toString());
     }
 
-    @Deprecated
     private void prepareCoverSheet(CaseDetails caseDetails, String partyAddressCcdFieldName,
                                    String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
                                    String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
@@ -159,18 +153,27 @@ public class GenerateCoverSheetService {
         } else {
             boolean sendToSolicitor = addressFoundInCaseData == AddressFoundInCaseData.SOLICITOR;
 
-            Addressee addressee = Addressee.builder()
-                .name(sendToSolicitor
-                    ? (String) caseData.get(solicitorNameCcdFieldName)
-                    : partyName(caseData.get(partyFirstMiddleNameCcdFieldName), caseData.get(partyLastNameCcdFieldName)))
-                .formattedAddress(documentHelper.formatAddressForLetterPrinting(sendToSolicitor
-                    ? (Map) caseData.get(solicitorAddressCcdFieldName)
-                    : (Map) caseData.get(partyAddressCcdFieldName)))
-                .build();
+            Addressee addressee =
+                buildAddressee(partyAddressCcdFieldName, solicitorAddressCcdFieldName, solicitorNameCcdFieldName, partyFirstMiddleNameCcdFieldName,
+                    partyLastNameCcdFieldName, caseData, sendToSolicitor);
             caseData.put(ADDRESSEE, addressee);
             caseData.put(COURT_CONTACT_DETAILS, formatCtscContactDetailsForCoversheet());
             caseData.put(CASE_NUMBER, caseDataService.nullToEmpty(caseDetails.getId()));
         }
+    }
+
+    private Addressee buildAddressee(String partyAddressCcdFieldName, String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
+                                     String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName, Map<String, Object> caseData,
+                                     boolean sendToSolicitor) {
+        Addressee addressee = Addressee.builder()
+            .name(sendToSolicitor
+                ? (String) caseData.get(solicitorNameCcdFieldName)
+                : partyName(caseData.get(partyFirstMiddleNameCcdFieldName), caseData.get(partyLastNameCcdFieldName)))
+            .formattedAddress(documentHelper.formatAddressForLetterPrinting(sendToSolicitor
+                ? (Map) caseData.get(solicitorAddressCcdFieldName)
+                : (Map) caseData.get(partyAddressCcdFieldName)))
+            .build();
+        return addressee;
     }
 
     private String formatCtscContactDetailsForCoversheet() {

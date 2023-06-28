@@ -13,9 +13,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.io.IOException;
@@ -84,50 +83,6 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGenerateIntervenerOneCoverSheet() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateIntervener1CoverSheet(caseDetailsWithSolicitors(), AUTH_TOKEN);
-
-        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
-        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
-        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
-
-        assertCoversheetCalledWithRequiredData();
-    }
-
-    @Test
-    public void shouldGenerateIntervenerTwoCoverSheet() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateIntervener2CoverSheet(caseDetailsWithSolicitors(), AUTH_TOKEN);
-
-        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
-        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
-        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
-
-        assertCoversheetCalledWithRequiredData();
-    }
-
-    @Test
-    public void shouldGenerateIntervenerThreeCoverSheet() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateIntervener3CoverSheet(caseDetailsWithSolicitors(), AUTH_TOKEN);
-
-        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
-        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
-        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
-
-        assertCoversheetCalledWithRequiredData();
-    }
-
-    @Test
-    public void shouldGenerateIntervenerFourCoverSheet() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateIntervener4CoverSheet(caseDetailsWithSolicitors(), AUTH_TOKEN);
-
-        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
-        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
-        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
-
-        assertCoversheetCalledWithRequiredData();
-    }
-
-    @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantAddressWhenApplicantSolicitorAddressIsEmpty() throws Exception {
         FinremCaseDetails caseDetails = caseDetailsWithEmptySolAddress();
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
@@ -168,50 +123,6 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGenerateIntervenerCoverSheetUsingIntervenerOneAddress() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithSolicitors();
-        FinremCaseData caseData = caseDetails.getData();
-        Address address1 = Address.builder().addressLine1("234 IntervenerOne Solicitor Street")
-            .addressLine2("Canning Town").county("Greater London").postCode("E16 W1A").build();
-        caseData.getIntervenerOneWrapper().setIntervenerAddress(address1);
-        generateCoverSheetService.generateIntervener1CoverSheet(caseDetails, AUTH_TOKEN);
-        assertCoversheetAddress("234 IntervenerOne Solicitor Street\nCanning Town\nGreater London\nE16 W1A");
-    }
-
-    @Test
-    public void shouldGenerateIntervenerCoverSheetUsingIntervenerTwoAddress() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithSolicitors();
-        FinremCaseData caseData = caseDetails.getData();
-        Address address2 = Address.builder().addressLine1("345 IntervenerTwo Solicitor Street")
-            .addressLine2("Canning Town").county("Greater London").postCode("E16 W1B").build();
-        caseData.getIntervenerTwoWrapper().setIntervenerAddress(address2);
-        generateCoverSheetService.generateIntervener2CoverSheet(caseDetails, AUTH_TOKEN);
-        assertCoversheetAddress("345 IntervenerTwo Solicitor Street\nCanning Town\nGreater London\nE16 W1B");
-    }
-
-    @Test
-    public void shouldGenerateIntervenerCoverSheetUsingIntervenerThreeAddress() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithSolicitors();
-        FinremCaseData caseData = caseDetails.getData();
-        Address address3 = Address.builder().addressLine1("456 IntervenerThree Solicitor Street")
-            .addressLine2("Canning Town").county("Greater London").postCode("E16 W1C").build();
-        caseData.getIntervenerThreeWrapper().setIntervenerAddress(address3);
-        generateCoverSheetService.generateIntervener3CoverSheet(caseDetails, AUTH_TOKEN);
-        assertCoversheetAddress("456 IntervenerThree Solicitor Street\nCanning Town\nGreater London\nE16 W1C");
-    }
-
-    @Test
-    public void shouldGenerateIntervenerCoverSheetUsingIntervenerFourAddress() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithSolicitors();
-        FinremCaseData caseData = caseDetails.getData();
-        Address address4 = Address.builder().addressLine1("567 IntervenerFour Solicitor Street")
-            .addressLine2("Canning Town").county("Greater London").postCode("E16 W1D").build();
-        caseData.getIntervenerFourWrapper().setIntervenerAddress(address4);
-        generateCoverSheetService.generateIntervener4CoverSheet(caseDetails, AUTH_TOKEN);
-        assertCoversheetAddress("567 IntervenerFour Solicitor Street\nCanning Town\nGreater London\nE16 W1D");
-    }
-
-    @Test
     public void shouldGenerateRespondentCoverSheetUsingRespondentSolicitorAddress() throws Exception {
         FinremCaseDetails caseDetails = caseDetailsWithSolicitors();
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
@@ -226,30 +137,8 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
         assertAddresseeName(1, "Mr J Solicitor");
 
-        FinremCaseData caseData = caseDetails.getData();
-
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         assertAddresseeName(2, "Ms J Solicitor");
-
-        caseData.getIntervenerOneWrapper().setIntervenerSolEmail("kerrykat@gmail.com");
-        caseData.getIntervenerOneWrapper().setIntervenerSolName("Ms K Solicitor");
-        generateCoverSheetService.generateIntervener1CoverSheet(caseDetails, AUTH_TOKEN);
-        assertAddresseeName(3, "Ms K Solicitor");
-
-        caseData.getIntervenerTwoWrapper().setIntervenerSolEmail("lewishamil@gmail.com");
-        caseData.getIntervenerTwoWrapper().setIntervenerSolName("Mr L Solicitor");
-        generateCoverSheetService.generateIntervener2CoverSheet(caseDetails, AUTH_TOKEN);
-        assertAddresseeName(4, "Mr L Solicitor");
-
-        caseData.getIntervenerThreeWrapper().setIntervenerSolEmail("mandymoore@hotmail.com");
-        caseData.getIntervenerThreeWrapper().setIntervenerSolName("Ms M Solicitor");
-        generateCoverSheetService.generateIntervener3CoverSheet(caseDetails, AUTH_TOKEN);
-        assertAddresseeName(5, "Ms M Solicitor");
-
-        caseData.getIntervenerFourWrapper().setIntervenerSolEmail("nihalarthanayake@hotmail.com");
-        caseData.getIntervenerFourWrapper().setIntervenerSolName("Mr N Solicitor");
-        generateCoverSheetService.generateIntervener4CoverSheet(caseDetails, AUTH_TOKEN);
-        assertAddresseeName(6, "Mr N Solicitor");
     }
 
     @Test
@@ -259,26 +148,25 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
         assertAddresseeName(1, "John Doe");
 
-        FinremCaseData caseData = caseDetails.getData();
-
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         assertAddresseeName(2, "Jane Doe");
+    }
 
-        caseData.getIntervenerOneWrapper().setIntervenerName("Janice Doe");
-        generateCoverSheetService.generateIntervener1CoverSheet(caseDetails, AUTH_TOKEN);
-        assertAddresseeName(3, "Janice Doe");
 
-        caseData.getIntervenerTwoWrapper().setIntervenerName("Janet Doe");
-        generateCoverSheetService.generateIntervener2CoverSheet(caseDetails, AUTH_TOKEN);
-        assertAddresseeName(4, "Janet Doe");
+    @Test
+    public void shouldGenerateIntervenerCoverSheet() throws Exception {
+        FinremCaseDetails caseDetails = caseDetailsWithIntervener1Unrepresented();
 
-        caseData.getIntervenerThreeWrapper().setIntervenerName("James Doe");
-        generateCoverSheetService.generateIntervener3CoverSheet(caseDetails, AUTH_TOKEN);
-        assertAddresseeName(5, "James Doe");
+        CaseDocument caseDocument =
+            generateCoverSheetService.generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN,
+                DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
 
-        caseData.getIntervenerFourWrapper().setIntervenerName("Jerry Doe");
-        generateCoverSheetService.generateIntervener4CoverSheet(caseDetails, AUTH_TOKEN);
-        assertAddresseeName(6, "Jerry Doe");
+        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
+        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
+        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
+
+        assertCoversheetAddressFromMap("Intervener 1 Address Line 1\nIntervener 1 Address Line 2"
+            + "\nIntervener 1 County\nIntervener 1 Post Town\nIntervener 1 Post Code");
     }
 
     private FinremCaseDetails caseDetailsConsented() throws Exception {
@@ -305,6 +193,14 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
     private FinremCaseDetails caseDetailsWithSolicitors() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-with-solicitors.json")) {
+            return getFinremCaseDetails(resourceAsStream);
+        }
+    }
+
+
+    private FinremCaseDetails caseDetailsWithIntervener1Unrepresented() throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json")) {
             return getFinremCaseDetails(resourceAsStream);
         }
     }
@@ -351,5 +247,13 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         MatcherAssert.assertThat(data, hasKey(COURT_CONTACT_DETAILS));
         assertEquals(expectedCourtContactDetails, data.get(COURT_CONTACT_DETAILS));
         MatcherAssert.assertThat(data, hasKey(CASE_NUMBER));
+    }
+
+    private void assertCoversheetAddressFromMap(String formattedAddress) {
+        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(), generateDocumentCaseDetailsCaptor.capture(),
+            any(), any(), any());
+        Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptor);
+        Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
+        assertThat(addressee.getFormattedAddress(), is(formattedAddress));
     }
 }

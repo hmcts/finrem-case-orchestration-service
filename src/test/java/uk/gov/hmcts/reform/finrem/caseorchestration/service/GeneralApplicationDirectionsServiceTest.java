@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
@@ -154,7 +155,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(1)).printIntervener1Documents(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printIntervenerDocuments(
+            any(IntervenerWrapper.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
     }
 
     @Test
@@ -169,7 +171,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(1)).printIntervener2Documents(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printIntervenerDocuments(
+            any(IntervenerWrapper.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
     }
 
     @Test
@@ -184,7 +187,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(1)).printIntervener3Documents(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printIntervenerDocuments(
+            any(IntervenerWrapper.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
     }
 
     @Test
@@ -199,7 +203,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(1)).printIntervener4Documents(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printIntervenerDocuments(
+            any(IntervenerWrapper.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
     }
 
     @Test

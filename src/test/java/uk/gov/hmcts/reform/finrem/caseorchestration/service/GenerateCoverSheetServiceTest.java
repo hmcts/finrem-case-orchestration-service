@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,9 +14,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.io.InputStream;
 import java.util.LinkedHashMap;
@@ -57,7 +55,8 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
 
     @Captor
-    private ArgumentCaptor<Map<String, Object>> generateDocumentCaseDetailsCaptorFinrem;
+    private ArgumentCaptor<Map<String, Object>> generateDocumentCaseDetailsMapCaptor;
+
 
     @Before
     public void setup() {
@@ -166,17 +165,34 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertAddresseeName(2, "Jane Doe");
     }
 
+
+    @Test
+    public void shouldGenerateIntervenerCoverSheet() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithIntervener1Unrepresented();
+
+        CaseDocument caseDocument = generateCoverSheetService.generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
+
+        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
+        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
+        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
+
+        assertCoversheetAddressFromMap("Intervener 1 Address Line 1\nIntervener 1 Address Line 2"
+            + "\nIntervener 1 County\nIntervener 1 Post Town\nIntervener 1 Post Code");
+    }
+
     private CaseDetails caseDetailsConsented() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
+
     }
 
-    private FinremCaseDetails finremCaseDetailsConsented() throws Exception {
+    private CaseDetails caseDetailsWithIntervener1Unrepresented() throws Exception {
         try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
-            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
 
@@ -231,41 +247,13 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertThat(data, hasKey(CASE_NUMBER));
     }
 
-
-    private void assertCoversheetAddressFinrem(String formattedAddress) {
-        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
-            generateDocumentCaseDetailsCaptorFinrem.capture(),
-            any(), any(), caseId);
-        Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptorFinrem);
+    private void assertCoversheetAddressFromMap(String formattedAddress) {
+        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(), generateDocumentCaseDetailsMapCaptor.capture(),
+            any(), any(), any());
+        Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsMapCaptor);
         Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
-        MatcherAssert.assertThat(addressee.getFormattedAddress(), is(formattedAddress));
+        assertThat(addressee.getFormattedAddress(), is(formattedAddress));
     }
 
-    private void assertAddresseeNameFinrem(int invocation, String name) {
-        verify(genericDocumentService, times(invocation)).generateDocumentFromPlaceholdersMap(any(),
-            generateDocumentCaseDetailsCaptorFinrem.capture(),
-            any(), any(), caseId);
-        Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptorFinrem);
-        Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
-        MatcherAssert.assertThat(addressee.getName(), is(name));
-    }
 
-    private void assertCoversheetCalledWithRequiredDataFinrem() {
-        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
-            generateDocumentCaseDetailsCaptorFinrem.capture(),
-            any(),
-            any(), caseId);
-        Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptorFinrem);
-
-        String expectedCourtContactDetails =
-            "HMCTS Financial Remedy\n"
-                + "PO BOX 12746\n"
-                + "HARLOW\n"
-                + "CM20 9QZ";
-
-        MatcherAssert.assertThat(data, hasKey(ADDRESSEE));
-        MatcherAssert.assertThat(data, hasKey(COURT_CONTACT_DETAILS));
-        assertEquals(expectedCourtContactDetails, data.get(COURT_CONTACT_DETAILS));
-        MatcherAssert.assertThat(data, hasKey(CASE_NUMBER));
-    }
 }
