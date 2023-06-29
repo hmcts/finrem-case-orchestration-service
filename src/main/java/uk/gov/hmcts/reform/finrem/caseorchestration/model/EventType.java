@@ -39,12 +39,29 @@ public enum EventType {
     GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
+    CASE_FLAG_CREATE("createFlags"),
+    CASE_FLAG_MANAGE("manageFlags"),
     ISSUE_APPLICATION("FR_issueApplication"),
     REGENERATE_FORM_C("FR_regenerateFormC"),
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
     UPDATE_CONTESTED_GENERAL_APPLICATION("updateGeneralApplication"),
-
+    READY_FOR_HEARING("FR_readyForHearing"),
+    REFER_TO_JUDGE("FR_referToJudge"),
+    REFER_TO_JUDGE_FROM_ORDER_MADE("FR_referToJudgeFromOrderMade"),
+    REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED("FR_referToJudgeFromConsOrdApproved"),
+    REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE("FR_referToJudgeFromConsOrdMade"),
+    REFER_TO_JUDGE_FROM_AWAITING_RESPONSE("FR_referToJudgeFromAwaitingResponse"),
+    REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER("FR_referToJudgeFromRespondToOrder"),
+    REFER_TO_JUDGE_FROM_CLOSE("FR_referToJudgeFromClose"),
+    REASSIGN_JUDGE("FR_reassignJudge"),
     NOC_REQUEST("nocRequest"),
+    MANUAL_PAYMENT("FR_manualPayment"),
+    ASSIGN_TO_JUDGE_CONSENT("FR_assignToJudgeConsent"),
+    MANAGE_INTERVENERS("manageInterveners"),
+    CREATE_GENERAL_LETTER("FR_generalLetter"),
+    CREATE_GENERAL_LETTER_JUDGE("FR_generalLetter_judge"),
+    CREATE_GENERAL_EMAIL("FR_generalEmail"),
+
     @JsonEnumDefaultValue
     NONE("");
 

@@ -15,7 +15,10 @@ def secrets = [
                 secret("password-solicitor","PASSWORD-SOLICITOR"),
                 secret("finrem-system-update-username", "FINREM_SYSTEMUPDATE_USERNAME"),
                 secret("finrem-system-update-password", "FINREM_SYSTEMUPDATE_PASSWORD"),
-                secret("finrem-idam-client-secret", "FINREM_IDAM_CLIENT_SECRET")
+                secret("finrem-idam-client-secret", "FINREM_IDAM_CLIENT_SECRET"),
+                secret("docmosis-api-key", "PDF_SERVICE_ACCESS_KEY"),
+                secret("docmosis-endpoint", "PDF_SERVICE_BASEURL"),
+                secret("gov-uk-notification-key", "UK_GOV_NOTIFY_API_KEY")
         ]
 ]
 
@@ -28,11 +31,30 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
     ]
 }
 
+def getProjectName() {
+    String projectPrefix = "HMCTS_d_to_i/finrem-ccd-definitions/"
+    def githubApi = new GithubAPI(this)
+    for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "use-defs-pr-") ) {
+        String prNumber = label.substring(12, label.length())
+        return projectPrefix + "PR-" + prNumber
+    }
+    return projectPrefix + "master"
+}
+
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 withPipeline(type, product, component) {
     loadVaultSecrets(secrets)
+
+    afterSuccess('checkout') {
+        step ([
+                $class: 'CopyArtifact',
+                selector: lastCompleted(),
+                projectName: getProjectName(),
+                target: "./definition_files"
+        ]);
+    }
 
     afterSuccess('functionalTest:aat') {
         steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
@@ -42,7 +64,6 @@ withPipeline(type, product, component) {
                 reportName           : "AAT Functional Tests",
                 alwaysLinkToLastBuild: true
         ]
-
     }
 
     afterSuccess('functionalTest:preview') {
@@ -61,9 +82,13 @@ withPipeline(type, product, component) {
 
     onMaster() {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+        env.JENKINS_BRANCH = "master"
     }
 
     onPR() {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+        env.CCD_DEFS = getProjectName()
+        env.JENKINS_BRANCH = "preview"
+        println "Using CCD definitions from: " + env.CCD_DEFS
     }
 }

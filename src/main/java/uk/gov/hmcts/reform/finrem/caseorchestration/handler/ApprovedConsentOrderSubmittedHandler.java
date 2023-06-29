@@ -1,26 +1,33 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-
-import java.util.Map;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderAvailableCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderMadeCorresponder;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler<Map<String, Object>> {
+public class ApprovedConsentOrderSubmittedHandler extends FinremCallbackHandler {
 
-    private final CaseDataService caseDataService;
-    private final NotificationService notificationService;
+    private final FinremConsentOrderMadeCorresponder consentOrderMadeCorresponder;
+    private final FinremConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
+
+    @Autowired
+    public ApprovedConsentOrderSubmittedHandler(FinremConsentOrderMadeCorresponder consentOrderMadeCorresponder,
+                                                FinremConsentOrderAvailableCorresponder consentOrderAvailableCorresponder,
+                                                FinremCaseDetailsMapper finremCaseDetailsMapper) {
+        super(finremCaseDetailsMapper);
+        this.consentOrderMadeCorresponder = consentOrderMadeCorresponder;
+        this.consentOrderAvailableCorresponder = consentOrderAvailableCorresponder;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -30,42 +37,16 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler<Map
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        sendConsentOrderAvailableEmailNotifications(caseDetails, caseData);
-        sendConsentOrderMadeEmailNotifications(caseDetails, caseData);
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
+        consentOrderMadeCorresponder.sendCorrespondence(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse
-            .<Map<String, Object>>builder()
+            .<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .build();
     }
 
-
-    private void sendConsentOrderAvailableEmailNotifications(CaseDetails caseDetails, Map<String, Object> caseData) {
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
-            notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
-        }
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
-            notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
-        }
-    }
-
-    private void sendConsentOrderMadeEmailNotifications(CaseDetails caseDetails, Map<String, Object> caseData) {
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
-            && caseDataService.isConsentedApplication(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Consent Order Made'");
-            notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(caseDetails);
-        }
-
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made'");
-            notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(caseDetails);
-        }
-    }
 }

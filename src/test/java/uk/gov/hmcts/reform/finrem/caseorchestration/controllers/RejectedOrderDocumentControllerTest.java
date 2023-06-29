@@ -17,6 +17,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.task.ScheduledTaskRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +61,9 @@ public class RejectedOrderDocumentControllerTest {
 
     @MockBean
     private RefusalOrderDocumentService documentService;
+
+    @MockBean
+    private ScheduledTaskRunner taskRunner;
 
     private MockMvc mvc;
     private JsonNode requestContent;

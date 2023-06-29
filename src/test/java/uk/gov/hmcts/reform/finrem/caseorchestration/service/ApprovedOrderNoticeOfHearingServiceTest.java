@@ -53,6 +53,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     static final String CASE_DATA = "case_data";
     static final String CASE_DETAILS = "caseDetails";
 
+
     @Autowired
     private ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
     @Autowired
@@ -85,8 +86,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Before
     public void setup() {
         caseDetails = caseDetailsFromResource("/fixtures/general-application-directions.json", objectMapper);
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument(DOC_URL, FILE_NAME,
-            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+            .thenReturn(caseDocument(DOC_URL, FILE_NAME, GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
     }
 
     @Test
@@ -189,12 +190,12 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(),
             eq(documentConfiguration.getAdditionalHearingTemplate()),
-            eq(documentConfiguration.getAdditionalHearingFileName()));
+            eq(documentConfiguration.getAdditionalHearingFileName()), eq(caseId));
     }
 
     private void assertBulkPrintServiceInteraction() {
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN),
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
     }
 
@@ -215,12 +216,13 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
     private void assertCaseData(Map<String, Object> data) {
         assertThat(data, allOf(
-            Matchers.<String, Object>hasEntry("CCDCaseNumber", 1234567890L),
+            Matchers.<String, Object>hasEntry("CCDCaseNumber", 123123123L),
             Matchers.hasEntry("CourtName", "Hastings County Court And Family Court Hearing Centre"),
             Matchers.hasEntry("CourtAddress", "The Law Courts, Bohemia Road, Hastings, TN34 1QX"),
             Matchers.hasEntry("CourtPhone", "0300 1235577"),
             Matchers.hasEntry("CourtEmail", "hastingsfamily@justice.gov.uk"),
             Matchers.hasEntry("ApplicantName", "Poor Guy"),
+            Matchers.hasEntry("AdditionalHearingDated", formattedNowDate),
             Matchers.<String, Object>hasEntry("HearingTime", "1pm"),
             Matchers.<String, Object>hasEntry("RespondentName", "test Korivi"),
             Matchers.<String, Object>hasEntry("HearingVenue",

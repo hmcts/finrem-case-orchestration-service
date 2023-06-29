@@ -25,7 +25,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
@@ -38,10 +40,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
 
@@ -55,6 +60,8 @@ public class HearingDocumentController extends BaseController {
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
     private final CaseDataService caseDataService;
+    private final GenerateCoverSheetService coverSheetService;
+    private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
@@ -69,10 +76,11 @@ public class HearingDocumentController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) throws IOException {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
-
         validateCaseData(callbackRequest);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        String caseId = caseDetails.getId().toString();
+        log.info("Received request for validating a hearing for Case ID: {}", caseId);
+
 
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
@@ -84,7 +92,8 @@ public class HearingDocumentController extends BaseController {
         if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
             CaseDocument caseDocument = objectMapper.convertValue(caseDetails.getData().get(HEARING_ADDITIONAL_DOC),
                 CaseDocument.class);
-            CaseDocument pdfDocument = additionalHearingDocumentService.convertToPdf(caseDocument, authorisationToken);
+            CaseDocument pdfDocument =
+                additionalHearingDocumentService.convertToPdf(caseDocument, authorisationToken, caseId);
             callbackRequest.getCaseDetails().getData().put(HEARING_ADDITIONAL_DOC, pdfDocument);
         }
 
@@ -97,17 +106,33 @@ public class HearingDocumentController extends BaseController {
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
+        log.info("Hearing date warning {} Case ID: {}", warnings, caseDetails.getId());
 
-        if (caseDataService.isContestedApplication(caseDetails)) {
-            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-            if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
-                log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
-                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            CaseDocument coverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
+            log.info("Applicant coversheet generated and attach to case {}  for case Id {}", caseDetails.getId(), coverSheet);
+            if (caseDataService.isApplicantAddressConfidential(caseDetails.getData())) {
+                log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
+                caseDetails.getData().remove(BULK_PRINT_COVER_SHEET_APP);
+                caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL, coverSheet);
             } else {
-                log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
-                hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authorisationToken);
+                log.info("Applicant adding coversheet to coversheet field for caseId {}", caseDetails.getId());
+                caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, coverSheet);
             }
         }
+        if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            CaseDocument coverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
+            log.info("Respondent coversheet generated and attach to case {}  for case Id {}", caseDetails.getId(), coverSheet);
+            if (caseDataService.isRespondentAddressConfidential(caseDetails.getData())) {
+                log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
+                caseDetails.getData().remove(BULK_PRINT_COVER_SHEET_RES);
+                caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL, coverSheet);
+            } else {
+                log.info("Respondent adding coversheet to coversheet field for caseId {}", caseDetails.getId());
+                caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES, coverSheet);
+            }
+        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
 
@@ -151,7 +176,7 @@ public class HearingDocumentController extends BaseController {
                 .stream()
                 .filter(e -> (e.getDirectionDetailsCollection() != null && e.getDirectionDetailsCollection().getDateOfHearing() != null))
                 .sorted(Comparator.comparing(e -> e.getDirectionDetailsCollection().getDateOfHearing()))
-                .collect(Collectors.toList());
+                .toList();
             caseData.put(DIRECTION_DETAILS_COLLECTION_CT, sortedDirectionDetailsCollectionList);
         }
     }

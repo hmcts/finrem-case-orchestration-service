@@ -39,6 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_RECITALS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -63,17 +64,21 @@ public class GeneralOrderService {
             .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
     }
 
-    public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(Map<String, Object> caseData) {
+    public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(Map<String, Object> caseData, String authorisationToken, String caseId) {
         CaseDocument latestGeneralOrder = documentHelper.getLatestGeneralOrder(caseData);
-        return latestGeneralOrder != null
-            ? BulkPrintDocument.builder().binaryFileUrl(latestGeneralOrder.getDocumentBinaryUrl())
-            .fileName(latestGeneralOrder.getDocumentFilename()).build()
-            : null;
+        if (latestGeneralOrder != null) {
+            CaseDocument pdfDocument =
+                genericDocumentService.convertDocumentIfNotPdfAlready(latestGeneralOrder, authorisationToken, caseId);
+            caseData.put(GENERAL_ORDER_LATEST_DOCUMENT, pdfDocument);
+            return BulkPrintDocument.builder().binaryFileUrl(pdfDocument.getDocumentBinaryUrl())
+                .fileName(pdfDocument.getDocumentFilename()).build();
+        }
+        return null;
     }
 
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {
         return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
-            documentConfiguration.getGeneralOrderTemplate(),
+            documentConfiguration.getGeneralOrderTemplate(caseDetails),
             documentConfiguration.getGeneralOrderFileName());
     }
 
@@ -97,6 +102,7 @@ public class GeneralOrderService {
             caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(caseDetails));
             caseData.put("GeneralOrderHeaderOne", "In the Family Court");
             caseData.put("GeneralOrderHeaderTwo", "sitting in the");
+            caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         }
 
         caseData.put("GeneralOrderJudgeDetails",

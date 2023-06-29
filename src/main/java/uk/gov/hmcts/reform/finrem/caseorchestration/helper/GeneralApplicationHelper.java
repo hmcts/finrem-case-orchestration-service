@@ -112,13 +112,13 @@ public class GeneralApplicationHelper {
     }
 
     public GeneralApplicationCollectionData migrateExistingGeneralApplication(Map<String, Object> caseData,
-                                                                              String userAuthorisation) {
+                                                                              String userAuthorisation, String caseId) {
         if (caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             String collectionId = UUID.randomUUID().toString();
             caseData.put(GENERAL_APPLICATION_TRACKING, collectionId);
             return GeneralApplicationCollectionData.builder()
                 .id(collectionId)
-                .generalApplicationItems(getApplicationItems(caseData, userAuthorisation))
+                .generalApplicationItems(getApplicationItems(caseData, userAuthorisation, caseId))
                 .build();
         }
         return null;
@@ -126,17 +126,17 @@ public class GeneralApplicationHelper {
 
     public GeneralApplicationCollectionData retrieveInitialGeneralApplicationData(Map<String, Object> caseData,
                                                                                   String collectionId,
-                                                                                  String userAuthorisation) {
+                                                                                  String userAuthorisation, String caseId) {
         if (caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             return GeneralApplicationCollectionData.builder()
                 .id(collectionId)
-                .generalApplicationItems(getApplicationItems(caseData, userAuthorisation))
+                .generalApplicationItems(getApplicationItems(caseData, userAuthorisation, caseId))
                 .build();
         }
         return null;
     }
 
-    public GeneralApplicationItems getApplicationItems(Map<String,Object> caseData, String userAuthorisation) {
+    public GeneralApplicationItems getApplicationItems(Map<String,Object> caseData, String userAuthorisation, String caseId) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
         builder.generalApplicationReceivedFrom(Objects.toString(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM), null));
@@ -148,7 +148,7 @@ public class GeneralApplicationHelper {
         CaseDocument caseDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT));
         if (caseDocument != null) {
             log.info("General Application Document before converting to Pdf {}", caseDocument);
-            CaseDocument pdfCaseDocument = getPdfDocument(caseDocument, userAuthorisation);
+            CaseDocument pdfCaseDocument = getPdfDocument(caseDocument, userAuthorisation, caseId);
             builder.generalApplicationDocument(pdfCaseDocument);
             log.info("General Application Document after converting to Pdf {}", pdfCaseDocument);
         }
@@ -156,7 +156,7 @@ public class GeneralApplicationHelper {
         CaseDocument draftDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
         if (draftDocument != null) {
             log.info("General Application Draft Document before converting to Pdf {}", draftDocument);
-            CaseDocument draftCaseDocument = getPdfDocument(draftDocument, userAuthorisation);
+            CaseDocument draftCaseDocument = getPdfDocument(draftDocument, userAuthorisation, caseId);
             builder.generalApplicationDraftOrder(draftCaseDocument);
             log.info("General Application Draft Document after converting to Pdf {}", draftCaseDocument);
         }
@@ -165,7 +165,7 @@ public class GeneralApplicationHelper {
         CaseDocument directionDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
         if (directionDocument != null) {
             log.info("General Application Direction Document before converting to Pdf {}", directionDocument);
-            CaseDocument directionCaseDocument = getPdfDocument(directionDocument, userAuthorisation);
+            CaseDocument directionCaseDocument = getPdfDocument(directionDocument, userAuthorisation, caseId);
             builder.generalApplicationDirectionsDocument(directionCaseDocument);
             log.info("General Application Direction Document after converting to Pdf {}", directionCaseDocument);
         }
@@ -233,7 +233,7 @@ public class GeneralApplicationHelper {
         }
     }
 
-    public CaseDocument getPdfDocument(CaseDocument document, String userAuthorisation) {
-        return service.convertDocumentIfNotPdfAlready(document, userAuthorisation);
+    public CaseDocument getPdfDocument(CaseDocument document, String userAuthorisation, String caseId) {
+        return service.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseId);
     }
 }

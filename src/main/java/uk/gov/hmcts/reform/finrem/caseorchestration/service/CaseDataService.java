@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -7,11 +9,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,6 +53,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
@@ -60,6 +73,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class CaseDataService {
 
     public final Function<List<Map>, Map> getLastMapValue = listMap -> listMap.stream().reduce((first, second) -> second).get();
+
+    public final ObjectMapper objectMapper;
 
     public static String nullToEmpty(Object o) {
         return Objects.toString(o, "");
@@ -127,6 +142,22 @@ public class CaseDataService {
         return buildFullName(caseDetails.getData(),
             isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
             isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
+    }
+
+    public String buildFullIntervener1Name(CaseDetails caseDetails) {
+        return buildFullName(caseDetails.getData(), INTERVENER1_FIRST_MIDDLE_NAME, INTERVENER1_LAST_NAME);
+    }
+
+    public String buildFullIntervener2Name(CaseDetails caseDetails) {
+        return buildFullName(caseDetails.getData(), INTERVENER2_FIRST_MIDDLE_NAME, INTERVENER2_LAST_NAME);
+    }
+
+    public String buildFullIntervener3Name(CaseDetails caseDetails) {
+        return buildFullName(caseDetails.getData(), INTERVENER3_FIRST_MIDDLE_NAME, INTERVENER3_LAST_NAME);
+    }
+
+    public String buildFullIntervener4Name(CaseDetails caseDetails) {
+        return buildFullName(caseDetails.getData(), INTERVENER4_FIRST_MIDDLE_NAME, INTERVENER4_LAST_NAME);
     }
 
     public void setFinancialRemediesCourtDetails(CaseDetails caseDetails) {
@@ -198,6 +229,10 @@ public class CaseDataService {
         return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 
+    public boolean isContestedFinremCaseDetailsApplication(FinremCaseDetails caseDetails) {
+        return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType().getCcdType()));
+    }
+
     public boolean isContestedPaperApplication(CaseDetails caseDetails) {
         return isContestedApplication(caseDetails) && isPaperApplication(caseDetails.getData());
     }
@@ -219,6 +254,7 @@ public class CaseDataService {
         return isAddressConfidential(caseData, APPLICANT_CONFIDENTIAL_ADDRESS);
     }
 
+
     public boolean isRespondentAddressConfidential(Map<String, Object> caseData) {
         return isAddressConfidential(caseData, RESPONDENT_CONFIDENTIAL_ADDRESS);
     }
@@ -230,5 +266,16 @@ public class CaseDataService {
     public boolean isContestedOrderNotApprovedCollectionPresent(Map<String, Object> caseData) {
         return caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION) != null
             && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION)).isEmpty();
+    }
+
+    public Map<String, Object> getPayloadOffFinremCaseData(FinremCaseData data) {
+        Map<String, Object> notificationRequestPayload;
+        try {
+            notificationRequestPayload =
+                objectMapper.readValue(objectMapper.writeValueAsString(data), HashMap.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error while converting finrem case details pojo into map payload", e);
+        }
+        return notificationRequestPayload;
     }
 }

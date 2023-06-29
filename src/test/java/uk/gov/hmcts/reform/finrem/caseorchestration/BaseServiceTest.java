@@ -3,20 +3,38 @@ package uk.gov.hmcts.reform.finrem.caseorchestration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +82,20 @@ public abstract class BaseServiceTest extends BaseTest {
     @Autowired
     protected FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    @MockBean
+    protected EmailService emailService;
+
+    public static final String CASE_DETAILS = "caseDetails";
+    public static final String CASE_DATA = "case_data";
+
+    public static final byte[] SOME_BYTES = "ainhsdcnoih".getBytes();
+
+    private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
+
+    protected String caseId = "123123123";
+
+    protected String formattedNowDate = DateTimeFormatter.ofPattern(CCDConfigConstant.LETTER_DATE_FORMAT).format(LocalDate.now());
+
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         List<String> natureOfApplication = List.of("Lump Sum Order",
@@ -76,6 +108,13 @@ public abstract class BaseServiceTest extends BaseTest {
             "Property Adjustment Order");
         caseData.put("natureOfApplication2", natureOfApplication);
         return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
+    }
+
+    protected FinremCaseDetails buildFinremCaseDetails() {
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(123L)
+            .build();
     }
 
     protected CallbackRequest getConsentedCallbackRequestForVariationOrder() {
@@ -109,6 +148,44 @@ public abstract class BaseServiceTest extends BaseTest {
                 .build())
             .build();
     }
+
+    protected FinremCallbackRequest getConsentedFinremCallbackRequestForVariationOrder() {
+        List<String> natureOfApplication = List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Variation Order",
+            "Property Adjustment Order");
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .appRespondentFmName("David")
+            .appRespondentLName("Goodman")
+            .applicantFmName("Victoria")
+            .applicantLname("Goodman")
+            .solicitorEmail(TEST_SOLICITOR_EMAIL)
+            .solicitorName(TEST_SOLICITOR_NAME)
+            .solicitorReference(TEST_SOLICITOR_REFERENCE)
+            .respondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL)
+            .respondentSolicitorName(TEST_RESP_SOLICITOR_NAME)
+            .respondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapper)
+            .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
+            .natureApplicationWrapper(NatureApplicationWrapper.builder()
+                .natureOfApplication2(Arrays.stream(NatureApplication.values()).toList()).build()).build();
+
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .caseType(CaseType.CONSENTED)
+                .id(12345L)
+                .data(caseData)
+                .build())
+            .build();
+    }
+
 
     protected CallbackRequest getConsentedCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
@@ -174,6 +251,35 @@ public abstract class BaseServiceTest extends BaseTest {
             .build();
     }
 
+    protected FinremCallbackRequest getConsentedNewCallbackRequest() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.getContactDetailsWrapper().setAppRespondentFmName("David");
+        caseData.getContactDetailsWrapper().setAppRespondentLName("Goodman");
+        caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
+        caseData.getContactDetailsWrapper().setApplicantLname("Goodman");
+        caseData.getContactDetailsWrapper().setSolicitorEmail(TEST_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
+        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.setCcdCaseType(CaseType.CONSENTED);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
+        caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .caseType(CaseType.CONSENTED)
+                .id(12345L)
+                .data(caseData)
+                .build())
+            .build();
+    }
+
     protected CallbackRequest getContestedCallbackRequest() {
         Map<String, Object> caseData = getCaseData();
         caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
@@ -202,6 +308,20 @@ public abstract class BaseServiceTest extends BaseTest {
             .build();
     }
 
+    protected FinremCallbackRequest getContestedNewCallbackRequest() {
+        FinremCaseData caseData = getFinremCaseData();
+        caseData.getContactDetailsWrapper().setRespondentFmName("David");
+        caseData.getContactDetailsWrapper().setRespondentLname("Goodman");
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .caseType(CaseType.CONTESTED)
+                .id(12345L)
+                .data(caseData)
+                .build())
+            .build();
+    }
+
     private Map<String, Object> getCaseData() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
@@ -219,6 +339,31 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put(NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
         caseData.put(BULK_PRINT_LETTER_ID_RES, NOTTINGHAM);
         return caseData;
+    }
+
+    private FinremCaseData getFinremCaseData() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
+        caseData.getContactDetailsWrapper().setApplicantLname("Goodman");
+        caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(TEST_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setApplicantSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
+        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
+        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
+        caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
+        return caseData;
+    }
+
+    protected String getResource(String resourcePath) throws IOException {
+        File file = ResourceUtils.getFile(this.getClass().getResource(resourcePath));
+        return new String(Files.readAllBytes(file.toPath()));
     }
 
     protected CallbackRequest getContestedCallbackRequestUpdateDetails() {
@@ -274,6 +419,14 @@ public abstract class BaseServiceTest extends BaseTest {
         }
     }
 
+    protected FinremCallbackRequest buildHearingFinremCallbackRequest(String payloadJson) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
+            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     protected List<InterimHearingData> convertToInterimHearingDataList(Object object) {
         return mapper.convertValue(object, new TypeReference<>() {
         });
@@ -298,6 +451,23 @@ public abstract class BaseServiceTest extends BaseTest {
                 .caseDetails(finremCaseDetails)
                 .eventType(EventType.getEventType(callbackRequest.getEventId()))
                 .build();
+        }
+    }
+
+    protected Map<String, Object> getDataFromCaptor(ArgumentCaptor<Map<String, Object>> documentGenerationRequestCaseDetailsCaptor) {
+        Map<String, Object> placeholdersMap = documentGenerationRequestCaseDetailsCaptor.getValue();
+        Map<String, Object> caseDetails = (Map) placeholdersMap.get(CASE_DETAILS);
+        Map<String, Object> data = (Map) caseDetails.get(CASE_DATA);
+        return data;
+    }
+
+    protected CaseDetails buildCaseDetailsFromJson(String testJson) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
+            CaseDetails caseDetails =
+                mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return caseDetails;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

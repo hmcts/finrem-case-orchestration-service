@@ -1,12 +1,12 @@
 {
-  "event_id": "some_event_id",
+  "event_id": "FR_solicitorCreate",
   "case_details": {
-    "id": "123",
+    "id": "1234",
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
-      "state": "applicationDrafted",
+      "state": "caseAdded",
       "PBANumber": "PBA123",
       "d81Question": "No",
       "paperApplication": "Yes",

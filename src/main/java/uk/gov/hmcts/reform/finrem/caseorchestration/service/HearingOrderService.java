@@ -41,13 +41,15 @@ public class HearingOrderService {
     public void convertToPdfAndStampAndStoreLatestDraftHearingOrder(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        Optional<DraftDirectionOrder> judgeApprovedHearingOrder = getJudgeApprovedHearingOrder(caseDetails);
+        Optional<DraftDirectionOrder> judgeApprovedHearingOrder = getJudgeApprovedHearingOrder(caseDetails, authorisationToken);
 
         if (judgeApprovedHearingOrder.isPresent()) {
+            String caseId = caseDetails.getId().toString();
             CaseDocument latestDraftDirectionOrderDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
                 judgeApprovedHearingOrder.get().getUploadDraftDocument(),
-                authorisationToken);
-            CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument, authorisationToken);
+                authorisationToken, caseId);
+            CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument,
+                authorisationToken, documentHelper.getStampType(caseDetails.getData()), caseId);
             updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
             updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder);
             appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder);
@@ -56,8 +58,8 @@ public class HearingOrderService {
         }
     }
 
-    public boolean latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails caseDetails) {
-        DraftDirectionOrder draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails)
+    public boolean latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails caseDetails, String authorisationToken) {
+        DraftDirectionOrder draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails, authorisationToken)
             .orElseThrow(IllegalArgumentException::new);
 
         Optional<DraftDirectionOrder> latestDraftDirectionOrder = Optional.ofNullable(caseDetails.getData().get(LATEST_DRAFT_DIRECTION_ORDER))
@@ -85,23 +87,36 @@ public class HearingOrderService {
         }
     }
 
-    public Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail(CaseDetails caseDetails) {
+    public Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail(CaseDetails caseDetails, String authorisationToken) {
         List<CollectionElement<DraftDirectionOrder>> draftDirectionOrders = Optional.ofNullable(caseDetails.getData()
                 .get(DRAFT_DIRECTION_ORDER_COLLECTION))
             .map(this::convertToListOfDraftDirectionOrder)
             .orElse(emptyList());
 
-        return draftDirectionOrders.isEmpty()
+        Optional<DraftDirectionOrder> draftDirectionOrder = draftDirectionOrders.isEmpty()
             ? Optional.empty()
             : Optional.of(draftDirectionOrders.get(draftDirectionOrders.size() - 1).getValue());
+
+        if (draftDirectionOrder.isPresent()) {
+            DraftDirectionOrder draftOrder = draftDirectionOrder.get();
+            String caseId = caseDetails.getId().toString();
+            return Optional.of(DraftDirectionOrder.builder().purposeOfDocument(draftOrder.getPurposeOfDocument())
+                .uploadDraftDocument(
+                    genericDocumentService.convertDocumentIfNotPdfAlready(
+                        draftOrder.getUploadDraftDocument(),
+                        authorisationToken, caseId))
+                .build());
+
+        }
+        return Optional.empty();
     }
 
-    private Optional<DraftDirectionOrder> getJudgeApprovedHearingOrder(CaseDetails caseDetails) {
-        Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails);
+    private Optional<DraftDirectionOrder> getJudgeApprovedHearingOrder(CaseDetails caseDetails, String authorisationToken) {
+        Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails, authorisationToken);
 
         return draftDirectionOrderCollectionTail.isEmpty()
             ? Optional.empty()
-            : latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails)
+            : latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails, authorisationToken)
             ? Optional.ofNullable(caseDetails.getData().get(LATEST_DRAFT_DIRECTION_ORDER)).map(this::convertToDraftDirectionOrder)
             : draftDirectionOrderCollectionTail;
     }

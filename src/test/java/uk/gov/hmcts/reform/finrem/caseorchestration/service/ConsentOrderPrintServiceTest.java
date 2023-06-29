@@ -10,13 +10,13 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,6 +32,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,17 +54,16 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     private final ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);
     private final CaseDocument caseDocument = TestSetUpUtils.caseDocument();
 
-    @Autowired
-    private ObjectMapper mapper;
-    @Autowired
-    private ConsentOrderPrintService consentOrderPrintService;
-    @Autowired
-    private EvidenceManagementClient evidenceManagementClientMock;
+    @Autowired private ObjectMapper mapper;
+    @Autowired private ConsentOrderPrintService consentOrderPrintService;
+    @MockBean private EvidenceManagementAuditService evidenceManagementAuditService;
 
     @MockBean
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     @MockBean
     private GenerateCoverSheetService coverSheetService;
+    @MockBean
+    private NotificationService notificationService;
     @MockBean
     private GenericDocumentService genericDocumentService;
     @MockBean
@@ -71,7 +71,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
     @Before
     public void init() {
-        when(genericDocumentService.bulkPrint(any())).thenReturn(LETTER_ID);
+        when(genericDocumentService.bulkPrint(any(), any(), any())).thenReturn(LETTER_ID);
     }
 
     @Test
@@ -84,6 +84,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(bulkPrintDocumentList());
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
@@ -94,14 +95,14 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(consentOrderNotApprovedDocumentService).prepareApplicantLetterPack(caseDetails, AUTH_TOKEN);
-        verify(genericDocumentService, times(2)).bulkPrint(any());
+        verify(genericDocumentService, times(2)).bulkPrint(any(), any(), any());
     }
 
     @Test
     public void shouldSendForBulkPrintPackWithRespondentAndApplicantAddressAsSolicitorEmailIsNo() {
         final String consentedBulkPrintSimpleJson = "/fixtures/contested/bulk_print_simple.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintSimpleJson, mapper);
-
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
 
@@ -121,7 +122,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             = "/fixtures/contested/bulk_print_consent_order_approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderApprovedJson, mapper);
         List<BulkPrintDocument> bulkPrintDocuments = emptyList();
-
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN)).thenReturn(bulkPrintDocuments);
@@ -140,7 +141,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         final String consentedBulkPrintConsentOrderApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderApprovedJson, mapper);
-
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
 
@@ -157,14 +158,14 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
-
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(any(CaseDetails.class), anyString()))
             .thenReturn(emptyList());
-        when(coverSheetService.generateRespondentCoverSheet(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument);
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
+        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getBinaryFileUrl)
             .collect(Collectors.toList()), hasItem("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
@@ -175,9 +176,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
-
-        when(coverSheetService.generateApplicantCoverSheet(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument);
-        when(coverSheetService.generateRespondentCoverSheet(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(bulkPrintDocuments);
 
@@ -190,9 +191,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
-
-        when(coverSheetService.generateApplicantCoverSheet(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument);
-        when(coverSheetService.generateRespondentCoverSheet(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(emptyList());
 
@@ -205,7 +206,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/consent-in-contested-application-approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
-
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(bulkPrintDocumentList());
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
@@ -219,7 +220,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         assertThat(caseData.get("bulkPrintLetterIdApp"), is(LETTER_ID));
 
         verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(genericDocumentService, times(2)).bulkPrint(any());
+        verify(genericDocumentService, times(2)).bulkPrint(any(), any(), any());
     }
 
     @Test
@@ -228,6 +229,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             = "/fixtures/contested/consent-in-contested-application-approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
         caseDetails.getData().put("applicantSolicitorConsentForEmails", "YES");
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(bulkPrintDocumentList());
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
@@ -241,28 +244,26 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         assertThat(caseData.get("bulkPrintLetterIdApp"), nullValue());
 
         verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(genericDocumentService, times(1)).bulkPrint(any());
+        verify(genericDocumentService, times(1)).bulkPrint(any(), any(), any());
     }
 
     @Test
     public void givenGeneralOrderIssuedAfterNotApprovedConsentOrder_whenSendOrderToBulkPrint_generalOrderIsPrinted() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/contested/bulk_print_consent_order_not_approved.json", mapper);
-
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(bulkPrintDocumentList());
         when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(any())).thenReturn(singletonList(caseDocument));
-        Date now = new Date();
-        Date beforeNow = new Date(now.getTime() - 1);
-        when(evidenceManagementClientMock.auditFileUrls(eq(AUTH_TOKEN), any())).thenReturn(asList(
-            FileUploadResponse.builder().modifiedOn(now).build(),
-            FileUploadResponse.builder().modifiedOn(beforeNow).build()));
+        when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(asList(
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().toString()).build(),
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().minusDays(2).toString()).build()));
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService, times(2)).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
+        verify(genericDocumentService, times(2)).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getBinaryFileUrl)
             .collect(Collectors.toList()), hasItem("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
@@ -274,7 +275,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
         caseDetails.getData().put(APPLICANT_CONFIDENTIAL_ADDRESS, "Yes");
         caseDetails.getData().put(RESPONDENT_CONFIDENTIAL_ADDRESS, "Yes");
-
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
@@ -289,5 +290,21 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         assertThat(caseData.containsKey(BULK_PRINT_COVER_SHEET_RES), is(false));
         assertThat(caseData.containsKey(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL), is(true));
+    }
+
+    @Test
+    public void shouldNotPrintLettersForBothPartiesIfTheyAreDigital() {
+        final String consentedBulkPrintConsentOrderNotApprovedJson
+            = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+
+
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
+
+        verify(coverSheetService, never()).generateApplicantCoverSheet(any(CaseDetails.class), any());
+        verify(coverSheetService, never()).generateRespondentCoverSheet(any(CaseDetails.class), any());
     }
 }

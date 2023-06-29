@@ -19,7 +19,8 @@ public abstract class CheckSolicitorIsDigitalServiceBase {
     }
 
     protected boolean isOrganisationEmpty(OrganisationPolicy organisationPolicy) {
-        return Optional.ofNullable(organisationPolicy.getOrganisation()).isEmpty()
+        return Optional.ofNullable(organisationPolicy).isEmpty()
+            || Optional.ofNullable(organisationPolicy.getOrganisation()).isEmpty()
             || organisationPolicy.getOrganisation().getOrganisationID() == null;
     }
 

@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -26,6 +27,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandler
 
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
+    private final CaseFlagsService caseFlagsService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -43,6 +45,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandler
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.put(LATEST_CONSENT_ORDER, caseDocument);
+        caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
 
         if (!idamService.isUserRoleAdmin(userAuthorisation)) {
             caseData.put(APPLICANT_REPRESENTED, YES_VALUE);

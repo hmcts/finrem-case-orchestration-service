@@ -8,23 +8,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SingleLetterOrEmailApplicantCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsSingleLetterOrEmailApplicantCorresponder;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 
 @Component
 @Slf4j
-public class HwfConsentedApplicantCorresponder extends SingleLetterOrEmailApplicantCorresponder {
+public class HwfConsentedApplicantCorresponder extends CaseDetailsSingleLetterOrEmailApplicantCorresponder {
 
     private final HelpWithFeesDocumentService helpWithFeesDocumentService;
 
     @Autowired
     public HwfConsentedApplicantCorresponder(BulkPrintService bulkPrintService,
-                                             NotificationService notificationService, HelpWithFeesDocumentService helpWithFeesDocumentService) {
-        super(notificationService, bulkPrintService);
+                                             NotificationService notificationService,
+                                             HelpWithFeesDocumentService helpWithFeesDocumentService) {
+        super(bulkPrintService, notificationService);
         this.helpWithFeesDocumentService = helpWithFeesDocumentService;
     }
-
 
     @Override
     public CaseDocument getDocumentToPrint(CaseDetails caseDetails, String authorisationToken) {

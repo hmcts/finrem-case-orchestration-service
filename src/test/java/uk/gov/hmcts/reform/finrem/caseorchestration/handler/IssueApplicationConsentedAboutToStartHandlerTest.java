@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -18,12 +18,12 @@ import java.time.LocalDate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 
-@RunWith(MockitoJUnitRunner.class)
-public class IssueApplicationConsentedAboutToStartHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class IssueApplicationConsentedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     @InjectMocks
@@ -33,28 +33,28 @@ public class IssueApplicationConsentedAboutToStartHandlerTest {
     private OnStartDefaultValueService onStartDefaultValueService;
 
     @Test
-    public void givenConsentedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
+    void givenConsentedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.ISSUE_APPLICATION),
             is(false));
     }
 
     @Test
-    public void givenConsentedCase_whenEventIsAmend_thenHandlerCanHandle() {
+    void givenConsentedCase_whenEventIsAmend_thenHandlerCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.ISSUE_APPLICATION),
             is(true));
     }
 
     @Test
-    public void givenConsentedCase_whenUseIssueApplication_thenDefaultIssueDateSetToCurrentDate() {
+    void givenConsentedCase_whenUseIssueApplication_thenDefaultIssueDateSetToCurrentDate() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(onStartDefaultValueService).defaultIssueDate(finremCallbackRequest);
     }
 
     @Test
-    public void givenConsentedCase_whenUseIssueApplicationAndIssueDateEnteredManually_thenHandle() {
+    void givenConsentedCase_whenUseIssueApplicationAndIssueDateEnteredManually_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         finremCallbackRequest.getCaseDetails().getData().setIssueDate(LocalDate.of(2000,10,10));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);

@@ -1,6 +1,6 @@
 {
   "token": "token_test",
-  "event_id": "some_event_id",
+  "event_id": "FR_issueApplication",
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
@@ -67,6 +67,9 @@
         "walesList": "swansea",
         "swanseaCourtList": "FR_swansea_hc_list_6"
       },
+      "regionList": "wales",
+      "walesFRCList": "swansea",
+      "cfcCourtList": "FR_swansea_hc_list_6",
       "applicationNotApproved": [
         {
           "id": "acdfd900-5976-4c8a-a518-9e972c5acc81",

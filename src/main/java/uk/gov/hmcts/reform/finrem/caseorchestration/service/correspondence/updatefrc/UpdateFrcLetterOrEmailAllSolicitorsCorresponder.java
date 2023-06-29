@@ -5,22 +5,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SingleLetterOrEmailAllPartiesCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsSingleLetterOrEmailAllPartiesCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
 @Component
 @Slf4j
-public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends SingleLetterOrEmailAllPartiesCorresponder {
+public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends CaseDetailsSingleLetterOrEmailAllPartiesCorresponder {
 
     private final UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
 
     @Autowired
     public UpdateFrcLetterOrEmailAllSolicitorsCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
+                                                           FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService) {
-        super(notificationService, bulkPrintService);
+        super(notificationService, bulkPrintService, finremCaseDetailsMapper);
         this.updateFrcInfoRespondentDocumentService = updateFrcInfoRespondentDocumentService;
     }
 
@@ -40,6 +43,13 @@ public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends SingleLette
     public void emailRespondentSolicitor(CaseDetails caseDetails) {
         log.info("Sending email notification to Respondent Solicitor for 'Update Frc information' for case: {}", caseDetails.getId());
         notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(caseDetails);
+    }
+
+    @Override
+    public void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
+        log.info("Sending email notification to Intervener Solicitor for 'Update Frc information' for case: {}", caseDetails.getId());
+        notificationService.sendUpdateFrcInformationEmailToIntervenerSolicitor(caseDetails,
+            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
 
 }

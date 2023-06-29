@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
 
@@ -30,6 +31,10 @@ public class OnStartDefaultValueService {
 
     public void defaultCivilPartnershipField(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+    }
+
+    public void defaultCivilPartnershipField(FinremCallbackRequest callbackRequest) {
+        callbackRequest.getCaseDetails().getData().setCivilPartnership(YesOrNo.NO);
     }
 
     public void defaultUrgencyQuestion(CallbackRequest callbackRequest) {
@@ -64,6 +69,4 @@ public class OnStartDefaultValueService {
     public void defaultContestedOrderDate(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(CONTESTED_ORDER_APPROVED_DATE, LocalDate.now());
     }
-
-
 }

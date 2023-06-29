@@ -36,7 +36,8 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 
 @Configuration
 @ComponentScan("uk.gov.hmcts.reform.finrem.functional")
-@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.finrem"},
+    basePackageClasses = ServiceAuthorisationApi.class)
 @PropertySource(value = {"classpath:application.properties"})
 @PropertySource(value = {"classpath:application-${env}.properties"})
 @Slf4j

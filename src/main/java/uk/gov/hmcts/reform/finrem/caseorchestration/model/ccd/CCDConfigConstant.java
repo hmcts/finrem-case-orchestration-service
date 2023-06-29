@@ -33,6 +33,20 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_EMAIL = "respondentEmail";
     public static final String RESPONDENT = "Respondent";
 
+    // Intervener related
+    public static final String INTERVENER1_FIRST_MIDDLE_NAME = "intervener1FMName";
+    public static final String INTERVENER1_LAST_NAME = "intervener1LName";
+    public static final String INTERVENER2_FIRST_MIDDLE_NAME = "intervener2FMName";
+    public static final String INTERVENER2_LAST_NAME = "intervener2LName";
+    public static final String INTERVENER3_FIRST_MIDDLE_NAME = "intervener3FMName";
+    public static final String INTERVENER3_LAST_NAME = "intervener3LName";
+    public static final String INTERVENER4_FIRST_MIDDLE_NAME = "intervener4FMName";
+    public static final String INTERVENER4_LAST_NAME = "intervener4LName";
+    public static final String INTERVENER = "Intervener";
+    public static final String INTERVENER1 = "Intervener1";
+    public static final String INTERVENER2 = "Intervener2";
+    public static final String INTERVENER3 = "Intervener3";
+    public static final String INTERVENER4 = "Intervener4";
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
@@ -91,7 +105,7 @@ public class CCDConfigConstant {
     public static final String WALES_FRC_LIST = "walesFRCList";
     public static final String WALES_FRC_LIST_CT = "walesList";
     public static final String HIGHCOURT_FRC_LIST = "highCourtFRCList";
-    public static final String HIGHCOURT_FRC_LIST_CT = "highCourtList";
+    public static final String HIGHCOURT_FRC_LIST_CT = "hcCourtList";
 
     //Regions
     public static final String LONDON = "london";
@@ -295,10 +309,11 @@ public class CCDConfigConstant {
     public static final String FORM_G = "formG";
     public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
     public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
-    public static final String ADDITIONAL_HEARING_DOCUMENTS_OPTION = "additionalHearingDocumentsOption";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
+
+    public static final String GENERAL_LETTER_UPLOADED_DOCUMENT = "generalLetterUploadedDocument";
     public static final String GENERAL_ORDER_PREVIEW_DOCUMENT = "generalOrderPreviewDocument";
     public static final String GENERAL_ORDER_CREATED_BY = "generalOrderCreatedBy";
     public static final String GENERAL_ORDER_BODY_TEXT = "generalOrderBodyText";
@@ -474,7 +489,7 @@ public class CCDConfigConstant {
     public static final String APP_CASE_SUMMARIES_COLLECTION = "appCaseSummariesCollection";
     public static final String APP_FORMS_H_COLLECTION = "appFormsHCollection";
     public static final String APP_EXPERT_EVIDENCE_COLLECTION = "appExpertEvidenceCollection";
-    public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsColl";
+    public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsCollection";
     public static final String APP_OTHER_COLLECTION = "appOtherCollection";
     public static final String RESP_HEARING_BUNDLES_COLLECTION = "respHearingBundlesCollection";
     public static final String RESP_FORM_E_EXHIBITS_COLLECTION = "respFormEExhibitsCollection";
@@ -488,6 +503,54 @@ public class CCDConfigConstant {
     public static final String RESP_OTHER_COLLECTION = "respOtherCollection";
 
     public static final String AMEND_CONSENT_ORDER = "AmendedConsentOrder";
+    public static final String INTV_ONE_CASE_SUMMARIES_COLLECTION = "intv1Summaries";
+    public static final String INTV_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv1Chronologies";
+    public static final String INTV_ONE_CORRESPONDENCE_COLLECTION = "intv1CorrespDocs";
+    public static final String INTV_ONE_EVIDENCE_COLLECTION = "intv1ExpertEvidence";
+    public static final String INTV_ONE_FORM_E_EXHIBITS_COLLECTION = "intv1FormEsExhibits";
+    public static final String INTV_ONE_FORMS_H_COLLECTION = "intv1FormHs";
+    public static final String INTV_ONE_HEARING_BUNDLES_COLLECTION = "intv1HearingBundles";
+    public static final String INTV_ONE_OTHER_COLLECTION = "intv1Other";
+    public static final String INTV_ONE_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv1Qa";
+    public static final String INTV_ONE_STATEMENTS_EXHIBITS_COLLECTION = "intv1StmtsExhibits";
+
+    public static final String INTV_TWO_CASE_SUMMARIES_COLLECTION = "intv2Summaries";
+    public static final String INTV_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv2Chronologies";
+    public static final String INTV_TWO_CORRESPONDENCE_COLLECTION = "intv2CorrespDocs";
+    public static final String INTV_TWO_EVIDENCE_COLLECTION = "intv2ExpertEvidence";
+    public static final String INTV_TWO_FORM_E_EXHIBITS_COLLECTION = "intv2FormEsExhibits";
+    public static final String INTV_TWO_FORMS_H_COLLECTION = "intv2FormHs";
+    public static final String INTV_TWO_HEARING_BUNDLES_COLLECTION = "intv2HearingBundles";
+    public static final String INTV_TWO_OTHER_COLLECTION = "intv2Other";
+    public static final String INTV_TWO_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv2Qa";
+    public static final String INTV_TWO_STATEMENTS_EXHIBITS_COLLECTION = "intv2StmtsExhibits";
+
+    public static final String INTV_THREE_CASE_SUMMARIES_COLLECTION = "intv3Summaries";
+    public static final String INTV_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv3Chronologies";
+    public static final String INTV_THREE_CORRESPONDENCE_COLLECTION = "intv3CorrespDocs";
+    public static final String INTV_THREE_EVIDENCE_COLLECTION = "intv3ExpertEvidence";
+    public static final String INTV_THREE_FORM_E_EXHIBITS_COLLECTION = "intv3FormEsExhibits";
+    public static final String INTV_THREE_FORMS_H_COLLECTION = "intv3FormHs";
+    public static final String INTV_THREE_HEARING_BUNDLES_COLLECTION = "intv3HearingBundles";
+    public static final String INTV_THREE_OTHER_COLLECTION = "intv3Other";
+    public static final String INTV_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv3Qa";
+    public static final String INTV_THREE_STATEMENTS_EXHIBITS_COLLECTION = "intv3StmtsExhibits";
+
+    public static final String INTV_FOUR_CASE_SUMMARIES_COLLECTION = "intv4Summaries";
+    public static final String INTV_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv4Chronologies";
+    public static final String INTV_FOUR_CORRESPONDENCE_COLLECTION = "intv4CorrespDocs";
+    public static final String INTV_FOUR_EVIDENCE_COLLECTION = "intv4ExpertEvidence";
+    public static final String INTV_FOUR_FORM_E_EXHIBITS_COLLECTION = "intv4FormEsExhibits";
+    public static final String INTV_FOUR_FORMS_H_COLLECTION = "intv4FormHs";
+    public static final String INTV_FOUR_HEARING_BUNDLES_COLLECTION = "intv4HearingBundles";
+    public static final String INTV_FOUR_OTHER_COLLECTION = "intv4Other";
+    public static final String INTV_FOUR_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv4Qa";
+    public static final String INTV_FOUR_STATEMENTS_EXHIBITS_COLLECTION = "intv4StmtsExhibits";
+
+    public static final String INTV_ONE_FDR_DOCS_COLLECTION = "intv1FdrCaseDocuments";
+    public static final String INTV_TWO_FDR_DOCS_COLLECTION = "intv2FdrCaseDocuments";
+    public static final String INTV_THREE_FDR_DOCS_COLLECTION = "intv3FdrCaseDocuments";
+    public static final String INTV_FOUR_FDR_DOCS_COLLECTION = "intv4FdrCaseDocuments";
 
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
@@ -498,6 +561,10 @@ public class CCDConfigConstant {
     public static final String ORGANISATION_POLICY_ORGANISATION_ID = "OrganisationID";
     public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
     public static final String RESP_SOLICITOR_POLICY = "[RESPSOLICITOR]";
+    public static final String INTVR_SOLICITOR_1_POLICY = "[INTVRSOLICITOR1]";
+    public static final String INTVR_SOLICITOR_2_POLICY = "[INTVRSOLICITOR2]";
+    public static final String INTVR_SOLICITOR_3_POLICY = "[INTVRSOLICITOR3]";
+    public static final String INTVR_SOLICITOR_4_POLICY = "[INTVRSOLICITOR4]";
     public static final String CREATOR_USER_ROLE = "[CREATOR]";
     public static final String SUBMIT_CASE_DATE = "authorisation3";
 
@@ -537,6 +604,7 @@ public class CCDConfigConstant {
 
     //Get user based on role i.e applicant or respondent
     public static final String CASE_ROLE = "currentUserCaseRole";
+    public static final String CASE_ROLE_FOR_FIELD_SHOW = "currentUserCaseRoleLabel";
 
     //Interim FRC List Names
     public static final String INTERIM_HEARING_PREFIX = "interim_";
@@ -616,9 +684,18 @@ public class CCDConfigConstant {
     //Manage Barristers
     public static final String APPLICANT_BARRISTER_COLLECTION = "appBarristerCollection";
     public static final String RESPONDENT_BARRISTER_COLLECTION = "respBarristerCollection";
+    public static final String INTERVENER_BARRISTER_1_COLLECTION = "intvr1BarristerCollection";
+    public static final String INTERVENER_BARRISTER_2_COLLECTION = "intvr2BarristerCollection";
+    public static final String INTERVENER_BARRISTER_3_COLLECTION = "intvr3BarristerCollection";
+    public static final String INTERVENER_BARRISTER_4_COLLECTION = "intvr4BarristerCollection";
     public static final String APPLICANT_BARRISTER_ROLE = "[APPBARRISTER]";
     public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
+    public static final String INTERVENER_BARRISTER_1_ROLE = "[INTVRBARRISTER1]";
+    public static final String INTERVENER_BARRISTER_2_ROLE = "[INTVRBARRISTER2]";
+    public static final String INTERVENER_BARRISTER_3_ROLE = "[INTVRBARRISTER3]";
+    public static final String INTERVENER_BARRISTER_4_ROLE = "[INTVRBARRISTER4]";
     public static final String CASEWORKER_ROLE = "[CASEWORKER]";
+    public static final String CASEWORKER_ROLE_FIELD_SHOW_LABEL = "CASEWORKER";
     public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
     public static final String MANAGE_BARRISTERS = "Manage Barristers";
 
@@ -629,4 +706,10 @@ public class CCDConfigConstant {
 
     //Hearing State
     public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
+    public static final String CASE_LEVEL_FLAGS = "caseFlags";
+    public static final String CASE_APPLICANT_FLAGS = "applicantFlags";
+    public static final String CASE_RESPONDENT_FLAGS = "respondentFlags";
+    public static final String CASE_LEVEL_ROLE = "Case";
+    
+    public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 }

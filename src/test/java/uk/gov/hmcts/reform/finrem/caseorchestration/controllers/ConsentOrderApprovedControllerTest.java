@@ -9,12 +9,13 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 
 import java.util.List;
 
@@ -23,6 +24,8 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -59,7 +62,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @MockBean
     private DocumentHelper documentHelper;
     @MockBean
-    private CaseDataService caseDataService;
+    private ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
 
     public String consentOrderApprovedEndpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -122,6 +125,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
@@ -143,6 +147,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
@@ -164,8 +169,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -176,9 +180,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any(CaseDetails.class));
+        verify(consentOrderAvailableCorresponder).sendCorrespondence(any());
     }
 
     @Test
@@ -189,8 +192,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -201,9 +203,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any(CaseDetails.class));
+        verify(consentOrderAvailableCorresponder).sendCorrespondence(any());
     }
 
     @Test
@@ -215,6 +216,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
@@ -239,8 +241,10 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
-        verify(consentOrderApprovedDocumentService, times(1)).generateAndPopulateConsentOrderLetter(any(), eq(AUTH_TOKEN));
+        verify(consentOrderApprovedDocumentService, times(1))
+            .stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN), anyString());
+        verify(consentOrderApprovedDocumentService, times(1))
+            .generateAndPopulateConsentOrderLetter(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -253,7 +257,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(consentOrderApprovedDocumentService).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
+        verify(consentOrderApprovedDocumentService)
+            .stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN), any());
     }
 
     @Test
@@ -294,15 +299,18 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
-        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
+        return when(genericDocumentService.annexStampDocument(
+            isA(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any()));
     }
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {
-        return when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
+        return when(genericDocumentService.stampDocument(
+            isA(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any()));
     }
 
-    private OngoingStubbing<List<PensionCollectionData>> whenStampingPensionDocuments() {
-        return when(consentOrderApprovedDocumentService.stampPensionDocuments(any(), eq(AUTH_TOKEN)));
+    private OngoingStubbing<List<PensionTypeCollection>> whenStampingPensionDocuments() {
+        return when(consentOrderApprovedDocumentService
+            .stampPensionDocuments(any(), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any()));
     }
 
     private void assertLetter(ResultActions result) throws Exception {

@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
@@ -39,6 +41,7 @@ public class DraftOnlineDocumentController {
 
     private final OnlineFormDocumentService service;
     private final IdamService idamService;
+    private final CaseFlagsService caseFlagsService;
 
     @PostMapping(path = "/documents/draft-contested-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles draft Contested Mini Form A generation. Serves as a callback from CCD")
@@ -53,6 +56,9 @@ public class DraftOnlineDocumentController {
 
         log.info("Received request to generate draft Contested Mini Form A for Case ID : {}",
             callback.getCaseDetails().getId());
+
+        CaseDetails caseDetails = callback.getCaseDetails();
+        caseFlagsService.setCaseFlagInformation(caseDetails);
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         if (!idamService.isUserRoleAdmin(authorisationToken)) {

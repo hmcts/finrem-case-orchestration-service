@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.searchuserrole.SearchCaseAssignedUserRolesRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,9 +50,23 @@ public class AssignCaseAccessService {
     private final SystemUserService systemUserService;
     private final FeatureToggleService featureToggleService;
 
+
     public void assignCaseAccess(CaseDetails caseDetails, String authorisationToken) {
         String userId = idamService.getIdamUserId(authorisationToken);
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, userId);
+        String url = assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()
+            + (featureToggleService.isUseUserTokenEnabled() ? "?use_user_token=true" : "");
+
+        restService.restApiPostCall(
+            authorisationToken,
+            url,
+            assignCaseAccessRequest
+        );
+    }
+
+    public void assignCaseAccess(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        String userId = idamService.getIdamUserId(authorisationToken);
+        AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(finremCaseDetails, userId);
         String url = assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()
             + (featureToggleService.isUseUserTokenEnabled() ? "?use_user_token=true" : "");
 
@@ -100,12 +116,11 @@ public class AssignCaseAccessService {
     private CaseAssignmentUserRolesRequest getCaseAssignmentUserRolesRequest(Long caseId, Set<String> users, String caseRole, String orgId) {
         final List<CaseAssignmentUserRoleWithOrganisation> caseAssignedRoles = users.stream()
             .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
-            .toList();
+            .collect(Collectors.toList());
 
-        CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
+        return CaseAssignmentUserRolesRequest.builder()
             .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
             .build();
-        return removeCaseAssignedUserRolesRequest;
     }
 
     public void grantCaseRoleToUser(Long caseId, String userId, String caseRole, String orgId) {
@@ -165,6 +180,20 @@ public class AssignCaseAccessService {
         return revokeCreatorRole(caseDetails, userToRemove.get().getUserId());
     }
 
+    public boolean isCreatorRoleActiveOnCase(CaseDetails caseDetails) {
+        log.info("About to start searching for creator role for caseId {}", caseDetails.getId());
+        List<CaseAssignmentUserRole> allRoles = getUserRoles(caseDetails.getId().toString())
+            .getCaseAssignmentUserRoles();
+        List<CaseAssignmentUserRole> creatorRoles = getCreatorRoles(allRoles);
+
+        if (creatorRoles.isEmpty()) {
+            log.info("No creator role found for caseId {}", caseDetails.getId());
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     public boolean isLegalCounselRepresentingOpposingLitigant(String userId,
                                                               String caseId,
                                                               Set<String> opposingCaseRoles) {
@@ -184,6 +213,14 @@ public class AssignCaseAccessService {
             serviceAuthTokenGenerator.generate(),
             List.of(caseId));
     }
+
+    public CaseAssignmentUserRolesResource searchUserRoles(String caseId) {
+        return caseDataApi.searchCaseUserRoles(
+            systemUserService.getSysUserToken(),
+            serviceAuthTokenGenerator.generate(),
+            SearchCaseAssignedUserRolesRequest.builder().caseIds(List.of(caseId)).build());
+    }
+
 
     private List<CaseAssignmentUserRole> getCreatorRoles(List<CaseAssignmentUserRole> allRoles) {
         return allRoles.stream()
@@ -224,4 +261,27 @@ public class AssignCaseAccessService {
             .userId(userId)
             .build());
     }
+
+    public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
+        log.info("retrieve active user case role for caseId {}", caseId);
+        String idamUserId = idamService.getIdamUserId(userAuthorisation);
+        CaseAssignmentUserRolesResource rolesResource1 = getUserRoles(caseId);
+        log.info("idamUserId {} case roles {} for caseId {}",
+            idamUserId, rolesResource1 != null ? rolesResource1 : "empty", caseId);
+
+        CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
+        if (rolesResource != null) {
+            List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
+            log.info("All roles {} for caseId {}", allRoles, caseId);
+            List<CaseAssignmentUserRole> activeRole = allRoles.stream().filter(role -> role.getUserId().equals(idamUserId)).toList();
+            if (!activeRole.isEmpty()) {
+                log.info("Active Role {} for caseId {}", activeRole, caseId);
+                String caseRole = activeRole.get(0).getCaseRole();
+                log.info("case role found {} for caseId {}", caseRole, caseId);
+                return caseRole;
+            }
+        }
+        return "case";
+    }
+
 }

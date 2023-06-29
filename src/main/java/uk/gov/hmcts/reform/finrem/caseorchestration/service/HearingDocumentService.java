@@ -13,9 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.heari
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
@@ -36,10 +34,10 @@ public class HearingDocumentService {
     private final FormCandGCorresponder formCandGCorresponder;
 
     public Map<String, CaseDocument> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
-        CaseDetails courtDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        courtDetailsCopy = addCourtFields(courtDetailsCopy);
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        caseDetailsCopy = addCourtFields(caseDetailsCopy);
 
-        return Optional.of(Pair.of(courtDetailsCopy, authorisationToken))
+        return Optional.of(Pair.of(caseDetailsCopy, authorisationToken))
             .filter(pair -> pair.getLeft().getData().get(FAST_TRACK_DECISION) != null)
             .map(this::courtCoverSheetDocuments)
             .orElseThrow(() -> new IllegalArgumentException("missing fastTrackDecision"));
@@ -55,15 +53,14 @@ public class HearingDocumentService {
     }
 
     private Map<String, CaseDocument> generateFormCAndG(Pair<CaseDetails, String> pair) {
-        CompletableFuture<CaseDocument> formCNonFastTrack =
-            supplyAsync(() -> genericDocumentService.generateDocument(pair.getRight(), addNonFastTrackFields.apply(pair.getLeft()),
-                documentConfiguration.getFormCNonFastTrackTemplate(), documentConfiguration.getFormCFileName()));
+        CaseDocument formCNonFastTrack =
+            genericDocumentService.generateDocument(pair.getRight(), addNonFastTrackFields.apply(pair.getLeft()),
+                documentConfiguration.getFormCNonFastTrackTemplate(pair.getLeft()), documentConfiguration.getFormCFileName());
 
-        CompletableFuture<CaseDocument> formG = supplyAsync(() -> genericDocumentService.generateDocument(pair.getRight(), pair.getLeft(),
-            documentConfiguration.getFormGTemplate(), documentConfiguration.getFormGFileName()));
+        CaseDocument formG = genericDocumentService.generateDocument(pair.getRight(), pair.getLeft(),
+            documentConfiguration.getFormGTemplate(pair.getLeft()), documentConfiguration.getFormGFileName());
 
-        return formCNonFastTrack
-            .thenCombine(formG, this::createDocumentMap).join();
+        return createDocumentMap(formCNonFastTrack, formG);
     }
 
     private Map<String, CaseDocument> createDocumentMap(CaseDocument formC, CaseDocument formG) {
@@ -77,7 +74,7 @@ public class HearingDocumentService {
         Map<String, CaseDocument> documentMap = new HashMap<>();
         documentMap.put(FORM_C,
             genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
-                documentConfiguration.getFormCFastTrackTemplate(), documentConfiguration.getFormCFileName()));
+                documentConfiguration.getFormCFastTrackTemplate(pair.getLeft()), documentConfiguration.getFormCFileName()));
         return documentMap;
     }
 

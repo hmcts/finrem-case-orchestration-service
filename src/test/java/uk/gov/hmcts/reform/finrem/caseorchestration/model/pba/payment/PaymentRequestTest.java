@@ -36,7 +36,6 @@ public class PaymentRequestTest {
             + "}";
         PaymentRequest paymentRequest = mapper.readValue(json, PaymentRequest.class);
         assertThat(paymentRequest.getAccountNumber(), is("PBA1"));
-        assertThat(paymentRequest.getCaseReference(), is("caseRef"));
         assertThat(paymentRequest.getCcdCaseNumber(), is("123"));
         assertThat(paymentRequest.getCustomerReference(), is("custRef"));
         assertThat(paymentRequest.getDescription(), is("desc"));
@@ -76,7 +75,6 @@ public class PaymentRequestTest {
             + "}";
         PaymentRequest paymentRequest = mapper.readValue(json, PaymentRequest.class);
         assertThat(paymentRequest.getAccountNumber(), is("PBA1"));
-        assertThat(paymentRequest.getCaseReference(), is("caseRef"));
         assertThat(paymentRequest.getCcdCaseNumber(), is("123"));
         assertThat(paymentRequest.getCustomerReference(), is("custRef"));
         assertThat(paymentRequest.getDescription(), is("desc"));

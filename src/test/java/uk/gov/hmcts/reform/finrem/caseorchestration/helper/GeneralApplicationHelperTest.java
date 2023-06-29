@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -39,6 +40,7 @@ public class GeneralApplicationHelperTest {
     public static final String AUTH_TOKEN = "tokien:)";
     @Mock
     private GenericDocumentService service;
+    private String caseId = "123123123";
 
     @Test
     public void givenDate_whenOjectToDateTimeIsNotNull_thenReturnLocalDate() {
@@ -62,15 +64,13 @@ public class GeneralApplicationHelperTest {
         CallbackRequest callbackRequest = callbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
-        assertNull(helper.migrateExistingGeneralApplication(data, AUTH_TOKEN));
+        assertNull(helper.migrateExistingGeneralApplication(data, AUTH_TOKEN, anyString()));
     }
 
     @Test
     public void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNull_thenReturnNull() {
-        CallbackRequest callbackRequest = callbackRequest();
-        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
-        assertNull(helper.retrieveInitialGeneralApplicationData(data, "any", AUTH_TOKEN));
+        assertNull(helper.retrieveInitialGeneralApplicationData(new HashMap<>(), "any", AUTH_TOKEN, anyString()));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class GeneralApplicationHelperTest {
         caseData.put(GENERAL_APPLICATION_OUTCOME_DECISION, "Approved");
 
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
-        GeneralApplicationCollectionData data = helper.retrieveInitialGeneralApplicationData(caseData, "any", AUTH_TOKEN);
+        GeneralApplicationCollectionData data = helper.retrieveInitialGeneralApplicationData(caseData, "any", AUTH_TOKEN, caseId);
         GeneralApplicationItems items = data.getGeneralApplicationItems();
 
         assertEquals("Applicant", items.getGeneralApplicationCreatedBy());
@@ -98,19 +98,19 @@ public class GeneralApplicationHelperTest {
 
         caseData.put(GENERAL_APPLICATION_OUTCOME_DECISION, "Not Approved");
         GeneralApplicationCollectionData dataNotApproved = helper.retrieveInitialGeneralApplicationData(caseData,
-            "any", AUTH_TOKEN);
+            "any", AUTH_TOKEN, caseId);
         GeneralApplicationItems itemsNa = dataNotApproved.getGeneralApplicationItems();
         assertEquals("Not Approved", itemsNa.getGeneralApplicationStatus());
 
         caseData.put(GENERAL_APPLICATION_OUTCOME_DECISION, "Other");
         GeneralApplicationCollectionData dataOther = helper.retrieveInitialGeneralApplicationData(caseData,
-            "any", AUTH_TOKEN);
+            "any", AUTH_TOKEN, caseId);
         GeneralApplicationItems itemsOther = dataOther.getGeneralApplicationItems();
         assertEquals("Other", itemsOther.getGeneralApplicationStatus());
 
         caseData.put(GENERAL_APPLICATION_OUTCOME_DECISION, "Anything");
         GeneralApplicationCollectionData dataDefault = helper.retrieveInitialGeneralApplicationData(caseData,
-            "any", AUTH_TOKEN);
+            "any", AUTH_TOKEN, caseId);
         GeneralApplicationItems itemsDefault = dataDefault.getGeneralApplicationItems();
         assertEquals("Other", itemsDefault.getGeneralApplicationStatus());
 
@@ -118,25 +118,25 @@ public class GeneralApplicationHelperTest {
 
         caseData.put(GENERAL_APPLICATION_OUTCOME_DECISION, "Approved");
         GeneralApplicationCollectionData dataApproved = helper.retrieveInitialGeneralApplicationData(caseData,
-            "any", AUTH_TOKEN);
+            "any", AUTH_TOKEN, caseId);
         GeneralApplicationItems itemsApp = dataApproved.getGeneralApplicationItems();
         assertEquals("Approved, Completed", itemsApp.getGeneralApplicationStatus());
 
         caseData.put(GENERAL_APPLICATION_OUTCOME_DECISION, "Not Approved");
         GeneralApplicationCollectionData dataNotApproved2 = helper.retrieveInitialGeneralApplicationData(caseData,
-            "any", AUTH_TOKEN);
+            "any", AUTH_TOKEN, caseId);
         GeneralApplicationItems itemsNa2 = dataNotApproved2.getGeneralApplicationItems();
         assertEquals("Not Approved, Completed", itemsNa2.getGeneralApplicationStatus());
 
         caseData.put(GENERAL_APPLICATION_OUTCOME_DECISION, "Other");
         GeneralApplicationCollectionData dataOther2 = helper.retrieveInitialGeneralApplicationData(caseData,
-            "any", AUTH_TOKEN);
+            "any", AUTH_TOKEN, caseId);
         GeneralApplicationItems itemsOther2 = dataOther2.getGeneralApplicationItems();
         assertEquals("Other, Completed", itemsOther2.getGeneralApplicationStatus());
 
         caseData.put(GENERAL_APPLICATION_OUTCOME_DECISION, "Anything");
         GeneralApplicationCollectionData dataDefault2 = helper.retrieveInitialGeneralApplicationData(caseData,
-            "any", AUTH_TOKEN);
+            "any", AUTH_TOKEN, caseId);
         GeneralApplicationItems itemsDefault2 = dataDefault2.getGeneralApplicationItems();
         assertEquals("Other", itemsDefault2.getGeneralApplicationStatus());
     }
@@ -146,9 +146,9 @@ public class GeneralApplicationHelperTest {
         CallbackRequest callbackRequest = callbackRequest();
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         CaseDocument docxDocment = helper.convertToCaseDocument(callbackRequest.getCaseDetails().getData().get("caseDocument"));
-        when(service.convertDocumentIfNotPdfAlready(docxDocment, AUTH_TOKEN)).thenReturn(caseDocument());
+        when(service.convertDocumentIfNotPdfAlready(docxDocment, AUTH_TOKEN, caseId)).thenReturn(caseDocument());
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
-        CaseDocument caseDocument = helper.getPdfDocument(helper.convertToCaseDocument(data.get("caseDocument")), AUTH_TOKEN);
+        CaseDocument caseDocument = helper.getPdfDocument(helper.convertToCaseDocument(data.get("caseDocument")), AUTH_TOKEN, caseId);
         assertEquals(FILE_NAME, caseDocument.getDocumentFilename());
     }
 

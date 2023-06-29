@@ -51,7 +51,8 @@ public class FeatureToggleServiceTest {
     @SpringBootTest(properties = {
         "feature.toggle.send_to_frc=false",
         "feature.toggle.assign_case_access=false",
-        "feature.toggle.pba_case_type=false"
+        "feature.toggle.pba_case_type=false",
+        "feature.toggle.send_letter_recipient_check=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
 
@@ -78,6 +79,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isPbaToggleEnabledReturnsFalse() {
             assertThat(featureToggleService.isPBAUsingCaseTypeEnabled(), is(false));
+        }
+
+        @Test
+        public void isSendLetterDuplicateCheckReturnsFalse() {
+            assertThat(featureToggleService.isSendLetterDuplicateCheckEnabled(), is(false));
         }
     }
 }

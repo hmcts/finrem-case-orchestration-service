@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -21,6 +22,7 @@ public class AmendedConsentOrderTest {
 
     @Test
     public void shouldPopulateAmendedConsentOrderObject() throws Exception {
+        objectMapper.registerModule(new JavaTimeModule());
         AmendedConsentOrder amendedConsentOrder = objectMapper.readValue(json, AmendedConsentOrder.class);
 
         assertThat(amendedConsentOrder.getAmendedConsentOrderDate(), is(notNullValue()));

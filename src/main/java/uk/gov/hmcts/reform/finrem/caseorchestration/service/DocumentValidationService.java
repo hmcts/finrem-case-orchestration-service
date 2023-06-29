@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
@@ -33,7 +32,7 @@ public class DocumentValidationService {
     private static final String FR_SOLICITOR_CREATE = "FR_SolicitorCreate";
     private static final String FR_AMEND_APPLICATION_DETAILS = "FR_amendApplicationDetails";
 
-    private final DocumentClient documentClient;
+    private final DocumentGeneratorValidationService documentGeneratorValidationService;
     private final DocumentHelper documentHelper;
 
     private static boolean hasErrors(DocumentValidationResponse documentValidationResponse) {
@@ -117,18 +116,19 @@ public class DocumentValidationService {
     private DocumentValidationResponse validateRespondToOrderDocument(String authToken, Map<String, Object> caseData) {
         Optional<CaseDocument> caseDocument = documentHelper.getLatestRespondToOrderDocuments(caseData);
         return caseDocument
-            .map(document -> documentClient.checkUploadedFileType(authToken, document.getDocumentBinaryUrl()))
+            .map(document -> documentGeneratorValidationService.validateFileType(
+                document.getDocumentBinaryUrl(), authToken))
             .orElseGet(() -> DocumentValidationResponse.builder().build());
     }
 
     private DocumentValidationResponse validateConsentOrderDocument(String authToken, Map<String, Object> caseData) {
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(caseData.get(CONSENT_ORDER));
-        return documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl());
+        return documentGeneratorValidationService.validateFileType(caseDocument.getDocumentBinaryUrl(), authToken);
     }
 
     private DocumentValidationResponse validateLatestConsentOrderDocument(String authToken, Map<String, Object> caseData) {
         CaseDocument caseDocument = documentHelper.getLatestAmendedConsentOrder(caseData);
-        return documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl());
+        return documentGeneratorValidationService.validateFileType(caseDocument.getDocumentBinaryUrl(), authToken);
     }
 
     private DocumentValidationResponse validateDocuments(String authToken, List<CaseDocument> caseDocuments) {
@@ -153,6 +153,6 @@ public class DocumentValidationService {
 
     private CompletableFuture<DocumentValidationResponse> validate(String authToken, CaseDocument caseDocument) {
         return CompletableFuture.supplyAsync(() ->
-            documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl()));
+            documentGeneratorValidationService.validateFileType(caseDocument.getDocumentBinaryUrl(), authToken));
     }
 }

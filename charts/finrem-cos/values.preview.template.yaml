@@ -1,4 +1,8 @@
 java:
+  devcpuRequests: 250m
+  devmemoryRequests: 1Gi
+  devcpuLimits: 1
+  devmemoryLimits: 1Gi
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
@@ -7,3 +11,7 @@ java:
     FEATURE_USE_USER_TOKEN: true
     FEATURE_SOLICITOR_NOC: true
     FEATURE_MANAGE_BUNDLE: true
+    FEATURE_SEND_LETTER_RECIPIENT_CHECK: false
+    SECURE_DOC_ENABLED: true
+    CRON_SEND_ORDER_ENABLED: false
+    CRON_LIST_FOR_HEARING_ENABLED: false

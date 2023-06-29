@@ -16,10 +16,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,6 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @Slf4j
@@ -43,6 +43,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     private final ConsentOrderPrintService consentOrderPrintService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
+
 
     @Override
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
@@ -69,14 +70,15 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }
 
-
+    @Deprecated()
     private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails, CaseDocument latestConsentOrder) {
-        log.info("Generating and preparing documents for latest consent order, case {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Generating and preparing documents for latest consent order, case {}", caseId);
 
         Map<String, Object> caseData = caseDetails.getData();
-
+        StampType stampType = documentHelper.getStampType(caseData);
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken);
+        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType, caseId);
 
         ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
@@ -84,27 +86,27 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
         ApprovedOrder approvedOrder = approvedOrderBuilder.build();
 
-        if (Boolean.FALSE.equals(pensionDocumentsExists(caseData))) {
+        if (Boolean.FALSE.equals(isPensionDocumentsEmpty(caseData))) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
-                caseDetails.getId());
+                caseId);
 
-            List<PensionCollectionData> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
-                getPensionDocuments(caseData), authToken);
+            List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
+                documentHelper.getPensionDocuments(caseData), authToken, stampType, caseId);
             log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
 
         List<CollectionElement<ApprovedOrder>> approvedOrders = singletonList(CollectionElement.<ApprovedOrder>builder()
             .value(approvedOrder).build());
-        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseDetails.getId());
+        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseId);
 
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseDetails.getId());
+        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseId);
 
-        if (Boolean.TRUE.equals(pensionDocumentsExists(caseData))) {
+        if (Boolean.TRUE.equals(isPensionDocumentsEmpty(caseData))) {
             log.info("Case {} has no pension documents, updating status to {} and sending for bulk print",
-                caseDetails.getId(),
+                caseId,
                 CONSENT_ORDER_MADE);
             try {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
@@ -113,7 +115,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                 consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
             } catch (JsonProcessingException e) {
-                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseDetails.getId(), e.getMessage());
+                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseId, e.getMessage());
             }
         }
     }
@@ -123,12 +125,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         });
     }
 
-    private List<PensionCollectionData> getPensionDocuments(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {
-        });
-    }
-
-    private Boolean pensionDocumentsExists(Map<String, Object> caseData) {
+    private Boolean isPensionDocumentsEmpty(Map<String, Object> caseData) {
         List<CaseDocument> pensionDocumentsData = documentHelper.getPensionDocumentsData(caseData);
         return pensionDocumentsData.isEmpty();
     }

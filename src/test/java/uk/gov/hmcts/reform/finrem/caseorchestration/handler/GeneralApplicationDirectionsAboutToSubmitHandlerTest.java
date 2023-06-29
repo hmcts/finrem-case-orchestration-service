@@ -68,11 +68,12 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         startHandler = new GeneralApplicationDirectionsAboutToStartHandler(helper, service);
         submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(helper, service);
 
-        when(documentService.convertDocumentIfNotPdfAlready(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
-            CaseDocument.builder().documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary")
+        when(documentService.convertDocumentIfNotPdfAlready(ArgumentMatchers.any(), ArgumentMatchers.any(), any()))
+            .thenReturn(
+            CaseDocument.builder()
+                .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary")
                 .documentFilename("InterimHearingNotice.pdf")
-                .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e").build()
-        );
+                .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e").build());
     }
 
     @Test

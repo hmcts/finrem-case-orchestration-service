@@ -12,13 +12,29 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -60,15 +76,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class TestSetUpUtils {
 
-    public static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
+    public static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
     public static final String BINARY_URL = DOC_URL + "/binary";
     public static final String FILE_NAME = "app_docs.pdf";
+    public static final String DOC_FILE_NAME = "app_docs.docx";
     public static final String VARIATION_FILE_NAME = "ApprovedVariationOrderLetter.pdf";
     public static final String INTE_DOC_URL = "http://dm-store/documents/e9ca7c4a-1f75-4b46-b0dc-744abc2dc0d3";
     public static final String INTE_BINARY_URL = INTE_DOC_URL + "/binary";
     public static final String INTE_FILE_NAME = "dummy1.pdf";
     public static final String REJECTED_ORDER_TYPE = "General Order";
-    public static final String PENSION_TYPE = "PPF1";
+    public static final String PENSION_TYPE = "Form PPF1";
     public static final String PENSION_ID = "1";
 
     public static final int INTERNAL_SERVER_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.value();
@@ -175,16 +192,30 @@ public class TestSetUpUtils {
         return caseDocument;
     }
 
-    public static TypedCaseDocument pensionDocument() {
-        TypedCaseDocument document = new TypedCaseDocument();
-        document.setPensionDocument(caseDocument());
-        document.setTypeOfDocument(PENSION_TYPE);
+    public static PaymentDocument paymentDocument() {
+        PaymentDocument document = new PaymentDocument();
+        document.setUploadedDocument(caseDocument());
+        document.setTypeOfDocument(PaymentDocumentType.COPY_OF_PAPER_FORM_A);
 
         return document;
     }
 
-    public static PensionCollectionData pensionDocumentData() {
-        PensionCollectionData document = new PensionCollectionData();
+    public static PaymentDocumentCollection paymentDocumentCollection() {
+        PaymentDocumentCollection collection = new PaymentDocumentCollection();
+        collection.setValue(paymentDocument());
+        return collection;
+    }
+
+    public static PensionType pensionDocument() {
+        PensionType document = new PensionType();
+        document.setPensionDocument(caseDocument());
+        document.setTypeOfDocument(PensionDocumentType.forValue(PENSION_TYPE));
+
+        return document;
+    }
+
+    public static PensionTypeCollection pensionDocumentData() {
+        PensionTypeCollection document = new PensionTypeCollection();
         document.setTypedCaseDocument(pensionDocument());
         document.setId(PENSION_ID);
 
@@ -218,6 +249,28 @@ public class TestSetUpUtils {
         return CaseDetails.builder()
             .caseTypeId(CaseType.CONSENTED.getCcdType())
             .id(123456789L)
+            .data(caseData)
+            .build();
+    }
+
+    public static FinremCaseDetails defaultConsentedFinremCaseDetails() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        List<NatureApplication> natureOfApplications = List.of(NatureApplication.LUMP_SUM_ORDER,
+            NatureApplication.PERIODICAL_PAYMENT_ORDER,
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.PENSION_ATTACHMENT_ORDER,
+            NatureApplication.PENSION_COMPENSATION_SHARING_ORDER,
+            NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER,
+            NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY,
+            NatureApplication.PROPERTY_ADJUSTMENT_ORDER);
+        caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureOfApplications);
+        populateApplicantNameAndAddress(caseData);
+        populateRespondentNameAndAddressConsented(caseData);
+
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONSENTED)
+            .id(123456789L)
+            .state(State.APPLICATION_SUBMITTED)
             .data(caseData)
             .build();
     }
@@ -266,6 +319,30 @@ public class TestSetUpUtils {
             .build();
     }
 
+    public static FinremCaseDetails defaultContestedFinremCaseDetails() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        List<NatureApplication> natureOfApplications = List.of(NatureApplication.LUMP_SUM_ORDER,
+            NatureApplication.PERIODICAL_PAYMENT_ORDER,
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.PENSION_ATTACHMENT_ORDER,
+            NatureApplication.PENSION_COMPENSATION_SHARING_ORDER,
+            NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER,
+            NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY,
+            NatureApplication.PROPERTY_ADJUSTMENT_ORDER);
+        caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureOfApplications);
+        populateApplicantNameAndAddress(caseData);
+        populateRespondentNameAndAddressContested(caseData);
+        populateCourtDetails(caseData);
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(987654321L)
+            .state(State.APPLICATION_SUBMITTED)
+            .data(caseData)
+            .build();
+    }
+
     private static void populateApplicantNameAndAddress(Map<String, Object> caseData) {
         Map<String, Object> applicantAddress = new HashMap<>();
         applicantAddress.put("AddressLine1", "50 Applicant Street");
@@ -282,15 +359,54 @@ public class TestSetUpUtils {
         caseData.put(APPLICANT_REPRESENTED, null);
     }
 
+
+    private static void populateApplicantNameAndAddress(FinremCaseData caseData) {
+        Address applicantAddress = Address.builder()
+            .addressLine1("50 Applicant Street")
+            .addressLine2("Second Address Line")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SW1")
+            .build();
+
+
+        caseData.getContactDetailsWrapper().setApplicantFmName("James");
+        caseData.getContactDetailsWrapper().setApplicantLname("Joyce");
+        caseData.getContactDetailsWrapper().setApplicantAddress(applicantAddress);
+        caseData.getContactDetailsWrapper().setApplicantRepresented(null);
+    }
+
     private static void populateCourtDetails(Map<String, Object> caseData) {
         caseData.put(REGION, MIDLANDS);
         caseData.put(MIDLANDS_FRC_LIST, NOTTINGHAM);
         caseData.put(NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_7");
     }
 
+    private static void populateCourtDetails(FinremCaseData caseData) {
+        caseData.setRegionWrapper(RegionWrapper.builder()
+            .defaultRegionWrapper(DefaultRegionWrapper.builder()
+                .regionList(Region.MIDLANDS)
+                .midlandsFrcList(RegionMidlandsFrc.NOTTINGHAM)
+                .courtListWrapper(DefaultCourtListWrapper.builder()
+                    .nottinghamCourtList(NottinghamCourt.MANSFIELD_MAGISTRATES_AND_COUNTY_COURT)
+                    .build())
+                .build())
+            .build());
+    }
+
     public static CaseDetails caseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
         try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception.getMessage(), exception);
+        }
+    }
+
+    public static FinremCaseDetails finremCaseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
+        try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
+            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         } catch (Exception exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }
@@ -320,6 +436,22 @@ public class TestSetUpUtils {
         caseData.put(CONSENTED_RESPONDENT_REPRESENTED, null);
     }
 
+    private static void populateRespondentNameAndAddressConsented(FinremCaseData caseData) {
+        Address respondentAddress = Address.builder().build();
+        respondentAddress.setAddressLine1("50 Respondent Street");
+        respondentAddress.setAddressLine2("Consented");
+        respondentAddress.setAddressLine3("Third Address Line");
+        respondentAddress.setCounty("London");
+        respondentAddress.setCountry("England");
+        respondentAddress.setPostTown("London");
+        respondentAddress.setPostCode("SW1");
+
+        caseData.getContactDetailsWrapper().setRespondentFmName("Jane");
+        caseData.getContactDetailsWrapper().setRespondentLname("Doe");
+        caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
+        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(null);
+    }
+
     private static void populateRespondentNameAndAddressContested(Map<String, Object> caseData) {
         Map<String, Object> respondentAddress = new HashMap<>();
         respondentAddress.put("AddressLine1", "50 Respondent Street");
@@ -334,6 +466,23 @@ public class TestSetUpUtils {
         caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Doe");
         caseData.put(RESPONDENT_ADDRESS, respondentAddress);
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, null);
+    }
+
+    private static void populateRespondentNameAndAddressContested(FinremCaseData caseData) {
+
+        Address respondentAddress = Address.builder().build();
+        respondentAddress.setAddressLine1("50 Respondent Street");
+        respondentAddress.setAddressLine2("Contested");
+        respondentAddress.setAddressLine3("Third Address Line");
+        respondentAddress.setCounty("London");
+        respondentAddress.setCountry("England");
+        respondentAddress.setPostTown("London");
+        respondentAddress.setPostCode("SW1");
+
+        caseData.getContactDetailsWrapper().setRespondentFmName("Jane");
+        caseData.getContactDetailsWrapper().setRespondentLname("Doe");
+        caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
+        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(null);
     }
 
     public static DocumentGenerationRequest matchDocumentGenerationRequestTemplateAndFilename(String template, String filename) {

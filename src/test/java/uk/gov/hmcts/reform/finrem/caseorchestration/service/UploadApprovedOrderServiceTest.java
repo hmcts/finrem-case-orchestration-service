@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 
 public class UploadApprovedOrderServiceTest extends BaseServiceTest {
+    private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
     private static final String JUDGE_TYPE = "TEST_TYPE";
     private static final String JUDGE_NAME = "TEST_NAME";
     private static final String APPROVED_DATE = "DATE";
@@ -90,7 +91,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void givenAboutToStart_whenPrepareFieldsForApprovedLetter_thenRemoveFields() {
-        when(hearingOrderService.draftDirectionOrderCollectionTail(caseDetails))
+        when(hearingOrderService.draftDirectionOrderCollectionTail(caseDetails, AUTH_TOKEN))
             .thenReturn(Optional.of(draftDirectionOrder));
 
         Map<String, Object> caseData = uploadApprovedOrderService.prepareFieldsForOrderApprovedCoverLetter(caseDetails);

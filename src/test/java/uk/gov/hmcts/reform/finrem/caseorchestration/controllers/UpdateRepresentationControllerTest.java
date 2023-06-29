@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 import org.mockito.stubbing.OngoingStubbing;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -15,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,10 +39,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 
-@WebMvcTest(UpdateRepresentationController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     private static final String PATH = "/fixtures/noticeOfChange/";
+    private static final String NO_ORG_POLICIES_JSON = "no-org-policies.json";
     private static final String VALID_AUTH_TOKEN = AUTH_TOKEN;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -51,6 +57,12 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @MockBean
     private FeatureToggleService featureToggleService;
+
+    @Autowired
+    private UpdateRepresentationController updateRepresentationController;
+
+    @InjectMocks
+    private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
     protected String updateEndpoint() {
         return "/case-orchestration/apply-noc-decision";
@@ -158,8 +170,8 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @Test
     public void givenCaseworkerNocEnabled_whenSettingDefaults_thenNullifyFields() throws Exception {
-        doRequestSetUp();
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
+        loadRequestContentWith(PATH + NO_ORG_POLICIES_JSON);
 
         mvc.perform(post(setDefaultsEndpoint())
                 .content(requestContent.toString())

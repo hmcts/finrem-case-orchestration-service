@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
@@ -28,7 +29,7 @@ public class NocTestConfig {
 
     @Bean
     public CaseDataService caseDataService() {
-        return new CaseDataService();
+        return new CaseDataService(new ObjectMapper());
     }
 
     @Bean
@@ -63,6 +64,8 @@ public class NocTestConfig {
     UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
     @MockBean
     UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
+    @MockBean
+    AssignToJudgeCorresponder assignToJudgeCorresponder;
 
 }
 

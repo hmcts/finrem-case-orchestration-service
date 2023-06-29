@@ -38,7 +38,7 @@ public class RejectGeneralApplicationDocumentService  {
         Map letterDetailsMap = convertGeneralApplicationRejectionLetterDetailsToMap(letterDetails);
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, letterDetailsMap,
             documentConfiguration.getGeneralApplicationRejectionTemplate(),
-            documentConfiguration.getGeneralApplicationRejectionFileName());
+            documentConfiguration.getGeneralApplicationRejectionFileName(), caseDetails.getId().toString());
     }
 
     private Map convertGeneralApplicationRejectionLetterDetailsToMap(GeneralApplicationRejectionLetterDetails letterDetails) {

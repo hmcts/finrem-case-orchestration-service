@@ -25,12 +25,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 
 import javax.validation.constraints.NotNull;
 
@@ -60,7 +61,7 @@ public class ConsentOrderApprovedController extends BaseController {
     private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
-    private final CaseDataService caseDataService;
+    private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
@@ -109,7 +110,8 @@ public class ConsentOrderApprovedController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, authToken);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData,
+                authToken, caseDetails.getId().toString());
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
 
         return ResponseEntity.ok(
@@ -143,13 +145,14 @@ public class ConsentOrderApprovedController extends BaseController {
     }
 
     private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails) {
-        log.info("Generating and preparing documents for latest consent order, case {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Generating and preparing documents for latest consent order, case {}", caseId);
 
         Map<String, Object> caseData = caseDetails.getData();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
-
+        StampType stampType = documentHelper.getStampType(caseData);
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken);
+        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType, caseId);
 
         ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
@@ -159,25 +162,26 @@ public class ConsentOrderApprovedController extends BaseController {
 
         if (!documentHelper.getPensionDocumentsData(caseData).isEmpty()) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
-                caseDetails.getId());
+                caseId);
 
-            List<PensionCollectionData> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
-                getPensionDocuments(caseData), authToken);
+            List<PensionTypeCollection> pensionDocList = documentHelper.getPensionDocuments(caseData);
+            List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
+                pensionDocList, authToken, stampType, caseId);
             log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
 
         List<CollectionElement<ApprovedOrder>> approvedOrders = singletonList(CollectionElement.<ApprovedOrder>builder()
             .value(approvedOrder).build());
-        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseDetails.getId());
+        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseId);
 
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseDetails.getId());
+        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseId);
 
         if (documentHelper.getPensionDocumentsData(caseData).isEmpty()) {
             log.info("Case {} has no pension documents, updating status to {} and sending for bulk print",
-                caseDetails.getId(),
+                caseId,
                 CONSENT_ORDER_MADE.toString());
             try {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
@@ -186,18 +190,10 @@ public class ConsentOrderApprovedController extends BaseController {
                 consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
                 notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
+                consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
 
-                if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-                    log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
-                    notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
-                }
-
-                if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-                    log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
-                    notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
-                }
             } catch (JsonProcessingException e) {
-                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseDetails.getId(), e.getMessage());
+                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseId, e.getMessage());
             }
         }
     }
@@ -207,7 +203,7 @@ public class ConsentOrderApprovedController extends BaseController {
         });
     }
 
-    private List<PensionCollectionData> getPensionDocuments(Map<String, Object> caseData) {
+    private List<PensionTypeCollection> getPensionDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {
         });
     }
