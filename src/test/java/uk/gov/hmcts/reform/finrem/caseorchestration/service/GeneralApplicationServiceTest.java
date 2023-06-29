@@ -61,6 +61,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationServiceTest {
@@ -245,6 +246,32 @@ public class GeneralApplicationServiceTest {
 
         assertEquals(1, generalApplicationCollectionDataList.size());
         assertEquals("applicant", caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
+            .getValue().getAppRespGeneralApplicationReceivedFrom());
+    }
+
+    @Test
+    public void updateAndSortGeneralApplicationsForRespondent() {
+
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(accessService.getActiveUser(any(), any())).thenReturn("Respondent");
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        wrapper.setAppRespGeneralApplications(wrapper.getGeneralApplications());
+        wrapper.setGeneralApplications(List.of(wrapper.getGeneralApplications().get(0)));
+        GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
+
+        wrapper.getAppRespGeneralApplications().forEach(
+            x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(RESPONDENT));
+        wrapperBefore.getGeneralApplications().forEach(
+            x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicList(RESPONDENT)));
+        wrapperBefore.setAppRespGeneralApplications(wrapperBefore.getGeneralApplications());
+
+        FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
+            = helper.covertToGeneralApplicationData(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications());
+
+        assertEquals(1, generalApplicationCollectionDataList.size());
+        assertEquals("respondent", caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
             .getValue().getAppRespGeneralApplicationReceivedFrom());
     }
 
