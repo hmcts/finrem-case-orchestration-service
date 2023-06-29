@@ -236,8 +236,8 @@ public class GeneralApplicationService {
             updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
             if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
                 && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
-                    caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().forEach(
-                        x -> x.getValue().setGeneralApplicationReceivedFrom(null));
+                caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().forEach(
+                    x -> x.getValue().setGeneralApplicationReceivedFrom(null));
             }
         }
 
