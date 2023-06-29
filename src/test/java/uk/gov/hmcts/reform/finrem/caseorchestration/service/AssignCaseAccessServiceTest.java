@@ -370,13 +370,13 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
         caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
                 SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of("1234567890"))
+                    .caseIds(List.of(TEST_CASE_ID))
                     .build())))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWheIntvr1SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(CASE_ID, AUTH_TOKEN), INTERVENER1);
+        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER1);
     }
 
     @Test
@@ -384,13 +384,13 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
         caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
                 SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of("1234567890"))
+                    .caseIds(List.of(TEST_CASE_ID))
                     .build())))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWhenIntvr2SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(CASE_ID, AUTH_TOKEN), INTERVENER2);
+        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER2);
     }
 
     @Test
@@ -398,13 +398,13 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
         caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
                 SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of("1234567890"))
+                    .caseIds(List.of(TEST_CASE_ID))
                     .build())))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWhenIntvr3SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(CASE_ID, AUTH_TOKEN), INTERVENER3);
+        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER3);
     }
 
     @Test
@@ -412,13 +412,13 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
         caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
                 SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of("1234567890"))
+                    .caseIds(List.of(TEST_CASE_ID))
                     .build())))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWhenIntvr4SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(CASE_ID, AUTH_TOKEN), INTERVENER4);
+        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER4);
     }
 
     @Test
@@ -426,13 +426,13 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
         caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
                 SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of("1234567890"))
+                    .caseIds(List.of(TEST_CASE_ID))
                     .build())))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWhenAppSolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(CASE_ID, AUTH_TOKEN), APPLICANT);
+        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), APPLICANT);
     }
 
     private CaseAssignmentUserRolesResource generateResourceWhenCreatorWasSolicitor() {

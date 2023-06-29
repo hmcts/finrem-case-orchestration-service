@@ -35,7 +35,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfigura
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.USER_ROLES_CACHE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
@@ -277,9 +276,6 @@ public class AssignCaseAccessService {
     public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
         log.info("retrieve active user case role for caseId {}", caseId);
         String idamUserId = idamService.getIdamUserId(userAuthorisation);
-        CaseAssignmentUserRolesResource rolesResource1 = getUserRoles(caseId);
-        log.info("idamUserId {} case roles {} for caseId {}",
-            idamUserId, rolesResource1 != null ? rolesResource1 : "empty", caseId);
 
         CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
         if (rolesResource != null) {
@@ -298,7 +294,7 @@ public class AssignCaseAccessService {
 
     public String getActiveUser(String caseId, String userAuthorisation) {
         String logMessage = "Logged in user role {} caseId {}";
-        String activeUserCaseRole =  getActiveUserCaseRole(caseId, userAuthorisation);
+        String activeUserCaseRole = getActiveUserCaseRole(caseId, userAuthorisation);
         if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getValue())) {
             log.info(logMessage, APPLICANT, caseId);
             return APPLICANT;
