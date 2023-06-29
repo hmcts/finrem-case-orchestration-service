@@ -715,9 +715,4 @@ public class CCDConfigConstant {
     
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 
-    public static final String INTERVENER_ONE = "intervener1";
-    public static final String INTERVENER_TWO = "intervener2";
-    public static final String INTERVENER_THREE = "intervener3";
-    public static final String INTERVENER_FOUR = "intervener4";
-
 }

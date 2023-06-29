@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 
 @Component
@@ -21,7 +21,7 @@ public class IntervenerOneLetterAddresseeGenerator extends IntervenerLetterAddre
 
     @Override
     protected String getIntervenerFieldName() {
-        return CCDConfigConstant.INTERVENER_ONE;
+        return IntervenerConstant.INTERVENER_ONE;
     }
 
     @Override
