@@ -445,12 +445,12 @@ public class GeneralApplicationServiceTest {
 
     @Test
     public void givenGeneralApplicationAndExistingIntervenerDirectionsDocument_ShouldUpdateIntervenerDirectionsDocuments() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
         IntervenerCaseDocumentCollection gaCaseDocumentCollection = IntervenerCaseDocumentCollection.builder().build();
         CaseDocument existingCaseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         existingCaseDocument.setDocumentUrl(DOC_IN_NEW_COLLECTION_URL);
         IntervenerCaseDocument gaCaseDocument = IntervenerCaseDocument.builder().build();
         gaCaseDocument.setDocument(existingCaseDocument);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
         gaCaseDocumentCollection.setValue(gaCaseDocument);
         List<IntervenerCaseDocumentCollection> gaDocumentCollectionList = new ArrayList<>();
         gaDocumentCollectionList.add(gaCaseDocumentCollection);
