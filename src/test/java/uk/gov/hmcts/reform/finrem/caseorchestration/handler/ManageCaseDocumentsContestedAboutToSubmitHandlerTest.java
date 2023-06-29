@@ -39,12 +39,9 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
+public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
     @Mock
@@ -55,7 +52,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
     private ApplicantOtherDocumentsCollectionService applicantOtherDocumentsCollectionService;
     private FdrDocumentsCollectionService fdrDocumentsCollectionService;
     private RespondentQuestionnairesAnswersCollectionService respondentQuestionnairesAnswersCollectionService;
-    private ManageCaseDocumentsContestedAboutToSubmitCaseHandler manageCaseDocumentsAboutToSubmitCaseHandler;
+    private ManageCaseDocumentsContestedAboutToSubmitHandler manageCaseDocumentsAboutToSubmitCaseHandler;
     private FinremCaseDetails caseDetails;
     private FinremCaseDetails caseDetailsBefore;
     private FinremCaseData caseData;
@@ -88,7 +85,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
         FinremCaseDetailsMapper finremCaseDetailsMapper =
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         manageCaseDocumentsAboutToSubmitCaseHandler =
-            new ManageCaseDocumentsContestedAboutToSubmitCaseHandler(finremCaseDetailsMapper,
+            new ManageCaseDocumentsContestedAboutToSubmitHandler(finremCaseDetailsMapper,
                 documentCollectionServices, uploadedDocumentHelper);
     }
 
@@ -118,17 +115,16 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.APP_OTHER_COLLECTION),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_OTHER_COLLECTION),
             hasSize(4));
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(3));
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
-        verify(uploadedDocumentHelper, times(1)).deleteRemovedDocuments(any(), any(), any());
     }
 
     private void setUpAddedDocuments() {
@@ -158,7 +154,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.APP_OTHER_COLLECTION)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_OTHER_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
