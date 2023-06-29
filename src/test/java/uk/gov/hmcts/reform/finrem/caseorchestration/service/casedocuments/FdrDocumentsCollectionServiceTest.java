@@ -30,12 +30,12 @@ public class FdrDocumentsCollectionServiceTest extends ManageCollectionsServiceT
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.addManagedDocumentToCollection(
+        collectionService.addManagedDocumentToSelectedCollection(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -48,22 +48,22 @@ public class FdrDocumentsCollectionServiceTest extends ManageCollectionsServiceT
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.YES, "Other Example");
         beforeEventDocList.add(removedDoc);
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.removeMovedDocumentFromCollection(
+        collectionService.removeManagedDocumentFromOriginalCollection(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build()
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(0));
     }
 }

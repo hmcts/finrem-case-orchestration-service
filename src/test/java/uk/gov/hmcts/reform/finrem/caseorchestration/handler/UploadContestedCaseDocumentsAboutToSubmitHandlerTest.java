@@ -87,9 +87,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(applicantCaseSummariesCollectionService)
-            .addManagedDocumentToCollection(callbackRequest,screenUploadDocumentList);
+            .addManagedDocumentToSelectedCollection(callbackRequest,screenUploadDocumentList);
         verify(applicantChronologiesStatementCollectionService)
-            .addManagedDocumentToCollection(callbackRequest, screenUploadDocumentList);
+            .addManagedDocumentToSelectedCollection(callbackRequest, screenUploadDocumentList);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

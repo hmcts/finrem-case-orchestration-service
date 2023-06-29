@@ -17,15 +17,15 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class  ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends FinremCallbackHandler {
+public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final List<DocumentCollectionService> documentCollectionServices;
     private final UploadedDocumentService uploadedDocumentHelper;
 
     @Autowired
-    public ManageCaseDocumentsContestedAboutToSubmitCaseHandler(FinremCaseDetailsMapper mapper,
-                                                                List<DocumentCollectionService> documentCollectionServices,
-                                                                UploadedDocumentService uploadedDocumentHelper) {
+    public ManageCaseDocumentsContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
+                                                            List<DocumentCollectionService> documentCollectionServices,
+                                                            UploadedDocumentService uploadedDocumentHelper) {
         super(mapper);
         this.documentCollectionServices = documentCollectionServices;
         this.uploadedDocumentHelper = uploadedDocumentHelper;
@@ -44,13 +44,12 @@ public class  ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends Finre
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
-        List<UploadCaseDocumentCollection> screenCollections = caseData.getManageCaseDocumentCollection();
+        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
         documentCollectionServices.forEach(documentCollectionService -> {
-            documentCollectionService.removeMovedDocumentFromCollection(callbackRequest);
-            documentCollectionService.addManagedDocumentToCollection(callbackRequest, screenCollections);
+            documentCollectionService.removeManagedDocumentFromOriginalCollection(callbackRequest);
+            documentCollectionService.addManagedDocumentToSelectedCollection(callbackRequest, managedCollections);
         });
         uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
-        uploadedDocumentHelper.deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

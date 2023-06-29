@@ -34,12 +34,12 @@ public class RespondentChronologiesStatementCollectionServiceTest extends Manage
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.addManagedDocumentToCollection(
+        collectionService.addManagedDocumentToSelectedCollection(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(3));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -56,22 +56,22 @@ public class RespondentChronologiesStatementCollectionServiceTest extends Manage
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.removeMovedDocumentFromCollection(
+        collectionService.removeManagedDocumentFromOriginalCollection(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build()
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
     }
 }

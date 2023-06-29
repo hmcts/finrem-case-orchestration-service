@@ -11,9 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 @Slf4j
 @Service
-public class ManageCaseDocumentsContestedAboutToStartCaseHandler extends FinremCallbackHandler {
+public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallbackHandler {
 
-    public ManageCaseDocumentsContestedAboutToStartCaseHandler(FinremCaseDetailsMapper mapper) {
+    public ManageCaseDocumentsContestedAboutToStartHandler(FinremCaseDetailsMapper mapper) {
         super(mapper);
     }
 

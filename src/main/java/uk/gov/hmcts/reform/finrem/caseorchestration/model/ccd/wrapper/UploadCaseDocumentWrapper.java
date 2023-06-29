@@ -108,9 +108,9 @@ public class UploadCaseDocumentWrapper {
     }
 
     @JsonIgnore
-    public List<UploadCaseDocumentCollection> getDocumentCollection(ManageCaseDocumentsCollectionType collectionName) {
+    public List<UploadCaseDocumentCollection> getDocumentCollectionPerType(ManageCaseDocumentsCollectionType collectionType) {
 
-        return switch (collectionName) {
+        return switch (collectionType) {
             case APPLICANT_FR_FORM_COLLECTION ->
                 appFrFormsCollection = getNonNull(appFrFormsCollection);
             case APPLICANT_EVIDENCE_COLLECTION ->

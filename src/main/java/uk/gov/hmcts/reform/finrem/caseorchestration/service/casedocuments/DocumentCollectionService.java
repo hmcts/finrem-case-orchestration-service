@@ -16,51 +16,52 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class DocumentCollectionService {
 
-    protected final ManageCaseDocumentsCollectionType serviceCollectionType;
+    protected final ManageCaseDocumentsCollectionType collectionType;
 
-    protected abstract List<UploadCaseDocumentCollection> getServiceCollectionType(
-        List<UploadCaseDocumentCollection> eventScreenDocumentCollections);
+    protected abstract List<UploadCaseDocumentCollection> getTypedManagedDocumentCollections(
+        List<UploadCaseDocumentCollection> allManagedDocumentCollections);
 
-    public void addManagedDocumentToCollection(FinremCallbackRequest callbackRequest,
-                                               List<UploadCaseDocumentCollection> allScreenCollections) {
+    public void addManagedDocumentToSelectedCollection(FinremCallbackRequest callbackRequest,
+                                                       List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        List<UploadCaseDocumentCollection> originalServiceCollection =
-            caseData.getUploadCaseDocumentWrapper().getDocumentCollection(serviceCollectionType);
-        List<UploadCaseDocumentCollection> screenServiceCollection =
-            getServiceCollectionType(allScreenCollections);
+        List<UploadCaseDocumentCollection> typedOriginalDocumentCollections =
+            caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
+        List<UploadCaseDocumentCollection> typedManagedDocumentCollections =
+            getTypedManagedDocumentCollections(allManagedDocumentCollections);
 
-        screenServiceCollection.stream()
-            .filter(screenServiceDocument -> !originalServiceCollection.contains(screenServiceDocument))
-            .forEach(screenServiceDocument -> originalServiceCollection.add(screenServiceDocument));
+        typedManagedDocumentCollections.stream()
+            .filter(managedDocumentCollection -> !typedOriginalDocumentCollections.contains(managedDocumentCollection))
+            .forEach(typedOriginalDocumentCollections::add);
 
-        originalServiceCollection.sort(Comparator.comparing(
+        typedOriginalDocumentCollections.sort(Comparator.comparing(
             UploadCaseDocumentCollection::getUploadCaseDocument, Comparator.comparing(
                 UploadCaseDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
                     Comparator.reverseOrder()))));
-        log.info("Adding items: {}, to {} Collection", screenServiceCollection,
-            serviceCollectionType);
-        allScreenCollections.removeAll(screenServiceCollection);
+        log.info("Adding items: {}, to {} Collection", typedManagedDocumentCollections,
+            collectionType);
+        allManagedDocumentCollections.removeAll(typedManagedDocumentCollections);
     }
 
-    public void removeMovedDocumentFromCollection(FinremCallbackRequest callbackRequest) {
+    public void removeManagedDocumentFromOriginalCollection(FinremCallbackRequest callbackRequest) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        List<UploadCaseDocumentCollection> originalDocumentCollectionForType =
-            caseData.getUploadCaseDocumentWrapper().getDocumentCollection(serviceCollectionType);
-        List<UploadCaseDocumentCollection> documentsToRemove = getDocumentsToRemove(caseData);
-        documentsToRemove.stream().forEach(originalDocumentCollectionForType::remove);
+        List<UploadCaseDocumentCollection> originalDocumentCollection =
+            caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
+        List<UploadCaseDocumentCollection> documentsToBeRemoved =
+            getDocumentsToBeRemovedFromOriginalCollection(caseData);
+        documentsToBeRemoved.forEach(originalDocumentCollection::remove);
     }
 
-    private List<UploadCaseDocumentCollection> getDocumentsToRemove(FinremCaseData caseData) {
-        List<UploadCaseDocumentCollection> allScreenCollections = caseData.getManageCaseDocumentCollection();
-        List<UploadCaseDocumentCollection> serviceScreenCollection = getServiceCollectionType(allScreenCollections);
-        List<String> serviceScreenCollectionDocIds = serviceScreenCollection.stream()
-            .map(UploadCaseDocumentCollection::getId).collect(Collectors.toList());
-        List<UploadCaseDocumentCollection> originalServiceCollection =
-            caseData.getUploadCaseDocumentWrapper().getDocumentCollection(serviceCollectionType);
+    private List<UploadCaseDocumentCollection> getDocumentsToBeRemovedFromOriginalCollection(FinremCaseData caseData) {
+        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
+        List<UploadCaseDocumentCollection> managedCollection = getTypedManagedDocumentCollections(managedCollections);
+        List<String> managedCollectionDocIds = managedCollection.stream()
+            .map(UploadCaseDocumentCollection::getId).toList();
+        List<UploadCaseDocumentCollection> originalDocumentCollection =
+            caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
 
-        return originalServiceCollection.stream().filter(originalDoc ->
-                !serviceScreenCollectionDocIds.contains(originalDoc.getId()))
+        return originalDocumentCollection.stream().filter(originalDoc ->
+                !managedCollectionDocIds.contains(originalDoc.getId()))
             .collect(Collectors.toList());
     }
 }

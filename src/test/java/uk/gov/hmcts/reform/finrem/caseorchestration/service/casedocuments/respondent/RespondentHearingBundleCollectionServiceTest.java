@@ -30,12 +30,12 @@ public class RespondentHearingBundleCollectionServiceTest extends ManageCollecti
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.addManagedDocumentToCollection(
+        collectionService.addManagedDocumentToSelectedCollection(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.RESP_HEARING_BUNDLES_COLLECTION),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_HEARING_BUNDLES_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -48,22 +48,22 @@ public class RespondentHearingBundleCollectionServiceTest extends ManageCollecti
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null);
         beforeEventDocList.add(removedDoc);
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.RESP_HEARING_BUNDLES_COLLECTION)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_HEARING_BUNDLES_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.RESP_HEARING_BUNDLES_COLLECTION)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_HEARING_BUNDLES_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.removeMovedDocumentFromCollection(
+        collectionService.removeManagedDocumentFromOriginalCollection(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build()
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.RESP_HEARING_BUNDLES_COLLECTION),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_HEARING_BUNDLES_COLLECTION),
             hasSize(0));
     }
 }

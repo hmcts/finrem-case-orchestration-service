@@ -46,7 +46,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         List<UploadCaseDocumentCollection> screenCollections = caseData.getManageCaseDocumentCollection();
 
         documentCollectionServices.forEach(documentCollectionService ->
-            documentCollectionService.addManagedDocumentToCollection(callbackRequest, screenCollections));
+            documentCollectionService.addManagedDocumentToSelectedCollection(callbackRequest, screenCollections));
 
         screenCollections.sort(Comparator.comparing(
             UploadCaseDocumentCollection::getUploadCaseDocument, Comparator.comparing(

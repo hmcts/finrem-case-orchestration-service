@@ -34,12 +34,12 @@ public class CaseDocumentCollectionServiceTest extends ManageCollectionsServiceT
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.addManagedDocumentToCollection(
+        collectionService.addManagedDocumentToSelectedCollection(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
             hasSize(3));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -56,22 +56,22 @@ public class CaseDocumentCollectionServiceTest extends ManageCollectionsServiceT
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.removeMovedDocumentFromCollection(
+        collectionService.removeManagedDocumentFromOriginalCollection(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build()
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
             hasSize(2));
     }
 

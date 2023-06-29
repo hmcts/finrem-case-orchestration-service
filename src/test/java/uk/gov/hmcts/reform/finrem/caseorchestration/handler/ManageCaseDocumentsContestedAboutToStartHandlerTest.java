@@ -24,14 +24,14 @@ import static org.hamcrest.Matchers.is;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ManageCaseDocumentsContestedAboutToStartCaseHandlerTest {
+public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
 
-    private ManageCaseDocumentsContestedAboutToStartCaseHandler manageCaseDocumentsAboutToStartCaseHandler;
+    private ManageCaseDocumentsContestedAboutToStartHandler manageCaseDocumentsAboutToStartCaseHandler;
 
     @Before
     public void setup() {
         manageCaseDocumentsAboutToStartCaseHandler =
-            new ManageCaseDocumentsContestedAboutToStartCaseHandler(
+            new ManageCaseDocumentsContestedAboutToStartHandler(
                 new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())));
     }
 

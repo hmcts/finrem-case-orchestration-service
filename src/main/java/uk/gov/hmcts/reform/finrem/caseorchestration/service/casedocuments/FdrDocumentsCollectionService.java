@@ -21,12 +21,12 @@ public class FdrDocumentsCollectionService extends DocumentCollectionService {
         super(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION);
     }
 
-    protected List<UploadCaseDocumentCollection> getServiceCollectionType(
-        List<UploadCaseDocumentCollection> eventScreenDocumentCollections) {
+    protected List<UploadCaseDocumentCollection> getTypedManagedDocumentCollections(
+        List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 
-        return eventScreenDocumentCollections.stream()
-            .filter(d -> {
-                UploadCaseDocument uploadedCaseDocument = d.getUploadCaseDocument();
+        return allManagedDocumentCollections.stream()
+            .filter(managedDocumentCollection -> {
+                UploadCaseDocument uploadedCaseDocument = managedDocumentCollection.getUploadCaseDocument();
                 return uploadedCaseDocument.getCaseDocuments() != null
                     && uploadedCaseDocument.getCaseDocumentType() != null
                     && uploadedCaseDocument.getCaseDocumentFdr() != null
