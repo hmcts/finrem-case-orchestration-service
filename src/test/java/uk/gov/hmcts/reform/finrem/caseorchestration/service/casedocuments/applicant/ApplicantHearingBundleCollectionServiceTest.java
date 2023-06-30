@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ManageCollectionsServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +19,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ApplicantHearingBundleCollectionServiceTest extends ManageCollectionsServiceTest {
+public class ApplicantHearingBundleCollectionServiceTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
-    ApplicantHearingBundleCollectionService collectionService;
+    ApplicantHearingBundleHandler collectionService;
 
     @Test
     public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {

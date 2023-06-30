@@ -12,9 +12,6 @@ public class CCDConfigConstant {
     public static final String CASE_DETAILS = "caseDetails";
     public static final String CASE_DATA = "case_data";
 
-    public static final String HMCTS_SERVICE_ID = "HMCTSServiceId";
-
-    public static final String SUPPLEMENTARY_DATA_UPDATES = "supplementary_data_updates";
     public static final String APPLICANT_FIRST_MIDDLE_NAME = "applicantFMName";
     public static final String APPLICANT_LAST_NAME = "applicantLName";
     public static final String APPLICANT_ADDRESS = "applicantAddress";
@@ -310,8 +307,6 @@ public class CCDConfigConstant {
     public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
     public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
-    public static final String GENERAL_LETTER = "generalLetterCollection";
-    public static final String GENERAL_LETTER_BODY = "generalLetterBody";
 
     public static final String GENERAL_LETTER_UPLOADED_DOCUMENT = "generalLetterUploadedDocument";
     public static final String GENERAL_ORDER_PREVIEW_DOCUMENT = "generalOrderPreviewDocument";
@@ -343,7 +338,6 @@ public class CCDConfigConstant {
     public static final String GENERAL_LETTER_ADDRESS_TO = "generalLetterAddressTo";
     public static final String GENERAL_LETTER_RECIPIENT = "generalLetterRecipient";
     public static final String GENERAL_LETTER_RECIPIENT_ADDRESS = "generalLetterRecipientAddress";
-    public static final String GENERAL_LETTER_PREVIEW = "generalLetterPreview";
     public static final String CONTESTED_CONSENT_ORDER_COLLECTION = "Contested_ConsentedApprovedOrders";
     public static final String CONTESTED_CONSENT_PENSION_COLLECTION = "consentPensionCollection";
     public static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION = "consentedNotApprovedOrders";
@@ -365,9 +359,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_UPLOADED_DOCUMENTS = "uploadGeneralDocuments";
 
     //general email
-    public static final String GENERAL_EMAIL_COLLECTION = "generalEmailCollection";
     public static final String GENERAL_EMAIL_RECIPIENT = "generalEmailRecipient";
-    public static final String GENERAL_EMAIL_CREATED_BY = "generalEmailCreatedBy";
     public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
 
     // General application
@@ -466,91 +458,12 @@ public class CCDConfigConstant {
     public static final String UPLOAD_ORDER = "uploadOrder";
 
     //Contested Case Documents
-    public static final String CONTESTED_UPLOADED_DOCUMENTS = "uploadCaseDocument";
-    public static final String APPLICANT_CORRESPONDENCE_COLLECTION = "appCorrespondenceCollection";
-    public static final String APPLICANT_FR_FORM_COLLECTION = "appFRFormsCollection";
-    public static final String APPLICANT_EVIDENCE_COLLECTION = "appEvidenceCollection";
-    public static final String APPLICANT_TRIAL_BUNDLE_COLLECTION = "appTrialBundleCollection";
-    public static final String APPLICANT_CONFIDENTIAL_DOCS_COLLECTION = "appConfidentialDocsCollection";
-    public static final String RESPONDENT_CORRESPONDENCE_COLLECTION = "respCorrespondenceCollection";
-    public static final String RESPONDENT_FR_FORM_COLLECTION = "respFRFormsCollection";
-    public static final String RESPONDENT_EVIDENCE_COLLECTION = "respEvidenceCollection";
-    public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respTrialBundleCollection";
-    public static final String RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION = "respConfidentialDocsCollection";
-    public static final String CONFIDENTIAL_DOCS_UPLOADED_COLLECTION = "confidentialDocumentsUploaded";
-    public static final String FDR_DOCS_COLLECTION = "fdrCaseDocumentCollection";
 
-    //Contested Case New Documents collections
-    public static final String APP_HEARING_BUNDLES_COLLECTION = "appHearingBundlesCollection";
-    public static final String APP_FORM_E_EXHIBITS_COLLECTION = "appFormEExhibitsCollection";
-    public static final String APP_CHRONOLOGIES_STATEMENTS_COLLECTION = "appChronologiesCollection";
-    public static final String APP_QUESTIONNAIRES_ANSWERS_COLLECTION = "appQACollection";
-    public static final String APP_STATEMENTS_EXHIBITS_COLLECTION = "appStatementsExhibitsCollection";
-    public static final String APP_CASE_SUMMARIES_COLLECTION = "appCaseSummariesCollection";
-    public static final String APP_FORMS_H_COLLECTION = "appFormsHCollection";
-    public static final String APP_EXPERT_EVIDENCE_COLLECTION = "appExpertEvidenceCollection";
+    public static final String CONFIDENTIAL_DOCS_UPLOADED_COLLECTION = "confidentialDocumentsUploaded";
+
     public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsCollection";
-    public static final String APP_OTHER_COLLECTION = "appOtherCollection";
-    public static final String RESP_HEARING_BUNDLES_COLLECTION = "respHearingBundlesCollection";
-    public static final String RESP_FORM_E_EXHIBITS_COLLECTION = "respFormEExhibitsCollection";
-    public static final String RESP_CHRONOLOGIES_STATEMENTS_COLLECTION = "respChronologiesCollection";
-    public static final String RESP_QUESTIONNAIRES_ANSWERS_COLLECTION = "respQACollection";
-    public static final String RESP_STATEMENTS_EXHIBITS_COLLECTION = "respStatementsExhibitsCollection";
-    public static final String RESP_CASE_SUMMARIES_COLLECTION = "respCaseSummariesCollection";
-    public static final String RESP_FORM_H_COLLECTION = "respFormsHCollection";
-    public static final String RESP_EXPERT_EVIDENCE_COLLECTION = "respExpertEvidenceCollection";
-    public static final String RESP_CORRESPONDENCE_COLLECTION = "respCorrespondenceDocsColl";
-    public static final String RESP_OTHER_COLLECTION = "respOtherCollection";
 
     public static final String AMEND_CONSENT_ORDER = "AmendedConsentOrder";
-    public static final String INTV_ONE_CASE_SUMMARIES_COLLECTION = "intv1Summaries";
-    public static final String INTV_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv1Chronologies";
-    public static final String INTV_ONE_CORRESPONDENCE_COLLECTION = "intv1CorrespDocs";
-    public static final String INTV_ONE_EVIDENCE_COLLECTION = "intv1ExpertEvidence";
-    public static final String INTV_ONE_FORM_E_EXHIBITS_COLLECTION = "intv1FormEsExhibits";
-    public static final String INTV_ONE_FORMS_H_COLLECTION = "intv1FormHs";
-    public static final String INTV_ONE_HEARING_BUNDLES_COLLECTION = "intv1HearingBundles";
-    public static final String INTV_ONE_OTHER_COLLECTION = "intv1Other";
-    public static final String INTV_ONE_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv1Qa";
-    public static final String INTV_ONE_STATEMENTS_EXHIBITS_COLLECTION = "intv1StmtsExhibits";
-
-    public static final String INTV_TWO_CASE_SUMMARIES_COLLECTION = "intv2Summaries";
-    public static final String INTV_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv2Chronologies";
-    public static final String INTV_TWO_CORRESPONDENCE_COLLECTION = "intv2CorrespDocs";
-    public static final String INTV_TWO_EVIDENCE_COLLECTION = "intv2ExpertEvidence";
-    public static final String INTV_TWO_FORM_E_EXHIBITS_COLLECTION = "intv2FormEsExhibits";
-    public static final String INTV_TWO_FORMS_H_COLLECTION = "intv2FormHs";
-    public static final String INTV_TWO_HEARING_BUNDLES_COLLECTION = "intv2HearingBundles";
-    public static final String INTV_TWO_OTHER_COLLECTION = "intv2Other";
-    public static final String INTV_TWO_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv2Qa";
-    public static final String INTV_TWO_STATEMENTS_EXHIBITS_COLLECTION = "intv2StmtsExhibits";
-
-    public static final String INTV_THREE_CASE_SUMMARIES_COLLECTION = "intv3Summaries";
-    public static final String INTV_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv3Chronologies";
-    public static final String INTV_THREE_CORRESPONDENCE_COLLECTION = "intv3CorrespDocs";
-    public static final String INTV_THREE_EVIDENCE_COLLECTION = "intv3ExpertEvidence";
-    public static final String INTV_THREE_FORM_E_EXHIBITS_COLLECTION = "intv3FormEsExhibits";
-    public static final String INTV_THREE_FORMS_H_COLLECTION = "intv3FormHs";
-    public static final String INTV_THREE_HEARING_BUNDLES_COLLECTION = "intv3HearingBundles";
-    public static final String INTV_THREE_OTHER_COLLECTION = "intv3Other";
-    public static final String INTV_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv3Qa";
-    public static final String INTV_THREE_STATEMENTS_EXHIBITS_COLLECTION = "intv3StmtsExhibits";
-
-    public static final String INTV_FOUR_CASE_SUMMARIES_COLLECTION = "intv4Summaries";
-    public static final String INTV_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv4Chronologies";
-    public static final String INTV_FOUR_CORRESPONDENCE_COLLECTION = "intv4CorrespDocs";
-    public static final String INTV_FOUR_EVIDENCE_COLLECTION = "intv4ExpertEvidence";
-    public static final String INTV_FOUR_FORM_E_EXHIBITS_COLLECTION = "intv4FormEsExhibits";
-    public static final String INTV_FOUR_FORMS_H_COLLECTION = "intv4FormHs";
-    public static final String INTV_FOUR_HEARING_BUNDLES_COLLECTION = "intv4HearingBundles";
-    public static final String INTV_FOUR_OTHER_COLLECTION = "intv4Other";
-    public static final String INTV_FOUR_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv4Qa";
-    public static final String INTV_FOUR_STATEMENTS_EXHIBITS_COLLECTION = "intv4StmtsExhibits";
-
-    public static final String INTV_ONE_FDR_DOCS_COLLECTION = "intv1FdrCaseDocuments";
-    public static final String INTV_TWO_FDR_DOCS_COLLECTION = "intv2FdrCaseDocuments";
-    public static final String INTV_THREE_FDR_DOCS_COLLECTION = "intv3FdrCaseDocuments";
-    public static final String INTV_FOUR_FDR_DOCS_COLLECTION = "intv4FdrCaseDocuments";
 
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
@@ -585,7 +498,6 @@ public class CCDConfigConstant {
     public static final String HEARING_ORDER_OTHER_COLLECTION = "hearingOrderOtherDocuments";
     public static final String LATEST_DRAFT_DIRECTION_ORDER = "latestDraftDirectionOrder";
     public static final String JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION = "judgesAmendedOrderCollection";
-    public static final String LATEST_DIRECTION_ORDER_IS_FINAL = "finalOrderYN";
     public static final String ANOTHER_HEARING_TO_BE_LISTED = "anotherHearingYN";
 
     //transfer to local courts
@@ -679,7 +591,6 @@ public class CCDConfigConstant {
     public static final String LIST_FOR_HEARING_COLLECTION_CONSENTED = "listForHearings";
     public static final String HEARING_PROMPT_FOR_DOCUMENT = "promptForAnyDocument";
     public static final String HEARING_UPLOADED_DOCUMENT = "uploadAdditionalDocument";
-    public static final String HEARING_NOTICE_DOCUMENT = "hearingNotice";
 
     //Manage Barristers
     public static final String APPLICANT_BARRISTER_COLLECTION = "appBarristerCollection";

@@ -1,28 +1,40 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV_ONE_FORMS_H_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
 
-public class IntervenerOneFormsHHandlerTest extends CaseDocumentHandlerTest {
+@RunWith(MockitoJUnitRunner.class)
+public class IntervenerOneFormsHHandlerTest extends BaseManageDocumentsHandlerTest {
 
-    IntervenerOneFormsHHandler handler = new IntervenerOneFormsHHandler(new ObjectMapper());
-
+    @InjectMocks
+    IntervenerOneFormsHHandler handler;
 
     @Test
-    public void appFormsHFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", INTERVENER_ONE, "no", "no", null));
+    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_H,
+            CaseDocumentParty.INTERVENER_ONE, YesOrNo.NO, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        handler.handle(uploadDocumentList, caseData);
+        handler.addManagedDocumentToSelectedCollection(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
+            screenUploadDocumentList);
 
-        assertThat(getDocumentCollection(caseData, INTV_ONE_FORMS_H_COLLECTION), hasSize(1));
+        assertThat(caseData.getUploadCaseDocumentWrapper()
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_ONE_FORMS_H_COLLECTION),
+            hasSize(1));
+        assertThat(caseData.getManageCaseDocumentCollection(),
+            hasSize(0));
     }
 }

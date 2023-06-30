@@ -22,12 +22,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentCollectionService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsCollectionService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementCollectionService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantOtherDocumentsCollectionService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementCollectionService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentQuestionnairesAnswersCollectionService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantOtherDocumentsHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentQuestionnairesAnswersHandler;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,12 +46,12 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     public static final String AUTH_TOKEN = "AuthTokien";
     @Mock
     private UploadedDocumentService uploadedDocumentHelper;
-    private RespondentChronologiesStatementCollectionService respondentChronologiesStatementCollectionService;
+    private RespondentChronologiesStatementHandler respondentChronologiesStatementCollectionService;
 
-    private ApplicantChronologiesStatementCollectionService applicantChronologiesStatementCollectionService;
-    private ApplicantOtherDocumentsCollectionService applicantOtherDocumentsCollectionService;
-    private FdrDocumentsCollectionService fdrDocumentsCollectionService;
-    private RespondentQuestionnairesAnswersCollectionService respondentQuestionnairesAnswersCollectionService;
+    private ApplicantChronologiesStatementHandler applicantChronologiesStatementCollectionService;
+    private ApplicantOtherDocumentsHandler applicantOtherDocumentsCollectionService;
+    private FdrDocumentsHandler fdrDocumentsCollectionService;
+    private RespondentQuestionnairesAnswersHandler respondentQuestionnairesAnswersCollectionService;
     private ManageCaseDocumentsContestedAboutToSubmitHandler manageCaseDocumentsAboutToSubmitCaseHandler;
     private FinremCaseDetails caseDetails;
     private FinremCaseDetails caseDetailsBefore;
@@ -67,17 +67,17 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         caseData = caseDetails.getData();
 
         respondentChronologiesStatementCollectionService =
-            new RespondentChronologiesStatementCollectionService();
+            new RespondentChronologiesStatementHandler();
         applicantOtherDocumentsCollectionService =
-            new ApplicantOtherDocumentsCollectionService();
+            new ApplicantOtherDocumentsHandler();
         fdrDocumentsCollectionService =
-            new FdrDocumentsCollectionService();
+            new FdrDocumentsHandler();
         respondentQuestionnairesAnswersCollectionService =
-            new RespondentQuestionnairesAnswersCollectionService();
+            new RespondentQuestionnairesAnswersHandler();
         applicantChronologiesStatementCollectionService =
-            new ApplicantChronologiesStatementCollectionService();
+            new ApplicantChronologiesStatementHandler();
 
-        List<DocumentCollectionService> documentCollectionServices =
+        List<DocumentHandler> documentHandlers =
             Stream.of(respondentChronologiesStatementCollectionService, applicantOtherDocumentsCollectionService,
                     fdrDocumentsCollectionService, respondentQuestionnairesAnswersCollectionService,
                     applicantChronologiesStatementCollectionService)
@@ -86,7 +86,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         manageCaseDocumentsAboutToSubmitCaseHandler =
             new ManageCaseDocumentsContestedAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentCollectionServices, uploadedDocumentHelper);
+                documentHandlers, uploadedDocumentHelper);
     }
 
     @Test
@@ -187,7 +187,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder().build())
             .build();
-        return FinremCaseDetails.builder().id(Long.valueOf(123)).caseType(CaseType.CONTESTED)
+        return FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED)
             .data(finremCaseData).build();
     }
 }

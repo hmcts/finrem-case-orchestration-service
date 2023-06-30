@@ -20,9 +20,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesCollectionService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementCollectionService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,13 +43,16 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     @Mock
     protected UploadedDocumentService uploadedDocumentHelper;
     @Mock
-    ApplicantCaseSummariesCollectionService applicantCaseSummariesCollectionService;
+    ApplicantCaseSummariesHandler applicantCaseSummariesCollectionService;
     @Mock
-    ApplicantChronologiesStatementCollectionService applicantChronologiesStatementCollectionService;
+    ApplicantChronologiesStatementHandler applicantChronologiesStatementCollectionService;
     @InjectMocks
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
 
     private final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
+
+    @Mock
+    private AssignCaseAccessService accessService;
 
     @Before
     public void setup() {
@@ -56,7 +60,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             new UploadContestedCaseDocumentsAboutToSubmitHandler(
                 new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())),
                 Arrays.asList(applicantCaseSummariesCollectionService, applicantChronologiesStatementCollectionService),
-                uploadedDocumentHelper);
+                uploadedDocumentHelper, accessService);
     }
 
     @Test

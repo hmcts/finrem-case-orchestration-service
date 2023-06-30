@@ -1,28 +1,40 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerfour;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV_FOUR_HEARING_BUNDLES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
 
-public class IntervenerFourHearingBundleHandlerTest extends CaseDocumentHandlerTest {
+@RunWith(MockitoJUnitRunner.class)
+public class IntervenerFourHearingBundleHandlerTest extends BaseManageDocumentsHandlerTest {
 
-    IntervenerFourHearingBundleHandler handler = new IntervenerFourHearingBundleHandler(new ObjectMapper());
+    @InjectMocks
+    IntervenerFourHearingBundleHandler handler;
 
     @Test
-    public void appHearingBundlesFiltered() {
-        uploadDocumentList
-            .add(createContestedUploadDocumentItem("Trial Bundle", INTERVENER_FOUR, "no", "no", null));
+    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
+            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        handler.handle(uploadDocumentList, caseData);
+        handler.addManagedDocumentToSelectedCollection(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
+            screenUploadDocumentList);
 
-        assertThat(getDocumentCollection(caseData, INTV_FOUR_HEARING_BUNDLES_COLLECTION), hasSize(1));
+        assertThat(caseData.getUploadCaseDocumentWrapper()
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_FOUR_HEARING_BUNDLES_COLLECTION),
+            hasSize(1));
+        assertThat(caseData.getManageCaseDocumentCollection(),
+            hasSize(0));
     }
 }

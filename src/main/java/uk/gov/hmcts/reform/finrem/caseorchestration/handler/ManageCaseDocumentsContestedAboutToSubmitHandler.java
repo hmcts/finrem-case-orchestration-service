@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentCollectionService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
 import java.util.List;
 
@@ -19,15 +19,15 @@ import java.util.List;
 @Service
 public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final List<DocumentCollectionService> documentCollectionServices;
+    private final List<DocumentHandler> documentHandlers;
     private final UploadedDocumentService uploadedDocumentHelper;
 
     @Autowired
     public ManageCaseDocumentsContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                            List<DocumentCollectionService> documentCollectionServices,
+                                                            List<DocumentHandler> documentHandlers,
                                                             UploadedDocumentService uploadedDocumentHelper) {
         super(mapper);
-        this.documentCollectionServices = documentCollectionServices;
+        this.documentHandlers = documentHandlers;
         this.uploadedDocumentHelper = uploadedDocumentHelper;
     }
 
@@ -45,7 +45,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
-        documentCollectionServices.forEach(documentCollectionService -> {
+        documentHandlers.forEach(documentCollectionService -> {
             documentCollectionService.removeManagedDocumentFromOriginalCollection(callbackRequest);
             documentCollectionService.addManagedDocumentToSelectedCollection(callbackRequest, managedCollections);
         });

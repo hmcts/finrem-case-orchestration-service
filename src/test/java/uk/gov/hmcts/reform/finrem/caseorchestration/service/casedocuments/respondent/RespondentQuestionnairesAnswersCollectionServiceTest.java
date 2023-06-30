@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ManageCollectionsServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +21,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RespondentQuestionnairesAnswersCollectionServiceTest extends ManageCollectionsServiceTest {
+public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
-    RespondentQuestionnairesAnswersCollectionService collectionService;
+    RespondentQuestionnairesAnswersHandler collectionService;
 
     @Test
     public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
@@ -50,7 +50,7 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends Manage
     public void givenAddedDocWithPreviousCollectionNotEmptyWhenaddManagedDocumentToCollectionThenAddNonDuplicatesScreenDocsToCollectionType() {
         UploadCaseDocumentCollection questionnaireDoc =
             createContestedUploadDocumentItem(CaseDocumentType.QUESTIONNAIRE,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null);
+                CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null);
         screenUploadDocumentList.add(questionnaireDoc);
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.REPLY_TO_QUESTIONNAIRE,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
