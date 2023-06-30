@@ -82,7 +82,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
 
         List<ContestedUploadedDocumentData> uploadedDocuments = (List<ContestedUploadedDocumentData>) caseData.get(CONTESTED_UPLOADED_DOCUMENTS);
 
-        if (!loggedInUserCaseRole.equals(CASE_LEVEL_ROLE)) {
+        if (!"case".equals(CASE_LEVEL_ROLE)) {
             uploadedDocuments.forEach(doc -> doc.getUploadedCaseDocument().setCaseDocumentParty(loggedInUserCaseRole));
         }
 
