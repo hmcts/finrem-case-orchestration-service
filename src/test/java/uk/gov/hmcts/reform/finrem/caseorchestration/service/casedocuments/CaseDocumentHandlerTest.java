@@ -7,6 +7,7 @@ import org.junit.Before;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
@@ -57,6 +58,12 @@ public abstract class CaseDocumentHandlerTest {
     }
 
     protected List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {
+        return mapper.registerModule(new JavaTimeModule()).convertValue(data.get(field),
+            new TypeReference<>() {
+            });
+    }
+
+    protected List<ConfidentialUploadedDocumentData> getConfidentialUploadedDocumentData(Map<String, Object> data, String field) {
         return mapper.registerModule(new JavaTimeModule()).convertValue(data.get(field),
             new TypeReference<>() {
             });

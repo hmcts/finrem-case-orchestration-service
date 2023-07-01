@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUpload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +33,19 @@ public class ConfidentialDocumentsHandlerTest extends CaseDocumentHandlerTest {
             = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
         assertEquals("respondent", documentCollection.get(0).getUploadedCaseDocument().getCaseDocumentParty());
         assertThat(documentCollection, hasSize(1));
+    }
 
+    @Test
+    public void partyMissingConfidentialDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", null, "yes", "no", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
+        confidentialDocumentsHandler.handle(uploadDocumentList, caseData);
+
+        List<ContestedUploadedDocumentData> documentCollection
+            = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        assertEquals("case", documentCollection.get(0).getUploadedCaseDocument().getCaseDocumentParty());
+        assertThat(documentCollection, hasSize(1));
     }
 
     @Test
@@ -55,6 +68,8 @@ public class ConfidentialDocumentsHandlerTest extends CaseDocumentHandlerTest {
                 .documentType("Other")
                 .documentLink(CaseDocument.builder().documentUrl("url").documentFilename("filename").build())
                 .documentComment("Comment")
+                .confidentialDocumentUploadDateTime(LocalDateTime.now())
+                .documentDateAdded(LocalDate.now().toString())
                 .build())).build();
     }
 }

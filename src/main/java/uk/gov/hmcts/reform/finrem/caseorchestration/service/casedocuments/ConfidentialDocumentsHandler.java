@@ -35,7 +35,7 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
                 && d.getUploadedCaseDocument().getCaseDocumentType() != null
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential() != null
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential().equalsIgnoreCase("Yes"))
-            .collect(Collectors.toList());
+            .toList();
 
 
         log.info("Adding items: {}, to Confidential Documents Collection", confidentialFiltered);
@@ -45,7 +45,7 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
             caseData,CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
         if (!confidentialFiltered.isEmpty()) {
             List<ConfidentialUploadedDocumentData> confidentialDocs = confidentialFiltered.stream().map(
-                doc -> buildConfidentialDocument(doc)).collect((Collectors.toList()));
+                this::buildConfidentialDocument).collect((Collectors.toList()));
             confidentialDocsCollection.addAll(confidentialDocs);
             confidentialDocsCollection.sort(Comparator.comparing(
                 ConfidentialUploadedDocumentData::getConfidentialUploadedDocument, Comparator.comparing(
@@ -67,7 +67,7 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
                 .documentFileName(uploadedCaseDocument.getCaseDocuments().getDocumentFilename())
                 .documentComment(uploadedCaseDocument.getHearingDetails())
                 .documentLink(uploadedCaseDocument.getCaseDocuments())
-                .caseDocumentParty(uploadedCaseDocument.getCaseDocumentParty())
+                .caseDocumentParty(uploadedCaseDocument.getCaseDocumentParty() != null ? uploadedCaseDocument.getCaseDocumentParty() : "case")
                 .documentType(uploadedCaseDocument.getCaseDocumentType())
                 .confidentialDocumentUploadDateTime(uploadedCaseDocument.getCaseDocumentUploadDateTime())
                 .build()).build();
