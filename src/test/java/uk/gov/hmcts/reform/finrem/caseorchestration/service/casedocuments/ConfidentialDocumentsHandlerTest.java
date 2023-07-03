@@ -5,7 +5,6 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,9 +28,9 @@ public class ConfidentialDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
         confidentialDocumentsHandler.handle(uploadDocumentList, caseData);
 
-        List<ContestedUploadedDocumentData> documentCollection
-            = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
-        assertEquals("respondent", documentCollection.get(0).getUploadedCaseDocument().getCaseDocumentParty());
+        List<ConfidentialUploadedDocumentData> documentCollection
+            = getConfidentialUploadedDocumentData(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        assertEquals("respondent", documentCollection.get(0).getConfidentialUploadedDocument().getCaseDocumentParty());
         assertThat(documentCollection, hasSize(1));
     }
 
@@ -42,10 +41,10 @@ public class ConfidentialDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
         confidentialDocumentsHandler.handle(uploadDocumentList, caseData);
 
-        List<ContestedUploadedDocumentData> documentCollection
-            = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
-        assertEquals("case", documentCollection.get(0).getUploadedCaseDocument().getCaseDocumentParty());
-        assertThat(documentCollection, hasSize(1));
+        List<ConfidentialUploadedDocumentData> confidentialUploadedDocumentData
+            = getConfidentialUploadedDocumentData(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        assertEquals("case", confidentialUploadedDocumentData.get(0).getConfidentialUploadedDocument().getCaseDocumentParty());
+        assertThat(confidentialUploadedDocumentData, hasSize(1));
     }
 
     @Test
@@ -58,7 +57,7 @@ public class ConfidentialDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
         confidentialDocumentsHandler.handle(uploadDocumentList, caseData);
 
-        assertThat(getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION), hasSize(1));
+        assertThat(getConfidentialUploadedDocumentData(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION), hasSize(1));
     }
 
     protected ConfidentialUploadedDocumentData createConfidentialUploadedDocumentDataItem() {
