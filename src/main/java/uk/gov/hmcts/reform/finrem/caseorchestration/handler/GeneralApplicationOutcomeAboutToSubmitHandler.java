@@ -1,38 +1,40 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_OTHER;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class GeneralApplicationOutcomeAboutToSubmitHandler
-    implements CallbackHandler<Map<String, Object>> {
+public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final GeneralApplicationHelper helper;
+    private final GeneralApplicationService service;
+
+    public GeneralApplicationOutcomeAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
+                                                        GeneralApplicationService service) {
+        super(finremCaseDetailsMapper);
+        this.helper = helper;
+        this.service = service;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -42,22 +44,22 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
-        CallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
+        FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         final String caseId = caseDetails.getId().toString();
         log.info("Received on start request to outcome decision general application for Case ID: {}", caseId);
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getData();
 
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
-        if (existingList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
+        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
+        if (existingList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             log.info("outcome stage migrate existing general application for Case ID: {}", caseId);
             migrateExistingApplication(caseDetails, userAuthorisation);
         } else {
-            DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
+            DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcomeList());
 
-            final String outcome = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+            final String outcome = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome().getValue(), null);
             log.info("Outcome decision {} for general application for Case ID: {} Event type {}",
                 outcome, caseId, EventType.GENERAL_APPLICATION_OUTCOME);
 
@@ -68,34 +70,47 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler
                 Collectors.toList());
 
             log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseId);
-            caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
-            caseData.remove(GENERAL_APPLICATION_OUTCOME_LIST);
-            caseData.remove(GENERAL_APPLICATION_OUTCOME_OTHER);
-            caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
+            service.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
+            caseData.getGeneralApplicationWrapper().setGeneralApplications(
+                helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
+            if (caseData.getGeneralApplicationWrapper().getGeneralApplications() != null
+                && !caseData.getGeneralApplicationWrapper().getGeneralApplications().isEmpty()) {
+                caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
+                    x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+            }
+            caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcome(null);
+            caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeOther(null);
+            caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeList(null);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void migrateExistingApplication(CaseDetails caseDetails, String userAuthorisation) {
+    private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation)  {
         String caseId = caseDetails.getId().toString();
-        Map<String, Object> caseData = caseDetails.getData();
-        List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
+        FinremCaseData caseData = caseDetails.getData();
         GeneralApplicationCollectionData data =
             helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
+        List<GeneralApplicationCollectionData> existingGeneralApplication =
+            helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         if (data != null) {
-            String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+            String status = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome().getValue(), null);
 
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
                 status, caseId, EventType.GENERAL_APPLICATION_OUTCOME);
             updateStatus(caseData, data, status);
             existingGeneralApplication.add(data);
-            caseData.put(GENERAL_APPLICATION_COLLECTION, existingGeneralApplication);
+            service.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
+            if (caseData.getGeneralApplicationWrapper().getGeneralApplications() != null
+                && !caseData.getGeneralApplicationWrapper().getGeneralApplications().isEmpty()) {
+                caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
+                    x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+            }
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
-        caseData.remove(GENERAL_APPLICATION_OUTCOME_LIST);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeList(null);
     }
 
-    private GeneralApplicationCollectionData setStatusForElement(Map<String, Object> caseData,
+    private GeneralApplicationCollectionData setStatusForElement(FinremCaseData caseData,
                                                                  GeneralApplicationCollectionData data,
                                                                  String code,
                                                                  String status) {
@@ -105,11 +120,11 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler
         return data;
     }
 
-    private GeneralApplicationCollectionData updateStatus(Map<String, Object> caseData,
+    private GeneralApplicationCollectionData updateStatus(FinremCaseData caseData,
                                                           GeneralApplicationCollectionData data,
                                                           String status) {
         GeneralApplicationItems items = data.getGeneralApplicationItems();
-        items.setGeneralApplicationOutcomeOther(Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
+        items.setGeneralApplicationOutcomeOther(Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcomeOther(), null));
         switch (status) {
             case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.APPROVED.getId());
             case "Not Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.NOT_APPROVED.getId());

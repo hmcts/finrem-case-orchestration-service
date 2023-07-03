@@ -25,7 +25,9 @@ public class GeneralApplicationItems {
     @JsonProperty("generalApplicationDraftOrder")
     private CaseDocument generalApplicationDraftOrder;
     @JsonProperty("generalApplicationReceivedFrom")
-    private String generalApplicationReceivedFrom;
+    private DynamicRadioList generalApplicationReceivedFrom;
+    @JsonProperty("appRespGeneralApplicationReceivedFrom")
+    private String appRespGeneralApplicationReceivedFrom;
     @JsonProperty("generalApplicationTimeEstimate")
     private String generalApplicationTimeEstimate;
     @JsonProperty("generalApplicationHearingRequired")
