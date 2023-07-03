@@ -11,7 +11,7 @@ public interface GeneralApplicationHandler {
         return "General Application "
             + index
             + " - Received from - "
-            + items.getGeneralApplicationReceivedFrom().getValue().getCode()
+            + items.getGeneralApplicationReceivedFrom()
             + " - Created Date - "
             + items.getGeneralApplicationCreatedDate()
             + " - Hearing Required - "

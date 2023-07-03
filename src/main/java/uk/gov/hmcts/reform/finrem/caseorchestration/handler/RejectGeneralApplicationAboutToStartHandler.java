@@ -1,40 +1,37 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REJECT_REASON;
 
 @Slf4j
 @Service
-public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackHandler implements GeneralApplicationHandler {
+@RequiredArgsConstructor
+public class RejectGeneralApplicationAboutToStartHandler
+    implements CallbackHandler<Map<String, Object>>, GeneralApplicationHandler {
 
     private final GeneralApplicationHelper helper;
-    private final GeneralApplicationService service;
-
-    public RejectGeneralApplicationAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-                                        GeneralApplicationService service) {
-        super(finremCaseDetailsMapper);
-        this.helper = helper;
-        this.service = service;
-    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -44,17 +41,17 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
-        FinremCallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
+        CallbackRequest callbackRequest,
         String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
         log.info("Received on start request to reject general application for Case ID: {}", caseId);
-        FinremCaseData caseData = caseDetails.getData();
+        Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getReadyForRejectOrReadyForReferList(caseData);
         AtomicInteger index = new AtomicInteger(0);
-        if (existingGeneralApplicationList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
+        if (existingGeneralApplicationList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             setNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
         } else {
             List<DynamicListElement> dynamicListElements = existingGeneralApplicationList.stream()
@@ -62,20 +59,20 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
                 .collect(Collectors.toList());
 
             if (dynamicListElements.isEmpty()) {
-                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
                     .errors(List.of("There is no general application available to reject.")).build();
             }
 
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
             log.info("collection dynamicList {} for case id {}", dynamicList, caseId);
-            caseData.getGeneralApplicationWrapper().setGeneralApplicationList(dynamicList);
+            caseData.put(GENERAL_APPLICATION_LIST, dynamicList);
         }
 
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationRejectReason(null);
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        caseData.remove(GENERAL_APPLICATION_REJECT_REASON);
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 
-    private void setNonCollectionGeneralApplication(FinremCaseData caseData,
+    private void setNonCollectionGeneralApplication(Map<String, Object> caseData,
                                                     AtomicInteger index,
                                                     String userAuthorisation,
                                                     String caseId) {
@@ -87,6 +84,6 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
         dynamicListElementsList.add(dynamicListElements);
 
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationList(dynamicList);
+        caseData.put(GENERAL_APPLICATION_LIST, dynamicList);
     }
 }

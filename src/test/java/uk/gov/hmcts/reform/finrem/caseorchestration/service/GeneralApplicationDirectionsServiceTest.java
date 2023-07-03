@@ -13,14 +13,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
@@ -29,6 +23,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -50,13 +45,47 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_D
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BRISTOL_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_CFC_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_CLEVELAND_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DEVON_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DORSET_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME_ESTIMATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HUMBER_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_KENTSURREY_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LANCASHIRE_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIVERPOOL_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_MANCHESTER_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NEWPORT_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NWYORKSHIRE_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_RECITALS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
@@ -76,8 +105,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private GenericDocumentService genericDocumentService;
     @MockBean
     private CcdService ccdService;
-    @MockBean
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
@@ -95,32 +122,22 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenDirectionEventExecutedReturnNoPreviousStateFound_thenHandlerReturnsPostStateNull() {
-        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO).build();
-        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-            .data(data).build();
-        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
         when(ccdService.getCcdEventDetailsOnCase(any(), any(), any())).thenReturn(new ArrayList<>());
         caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
-        assertNull(generalApplicationDirectionsService.getEventPostState(finremCaseDetails, AUTH_TOKEN));
+        assertNull(generalApplicationDirectionsService.getEventPostState(caseDetails, AUTH_TOKEN));
     }
 
     @Test
     public void givenContestedCase_whenDirectionEventExecutedReturnPreviousStateFound_thenHandlerReturnsPreviousPostState() {
-        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
-            .generalApplicationPreState("applicationIssued").build();
-        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-            .data(data).build();
-        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
+        caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
+        caseDetails.getData().put(GENERAL_APPLICATION_PRE_STATE, "applicationIssued");
         when(ccdService.getCcdEventDetailsOnCase(any(), any(), any())).thenReturn(new ArrayList<>());
 
-        assertEquals("applicationIssued", generalApplicationDirectionsService.getEventPostState(finremCaseDetails, AUTH_TOKEN));
+        assertEquals("applicationIssued", generalApplicationDirectionsService.getEventPostState(caseDetails, AUTH_TOKEN));
     }
 
     @Test
     public void givenContestedCase_whenDirectionEventExecutedAndAnySortOfHearingGoingOn_thenHandlerReturnsPostState() {
-
         List<CaseEventDetail> list = new ArrayList<>();
         CaseEventDetail.CaseEventDetailBuilder builder = CaseEventDetail.builder();
         builder.eventName("General Application Outcome");
@@ -134,107 +151,75 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         caseDetails.getData().put(GENERAL_APPLICATION_PRE_STATE, "applicationIssued");
         when(ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, caseDetails, EventType.GENERAL_APPLICATION_DIRECTIONS.getCcdType()))
             .thenReturn(list);
-        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
-            .generalApplicationPreState("applicationIssued").build();
-        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-            .data(data).build();
-        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
-        assertEquals(PREPARE_FOR_HEARING_STATE, generalApplicationDirectionsService.getEventPostState(finremCaseDetails, AUTH_TOKEN));
+
+        assertEquals(PREPARE_FOR_HEARING_STATE, generalApplicationDirectionsService.getEventPostState(caseDetails, AUTH_TOKEN));
+    }
+
+    private void buildCase() {
+        List<CaseEventDetail> list = new ArrayList<>();
+        CaseEventDetail.CaseEventDetailBuilder builder = CaseEventDetail.builder();
+        builder.eventName("General Application Outcome");
+        list.add(builder.build());
+
+        builder = CaseEventDetail.builder();
+        builder.eventName("List for Hearing");
+        list.add(builder.build());
     }
 
     @Test
-    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener1() {
-        List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
-            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
-        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
-            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener1-referdetails").build();
-        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-            .data(data).build();
-        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
+    public void whenGeneralApplicationDirectionsStarted_thenStateSpecificFieldAreSetToNull() {
+        generalApplicationDirectionsService.startGeneralApplicationDirections(caseDetails);
 
-        verify(bulkPrintService, times(1)).printIntervenerDocuments(
-            any(IntervenerWrapper.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+        Stream.of(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED,
+                GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE,
+                GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME,
+                GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME_ESTIMATE,
+                GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION,
+                GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_WALES_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_BRISTOL_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_CFC_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_CLEVELAND_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_DEVON_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_DORSET_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_HUMBER_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_KENTSURREY_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_LANCASHIRE_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_LIVERPOOL_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_MANCHESTER_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_NEWPORT_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_NWYORKSHIRE_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION,
+                GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE,
+                GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE,
+                GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME,
+                GENERAL_APPLICATION_DIRECTIONS_RECITALS,
+                GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE)
+            .forEach(ccdFieldName -> assertThat(caseDetails.getData().get(ccdFieldName), is(nullValue())));
     }
 
     @Test
-    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener2() {
+    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrinted() {
+
         List<BulkPrintDocument> documents = new ArrayList<>();
         documents.add(getCaseDocumentAsBulkPrintDocument(
             convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
-        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
-            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener2-referdetails").build();
-        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-            .data(data).build();
-        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(1)).printIntervenerDocuments(
-            any(IntervenerWrapper.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
-    }
+        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(caseDetails, documents, AUTH_TOKEN);
 
-    @Test
-    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener3() {
-        List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
-            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
-        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
-            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener3-referdetails").build();
-        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-            .data(data).build();
-        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
-
-        verify(bulkPrintService, times(1)).printIntervenerDocuments(
-            any(IntervenerWrapper.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
-    }
-
-    @Test
-    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener4() {
-        List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
-            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
-        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
-            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener4-referdetails").build();
-        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-            .data(data).build();
-        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
-
-        verify(bulkPrintService, times(1)).printIntervenerDocuments(
-            any(IntervenerWrapper.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
-    }
-
-    @Test
-    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForApplicant() {
-        List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
-            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
-        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
-            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("applicant-referdetails").build();
-        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-            .data(data).build();
-        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
-
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
-    }
-
-    @Test
-    public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForRespondent() {
-        List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
-            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
-        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
-            .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("respondent-referdetails").build();
-        FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-            .data(data).build();
-        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
-
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
     }
 
     @Test

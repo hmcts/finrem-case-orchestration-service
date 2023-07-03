@@ -49,19 +49,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_1_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_2_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_3_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_4_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_BARRISTER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
@@ -69,7 +61,6 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
 
     public static final String TEST_USER_ID = "someUserId";
     public static final String SOME_OTHER_USER_ID = "someOtherUserId";
-    public static final String AUTH_TOKEN = "tolkien:)";
     public static final String CASE_ID = "1234567890";
     private static final String CREATOR_ROLE = "[CREATOR]";
     private static final String ORG_ID = "otherID";
@@ -365,76 +356,6 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         assertTrue(caseAssignmentUserRoles.stream().anyMatch(role -> role.getCaseRole().equals(APP_SOLICITOR_POLICY)));
     }
 
-    @Test
-    public void shouldFindActiveUserCaseRoleForIntervener1() throws JsonProcessingException {
-        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
-        caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
-                SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of(TEST_CASE_ID))
-                    .build())))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(mapper.writeValueAsString(generateResourceWheIntvr1SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER1);
-    }
-
-    @Test
-    public void shouldFindActiveUserCaseRoleForIntervener2() throws JsonProcessingException {
-        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
-        caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
-                SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of(TEST_CASE_ID))
-                    .build())))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(mapper.writeValueAsString(generateResourceWhenIntvr2SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER2);
-    }
-
-    @Test
-    public void shouldFindActiveUserCaseRoleForIntervener3() throws JsonProcessingException {
-        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
-        caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
-                SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of(TEST_CASE_ID))
-                    .build())))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(mapper.writeValueAsString(generateResourceWhenIntvr3SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER3);
-    }
-
-    @Test
-    public void shouldFindActiveUserCaseRoleForIntervener4() throws JsonProcessingException {
-        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
-        caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
-                SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of(TEST_CASE_ID))
-                    .build())))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(mapper.writeValueAsString(generateResourceWhenIntvr4SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER4);
-    }
-
-    @Test
-    public void shouldFindActiveUserCaseRoleForApplicant() throws JsonProcessingException {
-        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
-        caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
-                SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of(TEST_CASE_ID))
-                    .build())))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(mapper.writeValueAsString(generateResourceWhenAppSolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), APPLICANT);
-    }
-
     private CaseAssignmentUserRolesResource generateResourceWhenCreatorWasSolicitor() {
         List<CaseAssignmentUserRole> roles = List.of(
             CaseAssignmentUserRole.builder()
@@ -468,50 +389,6 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .caseDataId(TEST_CASE_ID)
                 .userId(TEST_USER_ID).build()
             );
-
-        return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
-    }
-
-    private CaseAssignmentUserRolesResource generateResourceWheIntvr1SolOnCase() {
-        List<CaseAssignmentUserRole> roles = List.of(
-            CaseAssignmentUserRole.builder()
-                .caseRole(INTVR_SOLICITOR_1_POLICY)
-                .caseDataId(TEST_CASE_ID)
-                .userId(TEST_USER_ID).build()
-        );
-
-        return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
-    }
-
-    private CaseAssignmentUserRolesResource generateResourceWhenIntvr2SolOnCase() {
-        List<CaseAssignmentUserRole> roles = List.of(
-            CaseAssignmentUserRole.builder()
-                .caseRole(INTVR_SOLICITOR_2_POLICY)
-                .caseDataId(TEST_CASE_ID)
-                .userId(TEST_USER_ID).build()
-        );
-
-        return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
-    }
-
-    private CaseAssignmentUserRolesResource generateResourceWhenIntvr3SolOnCase() {
-        List<CaseAssignmentUserRole> roles = List.of(
-            CaseAssignmentUserRole.builder()
-                .caseRole(INTVR_SOLICITOR_3_POLICY)
-                .caseDataId(TEST_CASE_ID)
-                .userId(TEST_USER_ID).build()
-        );
-
-        return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
-    }
-
-    private CaseAssignmentUserRolesResource generateResourceWhenIntvr4SolOnCase() {
-        List<CaseAssignmentUserRole> roles = List.of(
-            CaseAssignmentUserRole.builder()
-                .caseRole(INTVR_SOLICITOR_4_POLICY)
-                .caseDataId(TEST_CASE_ID)
-                .userId(TEST_USER_ID).build()
-        );
 
         return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
     }

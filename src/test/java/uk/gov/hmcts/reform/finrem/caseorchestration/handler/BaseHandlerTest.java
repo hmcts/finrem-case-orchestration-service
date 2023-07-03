@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 
 import java.io.File;
@@ -45,16 +44,4 @@ public class BaseHandlerTest {
             throw new RuntimeException(e);
         }
     }
-
-    protected FinremCallbackRequest buildFinremCallbackRequest(String testJson) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
-            FinremCaseDetails caseDetails =
-                objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-            return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
 }
