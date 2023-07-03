@@ -254,6 +254,4 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
         assertThat(addressee.getFormattedAddress(), is(formattedAddress));
     }
-
-
 }

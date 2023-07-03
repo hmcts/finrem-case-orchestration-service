@@ -61,7 +61,6 @@ public class AddresseeGeneratorHelper {
         return caseData.isApplicantRepresentedByASolicitor()
             ? caseData.getAppSolicitorName()
             : caseData.getFullApplicantName();
-
     }
 
     private static Address getAppAddress(FinremCaseData caseData) {
@@ -96,7 +95,23 @@ public class AddresseeGeneratorHelper {
         return caseData.isRespondentRepresentedByASolicitor()
             ? caseData.getContactDetailsWrapper().getRespondentSolicitorAddress()
             : caseData.getContactDetailsWrapper().getRespondentAddress();
+    }
 
+    private static Addressee getIntervenerAddressee(IntervenerWrapper intervenerWrapper) {
+        return Addressee.builder()
+            .name(intervenerWrapper.getIntervenerName())
+            .formattedAddress(formatAddressForLetterPrinting(intervenerWrapper.getIntervenerAddress()))
+            .build();
+    }
+
+    private static String getIntvrName(IntervenerWrapper wrapper) {
+        return wrapper.isIntervenerSolicitorPopulated()
+            ? wrapper.getIntervenerSolName()
+            : wrapper.getIntervenerName();
+    }
+
+    private static Address getIntvrAddress(IntervenerWrapper wrapper) {
+        return wrapper.getIntervenerAddress();
     }
 
     public static String formatAddressForLetterPrinting(Address address) {

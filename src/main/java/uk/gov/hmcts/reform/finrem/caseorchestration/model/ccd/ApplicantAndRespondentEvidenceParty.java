@@ -9,12 +9,9 @@ import java.util.Arrays;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
-public enum GeneralLetterAddressToType {
-    APPLICANT_SOLICITOR("applicantSolicitor"),
-    RESPONDENT_SOLICITOR("respondentSolicitor"),
-    RESPONDENT("respondent"),
-    OTHER("other"),
-    APPLICANT("applicant");
+public enum ApplicantAndRespondentEvidenceParty {
+    APPLICANT("applicant"),
+    RESPONDENT("respondent");
 
     private final String value;
 
@@ -23,8 +20,8 @@ public enum GeneralLetterAddressToType {
         return value;
     }
 
-    public static GeneralLetterAddressToType forValue(String value) {
-        return Arrays.stream(GeneralLetterAddressToType.values())
+    public static ApplicantAndRespondentEvidenceParty forValue(String value) {
+        return Arrays.stream(ApplicantAndRespondentEvidenceParty.values())
             .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }

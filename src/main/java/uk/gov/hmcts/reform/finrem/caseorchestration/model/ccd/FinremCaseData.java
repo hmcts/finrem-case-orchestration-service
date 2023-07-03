@@ -148,6 +148,10 @@ public class FinremCaseData {
     private YesOrNo evidenceHandled;
     private CaseDocument approvedConsentOrderLetter;
     private CaseDocument bulkPrintCoverSheetRes;
+    private CaseDocument bulkPrintCoverSheetIntervener1;
+    private CaseDocument bulkPrintCoverSheetIntervener2;
+    private CaseDocument bulkPrintCoverSheetIntervener3;
+    private CaseDocument bulkPrintCoverSheetIntervener4;
     private String bulkPrintLetterIdRes;
     private CaseDocument bulkPrintCoverSheetApp;
     private String bulkPrintLetterIdApp;
@@ -283,6 +287,7 @@ public class FinremCaseData {
     private OrganisationPolicy respondentOrganisationPolicy;
     private CaseRole currentUserCaseRole;
     private String currentUserCaseRoleLabel;
+    private String currentUserCaseRoleType;
     private CaseDocument outOfFamilyCourtResolution;
 
     private DynamicRadioList intervenersList;

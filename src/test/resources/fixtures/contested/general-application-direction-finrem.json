@@ -55,19 +55,91 @@
         "document_filename": "InterimHearingNotice.pdf",
         "document_binary_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
       },
-      "generalApplicationDraftOrder": {
-        "document_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
-        "document_filename": "InterimHearingNotice.pdf",
-        "document_binary_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
-      },
-      "generalApplicationDirectionsDocument": {
-        "document_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
-        "document_filename": "InterimHearingNotice.pdf",
-        "document_binary_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
-      },
       "propertyAddress": "26 Riverside gardens, SW10XE",
       "applicantSolicitorConsentForEmails": "Yes",
       "isAdmin": "No",
+      "generalApplicationOutcome":"Approved",
+      "generalApplications": [
+        {
+          "id": "b0bfb0af-4f07-4628-a677-1de904b6ea1c",
+          "value": {
+            "gaSupportDocuments": [
+              {
+                "id": "57df3dde-f567-4b4f-97e8-4d861ecd61cf",
+                "value": {
+                  "supportDocument": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d35e07e7-67df-4e10-9ca7-027673345e23",
+                    "document_filename": "InterimHearingNotice.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d35e07e7-67df-4e10-9ca7-027673345e23/binary"
+                  }
+                }
+              },
+              {
+                "id": "97c2babd-1b2f-4755-ad09-80b641f29a0c",
+                "value": {
+                  "supportDocument": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/44c5eddf-a452-43cf-b9b0-e8e1ed0ac16f",
+                    "document_filename": "Form C. Out of family court resolution update.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/44c5eddf-a452-43cf-b9b0-e8e1ed0ac16f/binary"
+                  }
+                }
+              }
+            ],
+            "generalApplicationDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/430581ec-e378-45d7-9bc6-4d55917ac472",
+              "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/430581ec-e378-45d7-9bc6-4d55917ac472/binary"
+            },
+            "generalApplicationCreatedBy": "Claire Mumford",
+            "generalApplicationDraftOrder": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1c7a2d0e-c14a-488e-988f-0075ec3a0059",
+              "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1c7a2d0e-c14a-488e-988f-0075ec3a0059/binary"
+            },
+            "generalApplicationTimeEstimate": "24 Hours",
+            "generalApplicationHearingRequired": "Yes",
+            "generalApplicationStatus": "Approved",
+            "generalApplicationSpecialMeasures": "Nisi quod sit sint"
+          }
+        },
+        {
+          "id": "aed407b8-71c6-4e04-ab3f-6b0814b54a9c",
+          "value": {
+            "gaSupportDocuments": [
+              {
+                "id": "57df3dde-f567-4b4f-97e8-4d861ecd61df",
+                "value": {
+                  "supportDocument": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d35e07e7-67df-4e10-9ca7-027673345e23",
+                    "document_filename": "InterimHearingNotice.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d35e07e7-67df-4e10-9ca7-027673345e23/binary"
+                  }
+                }
+              },
+              {
+                "id": "97c2babd-1b2f-4755-ad09-80b641f29b0c",
+                "value": {
+                  "supportDocument": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/44c5eddf-a452-43cf-b9b0-e8e1ed0ac16f",
+                    "document_filename": "Form C. Out of family court resolution update.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/44c5eddf-a452-43cf-b9b0-e8e1ed0ac16f/binary"
+                  }
+                }
+              }
+            ],
+            "generalApplicationDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/725dcd3e-528d-4675-88f3-64c793b8ded5",
+              "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/725dcd3e-528d-4675-88f3-64c793b8ded5/binary"
+            },
+            "generalApplicationCreatedBy": "Claire Mumford",
+            "generalApplicationTimeEstimate": null,
+            "generalApplicationStatus": "Referred To Judge",
+            "generalApplicationHearingRequired": "No",
+            "generalApplicationSpecialMeasures": null
+          }
+        }
+      ],
       "orderSummary": {
         "Fees": [
           {
@@ -126,7 +198,6 @@
       "otherReasonForComplexityText": null,
       "uploadAdditionalDocument": [],
       "applicantSolicitorFirm": "MSN Firm",
-      "generalApplicationReceivedFrom": "applicant",
       "applicantLName": "Tok",
       "rSolicitorEmail": "vivcontestedupdatesol@mailinator.com",
       "respondentAddress": {},

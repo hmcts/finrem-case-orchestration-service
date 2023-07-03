@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedD
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FDR_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV_FOUR_FDR_DOCS_COLLECTION;
@@ -44,7 +44,7 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDo
                     && uploadedCaseDocument.getCaseDocumentFdr() != null
                     && uploadedCaseDocument.getCaseDocumentFdr().equalsIgnoreCase("Yes");
             })
-            .collect(Collectors.toList());
+            .toList();
 
         List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, FDR_DOCS_COLLECTION);
         addAndSortCollection(fdrFiltered, fdrDocsCollection);
@@ -63,7 +63,7 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDo
                                                                           Map<String, Object> caseData) {
         String logMessage = "Logged in user role {}";
         Optional<String> activeUserCaseRole =
-            fdrFiltered.stream().map(doc -> doc.getUploadedCaseDocument().getCaseDocumentParty()).findFirst();
+            fdrFiltered.stream().map(doc -> doc.getUploadedCaseDocument().getCaseDocumentParty()).filter(Objects::nonNull).findFirst();
         String role = "";
         if (activeUserCaseRole.isPresent()) {
             role = activeUserCaseRole.get();
