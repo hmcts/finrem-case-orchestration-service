@@ -10,12 +10,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -30,8 +29,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GeneralApplicationWrapper {
     private YesOrNo generalApplicationDirectionsHearingRequired;
-    private String generalApplicationReceivedFrom;
-    private ApplicantAndRespondentEvidenceParty appRespGeneralApplicationReceivedFrom;
+    private EvidenceParty generalApplicationReceivedFrom;
     private String generalApplicationDirectionsHearingTime;
     private String generalApplicationDirectionsHearingTimeEstimate;
     private String generalApplicationDirectionsAdditionalInformation;
@@ -41,7 +39,6 @@ public class GeneralApplicationWrapper {
     private LocalDate generalApplicationDirectionsCourtOrderDate;
     private String generalApplicationDirectionsTextFromJudge;
     private CaseDocument generalApplicationDirectionsDocument;
-    private List<IntervenerCaseDocumentCollection> generalApplicationIntvrDocuments;
     private String generalApplicationNotApprovedReason;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -65,11 +62,6 @@ public class GeneralApplicationWrapper {
     private String generalApplicationOutcomeOther;
     private GeneralApplicationOutcome generalApplicationOutcome;
     private List<GeneralApplicationsCollection> generalApplications;
-    private List<GeneralApplicationsCollection> appRespGeneralApplications;
-    private List<GeneralApplicationsCollection> intervener1GeneralApplications;
-    private List<GeneralApplicationsCollection> intervener2GeneralApplications;
-    private List<GeneralApplicationsCollection> intervener3GeneralApplications;
-    private List<GeneralApplicationsCollection> intervener4GeneralApplications;
     private String generalApplicationTracking;
     private String generalApplicationRejectReason;
     private DynamicList generalApplicationList;

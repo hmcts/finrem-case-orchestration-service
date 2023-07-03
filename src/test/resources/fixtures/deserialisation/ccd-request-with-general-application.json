@@ -156,6 +156,7 @@
       "generalApplications": [
         {
           "value": {
+            "generalApplicationReceivedFrom": "respondent",
             "generalApplicationCreatedBy": "Claire Mumford",
             "generalApplicationHearingRequired": "No",
             "generalApplicationSpecialMeasures": null,
