@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_HEARING_COLLECTION_CONSENTED;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -88,9 +88,8 @@ public class ReadyForHearingConsentedAboutToStartHandlerTest extends BaseHandler
         finremCallbackRequest.getCaseDetails().getData().setListForHearings(listForHearings);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertNull(response.getErrors());
+        assertThat(response.getErrors(), is(empty()));
     }
-
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
@@ -101,6 +100,4 @@ public class ReadyForHearingConsentedAboutToStartHandlerTest extends BaseHandler
                 .data(new FinremCaseData()).build())
             .build();
     }
-
-
 }

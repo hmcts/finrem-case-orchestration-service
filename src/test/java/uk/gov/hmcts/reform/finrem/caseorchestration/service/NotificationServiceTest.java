@@ -1198,7 +1198,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1.getValue())).thenReturn(true);
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode())).thenReturn(true);
         assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOneWrapper()));
     }
 
@@ -1209,7 +1209,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1.getValue())).thenReturn(false);
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode())).thenReturn(false);
         assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOneWrapper()));
     }
 
@@ -1222,7 +1222,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_2.getValue())).thenReturn(true);
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode())).thenReturn(true);
         assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerTwoWrapper()));
     }
 
@@ -1233,7 +1233,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_2.getValue())).thenReturn(false);
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode())).thenReturn(false);
         assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerTwoWrapper()));
     }
 
@@ -1246,7 +1246,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_3.getValue())).thenReturn(true);
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode())).thenReturn(true);
         assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThreeWrapper()));
     }
 
@@ -1257,7 +1257,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_3.getValue())).thenReturn(false);
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode())).thenReturn(false);
         assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThreeWrapper()));
     }
 
@@ -1270,7 +1270,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_4.getValue())).thenReturn(true);
+            CaseRole.INTVR_SOLICITOR_4.getCcdCode())).thenReturn(true);
         assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerFourWrapper()));
     }
 
@@ -1496,7 +1496,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         assertTrue(actual);
         verify(checkSolicitorIsDigitalService).isIntervenerSolicitorDigital(callbackRequest.getCaseDetails().getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1.getValue());
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode());
 
     }
 
@@ -1510,7 +1510,7 @@ public class NotificationServiceTest extends BaseServiceTest {
             finremCallbackRequest.getCaseDetails());
         assertTrue(actual);
         verify(checkSolicitorIsDigitalService).isIntervenerSolicitorDigital(finremCallbackRequest.getCaseDetails().getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1.getValue());
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode());
     }
 
     @Test

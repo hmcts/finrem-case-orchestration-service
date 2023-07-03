@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -50,6 +51,13 @@ public abstract class DocumentHandler {
         List<UploadCaseDocumentCollection> documentsToBeRemoved =
             getDocumentsToBeRemovedFromOriginalCollection(caseData);
         documentsToBeRemoved.forEach(originalDocumentCollection::remove);
+    }
+
+    protected boolean isIntervener(CaseDocumentParty caseDocumentParty) {
+        return caseDocumentParty.equals(CaseDocumentParty.INTERVENER_ONE)
+            || caseDocumentParty.equals(CaseDocumentParty.INTERVENER_TWO)
+            || caseDocumentParty.equals(CaseDocumentParty.INTERVENER_THREE)
+            || caseDocumentParty.equals(CaseDocumentParty.INTERVENER_FOUR);
     }
 
     private List<UploadCaseDocumentCollection> getDocumentsToBeRemovedFromOriginalCollection(FinremCaseData caseData) {

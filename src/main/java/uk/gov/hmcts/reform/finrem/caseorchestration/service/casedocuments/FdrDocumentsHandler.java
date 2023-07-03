@@ -26,6 +26,7 @@ public class FdrDocumentsHandler extends DocumentHandler {
                 return uploadedCaseDocument.getCaseDocuments() != null
                     && uploadedCaseDocument.getCaseDocumentType() != null
                     && uploadedCaseDocument.getCaseDocumentFdr() != null
+                    && !isIntervener(uploadedCaseDocument.getCaseDocumentParty())
                     && uploadedCaseDocument.getCaseDocumentFdr().equals(YesOrNo.YES);
             }).collect(Collectors.toList());
     }

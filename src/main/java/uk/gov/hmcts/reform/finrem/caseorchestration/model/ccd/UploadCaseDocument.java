@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -27,4 +28,12 @@ public class UploadCaseDocument {
     private YesOrNo caseDocumentFdr;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime caseDocumentUploadDateTime;
+
+    @JsonIgnore
+    public YesOrNo getCaseDocumentConfidential() {
+        if (caseDocumentConfidential == null) {
+            this.caseDocumentConfidential = YesOrNo.NO;
+        }
+        return caseDocumentConfidential;
+    }
 }
