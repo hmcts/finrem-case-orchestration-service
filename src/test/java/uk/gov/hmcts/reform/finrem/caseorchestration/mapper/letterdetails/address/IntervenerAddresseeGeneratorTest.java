@@ -108,9 +108,9 @@ public class IntervenerAddresseeGeneratorTest {
         AddresseeDetails addresseeDetails = intervenerOneAddresseeGenerator.generate(finremCaseDetails);
 
         assertEquals("intervener1 name", addresseeDetails.getAddresseeName());
-        assertEquals("intervener1 address line 1", addresseeDetails.getAddressToSendTo().get("AddressLine1"));
-        assertEquals("intervener1 address line 2", addresseeDetails.getAddressToSendTo().get("AddressLine2"));
-        assertEquals("intervener1 postcode", addresseeDetails.getAddressToSendTo().get("PostCode"));
+        assertEquals("intervener1 address line 1", addresseeDetails.getFinremAddressToSendTo().getAddressLine1());
+        assertEquals("intervener1 address line 2", addresseeDetails.getFinremAddressToSendTo().getAddressLine2());
+        assertEquals("intervener1 postcode", addresseeDetails.getFinremAddressToSendTo().getPostCode());
     }
 
     @Test
@@ -122,9 +122,10 @@ public class IntervenerAddresseeGeneratorTest {
         AddresseeDetails addresseeDetails = intervenerTwoAddresseeGenerator.generate(finremCaseDetails);
         assertNotNull(addresseeDetails);
         assertEquals("intervener2 name", addresseeDetails.getAddresseeName());
-        assertEquals("intervener2 address line 1", addresseeDetails.getAddressToSendTo().get("AddressLine1"));
-        assertEquals("intervener2 address line 2", addresseeDetails.getAddressToSendTo().get("AddressLine2"));
-        assertEquals("intervener2 postcode", addresseeDetails.getAddressToSendTo().get("PostCode"));
+        assertEquals("intervener2 address line 1", addresseeDetails.getFinremAddressToSendTo().getAddressLine1());
+        assertEquals("intervener2 address line 2", addresseeDetails.getFinremAddressToSendTo().getAddressLine2());
+        assertEquals("intervener2 postcode", addresseeDetails.getFinremAddressToSendTo().getPostCode());
+        ;
     }
 
     @Test
@@ -136,9 +137,10 @@ public class IntervenerAddresseeGeneratorTest {
         AddresseeDetails addresseeDetails = intervenerThreeAddresseeGenerator.generate(finremCaseDetails);
         assertNotNull(addresseeDetails);
         assertEquals("intervener3 name", addresseeDetails.getAddresseeName());
-        assertEquals("intervener3 address line 1", addresseeDetails.getAddressToSendTo().get("AddressLine1"));
-        assertEquals("intervener3 address line 2", addresseeDetails.getAddressToSendTo().get("AddressLine2"));
-        assertEquals("intervener3 postcode", addresseeDetails.getAddressToSendTo().get("PostCode"));
+        assertEquals("intervener3 address line 1", addresseeDetails.getFinremAddressToSendTo().getAddressLine1());
+        assertEquals("intervener3 address line 2", addresseeDetails.getFinremAddressToSendTo().getAddressLine2());
+        assertEquals("intervener3 postcode", addresseeDetails.getFinremAddressToSendTo().getPostCode());
+        ;
     }
 
     @Test
@@ -150,9 +152,10 @@ public class IntervenerAddresseeGeneratorTest {
         AddresseeDetails addresseeDetails = intervenerFourAddresseeGenerator.generate(finremCaseDetails);
         assertNotNull(addresseeDetails);
         assertEquals("intervener4 name", addresseeDetails.getAddresseeName());
-        assertEquals("intervener4 address line 1", addresseeDetails.getAddressToSendTo().get("AddressLine1"));
-        assertEquals("intervener4 address line 2", addresseeDetails.getAddressToSendTo().get("AddressLine2"));
-        assertEquals("intervener4 postcode", addresseeDetails.getAddressToSendTo().get("PostCode"));
+        assertEquals("intervener4 address line 1", addresseeDetails.getFinremAddressToSendTo().getAddressLine1());
+        assertEquals("intervener4 address line 2", addresseeDetails.getFinremAddressToSendTo().getAddressLine2());
+        assertEquals("intervener4 postcode", addresseeDetails.getFinremAddressToSendTo().getPostCode());
+        ;
     }
 
     private CaseDetails buildCaseDetails(String intervenerField, IntervenerWrapper intervenerWrapper) {
