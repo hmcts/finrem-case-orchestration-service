@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UploadConfidentialDocument {
-    private CaseDocumentParty caseDocumentParty;
     @JsonProperty("DocumentLink")
     private CaseDocument documentLink;
     @JsonProperty("caseDocumentParty")
