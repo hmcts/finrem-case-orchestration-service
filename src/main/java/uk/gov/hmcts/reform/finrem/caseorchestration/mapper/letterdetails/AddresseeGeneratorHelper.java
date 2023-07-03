@@ -70,14 +70,6 @@ public class AddresseeGeneratorHelper {
 
     }
 
-    private static Addressee getIntervenerAddressee(IntervenerWrapper intervenerWrapper) {
-        return Addressee.builder()
-            .name(intervenerWrapper.getIntervenerName())
-            .formattedAddress(formatAddressForLetterPrinting(intervenerWrapper.getIntervenerAddress()))
-            .build();
-    }
-
-
     private static Addressee getRespondentAddressee(FinremCaseData caseData) {
         return Addressee.builder()
             .name(getRespName(caseData))
