@@ -1,39 +1,82 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import lombok.experimental.SuperBuilder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
-import java.time.LocalDate;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Data
-@Builder(toBuilder = true)
-@AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class IntervenerOneWrapper {
-    private String intervener1Name;
-    private Address intervener1Address;
-    private String intervener1Email;
-    private String intervener1Phone;
-    private YesOrNo intervener1Represented;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate intervener1DateAdded;
-    private String intervener1SolName;
-    private String intervener1SolEmail;
-    private String intervener1SolPhone;
-    private String intervener1SolicitorFirm;
-    private String intervener1SolicitorReference;
-    private OrganisationPolicy intervener1Organisation;
+public class IntervenerOneWrapper extends IntervenerWrapper {
+
+    @Override
+    @JsonIgnore
+    public String getIntervenerLabel() {
+        return "Intervener 1";
+    }
+
+    @Override
+    @JsonIgnore
+    public IntervenerType getIntervenerType() {
+        return IntervenerType.INTERVENER_ONE;
+    }
+
+    @Override
+    @JsonIgnore
+    public String getAddIntervenerCode() {
+        return "addIntervener1";
+    }
+
+    @Override
+    @JsonIgnore
+    public String getAddIntervenerValue() {
+        return "Add Intervener 1";
+    }
+
+    @Override
+    @JsonIgnore
+    public String getDeleteIntervenerCode() {
+        return "delIntervener1";
+    }
+
+    @Override
+    @JsonIgnore
+    public String getDeleteIntervenerValue() {
+        return "Remove Intervener 1";
+    }
+
+    @Override
+    @JsonIgnore
+    public String getUpdateIntervenerValue() {
+        return "Amend Intervener 1";
+    }
+
+    @Override
+    @JsonIgnore
+    public CaseRole getIntervenerSolicitorCaseRole() {
+        return CaseRole.INTVR_SOLICITOR_1;
+    }
+
+    @Override
+    @JsonIgnore
+    public DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient() {
+        return DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE;
+    }
+
+    @Override
+    @JsonIgnore
+    public IntervenerWrapper getIntervenerWrapperFromCaseData(FinremCaseData caseData) {
+        return caseData.getIntervenerOneWrapper();
+    }
+
+    @Override
+    @JsonIgnore
+    public void removeIntervenerWrapperFromCaseData(FinremCaseData caseData) {
+        caseData.setIntervenerOneWrapper(null);
+    }
 }

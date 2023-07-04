@@ -23,7 +23,7 @@ public enum ContestedUploadCaseFilesCollectionType {
     APP_CASE_SUMMARIES_COLLECTION("appCaseSummariesCollection"),
     APP_FORMS_H_COLLECTION("appFormsHCollection"),
     APP_EXPERT_EVIDENCE_COLLECTION("appExpertEvidenceCollection"),
-    APP_CORRESPONDENCE_COLLECTION("appCorrespondenceDocsColl"),
+    APP_CORRESPONDENCE_COLLECTION("appCorrespondenceDocsCollection"),
     APP_OTHER_COLLECTION("appOtherCollection"),
     RESP_HEARING_BUNDLES_COLLECTION("respHearingBundlesCollection"),
     RESP_FORM_E_EXHIBITS_COLLECTION("respFormEExhibitsCollection"),

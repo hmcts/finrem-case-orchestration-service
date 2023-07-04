@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPost
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderCorresponder;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +26,7 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     private final NotificationService notificationService;
     private final GeneralOrderService generalOrderService;
     private final CcdService ccdService;
+    private final ContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
     public SendOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               NotificationService notificationService,
@@ -77,6 +80,34 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     private boolean isOptionThatRequireUpdate(SendOrderEventPostStateOption postStateOption) {
         return postStateOption.getEventToTrigger().equals(EventType.PREPARE_FOR_HEARING)
             || postStateOption.getEventToTrigger().equals(EventType.CLOSE);
+    }
+
+    private void sendNotifications(CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+        if (!caseDataService.isPaperApplication(caseData) && Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
+            log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+            contestedSendOrderCorresponder.sendCorrespondence(caseDetails);
+    private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+        String caseId = String.valueOf(caseDetails.getId());
+
+        if (Objects.nonNull(caseData.getFinalOrderCollection())) {
+            log.info("Received request to send email for 'Order Approved' for Case ID: {}", caseId);
+            if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
+                && parties.contains(CaseRole.APP_SOLICITOR.getValue())) {
+                log.info("Sending 'Order Approved' email notification to Applicant Solicitor for Case ID: {}", caseId);
+                notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
+            }
+
+            if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
+                && parties.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+                log.info("Sending 'Order Approved' email notification to Respondent Solicitor for Case ID: {}", caseId);
+                notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
+            }
+            //add Interveners notification
+        }
     }
 
     private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties) {

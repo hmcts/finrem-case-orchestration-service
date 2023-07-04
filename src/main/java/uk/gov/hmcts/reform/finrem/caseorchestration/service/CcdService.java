@@ -2,6 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
+import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CaseEventsApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -9,7 +13,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 
 import java.util.List;
@@ -77,5 +83,15 @@ public class CcdService {
             JURISDICTION,
             caseTypeId,
             caseId.toString());
+    }
+
+    public SearchResult getCaseByCaseId(String caseId, CaseType caseType, String authorisation) {
+        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
+        SearchSourceBuilder searchBuilder = new SearchSourceBuilder();
+        String escapeValue = StringEscapeUtils.escapeJava(StringEscapeUtils.escapeJson(caseId));
+        searchBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("reference", escapeValue).operator(Operator.AND)));
+
+        return coreCaseDataApi.searchCases(idamToken.getIdamOauth2Token(),
+            idamToken.getServiceAuthorization(), caseType.getCcdType(), searchBuilder.toString());
     }
 }

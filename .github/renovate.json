@@ -1,12 +1,20 @@
 {
-  "enabledManagers": ["helm-requirements","gradle-wrapper"],
-  "labels": ["dependencies"],
-  "helm-requirements":
-  {
-    "fileMatch": ["\\Chart.yaml|requirements.yaml$"],
+  "enabledManagers": [
+    "helm-requirements",
+    "gradle-wrapper"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "helm-requirements": {
+    "fileMatch": [
+      "\\Chart.yaml|requirements.yaml$"
+    ],
     "aliases": {
       "hmctspublic": "https://hmctspublic.azurecr.io/helm/v1/repo/"
     }
   },
-  "schedule": ["before 6am on Monday"]
+  "extends": [
+    "local>hmcts/.github:renovate-config"
+  ]
 }

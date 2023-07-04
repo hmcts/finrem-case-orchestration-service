@@ -39,7 +39,6 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to set nature of application for consented case with Case ID: {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
-        log.info("caseData ={}= for case id {}", caseData, caseDetails.getId());
         final Intention intention = caseData.getApplicantIntendsTo();
         log.info("Applicant intends to {} for case id: {}", intention, caseDetails.getId());
 

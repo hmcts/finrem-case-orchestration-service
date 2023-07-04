@@ -74,13 +74,13 @@ public class IntervenersAboutToStartHandlerTest {
     public void givenContestedCase_whenUseManageIntervenersAndThereIsOneIntervnerAlready_thenPrepareIntervenersList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
-            .builder().intervener1Name("One name").intervener1Email("test@test.com").build();
+            .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
         IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
-            .builder().intervener2Name("Two name").intervener2Email("test@test.com").build();
+            .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
-            .builder().intervener3Name("Three name").intervener3Email("test@test.com").build();
+            .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
-            .builder().intervener4Name("Four name").intervener4Email("test@test.com").build();
+            .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerOneWrapper(oneWrapper);
         finremCallbackRequest.getCaseDetails().getData().setIntervenerTwoWrapper(twoWrapper);

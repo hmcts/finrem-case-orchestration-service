@@ -58,10 +58,13 @@ public enum EventType {
     MANUAL_PAYMENT("FR_manualPayment"),
     ASSIGN_TO_JUDGE_CONSENT("FR_assignToJudgeConsent"),
     MANAGE_INTERVENERS("manageInterveners"),
+    CREATE_GENERAL_LETTER("FR_generalLetter"),
+    CREATE_GENERAL_LETTER_JUDGE("FR_generalLetter_judge"),
     CREATE_GENERAL_EMAIL("FR_generalEmail"),
 
     @JsonEnumDefaultValue
     NONE("");
+
     private final String ccdType;
 
     @JsonValue

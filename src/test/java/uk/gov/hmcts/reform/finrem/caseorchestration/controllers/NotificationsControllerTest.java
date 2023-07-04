@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
@@ -32,6 +36,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.conse
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderNotApprovedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedDraftOrderCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedIntermHearingCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.GeneralOrderRaisedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfConsentedApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfContestedApplicantCorresponder;
@@ -78,6 +84,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
     ContestedConsentOrderNotApprovedCorresponder.class,
     ConsentOrderAvailableCorresponder.class,
     ConsentOrderNotApprovedSentCorresponder.class,
+    ContestedIntermHearingCorresponder.class,
+    ContestedDraftOrderCorresponder.class,
+    FinremCaseDetailsMapper.class,
     DocumentHelper.class})
 public class NotificationsControllerTest extends BaseControllerTest {
 
@@ -113,6 +122,19 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private DocumentHelper documentHelper;
     @MockBean
     private GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
+    @MockBean
+    private ContestedIntermHearingCorresponder contestedIntermHearingCorresponder;
+    @MockBean
+    private ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
+    @MockBean
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Override
+    @Before
+    public void setUp() {
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
+            .thenReturn(getFinremCaseDetailsFromCaseDetails());
+    }
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
@@ -283,27 +305,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
 
-        verify(notificationService).sendSolicitorToDraftOrderEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendDraftOrderEmailAsSolicitorOptedOutOfEmailComms() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-
-        notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendDraftOrderEmailAsRespondentSolicitorIsNominated() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(any())).thenReturn(false);
-
-        notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CaseDetails.class));
+        verify(contestedDraftOrderCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
@@ -313,27 +315,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendDraftOrderEmail(buildCallbackRequest());
 
-        verify(notificationService).sendSolicitorToDraftOrderEmailRespondent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldSendSolicitorToDraftOrderEmailRespondent_shouldNotSendEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
-
-        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldSendSolicitorToDraftOrderEmailRespondent_respSolicitorNotResponsible() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(false);
-
-        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any(CaseDetails.class));
+        verify(contestedDraftOrderCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
@@ -549,21 +531,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
 
-        verify(notificationService, times(1)).sendInterimNotificationEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, times(1)).sendInterimNotificationEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendInterimHearingWhenNotAgreed() {
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
-        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
-
-        verify(notificationService, never()).sendInterimNotificationEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, never()).sendInterimNotificationEmailToRespondentSolicitor(any(CaseDetails.class));
+        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
@@ -575,8 +543,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
 
-        verify(notificationService, times(1)).sendInterimNotificationEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, never()).sendInterimNotificationEmailToRespondentSolicitor(any(CaseDetails.class));
+        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
@@ -588,8 +555,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
 
-        verify(notificationService, never()).sendInterimNotificationEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, times(1)).sendInterimNotificationEmailToRespondentSolicitor(any(CaseDetails.class));
+        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
@@ -673,5 +639,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
         callbackRequest.getCaseDetails().getData().put(FINAL_ORDER_COLLECTION, finalOrderCollection);
 
         return callbackRequest;
+    }
+
+    private FinremCaseDetails getFinremCaseDetailsFromCaseDetails() {
+        return FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
     }
 }

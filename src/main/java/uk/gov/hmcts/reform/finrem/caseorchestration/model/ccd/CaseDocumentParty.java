@@ -1,17 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum CaseDocumentParty {
     APPLICANT("applicant"),
     RESPONDENT("respondent"),
+    INTERVENER_ONE("intervener1"),
+    INTERVENER_TWO("intervener2"),
+    INTERVENER_THREE("intervener3"),
+    INTERVENER_FOUR("intervener4"),
     CASE("case");
 
     private final String value;

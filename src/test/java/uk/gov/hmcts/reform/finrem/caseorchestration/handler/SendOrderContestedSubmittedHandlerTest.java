@@ -25,9 +25,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderCorresponder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
@@ -41,6 +43,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEND_ORDER_POST_STATE_OPTION_FIELD;
 
 @ExtendWith(MockitoExtension.class)
 class SendOrderContestedSubmittedHandlerTest {
@@ -53,6 +57,12 @@ class SendOrderContestedSubmittedHandlerTest {
     private NotificationService notificationService;
     @Mock
     private GeneralOrderService generalOrderService;
+    private FeatureToggleService featureToggleService;
+    @Mock
+    private NotificationService notificationService;
+    @Mock
+    private ContestedSendOrderCorresponder contestedSendOrderCorresponder;
+
     @Mock
     private CcdService ccdService;
 
@@ -371,4 +381,5 @@ class SendOrderContestedSubmittedHandlerTest {
                 .data(new FinremCaseData()).build())
             .build();
     }
+
 }

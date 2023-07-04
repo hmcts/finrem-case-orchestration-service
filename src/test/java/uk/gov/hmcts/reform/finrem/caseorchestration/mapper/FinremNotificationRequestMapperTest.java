@@ -11,9 +11,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -80,6 +83,28 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
         caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             caseDetails);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals("RG-123456789", notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("contested", notificationRequest.getCaseType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+        assertEquals("First Directions Appointment (FDA)", notificationRequest.getHearingType());
+    }
+
+    @Test
+    public void shouldReturnHearingTypeForPrepareForHearingContestedEventInvokeIntervener() {
+        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
+        SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(TEST_SOLICITOR_EMAIL)
+            .solicitorNameKey(TEST_SOLICITOR_NAME)
+            .solicitorReferenceKey("RG-123456789").build();
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
+            caseDetails, dataKeysWrapper);
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals("RG-123456789", notificationRequest.getSolicitorReferenceNumber());
@@ -181,6 +206,31 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
 
         assertThat(interimHearingList.isEmpty(), is(false));
 
+    }
+
+    @Test
+    public void shouldCreateNotificationRequestForIntervenerNotification() {
+        Organisation org = Organisation.builder().organisationName("test org").organisationID("1").build();
+        OrganisationPolicy intervenerOrg = OrganisationPolicy.builder().organisation(org).build();
+        IntervenerOneWrapper intervenerDetails = IntervenerOneWrapper.builder()
+            .intervenerName("intervener name")
+            .intervenerOrganisation(intervenerOrg)
+            .intervenerSolicitorReference(TEST_SOLICITOR_REFERENCE).build();
+        String recipient = TEST_SOLICITOR_NAME;
+        String email = TEST_SOLICITOR_EMAIL;
+        String referenceNumber = TEST_SOLICITOR_REFERENCE;
+        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(
+            caseDetails, intervenerDetails, recipient, email, referenceNumber);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+        assertEquals("intervener name", notificationRequest.getIntervenerFullName());
+        assertEquals("test org", notificationRequest.getIntervenerSolicitorFirm());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getIntervenerSolicitorReferenceNumber());
     }
 
 
