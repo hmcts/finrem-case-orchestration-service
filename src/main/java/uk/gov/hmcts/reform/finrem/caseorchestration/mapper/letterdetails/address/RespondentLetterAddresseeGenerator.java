@@ -50,12 +50,14 @@ public class RespondentLetterAddresseeGenerator implements LetterAddresseeGenera
     public AddresseeDetails generate(FinremCaseDetails caseDetails) {
         AddresseeDetails addresseeDetails;
         if (caseDetails.getData().isRespondentRepresentedByASolicitor()) {
+            log.info("Respondent is represented by a solicitor for case{}", caseDetails.getId());
             addresseeDetails = AddresseeDetails.builder()
                 .reference(nullToEmpty((caseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorReference())))
-                .addresseeName(nullToEmpty(caseDetails.getData().getRespondentSolicitorName()))
+                .addresseeName(nullToEmpty(caseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorName()))
                 .finremAddressToSendTo(caseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorAddress())
                 .build();
         } else {
+            log.info("Respondent is not represented by a solicitor for case{}", caseDetails.getId());
             addresseeDetails = AddresseeDetails.builder()
                 .addresseeName(caseDetails.getData().getRespondentFullName())
                 .finremAddressToSendTo(caseDetails.getData().getContactDetailsWrapper().getRespondentAddress())

@@ -31,7 +31,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
     }
 
     protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        if (shouldSendApplicantSolicitorEmail(caseDetails)) {
+        if (Boolean.FALSE && shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         } else {
@@ -45,7 +45,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
     }
 
     protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        if (shouldSendRespondentSolicitorEmail(caseDetails)) {
+        if (Boolean.FALSE && shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
         } else {
