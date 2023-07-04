@@ -48,6 +48,8 @@ public class UpdateGeneralApplicationStatusAboutToStartHandler extends FinremCal
             EventType.UPDATE_CONTESTED_GENERAL_APPLICATION, caseId);
         FinremCaseData caseData = caseDetails.getData();
 
+        helper.populateGeneralApplicationSender(caseData.getGeneralApplicationWrapper().getGeneralApplications());
+
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(
             caseData, GENERAL_APPLICATION_COLLECTION);
         GeneralApplicationCollectionData data =

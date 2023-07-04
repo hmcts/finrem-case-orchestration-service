@@ -102,7 +102,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
     public void givenCase_whenRejectingAnApplication_thenRemoveElementFromCollection() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(
-            x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+            ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle =
             startHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -113,7 +113,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
         assertEquals(2, dynamicList.getListItems().size());
 
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(x ->
-            x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+            x.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle =
             submitHandler.handle(callbackRequest, AUTH_TOKEN);

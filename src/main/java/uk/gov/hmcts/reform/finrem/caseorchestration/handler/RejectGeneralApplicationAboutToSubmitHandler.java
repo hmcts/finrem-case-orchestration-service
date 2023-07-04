@@ -67,7 +67,7 @@ public class RejectGeneralApplicationAboutToSubmitHandler
             log.info("applicationCollectionDataList : {}", applicationCollectionDataList.size());
             generalApplicationService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
             caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
-                x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+                ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
         }
         String previousState = Objects.toString(caseDetails.getData().getGeneralApplicationWrapper()
             .getGeneralApplicationPreState(), caseDetails.getState().getStateId());

@@ -32,8 +32,6 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
 
     public static final String APPLICANT = "applicant";
     public static final String RESPONDENT = "respondent";
-    public static final String CASE = "case";
-
     private final NotificationService notificationService;
     private final PaperNotificationService paperNotificationService;
     private final ObjectMapper objectMapper;
@@ -153,7 +151,7 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
 
         return rejectedApplication
             .map(GeneralApplicationCollectionData::getGeneralApplicationItems)
-            .map(GeneralApplicationItems::getGeneralApplicationReceivedFrom)
+            .map(GeneralApplicationItems::getGeneralApplicationSender)
             .orElse(dynamicRadioList);
     }
 }

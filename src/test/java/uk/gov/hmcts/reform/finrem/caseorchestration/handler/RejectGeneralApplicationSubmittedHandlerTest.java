@@ -58,7 +58,6 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
 
     public static final String APPLICANT = "applicant";
     public static final String RESPONDENT = "respondent";
-    public static final String CASE = "case";
     public static final String TEST_ID = "1fa411d2-3da3-468d-ad8d-3bfb2514203d";
 
     @InjectMocks
@@ -116,9 +115,9 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
             .thenReturn(true);
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
-        wrapper.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(
+        wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
             buildDynamicIntervenerListForApplicant()));
-        wrapperBefore.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(
+        wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
             buildDynamicIntervenerListForApplicant()));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(notificationService).sendGeneralApplicationRejectionEmailToAppSolicitor(callbackRequest.getCaseDetails());
@@ -132,9 +131,9 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
             .thenReturn(true);
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
-        wrapper.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(
+        wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
             buildDynamicIntervenerListForRespondent()));
-        wrapperBefore.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(
+        wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
             buildDynamicIntervenerListForRespondent()));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(notificationService).sendGeneralApplicationRejectionEmailToResSolicitor(callbackRequest.getCaseDetails());
@@ -148,9 +147,9 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
             caseDetailsBefore(buildDynamicIntervenerListForApplicant()));
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
-        wrapper.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(
+        wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
             buildDynamicIntervenerListForApplicant()));
-        wrapperBefore.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(
+        wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
             buildDynamicIntervenerListForApplicant()));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(paperNotificationService).printApplicantRejectionGeneralApplication(
@@ -165,9 +164,9 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
             caseDetailsBefore(buildDynamicIntervenerListForRespondent()));
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
-        wrapper.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(
+        wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
             buildDynamicIntervenerListForRespondent()));
-        wrapperBefore.getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(
+        wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
             buildDynamicIntervenerListForRespondent()));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(paperNotificationService).printRespondentRejectionGeneralApplication(
@@ -237,7 +236,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
             GeneralApplicationCollectionData.builder()
                 .id(TEST_ID)
                 .generalApplicationItems(GeneralApplicationItems.builder()
-                    .generalApplicationReceivedFrom(receivedFrom)
+                    .generalApplicationSender(receivedFrom)
                     .build())
                 .build()
         );
@@ -251,7 +250,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
 
     protected FinremCallbackRequest buildCallbackRequest() {
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(
+            GeneralApplicationItems.builder().generalApplicationSender(
                 buildDynamicIntervenerListForApplicant()).generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -267,19 +266,19 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
             .id(UUID.randomUUID()).value(generalApplicationItems).build();
         GeneralApplicationsCollection intervener4GeneralApplications = GeneralApplicationsCollection.builder()
             .id(UUID.randomUUID()).value(generalApplicationItems).build();
-        intervener1GeneralApplications.getValue().setGeneralApplicationReceivedFrom(
+        intervener1GeneralApplications.getValue().setGeneralApplicationSender(
             buildDynamicListForIntervener(INTERVENER1));
-        intervener2GeneralApplications.getValue().setGeneralApplicationReceivedFrom(
+        intervener2GeneralApplications.getValue().setGeneralApplicationSender(
             buildDynamicListForIntervener(INTERVENER2));
-        intervener3GeneralApplications.getValue().setGeneralApplicationReceivedFrom(
+        intervener3GeneralApplications.getValue().setGeneralApplicationSender(
             buildDynamicListForIntervener(INTERVENER3));
-        intervener4GeneralApplications.getValue().setGeneralApplicationReceivedFrom(
+        intervener4GeneralApplications.getValue().setGeneralApplicationSender(
             buildDynamicListForIntervener(INTERVENER4));
         GeneralApplicationsCollection generalApplicationsBefore = GeneralApplicationsCollection.builder()
             .id(UUID.fromString("1fa411d2-3da3-468d-ad8d-3bfb2514203d")).build();
         GeneralApplicationItems generalApplicationItemsAdded =
             GeneralApplicationItems.builder().generalApplicationDocument(caseDocument).generalApplicationDraftOrder(caseDocument)
-                .generalApplicationDirectionsDocument(caseDocument).generalApplicationReceivedFrom(buildDynamicIntervenerListForApplicant())
+                .generalApplicationDirectionsDocument(caseDocument).generalApplicationSender(buildDynamicIntervenerListForApplicant())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationStatus(String.valueOf(DIRECTION_APPROVED)).generalApplicationHearingRequired("No")
                 .generalApplicationCreatedDate(LocalDate.now()).build();

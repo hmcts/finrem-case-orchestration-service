@@ -100,7 +100,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
         FinremCallbackRequest callbackRequest =
             buildFinremCallbackRequest(GA_NON_COLL_JSON);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = startHandle.getData();
@@ -125,7 +125,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
     public void givenCase_whenApproveAnApplication_thenUpdateStatusApproved() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -150,7 +150,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
     public void givenCase_whenNotApproveAnApplication_thenUpdateStatusNotApproved() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle =
             startHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -178,7 +178,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
     public void givenCase_whenOtherAnApplication_thenUpdateStatusOther() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler
             .handle(callbackRequest, AUTH_TOKEN);

@@ -118,8 +118,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     public void givenCase_whenExistingApplication_thenMigratedAndUpdateStatusApprovedCompleted() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
 
-        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(x ->
-            x.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(ga ->
+            ga.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
 
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
@@ -131,7 +131,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         dynamicListForCaseDetails.setListItems(listItems);
         CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();
@@ -174,7 +174,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     public void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompleted() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
-            .getGeneralApplications().forEach(x -> x.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
+            .getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
 
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
@@ -186,7 +186,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         dynamicListForCaseDetails.setListItems(listItems);
         CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();
@@ -223,7 +223,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     public void givenCase_whenNotApproveAnApplication_thenUpdateStatusNotApproved() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         finremCallbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-            .forEach(x -> x.getValue().setGeneralApplicationStatus(DIRECTION_NOT_APPROVED.getId()));
+            .forEach(ga -> ga.getValue().setGeneralApplicationStatus(DIRECTION_NOT_APPROVED.getId()));
 
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
@@ -237,7 +237,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
 
         CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();
@@ -273,7 +273,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     public void givenCase_whenOtherAnApplication_thenUpdateStatusOther() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications(
-        ).forEach(x -> x.getValue().setGeneralApplicationStatus(DIRECTION_OTHER.getId()));
+        ).forEach(ga -> ga.getValue().setGeneralApplicationStatus(DIRECTION_OTHER.getId()));
 
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
@@ -286,7 +286,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
 
         CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();
@@ -324,7 +324,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         when(service.getEventPostState(any(), any())).thenReturn(PREPARE_FOR_HEARING_STATE);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(
-            x -> x.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
+            ga -> ga.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
             .label("General Application 1 - Received from - applicant - Created Date 2023-06-13 -Hearing Required - No")
@@ -335,7 +335,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         dynamicListForCaseDetails.setListItems(listItems);
         CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();
@@ -389,7 +389,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();
@@ -408,7 +408,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
         GeneralApplicationItems generalApplicationItemsAdded =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationDraftOrder(caseDocument2)
                 .generalApplicationDirectionsDocument(caseDocument3).generalApplicationDocument(caseDocument1)
                 .generalApplicationCreatedBy("Claire Mumford")

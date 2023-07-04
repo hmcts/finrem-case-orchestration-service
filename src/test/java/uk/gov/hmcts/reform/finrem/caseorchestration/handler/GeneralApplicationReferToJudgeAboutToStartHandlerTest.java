@@ -92,7 +92,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseH
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
             .caseDetailsBefore(buildCaseDetailsWithPath(GA_NON_COLL_JSON)).build();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
-        data.getGeneralApplicationWrapper().getGeneralApplications().forEach(x -> x.getValue()
+        data.getGeneralApplicationWrapper().getGeneralApplications().forEach(ga -> ga.getValue()
             .setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId()));
         data.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail("judge@mailinator.com");
 
@@ -108,7 +108,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseH
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
                 .get(0).getValue());
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(
-            x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+            ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();

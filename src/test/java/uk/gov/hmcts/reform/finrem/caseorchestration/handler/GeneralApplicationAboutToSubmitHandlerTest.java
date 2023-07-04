@@ -56,8 +56,6 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     private GeneralApplicationService service;
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private static final String GA_JSON = "/fixtures/contested/general-application.json";
-    private static final String GA_UNSORTED_JSON = "/fixtures/contested/general-application-unsorted.json";
 
     @Before
     public void setup() {
@@ -158,7 +156,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     private GeneralApplicationItems getApplicationItems(FinremCaseData caseData) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
-        builder.generalApplicationReceivedFrom(buildDynamicIntervenerList());
+        builder.generalApplicationSender(buildDynamicIntervenerList());
         builder.generalApplicationCreatedBy(Objects.toString(
             caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy(), null));
         builder.generalApplicationHearingRequired(Objects.toString(
@@ -198,7 +196,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
 
     protected FinremCallbackRequest buildCallbackRequest() {
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -209,7 +207,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         generalApplicationsBefore.setId(UUID.randomUUID());
         generalApplications.setId(UUID.randomUUID());
         GeneralApplicationItems generalApplicationItemsAdded =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(buildDynamicIntervenerList())
+            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(LocalDate.now()).build();

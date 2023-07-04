@@ -54,10 +54,11 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
 
         log.info("Mid callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
+        String caseId = caseDetails.getId().toString();
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(
-            caseDetails.getId().toString(), userAuthorisation);
-        log.info("Logged in user case role type {}", loggedInUserCaseRole);
+            caseId, userAuthorisation);
+        log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
@@ -80,7 +81,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                     .listItems(List.of(listElement))
                     .build();
                 if (generalApplications != null && !generalApplications.isEmpty()) {
-                    generalApplications.forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(radioList));
+                    generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
                 }
             }
             case INTERVENER1 -> {
@@ -93,7 +94,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                     .listItems(List.of(listElement))
                     .build();
                 if (generalApplications != null && !generalApplications.isEmpty()) {
-                    generalApplications.forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(radioList));
+                    generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
                 }
             }
             case INTERVENER2 -> {
@@ -106,7 +107,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                     .listItems(List.of(listElement))
                     .build();
                 if (generalApplications != null && !generalApplications.isEmpty()) {
-                    generalApplications.forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(radioList));
+                    generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
                 }
             }
             case INTERVENER3 -> {
@@ -119,7 +120,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                     .listItems(List.of(listElement))
                     .build();
                 if (generalApplications != null && !generalApplications.isEmpty()) {
-                    generalApplications.forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(radioList));
+                    generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
                 }
             }
             case INTERVENER4 -> {
@@ -132,7 +133,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                     .listItems(List.of(listElement))
                     .build();
                 if (generalApplications != null && !generalApplications.isEmpty()) {
-                    generalApplications.forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(radioList));
+                    generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
                 }
             }
             default -> {

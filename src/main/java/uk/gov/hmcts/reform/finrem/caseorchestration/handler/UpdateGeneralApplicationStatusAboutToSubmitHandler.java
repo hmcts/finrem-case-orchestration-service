@@ -53,7 +53,7 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandler extends FinremCa
             List<GeneralApplicationCollectionData> list = generalApplicationList.stream().map(this::updateStatus).toList();
             service.updateGeneralApplicationCollectionData(list, caseData);
             caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
-                x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+                ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
 
         }
         helper.deleteNonCollectionGeneralApplication(caseData);

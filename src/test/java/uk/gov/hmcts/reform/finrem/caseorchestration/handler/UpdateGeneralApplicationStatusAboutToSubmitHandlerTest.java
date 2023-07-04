@@ -121,8 +121,8 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandlerTest {
                 .caseDetailsBefore(buildCaseDetailsWithPath(GA_UNSORTED_JSON)).build();
 
         FinremCaseDetails caseDetailsCopy = deepCopy(callbackRequest.getCaseDetails(), FinremCaseDetails.class);
-        caseDetailsCopy.getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(x -> x.getValue()
-            .setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+        caseDetailsCopy.getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(ga -> ga.getValue()
+            .setGeneralApplicationSender(buildDynamicIntervenerList()));
         List<GeneralApplicationCollectionData> unsortedList =
             helper.getGeneralApplicationList(caseDetailsCopy.getData(), GENERAL_APPLICATION_COLLECTION);
 
@@ -192,7 +192,7 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandlerTest {
     private GeneralApplicationItems getApplicationItems(FinremCaseData caseData) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
-        builder.generalApplicationReceivedFrom(buildDynamicIntervenerList());
+        builder.generalApplicationSender(buildDynamicIntervenerList());
         builder.generalApplicationCreatedBy(Objects.toString(
             caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy(), null));
         builder.generalApplicationHearingRequired(Objects.toString(

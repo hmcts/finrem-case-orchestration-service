@@ -126,8 +126,8 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
     }
 
     private void assertData(FinremCaseData caseData, GeneralApplicationItems generalApplicationItems) {
-        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationReceivedFrom().getValue().getCode());
-        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationReceivedFrom().getValue().getLabel());
+        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationSender().getValue().getCode());
+        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationSender().getValue().getLabel());
         assertEquals("Claire Mumford", generalApplicationItems.getGeneralApplicationCreatedBy());
         assertEquals("No", generalApplicationItems.getGeneralApplicationHearingRequired());
         String directionGiven = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired(), null);
@@ -184,7 +184,7 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
 
     protected FinremCallbackRequest buildCallbackRequest() {
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(
+            GeneralApplicationItems.builder().generalApplicationSender(
                 buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -199,7 +199,7 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
         GeneralApplicationItems generalApplicationItemsAdded =
             GeneralApplicationItems.builder().generalApplicationDocument(caseDocument).generalApplicationDraftOrder(caseDocument)
-                .generalApplicationDirectionsDocument(caseDocument).generalApplicationReceivedFrom(buildDynamicIntervenerList())
+                .generalApplicationDirectionsDocument(caseDocument).generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationStatus(String.valueOf(DIRECTION_APPROVED)).generalApplicationHearingRequired("No")
                 .generalApplicationCreatedDate(LocalDate.now()).build();

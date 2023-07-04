@@ -124,11 +124,11 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
     public void givenCase_whenExistingGeneApp_thenSetcreatedBy() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON)).build();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
-        data.getGeneralApplicationWrapper().getGeneralApplications().forEach(x -> x.getValue()
-            .setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+        data.getGeneralApplicationWrapper().getGeneralApplications().forEach(ga -> ga.getValue()
+            .setGeneralApplicationSender(buildDynamicIntervenerList()));
         data.getGeneralApplicationWrapper().setGeneralApplicationReceivedFrom(APPLICANT);
-        data.getGeneralApplicationWrapper().getGeneralApplications().forEach(x -> x.getValue()
-            .setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+        data.getGeneralApplicationWrapper().getGeneralApplications().forEach(ga -> ga.getValue()
+            .setGeneralApplicationSender(buildDynamicIntervenerList()));
         List<GeneralApplicationCollectionData> collection = helper.getGeneralApplicationList(data, GENERAL_APPLICATION_COLLECTION);
         generalApplicationService.updateGeneralApplicationCollectionData(collection, data);
         CaseDocument document = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
@@ -148,8 +148,8 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
     public void givenContestedCase_whenExistingGeneAppAndDirectionGiven_thenMigrateToCollection() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON)).build();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
-        data.getGeneralApplicationWrapper().getGeneralApplications().forEach(x -> x.getValue()
-            .setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+        data.getGeneralApplicationWrapper().getGeneralApplications().forEach(ga -> ga.getValue()
+            .setGeneralApplicationSender(buildDynamicIntervenerList()));
         data.getGeneralApplicationWrapper().setGeneralApplicationReceivedFrom(APPLICANT);
         data.getGeneralApplicationWrapper().setGeneralApplicationOutcome(GeneralApplicationOutcome.APPROVED);
         data.getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
@@ -169,8 +169,8 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
     }
 
     private void assertData(GeneralApplicationItems generalApplicationItems) {
-        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationReceivedFrom().getValue().getCode());
-        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationReceivedFrom().getValue().getLabel());
+        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationSender().getValue().getCode());
+        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationSender().getValue().getLabel());
         assertEquals("Claire Mumford", generalApplicationItems.getGeneralApplicationCreatedBy());
         assertEquals("NO", generalApplicationItems.getGeneralApplicationHearingRequired());
         assertEquals(GeneralApplicationStatus.REFERRED.getId(), generalApplicationItems.getGeneralApplicationStatus());

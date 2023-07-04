@@ -7,6 +7,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -33,6 +35,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
@@ -99,10 +102,14 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     @Test
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_NON_COLL_JSON);
+        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
+            buildCaseDetailsFromJson(GA_NON_COLL_JSON));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
+        DynamicList dynamicList = helper.objectToDynamicList(
+            caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList()
+        );
 
         assertEquals(1, dynamicList.getListItems().size());
         verify(service).startGeneralApplicationDirections(any());
@@ -112,7 +119,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle =
             handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -172,6 +179,15 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
             FinremCaseDetails caseDetails =
                 objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
             return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CaseDetails buildCaseDetailsFromJson(String testJson) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
+            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return caseDetails;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

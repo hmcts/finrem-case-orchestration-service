@@ -76,7 +76,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
             if (caseData.getGeneralApplicationWrapper().getGeneralApplications() != null
                 && !caseData.getGeneralApplicationWrapper().getGeneralApplications().isEmpty()) {
                 caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
-                    x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+                    ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
             }
             caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcome(null);
             caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeOther(null);
@@ -103,7 +103,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
             if (caseData.getGeneralApplicationWrapper().getGeneralApplications() != null
                 && !caseData.getGeneralApplicationWrapper().getGeneralApplications().isEmpty()) {
                 caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
-                    x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+                    ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
             }
         }
         helper.deleteNonCollectionGeneralApplication(caseData);

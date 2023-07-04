@@ -61,11 +61,13 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         FinremCaseData caseData = finremCaseDetails.getData();
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
-        log.info("Logged in user case role type {}", loggedInUserCaseRole);
+        log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails());
 
         service.startGeneralApplicationDirections(caseDetails);
+
+        helper.populateGeneralApplicationSender(caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
         List<GeneralApplicationCollectionData> outcomeList = helper.getOutcomeList(caseData);
         AtomicInteger index = new AtomicInteger(0);

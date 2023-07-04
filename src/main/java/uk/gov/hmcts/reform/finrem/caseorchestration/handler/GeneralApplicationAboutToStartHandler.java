@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -62,7 +63,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
             helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
-        log.info("Logged in user case role type {}", loggedInUserCaseRole);
+        log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         if (data != null) {
@@ -80,18 +81,27 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
                 .getGeneralApplications();
             if (generalApplications.isEmpty()) {
                 GeneralApplicationItems items = GeneralApplicationItems.builder()
-                    .generalApplicationReceivedFrom(dynamicList).build();
+                    .generalApplicationSender(dynamicList).build();
                 GeneralApplicationsCollection collection = GeneralApplicationsCollection.builder().value(items).build();
                 caseData.getGeneralApplicationWrapper().setGeneralApplications(List.of(collection));
             } else {
-                generalApplications.forEach(x -> {
-                    String existingCode = x.getValue().getGeneralApplicationReceivedFrom().getValue().getCode();
-                    String existingLabel = x.getValue().getGeneralApplicationReceivedFrom().getValue().getLabel();
+                generalApplications.forEach(ga -> {
+                    String generalApplicationReceivedFrom = ga.getValue().getGeneralApplicationReceivedFrom();
+                    String existingCode;
+                    String existingLabel;
+                    if (generalApplicationReceivedFrom != null && !generalApplicationReceivedFrom.isEmpty()) {
+                        existingCode = StringUtils.capitalize(ga.getValue().getGeneralApplicationReceivedFrom());
+                        existingLabel = StringUtils.capitalize(ga.getValue().getGeneralApplicationReceivedFrom());
+                        ga.getValue().setGeneralApplicationReceivedFrom(null);
+                    } else {
+                        existingCode = ga.getValue().getGeneralApplicationSender().getValue().getCode();
+                        existingLabel = ga.getValue().getGeneralApplicationSender().getValue().getLabel();
+                    }
                     DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
                         .code(existingCode).label(existingLabel).build();
                     DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
                         .listItems(dynamicListElements).build();
-                    x.getValue().setGeneralApplicationReceivedFrom(existingRadioList);
+                    ga.getValue().setGeneralApplicationSender(existingRadioList);
                 });
             }
         }

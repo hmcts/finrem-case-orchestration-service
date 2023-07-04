@@ -111,8 +111,8 @@ public class GeneralApplicationHelperTest {
         GeneralApplicationItems items = data.getGeneralApplicationItems();
 
         assertEquals(APPLICANT, items.getGeneralApplicationCreatedBy());
-        assertEquals(APPLICANT, items.getGeneralApplicationReceivedFrom().getValue().getCode());
-        assertEquals(APPLICANT, items.getGeneralApplicationReceivedFrom().getValue().getLabel());
+        assertEquals(APPLICANT, items.getGeneralApplicationSender().getValue().getCode());
+        assertEquals(APPLICANT, items.getGeneralApplicationSender().getValue().getLabel());
         assertEquals("YES", items.getGeneralApplicationHearingRequired());
         assertEquals("2 weeks", items.getGeneralApplicationTimeEstimate());
         assertEquals("None", items.getGeneralApplicationSpecialMeasures());
@@ -233,8 +233,8 @@ public class GeneralApplicationHelperTest {
     }
 
     private void assertData(List<GeneralApplicationItems> resultingList) {
-        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom().getValue().getCode(), APPLICANT);
-        assertEquals(resultingList.get(0).getGeneralApplicationReceivedFrom().getValue().getLabel(), APPLICANT);
+        assertEquals(resultingList.get(0).getGeneralApplicationSender().getValue().getCode(), APPLICANT);
+        assertEquals(resultingList.get(0).getGeneralApplicationSender().getValue().getLabel(), APPLICANT);
         assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
         assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
         assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
@@ -274,7 +274,7 @@ public class GeneralApplicationHelperTest {
 
     protected FinremCallbackRequest callbackRequest() {
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(
+            GeneralApplicationItems.builder().generalApplicationSender(
                 buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -285,7 +285,7 @@ public class GeneralApplicationHelperTest {
         generalApplicationsBefore.setId(UUID.randomUUID());
         generalApplications.setId(UUID.randomUUID());
         GeneralApplicationItems generalApplicationItemsAdded =
-            GeneralApplicationItems.builder().generalApplicationReceivedFrom(
+            GeneralApplicationItems.builder().generalApplicationSender(
                 buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(LocalDate.now()).build();

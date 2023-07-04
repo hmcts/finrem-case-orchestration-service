@@ -52,6 +52,8 @@ public class GeneralApplicationOutcomeAboutToStartHandler extends FinremCallback
         log.info("Received on start request to outcome general application for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
+        helper.populateGeneralApplicationSender(caseData.getGeneralApplicationWrapper().getGeneralApplications());
+
         List<GeneralApplicationCollectionData> referredList = helper.getReferredList(caseData);
         AtomicInteger index = new AtomicInteger(0);
         if (referredList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {

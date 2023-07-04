@@ -142,7 +142,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
         gaService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
         caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
-            x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+            ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
     }
 
@@ -165,10 +165,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
         GeneralApplicationWrapper wrapper = finremCaseDetails.getData().getGeneralApplicationWrapper();
-        if (items.getGeneralApplicationReceivedFrom().getValue().getCode().equalsIgnoreCase(INTERVENER1)
-            || items.getGeneralApplicationReceivedFrom().getValue().getCode().equalsIgnoreCase(INTERVENER2)
-            || items.getGeneralApplicationReceivedFrom().getValue().getCode().equalsIgnoreCase(INTERVENER3)
-            || items.getGeneralApplicationReceivedFrom().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
+        if (items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER1)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER2)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER3)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
             gaService.updateIntervenerDirectionsDocumentCollection(wrapper, caseDocument);
         }
         items.setGeneralApplicationDirectionsDocument(caseDocument);

@@ -81,7 +81,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
 
         service.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
         caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
-            x -> x.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+            ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
     }
 
     private void migrateExistingApplication(FinremCaseData caseData, String userAuthorisation, String caseId) {

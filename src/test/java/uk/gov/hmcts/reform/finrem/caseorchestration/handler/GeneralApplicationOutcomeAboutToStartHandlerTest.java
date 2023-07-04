@@ -93,7 +93,7 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
             .caseDetailsBefore(buildCaseDetailsWithPath(GA_NON_COLL_JSON)).build();
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(
-            x -> x.getValue().setGeneralApplicationStatus("Approved"));
+            ga -> ga.getValue().setGeneralApplicationStatus("Approved"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertTrue(startHandle.getErrors().contains("There are no general application available for decision."));
@@ -117,7 +117,7 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
             .caseDetailsBefore(buildCaseDetailsWithPath(GA_JSON)).build();
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
@@ -132,11 +132,11 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
             .caseDetailsBefore(buildCaseDetailsWithPath(GA_NON_COLL_JSON)).build();
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(data, GENERAL_APPLICATION_COLLECTION);
-        existingList.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationStatus(String.valueOf(APPROVED)));
+        existingList.forEach(ga -> ga.getGeneralApplicationItems().setGeneralApplicationStatus(String.valueOf(APPROVED)));
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(existingList));
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);

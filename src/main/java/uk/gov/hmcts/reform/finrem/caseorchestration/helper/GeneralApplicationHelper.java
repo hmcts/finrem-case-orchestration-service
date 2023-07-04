@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -184,9 +185,9 @@ public class GeneralApplicationHelper {
                 .code(existingValue).label(existingValue).build();
             DynamicRadioList existingRadioList = DynamicRadioList.builder().value(listElement)
                 .listItems(dynamicListElements).build();
-            builder.generalApplicationReceivedFrom(existingRadioList);
+            builder.generalApplicationSender(existingRadioList);
         } else {
-            builder.generalApplicationReceivedFrom(null);
+            builder.generalApplicationSender(null);
         }
         builder.generalApplicationCreatedBy(Objects.toString(caseData.getGeneralApplicationWrapper()
             .getGeneralApplicationCreatedBy(), null));
@@ -308,6 +309,25 @@ public class GeneralApplicationHelper {
             && ObjectUtils.isNotEmpty(wrapper.getIntervenerOrganisation().getOrganisation())
             && ObjectUtils.isNotEmpty(wrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID()))
             || ObjectUtils.isNotEmpty(wrapper.getIntervenerName());
+    }
+
+    public void populateGeneralApplicationSender(List<GeneralApplicationsCollection> generalApplications) {
+        if (generalApplications != null && !generalApplications.isEmpty()) {
+            generalApplications.forEach(ga -> {
+                String generalApplicationReceivedFrom = ga.getValue().getGeneralApplicationReceivedFrom();
+                if (generalApplicationReceivedFrom != null
+                    && !generalApplicationReceivedFrom.isEmpty()) {
+                    List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
+                    String existingCode = StringUtils.capitalize(ga.getValue().getGeneralApplicationReceivedFrom());
+                    String existingLabel = StringUtils.capitalize(ga.getValue().getGeneralApplicationReceivedFrom());
+                    DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
+                        .code(existingCode).label(existingLabel).build();
+                    DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
+                        .listItems(dynamicListElements).build();
+                    ga.getValue().setGeneralApplicationSender(existingRadioList);
+                }
+            });
+        }
     }
 
     public void buildDynamicIntervenerList(List<DynamicRadioListElement> dynamicListElements,
