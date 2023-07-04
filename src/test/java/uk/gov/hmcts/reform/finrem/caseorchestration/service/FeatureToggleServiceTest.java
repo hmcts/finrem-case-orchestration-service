@@ -24,7 +24,8 @@ public class FeatureToggleServiceTest {
     @SpringBootTest(properties = {
         "feature.toggle.send_to_frc=true",
         "feature.toggle.assign_case_access=true",
-        "feature.toggle.pba_case_type=true"
+        "feature.toggle.pba_case_type=true",
+        "feature.toggle.intervener_enabled=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn extends BaseServiceTest {
 
@@ -44,6 +45,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isPbaToggleEnabledReturnsTrue() {
             assertThat(featureToggleService.isPBAUsingCaseTypeEnabled(), is(true));
+        }
+
+        @Test
+        public void isIntervenerEnabled() {
+            assertThat(featureToggleService.isIntervenerEnabled(), is(false));
         }
     }
 
