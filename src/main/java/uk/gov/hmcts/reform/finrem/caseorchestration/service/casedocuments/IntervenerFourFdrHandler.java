@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
 
 @Service
-public class IntervenerFourFdrHandler extends PartyDocumentHandler {
+public class IntervenerFourFdrHandler extends PartyDocumentsHandler {
 
     public IntervenerFourFdrHandler() {
         super(ManageCaseDocumentsCollectionType.INTV_FOUR_FDR_DOCS_COLLECTION, CaseDocumentParty.INTERVENER_FOUR);

@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
 
-public class CorrespondenceHandler extends PartyDocumentHandler {
+public class CorrespondenceHandler extends PartyDocumentsHandler {
 
     public CorrespondenceHandler(ManageCaseDocumentsCollectionType manageCaseDocumentsCollectionType,
                                  CaseDocumentParty party) {

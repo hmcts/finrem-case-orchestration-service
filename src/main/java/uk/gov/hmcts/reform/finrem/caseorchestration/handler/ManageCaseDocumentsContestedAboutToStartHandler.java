@@ -8,13 +8,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.LegacyConfidentialDocumentsService;
+
+import java.util.ArrayList;
 
 @Slf4j
 @Service
 public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallbackHandler {
 
-    public ManageCaseDocumentsContestedAboutToStartHandler(FinremCaseDetailsMapper mapper) {
+    private final LegacyConfidentialDocumentsService legacyConfidentialDocumentsService;
+
+    public ManageCaseDocumentsContestedAboutToStartHandler(FinremCaseDetailsMapper mapper,
+                                                           LegacyConfidentialDocumentsService legacyConfidentialDocumentsService) {
         super(mapper);
+        this.legacyConfidentialDocumentsService = legacyConfidentialDocumentsService;
     }
 
     @Override
@@ -31,6 +38,15 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
 
         caseData.setManageCaseDocumentCollection(caseData.getUploadCaseDocumentWrapper().getAllCollections());
 
+        migrateLegacyConfidentialCaseDocumentFormat(caseData);
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+    }
+
+    private void migrateLegacyConfidentialCaseDocumentFormat(FinremCaseData caseData) {
+        caseData.getManageCaseDocumentCollection().addAll(
+            legacyConfidentialDocumentsService.getConfidentialCaseDocumentCollection(
+                caseData.getConfidentialDocumentsUploaded()));
+        caseData.setConfidentialDocumentsUploaded(new ArrayList<>());
     }
 }

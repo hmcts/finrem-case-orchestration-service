@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
 
-public class HearingBundleHandler extends PartyDocumentHandler {
+public class HearingBundleHandler extends PartyDocumentsHandler {
 
     public HearingBundleHandler(ManageCaseDocumentsCollectionType manageCaseDocumentsCollectionType,
                                 CaseDocumentParty party) {

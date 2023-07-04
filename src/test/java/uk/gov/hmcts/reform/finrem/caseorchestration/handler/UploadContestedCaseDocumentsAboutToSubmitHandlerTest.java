@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCase
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.IntervenerOneFdrHandler;
@@ -69,7 +69,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
     private IntervenerOneFdrHandler intervenerOneFdrHandler;
 
-    private CaseDocumentHandler caseDocumentHandler;
+    private CaseDocumentsHandler caseDocumentHandler;
     private FdrDocumentsHandler fdrDocumentsHandler;
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
     private FinremCaseDetails caseDetails;
@@ -92,7 +92,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         intervenerThreeChronologiesStatementHandler = new IntervenerThreeChronologiesStatementHandler();
         intervenerFourChronologiesStatementHandler = new IntervenerFourChronologiesStatementHandler();
         intervenerOneFdrHandler = new IntervenerOneFdrHandler();
-        caseDocumentHandler = new CaseDocumentHandler();
+        caseDocumentHandler = new CaseDocumentsHandler();
         fdrDocumentsHandler = new FdrDocumentsHandler();
 
 

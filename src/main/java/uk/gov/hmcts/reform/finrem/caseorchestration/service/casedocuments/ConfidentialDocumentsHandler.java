@@ -10,11 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class FdrDocumentsHandler extends DocumentHandler {
+public class ConfidentialDocumentsHandler extends DocumentHandler {
 
-
-    public FdrDocumentsHandler() {
-        super(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION);
+    public ConfidentialDocumentsHandler() {
+        super(ManageCaseDocumentsCollectionType.CONFIDENTIAL_DOCS_COLLECTION);
     }
 
     protected List<UploadCaseDocumentCollection> getTypedManagedDocumentCollections(
@@ -25,9 +24,7 @@ public class FdrDocumentsHandler extends DocumentHandler {
                 UploadCaseDocument uploadedCaseDocument = managedDocumentCollection.getUploadCaseDocument();
                 return uploadedCaseDocument.getCaseDocuments() != null
                     && uploadedCaseDocument.getCaseDocumentType() != null
-                    && !isIntervener(uploadedCaseDocument.getCaseDocumentParty())
-                    && uploadedCaseDocument.getCaseDocumentConfidential().equals(YesOrNo.NO)
-                    && uploadedCaseDocument.getCaseDocumentFdr().equals(YesOrNo.YES);
+                    && uploadedCaseDocument.getCaseDocumentConfidential().equals(YesOrNo.YES);
             }).collect(Collectors.toList());
     }
 }

@@ -29,6 +29,15 @@ public class UploadCaseDocument {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime caseDocumentUploadDateTime;
 
+
+    @JsonIgnore
+    public YesOrNo getCaseDocumentFdr() {
+        if (caseDocumentFdr == null) {
+            this.caseDocumentFdr = YesOrNo.NO;
+        }
+        return caseDocumentFdr;
+    }
+
     @JsonIgnore
     public YesOrNo getCaseDocumentConfidential() {
         if (caseDocumentConfidential == null) {

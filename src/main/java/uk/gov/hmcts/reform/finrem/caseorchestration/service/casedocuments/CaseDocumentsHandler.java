@@ -7,10 +7,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
 
 @Service
-public class CaseDocumentHandler extends PartyDocumentHandler {
+public class CaseDocumentsHandler extends PartyDocumentsHandler {
 
     @Autowired
-    public CaseDocumentHandler() {
+    public CaseDocumentsHandler() {
         super(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS,
             CaseDocumentParty.CASE);
     }

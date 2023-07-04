@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Deprecated
 public class UploadConfidentialDocument {
     @JsonProperty("DocumentType")
     private CaseDocumentType documentType;

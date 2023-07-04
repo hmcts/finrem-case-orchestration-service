@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class PartyDocumentHandler extends DocumentHandler {
+public abstract class PartyDocumentsHandler extends DocumentHandler {
     private final CaseDocumentParty party;
 
-    public PartyDocumentHandler(ManageCaseDocumentsCollectionType manageCaseDocumentsCollectionType,
-                                CaseDocumentParty party) {
+    public PartyDocumentsHandler(ManageCaseDocumentsCollectionType manageCaseDocumentsCollectionType,
+                                 CaseDocumentParty party) {
         super(manageCaseDocumentsCollectionType);
         this.party = party;
     }

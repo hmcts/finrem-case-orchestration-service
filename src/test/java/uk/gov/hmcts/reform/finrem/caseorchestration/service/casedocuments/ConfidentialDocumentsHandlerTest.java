@@ -17,30 +17,27 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
+
 @RunWith(MockitoJUnitRunner.class)
-public class CaseDocumentHandlerTest extends BaseManageDocumentsHandlerTest {
+public class ConfidentialDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
-    CaseDocumentsHandler collectionService;
+    ConfidentialDocumentsHandler handler;
 
     @Test
     public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT,
-            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.SKELETON_ARGUMENT,
-            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
-            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
+            CaseDocumentParty.RESPONDENT, YesOrNo.YES, YesOrNo.YES, "Other Example"));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.addManagedDocumentToSelectedCollection(
+        handler.addManagedDocumentToSelectedCollection(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
-            hasSize(3));
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONFIDENTIAL_DOCS_COLLECTION),
+            hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -48,31 +45,26 @@ public class CaseDocumentHandlerTest extends BaseManageDocumentsHandlerTest {
     @Test
     public void givenRemovedDocFromScreenCollectionWhenDeleteRemovedDocumentFromCollectionThenRemoveScreenDocsFromCollectionType() {
         List<UploadCaseDocumentCollection> beforeEventDocList = new ArrayList<>();
-        UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT,
-            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null);
+        UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
+            CaseDocumentParty.APPLICANT, YesOrNo.YES, YesOrNo.YES, "Other Example");
         beforeEventDocList.add(removedDoc);
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.SKELETON_ARGUMENT,
-            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
-            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
+            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.removeManagedDocumentFromOriginalCollection(
+        handler.removeManagedDocumentFromOriginalCollection(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build()
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
-            hasSize(2));
+                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONFIDENTIAL_DOCS_COLLECTION),
+            hasSize(0));
     }
-
 }
