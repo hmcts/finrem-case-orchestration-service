@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDateTime;
@@ -30,8 +30,8 @@ public class LegacyConfidentialDocumentsServiceTest {
     public void givenLegacyConfidentialDocument_WhenGetUploadCaseDocumentCollection_ThenReturnCorrectUploadCaseDocument() {
 
         LocalDateTime now = LocalDateTime.now();
-        UploadConfidentialDocumentCollection legacyConfidentialDocumentCollection =
-            UploadConfidentialDocumentCollection.builder()
+        ConfidentialUploadedDocumentData legacyConfidentialDocumentCollection =
+            ConfidentialUploadedDocumentData.builder()
                 .id(LEGACY_CONFIDENTIAL_ID)
                 .value(UploadConfidentialDocument.builder()
                     .documentComment(LEGACY_CONFIDENTIAL_COMMENT)

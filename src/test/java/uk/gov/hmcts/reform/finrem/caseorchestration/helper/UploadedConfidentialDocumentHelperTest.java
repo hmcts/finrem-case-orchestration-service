@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +46,7 @@ public class UploadedConfidentialDocumentHelperTest {
             caseDataBefore,
             CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
-        List<UploadConfidentialDocumentCollection> documentData =
+        List<ConfidentialUploadedDocumentData> documentData =
             getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
         documentData.forEach(document ->
@@ -69,11 +69,11 @@ public class UploadedConfidentialDocumentHelperTest {
             caseDataBefore,
             CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
-        List<UploadConfidentialDocumentCollection> documentData = getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        List<ConfidentialUploadedDocumentData> documentData = getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
         assertThat(documentData, hasSize(3));
         assertThat(documentData.stream()
-            .map(UploadConfidentialDocumentCollection::getValue)
+            .map(ConfidentialUploadedDocumentData::getValue)
             .map(UploadConfidentialDocument::getConfidentialDocumentUploadDateTime)
             .filter(Objects::nonNull)
             .toList(), hasSize(2));
@@ -87,8 +87,8 @@ public class UploadedConfidentialDocumentHelperTest {
         assertThat(modifiedData, is(notNullValue()));
     }
 
-    private UploadConfidentialDocumentCollection confidentialDocument(String filename, UUID id) {
-        return UploadConfidentialDocumentCollection.builder()
+    private ConfidentialUploadedDocumentData confidentialDocument(String filename, UUID id) {
+        return ConfidentialUploadedDocumentData.builder()
             .id(id.toString())
             .value(UploadConfidentialDocument.builder()
                 .documentFileName(filename)
@@ -96,7 +96,7 @@ public class UploadedConfidentialDocumentHelperTest {
             .build();
     }
 
-    private List<UploadConfidentialDocumentCollection> getContestedUploadedDocs(Map<String, Object> data, String documentCollection) {
+    private List<ConfidentialUploadedDocumentData> getContestedUploadedDocs(Map<String, Object> data, String documentCollection) {
         return mapper.convertValue(data.get(documentCollection), new TypeReference<>() {});
     }
 }

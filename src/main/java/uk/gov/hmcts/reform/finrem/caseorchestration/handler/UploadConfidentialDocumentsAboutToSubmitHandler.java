@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedConfidentialD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -48,9 +48,9 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler
             callbackRequest.getCaseDetailsBefore().getData(),
             CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
-        List<UploadConfidentialDocumentCollection> uploadedDocuments = getConfidentialDocumentCollection(caseData);
+        List<ConfidentialUploadedDocumentData> uploadedDocuments = getConfidentialDocumentCollection(caseData);
 
-        uploadedDocuments.sort(comparing(UploadConfidentialDocumentCollection::getValue,
+        uploadedDocuments.sort(comparing(ConfidentialUploadedDocumentData::getValue,
             comparing(UploadConfidentialDocument::getConfidentialDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
 
         caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, uploadedDocuments);
@@ -61,10 +61,10 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler
             .build();
     }
 
-    private List<UploadConfidentialDocumentCollection> getConfidentialDocumentCollection(Map<String, Object> caseData) {
+    private List<ConfidentialUploadedDocumentData> getConfidentialDocumentCollection(Map<String, Object> caseData) {
         objectMapper.registerModule(new JavaTimeModule());
 
-        List<UploadConfidentialDocumentCollection> confidentialDocuments = objectMapper
+        List<ConfidentialUploadedDocumentData> confidentialDocuments = objectMapper
             .convertValue(caseData.get(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION), new TypeReference<>() {
             });
 

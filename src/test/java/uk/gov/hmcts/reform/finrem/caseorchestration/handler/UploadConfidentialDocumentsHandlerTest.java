@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -36,18 +36,18 @@ public class UploadConfidentialDocumentsHandlerTest {
     ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private UploadConfidentialDocumentsAboutToSubmitHandler uploadConfidentialDocumentsAboutToSubmitHandler;
 
-    private final List<UploadConfidentialDocumentCollection> uploadDocumentList = new ArrayList<>();
-    private final List<UploadConfidentialDocumentCollection> existingDocumentList = new ArrayList<>();
+    private final List<ConfidentialUploadedDocumentData> uploadDocumentList = new ArrayList<>();
+    private final List<ConfidentialUploadedDocumentData> existingDocumentList = new ArrayList<>();
     private final List<String> expectedDocumentIdList = new ArrayList<>();
-    List<UploadConfidentialDocumentCollection> handledDocumentList = new ArrayList<>();
+    List<ConfidentialUploadedDocumentData> handledDocumentList = new ArrayList<>();
     List<String> handledDocumentIdList = new ArrayList<>();
 
     private final UploadedConfidentialDocumentService uploadedConfidentialDocumentHelper = new UploadedConfidentialDocumentService(objectMapper);
 
-    protected UploadConfidentialDocumentCollection createConfidentialUploadDocumentItem(CaseDocumentType type, CaseDocument link,
-                                                                                        LocalDate dateAdded, String fileName,
-                                                                                        String comment) {
-        return UploadConfidentialDocumentCollection.builder()
+    protected ConfidentialUploadedDocumentData createConfidentialUploadDocumentItem(CaseDocumentType type, CaseDocument link,
+                                                                                    LocalDate dateAdded, String fileName,
+                                                                                    String comment) {
+        return ConfidentialUploadedDocumentData.builder()
             .id(UUID.randomUUID().toString())
             .value(UploadConfidentialDocument
                 .builder()
@@ -86,14 +86,14 @@ public class UploadConfidentialDocumentsHandlerTest {
         CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension", "/binaryUrl");
 
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        UploadConfidentialDocumentCollection oldDoc = createConfidentialUploadDocumentItem(
+        ConfidentialUploadedDocumentData oldDoc = createConfidentialUploadDocumentItem(
             CaseDocumentType.OTHER, documentLink, LocalDate.now(), "oldDocument.filename", "Old Example");
 
         existingDocumentList.add(oldDoc);
         caseDetailsBefore.getData().put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, existingDocumentList);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        UploadConfidentialDocumentCollection newDoc = createConfidentialUploadDocumentItem(
+        ConfidentialUploadedDocumentData newDoc = createConfidentialUploadDocumentItem(
             CaseDocumentType.OTHER, documentLink, LocalDate.now(), "newDocument.filename", "New Example");
         uploadDocumentList.add(newDoc);
         uploadDocumentList.add(oldDoc);
@@ -103,7 +103,7 @@ public class UploadConfidentialDocumentsHandlerTest {
         expectedDocumentIdList.add(oldDoc.getId());
 
         handledDocumentList.addAll(
-            (List<UploadConfidentialDocumentCollection>) uploadConfidentialDocumentsAboutToSubmitHandler.handle(
+            (List<ConfidentialUploadedDocumentData>) uploadConfidentialDocumentsAboutToSubmitHandler.handle(
                 callbackRequest, AUTH_TOKEN).getData().get(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION));
 
         handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));

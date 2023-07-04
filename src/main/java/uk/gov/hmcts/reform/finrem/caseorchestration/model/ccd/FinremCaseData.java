@@ -275,7 +275,7 @@ public class FinremCaseData {
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
-    private List<UploadConfidentialDocumentCollection> confidentialDocumentsUploaded;
+    private List<ConfidentialUploadedDocumentData> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")
     private OrganisationPolicy applicantOrganisationPolicy;
