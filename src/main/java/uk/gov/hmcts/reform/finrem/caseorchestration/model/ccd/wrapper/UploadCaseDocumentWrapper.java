@@ -129,7 +129,7 @@ public class UploadCaseDocumentWrapper {
     private List<UploadCaseDocumentCollection> intv3FdrCaseDocuments;
     private List<UploadCaseDocumentCollection> intv4FdrCaseDocuments;
 
-    private List<UploadCaseDocumentCollection> confidentialCaseDocumentCollection;
+    private List<UploadCaseDocumentCollection> confidentialDocumentCollection;
 
 
     @JsonIgnore
@@ -157,7 +157,7 @@ public class UploadCaseDocumentWrapper {
                 intv3FormEsExhibits, intv3FormHs, intv3HearingBundles, intv3Other, intv3Qa, intv3StmtsExhibits,
                 intv4Summaries, intv4Chronologies, intv4CorrespDocs, intv4ExpertEvidence, intv4FormEsExhibits,
                 intv4FormHs, intv4HearingBundles, intv4Other, intv4Qa, intv4StmtsExhibits, intv1FdrCaseDocuments,
-                intv2FdrCaseDocuments, intv3FdrCaseDocuments, intv4FdrCaseDocuments, confidentialCaseDocumentCollection)
+                intv2FdrCaseDocuments, intv3FdrCaseDocuments, intv4FdrCaseDocuments, confidentialDocumentCollection)
             .filter(Objects::nonNull)
             .flatMap(Collection::stream).collect(Collectors.toList());
     }
@@ -256,8 +256,8 @@ public class UploadCaseDocumentWrapper {
             case INTV_TWO_FDR_DOCS_COLLECTION -> intv2FdrCaseDocuments = getNonNull(intv2FdrCaseDocuments);
             case INTV_THREE_FDR_DOCS_COLLECTION -> intv3FdrCaseDocuments = getNonNull(intv3FdrCaseDocuments);
             case INTV_FOUR_FDR_DOCS_COLLECTION -> intv4FdrCaseDocuments = getNonNull(intv4FdrCaseDocuments);
-            case CONFIDENTIAL_DOCS_COLLECTION -> confidentialCaseDocumentCollection =
-                getNonNull(confidentialCaseDocumentCollection);
+            case CONFIDENTIAL_DOCS_COLLECTION -> confidentialDocumentCollection =
+                getNonNull(confidentialDocumentCollection);
         };
     }
 
