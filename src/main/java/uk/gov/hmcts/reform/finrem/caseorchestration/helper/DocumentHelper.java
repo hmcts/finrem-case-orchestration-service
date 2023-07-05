@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -215,6 +217,14 @@ public class DocumentHelper {
             nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()));
     }
 
+    public boolean hasAnotherHearing(FinremCaseData caseData) {
+        List<DirectionDetailCollection> directionDetailsCollectionList =
+            caseData.getDirectionDetailsCollection();
+        // use a utility to handle directionDetailsCollectionList being null as well as empty
+        return !CollectionUtils.isEmpty(directionDetailsCollectionList) && YES_VALUE.equalsIgnoreCase(
+            nullToEmpty(directionDetailsCollectionList.get(0).getValue().getIsAnotherHearingYN()));
+    }
+
     public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
         if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             log.warn("Latest general order not found for printing for case");
@@ -317,8 +327,26 @@ public class DocumentHelper {
     }
 
     public Optional<CaseDocument> getLatestAdditionalHearingDocument(Map<String, Object> caseData) {
+
+
+
         Optional<AdditionalHearingDocumentData> additionalHearingDocumentData =
             ofNullable(caseData.get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION))
+                .map(this::convertToAdditionalHearingDocumentData)
+                .orElse(emptyList())
+                .stream()
+                .reduce((first, second) -> second);
+        if (additionalHearingDocumentData.isPresent()) {
+            return additionalHearingDocumentData
+                .map(additionalHearingDocumentDataCopy -> additionalHearingDocumentData.get().getAdditionalHearingDocument().getDocument());
+        }
+        return Optional.empty();
+    }
+
+
+    public Optional<CaseDocument> getLatestAdditionalHearingDocument(FinremCaseData caseData) {
+        Optional<AdditionalHearingDocumentData> additionalHearingDocumentData =
+            ofNullable(caseData.getAdditionalHearingDocuments())
                 .map(this::convertToAdditionalHearingDocumentData)
                 .orElse(emptyList())
                 .stream()
@@ -555,6 +583,7 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
+
     public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data,
                                                                            String authorisationToken,
                                                                            String caseId) {
@@ -573,6 +602,27 @@ public class DocumentHelper {
         });
 
         data.put(HEARING_ORDER_OTHER_COLLECTION, pdfDocuments);
+        return bulkPrintDocuments;
+    }
+
+    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(FinremCaseData data,
+                                                                           String authorisationToken,
+                                                                           String caseId) {
+
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        List<DocumentCollection> pdfDocuments = new ArrayList<>();
+        List<DocumentCollection> documentCollections = covertDocumentCollections(data.getHearingOrderOtherDocuments());
+        documentCollections.forEach(doc -> {
+            CaseDocument caseDocument = doc.getValue();
+            CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
+            pdfDocuments.add(DocumentCollection
+                .builder()
+                .value(pdfDocument)
+                .build());
+            bulkPrintDocuments.add(getCaseDocumentAsBulkPrintDocument(pdfDocument));
+        });
+
+        data.setHearingOrderOtherDocuments(pdfDocuments);
         return bulkPrintDocuments;
     }
 

@@ -28,10 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class SendOrderContestedSubmittedHandler
     implements CallbackHandler<Map<String, Object>> {
-
-    private final CaseDataService caseDataService;
-    private final FeatureToggleService featureToggleService;
-    private final NotificationService notificationService;
     private final CcdService ccdService;
     private final ContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
@@ -81,7 +77,7 @@ public class SendOrderContestedSubmittedHandler
     private void sendNotifications(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
-        if (!caseDataService.isPaperApplication(caseData) && Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
+        if (Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
             log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
             contestedSendOrderCorresponder.sendCorrespondence(caseDetails);
         }

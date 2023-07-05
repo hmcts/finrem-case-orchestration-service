@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
@@ -64,12 +65,25 @@ public class GeneralOrderService {
             .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
     }
 
+    @Deprecated
     public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(Map<String, Object> caseData, String authorisationToken, String caseId) {
         CaseDocument latestGeneralOrder = documentHelper.getLatestGeneralOrder(caseData);
         if (latestGeneralOrder != null) {
             CaseDocument pdfDocument =
                 genericDocumentService.convertDocumentIfNotPdfAlready(latestGeneralOrder, authorisationToken, caseId);
             caseData.put(GENERAL_ORDER_LATEST_DOCUMENT, pdfDocument);
+            return BulkPrintDocument.builder().binaryFileUrl(pdfDocument.getDocumentBinaryUrl())
+                .fileName(pdfDocument.getDocumentFilename()).build();
+        }
+        return null;
+    }
+
+    public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(FinremCaseData caseData, String authorisationToken, String caseId) {
+        CaseDocument latestGeneralOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+        if (latestGeneralOrder != null) {
+            CaseDocument pdfDocument =
+                genericDocumentService.convertDocumentIfNotPdfAlready(latestGeneralOrder, authorisationToken, caseId);
+            caseData.getGeneralOrderWrapper().setGeneralOrderLatestDocument(pdfDocument);
             return BulkPrintDocument.builder().binaryFileUrl(pdfDocument.getDocumentBinaryUrl())
                 .fileName(pdfDocument.getDocumentFilename()).build();
         }

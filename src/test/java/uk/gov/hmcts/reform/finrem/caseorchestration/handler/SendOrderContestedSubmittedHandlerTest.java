@@ -14,9 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderCorresponder;
 
@@ -37,12 +35,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class SendOrderContestedSubmittedHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
-    public static final String CLOSE_STATE = "close";
-    @Mock
-    private CaseDataService caseDataService;
-    @Mock
-    private FeatureToggleService featureToggleService;
     @Mock
     private NotificationService notificationService;
     @Mock
