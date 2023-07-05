@@ -84,12 +84,16 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
                 GeneralApplicationsCollection collection = GeneralApplicationsCollection.builder().value(items).build();
                 caseData.getGeneralApplicationWrapper().setGeneralApplications(List.of(collection));
             } else {
+                log.info(generalApplications.get(0).getValue().getGeneralApplicationReceivedFrom());
                 helper.populateGeneralApplicationSender(generalApplications);
                 generalApplications.forEach(ga -> {
                     String existingCode = ga.getValue().getGeneralApplicationSender().getValue().getCode();
                     String existingLabel = ga.getValue().getGeneralApplicationSender().getValue().getLabel();
+                    log.info("existingCode {}", existingCode);
+                    log.info("existingLabel {}", existingLabel);
                     DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
                         .code(existingCode).label(existingLabel).build();
+                    log.info("listElement {}", newListElement);
                     DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
                         .listItems(dynamicListElements).build();
                     ga.getValue().setGeneralApplicationSender(existingRadioList);
