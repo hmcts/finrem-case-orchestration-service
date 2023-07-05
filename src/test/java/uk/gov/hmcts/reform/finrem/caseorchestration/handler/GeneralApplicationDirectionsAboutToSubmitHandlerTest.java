@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
@@ -66,12 +67,9 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     @Mock
     private GeneralApplicationDirectionsService service;
     @Mock
-    private GenericDocumentService documentService;
-    @Mock
     private GeneralApplicationService gaService;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -117,9 +115,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     @Test
     public void givenCase_whenExistingApplication_thenMigratedAndUpdateStatusApprovedCompleted() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
+            .setGeneralApplications(List.of(GeneralApplicationsCollection.builder().build()));
 
-        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(ga ->
-            ga.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
+            .setGeneralApplicationOutcome(GeneralApplicationOutcome.APPROVED);
 
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
@@ -135,14 +135,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();
-        GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
-            .value(generalApplicationItems).build();
-        details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
-            callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
-                .getGeneralApplications().get(0).getValue());
+            generalApplicationItems);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
         FinremCaseData finremCaseData = startHandle.getData();
@@ -150,24 +146,26 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
 
+        String collectionId = UUID.randomUUID().toString();
+
+        CaseDocument caseDocument = CaseDocument.builder().documentFilename("migrated_docs.pdf")
+            .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
+            .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
+        when(service.getBulkPrintDocument(details, AUTH_TOKEN)).thenReturn(caseDocument);
+
+        when(helper.migrateExistingGeneralApplication(callbackRequest.getCaseDetails().getData(),
+            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+            GeneralApplicationCollectionData.builder()
+                .id(collectionId)
+                .generalApplicationItems(generalApplicationItems)
+                .build());
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
             = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
-        assertEquals(2, list.size());
-
-        assertEquals("InterimHearingNotice.pdf", list.get(1).getGeneralApplicationItems()
-            .getGeneralApplicationDocument().getDocumentFilename());
-        assertEquals("InterimHearingNotice.pdf", list.get(1).getGeneralApplicationItems()
-            .getGeneralApplicationDraftOrder().getDocumentFilename());
-        assertEquals("app_docs.pdf", list.get(1).getGeneralApplicationItems()
-            .getGeneralApplicationDirectionsDocument().getDocumentFilename());
-
-        assertEquals(DIRECTION_APPROVED.getId(),
-            list.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
-        assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
-        assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationOutcome());
+        assertEquals(1, list.size());
     }
 
     @Test
@@ -401,16 +399,13 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         CaseDocument caseDocument1 = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
-        CaseDocument caseDocument2 = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
-            .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
-            .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
-        CaseDocument caseDocument3 = CaseDocument.builder().documentFilename("app_docs.pdf")
+        CaseDocument caseDocument2 = CaseDocument.builder().documentFilename("app_docs.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
         GeneralApplicationItems generalApplicationItemsAdded =
             GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
-                .generalApplicationDraftOrder(caseDocument2)
-                .generalApplicationDirectionsDocument(caseDocument3).generalApplicationDocument(caseDocument1)
+                .generalApplicationDraftOrder(caseDocument1)
+                .generalApplicationDirectionsDocument(caseDocument2).generalApplicationDocument(caseDocument1)
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();

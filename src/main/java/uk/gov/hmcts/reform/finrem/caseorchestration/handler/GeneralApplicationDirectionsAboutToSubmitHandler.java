@@ -180,11 +180,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
             EventType.GENERAL_APPLICATION_DIRECTIONS);
 
-        switch (gaElementStatus) {
-            case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
-            case "Not Approved" ->
+        switch (gaElementStatus.toLowerCase()) {
+            case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
+            case "not approved" ->
                 items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
-            case "Other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
+            case "other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
             default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
         }
 
