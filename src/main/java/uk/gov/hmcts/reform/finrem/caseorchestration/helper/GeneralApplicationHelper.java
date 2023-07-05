@@ -314,9 +314,8 @@ public class GeneralApplicationHelper {
     public void populateGeneralApplicationSender(List<GeneralApplicationsCollection> generalApplications) {
         if (generalApplications != null && !generalApplications.isEmpty()) {
             generalApplications.forEach(ga -> {
-                String generalApplicationReceivedFrom = ga.getValue().getGeneralApplicationReceivedFrom();
-                if (generalApplicationReceivedFrom != null
-                    && !generalApplicationReceivedFrom.isEmpty()) {
+                if (ga.getValue().getGeneralApplicationReceivedFrom() != null
+                    && !ga.getValue().getGeneralApplicationReceivedFrom().isEmpty()) {
                     List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
                     String existingCode = StringUtils.capitalize(ga.getValue().getGeneralApplicationReceivedFrom());
                     String existingLabel = StringUtils.capitalize(ga.getValue().getGeneralApplicationReceivedFrom());
@@ -325,6 +324,7 @@ public class GeneralApplicationHelper {
                     DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
                         .listItems(dynamicListElements).build();
                     ga.getValue().setGeneralApplicationSender(existingRadioList);
+                    ga.getValue().setGeneralApplicationReceivedFrom(null);
                 }
             });
         }
