@@ -7,23 +7,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
-import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -31,10 +27,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_LIST;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandlerTest {
@@ -42,14 +38,11 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
     private GeneralApplicationOutcomeAboutToStartHandler handler;
     @Mock
     private GenericDocumentService service;
-    @Mock
-    private GeneralApplicationService gaService;
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private static final String GA_JSON = "/fixtures/contested/general-application-referred-finrem.json";
+    private static final String GA_JSON = "/fixtures/contested/general-application-referred.json";
     private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application.json";
 
 
@@ -57,7 +50,7 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
-        handler = new GeneralApplicationOutcomeAboutToStartHandler(finremCaseDetailsMapper, helper, gaService);
+        handler = new GeneralApplicationOutcomeAboutToStartHandler(helper);
     }
 
     @Test
@@ -90,88 +83,59 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
 
     @Test
     public void givenContestedCase_whenNonCollectionGeneralApplicationExistAndAlreadyOutcomed_thenReturnError() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
-            .caseDetailsBefore(buildCaseDetailsWithPath(GA_NON_COLL_JSON)).build();
-        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(
-            x -> x.getValue().setGeneralApplicationStatus("Approved"));
+        CallbackRequest callbackRequest =
+            buildCallbackRequest(GA_NON_COLL_JSON);
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, APPROVED.getId());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertTrue(startHandle.getErrors().contains("There are no general application available for decision."));
     }
 
     @Test
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_NON_COLL_JSON))
-            .caseDetailsBefore(buildCaseDetailsWithPath(GA_NON_COLL_JSON)).build();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        FinremCaseData caseData = handle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcomeList());
+        Map<String, Object> caseData = handle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
 
         assertEquals(1, dynamicList.getListItems().size());
-        assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome());
+        assertNull(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
     @Test
     public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
-            .caseDetailsBefore(buildCaseDetailsWithPath(GA_JSON)).build();
-        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        FinremCaseData caseData = handle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcomeList());
+        Map<String, Object> caseData = handle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
 
         assertEquals(2, dynamicList.getListItems().size());
-        assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome());
+        assertNull(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
     @Test
     public void givenCase_whenNoExistingGeneAppAvailable_thenShowError() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_JSON))
-            .caseDetailsBefore(buildCaseDetailsWithPath(GA_NON_COLL_JSON)).build();
-        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-            .forEach(x -> x.getValue().setGeneralApplicationReceivedFrom(buildDynamicIntervenerList()));
-        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
 
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(data, GENERAL_APPLICATION_COLLECTION);
-        existingList.forEach(x -> x.getGeneralApplicationItems().setGeneralApplicationStatus(String.valueOf(APPROVED)));
-        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplications(
-            helper.convertToGeneralApplicationsCollection(existingList));
-        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
+        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
+        List<GeneralApplicationCollectionData> updatedList
+            = existingList.stream().map(this::updateStatus).collect(Collectors.toList());
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
+        callbackRequest.getCaseDetails().getData().remove(GENERAL_APPLICATION_CREATED_BY);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for decision."));
+
+
     }
 
-    private FinremCaseDetails buildCaseDetailsWithPath(String path) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            FinremCaseDetails caseDetails =
-                objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-            return FinremCallbackRequest.builder().caseDetails(caseDetails).build().getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    private GeneralApplicationCollectionData updateStatus(GeneralApplicationCollectionData obj) {
+        if (obj.getId().equals("b0bfb0af-4f07-4628-a677-1de904b6ea1c")) {
+            obj.getGeneralApplicationItems().setGeneralApplicationStatus(APPROVED.getId());
         }
-    }
-
-    public DynamicRadioListElement getDynamicListElement(String code, String label) {
-        return DynamicRadioListElement.builder()
-            .code(code)
-            .label(label)
-            .build();
-    }
-
-    public DynamicRadioList buildDynamicIntervenerList() {
-
-        List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
-            getDynamicListElement(RESPONDENT, RESPONDENT),
-            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
-        );
-        return DynamicRadioList.builder()
-            .value(dynamicListElements.get(0))
-            .listItems(dynamicListElements)
-            .build();
+        return obj;
     }
 
 }
