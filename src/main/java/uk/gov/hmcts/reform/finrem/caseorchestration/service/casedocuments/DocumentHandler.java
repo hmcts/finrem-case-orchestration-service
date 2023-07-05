@@ -54,10 +54,11 @@ public abstract class DocumentHandler {
     }
 
     protected boolean isIntervener(CaseDocumentParty caseDocumentParty) {
-        return caseDocumentParty.equals(CaseDocumentParty.INTERVENER_ONE)
+        return caseDocumentParty != null
+            && (caseDocumentParty.equals(CaseDocumentParty.INTERVENER_ONE)
             || caseDocumentParty.equals(CaseDocumentParty.INTERVENER_TWO)
             || caseDocumentParty.equals(CaseDocumentParty.INTERVENER_THREE)
-            || caseDocumentParty.equals(CaseDocumentParty.INTERVENER_FOUR);
+            || caseDocumentParty.equals(CaseDocumentParty.INTERVENER_FOUR));
     }
 
     private List<UploadCaseDocumentCollection> getDocumentsToBeRemovedFromOriginalCollection(FinremCaseData caseData) {

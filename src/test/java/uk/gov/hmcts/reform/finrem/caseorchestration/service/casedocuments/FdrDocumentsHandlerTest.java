@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -26,7 +25,7 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     @Test
     public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.YES, "Other Example"));
+            null, YesOrNo.NO, YesOrNo.YES, "Other Example"));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -45,7 +44,7 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     public void givenRemovedDocFromScreenCollectionWhenDeleteRemovedDocumentFromCollectionThenRemoveScreenDocsFromCollectionType() {
         List<UploadCaseDocumentCollection> beforeEventDocList = new ArrayList<>();
         UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.YES, "Other Example");
+            null, YesOrNo.NO, YesOrNo.YES, "Other Example");
         beforeEventDocList.add(removedDoc);
         caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
