@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -20,14 +21,20 @@ public class FdrDocumentsHandler extends DocumentHandler {
     protected List<UploadCaseDocumentCollection> getTypedManagedDocumentCollections(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 
-        return allManagedDocumentCollections.stream()
-            .filter(managedDocumentCollection -> {
-                UploadCaseDocument uploadedCaseDocument = managedDocumentCollection.getUploadCaseDocument();
-                return uploadedCaseDocument.getCaseDocuments() != null
-                    && uploadedCaseDocument.getCaseDocumentType() != null
-                    && !isIntervener(uploadedCaseDocument.getCaseDocumentParty())
-                    && uploadedCaseDocument.getCaseDocumentConfidential().equals(YesOrNo.NO)
-                    && uploadedCaseDocument.getCaseDocumentFdr().equals(YesOrNo.YES);
-            }).collect(Collectors.toList());
+        return allManagedDocumentCollections.stream().filter(this::isFdr).collect(Collectors.toList());
+    }
+
+    private boolean isFdr(UploadCaseDocumentCollection managedDocumentCollection) {
+        UploadCaseDocument uploadedCaseDocument = managedDocumentCollection.getUploadCaseDocument();
+        return !isIntervener(uploadedCaseDocument.getCaseDocumentParty())
+            && YesOrNo.isNoOrNull(uploadedCaseDocument.getCaseDocumentConfidential())
+            && YesOrNo.isYes(uploadedCaseDocument.getCaseDocumentFdr());
+    }
+
+    private boolean isIntervener(CaseDocumentParty caseDocumentParty) {
+        return CaseDocumentParty.INTERVENER_ONE.equals(caseDocumentParty)
+            || CaseDocumentParty.INTERVENER_TWO.equals(caseDocumentParty)
+            || CaseDocumentParty.INTERVENER_THREE.equals(caseDocumentParty)
+            || CaseDocumentParty.INTERVENER_FOUR.equals(caseDocumentParty);
     }
 }

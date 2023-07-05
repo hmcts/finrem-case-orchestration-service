@@ -26,15 +26,14 @@ public abstract class PartyDocumentsHandler extends DocumentHandler {
         List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 
         return allManagedDocumentCollections.stream()
-            .filter(d -> {
-                UploadCaseDocument uploadedCaseDocument = d.getUploadCaseDocument();
-                return uploadedCaseDocument.getCaseDocuments() != null
-                    && uploadedCaseDocument.getCaseDocumentParty() != null
-                    && uploadedCaseDocument.getCaseDocumentType() != null
-                    && uploadedCaseDocument.getCaseDocumentParty().equals(party)
-                    && uploadedCaseDocument.getCaseDocumentConfidential().equals(YesOrNo.NO);
-            })
+            .filter(this::isNonConfidentialDocWithParty)
             .filter(d -> canHandleDocument(d.getUploadCaseDocument()))
             .collect(Collectors.toList());
+    }
+
+    private boolean isNonConfidentialDocWithParty(UploadCaseDocumentCollection d) {
+        UploadCaseDocument uploadedCaseDocument = d.getUploadCaseDocument();
+        return party.equals(uploadedCaseDocument.getCaseDocumentParty())
+            && YesOrNo.isNoOrNull(uploadedCaseDocument.getCaseDocumentConfidential());
     }
 }

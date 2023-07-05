@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
@@ -20,11 +19,8 @@ public class ConfidentialDocumentsHandler extends DocumentHandler {
         List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 
         return allManagedDocumentCollections.stream()
-            .filter(managedDocumentCollection -> {
-                UploadCaseDocument uploadedCaseDocument = managedDocumentCollection.getUploadCaseDocument();
-                return uploadedCaseDocument.getCaseDocuments() != null
-                    && uploadedCaseDocument.getCaseDocumentType() != null
-                    && uploadedCaseDocument.getCaseDocumentConfidential().equals(YesOrNo.YES);
-            }).collect(Collectors.toList());
+            .filter(managedDocumentCollection ->
+                YesOrNo.isYes(managedDocumentCollection.getUploadCaseDocument().getCaseDocumentConfidential()))
+            .collect(Collectors.toList());
     }
 }
