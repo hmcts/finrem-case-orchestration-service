@@ -82,7 +82,6 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
                     generalApplicationItems.getGeneralApplicationReceivedFrom());
                 String existingLabel = StringUtils.capitalize(
                     generalApplicationItems.getGeneralApplicationReceivedFrom());
-                log.info("existing code for received from {}", existingCode);
                 DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
                     .code(existingCode).label(existingLabel).build();
                 DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
@@ -103,16 +102,11 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
                 GeneralApplicationsCollection collection = GeneralApplicationsCollection.builder().value(items).build();
                 caseData.getGeneralApplicationWrapper().setGeneralApplications(List.of(collection));
             } else {
-                log.info(generalApplications.get(0).getValue().getGeneralApplicationReceivedFrom());
                 generalApplications.forEach(ga -> {
-                    log.info("existingGA {}, {}", ga, caseId);
                     String existingCode = ga.getValue().getGeneralApplicationSender().getValue().getCode();
                     String existingLabel = ga.getValue().getGeneralApplicationSender().getValue().getLabel();
-                    log.info("existingCode {}, {}", existingCode, caseId);
-                    log.info("existingLabel {}, {}", existingLabel, caseId);
                     DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
                         .code(existingCode).label(existingLabel).build();
-                    log.info("listElement {}, {}", newListElement, caseId);
                     DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
                         .listItems(dynamicListElements).build();
                     ga.getValue().setGeneralApplicationSender(existingRadioList);

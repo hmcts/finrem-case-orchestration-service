@@ -67,7 +67,7 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
 
         service.startGeneralApplicationDirections(caseDetails);
 
-        helper.populateGeneralApplicationSender(caseData.getGeneralApplicationWrapper().getGeneralApplications());
+        helper.populateGeneralApplicationSender(caseData);
 
         List<GeneralApplicationCollectionData> outcomeList = helper.getOutcomeList(caseData);
         AtomicInteger index = new AtomicInteger(0);

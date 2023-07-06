@@ -52,7 +52,7 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
         log.info("Received on start request to reject general application for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
-        helper.populateGeneralApplicationSender(caseData.getGeneralApplicationWrapper().getGeneralApplications());
+        helper.populateGeneralApplicationSender(caseData);
 
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getReadyForRejectOrReadyForReferList(caseData);
         AtomicInteger index = new AtomicInteger(0);

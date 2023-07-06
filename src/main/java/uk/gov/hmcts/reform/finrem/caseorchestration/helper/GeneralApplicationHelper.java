@@ -311,23 +311,26 @@ public class GeneralApplicationHelper {
             || ObjectUtils.isNotEmpty(wrapper.getIntervenerName());
     }
 
-    public void populateGeneralApplicationSender(List<GeneralApplicationsCollection> generalApplications) {
+    public void populateGeneralApplicationSender(FinremCaseData caseData) {
+        List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
+        buildDynamicIntervenerList(dynamicListElements, caseData);
+        List<GeneralApplicationsCollection> generalApplications =
+            caseData.getGeneralApplicationWrapper().getGeneralApplications();
         if (generalApplications != null && !generalApplications.isEmpty()) {
-            generalApplications.forEach(ga -> {
-                log.info("general application received from value {}",
-                    ga.getValue().getGeneralApplicationReceivedFrom());
-                if (ga.getValue().getGeneralApplicationReceivedFrom() != null
-                    && !ga.getValue().getGeneralApplicationReceivedFrom().isEmpty()) {
-                    List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
-                    String existingCode = StringUtils.capitalize(ga.getValue().getGeneralApplicationReceivedFrom());
-                    String existingLabel = StringUtils.capitalize(ga.getValue().getGeneralApplicationReceivedFrom());
-                    log.info("existing code for received from", existingCode);
+            caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(ga -> {
+                GeneralApplicationItems generalApplicationItems = ga.getValue();
+                if (generalApplicationItems.getGeneralApplicationReceivedFrom() != null
+                    && !generalApplicationItems.getGeneralApplicationReceivedFrom().isEmpty()) {
+                    String existingCode = StringUtils.capitalize(
+                        generalApplicationItems.getGeneralApplicationReceivedFrom());
+                    String existingLabel = StringUtils.capitalize(
+                        generalApplicationItems.getGeneralApplicationReceivedFrom());
                     DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
                         .code(existingCode).label(existingLabel).build();
                     DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
                         .listItems(dynamicListElements).build();
-                    ga.getValue().setGeneralApplicationSender(existingRadioList);
-                    ga.getValue().setGeneralApplicationReceivedFrom(null);
+                    generalApplicationItems.setGeneralApplicationSender(existingRadioList);
+                    generalApplicationItems.setGeneralApplicationReceivedFrom(null);
                 }
             });
         }
