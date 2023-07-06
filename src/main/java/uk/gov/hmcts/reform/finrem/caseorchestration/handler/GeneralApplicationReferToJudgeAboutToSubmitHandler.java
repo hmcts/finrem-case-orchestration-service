@@ -51,6 +51,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
             EventType.GENERAL_APPLICATION_REFER_TO_JUDGE,
             caseId);
         FinremCaseData caseData = caseDetails.getData();
+        helper.populateGeneralApplicationSender(caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationReferList());

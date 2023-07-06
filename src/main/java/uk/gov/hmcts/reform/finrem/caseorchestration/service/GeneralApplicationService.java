@@ -385,7 +385,7 @@ public class GeneralApplicationService {
                     ga.getGeneralApplicationItems().getGeneralApplicationStatus());
             }
             if (ga.getGeneralApplicationItems().getGeneralApplicationSender() != null) {
-                log.info("general application sender from is {} on case id 1688466084529064 with status {}",
+                log.info("general application sender is {} on case id 1688466084529064 with status {}",
                     ga.getGeneralApplicationItems().getGeneralApplicationSender(),
                     ga.getGeneralApplicationItems().getGeneralApplicationStatus());
             }
