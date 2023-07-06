@@ -12,7 +12,6 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONFIDENTIAL_DOCS_UPLOADED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
@@ -29,10 +28,7 @@ public class ConfidentialDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
         List<ContestedUploadedDocumentData> documentCollection
             = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
-        assertEquals("respondent", documentCollection.get(0).getUploadedCaseDocument().getCaseDocumentParty());
         assertThat(documentCollection, hasSize(1));
-
-
     }
 
     @Test

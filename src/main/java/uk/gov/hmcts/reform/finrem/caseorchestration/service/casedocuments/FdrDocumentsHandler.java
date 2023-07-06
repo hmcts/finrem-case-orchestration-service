@@ -7,6 +7,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -28,9 +29,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Slf4j
 @Order(2)
 public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDocumentData> {
+
+    private final FeatureToggleService featureToggleService;
+
     @Autowired
-    public FdrDocumentsHandler(ObjectMapper objectMapper) {
+    public FdrDocumentsHandler(ObjectMapper objectMapper, FeatureToggleService featureToggleService) {
         super(objectMapper);
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -49,7 +54,9 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDo
         List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, FDR_DOCS_COLLECTION);
         addAndSortCollection(fdrFiltered, fdrDocsCollection);
 
-        copyFdrCollIntoIntervenerDocIfActiveCaseRoleIsIntervener(fdrFiltered, caseData);
+        if (featureToggleService.isIntervenerEnabled()) {
+            copyFdrCollIntoIntervenerDocIfActiveCaseRoleIsIntervener(fdrFiltered, caseData);
+        }
 
         uploadedDocuments.removeAll(fdrFiltered);
 
