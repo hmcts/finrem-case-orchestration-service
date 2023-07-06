@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -287,8 +289,15 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
             isA(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
 
+        FinremCallbackRequest emptyCallbackRequest = getEmptyCallbackRequest();
+        emptyCallbackRequest.getCaseDetails().getData().setUploadHearingOrder(
+            asList(DirectionOrderCollection.builder().value(
+                    DirectionOrder.builder().uploadDraftDocument(
+                            CaseDocument.builder().build())
+                        .build())
+                .build()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
+            sendOrderContestedAboutToSubmitHandler.handle(emptyCallbackRequest, AUTH_TOKEN);
 
         verify(genericDocumentService).stampDocument(
             eq(caseDocument()), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq(CASE_ID));
@@ -305,7 +314,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(
             Optional.of(BulkPrintDocument.builder().binaryFileUrl("HearingOrderBinaryURL").build()));
-        when(documentHelper.getHearingDocumentsAsBulkPrintDocuments(anyMap(), any(), anyString())).thenReturn(
+        when(documentHelper.getHearingDocumentsAsBulkPrintDocuments(any(FinremCaseData.class), any(), anyString())).thenReturn(
             singletonList(BulkPrintDocument.builder().binaryFileUrl("OtherHearingOrderDocumentsURL").build()));
 
         CaseDocument additionalHearingDocument = CaseDocument.builder().documentBinaryUrl("AdditionalHearingDocumentURL").build();

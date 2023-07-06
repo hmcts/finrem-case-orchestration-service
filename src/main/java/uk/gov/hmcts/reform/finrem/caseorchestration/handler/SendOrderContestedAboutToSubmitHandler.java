@@ -128,7 +128,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         String caseId = String.valueOf(caseDetails.getId());
         log.info("In request to send hearing pack for case {}:", caseId);
 
-
         List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails.getData(), authorisationToken, caseId);
         if (!hearingDocumentPack.isEmpty()) {
             if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
@@ -169,7 +168,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
         return hearingDocumentPack;
     }
-
 
     private boolean contestedGeneralOrderPresent(FinremCaseDetails caseDetails) {
         return !isNull(caseDetails.getData().getGeneralOrderWrapper().getGeneralOrderLatestDocument());
