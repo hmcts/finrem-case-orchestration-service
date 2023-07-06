@@ -55,7 +55,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
         FinremCaseData caseData = caseDetails.getData();
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferList(null);
 
-        helper.populateGeneralApplicationSender(caseData);
+        helper.populateGeneralApplicationSender(caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getReadyForRejectOrReadyForReferList(caseData);
         AtomicInteger index = new AtomicInteger(0);

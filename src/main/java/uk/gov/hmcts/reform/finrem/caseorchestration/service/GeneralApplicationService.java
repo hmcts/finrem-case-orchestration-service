@@ -78,7 +78,8 @@ public class GeneralApplicationService {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        helper.populateGeneralApplicationSender(caseDetailsBefore.getData());
+        helper.populateGeneralApplicationSender(caseDetailsBefore.getData(), caseDetailsBefore.getData()
+            .getGeneralApplicationWrapper().getGeneralApplications());
 
         List<GeneralApplicationCollectionData> generalApplicationListBefore =
             helper.getGeneralApplicationList(caseDetailsBefore.getData(), GENERAL_APPLICATION_COLLECTION);
@@ -377,6 +378,8 @@ public class GeneralApplicationService {
     public void updateGeneralApplicationCollectionData(List<GeneralApplicationCollectionData> generalApplications,
                                                        FinremCaseData caseData) {
         log.info("entering updateGeneralApplicationCollection Data for case Id 1688466084529064");
+        helper.populateGeneralApplicationSender(caseData,
+            helper.convertToGeneralApplicationsCollection(generalApplications));
         List<GeneralApplicationCollectionData> appRespGeneralApplications =
             generalApplications.stream().filter(ga ->
                 APPLICANT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())

@@ -311,13 +311,12 @@ public class GeneralApplicationHelper {
             || ObjectUtils.isNotEmpty(wrapper.getIntervenerName());
     }
 
-    public void populateGeneralApplicationSender(FinremCaseData caseData) {
+    public void populateGeneralApplicationSender(FinremCaseData caseData,
+                                                 List<GeneralApplicationsCollection> generalApplications) {
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         buildDynamicIntervenerList(dynamicListElements, caseData);
-        List<GeneralApplicationsCollection> generalApplications =
-            caseData.getGeneralApplicationWrapper().getGeneralApplications();
         if (generalApplications != null && !generalApplications.isEmpty()) {
-            caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(ga -> {
+            generalApplications.forEach(ga -> {
                 GeneralApplicationItems generalApplicationItems = ga.getValue();
                 if (generalApplicationItems.getGeneralApplicationReceivedFrom() != null
                     && !generalApplicationItems.getGeneralApplicationReceivedFrom().isEmpty()) {
