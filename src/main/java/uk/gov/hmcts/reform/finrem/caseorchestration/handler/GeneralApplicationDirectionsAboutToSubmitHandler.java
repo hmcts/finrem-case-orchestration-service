@@ -68,6 +68,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             EventType.GENERAL_APPLICATION_DIRECTIONS, callbackRequest.getCaseDetails().getId());
 
         FinremCaseData caseData = caseDetails.getData();
+        helper.populateGeneralApplicationSender(caseData,
+            caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
         List<BulkPrintDocument> documents = new ArrayList<>();
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData,

@@ -378,6 +378,7 @@ public class GeneralApplicationService {
     public void updateGeneralApplicationCollectionData(List<GeneralApplicationCollectionData> generalApplications,
                                                        FinremCaseData caseData) {
         log.info("entering updateGeneralApplicationCollection Data for case Id 1688466084529064");
+        helper.populateGeneralApplicationDataSender(caseData, generalApplications);
         generalApplications.forEach(ga -> {
             if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null) {
                 log.info("general application received from is {} on case id 1688466084529064 with status {}",

@@ -51,7 +51,6 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
         final String caseId = caseDetails.getId().toString();
         log.info("Received on start request to outcome decision general application for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
-        helper.populateGeneralApplicationSender(caseData, caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplications());
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         if (existingList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {

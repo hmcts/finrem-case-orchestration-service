@@ -335,6 +335,29 @@ public class GeneralApplicationHelper {
         }
     }
 
+    public void populateGeneralApplicationDataSender(FinremCaseData caseData,
+                                                 List<GeneralApplicationCollectionData> generalApplicationData) {
+        List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
+        buildDynamicIntervenerList(dynamicListElements, caseData);
+        if (generalApplicationData != null && !generalApplicationData.isEmpty()) {
+            generalApplicationData.forEach(ga -> {
+                if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null
+                    && !ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().isEmpty()) {
+                    String existingCode = StringUtils.capitalize(
+                        ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom());
+                    String existingLabel = StringUtils.capitalize(
+                        ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom());
+                    DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
+                        .code(existingCode).label(existingLabel).build();
+                    DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
+                        .listItems(dynamicListElements).build();
+                    ga.getGeneralApplicationItems().setGeneralApplicationSender(existingRadioList);
+                    ga.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(null);
+                }
+            });
+        }
+    }
+
     public void buildDynamicIntervenerList(List<DynamicRadioListElement> dynamicListElements,
                                             FinremCaseData caseData) {
         dynamicListElements.addAll(List.of(getDynamicListElements(APPLICANT, APPLICANT),

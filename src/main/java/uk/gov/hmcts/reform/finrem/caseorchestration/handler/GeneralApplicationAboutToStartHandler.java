@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -74,22 +73,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
         helper.buildDynamicIntervenerList(dynamicListElements, caseData);
         DynamicRadioList dynamicList = helper.getDynamicRadioList(dynamicListElements);
 
-        existingGeneralApplication.forEach(ga -> {
-            GeneralApplicationItems generalApplicationItems = ga.getGeneralApplicationItems();
-            if (generalApplicationItems.getGeneralApplicationReceivedFrom() != null
-                && !generalApplicationItems.getGeneralApplicationReceivedFrom().isEmpty()) {
-                String existingCode = StringUtils.capitalize(
-                    generalApplicationItems.getGeneralApplicationReceivedFrom());
-                String existingLabel = StringUtils.capitalize(
-                    generalApplicationItems.getGeneralApplicationReceivedFrom());
-                DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
-                    .code(existingCode).label(existingLabel).build();
-                DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
-                    .listItems(dynamicListElements).build();
-                generalApplicationItems.setGeneralApplicationSender(existingRadioList);
-                generalApplicationItems.setGeneralApplicationReceivedFrom(null);
-            }
-        });
+        helper.populateGeneralApplicationDataSender(caseData, existingGeneralApplication);
 
         generalApplicationService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
 
