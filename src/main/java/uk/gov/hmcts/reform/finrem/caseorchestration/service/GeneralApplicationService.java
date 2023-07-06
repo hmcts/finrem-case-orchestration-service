@@ -378,8 +378,16 @@ public class GeneralApplicationService {
     public void updateGeneralApplicationCollectionData(List<GeneralApplicationCollectionData> generalApplications,
                                                        FinremCaseData caseData) {
         log.info("entering updateGeneralApplicationCollection Data for case Id 1688466084529064");
-        helper.populateGeneralApplicationSender(caseData,
-            helper.convertToGeneralApplicationsCollection(generalApplications));
+        generalApplications.forEach(ga -> {
+            if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null) {
+                log.info("general application received from not null on case id 1688466084529064 with status {}",
+                    ga.getGeneralApplicationItems().getGeneralApplicationStatus());
+            }
+            if (ga.getGeneralApplicationItems().getGeneralApplicationSender() != null) {
+                log.info("general application sender from not null on case id 1688466084529064 with status {}",
+                    ga.getGeneralApplicationItems().getGeneralApplicationStatus());
+            }
+        });
         List<GeneralApplicationCollectionData> appRespGeneralApplications =
             generalApplications.stream().filter(ga ->
                 APPLICANT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())
