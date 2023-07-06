@@ -380,11 +380,13 @@ public class GeneralApplicationService {
         log.info("entering updateGeneralApplicationCollection Data for case Id 1688466084529064");
         generalApplications.forEach(ga -> {
             if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null) {
-                log.info("general application received from not null on case id 1688466084529064 with status {}",
+                log.info("general application received from is {} on case id 1688466084529064 with status {}",
+                    ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom(),
                     ga.getGeneralApplicationItems().getGeneralApplicationStatus());
             }
             if (ga.getGeneralApplicationItems().getGeneralApplicationSender() != null) {
-                log.info("general application sender from not null on case id 1688466084529064 with status {}",
+                log.info("general application sender from is {} on case id 1688466084529064 with status {}",
+                    ga.getGeneralApplicationItems().getGeneralApplicationSender(),
                     ga.getGeneralApplicationItems().getGeneralApplicationStatus());
             }
         });
