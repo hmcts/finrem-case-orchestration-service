@@ -364,19 +364,19 @@ public class GeneralApplicationHelper {
             getDynamicListElements(RESPONDENT, RESPONDENT),
             getDynamicListElements(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         ));
-        IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapper();
+        IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapperIfPopulated();
         if (getIntervenerPopulated(oneWrapper)) {
             dynamicListElements.add(getDynamicListElements(INTERVENER1, INTERVENER1));
         }
-        IntervenerTwoWrapper twoWrapper = caseData.getIntervenerTwoWrapper();
+        IntervenerTwoWrapper twoWrapper = caseData.getIntervenerTwoWrapperIfPopulated();
         if (getIntervenerPopulated(twoWrapper)) {
             dynamicListElements.add(getDynamicListElements(INTERVENER2, INTERVENER2));
         }
-        IntervenerThreeWrapper threeWrapper = caseData.getIntervenerThreeWrapper();
+        IntervenerThreeWrapper threeWrapper = caseData.getIntervenerThreeWrapperIfPopulated();
         if (getIntervenerPopulated(threeWrapper)) {
             dynamicListElements.add(getDynamicListElements(INTERVENER3, INTERVENER3));
         }
-        IntervenerFourWrapper fourWrapper = caseData.getIntervenerFourWrapper();
+        IntervenerFourWrapper fourWrapper = caseData.getIntervenerFourWrapperIfPopulated();
         if (getIntervenerPopulated(fourWrapper)) {
             dynamicListElements.add(getDynamicListElements(INTERVENER4, INTERVENER4));
         }
