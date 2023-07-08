@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.cons
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -29,7 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @ExtendWith(MockitoExtension.class)
 class FinremContestedSendOrderCorresponderTest {
 
-    @InjectMocks
     private FinremContestedSendOrderCorresponder corresponder;
     @Mock
     private NotificationService notificationService;
@@ -42,6 +40,8 @@ class FinremContestedSendOrderCorresponderTest {
 
     @BeforeEach
     void setUp() {
+        corresponder = new  FinremContestedSendOrderCorresponder(notificationService,
+            bulkPrintService, generalOrderService);
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         caseDetails = finremCallbackRequest.getCaseDetails();
     }
