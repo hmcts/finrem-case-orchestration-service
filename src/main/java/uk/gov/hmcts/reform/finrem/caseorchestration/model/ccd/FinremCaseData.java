@@ -384,6 +384,25 @@ public class FinremCaseData {
     @JsonIgnore
     private Addressee currentAddressee;
 
+    @Builder.Default
+    @JsonIgnore
+    private boolean applicantCorrespondenceEnabled = true;
+    @Builder.Default
+    @JsonIgnore
+    private boolean respondentCorrespondenceEnabled = true;
+    @Builder.Default
+    @JsonIgnore
+    private boolean intervener1CorrespondenceEnabled = true;
+    @Builder.Default
+    @JsonIgnore
+    private boolean intervener2CorrespondenceEnabled = true;
+    @Builder.Default
+    @JsonIgnore
+    private boolean intervener3CorrespondenceEnabled = true;
+    @Builder.Default
+    @JsonIgnore
+    private boolean intervener4CorrespondenceEnabled = true;
+
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ScheduleOneWrapper scheduleOneWrapper;
@@ -506,11 +525,27 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public IntervenerOneWrapper getIntervenerOneWrapperIfPopulated() {
+        if (intervenerOneWrapper != null) {
+            return this.intervenerOneWrapper;
+        }
+        return null;
+    }
+
+    @JsonIgnore
     public IntervenerTwoWrapper getIntervenerTwoWrapper() {
         if (intervenerTwoWrapper == null) {
             this.intervenerTwoWrapper = IntervenerTwoWrapper.builder().build();
         }
         return intervenerTwoWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerTwoWrapper getIntervenerTwoWrapperIfPopulated() {
+        if (intervenerTwoWrapper != null) {
+            return this.intervenerTwoWrapper;
+        }
+        return null;
     }
 
     @JsonIgnore
@@ -522,11 +557,28 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public IntervenerThreeWrapper getIntervenerThreeWrapperIfPopulated() {
+        if (intervenerThreeWrapper != null) {
+            return this.intervenerThreeWrapper;
+        }
+        return null;
+    }
+
+
+    @JsonIgnore
     public IntervenerFourWrapper getIntervenerFourWrapper() {
         if (intervenerFourWrapper == null) {
             this.intervenerFourWrapper = IntervenerFourWrapper.builder().build();
         }
         return intervenerFourWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerFourWrapper getIntervenerFourWrapperIfPopulated() {
+        if (intervenerFourWrapper != null) {
+            return this.intervenerFourWrapper;
+        }
+        return null;
     }
 
     @JsonIgnore

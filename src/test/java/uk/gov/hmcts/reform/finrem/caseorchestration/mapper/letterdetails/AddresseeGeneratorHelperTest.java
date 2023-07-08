@@ -9,6 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 
 import java.util.Map;
 
@@ -75,12 +79,93 @@ public class AddresseeGeneratorHelperTest {
         assertEquals("1 Respondent Street\nAddress Line 2", addressee.getFormattedAddress());
     }
 
+
+    @Test
+    public void givenIntervenerOneRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+        caseData.setIntervenerTwoWrapper(IntervenerTwoWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
+            .addressLine1("2 Intervener Street")
+            .addressLine2("Address Line 2")
+            .postCode("SW1 1AA")
+            .build()).build());
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
+
+        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO);
+
+        assertEquals("Intervener Name", addressee.getName());
+        assertEquals("2 Intervener Street\nAddress Line 2\nSW1 1AA", addressee.getFormattedAddress());
+    }
+
+
+    @Test
+    public void givenIntervenerTwoRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+        caseData.setIntervenerOneWrapper(IntervenerOneWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
+            .addressLine1("1 Intervener Street")
+            .addressLine2("Address Line 2")
+            .postCode("SW1 1AA")
+            .build()).build());
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
+
+        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
+
+        assertEquals("Intervener Name", addressee.getName());
+        assertEquals("1 Intervener Street\nAddress Line 2\nSW1 1AA", addressee.getFormattedAddress());
+    }
+
+
+    @Test
+    public void givenIntervenerThreeRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+        caseData.setIntervenerThreeWrapper(IntervenerThreeWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
+            .addressLine1("3 Intervener Street")
+            .addressLine2("Address Line 2")
+            .postCode("SW1 1AA")
+            .build()).build());
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
+
+        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE);
+
+        assertEquals("Intervener Name", addressee.getName());
+        assertEquals("3 Intervener Street\nAddress Line 2\nSW1 1AA", addressee.getFormattedAddress());
+    }
+
+
+    @Test
+    public void givenIntervenerFourRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+        caseData.setIntervenerFourWrapper(IntervenerFourWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
+            .addressLine1("4 Intervener Street")
+            .addressLine2("Address Line 2")
+            .postCode("SW1 1AA")
+            .build()).build());
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
+
+        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR);
+
+        assertEquals("Intervener Name", addressee.getName());
+        assertEquals("4 Intervener Street\nAddress Line 2\nSW1 1AA", addressee.getFormattedAddress());
+    }
+
+
     @Test
     public void givenRespondentSolicitorRecipient_whenGetAddressee_thenReturnRespondentSolicitorAddressee() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorName("RespSolName");
+        caseData.getContactDetailsWrapper().setRespondentSolicitorName("RespSol Name");
         caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(Address.builder()
             .addressLine1("1 RespondentSolicitor Street")
             .addressLine2("Address Line 2")
@@ -90,7 +175,7 @@ public class AddresseeGeneratorHelperTest {
         Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
 
-        assertEquals("RespSolName", addressee.getName());
+        assertEquals("RespSol Name", addressee.getName());
         assertEquals("1 RespondentSolicitor Street\nAddress Line 2", addressee.getFormattedAddress());
     }
 
@@ -125,18 +210,18 @@ public class AddresseeGeneratorHelperTest {
         Map<GeneralLetterAddressToType, Address> addressMap =
             (Map<GeneralLetterAddressToType, Address>) addressToCaseDataMapping.get(ADDRESS_MAP);
 
-        assertEquals(addressMap.get(GeneralLetterAddressToType.APPLICANT_SOLICITOR).getAddressLine1(),
-            "50 App Sol Street");
-        assertEquals(addressMap.get(GeneralLetterAddressToType.RESPONDENT_SOLICITOR).getAddressLine1(),
-            "50 Resp Sol Street");
+        assertEquals("50 App Sol Street",
+            addressMap.get(GeneralLetterAddressToType.APPLICANT_SOLICITOR).getAddressLine1());
+        assertEquals("50 Resp Sol Street",
+            addressMap.get(GeneralLetterAddressToType.RESPONDENT_SOLICITOR).getAddressLine1());
         assertEquals(addressMap.get(GeneralLetterAddressToType.RESPONDENT), new Address());
 
         Map<GeneralLetterAddressToType, String> nameMap =
             (Map<GeneralLetterAddressToType, String>) addressToCaseDataMapping.get(NAME_MAP);
 
-        assertEquals(nameMap.get(GeneralLetterAddressToType.APPLICANT_SOLICITOR), "AppSolName");
-        assertEquals(nameMap.get(GeneralLetterAddressToType.RESPONDENT_SOLICITOR), "RespSolName");
-        assertEquals(nameMap.get(GeneralLetterAddressToType.RESPONDENT), "");
-        assertEquals(nameMap.get(GeneralLetterAddressToType.OTHER), "");
+        assertEquals("AppSolName", nameMap.get(GeneralLetterAddressToType.APPLICANT_SOLICITOR));
+        assertEquals("RespSolName", nameMap.get(GeneralLetterAddressToType.RESPONDENT_SOLICITOR));
+        assertEquals("", nameMap.get(GeneralLetterAddressToType.RESPONDENT));
+        assertEquals("", nameMap.get(GeneralLetterAddressToType.OTHER));
     }
 }

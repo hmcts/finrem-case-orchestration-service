@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -260,12 +261,47 @@ public class GeneralOrderService {
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
 
+    public boolean isOrderSharedWithApplicant(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.APP_SOLICITOR.getValue())
+            || parties.contains(CaseRole.APP_BARRISTER.getValue()));
+    }
+
+    public boolean isOrderSharedWithRespondent(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.RESP_SOLICITOR.getValue())
+            || parties.contains(CaseRole.RESP_BARRISTER.getValue()));
+    }
+
+    public boolean isOrderSharedWithIntervener1(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_1.getValue())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_1.getValue()));
+    }
+
+    public boolean isOrderSharedWithIntervener2(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_2.getValue())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_2.getValue()));
+    }
+
+    public boolean isOrderSharedWithIntervener3(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_3.getValue())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_3.getValue()));
+    }
+
+    public boolean isOrderSharedWithIntervener4(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_4.getValue())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_4.getValue()));
+    }
+
     public List<CaseDocument> hearingOrdersToShare(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {
         FinremCaseData caseData = caseDetails.getData();
         List<CaseDocument> orders = new ArrayList<>();
         List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
-
-        if (selectedDocs != null) {
+        if (selectedDocs != null && hearingOrders != null) {
             List<DynamicMultiSelectListElement> docs = selectedDocs.getValue();
             docs.forEach(doc -> hearingOrders.forEach(obj -> addToList(doc, obj, orders, caseDetails.getId())));
         }
@@ -279,5 +315,37 @@ public class GeneralOrderService {
             log.info("Adding document to orders {} for caseId {}", caseDocument, caseId);
             orders.add(caseDocument);
         }
+    }
+
+    public List<BulkPrintDocument> getBulkPrintDocuments(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        DynamicMultiSelectList selectedOrders = caseData.getOrdersToShare();
+
+        List<BulkPrintDocument>  bulkPrintDocuments = new ArrayList<>();
+        CaseDocument generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+
+        if (isSelectedOrderMatches(selectedOrders, generalOrder)) {
+            bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
+        }
+
+        List<CaseDocument> hearingOrders = hearingOrdersToShare(caseDetails, selectedOrders);
+        if (!hearingOrders.isEmpty()) {
+            hearingOrders.forEach(doc -> bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(doc)));
+        }
+
+        CaseDocument document = caseData.getAdditionalDocument();
+        if (document != null) {
+            bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(document));
+        }
+        return bulkPrintDocuments;
+    }
+
+    public boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, CaseDocument caseDocument) {
+        if (caseDocument != null) {
+            Optional<DynamicMultiSelectListElement> listElement = selectedDocs.getValue().stream()
+                .filter(e -> e.getCode().equals(caseDocument.getDocumentFilename())).findAny();
+            return listElement.isPresent();
+        }
+        return false;
     }
 }

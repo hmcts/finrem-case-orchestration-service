@@ -18,10 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.util.ArrayList;
@@ -34,13 +32,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -53,17 +48,11 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     @InjectMocks
     private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
     @Mock
+    private GeneralOrderService generalOrderService;
+    @Mock
     private GenericDocumentService genericDocumentService;
     @Mock
     private DocumentHelper documentHelper;
-    @Mock
-    private GeneralOrderService generalOrderService;
-
-    @Mock
-    private BulkPrintService bulkPrintService;
-    @Mock
-    private NotificationService notificationService;
-
 
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
@@ -164,8 +153,6 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getRespOrderCollection());
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
-        verifyNoInteractions(bulkPrintService);
-        verifyNoInteractions(notificationService);
         verify(documentHelper).getStampType(caseData);
 
     }
@@ -210,15 +197,11 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
         assertEquals("selected parties on case", 6, caseData.getPartiesOnCase().getValue().size());
         assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertEquals(3, caseData.getIntv1OrderCollection().size());
-        assertEquals(3, caseData.getAppOrderCollection().size());
-        assertEquals(3, caseData.getRespOrderCollection().size());
+        assertEquals(2, caseData.getIntv1OrderCollection().size());
+        assertEquals(2, caseData.getAppOrderCollection().size());
+        assertEquals(2, caseData.getRespOrderCollection().size());
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
-        verify(bulkPrintService, times(2)).printApplicantDocuments(any(FinremCaseDetails.class), any(), anyList());
-        verify(bulkPrintService, times(2)).printRespondentDocuments(any(FinremCaseDetails.class), any(), anyList());
-        verify(notificationService, times(2)).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
-        verify(notificationService, times(2)).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(documentHelper).getStampType(caseData);
 
     }
@@ -257,10 +240,6 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertEquals(2, caseData.getIntv1OrderCollection().size());
 
-        verify(bulkPrintService).printApplicantDocuments(any(FinremCaseDetails.class), any(), anyList());
-        verify(bulkPrintService).printRespondentDocuments(any(FinremCaseDetails.class), any(), anyList());
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
-        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
 

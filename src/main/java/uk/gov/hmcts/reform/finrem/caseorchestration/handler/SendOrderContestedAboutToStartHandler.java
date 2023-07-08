@@ -12,10 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 
 import java.util.ArrayList;
@@ -34,7 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler {
 
     private final GeneralOrderService generalOrderService;
-    private static final String CASE_ROLE_LABEL = "%s - %s";
+    private static final String DISPLAY_LABEL = "%s - %s";
 
     public SendOrderContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                  GeneralOrderService generalOrderService) {
@@ -61,7 +58,6 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
         DynamicMultiSelectList roleList = getAllActivePartyList(caseDetails);
         finremCaseData.setPartiesOnCase(roleList);
 
-        finremCaseData.setAdditionalDocument(null);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
     }
@@ -73,24 +69,14 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
-        if ((ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy())
-            && ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy().getOrganisation())
-            && ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID()))
-            || ObjectUtils.isNotEmpty(caseData.getFullApplicantName())) {
-            String assignedRole = caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole();
-            dynamicListElements.add(generalOrderService.getDynamicMultiSelectListElement(assignedRole,
-                CASE_ROLE_LABEL.formatted(APPLICANT, caseData.getFullApplicantName())));
-        }
+        String assignedAppRole = caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole();
+        dynamicListElements.add(generalOrderService.getDynamicMultiSelectListElement(assignedAppRole,
+            DISPLAY_LABEL.formatted(APPLICANT, caseData.getFullApplicantName())));
 
-        if ((ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy())
-            && ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy().getOrganisation())
-            && ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID()))
-            || ObjectUtils.isNotEmpty(caseData.getRespondentFullName())) {
+        String assignedRespRole = caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole();
+        dynamicListElements.add(generalOrderService.getDynamicMultiSelectListElement(assignedRespRole,
+            DISPLAY_LABEL.formatted(RESPONDENT, caseData.getRespondentFullName())));
 
-            String assignedRole = caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole();
-            dynamicListElements.add(generalOrderService.getDynamicMultiSelectListElement(assignedRole,
-                CASE_ROLE_LABEL.formatted(RESPONDENT, caseData.getRespondentFullName())));
-        }
         return getRoleList(intervenerCaseRoleList(caseData, dynamicListElements),
             caseDetails.getData().getPartiesOnCase());
     }
@@ -112,48 +98,32 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
     private List<DynamicMultiSelectListElement> intervenerCaseRoleList(FinremCaseData caseData,
                                                                        List<DynamicMultiSelectListElement> dynamicListElements) {
         //intervener1
-        IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapper();
-        if ((ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Organisation())
-            && ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID()))
-            || ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Name())) {
-
-            String assignedRole = oneWrapper.getIntervener1Organisation().getOrgPolicyCaseAssignedRole();
+        IntervenerWrapper oneWrapper = caseData.getIntervenerOneWrapperIfPopulated();
+        if (oneWrapper != null && ObjectUtils.isNotEmpty(oneWrapper.getIntervenerOrganisation())) {
+            String assignedRole = oneWrapper.getIntervenerOrganisation().getOrgPolicyCaseAssignedRole();
             dynamicListElements.add(generalOrderService.getDynamicMultiSelectListElement(assignedRole,
-                CASE_ROLE_LABEL.formatted(capitalize(INTERVENER_ONE), oneWrapper.getIntervener1Name())));
+                DISPLAY_LABEL.formatted(capitalize(INTERVENER_ONE), oneWrapper.getIntervenerName())));
         }
         //intervener2
-        IntervenerTwoWrapper twoWrapper = caseData.getIntervenerTwoWrapper();
-        if ((ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Organisation())
-            && ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Organisation().getOrganisation().getOrganisationID()))
-            || ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Name())) {
-
-            String assignedRole = twoWrapper.getIntervener2Organisation().getOrgPolicyCaseAssignedRole();
+        IntervenerWrapper twoWrapper = caseData.getIntervenerTwoWrapperIfPopulated();
+        if (twoWrapper != null && ObjectUtils.isNotEmpty(twoWrapper.getIntervenerOrganisation())) {
+            String assignedRole = twoWrapper.getIntervenerOrganisation().getOrgPolicyCaseAssignedRole();
             dynamicListElements.add(generalOrderService.getDynamicMultiSelectListElement(assignedRole,
-                CASE_ROLE_LABEL.formatted(capitalize(INTERVENER_TWO), twoWrapper.getIntervener2Name())));
+                DISPLAY_LABEL.formatted(capitalize(INTERVENER_TWO), twoWrapper.getIntervenerName())));
         }
         //intervener3
-        IntervenerThreeWrapper threeWrapper = caseData.getIntervenerThreeWrapper();
-        if ((ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Organisation())
-            && ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Organisation().getOrganisation().getOrganisationID()))
-            || ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Name())) {
-
-            String assignedRole = threeWrapper.getIntervener3Organisation().getOrgPolicyCaseAssignedRole();
+        IntervenerWrapper threeWrapper = caseData.getIntervenerThreeWrapperIfPopulated();
+        if (threeWrapper != null && ObjectUtils.isNotEmpty(threeWrapper.getIntervenerOrganisation())) {
+            String assignedRole = threeWrapper.getIntervenerOrganisation().getOrgPolicyCaseAssignedRole();
             dynamicListElements.add(generalOrderService.getDynamicMultiSelectListElement(assignedRole,
-                CASE_ROLE_LABEL.formatted(capitalize(INTERVENER_THREE), threeWrapper.getIntervener3Name())));
+                DISPLAY_LABEL.formatted(capitalize(INTERVENER_THREE), threeWrapper.getIntervenerName())));
         }
         //intervener4
-        IntervenerFourWrapper fourWrapper = caseData.getIntervenerFourWrapper();
-        if ((ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation())
-            && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation().getOrganisation().getOrganisationID()))
-            || ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Name())) {
-
-            String assignedRole = fourWrapper.getIntervener4Organisation().getOrgPolicyCaseAssignedRole();
+        IntervenerWrapper fourWrapper = caseData.getIntervenerFourWrapperIfPopulated();
+        if (fourWrapper != null && ObjectUtils.isNotEmpty(fourWrapper.getIntervenerOrganisation())) {
+            String assignedRole = fourWrapper.getIntervenerOrganisation().getOrgPolicyCaseAssignedRole();
             dynamicListElements.add(generalOrderService.getDynamicMultiSelectListElement(assignedRole,
-                CASE_ROLE_LABEL.formatted(capitalize(INTERVENER_FOUR), fourWrapper.getIntervener4Name())));
+                DISPLAY_LABEL.formatted(capitalize(INTERVENER_FOUR), fourWrapper.getIntervenerName())));
         }
         return dynamicListElements;
     }

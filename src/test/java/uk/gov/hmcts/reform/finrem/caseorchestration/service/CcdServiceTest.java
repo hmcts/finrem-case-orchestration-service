@@ -72,7 +72,7 @@ public class CcdServiceTest {
             .cases(List.of(caseDetails)).build());
         when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
 
-        SearchResult result = ccdService.getCaseByCaseId("123", CaseType.CONTESTED, AUTH_TOKEN);
+        ccdService.getCaseByCaseId("123", CaseType.CONTESTED, AUTH_TOKEN);
 
         verify(coreCaseDataApi).searchCases(any(), any(), any(), any());
     }

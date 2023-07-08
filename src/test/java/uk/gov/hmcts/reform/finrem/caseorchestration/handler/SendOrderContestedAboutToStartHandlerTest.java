@@ -59,13 +59,13 @@ class SendOrderContestedAboutToStartHandlerTest {
             CaseRole.APP_SOLICITOR.getValue()));
         data.setRespondentOrganisationPolicy(getOrganisation("ORGRESP","respondent",
             CaseRole.RESP_SOLICITOR.getValue()));
-        data.getIntervenerOneWrapper().setIntervener1Organisation(getOrganisation("ORGINTV1","intervener1",
+        data.getIntervenerOneWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV1","intervener1",
             CaseRole.INTVR_SOLICITOR_1.getValue()));
-        data.getIntervenerTwoWrapper().setIntervener2Organisation(getOrganisation("ORGINTV2","intervener2",
+        data.getIntervenerTwoWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV2","intervener2",
             CaseRole.INTVR_SOLICITOR_2.getValue()));
-        data.getIntervenerThreeWrapper().setIntervener3Organisation(getOrganisation("ORGINTV3","intervener3",
+        data.getIntervenerThreeWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV3","intervener3",
             CaseRole.INTVR_SOLICITOR_3.getValue()));
-        data.getIntervenerFourWrapper().setIntervener4Organisation(getOrganisation("ORGINTV4","intervener4",
+        data.getIntervenerFourWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV4","intervener4",
             CaseRole.INTVR_SOLICITOR_4.getValue()));
 
 
@@ -86,13 +86,13 @@ class SendOrderContestedAboutToStartHandlerTest {
             CaseRole.APP_SOLICITOR.getValue()));
         data.setRespondentOrganisationPolicy(getOrganisation("ORGRESP","respondent",
             CaseRole.RESP_SOLICITOR.getValue()));
-        data.getIntervenerOneWrapper().setIntervener1Organisation(getOrganisation("ORGINTV1","intervener1",
+        data.getIntervenerOneWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV1","intervener1",
             CaseRole.INTVR_SOLICITOR_1.getValue()));
-        data.getIntervenerTwoWrapper().setIntervener2Organisation(getOrganisation("ORGINTV2","intervener2",
+        data.getIntervenerTwoWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV2","intervener2",
             CaseRole.INTVR_SOLICITOR_2.getValue()));
-        data.getIntervenerThreeWrapper().setIntervener3Organisation(getOrganisation("ORGINTV3","intervener3",
+        data.getIntervenerThreeWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV3","intervener3",
             CaseRole.INTVR_SOLICITOR_3.getValue()));
-        data.getIntervenerFourWrapper().setIntervener4Organisation(getOrganisation("ORGINTV4","intervener4",
+        data.getIntervenerFourWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV4","intervener4",
             CaseRole.INTVR_SOLICITOR_4.getValue()));
 
 
@@ -134,21 +134,21 @@ class SendOrderContestedAboutToStartHandlerTest {
         data.setRespondentOrganisationPolicy(getOrganisation(null,null,
             CaseRole.RESP_SOLICITOR.getValue()));
 
-        data.getIntervenerOneWrapper().setIntervener1Name("Intv1");
-        data.getIntervenerOneWrapper().setIntervener1Organisation(getOrganisation(null,null,
+        data.getIntervenerOneWrapper().setIntervenerName("Intv1");
+        data.getIntervenerOneWrapper().setIntervenerOrganisation(getOrganisation(null,null,
             CaseRole.INTVR_SOLICITOR_1.getValue()));
 
-        data.getIntervenerTwoWrapper().setIntervener2Organisation(getOrganisation(null,null,
+        data.getIntervenerTwoWrapper().setIntervenerOrganisation(getOrganisation(null,null,
             CaseRole.INTVR_SOLICITOR_2.getValue()));
-        data.getIntervenerTwoWrapper().setIntervener2Name("Intv2");
+        data.getIntervenerTwoWrapper().setIntervenerName("Intv2");
 
-        data.getIntervenerThreeWrapper().setIntervener3Organisation(getOrganisation(null,null,
+        data.getIntervenerThreeWrapper().setIntervenerOrganisation(getOrganisation(null,null,
             CaseRole.INTVR_SOLICITOR_3.getValue()));
-        data.getIntervenerThreeWrapper().setIntervener3Name("Intv3");
+        data.getIntervenerThreeWrapper().setIntervenerName("Intv3");
 
-        data.getIntervenerFourWrapper().setIntervener4Organisation(getOrganisation(null,null,
+        data.getIntervenerFourWrapper().setIntervenerOrganisation(getOrganisation(null,null,
             CaseRole.INTVR_SOLICITOR_4.getValue()));
-        data.getIntervenerFourWrapper().setIntervener4Name("Intv4");
+        data.getIntervenerFourWrapper().setIntervenerName("Intv4");
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 

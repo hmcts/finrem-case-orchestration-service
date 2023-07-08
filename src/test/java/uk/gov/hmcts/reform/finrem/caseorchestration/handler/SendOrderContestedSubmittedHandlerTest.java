@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -21,15 +22,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremContestedSendOrderCorresponder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
@@ -43,8 +41,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEND_ORDER_POST_STATE_OPTION_FIELD;
 
 @ExtendWith(MockitoExtension.class)
 class SendOrderContestedSubmittedHandlerTest {
@@ -54,17 +50,13 @@ class SendOrderContestedSubmittedHandlerTest {
     private SendOrderContestedSubmittedHandler sendOrderContestedSubmittedHandler;
 
     @Mock
-    private NotificationService notificationService;
-    @Mock
     private GeneralOrderService generalOrderService;
-    private FeatureToggleService featureToggleService;
-    @Mock
-    private NotificationService notificationService;
-    @Mock
-    private ContestedSendOrderCorresponder contestedSendOrderCorresponder;
-
     @Mock
     private CcdService ccdService;
+    @Mock
+    private DocumentHelper documentHelper;
+    @Mock
+    private FinremContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
 
     @Test
@@ -123,11 +115,12 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
             caseDetails.getCaseType().getCcdType(), EventType.PREPARE_FOR_HEARING.getCcdType());
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
     @Test
@@ -136,11 +129,12 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.CLOSE);
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
             caseDetails.getCaseType().getCcdType(), EventType.CLOSE.getCcdType());
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
     @Test
@@ -149,11 +143,12 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService, never()).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
             caseDetails.getCaseType().getCcdType(), EventType.SEND_ORDER.getCcdType());
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
     @Test
@@ -161,10 +156,11 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService, never()).executeCcdEventOnCase(any(), any(), any(), any());
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
     @Test
@@ -180,14 +176,11 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
-        verify(notificationService).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
         verifyNoInteractions(ccdService);
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
     @Test
@@ -197,11 +190,11 @@ class SendOrderContestedSubmittedHandlerTest {
         setupData(caseDetails);
         FinremCaseData data = caseDetails.getData();
         data.setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verifyNoInteractions(notificationService);
         verifyNoInteractions(ccdService);
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
     @Test
@@ -217,14 +210,11 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.RESP_SOLICITOR.getValue()));
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
-        verify(notificationService, never()).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
         verifyNoInteractions(ccdService);
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
     @Test
@@ -237,17 +227,14 @@ class SendOrderContestedSubmittedHandlerTest {
         data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
         data.setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getValue()));
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
-        verify(notificationService).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
     @Test
@@ -264,17 +251,14 @@ class SendOrderContestedSubmittedHandlerTest {
 
         data.setDirectionDetailsCollection(singletonList(DirectionDetailCollection.builder()
             .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build()));
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
-        verify(notificationService, never()).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
     @Test
@@ -296,14 +280,11 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getValue()));
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
-        verify(notificationService).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
 
@@ -328,20 +309,11 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
-
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
-        verify(notificationService, never()).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
-    }
-
-    public BulkPrintDocument getBulkPrintDocument(CaseDocument caseDocument) {
-        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
-            .fileName(caseDocument.getDocumentFilename())
-            .build();
+        verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
     private DynamicMultiSelectList getParties() {

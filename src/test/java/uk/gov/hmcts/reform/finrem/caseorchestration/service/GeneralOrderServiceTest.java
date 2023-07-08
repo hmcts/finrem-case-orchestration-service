@@ -37,6 +37,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
@@ -332,6 +333,36 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         List<String> partyList = generalOrderService.getParties(caseDetails);
         assertEquals("6 parties availablle ", 6, partyList.size());
+    }
+
+
+    @Test
+    public void isOrderSharedWithApplicant() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getValue()),
+            getDynamicElementList(CaseRole.RESP_SOLICITOR.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getValue()));
+
+        DynamicMultiSelectList parties = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+
+        data.setPartiesOnCase(parties);
+
+        assertTrue(generalOrderService.isOrderSharedWithApplicant(caseDetails));
+        assertTrue(generalOrderService.isOrderSharedWithRespondent(caseDetails));
+        assertTrue(generalOrderService.isOrderSharedWithIntervener1(caseDetails));
+        assertTrue(generalOrderService.isOrderSharedWithIntervener2(caseDetails));
+        assertTrue(generalOrderService.isOrderSharedWithIntervener3(caseDetails));
+        assertTrue(generalOrderService.isOrderSharedWithIntervener4(caseDetails));
+
     }
 
     @Test

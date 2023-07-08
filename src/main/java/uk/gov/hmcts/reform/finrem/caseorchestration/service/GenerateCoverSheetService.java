@@ -141,7 +141,7 @@ public class GenerateCoverSheetService {
                 .build();
             caseData.put(ADDRESSEE, addressee);
             caseData.put(COURT_CONTACT_DETAILS, formatCtscContactDetailsForCoversheet());
-            caseData.put(CASE_NUMBER, caseDataService.nullToEmpty(caseDetails.getId()));
+            caseData.put(CASE_NUMBER, CaseDataService.nullToEmpty(caseDetails.getId()));
         }
     }
 
@@ -165,6 +165,15 @@ public class GenerateCoverSheetService {
             ? AddressFoundInCaseData.SOLICITOR
             : caseDataService.addressLineOneNotEmpty((Map) caseData.get(partyAddressCcdFieldName)) ? AddressFoundInCaseData.PARTY
             : AddressFoundInCaseData.NONE;
+    }
+
+    public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
+                                                     final String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, recipient);
     }
 
     private String partyName(Object partyFirstMiddleName, Object partyLastName) {

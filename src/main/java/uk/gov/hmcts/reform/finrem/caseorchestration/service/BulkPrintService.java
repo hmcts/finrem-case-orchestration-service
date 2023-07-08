@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 
@@ -232,5 +233,23 @@ public class BulkPrintService {
 
     public String getRecipient(String text) {
         return StringUtils.remove(WordUtils.capitalizeFully(text, '_'), "_");
+    }
+
+    public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper,
+                                         FinremCaseDetails caseDetails,
+                                         String authorisationToken,
+                                         List<BulkPrintDocument> caseDocuments) {
+
+        return printDocumentsWithCoversheet(caseDetails,
+            generateIntervenerCoverSheet(caseDetails, authorisationToken, intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
+            intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
+    }
+
+    private BulkPrintDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails, String authorisationToken,
+                                                          DocumentHelper.PaperNotificationRecipient recipient) {
+        CaseDocument intervenerCoverSheet =
+            coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
+        log.info("Intervener cover sheet generated {}, for case Id {}", intervenerCoverSheet, caseDetails.getId());
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
     }
 }

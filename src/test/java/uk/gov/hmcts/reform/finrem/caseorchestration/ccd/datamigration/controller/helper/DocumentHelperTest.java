@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -89,7 +88,6 @@ public class DocumentHelperTest {
     private static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
     private static final String BINARY_URL = DOC_URL + "/binary";
     private static final String FILE_NAME = "app_docs.docx";
-    private static final String TEST_CASE_ID = "123123";
     private ObjectMapper objectMapper;
     private DocumentHelper documentHelper;
     @Mock
@@ -313,12 +311,13 @@ public class DocumentHelperTest {
 
         String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
 
-        String expectedAddress = "50 Applicant Street" + "\n"
-            + "Second Address Line" + "\n"
-            + "Third Address Line" + "\n"
-            + "Greater London" + "\n"
-            + "London" + "\n"
-            + "SW1";
+        String expectedAddress = """
+            50 Applicant Street
+            Second Address Line
+            Third Address Line
+            Greater London
+            London
+            SW1""";
 
         assertThat(formattedAddress, is(expectedAddress));
     }
@@ -353,12 +352,13 @@ public class DocumentHelperTest {
         testAddressMap.put("PostCode", "SW1");
 
         String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
-        String expectedAddress = "50 Applicant Street" + "\n"
-            + "Second Address Line" + "\n"
-            + "Third Address Line" + "\n"
-            + "Greater London" + "\n"
-            + "London" + "\n"
-            + "SW1";
+        String expectedAddress = """
+            50 Applicant Street
+            Second Address Line
+            Third Address Line
+            Greater London
+            London
+            SW1""";
 
         assertThat(formattedAddress, is(expectedAddress));
     }

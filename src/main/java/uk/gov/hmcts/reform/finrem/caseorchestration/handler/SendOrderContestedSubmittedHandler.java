@@ -4,38 +4,38 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremContestedSendOrderCorresponder;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
 public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
-    private final NotificationService notificationService;
     private final GeneralOrderService generalOrderService;
     private final CcdService ccdService;
-    private final ContestedSendOrderCorresponder contestedSendOrderCorresponder;
+    private final DocumentHelper documentHelper;
+    private final FinremContestedSendOrderCorresponder contestedSendOrderCorresponder;
+
 
     public SendOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                              NotificationService notificationService,
                                               GeneralOrderService generalOrderService,
-                                              CcdService ccdService) {
+                                              CcdService ccdService,
+                                              DocumentHelper documentHelper,
+                                              FinremContestedSendOrderCorresponder contestedSendOrderCorresponder) {
         super(finremCaseDetailsMapper);
-        this.notificationService = notificationService;
         this.generalOrderService = generalOrderService;
         this.ccdService = ccdService;
+        this.documentHelper = documentHelper;
+        this.contestedSendOrderCorresponder = contestedSendOrderCorresponder;
     }
 
 
@@ -56,7 +56,7 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
         List<String> parties = generalOrderService.getParties(caseDetails);
         log.info("Selected parties {} on case {}", parties, caseDetails.getId());
 
-        sendNotifications(callbackRequest, parties);
+        sendNotifications(callbackRequest, parties, userAuthorisation);
 
         updateCaseWithPostStateOption(caseDetails, userAuthorisation);
 
@@ -82,53 +82,40 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
             || postStateOption.getEventToTrigger().equals(EventType.CLOSE);
     }
 
-    private void sendNotifications(CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-        if (!caseDataService.isPaperApplication(caseData) && Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
-            log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-            contestedSendOrderCorresponder.sendCorrespondence(caseDetails);
-    private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties) {
+
+
+
+    private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
-        String caseId = String.valueOf(caseDetails.getId());
 
-        if (Objects.nonNull(caseData.getFinalOrderCollection())) {
-            log.info("Received request to send email for 'Order Approved' for Case ID: {}", caseId);
-            if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
-                && parties.contains(CaseRole.APP_SOLICITOR.getValue())) {
-                log.info("Sending 'Order Approved' email notification to Applicant Solicitor for Case ID: {}", caseId);
-                notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
-            }
-
-            if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
-                && parties.contains(CaseRole.RESP_SOLICITOR.getValue())) {
-                log.info("Sending 'Order Approved' email notification to Respondent Solicitor for Case ID: {}", caseId);
-                notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
-            }
-            //add Interveners notification
-        }
+        FinremCaseDetails copyCaseDetails = documentHelper.deepCopy(caseDetails, FinremCaseDetails.class);
+        setPartiesToRecieveCommunication(copyCaseDetails, parties);
+        log.info("About to start send order correspondence for case {}", caseDetails.getId());
+        contestedSendOrderCorresponder.sendCorrespondence(copyCaseDetails, userAuthorisation);
+        log.info("Finish sending order correspondence for case {}", caseDetails.getId());
     }
 
-    private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
-        String caseId = String.valueOf(caseDetails.getId());
-
-        if (Objects.nonNull(caseData.getFinalOrderCollection())) {
-            log.info("Received request to send email for 'Order Approved' for Case ID: {}", caseId);
-            if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
-                && parties.contains(CaseRole.APP_SOLICITOR.getValue())) {
-                log.info("Sending 'Order Approved' email notification to Applicant Solicitor for Case ID: {}", caseId);
-                notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
+    private void setPartiesToRecieveCommunication(FinremCaseDetails copyCaseDetails, List<String> parties) {
+        FinremCaseData data = copyCaseDetails.getData();
+        parties.forEach(role -> {
+            if (!generalOrderService.isOrderSharedWithApplicant(copyCaseDetails)) {
+                data.setApplicantCorrespondenceEnabled(false);
             }
-
-            if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
-                && parties.contains(CaseRole.RESP_SOLICITOR.getValue())) {
-                log.info("Sending 'Order Approved' email notification to Respondent Solicitor for Case ID: {}", caseId);
-                notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
+            if (!generalOrderService.isOrderSharedWithRespondent(copyCaseDetails)) {
+                data.setRespondentCorrespondenceEnabled(false);
             }
-            //add Interveners notification
-        }
+            if (!generalOrderService.isOrderSharedWithIntervener1(copyCaseDetails)) {
+                data.setIntervener1CorrespondenceEnabled(false);
+            }
+            if (!generalOrderService.isOrderSharedWithIntervener2(copyCaseDetails)) {
+                data.setIntervener2CorrespondenceEnabled(false);
+            }
+            if (!generalOrderService.isOrderSharedWithIntervener3(copyCaseDetails)) {
+                data.setIntervener3CorrespondenceEnabled(false);
+            }
+            if (!generalOrderService.isOrderSharedWithIntervener4(copyCaseDetails)) {
+                data.setIntervener4CorrespondenceEnabled(false);
+            }
+        });
     }
 }
