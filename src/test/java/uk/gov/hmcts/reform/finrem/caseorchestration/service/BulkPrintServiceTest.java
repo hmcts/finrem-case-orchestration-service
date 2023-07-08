@@ -51,6 +51,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     private ObjectMapper mapper;
     @Autowired
     private DocumentHelper documentHelper;
+    @MockBean
+    private GeneralOrderService generalOrderService;
 
     @MockBean
     private GenerateCoverSheetService coverSheetService;
@@ -313,6 +315,14 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
+    }
+
+    @Test
+    public void getBulkPrintDocuments() {
+        when(generalOrderService.getBulkPrintDocuments(any()))
+            .thenReturn(List.of(BulkPrintDocument.builder().fileName("abc.pdf").binaryFileUrl("binary").build()));
+        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.getBulkPrintDocuments(finremCaseDetails());
+        assertEquals(1, bulkPrintDocuments.size());
     }
 
     private CaseDetails caseDetails() {

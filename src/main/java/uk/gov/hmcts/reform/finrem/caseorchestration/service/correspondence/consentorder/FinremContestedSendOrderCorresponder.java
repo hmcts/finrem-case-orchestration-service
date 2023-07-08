@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremMultiLetterOrEmailAllPartiesCorresponder;
 
@@ -21,14 +20,10 @@ import java.util.List;
 @Slf4j
 public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEmailAllPartiesCorresponder {
 
-    private final GeneralOrderService generalOrderService;
-
     @Autowired
     public FinremContestedSendOrderCorresponder(NotificationService notificationService,
-                                                BulkPrintService bulkPrintService,
-                                                GeneralOrderService generalOrderService) {
+                                                BulkPrintService bulkPrintService) {
         super(bulkPrintService, notificationService);
-        this.generalOrderService = generalOrderService;
     }
 
     @Override
@@ -77,6 +72,6 @@ public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEma
 
     @Override
     public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
-        return generalOrderService.getBulkPrintDocuments(caseDetails);
+        return bulkPrintService.getBulkPrintDocuments(caseDetails);
     }
 }

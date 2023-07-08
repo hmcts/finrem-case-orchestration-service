@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.cons
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
@@ -28,20 +28,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @ExtendWith(MockitoExtension.class)
 class FinremContestedSendOrderCorresponderTest {
 
+    @InjectMocks
     private FinremContestedSendOrderCorresponder corresponder;
     @Mock
     private NotificationService notificationService;
     @Mock
     private BulkPrintService bulkPrintService;
-    @Mock
-    private GeneralOrderService generalOrderService;
+
 
     private FinremCaseDetails caseDetails;
 
     @BeforeEach
     void setUp() {
-        corresponder = new  FinremContestedSendOrderCorresponder(notificationService,
-            bulkPrintService, generalOrderService);
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         caseDetails = finremCallbackRequest.getCaseDetails();
     }
@@ -112,7 +110,7 @@ class FinremContestedSendOrderCorresponderTest {
 
     @Test
     void getDocumentsToPrint() {
-        when(generalOrderService.getBulkPrintDocuments(any()))
+        when(bulkPrintService.getBulkPrintDocuments(any()))
             .thenReturn(List.of(BulkPrintDocument.builder().fileName("abc.pdf").binaryFileUrl("binary").build()));
         List<BulkPrintDocument> documentsToPrint = corresponder.getDocumentsToPrint(caseDetails);
         assertEquals(1, documentsToPrint.size());

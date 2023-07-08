@@ -37,6 +37,7 @@ public class BulkPrintService {
     private final DocumentHelper documentHelper;
     private final GenerateCoverSheetService coverSheetService;
     private final CaseDataService caseDataService;
+    private final GeneralOrderService generalOrderService;
 
     /**
      * Please upgrade your code.
@@ -251,5 +252,9 @@ public class BulkPrintService {
             coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
         log.info("Intervener cover sheet generated {}, for case Id {}", intervenerCoverSheet, caseDetails.getId());
         return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
+    }
+
+    public List<BulkPrintDocument> getBulkPrintDocuments(FinremCaseDetails caseDetails) {
+        return generalOrderService.getBulkPrintDocuments(caseDetails);
     }
 }
