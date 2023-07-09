@@ -317,29 +317,6 @@ public class GeneralOrderService {
         }
     }
 
-    public List<BulkPrintDocument> getBulkPrintDocuments(FinremCaseDetails caseDetails) {
-        FinremCaseData caseData = caseDetails.getData();
-        DynamicMultiSelectList selectedOrders = caseData.getOrdersToShare();
-
-        List<BulkPrintDocument>  bulkPrintDocuments = new ArrayList<>();
-        CaseDocument generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
-
-        if (isSelectedOrderMatches(selectedOrders, generalOrder)) {
-            bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
-        }
-
-        List<CaseDocument> hearingOrders = hearingOrdersToShare(caseDetails, selectedOrders);
-        if (!hearingOrders.isEmpty()) {
-            hearingOrders.forEach(doc -> bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(doc)));
-        }
-
-        CaseDocument document = caseData.getAdditionalDocument();
-        if (document != null) {
-            bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(document));
-        }
-        return bulkPrintDocuments;
-    }
-
     public boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, CaseDocument caseDocument) {
         if (caseDocument != null) {
             Optional<DynamicMultiSelectListElement> listElement = selectedDocs.getValue().stream()

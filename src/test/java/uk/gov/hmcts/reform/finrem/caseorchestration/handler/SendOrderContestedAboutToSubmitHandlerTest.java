@@ -200,6 +200,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(2, caseData.getIntv1OrderCollection().size());
         assertEquals(2, caseData.getAppOrderCollection().size());
         assertEquals(2, caseData.getRespOrderCollection().size());
+        assertEquals(3, caseData.getOrdersSentToPartiesCollection().size());
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
@@ -279,5 +280,4 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
                 .data(new FinremCaseData()).build())
             .build();
     }
-
 }

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
@@ -20,9 +21,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
@@ -110,10 +114,32 @@ class FinremContestedSendOrderCorresponderTest {
 
     @Test
     void getDocumentsToPrint() {
-        when(bulkPrintService.getBulkPrintDocuments(any()))
-            .thenReturn(List.of(BulkPrintDocument.builder().fileName("abc.pdf").binaryFileUrl("binary").build()));
+        caseDetails.getData().setOrdersSentToPartiesCollection(List.of(caseDocument()));
         List<BulkPrintDocument> documentsToPrint = corresponder.getDocumentsToPrint(caseDetails);
         assertEquals(1, documentsToPrint.size());
+    }
+
+
+    @Test
+    void shouldSendLettersToInterveners() {
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerName("Intervener 1")
+            .intervenerEmail("Intervener email")
+            .build();
+
+        caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
+        caseDetails.getData().setOrdersSentToPartiesCollection(List.of(caseDocument()));
+
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
+            any(FinremCaseDetails.class))).thenReturn(false);
+
+        corresponder.sendCorrespondence(caseDetails, "authToken");
+
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOneWrapper, caseDetails);
+        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOneWrapper.class), any(FinremCaseDetails.class),
+            anyString(), anyList());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

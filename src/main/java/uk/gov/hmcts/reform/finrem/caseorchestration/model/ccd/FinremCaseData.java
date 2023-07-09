@@ -403,6 +403,8 @@ public class FinremCaseData {
     @JsonIgnore
     private boolean intervener4CorrespondenceEnabled = true;
 
+    private List<CaseDocument> ordersSentToPartiesCollection;
+
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ScheduleOneWrapper scheduleOneWrapper;

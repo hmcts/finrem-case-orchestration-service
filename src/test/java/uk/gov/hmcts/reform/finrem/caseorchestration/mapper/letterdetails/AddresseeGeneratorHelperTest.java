@@ -17,10 +17,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.ADDRESS_MAP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.NAME_MAP;
 
 public class AddresseeGeneratorHelperTest {
+
+
+    @Test
+    public void givenUnknownRecipient_whenGetAddressee_thenReturnNull() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).build();
+        assertNull(AddresseeGeneratorHelper.generateAddressee(caseDetails, null));
+    }
+
 
     @Test
     public void givenApplicantRecipient_whenGetAddressee_thenReturnApplicantAddressee() {
