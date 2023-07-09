@@ -121,6 +121,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getAppOrderCollection())
                 .orElse(new ArrayList<>());
             hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
+            addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
             caseData.setAppOrderCollection(orderColl);
         }
 
@@ -129,6 +130,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getRespOrderCollection())
                 .orElse(new ArrayList<>());
             hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
+            addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
             caseData.setRespOrderCollection(orderColl);
         }
 
@@ -137,6 +139,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv1OrderCollection())
                 .orElse(new ArrayList<>());
             hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
+            addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
             caseData.setIntv1OrderCollection(orderColl);
         }
 
@@ -145,6 +148,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv2OrderCollection())
                 .orElse(new ArrayList<>());
             hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
+            addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
             caseData.setIntv2OrderCollection(orderColl);
         }
 
@@ -153,6 +157,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv3OrderCollection())
                 .orElse(new ArrayList<>());
             hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
+            addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
             caseData.setIntv3OrderCollection(orderColl);
         }
 
@@ -161,6 +166,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv4OrderCollection())
                 .orElse(new ArrayList<>());
             hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
+            addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
             caseData.setIntv4OrderCollection(orderColl);
         }
 
@@ -223,6 +229,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> intv4ApprovedOrderCollections = Optional.ofNullable(caseData.getIntv4OrderCollection())
                 .orElse(new ArrayList<>());
             intv4ApprovedOrderCollections.add(getApprovedOrderCollection(generalOrder));
+            addAdditionalOrderDocumentToPartyCollection(caseData, intv4ApprovedOrderCollections);
             caseData.setIntv4OrderCollection(intv4ApprovedOrderCollections);
         }
     }
@@ -237,6 +244,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> intv3ApprovedOrderCollections = Optional.ofNullable(caseData.getIntv3OrderCollection())
                 .orElse(new ArrayList<>());
             intv3ApprovedOrderCollections.add(getApprovedOrderCollection(generalOrder));
+            addAdditionalOrderDocumentToPartyCollection(caseData, intv3ApprovedOrderCollections);
             caseData.setIntv3OrderCollection(intv3ApprovedOrderCollections);
         }
     }
@@ -251,6 +259,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> intv2ApprovedOrderCollections = Optional.ofNullable(caseData.getIntv2OrderCollection())
                 .orElse(new ArrayList<>());
             intv2ApprovedOrderCollections.add(getApprovedOrderCollection(generalOrder));
+            addAdditionalOrderDocumentToPartyCollection(caseData, intv2ApprovedOrderCollections);
             caseData.setIntv2OrderCollection(intv2ApprovedOrderCollections);
         }
     }
@@ -265,6 +274,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> intv1ApprovedOrderCollections = Optional.ofNullable(caseData.getIntv1OrderCollection())
                 .orElse(new ArrayList<>());
             intv1ApprovedOrderCollections.add(getApprovedOrderCollection(generalOrder));
+            addAdditionalOrderDocumentToPartyCollection(caseData, intv1ApprovedOrderCollections);
             caseData.setIntv1OrderCollection(intv1ApprovedOrderCollections);
         }
     }
@@ -279,6 +289,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> respApprovedOrderCollections = Optional.ofNullable(caseData.getRespOrderCollection())
                 .orElse(new ArrayList<>());
             respApprovedOrderCollections.add(getApprovedOrderCollection(generalOrder));
+            addAdditionalOrderDocumentToPartyCollection(caseData, respApprovedOrderCollections);
             caseData.setRespOrderCollection(respApprovedOrderCollections);
         }
     }
@@ -293,7 +304,15 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<ApprovedOrderCollection> appApprovedOrderCollections = Optional.ofNullable(caseData.getAppOrderCollection())
                 .orElse(new ArrayList<>());
             appApprovedOrderCollections.add(getApprovedOrderCollection(generalOrder));
+            addAdditionalOrderDocumentToPartyCollection(caseData, appApprovedOrderCollections);
             caseData.setAppOrderCollection(appApprovedOrderCollections);
+        }
+    }
+
+    private void addAdditionalOrderDocumentToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> approvedOrderCollections) {
+        CaseDocument additionalDocument = caseData.getAdditionalDocument();
+        if (additionalDocument != null) {
+            approvedOrderCollections.add(getApprovedOrderCollection(additionalDocument));
         }
     }
 

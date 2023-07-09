@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,8 +28,8 @@ import java.util.UUID;
 import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -85,7 +84,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = response.getData();
 
-        Assertions.assertNull(caseData.getPartiesOnCase());
+        assertNull(caseData.getPartiesOnCase());
 
         verify(generalOrderService).getParties(callbackRequest.getCaseDetails());
         verify(generalOrderService).hearingOrdersToShare(callbackRequest.getCaseDetails(), null);
@@ -105,7 +104,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         Exception exception = Assert.assertThrows(RuntimeException.class,
             () -> sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN));
-        Assertions.assertNull(exception.getMessage());
+        assertNull(exception.getMessage());
     }
 
     @Test
@@ -191,6 +190,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
         when(generalOrderService.isSelectedOrderMatches(selectedDocs, caseDocument())).thenReturn(true);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
             = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -198,13 +198,14 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
         assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertEquals(3, caseData.getIntv1OrderCollection().size());
-        assertEquals(3, caseData.getAppOrderCollection().size());
-        assertEquals(3, caseData.getRespOrderCollection().size());
+        assertEquals(5, caseData.getIntv1OrderCollection().size());
+        assertEquals(5, caseData.getAppOrderCollection().size());
+        assertEquals(5, caseData.getRespOrderCollection().size());
         assertEquals(4, caseData.getOrdersSentToPartiesCollection().size());
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(generalOrderService).isSelectedOrderMatches(any(), any());
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
 
     }
