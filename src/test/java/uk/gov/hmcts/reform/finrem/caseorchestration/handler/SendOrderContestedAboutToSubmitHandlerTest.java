@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.Assert;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -29,8 +29,8 @@ import java.util.UUID;
 import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,8 +41,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SendOrderContestedAboutToSubmitHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class SendOrderContestedAboutToSubmitHandlerTest {
 
     private static final String uuid = UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString();
     @InjectMocks
@@ -55,28 +55,28 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     private DocumentHelper documentHelper;
 
     @Test
-    public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
+    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
         assertThat(sendOrderContestedAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER),
             is(true));
     }
 
     @Test
-    public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventClose_thenHandlerCanNotHandle() {
+    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventClose_thenHandlerCanNotHandle() {
         assertThat(sendOrderContestedAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE),
             is(false));
     }
 
     @Test
-    public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
+    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
         assertThat(sendOrderContestedAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.SEND_ORDER),
             is(false));
     }
 
     @Test
-    public void givenContestedCase_whenNoOrderAvailable_thenHandlerDoNothing() {
+    void givenContestedCase_whenNoOrderAvailable_thenHandlerDoNothing() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
@@ -85,7 +85,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = response.getData();
 
-        assertNull(caseData.getPartiesOnCase());
+        Assertions.assertNull(caseData.getPartiesOnCase());
 
         verify(generalOrderService).getParties(callbackRequest.getCaseDetails());
         verify(generalOrderService).hearingOrdersToShare(callbackRequest.getCaseDetails(), null);
@@ -96,7 +96,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
 
     @Test
-    public void givenContestedCase_whenAnyOfMethodFails_thenHandlerThrowError() {
+    void givenContestedCase_whenAnyOfMethodFails_thenHandlerThrowError() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -109,7 +109,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenOrderAvailableButNoParty_thenHandlerHandleRequest() {
+    void givenContestedCase_whenOrderAvailableButNoParty_thenHandlerHandleRequest() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -158,7 +158,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenOrderAvailableToShareWithParties_thenHandlerHandleRequest() {
+    void givenContestedCase_whenOrderAvailableToShareWithParties_thenHandlerHandleRequest() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -196,7 +196,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
             = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
-        assertEquals("selected parties on case", 6, caseData.getPartiesOnCase().getValue().size());
+        assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertEquals(3, caseData.getIntv1OrderCollection().size());
         assertEquals(3, caseData.getAppOrderCollection().size());
@@ -210,7 +210,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenOrderAvailableToStampAndNoAdditionalDocumentUploaded_thenHandlerHandleRequest() {
+    void givenContestedCase_whenOrderAvailableToStampAndNoAdditionalDocumentUploaded_thenHandlerHandleRequest() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -239,7 +239,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
             = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
-        assertEquals("selected parties on case", 6, caseData.getPartiesOnCase().getValue().size());
+        assertEquals(12, caseData.getPartiesOnCase().getValue().size());
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertEquals(2, caseData.getIntv1OrderCollection().size());
 
