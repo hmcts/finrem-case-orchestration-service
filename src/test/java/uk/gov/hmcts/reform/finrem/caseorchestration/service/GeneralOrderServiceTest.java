@@ -342,12 +342,13 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getValue()),
-            getDynamicElementList(CaseRole.RESP_SOLICITOR.getValue()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getValue()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getValue()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getValue()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getValue()));
+        List<DynamicMultiSelectListElement> dynamicElementList =
+            List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getValue()),getDynamicElementList(CaseRole.APP_BARRISTER.getValue()),
+            getDynamicElementList(CaseRole.RESP_SOLICITOR.getValue()),getDynamicElementList(CaseRole.RESP_BARRISTER.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getValue()),getDynamicElementList(CaseRole.INTVR_BARRISTER_1.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getValue()),getDynamicElementList(CaseRole.INTVR_BARRISTER_2.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getValue()),getDynamicElementList(CaseRole.INTVR_BARRISTER_3.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getValue()),getDynamicElementList(CaseRole.INTVR_BARRISTER_4.getValue()));
 
         DynamicMultiSelectList parties = DynamicMultiSelectList.builder()
             .value(dynamicElementList)

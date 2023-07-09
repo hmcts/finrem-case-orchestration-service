@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseD
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -114,7 +117,9 @@ class FinremContestedSendOrderCorresponderTest {
 
     @Test
     void getDocumentsToPrint() {
-        caseDetails.getData().setOrdersSentToPartiesCollection(List.of(caseDocument()));
+        List<OrderSentToPartiesCollection> orders = new ArrayList<>();
+        orders.add(OrderSentToPartiesCollection.builder().value(SendOrderDocuments.builder().caseDocument(caseDocument()).build()).build());
+        caseDetails.getData().setOrdersSentToPartiesCollection(orders);
         List<BulkPrintDocument> documentsToPrint = corresponder.getDocumentsToPrint(caseDetails);
         assertEquals(1, documentsToPrint.size());
     }
@@ -128,7 +133,10 @@ class FinremContestedSendOrderCorresponderTest {
             .build();
 
         caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
-        caseDetails.getData().setOrdersSentToPartiesCollection(List.of(caseDocument()));
+
+        List<OrderSentToPartiesCollection> orders = new ArrayList<>();
+        orders.add(OrderSentToPartiesCollection.builder().value(SendOrderDocuments.builder().caseDocument(caseDocument()).build()).build());
+        caseDetails.getData().setOrdersSentToPartiesCollection(orders);
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
@@ -74,10 +75,13 @@ public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEma
 
     @Override
     public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
-        List<CaseDocument> ordersSentToPartiesCollection = caseDetails.getData().getOrdersSentToPartiesCollection();
+        List<OrderSentToPartiesCollection> sentToPartiesCollection = caseDetails.getData().getOrdersSentToPartiesCollection();
         List<BulkPrintDocument> bulkPrintDocumentList = new ArrayList<>();
-        ordersSentToPartiesCollection.forEach(doc -> bulkPrintDocumentList.add(BulkPrintDocument.builder()
-            .fileName(doc.getDocumentFilename()).binaryFileUrl(doc.getDocumentBinaryUrl()).build()));
+        sentToPartiesCollection.forEach(sendOrderObj -> {
+            CaseDocument caseDocument = sendOrderObj.getValue().getCaseDocument();
+            bulkPrintDocumentList.add(BulkPrintDocument.builder()
+                .fileName(caseDocument.getDocumentFilename()).binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build());
+        });
         return bulkPrintDocumentList;
     }
 }

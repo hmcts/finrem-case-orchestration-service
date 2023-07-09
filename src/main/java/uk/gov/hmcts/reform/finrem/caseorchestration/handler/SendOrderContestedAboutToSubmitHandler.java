@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -69,30 +71,30 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             DynamicMultiSelectList selectedOrders = caseData.getOrdersToShare();
             log.info("selected orders {} on case {}", selectedOrders, caseId);
 
-            List<CaseDocument> ordersSentToPartiesCollection = new ArrayList<>();
+            List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
             CaseDocument document = caseData.getAdditionalDocument();
             if (document != null) {
                 log.info("additional uploaded document with send order {} for caseId {}", document, caseId);
                 CaseDocument additionalUploadedOrderDoc = genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseId);
-                ordersSentToPartiesCollection.add(additionalUploadedOrderDoc);
+                printOrderCollection.add(addToPrintOrderCollection(additionalUploadedOrderDoc));
                 caseData.setAdditionalDocument(additionalUploadedOrderDoc);
             }
 
             log.info("Share and print general with for case {}", caseDetails.getId());
-            shareAndSendGeneralOrderWithSelectedParties(caseDetails, parties, selectedOrders, ordersSentToPartiesCollection);
+            shareAndSendGeneralOrderWithSelectedParties(caseDetails, parties, selectedOrders, printOrderCollection);
 
 
             log.info("Share and print hearing order for case {}", caseDetails.getId());
             List<CaseDocument> hearingOrders = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
             if (hearingOrders != null && !hearingOrders.isEmpty()) {
-                shareAndSendHearingDocuments(caseDetails, hearingOrders, parties, ordersSentToPartiesCollection, userAuthorisation);
+                shareAndSendHearingDocuments(caseDetails, hearingOrders, parties, printOrderCollection, userAuthorisation);
                 log.info("sending for stamp final order on case {}", caseDetails.getId());
                 hearingOrders.forEach(orderToStamp -> {
                     log.info("StampFinalOrder {} for Case ID {}, ", orderToStamp, caseId);
                     stampAndAddToCollection(caseDetails, orderToStamp, userAuthorisation);
                 });
             }
-            caseData.setOrdersSentToPartiesCollection(ordersSentToPartiesCollection);
+            caseData.setOrdersSentToPartiesCollection(printOrderCollection);
         } catch (RuntimeException e) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
@@ -106,12 +108,12 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void shareAndSendHearingDocuments(FinremCaseDetails caseDetails,
                                               List<CaseDocument> hearingOrders,
                                               List<String> partyList,
-                                              List<CaseDocument> ordersSentToPartiesCollection,
+                                              List<OrderSentToPartiesCollection> printOrderCollection,
                                               String userAuthorisation) {
         Long caseId = caseDetails.getId();
         log.info("Share Hearing Documents for case {}:", caseId);
         List<CaseDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, hearingOrders, userAuthorisation);
-        ordersSentToPartiesCollection.addAll(hearingDocumentPack);
+        hearingDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
 
         FinremCaseData caseData = caseDetails.getData();
         if (partyList.contains(CaseRole.APP_SOLICITOR.getValue())) {
@@ -192,7 +194,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void shareAndSendGeneralOrderWithSelectedParties(FinremCaseDetails caseDetails,
                                                              List<String> partyList,
                                                              DynamicMultiSelectList selectedOrders,
-                                                             List<CaseDocument> ordersSentToPartiesCollection) {
+                                                             List<OrderSentToPartiesCollection> printOrderCollection) {
 
         Long caseId = caseDetails.getId();
         log.info("Share selected 'GeneralOrder' With selected parties for caseId {}", caseId);
@@ -207,7 +209,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             shareAndPrintOrderWithIntervenerTwo(caseDetails, partyList, generalOrder);
             shareAndPrintOrderWithIntervenerThree(caseDetails, partyList, generalOrder);
             shareAndPrintOrderWithIntervenerFour(caseDetails, partyList, generalOrder);
-            ordersSentToPartiesCollection.add(generalOrder);
+            printOrderCollection.add(addToPrintOrderCollection(generalOrder));
         }
     }
 
@@ -320,6 +322,12 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
         caseData.setFinalOrderCollection(finalOrderCollection);
         log.info("Finished stamping final order for caseId {}", caseId);
+    }
+
+    private OrderSentToPartiesCollection addToPrintOrderCollection(CaseDocument document) {
+        return OrderSentToPartiesCollection.builder()
+            .value(SendOrderDocuments.builder().caseDocument(document).build())
+            .build();
     }
 
     private DirectionOrderCollection prepareFinalOrderList(CaseDocument document) {
