@@ -14,9 +14,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesHandler;
@@ -32,6 +34,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
@@ -39,6 +42,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDocumentHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
+    private static final String USER_ID = "testUserId";
+    public static final String CASE_ID = "1234567890";
 
     @Mock
     ApplicantCaseSummariesHandler applicantCaseSummariesHandler;
@@ -46,7 +51,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
     @Mock
     ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
     @Mock
-    private AssignCaseAccessService accessService;
+    private CaseAssignedRoleService caseAssignedRoleService;
 
     @Mock
     FeatureToggleService featureToggleService;
@@ -67,7 +72,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         when(featureToggleService.isManageBundleEnabled()).thenReturn(false);
         uploadContestedCaseDocumentsHandler = new UploadContestedCaseDocumentsAboutToSubmitHandler(featureToggleService,
             Arrays.asList(applicantCaseSummariesHandler, applicantChronologiesStatementHandler),
-            objectMapper, uploadedDocumentHelper, accessService);
+            objectMapper, uploadedDocumentHelper, caseAssignedRoleService);
     }
 
     @Test
@@ -89,8 +94,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
     public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandlers() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN)).thenReturn("[APPSOLICITOR]");
+        when(featureToggleService.isIntervenerEnabled()).thenReturn(true);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "", "yes", "no", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
@@ -106,36 +112,38 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
     }
 
     @Test
-    public void givenUploadCaseDocument_whenDocIsValidAndUploadedByCaseWorkerAndPartyChoosenApplicant_thenExecuteHandlers() {
-        List<String> roles = List.of(CASE_LEVEL_ROLE);
+    public void givenUploadCaseDocument_whenDocIsValidAndUploadedByCaseRoleAndPartyChoosenApplicant_thenExecuteHandlers() {
 
-        for (String activeRole : roles) {
-            CallbackRequest callbackRequest = buildCallbackRequest();
-            CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN)).thenReturn(activeRole);
-            uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Other Example"));
-            caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
-            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-            caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
-            uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
-            List<ContestedUploadedDocumentData> uploadedDocumentPost
-                = convertToUploadDocList(caseDetails.getData().get(CONTESTED_UPLOADED_DOCUMENTS));
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        when(featureToggleService.isIntervenerEnabled()).thenReturn(true);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CASE_LEVEL_ROLE.toLowerCase()));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
-            verify(applicantCaseSummariesHandler).handle(uploadedDocumentPost, caseDetails.getData());
-            verify(applicantChronologiesStatementHandler).handle(uploadedDocumentPost, caseDetails.getData());
-        }
+        List<ContestedUploadedDocumentData> uploadedDocumentPost
+            = convertToUploadDocList(caseDetails.getData().get(CONTESTED_UPLOADED_DOCUMENTS));
+
+        verify(applicantCaseSummariesHandler).handle(uploadedDocumentPost, caseDetails.getData());
+        verify(applicantChronologiesStatementHandler).handle(uploadedDocumentPost, caseDetails.getData());
+
     }
 
     @Test
     public void givenUploadCaseDocument_whenDocIsValidAndUploadedByInterveners_thenExecuteHandlers() {
         List<String> roles = List.of("[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]",
             "[[INTVRBARRISTER1]]", "[[INTVRBARRISTER2]]", "[[INTVRBARRISTER3]]", "[[INTVRBARRISTER4]]", "[RESPSOLICITOR]", "");
-
+        when(featureToggleService.isIntervenerEnabled()).thenReturn(true);
         for (String activeRole : roles) {
             CallbackRequest callbackRequest = buildCallbackRequest();
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN)).thenReturn(activeRole);
+            when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+                .thenReturn(getCaseAssignedUserRolesResource(activeRole));
             uploadDocumentList.add(createContestedUploadDocumentItem("Other", "", "yes", "no", "Other Example"));
             caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
@@ -153,7 +161,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
     @Test
     public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandler_And_ValidateDocumentOrder() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN)).thenReturn("[APPSOLICITOR]");
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         ContestedUploadedDocumentData oldDoc = createContestedUploadDocumentItem("Other", "", "yes", "no", "Old Document Example");
         existingDocumentList.add(oldDoc);
@@ -181,7 +188,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
         when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "", "yes", "no","Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "", "yes", "no", "Other Example"));
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -196,8 +203,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
     public void givenUploadFileWithoutTrialBundleWhenAboutToSubmitThenNoErrors() {
 
         when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN)).thenReturn("[APPSOLICITOR]");
-        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "", "yes", "no","Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "", "yes", "no", "Other Example"));
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -221,5 +227,15 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
     public List<ContestedUploadedDocumentData> convertToUploadDocList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
+    }
+
+    private CaseAssignedUserRolesResource getCaseAssignedUserRolesResource(String caseRole) {
+        return CaseAssignedUserRolesResource.builder()
+            .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder()
+                .userId(USER_ID)
+                .caseRole(caseRole)
+                .caseDataId(CASE_ID)
+                .build()))
+            .build();
     }
 }
