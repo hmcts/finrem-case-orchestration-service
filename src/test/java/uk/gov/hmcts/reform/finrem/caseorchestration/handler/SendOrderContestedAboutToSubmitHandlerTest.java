@@ -158,7 +158,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenOrderAvailableToStamp_thenHandlerHandleRequest() {
+    public void givenContestedCase_whenOrderAvailableToShareWithParties_thenHandlerHandleRequest() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -190,6 +190,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
+        when(generalOrderService.isSelectedOrderMatches(selectedDocs, caseDocument())).thenReturn(true);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
             = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -197,12 +198,13 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
         assertEquals("selected parties on case", 6, caseData.getPartiesOnCase().getValue().size());
         assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertEquals(2, caseData.getIntv1OrderCollection().size());
-        assertEquals(2, caseData.getAppOrderCollection().size());
-        assertEquals(2, caseData.getRespOrderCollection().size());
-        assertEquals(3, caseData.getOrdersSentToPartiesCollection().size());
+        assertEquals(3, caseData.getIntv1OrderCollection().size());
+        assertEquals(3, caseData.getAppOrderCollection().size());
+        assertEquals(3, caseData.getRespOrderCollection().size());
+        assertEquals(4, caseData.getOrdersSentToPartiesCollection().size());
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
+        verify(generalOrderService).isSelectedOrderMatches(any(), any());
         verify(documentHelper).getStampType(caseData);
 
     }
@@ -258,9 +260,12 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     private List<String> partyList() {
-        return of(CaseRole.APP_SOLICITOR.getValue(),
-            CaseRole.RESP_SOLICITOR.getValue(), CaseRole.INTVR_SOLICITOR_1.getValue(), CaseRole.INTVR_SOLICITOR_2.getValue(),
-            CaseRole.INTVR_SOLICITOR_3.getValue(), CaseRole.INTVR_SOLICITOR_4.getValue());
+        return of(CaseRole.APP_SOLICITOR.getValue(),CaseRole.APP_BARRISTER.getValue(),
+            CaseRole.RESP_SOLICITOR.getValue(),CaseRole.RESP_BARRISTER.getValue(),
+            CaseRole.INTVR_SOLICITOR_1.getValue(),CaseRole.INTVR_BARRISTER_1.getValue(),
+            CaseRole.INTVR_SOLICITOR_2.getValue(),CaseRole.INTVR_BARRISTER_2.getValue(),
+            CaseRole.INTVR_SOLICITOR_3.getValue(),CaseRole.INTVR_BARRISTER_3.getValue(),
+            CaseRole.INTVR_SOLICITOR_4.getValue(),CaseRole.INTVR_BARRISTER_4.getValue());
     }
 
     private DynamicMultiSelectListElement getElementList(String role) {
