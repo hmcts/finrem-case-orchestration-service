@@ -41,7 +41,6 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
     @Mock
     private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
 
-
     private static final String DATE_OF_HEARING = "2019-01-01";
 
     @Before

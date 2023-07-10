@@ -150,6 +150,10 @@ public class FinremCaseData {
     private CaseDocument bulkPrintCoverSheetRes;
     private String bulkPrintLetterIdRes;
     private CaseDocument bulkPrintCoverSheetApp;
+    private CaseDocument bulkPrintCoverSheetIntervener1;
+    private CaseDocument bulkPrintCoverSheetIntervener2;
+    private CaseDocument bulkPrintCoverSheetIntervener3;
+    private CaseDocument bulkPrintCoverSheetIntervener4;
     private String bulkPrintLetterIdApp;
     private List<ConsentOrderCollection> approvedOrderCollection;
     private ApplicantRole divRoleOfFrApplicant;
@@ -507,7 +511,7 @@ public class FinremCaseData {
     @JsonIgnore
     public IntervenerThreeWrapper getIntervenerThreeWrapper() {
         if (intervenerThreeWrapper == null) {
-            this.intervenerThreeWrapper =  IntervenerThreeWrapper.builder().build();
+            this.intervenerThreeWrapper = IntervenerThreeWrapper.builder().build();
         }
         return intervenerThreeWrapper;
     }
