@@ -112,26 +112,6 @@ public class GenerateCoverSheetService {
     }
 
     @Deprecated
-    public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails,
-                                                     final String authorisationToken,
-                                                     DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        return generateCoverSheet(finremCaseDetails, authorisationToken, recipient);
-
-    }
-
-    public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
-                                                     final String authorisationToken,
-                                                     DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
-
-        return generateCoverSheet(caseDetails, authorisationToken, recipient);
-    }
-
-    @Deprecated
     private CaseDocument generateCoverSheet(CaseDetails caseDetails, String authorisationToken, String partyAddressCcdFieldName,
                                             String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
                                             String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,

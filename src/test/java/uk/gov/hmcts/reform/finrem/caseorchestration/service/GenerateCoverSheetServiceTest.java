@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.io.InputStream;
 import java.util.LinkedHashMap;
@@ -169,10 +170,8 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateIntervenerCoverSheet() throws Exception {
-        CaseDetails caseDetails = 
-          
-          
-          ();
+
+        CaseDetails caseDetails = caseDetailsWithIntervener1Unrepresented();
 
         CaseDocument caseDocument = generateCoverSheetService.generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
@@ -203,7 +202,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     private FinremCaseDetails finremCaseDetailsConsented() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         }
     }
 
