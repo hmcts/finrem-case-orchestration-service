@@ -6,10 +6,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -47,30 +43,10 @@ public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEma
 
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
-        if (caseDetails.getData().isIntervener1CorrespondenceEnabled()) {
-            log.info("Sending email notification to Intervener1 Solicitor for 'Order Approved' for case: {}", caseDetails.getId());
-            IntervenerOneWrapper oneWrapper = caseDetails.getData().getIntervenerOneWrapperIfPopulated();
-            notificationService.sendContestOrderApprovedEmailIntervener(caseDetails,
-                notificationService.getCaseDataKeysForIntervenerSolicitor(oneWrapper));
-        }
-        if (caseDetails.getData().isIntervener2CorrespondenceEnabled()) {
-            log.info("Sending email notification to Intervener2 Solicitor for 'Order Approved' for case: {}", caseDetails.getId());
-            IntervenerTwoWrapper twoWrapper = caseDetails.getData().getIntervenerTwoWrapperIfPopulated();
-            notificationService.sendContestOrderApprovedEmailIntervener(caseDetails,
-                notificationService.getCaseDataKeysForIntervenerSolicitor(twoWrapper));
-        }
-        if (caseDetails.getData().isIntervener3CorrespondenceEnabled()) {
-            log.info("Sending email notification to Intervener3 Solicitor for 'Order Approved' for case: {}", caseDetails.getId());
-            IntervenerThreeWrapper threeWrapper = caseDetails.getData().getIntervenerThreeWrapperIfPopulated();
-            notificationService.sendContestOrderApprovedEmailIntervener(caseDetails,
-                notificationService.getCaseDataKeysForIntervenerSolicitor(threeWrapper));
-        }
-        if (caseDetails.getData().isIntervener4CorrespondenceEnabled()) {
-            log.info("Sending email notification to Intervener4 Solicitor for 'Order Approved' for case: {}", caseDetails.getId());
-            IntervenerFourWrapper fourWrapper = caseDetails.getData().getIntervenerFourWrapperIfPopulated();
-            notificationService.sendContestOrderApprovedEmailIntervener(caseDetails,
-                notificationService.getCaseDataKeysForIntervenerSolicitor(fourWrapper));
-        }
+        log.info("Sending email notification to Intervener type {} Solicitor for 'Order Approved' for case: {}",
+            intervenerWrapper.getIntervenerType(), caseDetails.getId());
+        notificationService.sendContestOrderApprovedEmailIntervener(caseDetails,
+            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
 
     @Override

@@ -390,19 +390,6 @@ public class FinremCaseData {
     @Builder.Default
     @JsonIgnore
     private boolean respondentCorrespondenceEnabled = true;
-    @Builder.Default
-    @JsonIgnore
-    private boolean intervener1CorrespondenceEnabled = true;
-    @Builder.Default
-    @JsonIgnore
-    private boolean intervener2CorrespondenceEnabled = true;
-    @Builder.Default
-    @JsonIgnore
-    private boolean intervener3CorrespondenceEnabled = true;
-    @Builder.Default
-    @JsonIgnore
-    private boolean intervener4CorrespondenceEnabled = true;
-
     private List<OrderSentToPartiesCollection> ordersSentToPartiesCollection;
 
     @JsonUnwrapped

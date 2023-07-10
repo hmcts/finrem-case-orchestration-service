@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -39,6 +40,11 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     private String intervenerPhone;
     private YesOrNo intervenerRepresented;
+
+    @Builder.Default
+    @JsonIgnore
+    private boolean intervenerCorrespondenceEnabled = true;
+
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate intervenerDateAdded;

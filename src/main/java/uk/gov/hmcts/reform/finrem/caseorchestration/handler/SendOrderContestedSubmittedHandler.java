@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -22,19 +21,16 @@ import java.util.List;
 public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     private final GeneralOrderService generalOrderService;
     private final CcdService ccdService;
-    private final DocumentHelper documentHelper;
     private final FinremContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
 
     public SendOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               GeneralOrderService generalOrderService,
                                               CcdService ccdService,
-                                              DocumentHelper documentHelper,
                                               FinremContestedSendOrderCorresponder contestedSendOrderCorresponder) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.ccdService = ccdService;
-        this.documentHelper = documentHelper;
         this.contestedSendOrderCorresponder = contestedSendOrderCorresponder;
     }
 
@@ -87,34 +83,32 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
 
     private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        FinremCaseDetails copyCaseDetails = documentHelper.deepCopy(caseDetails, FinremCaseDetails.class);
-        setPartiesToRecieveCommunication(copyCaseDetails, parties);
+        setPartiesToRecieveCommunication(caseDetails, parties);
         log.info("About to start send order correspondence for case {}", caseDetails.getId());
-        contestedSendOrderCorresponder.sendCorrespondence(copyCaseDetails, userAuthorisation);
+        contestedSendOrderCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
         log.info("Finish sending order correspondence for case {}", caseDetails.getId());
     }
 
-    private void setPartiesToRecieveCommunication(FinremCaseDetails copyCaseDetails, List<String> parties) {
-        FinremCaseData data = copyCaseDetails.getData();
+    private void setPartiesToRecieveCommunication(FinremCaseDetails caseDetails, List<String> parties) {
+        FinremCaseData data = caseDetails.getData();
         parties.forEach(role -> {
-            if (!generalOrderService.isOrderSharedWithApplicant(copyCaseDetails)) {
-                data.setApplicantCorrespondenceEnabled(false);
+            data.setApplicantCorrespondenceEnabled(!generalOrderService.isOrderSharedWithApplicant(caseDetails));
+            data.setRespondentCorrespondenceEnabled(!generalOrderService.isOrderSharedWithRespondent(caseDetails));
+            if (data.getIntervenerOneWrapperIfPopulated() != null) {
+                data.getIntervenerOneWrapperIfPopulated()
+                    .setIntervenerCorrespondenceEnabled(!generalOrderService.isOrderSharedWithIntervener1(caseDetails));
             }
-            if (!generalOrderService.isOrderSharedWithRespondent(copyCaseDetails)) {
-                data.setRespondentCorrespondenceEnabled(false);
+            if (data.getIntervenerTwoWrapperIfPopulated() != null) {
+                data.getIntervenerTwoWrapperIfPopulated()
+                    .setIntervenerCorrespondenceEnabled(!generalOrderService.isOrderSharedWithIntervener2(caseDetails));
             }
-            if (!generalOrderService.isOrderSharedWithIntervener1(copyCaseDetails)) {
-                data.setIntervener1CorrespondenceEnabled(false);
+            if (data.getIntervenerThreeWrapperIfPopulated() != null) {
+                data.getIntervenerThreeWrapperIfPopulated()
+                    .setIntervenerCorrespondenceEnabled(!generalOrderService.isOrderSharedWithIntervener3(caseDetails));
             }
-            if (!generalOrderService.isOrderSharedWithIntervener2(copyCaseDetails)) {
-                data.setIntervener2CorrespondenceEnabled(false);
-            }
-            if (!generalOrderService.isOrderSharedWithIntervener3(copyCaseDetails)) {
-                data.setIntervener3CorrespondenceEnabled(false);
-            }
-            if (!generalOrderService.isOrderSharedWithIntervener4(copyCaseDetails)) {
-                data.setIntervener4CorrespondenceEnabled(false);
+            if (data.getIntervenerFourWrapperIfPopulated() != null) {
+                data.getIntervenerFourWrapperIfPopulated()
+                    .setIntervenerCorrespondenceEnabled(!generalOrderService.isOrderSharedWithIntervener4(caseDetails));
             }
         });
     }

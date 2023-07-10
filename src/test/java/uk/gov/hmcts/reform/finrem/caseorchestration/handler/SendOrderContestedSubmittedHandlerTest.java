@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -53,8 +52,6 @@ class SendOrderContestedSubmittedHandlerTest {
     private GeneralOrderService generalOrderService;
     @Mock
     private CcdService ccdService;
-    @Mock
-    private DocumentHelper documentHelper;
     @Mock
     private FinremContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
@@ -115,7 +112,6 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
@@ -129,7 +125,6 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.CLOSE);
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
@@ -143,7 +138,6 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService, never()).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
@@ -156,7 +150,6 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService, never()).executeCcdEventOnCase(any(), any(), any(), any());
@@ -176,7 +169,6 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verifyNoInteractions(ccdService);
@@ -190,7 +182,6 @@ class SendOrderContestedSubmittedHandlerTest {
         setupData(caseDetails);
         FinremCaseData data = caseDetails.getData();
         data.setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verifyNoInteractions(ccdService);
@@ -210,7 +201,6 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.RESP_SOLICITOR.getValue()));
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verifyNoInteractions(ccdService);
@@ -227,7 +217,6 @@ class SendOrderContestedSubmittedHandlerTest {
         data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
         data.setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getValue()));
 
@@ -251,7 +240,6 @@ class SendOrderContestedSubmittedHandlerTest {
 
         data.setDirectionDetailsCollection(singletonList(DirectionDetailCollection.builder()
             .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build()));
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
 
@@ -280,7 +268,6 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getValue()));
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
@@ -309,7 +296,6 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
-        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
