@@ -7,9 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -28,7 +26,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @SuperBuilder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@NoArgsConstructor
 @AllArgsConstructor
 public abstract class IntervenerWrapper implements IntervenerDetails {
 
@@ -41,9 +38,9 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     private String intervenerPhone;
     private YesOrNo intervenerRepresented;
 
-    @Builder.Default
     @JsonIgnore
-    private boolean intervenerCorrespondenceEnabled = true;
+    private Boolean intervenerCorrespondenceEnabled;
+
 
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -60,6 +57,10 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     private String intervenerSolicitorReference;
 
     private OrganisationPolicy intervenerOrganisation;
+
+    protected IntervenerWrapper() {
+        intervenerCorrespondenceEnabled =  Boolean.TRUE;
+    }
 
     public abstract String getIntervenerLabel();
 

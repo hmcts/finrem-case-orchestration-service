@@ -47,7 +47,10 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         FinremCaseData caseData = caseDetails.getData();
         List<IntervenerWrapper> interveners = caseData.getInterveners();
         interveners.forEach(intervenerWrapper -> {
-            if (intervenerWrapper.isIntervenerCorrespondenceEnabled()) {
+            log.info("Intervener type {}, communication enabled {}, caseId {}", intervenerWrapper.getIntervenerType(),
+                intervenerWrapper.getIntervenerCorrespondenceEnabled(), caseDetails.getId());
+            if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
+                && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
                 if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
                     log.info("Sending email correspondence to {} for case: {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
@@ -58,7 +61,6 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
                         intervenerWrapper.getIntervenerType().getTypeValue(),
                         caseDetails.getId());
                     bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
-
                 }
             }
         });

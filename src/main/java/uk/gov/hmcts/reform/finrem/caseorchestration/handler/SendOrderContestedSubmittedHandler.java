@@ -79,8 +79,6 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     }
 
 
-
-
     private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setPartiesToRecieveCommunication(caseDetails, parties);
@@ -92,24 +90,16 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     private void setPartiesToRecieveCommunication(FinremCaseDetails caseDetails, List<String> parties) {
         FinremCaseData data = caseDetails.getData();
         parties.forEach(role -> {
-            data.setApplicantCorrespondenceEnabled(!generalOrderService.isOrderSharedWithApplicant(caseDetails));
-            data.setRespondentCorrespondenceEnabled(!generalOrderService.isOrderSharedWithRespondent(caseDetails));
-            if (data.getIntervenerOneWrapperIfPopulated() != null) {
-                data.getIntervenerOneWrapperIfPopulated()
-                    .setIntervenerCorrespondenceEnabled(!generalOrderService.isOrderSharedWithIntervener1(caseDetails));
-            }
-            if (data.getIntervenerTwoWrapperIfPopulated() != null) {
-                data.getIntervenerTwoWrapperIfPopulated()
-                    .setIntervenerCorrespondenceEnabled(!generalOrderService.isOrderSharedWithIntervener2(caseDetails));
-            }
-            if (data.getIntervenerThreeWrapperIfPopulated() != null) {
-                data.getIntervenerThreeWrapperIfPopulated()
-                    .setIntervenerCorrespondenceEnabled(!generalOrderService.isOrderSharedWithIntervener3(caseDetails));
-            }
-            if (data.getIntervenerFourWrapperIfPopulated() != null) {
-                data.getIntervenerFourWrapperIfPopulated()
-                    .setIntervenerCorrespondenceEnabled(!generalOrderService.isOrderSharedWithIntervener4(caseDetails));
-            }
+            data.setApplicantCorrespondenceEnabled(generalOrderService.isOrderSharedWithApplicant(caseDetails));
+            data.setRespondentCorrespondenceEnabled(generalOrderService.isOrderSharedWithRespondent(caseDetails));
+            data.getIntervenerOneWrapper()
+                .setIntervenerCorrespondenceEnabled(generalOrderService.isOrderSharedWithIntervener1(caseDetails));
+            data.getIntervenerTwoWrapper()
+                .setIntervenerCorrespondenceEnabled(generalOrderService.isOrderSharedWithIntervener2(caseDetails));
+            data.getIntervenerThreeWrapper()
+                .setIntervenerCorrespondenceEnabled(generalOrderService.isOrderSharedWithIntervener3(caseDetails));
+            data.getIntervenerFourWrapper()
+                .setIntervenerCorrespondenceEnabled(generalOrderService.isOrderSharedWithIntervener4(caseDetails));
         });
     }
 }
