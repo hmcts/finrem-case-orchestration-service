@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -49,6 +50,8 @@ public class GenerateCoverSheetService {
     private final CaseDataService caseDataService;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
 
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+
     @Deprecated
     public CaseDocument generateApplicantCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
@@ -85,6 +88,27 @@ public class GenerateCoverSheetService {
             documentConfiguration.getBulkPrintTemplate());
 
         return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+    }
+
+
+    @Deprecated
+    public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails,
+                                                     final String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        return generateCoverSheet(finremCaseDetails, authorisationToken, recipient);
+
+    }
+
+    public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
+                                                     final String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, recipient);
     }
 
     @Deprecated
