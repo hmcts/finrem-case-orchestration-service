@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class FinremAdditionalHearingCorresponder extends FinremHearingCorresponder {
 
     private final DocumentHelper documentHelper;
@@ -24,7 +26,7 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
+    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> documents = new ArrayList<>();
 
         List<AdditionalHearingDocumentCollection> additionalHearingDocuments = caseDetails.getData().getAdditionalHearingDocuments();

@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderGeneralOrderLetterCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderHearingLettersCorresponder;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -78,6 +80,11 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     private DocumentHelper documentHelper;
     @Mock
     private GeneralOrderService generalOrderService;
+
+    @Mock
+    ContestedSendOrderHearingLettersCorresponder contestedSendOrderHearingLettersCorresponder;
+    @Mock
+    ContestedSendOrderGeneralOrderLetterCorresponder contestedSendOrderGeneralOrderLetterCorresponder;
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;

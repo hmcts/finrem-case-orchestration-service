@@ -13,6 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FinremAdditionalHearingCorresponderTest extends FinremHearingCorrespondenceBaseTest {
@@ -33,7 +34,7 @@ public class FinremAdditionalHearingCorresponderTest extends FinremHearingCorres
 
     @Test
     public void shouldGetDocumentsToPrint() {
-        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails);
+        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails, AUTH_TOKEN);
         assertEquals(2, documentsToPrint.size());
     }
 

@@ -22,19 +22,18 @@ import java.util.stream.Collectors;
 public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
 
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
 
     @Autowired
     public FinremFormCandGCorresponder(BulkPrintService bulkPrintService,
                                        NotificationService notificationService,
-                                       DocumentHelper documentHelper, ObjectMapper objectMapper) {
+                                       DocumentHelper documentHelper) {
         super(bulkPrintService, notificationService);
         this.documentHelper = documentHelper;
-        this.objectMapper = objectMapper;
+
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
+    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails, String authorisationToken) {
         String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
         return getHearingCaseDocuments(caseDetails.getData(), caseId);
     }

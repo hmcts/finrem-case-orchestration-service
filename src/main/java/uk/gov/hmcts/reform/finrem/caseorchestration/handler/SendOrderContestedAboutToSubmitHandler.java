@@ -16,17 +16,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderGeneralOrderLetterCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedSendOrderHearingLettersCorresponder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
@@ -40,12 +40,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class SendOrderContestedAboutToSubmitHandler
     implements CallbackHandler<Map<String, Object>> {
-
-    private final BulkPrintService bulkPrintService;
-    private final GeneralOrderService generalOrderService;
     private final GenericDocumentService genericDocumentService;
-    private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
+    private final ContestedSendOrderGeneralOrderLetterCorresponder contestedSendOrderGeneralOrderLetterCorresponder;
+    private final ContestedSendOrderHearingLettersCorresponder contestedSendOrderHearingLettersCorresponder;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -82,7 +80,7 @@ public class SendOrderContestedAboutToSubmitHandler
                 .get(index)
                 .getHearingOrderDocuments().getUploadDraftDocument();
 
-            List<HearingOrderCollectionData> hearings =  new ArrayList<>(hearingOrderCollectionData);
+            List<HearingOrderCollectionData> hearings = new ArrayList<>(hearingOrderCollectionData);
             String caseId = caseDetails.getId().toString();
             CaseDocument latestHearingOrderPdf =
                 genericDocumentService.convertDocumentIfNotPdfAlready(latestHearingOrder, authToken, caseId);
@@ -103,18 +101,7 @@ public class SendOrderContestedAboutToSubmitHandler
         String caseId = String.valueOf(caseDetails.getId());
         log.info("In request to send general order for case {}:", caseId);
         if (contestedGeneralOrderPresent(caseDetails)) {
-            log.info("General order found for case {}:", caseDetails.getId());
-            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData(),
-                authorisationToken, caseId);
-            if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-                log.info("Sending Applicant Order for Contested Case ID: {}", caseDetails.getId());
-                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
-            }
-
-            if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
-                log.info("Sending Respondent Order for Contested Case ID: {}", caseDetails.getId());
-                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
-            }
+            contestedSendOrderGeneralOrderLetterCorresponder.sendIntervenerCorrespondence(authorisationToken, caseDetails);
         }
     }
 
@@ -122,42 +109,8 @@ public class SendOrderContestedAboutToSubmitHandler
 
         String caseId = String.valueOf(caseDetails.getId());
         log.info("In request to send hearing pack for case {}:", caseId);
-        Map<String, Object> caseData = caseDetails.getData();
+        contestedSendOrderHearingLettersCorresponder.sendCorrespondence(caseDetails, authorisationToken);
 
-        List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData, authorisationToken, caseId);
-        if (!hearingDocumentPack.isEmpty()) {
-            if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-                log.info("Received request to send hearing pack for applicant for case {}:", caseId);
-                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, hearingDocumentPack);
-            }
-
-            if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
-                log.info("Received request to send hearing pack for respondent for case {}:", caseId);
-                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
-            }
-        }
-    }
-
-    private List<BulkPrintDocument> createHearingDocumentPack(Map<String, Object> caseData, String authorisationToken, String caseId) {
-        List<BulkPrintDocument> hearingDocumentPack = new ArrayList<>();
-
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, CONTESTED_ORDER_APPROVED_COVER_LETTER).ifPresent(hearingDocumentPack::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, LATEST_DRAFT_HEARING_ORDER).ifPresent(hearingDocumentPack::add);
-
-        if (documentHelper.hasAnotherHearing(caseData)) {
-            Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
-            latestAdditionalHearingDocument.ifPresent(
-                caseDocument -> hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
-        }
-
-        List<BulkPrintDocument> otherHearingDocuments = documentHelper.getHearingDocumentsAsBulkPrintDocuments(
-            caseData, authorisationToken, caseId);
-
-        if (otherHearingDocuments != null) {
-            hearingDocumentPack.addAll(otherHearingDocuments);
-        }
-
-        return hearingDocumentPack;
     }
 
     private boolean contestedGeneralOrderPresent(CaseDetails caseDetails) {
@@ -176,7 +129,7 @@ public class SendOrderContestedAboutToSubmitHandler
 
             List<HearingOrderCollectionData> finalOrderCollection =
                 Optional.ofNullable(documentHelper.getFinalOrderDocuments(caseData))
-                .orElse(new ArrayList<>());
+                    .orElse(new ArrayList<>());
             log.info("Existing final order collection = {}", finalOrderCollection);
 
             finalOrderCollection.add(HearingOrderCollectionData.builder()

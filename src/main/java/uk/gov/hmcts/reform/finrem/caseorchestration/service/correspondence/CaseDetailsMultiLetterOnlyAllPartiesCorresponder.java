@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -15,29 +16,30 @@ import java.util.List;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extends MultiLetterOrEmailAllPartiesCorresponder<CaseDetails> {
+public abstract class CaseDetailsMultiLetterOnlyAllPartiesCorresponder extends MultiLetterOrEmailAllPartiesCorresponder<CaseDetails> {
 
     protected final BulkPrintService bulkPrintService;
     protected final NotificationService notificationService;
     protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     protected void sendApplicantCorrespondence(String authorisationToken, CaseDetails caseDetails) {
-        if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
-            this.emailApplicantSolicitor(caseDetails);
-        } else {
+        if (!shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails, authorisationToken));
+            List<BulkPrintDocument> documentsToPrint = getDocumentsToPrint(caseDetails, authorisationToken);
+            if (!documentsToPrint.isEmpty()) {
+                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documentsToPrint);
+            }
         }
     }
 
     public void sendRespondentCorrespondence(String authorisationToken, CaseDetails caseDetails) {
-        if (shouldSendRespondentSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
-            this.emailRespondentSolicitor(caseDetails);
-        } else {
+        if (!shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails, authorisationToken));
+            List<BulkPrintDocument> documentsToPrint = getDocumentsToPrint(caseDetails, authorisationToken);
+            if (!documentsToPrint.isEmpty()) {
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documentsToPrint);
+            }
+
         }
     }
 
@@ -46,19 +48,35 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
             final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
             final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
             interveners.forEach(intervenerWrapper -> {
-                if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, finremCaseDetails)) {
-                    log.info("Sending email correspondence to {} for case: {}",
-                        intervenerWrapper.getIntervenerType().getTypeValue(),
-                        caseDetails.getId());
-                    this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
-                } else if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
-                    log.info("Sending letter correspondence to {} for case: {}",
-                        intervenerWrapper.getIntervenerType().getTypeValue(),
-                        caseDetails.getId());
-                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, getDocumentsToPrint(caseDetails, authorisationToken));
+                if (!shouldSendIntervenerSolicitorEmail(intervenerWrapper, finremCaseDetails)) {
+                    if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
+                        log.info("Sending letter correspondence to {} for case: {}",
+                            intervenerWrapper.getIntervenerType().getTypeValue(),
+                            caseDetails.getId());
+                        List<BulkPrintDocument> documentsToPrint = getDocumentsToPrint(caseDetails, authorisationToken);
+                        if (!documentsToPrint.isEmpty()) {
+                            bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
+                                documentsToPrint);
+                        }
+                    }
                 }
             });
         }
+    }
+
+    @Override
+    protected void emailApplicantSolicitor(CaseDetails caseDetails) {
+        log.info("Not sending email correspondence to applicant for case: {}");
+    }
+
+    @Override
+    protected void emailRespondentSolicitor(CaseDetails caseDetails) {
+        log.info("Not sending email correspondence to respondent for case: {}");
+    }
+
+    @Override
+    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
+        log.info("Not sending email correspondence to intervener for case: {}");
     }
 
     protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {

@@ -32,7 +32,7 @@ public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearin
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
+    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails, String authorisationToken) {
         List<CaseDocument> hearingNoticePack = caseDetails.getData().getHearingNoticeDocumentPack().stream()
             .map(DocumentCollection::getValue)
             .collect(Collectors.toList());
