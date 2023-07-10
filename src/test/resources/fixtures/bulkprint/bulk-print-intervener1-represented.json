@@ -24,7 +24,12 @@
         },
         "intervenerPhone": "Intervener 1 Phone",
         "intervenerEmail": "Intervener 1 Email",
-        "intervenerRepresented": "No"
+        "intervenerRepresented": "Yes",
+        "intervenerSolName" : "Intervener 1 Solicitor Name",
+        "intervenerSolPhone" : "Intervener 1 Solicitor Phone",
+        "intervenerSolEmail" : "Intervener 1 Solicitor Email",
+        "intervenerSolicitorFirm" : "Intervener 1 Solicitor Firm",
+        "intervenerSolicitorReference" : "Intervener 1 Solicitor Reference"
       },
       "uploadOrder": [
         {

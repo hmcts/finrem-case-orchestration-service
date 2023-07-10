@@ -272,5 +272,5 @@ public class BulkPrintService {
             generateIntervenerCoverSheet(caseDetails, authorisationToken, intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
             intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
     }
-
 }
+

@@ -90,6 +90,27 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 
+
+    @Deprecated
+    public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails,
+                                                     final String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        return generateCoverSheet(finremCaseDetails, authorisationToken, recipient);
+
+    }
+
+    public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
+                                                     final String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, recipient);
+    }
+
     @Deprecated
     public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails,
                                                      final String authorisationToken,

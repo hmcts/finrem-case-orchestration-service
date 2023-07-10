@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
@@ -168,7 +169,10 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateIntervenerCoverSheet() throws Exception {
-        CaseDetails caseDetails = caseDetailsWithIntervener1Unrepresented();
+        CaseDetails caseDetails = 
+          
+          
+          ();
 
         CaseDocument caseDocument = generateCoverSheetService.generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
@@ -190,6 +194,13 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     }
 
     private CaseDetails caseDetailsWithIntervener1Unrepresented() throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private FinremCaseDetails finremCaseDetailsConsented() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
@@ -254,6 +265,4 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
         assertThat(addressee.getFormattedAddress(), is(formattedAddress));
     }
-
-
 }
