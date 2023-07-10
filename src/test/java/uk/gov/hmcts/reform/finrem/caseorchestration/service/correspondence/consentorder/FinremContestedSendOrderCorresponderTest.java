@@ -130,6 +130,7 @@ class FinremContestedSendOrderCorresponderTest {
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
+            .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .build();
 
         caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
