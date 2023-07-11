@@ -69,7 +69,7 @@ public class UpdateRepresentationService {
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
                                                                String authToken) {
 
-        log.info("Updating representation for case ID {}", caseDetails.getId());
+        log.info("Updating representation for case ID {}", caseDetails.getId()); //Update representation
 
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
