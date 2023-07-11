@@ -36,6 +36,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -488,5 +489,30 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertThat(court.get("courtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));
         assertThat(court.get("phoneNumber"), is("0115 910 3504"));
         assertThat(court.get("email"), is("FRCNottingham@justice.gov.uk"));
+    }
+
+    @Test
+    public void isSelectedGeneralOrderMatchesReturnTrue() {
+        DynamicMultiSelectListElement listElement
+            = DynamicMultiSelectListElement.builder().code(caseDocument().getDocumentFilename())
+            .label(caseDocument().getDocumentFilename()).build();
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(listElement);
+
+        DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+        assertTrue(generalOrderService.isSelectedOrderMatches(selectList, caseDocument()));
+    }
+
+    @Test
+    public void isSelectedGeneralOrderNotMatchesReturnFalse() {
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(caseDocument()));
+
+        DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+        assertFalse(generalOrderService.isSelectedOrderMatches(selectList, caseDocument()));
     }
 }
