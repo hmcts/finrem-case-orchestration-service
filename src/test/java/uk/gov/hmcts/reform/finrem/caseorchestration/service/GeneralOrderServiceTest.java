@@ -515,4 +515,15 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .build();
         assertFalse(generalOrderService.isSelectedOrderMatches(selectList, caseDocument()));
     }
+
+    @Test
+    public void isSelectedGeneralOrderNotMatchesSelectedDocumentIsNullReturnFalse() {
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(caseDocument()));
+
+        DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+        assertFalse(generalOrderService.isSelectedOrderMatches(selectList, null));
+    }
 }
