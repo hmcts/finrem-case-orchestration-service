@@ -34,7 +34,7 @@ public class CaseAssignedRoleService {
     public Map<String, Object> setCaseAssignedUserRole(CaseDetails caseDetails,
                                                        String authToken) {
 
-        CaseAssignedUserRolesResource resource = getCaseAssignedUserRole(caseDetails, authToken);
+        CaseAssignedUserRolesResource resource = getCaseAssignedUserRole(caseDetails.getId().toString(), authToken);
         String caseRole = resource.getCaseAssignedUserRoles().get(0).getCaseRole();
 
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
@@ -52,8 +52,8 @@ public class CaseAssignedRoleService {
     }
 
     @Cacheable(cacheManager = REQUEST_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
-    public CaseAssignedUserRolesResource getCaseAssignedUserRole(CaseDetails caseDetails, String authToken) {
+    public CaseAssignedUserRolesResource getCaseAssignedUserRole(String caseId, String authToken) {
         return dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
-            caseDetails.getId().toString(), idamService.getIdamUserId(authToken));
+            caseId, idamService.getIdamUserId(authToken));
     }
 }

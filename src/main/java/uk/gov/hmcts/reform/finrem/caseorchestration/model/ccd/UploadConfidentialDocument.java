@@ -27,8 +27,6 @@ public class UploadConfidentialDocument {
     private CaseDocumentType documentType;
     @JsonProperty("DocumentLink")
     private CaseDocument documentLink;
-    @JsonProperty("caseDocumentParty")
-    private String caseDocumentParty;
     @JsonProperty("DocumentDateAdded")
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

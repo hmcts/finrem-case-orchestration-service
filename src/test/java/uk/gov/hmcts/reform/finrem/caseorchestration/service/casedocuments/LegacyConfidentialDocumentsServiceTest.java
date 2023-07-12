@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -35,7 +34,6 @@ public class LegacyConfidentialDocumentsServiceTest {
                 .id(LEGACY_CONFIDENTIAL_ID)
                 .value(UploadConfidentialDocument.builder()
                     .documentComment(LEGACY_CONFIDENTIAL_COMMENT)
-                    .caseDocumentParty("case")
                     .confidentialDocumentUploadDateTime(now)
                     .documentLink(CaseDocument.builder().documentFilename(LEGACY_CONFIDENTIAL_FILENAME).build())
                     .documentType(CaseDocumentType.CARE_PLAN)
@@ -50,8 +48,6 @@ public class LegacyConfidentialDocumentsServiceTest {
             equalTo(LEGACY_CONFIDENTIAL_COMMENT));
         assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocumentConfidential(),
             is(YesOrNo.YES));
-        assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocumentParty(),
-            is(CaseDocumentParty.CASE));
         assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocumentType(),
             is(CaseDocumentType.CARE_PLAN));
         assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocuments().getDocumentFilename(),

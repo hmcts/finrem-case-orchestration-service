@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -23,7 +25,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
@@ -53,10 +56,16 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
 
+    private static final String USER_ID = "testUserId";
+    public static final String CASE_ID = "1234567890";
+
     @Mock
     protected UploadedDocumentService uploadedDocumentHelper;
     @Mock
-    private AssignCaseAccessService accessService;
+    private CaseAssignedRoleService caseAssignedRoleService;
+    @Mock
+    private FeatureToggleService featureToggleService;
+
     private ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
     private RespondentChronologiesStatementHandler respondentChronologiesStatementHandler;
 
@@ -106,7 +115,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         uploadContestedCaseDocumentsHandler =
             new UploadContestedCaseDocumentsAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentHandlers, uploadedDocumentHelper, accessService);
+                documentHandlers, uploadedDocumentHelper, caseAssignedRoleService, featureToggleService);
+
+        when(featureToggleService.isIntervenerEnabled()).thenReturn(true);
     }
 
     @Test
@@ -130,8 +141,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             null, YesOrNo.NO, YesOrNo.YES, null));
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn(CaseRole.APP_SOLICITOR.getCcdCode());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -153,8 +164,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             null, YesOrNo.NO, YesOrNo.NO, null));
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn(CaseRole.APP_SOLICITOR.getCcdCode());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -176,8 +187,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             null, YesOrNo.NO, YesOrNo.NO, null));
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn(CaseRole.RESP_SOLICITOR.getCcdCode());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.RESP_SOLICITOR.getCcdCode()));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -199,8 +210,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             null, YesOrNo.NO, YesOrNo.NO, null));
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn(CaseRole.INTVR_SOLICITOR_1.getCcdCode());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -224,8 +235,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             null, YesOrNo.NO, YesOrNo.NO, null));
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn(CaseRole.INTVR_SOLICITOR_2.getCcdCode());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -247,8 +258,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             null, YesOrNo.NO, YesOrNo.NO, null));
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn(CaseRole.INTVR_SOLICITOR_3.getCcdCode());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -270,8 +281,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             null, YesOrNo.NO, YesOrNo.NO, null));
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn(CaseRole.INTVR_SOLICITOR_4.getCcdCode());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -293,8 +304,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             null, YesOrNo.NO, YesOrNo.NO, null));
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn(CaseRole.CASEWORKER.getCcdCode());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.CASEWORKER.getCcdCode()));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -316,8 +327,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             null, YesOrNo.NO, YesOrNo.NO, null));
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn(CaseRole.INTVR_SOLICITOR_1.getCcdCode());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -343,8 +354,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn(CaseRole.APP_SOLICITOR.getCcdCode());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -385,8 +396,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        when(accessService.getActiveUserCaseRole(caseDetails.getId().toString(), AUTH_TOKEN))
-            .thenReturn("[APPSOLICITOR]");
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
 
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             null, YesOrNo.YES, YesOrNo.NO, "Other Example"));
@@ -421,7 +432,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     private FinremCallbackRequest buildCallbackRequest() {
         FinremCaseData data = FinremCaseData.builder().build();
         FinremCaseDetails caseDetails =
-            FinremCaseDetails.builder().data(data).id(123L).build();
+            FinremCaseDetails.builder().data(data).id(Long.valueOf(CASE_ID)).build();
         FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(data).id(123L).build();
         return FinremCallbackRequest.builder().eventType(EventType.UPLOAD_CASE_FILES)
             .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
@@ -454,7 +465,17 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder().build())
             .build();
-        return FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED)
+        return FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CaseType.CONTESTED)
             .data(finremCaseData).build();
+    }
+
+    private CaseAssignedUserRolesResource getCaseAssignedUserRolesResource(String caseRole) {
+        return CaseAssignedUserRolesResource.builder()
+            .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder()
+                .userId(USER_ID)
+                .caseRole(caseRole)
+                .caseDataId(CASE_ID)
+                .build()))
+            .build();
     }
 }

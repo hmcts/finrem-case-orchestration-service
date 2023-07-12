@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.LegacyConfidentialDocumentsService;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,12 +30,10 @@ public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
 
     @Before
     public void setup() {
-        LegacyConfidentialDocumentsService legacyConfidentialDocumentsService =
-            new LegacyConfidentialDocumentsService();
         manageCaseDocumentsAboutToStartCaseHandler =
             new ManageCaseDocumentsContestedAboutToStartHandler(
                 new FinremCaseDetailsMapper(
-                    new ObjectMapper().registerModule(new JavaTimeModule())), legacyConfidentialDocumentsService);
+                    new ObjectMapper().registerModule(new JavaTimeModule())));
     }
 
     @Test

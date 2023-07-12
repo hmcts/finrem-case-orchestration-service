@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -38,7 +37,6 @@ public class LegacyConfidentialDocumentsService {
                 UploadCaseDocument.builder()
                     .caseDocuments(legacyConfidentialDocument.getDocumentLink())
                     .caseDocumentType(legacyConfidentialDocument.getDocumentType())
-                    .caseDocumentParty(CaseDocumentParty.forValue(legacyConfidentialDocument.getCaseDocumentParty()))
                     .caseDocumentOther(legacyConfidentialDocument.getDocumentComment())
                     .caseDocumentConfidential(YesOrNo.YES)
                     .caseDocumentUploadDateTime(legacyConfidentialDocument.getConfidentialDocumentUploadDateTime())
