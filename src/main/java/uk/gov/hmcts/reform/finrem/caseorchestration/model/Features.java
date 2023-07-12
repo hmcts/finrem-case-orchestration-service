@@ -14,6 +14,7 @@ public enum Features {
     USE_USER_TOKEN("use_user_token"),
     SOLICITOR_NOTICE_OF_CHANGE("solicitor_notice_of_change"),
     SEND_LETTER_RECIPIENT_CHECK("send_letter_recipient_check"),
-    SECURE_DOC_ENABLED("secure_doc_enabled");
+    SECURE_DOC_ENABLED("secure_doc_enabled"),
+    INTERVENER_ENABLED("intervener_enabled");
     private final String name;
 }
