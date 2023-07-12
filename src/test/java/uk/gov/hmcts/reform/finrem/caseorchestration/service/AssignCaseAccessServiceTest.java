@@ -79,8 +79,6 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
     @MockBean
     private RestService restService;
     @MockBean
-    private FeatureToggleService featureToggleService;
-    @MockBean
     private SystemUserService systemUserService;
 
     @ClassRule
@@ -103,7 +101,6 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         when(assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(any(FinremCaseDetails.class), eq(TEST_USER_ID)))
             .thenReturn(assignCaseAccessRequest);
         when(assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()).thenReturn(TEST_URL);
-        when(featureToggleService.isUseUserTokenEnabled()).thenReturn(true);
     }
 
     @Test

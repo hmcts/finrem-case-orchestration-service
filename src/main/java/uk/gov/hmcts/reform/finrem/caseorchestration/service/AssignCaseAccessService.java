@@ -55,7 +55,7 @@ public class AssignCaseAccessService {
         String userId = idamService.getIdamUserId(authorisationToken);
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, userId);
         String url = assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()
-            + (featureToggleService.isUseUserTokenEnabled() ? "?use_user_token=true" : "");
+            + "?use_user_token=true";
 
         restService.restApiPostCall(
             authorisationToken,
@@ -68,7 +68,7 @@ public class AssignCaseAccessService {
         String userId = idamService.getIdamUserId(authorisationToken);
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(finremCaseDetails, userId);
         String url = assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()
-            + (featureToggleService.isUseUserTokenEnabled() ? "?use_user_token=true" : "");
+            + "?use_user_token=true";
 
         restService.restApiPostCall(
             authorisationToken,
