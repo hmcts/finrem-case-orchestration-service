@@ -20,11 +20,12 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
     protected final NotificationService notificationService;
 
     protected void sendApplicantCorrespondence(String authorisationToken, FinremCaseDetails caseDetails) {
-        if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
-            this.emailApplicantSolicitor(caseDetails);
-        } else {
-            if (caseDetails.getData().isApplicantCorrespondenceEnabled()) {
+        if (caseDetails.getData().isApplicantCorrespondenceEnabled()) {
+            if (shouldSendApplicantSolicitorEmail(caseDetails)) {
+                log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
+                this.emailApplicantSolicitor(caseDetails);
+            } else {
+
                 log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
             }
@@ -32,11 +33,11 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
     }
 
     public void sendRespondentCorrespondence(String authorisationToken, FinremCaseDetails caseDetails) {
-        if (shouldSendRespondentSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
-            this.emailRespondentSolicitor(caseDetails);
-        } else {
-            if (caseDetails.getData().isRespondentCorrespondenceEnabled()) {
+        if (caseDetails.getData().isRespondentCorrespondenceEnabled()) {
+            if (shouldSendRespondentSolicitorEmail(caseDetails)) {
+                log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
+                this.emailRespondentSolicitor(caseDetails);
+            } else {
                 log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
                 bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
             }

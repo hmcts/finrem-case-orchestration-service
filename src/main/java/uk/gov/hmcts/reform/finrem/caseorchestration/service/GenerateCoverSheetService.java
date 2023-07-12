@@ -191,15 +191,6 @@ public class GenerateCoverSheetService {
             : AddressFoundInCaseData.NONE;
     }
 
-    public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
-                                                     final String authorisationToken,
-                                                     DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
-
-        return generateCoverSheet(caseDetails, authorisationToken, recipient);
-    }
-
     private String partyName(Object partyFirstMiddleName, Object partyLastName) {
         return StringUtils.joinWith(" ", partyFirstMiddleName, partyLastName).trim();
     }
