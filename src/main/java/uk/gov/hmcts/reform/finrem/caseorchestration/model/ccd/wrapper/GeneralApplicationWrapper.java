@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollection;
@@ -69,4 +70,5 @@ public class GeneralApplicationWrapper {
     private String generalApplicationReferDetail;
     private DynamicList generalApplicationOutcomeList;
     private DynamicList generalApplicationDirectionsList;
+    private CaseDocumentParty appRespGeneralApplicationReceivedFrom;
 }

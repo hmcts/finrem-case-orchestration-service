@@ -89,7 +89,7 @@ public class GetUserRolesConsumerTest extends BaseTest {
     public void verifyGetUserRoles() {
         given(idamService.getIdamUserId(AUTHORIZATION_TOKEN)).willReturn(ASSIGNEE_ID);
         given(authTokenGenerator.generate()).willReturn(SERVICE_AUTH_TOKEN);
-        caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTHORIZATION_TOKEN);
+        caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTHORIZATION_TOKEN);
     }
 
 

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -51,6 +52,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     private ObjectMapper mapper;
     @Autowired
     private DocumentHelper documentHelper;
+
+    @Autowired
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @MockBean
     private GenerateCoverSheetService coverSheetService;
@@ -289,6 +293,34 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL), is(true));
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES), is(false));
     }
+
+
+    @Test
+    public void shouldPrintIntervenerDocuments() {
+        final String contestedBulkPrintConsentIntervener1Json
+            = "/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(contestedBulkPrintConsentIntervener1Json, mapper);
+        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
+
+        when(coverSheetService.generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE))
+            .thenReturn(caseDocument);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN))).thenReturn(letterId);
+
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        IntervenerOneWrapper intervenerOneWrapper = finremCaseDetails.getData().getIntervenerOneWrapper();
+
+        UUID uuid = bulkPrintService.printIntervenerDocuments(intervenerOneWrapper, caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+
+        assertThat(uuid, is(letterId));
+
+        verify(coverSheetService).generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
+        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
+
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
+    }
+
 
     @Test
     public void shouldPrintIntervenerDocumentsFinrem() {

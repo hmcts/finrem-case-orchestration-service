@@ -235,6 +235,18 @@ public class BulkPrintService {
         return StringUtils.remove(WordUtils.capitalizeFully(text, '_'), "_");
     }
 
+
+    @Deprecated(since = "15-Feb-2023")
+    public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails,
+                                         String authorisationToken,
+                                         List<BulkPrintDocument> caseDocuments) {
+
+        return printDocumentsWithCoversheet(caseDetails,
+            generateIntervenerCoverSheet(caseDetails, authorisationToken,
+                intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
+            intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
+    }
+
     public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper,
                                          FinremCaseDetails caseDetails,
                                          String authorisationToken,
@@ -245,8 +257,17 @@ public class BulkPrintService {
             intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
     }
 
+    @Deprecated(since = "15-Feb-2023")
+    private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken,
+                                                           DocumentHelper.PaperNotificationRecipient recipient) {
+        CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
+        log.info("Intervener cover sheet generated {}, for case Id {}",
+            intervenerCoverSheet, caseDetails.getId());
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
+    }
+
     private BulkPrintDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails, String authorisationToken,
-                                                          DocumentHelper.PaperNotificationRecipient recipient) {
+                                                           DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDocument intervenerCoverSheet =
             coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
         log.info("Intervener cover sheet generated {}, for case Id {}", intervenerCoverSheet, caseDetails.getId());
