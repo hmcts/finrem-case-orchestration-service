@@ -37,12 +37,11 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler<Map<S
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
-        String  caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
-        log.info("In Manage barrister about to start callback for case {}", caseId);
+        log.info("In Manage barrister about to start callback for case {}", callbackRequest.getCaseDetails().getId());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        CaseAssignedUserRolesResource userCaseRole = caseAssignedRoleService.getCaseAssignedUserRole(caseId, userAuthorisation);
+        CaseAssignedUserRolesResource userCaseRole = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, userAuthorisation);
         if (userCaseRole.getCaseAssignedUserRoles() == null || userCaseRole.getCaseAssignedUserRoles().isEmpty()) {
             caseData.put(CASE_ROLE, CASEWORKER_ROLE);
             caseData.put(CASE_ROLE_FOR_FIELD_SHOW, CASEWORKER_ROLE_FIELD_SHOW_LABEL);

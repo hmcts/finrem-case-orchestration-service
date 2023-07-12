@@ -94,8 +94,7 @@ public class ManageBarristerAboutToStartHandlerTest {
 
     @Test
     public void givenUserIsApplicantSolicitor_whenHandle_thenSetCurrentUserCaseRoleToAppSolicitor() {
-        String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseId, AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
@@ -108,8 +107,7 @@ public class ManageBarristerAboutToStartHandlerTest {
 
     @Test
     public void givenUserIsRespondentSolicitor_whenHandle_thenSetCurrentUserCaseRoleToRespSolicitor() {
-        String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseId, AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(RESP_SOLICITOR_POLICY));
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
@@ -123,8 +121,7 @@ public class ManageBarristerAboutToStartHandlerTest {
 
     @Test
     public void givenUserIsCaseWorker_whenHandle_thenSetCurrentUserCaseRoleToCaseWorker() {
-        String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseId, AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().build());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
