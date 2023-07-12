@@ -85,6 +85,7 @@ public class ManageBarristerServiceTest {
     private static final String SYS_USER_TOKEN = "sysUserToken";
     private static final String CLIENT_NAME = "Client Name";
     private static final String SOME_ORG_ID = "someOrgId";
+    public static final String CASEWORKER_POLICY = "[CASEWORKER]";
     private static final Barrister DEFAULT_BARRISTER = Barrister.builder()
         .email("someEmail")
         .build();
