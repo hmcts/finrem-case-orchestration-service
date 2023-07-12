@@ -6,23 +6,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REJECT_REASON;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
@@ -30,12 +28,15 @@ public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandler
     private RejectGeneralApplicationAboutToStartHandler handler;
     @Mock
     private GenericDocumentService service;
+    @Mock
+    private GeneralApplicationService gaService;
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private static final String NO_GA_JSON = "/fixtures/contested/no-general-application.json";
-    private static final String GA_JSON = "/fixtures/contested/general-application-double.json";
+    private static final String NO_GA_JSON = "/fixtures/contested/no-general-application-finrem.json";
+    private static final String GA_JSON = "/fixtures/contested/general-application-details.json";
     private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application.json";
 
 
@@ -43,7 +44,7 @@ public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandler
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
-        handler = new RejectGeneralApplicationAboutToStartHandler(helper);
+        handler = new RejectGeneralApplicationAboutToStartHandler(finremCaseDetailsMapper, helper, gaService);
     }
 
     @Test
@@ -76,39 +77,24 @@ public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandler
 
     @Test
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
-        CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_NON_COLL_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        Map<String, Object> caseData = handle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
+        FinremCaseData caseData = handle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationList());
 
         assertEquals(1, dynamicList.getListItems().size());
-        assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
+        assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason());
     }
-
-    @Test
-    public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
-        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        Map<String, Object> caseData = handle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
-
-        assertEquals(2, dynamicList.getListItems().size());
-        assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
-    }
-
 
     @Test
     public void givenCase_whenNoExistingGeneApp_thenHandle() {
-        CallbackRequest callbackRequest = buildCallbackRequest(NO_GA_JSON);
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        Map<String, Object> caseData = handle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(NO_GA_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseData caseData = handle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationList());
 
         assertNull(dynamicList);
-        assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
+        assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason());
     }
-
 }

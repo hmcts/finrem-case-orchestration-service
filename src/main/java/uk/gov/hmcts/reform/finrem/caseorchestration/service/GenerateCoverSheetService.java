@@ -137,7 +137,6 @@ public class GenerateCoverSheetService {
             caseDetails.getId().toString());
     }
 
-    @Deprecated
     private void prepareCoverSheet(CaseDetails caseDetails, String partyAddressCcdFieldName,
                                    String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
                                    String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
@@ -155,18 +154,27 @@ public class GenerateCoverSheetService {
         } else {
             boolean sendToSolicitor = addressFoundInCaseData == AddressFoundInCaseData.SOLICITOR;
 
-            Addressee addressee = Addressee.builder()
-                .name(sendToSolicitor
-                    ? (String) caseData.get(solicitorNameCcdFieldName)
-                    : partyName(caseData.get(partyFirstMiddleNameCcdFieldName), caseData.get(partyLastNameCcdFieldName)))
-                .formattedAddress(documentHelper.formatAddressForLetterPrinting(sendToSolicitor
-                    ? (Map) caseData.get(solicitorAddressCcdFieldName)
-                    : (Map) caseData.get(partyAddressCcdFieldName)))
-                .build();
+            Addressee addressee =
+                buildAddressee(partyAddressCcdFieldName, solicitorAddressCcdFieldName, solicitorNameCcdFieldName, partyFirstMiddleNameCcdFieldName,
+                    partyLastNameCcdFieldName, caseData, sendToSolicitor);
             caseData.put(ADDRESSEE, addressee);
             caseData.put(COURT_CONTACT_DETAILS, formatCtscContactDetailsForCoversheet());
             caseData.put(CASE_NUMBER, caseDataService.nullToEmpty(caseDetails.getId()));
         }
+    }
+
+    private Addressee buildAddressee(String partyAddressCcdFieldName, String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
+                                     String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName, Map<String, Object> caseData,
+                                     boolean sendToSolicitor) {
+        Addressee addressee = Addressee.builder()
+            .name(sendToSolicitor
+                ? (String) caseData.get(solicitorNameCcdFieldName)
+                : partyName(caseData.get(partyFirstMiddleNameCcdFieldName), caseData.get(partyLastNameCcdFieldName)))
+            .formattedAddress(documentHelper.formatAddressForLetterPrinting(sendToSolicitor
+                ? (Map) caseData.get(solicitorAddressCcdFieldName)
+                : (Map) caseData.get(partyAddressCcdFieldName)))
+            .build();
+        return addressee;
     }
 
     private String formatCtscContactDetailsForCoversheet() {
