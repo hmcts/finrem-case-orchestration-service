@@ -85,6 +85,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
+            .intervenerCorrespondenceEnabled(true)
             .build();
 
         caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
@@ -109,6 +110,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
+            .intervenerCorrespondenceEnabled(true)
             .build();
 
         caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
