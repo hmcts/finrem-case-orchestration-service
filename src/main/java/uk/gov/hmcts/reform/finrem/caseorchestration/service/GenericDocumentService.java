@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class GenericDocumentService {
 
@@ -85,11 +87,13 @@ public class GenericDocumentService {
                                       String authorisationToken,
                                       StampType stampType,
                                       String caseId) {
-
+        CaseDocument pdfCaseDocument = convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
+        log.info("Pdf converation if document is not pdf origial {} pdfdocument {} for case Id {}",
+            document.getDocumentFilename(), pdfCaseDocument.getDocumentFilename(), caseId);
         Document stampedDocument = pdfStampingService.stampDocument(
-            Document.builder().url(document.getDocumentUrl())
-                .binaryUrl(document.getDocumentBinaryUrl())
-                .fileName(document.getDocumentFilename())
+            Document.builder().url(pdfCaseDocument.getDocumentUrl())
+                .binaryUrl(pdfCaseDocument.getDocumentBinaryUrl())
+                .fileName(pdfCaseDocument.getDocumentFilename())
                 .build(), authorisationToken, false, stampType, caseId);
         return toCaseDocument(stampedDocument);
     }
