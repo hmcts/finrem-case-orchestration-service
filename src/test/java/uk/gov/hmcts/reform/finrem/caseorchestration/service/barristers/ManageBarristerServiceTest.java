@@ -85,7 +85,6 @@ public class ManageBarristerServiceTest {
     private static final String SYS_USER_TOKEN = "sysUserToken";
     private static final String CLIENT_NAME = "Client Name";
     private static final String SOME_ORG_ID = "someOrgId";
-    public static final String CASEWORKER_POLICY = "[CASEWORKER]";
     private static final Barrister DEFAULT_BARRISTER = Barrister.builder()
         .email("someEmail")
         .build();
@@ -127,7 +126,7 @@ public class ManageBarristerServiceTest {
         List<BarristerData> applicantBarristers = applicantBarristerCollection();
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
         caseDetails.getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -140,7 +139,7 @@ public class ManageBarristerServiceTest {
         List<BarristerData> intervener1Barristers = intervener1BarristerCollection();
         caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_1_POLICY);
         caseDetails.getData().put(INTERVENER_BARRISTER_1_COLLECTION, intervener1Barristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_1_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -153,7 +152,7 @@ public class ManageBarristerServiceTest {
         List<BarristerData> intervener2Barristers = intervener2BarristerCollection();
         caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_2_POLICY);
         caseDetails.getData().put(INTERVENER_BARRISTER_2_COLLECTION, intervener2Barristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_2_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -166,7 +165,7 @@ public class ManageBarristerServiceTest {
         List<BarristerData> intervener3Barristers = intervener3BarristerCollection();
         caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_3_POLICY);
         caseDetails.getData().put(INTERVENER_BARRISTER_3_COLLECTION, intervener3Barristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_3_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -179,7 +178,7 @@ public class ManageBarristerServiceTest {
         List<BarristerData> intervener4Barristers = intervener4BarristerCollection();
         caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_4_POLICY);
         caseDetails.getData().put(INTERVENER_BARRISTER_4_COLLECTION, intervener4Barristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_4_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -192,7 +191,7 @@ public class ManageBarristerServiceTest {
     public void givenNoCurrentBarristers_whenGetBarristersForPartyApplicant_thenReturnEmptyList() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
         caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -204,7 +203,7 @@ public class ManageBarristerServiceTest {
     public void givenNoCurrentBarristers_whenGetBarristersForPartyIntervener1_thenReturnEmptyList() {
         caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_1_POLICY);
         caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_1_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -216,7 +215,7 @@ public class ManageBarristerServiceTest {
     public void givenNoCurrentBarristers_whenGetBarristersForPartyIntervener2_thenReturnEmptyList() {
         caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_2_POLICY);
         caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_2_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -228,7 +227,7 @@ public class ManageBarristerServiceTest {
     public void givenNoCurrentBarristers_whenGetBarristersForPartyIntervener3_thenReturnEmptyList() {
         caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_3_POLICY);
         caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_3_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -240,7 +239,7 @@ public class ManageBarristerServiceTest {
     public void givenNoCurrentBarristers_whenGetBarristersForPartyIntervener4_thenReturnEmptyList() {
         caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_4_POLICY);
         caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_4_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -253,7 +252,7 @@ public class ManageBarristerServiceTest {
         List<BarristerData> respondentBarristers = respondentBarristerCollection();
         caseDetails.getData().put(CASE_ROLE, RESP_SOLICITOR_POLICY);
         caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(RESP_SOLICITOR_POLICY));
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -267,7 +266,7 @@ public class ManageBarristerServiceTest {
         caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, APPLICANT);
         caseDetails.getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().build());
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -281,7 +280,7 @@ public class ManageBarristerServiceTest {
         caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER1);
         caseDetails.getData().put(INTERVENER_BARRISTER_1_COLLECTION, intervener1Barristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().build());
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -295,7 +294,7 @@ public class ManageBarristerServiceTest {
         caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER2);
         caseDetails.getData().put(INTERVENER_BARRISTER_2_COLLECTION, intervener2Barristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().build());
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -309,7 +308,7 @@ public class ManageBarristerServiceTest {
         caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER3);
         caseDetails.getData().put(INTERVENER_BARRISTER_3_COLLECTION, intervener3Barristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().build());
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -323,7 +322,7 @@ public class ManageBarristerServiceTest {
         caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER4);
         caseDetails.getData().put(INTERVENER_BARRISTER_4_COLLECTION, intervener4Barristers);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().build());
 
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
@@ -339,7 +338,7 @@ public class ManageBarristerServiceTest {
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_TWO, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         Map<String, Object> caseData = manageBarristerService.updateBarristerAccess(caseDetails,
@@ -369,7 +368,7 @@ public class ManageBarristerServiceTest {
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(CASEWORKER_NAME);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
         when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         Map<String, Object> caseData = manageBarristerService.updateBarristerAccess(caseDetails,
@@ -394,7 +393,7 @@ public class ManageBarristerServiceTest {
     public void givenNoUserFound_whenUpdateBarristerAccess_thenThrowError() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
         when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN)).thenReturn(
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(
             buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.empty());
 
@@ -413,7 +412,7 @@ public class ManageBarristerServiceTest {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
         BarristerChange barristerChange = buildBarristerChange();
         when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(barristerChange);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(any(), any()))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         manageBarristerService.notifyBarristerAccess(caseDetails,
@@ -443,7 +442,7 @@ public class ManageBarristerServiceTest {
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         Map<String, Object> caseData = manageBarristerService.updateBarristerAccess(caseDetails,
