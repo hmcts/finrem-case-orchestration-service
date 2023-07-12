@@ -134,6 +134,7 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderCoverLetter(any(), any());
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), any());
     }
 
     @Test

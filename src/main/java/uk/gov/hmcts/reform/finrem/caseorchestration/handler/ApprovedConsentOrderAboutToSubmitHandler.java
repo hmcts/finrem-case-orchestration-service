@@ -57,20 +57,22 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("ConsentOrderApprovedAboutToSubmitHandle handle case Id {}", caseDetails.getId());
+        String caseId =  String.valueOf(caseDetails.getId());
+        log.info("ConsentOrderApprovedAboutToSubmitHandle handle case Id {}", caseId);
 
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
+        CaseDocument pdfConsentOrder = genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder, userAuthorisation, caseId);
+        caseDetails.getData().put(LATEST_CONSENT_ORDER, pdfConsentOrder);
 
         if (!isEmpty(latestConsentOrder)) {
             generateAndPrepareDocuments(userAuthorisation, caseDetails, latestConsentOrder);
         } else {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for case: {}",
-                caseDetails.getId());
+                caseId);
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }
 
-    @Deprecated()
     private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails, CaseDocument latestConsentOrder) {
         String caseId = caseDetails.getId().toString();
         log.info("Generating and preparing documents for latest consent order, case {}", caseId);
