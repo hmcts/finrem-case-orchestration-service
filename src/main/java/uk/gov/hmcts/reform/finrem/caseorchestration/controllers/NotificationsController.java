@@ -20,9 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
@@ -55,8 +53,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NotificationsController extends BaseController {
 
     private final NotificationService notificationService;
-    private final PaperNotificationService paperNotificationService;
-    private final GeneralEmailService generalEmailService;
     private final CaseDataService caseDataService;
     private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
@@ -337,15 +333,14 @@ public class NotificationsController extends BaseController {
             description = "General application refer to judge email sent successfully",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendInterimHearingNotification(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-        if (!caseDataService.isPaperApplication(caseData)) {
-            contestedIntermHearingCorresponder.sendCorrespondence(caseDetails);
-        }
+        contestedIntermHearingCorresponder.sendCorrespondence(caseDetails, authToken);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 

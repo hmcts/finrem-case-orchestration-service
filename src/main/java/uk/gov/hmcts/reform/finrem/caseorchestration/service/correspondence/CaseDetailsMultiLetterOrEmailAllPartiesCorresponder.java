@@ -27,7 +27,7 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
             this.emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails, authorisationToken));
         }
     }
 
@@ -37,7 +37,7 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
             this.emailRespondentSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails, authorisationToken));
         }
     }
 
@@ -46,7 +46,7 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
             final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
             final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
             interveners.forEach(intervenerWrapper -> {
-                if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, finremCaseDetails)) {
+                if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
                     log.info("Sending email correspondence to {} for case: {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
                         caseDetails.getId());
@@ -55,7 +55,8 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
                     log.info("Sending letter correspondence to {} for case: {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
                         caseDetails.getId());
-                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
+                        getDocumentsToPrint(caseDetails, authorisationToken));
                 }
             });
         }
@@ -69,7 +70,7 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
         return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
-    protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+    protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
 

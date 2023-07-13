@@ -34,7 +34,7 @@ public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
+    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails, String authorisationToken) {
         String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
         return getHearingCaseDocuments(caseDetails.getData(), caseId);
     }

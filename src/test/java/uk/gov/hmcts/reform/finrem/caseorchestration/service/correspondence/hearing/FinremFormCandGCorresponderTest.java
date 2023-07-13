@@ -46,7 +46,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
 
     @Test
     public void getDocumentsToPrint() {
-        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails);
+        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails, AUTH_TOKEN);
         assertEquals(5, documentsToPrint.size());
     }
 

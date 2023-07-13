@@ -24,7 +24,7 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
+    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> documents = new ArrayList<>();
 
         List<AdditionalHearingDocumentCollection> additionalHearingDocuments = caseDetails.getData().getAdditionalHearingDocuments();

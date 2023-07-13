@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.List;
 
-public abstract class MultiLetterOrEmailAllPartiesCorresponder<D> extends EmailAndLettersCorresponderBase<D> {
+public abstract class MultiLetterOnlyAllPartiesCorresponder<D> extends EmailAndLettersCorresponderBase<D> {
 
     @Override
     public void sendCorrespondence(D caseDetails, String authorisationToken) {
@@ -19,12 +18,6 @@ public abstract class MultiLetterOrEmailAllPartiesCorresponder<D> extends EmailA
     protected abstract void sendRespondentCorrespondence(String authorisationToken, D caseDetails);
 
     protected abstract void sendIntervenerCorrespondence(String authorisationToken, D caseDetails);
-
-    protected abstract void emailApplicantSolicitor(D caseDetails);
-
-    protected abstract void emailRespondentSolicitor(D caseDetails);
-
-    protected abstract void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, D caseDetails);
 
     public abstract List<BulkPrintDocument> getDocumentsToPrint(D caseDetails, String authorisationToken);
 }

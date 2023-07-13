@@ -129,6 +129,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+
     @Override
     @Before
     public void setUp() {
@@ -529,9 +530,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
-        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
+        notificationsController.sendInterimHearingNotification(AUTH_TOKEN, buildCallbackInterimRequest());
 
-        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
+        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class), anyString());
     }
 
     @Test
@@ -541,9 +542,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
 
-        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
+        notificationsController.sendInterimHearingNotification(AUTH_TOKEN, buildCallbackInterimRequest());
 
-        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
+        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class), anyString());
     }
 
     @Test
@@ -553,9 +554,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
-        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
+        notificationsController.sendInterimHearingNotification(AUTH_TOKEN, buildCallbackInterimRequest());
 
-        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
+        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class), anyString());
     }
 
     @Test

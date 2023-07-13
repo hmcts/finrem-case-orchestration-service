@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Component
@@ -21,12 +22,19 @@ public abstract class CaseDetailsEmailOnlyApplicantSolicitorCorresponder extends
         }
     }
 
+    @Override
     protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {
         return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
+    @Override
     protected boolean shouldSendRespondentSolicitorEmail(CaseDetails caseDetails) {
         return Boolean.FALSE;
+    }
+
+    @Override
+    protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
+        return false;
     }
 
     protected abstract void emailApplicantSolicitor(CaseDetails caseDetails);

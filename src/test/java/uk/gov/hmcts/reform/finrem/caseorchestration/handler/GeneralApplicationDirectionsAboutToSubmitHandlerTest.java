@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalapplications.GeneralApplicationsDetailsCorresponder;
 
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,9 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     private GeneralApplicationDirectionsService service;
     @Mock
     private GenericDocumentService documentService;
+
+    @Mock
+    private GeneralApplicationsDetailsCorresponder corresponder;
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -66,7 +70,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
         startHandler = new GeneralApplicationDirectionsAboutToStartHandler(helper, service);
-        submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(helper, service);
+        submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(helper, service, corresponder);
 
         when(documentService.convertDocumentIfNotPdfAlready(ArgumentMatchers.any(), ArgumentMatchers.any(), any()))
             .thenReturn(
@@ -164,7 +168,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
 
-        verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(corresponder).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
 
@@ -252,7 +256,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
         assertEquals(PREPARE_FOR_HEARING_STATE, submitHandle.getState());
-        verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(corresponder).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     private GeneralApplicationCollectionData updateStatus(GeneralApplicationCollectionData obj, GeneralApplicationStatus status) {

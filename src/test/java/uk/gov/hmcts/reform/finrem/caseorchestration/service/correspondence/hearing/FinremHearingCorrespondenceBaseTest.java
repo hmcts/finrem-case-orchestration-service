@@ -30,6 +30,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
     FinremCaseDetails caseDetails;
     FinremMultiLetterOrEmailAllPartiesCorresponder applicantAndRespondentMultiLetterCorresponder;
 
+    protected static final String AUTH_TOKEN = "authToken";
 
     @Test
     public void shouldEmailApplicantAndRespondent() {

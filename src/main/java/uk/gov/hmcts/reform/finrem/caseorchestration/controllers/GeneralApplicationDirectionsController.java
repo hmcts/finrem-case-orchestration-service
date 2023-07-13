@@ -21,10 +21,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 
-import javax.validation.constraints.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -34,8 +33,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequiredArgsConstructor
 @Slf4j
 public class GeneralApplicationDirectionsController extends BaseController {
-
     private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
+
 
     @PostMapping(path = "/submit-general-application-directions", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Submit general application directions")
@@ -88,36 +87,6 @@ public class GeneralApplicationDirectionsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(caseDetails.getData())
-            .build());
-    }
-
-    @PostMapping(path = "/submit-for-interim-hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @Operation(summary = "submit for interim hearing")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> submitInterimHearing(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
-
-        CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to submit for interim hearing for Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
-
-        List<String> errors = new ArrayList<>();
-        try {
-            generalApplicationDirectionsService.submitInterimHearing(caseDetails, authorisationToken);
-        } catch (InvalidCaseDataException invalidCaseDataException) {
-            errors.add(invalidCaseDataException.getMessage());
-        }
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(caseDetails.getData())
-            .errors(errors)
             .build());
     }
 }

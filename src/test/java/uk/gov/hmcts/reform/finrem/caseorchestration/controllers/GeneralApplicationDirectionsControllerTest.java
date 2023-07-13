@@ -95,15 +95,4 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
-
-    @Test
-    public void submitInterimHearing() throws Exception {
-        mvc.perform(post(INTERIM_HEARING_URL)
-                .content(resourceContentAsString("/fixtures/general-application.json"))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
-
-        verify(generalApplicationDirectionsService, times(1)).submitInterimHearing(isA(CaseDetails.class), eq(AUTH_TOKEN));
-    }
 }

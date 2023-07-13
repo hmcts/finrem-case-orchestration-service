@@ -39,6 +39,8 @@ public abstract class HearingCorrespondenceBaseTest {
     CaseDetails caseDetails;
     MultiLetterOrEmailAllPartiesCorresponder applicantAndRespondentMultiLetterCorresponder;
 
+    protected static String AUTH_TOKEN = "authToken";
+
 
     @Test
     public void shouldEmailApplicantAndRespondent() {
@@ -109,7 +111,7 @@ public abstract class HearingCorrespondenceBaseTest {
             FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCaseDetails);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
-            any(FinremCaseDetails.class))).thenReturn(true);
+            any(CaseDetails.class))).thenReturn(true);
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerOneWrapper))
             .thenReturn(SolicitorCaseDataKeysWrapper.builder().build());
 
@@ -141,7 +143,7 @@ public abstract class HearingCorrespondenceBaseTest {
         FinremCaseDetails finremCaseDetails =
             FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOneWrapper, finremCaseDetails)).thenReturn(false);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOneWrapper,  caseDetails)).thenReturn(false);
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
 

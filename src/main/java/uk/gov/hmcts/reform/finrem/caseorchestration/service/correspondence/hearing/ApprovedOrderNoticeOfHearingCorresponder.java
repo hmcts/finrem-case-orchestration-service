@@ -37,7 +37,7 @@ public class ApprovedOrderNoticeOfHearingCorresponder extends HearingCorresponde
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
+    public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
         List<CaseDocument> hearingNoticePack = getHearingNoticeDocumentPackFromCaseData(caseDetails);
         List<BulkPrintDocument> documentsToPrint = documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
         return documentsToPrint;

@@ -39,7 +39,7 @@ public class FinremApprovedOrderNoticeOfHearingCorresponderTest extends FinremHe
     @Test
     public void shouldGetDocumentsToPrint() {
         when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(anyList())).thenReturn(List.of(getBulkPrintDocument(), getBulkPrintDocument()));
-        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails);
+        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails, AUTH_TOKEN);
         assertEquals(2, documentsToPrint.size());
     }
 

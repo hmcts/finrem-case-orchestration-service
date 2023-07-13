@@ -33,7 +33,7 @@ public class FinremAdditionalHearingCorresponderTest extends FinremHearingCorres
 
     @Test
     public void shouldGetDocumentsToPrint() {
-        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails);
+        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails, AUTH_TOKEN);
         assertEquals(2, documentsToPrint.size());
     }
 

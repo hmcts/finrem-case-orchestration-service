@@ -25,7 +25,7 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
             this.emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails, authorisationToken));
         }
     }
 
@@ -35,7 +35,7 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
             this.emailRespondentSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails, authorisationToken));
         }
     }
 
@@ -52,7 +52,8 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
                 log.info("Sending letter correspondence to {} for case: {}",
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
-                bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+                bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
+                    getDocumentsToPrint(caseDetails, authorisationToken));
             }
         });
     }

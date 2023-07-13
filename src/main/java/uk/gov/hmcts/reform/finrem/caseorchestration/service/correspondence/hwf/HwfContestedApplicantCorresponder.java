@@ -22,4 +22,5 @@ public class HwfContestedApplicantCorresponder extends CaseDetailsEmailOnlyAppli
         notificationService.sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
     }
 
+
 }

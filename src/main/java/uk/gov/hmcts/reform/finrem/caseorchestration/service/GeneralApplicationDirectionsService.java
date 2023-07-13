@@ -23,12 +23,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT;
@@ -72,8 +67,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_INTERIM_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
@@ -95,6 +88,7 @@ public class GeneralApplicationDirectionsService {
     private final ObjectMapper objectMapper;
     private final CcdService ccdService;
 
+
     private static final String CASE_NUMBER = "ccdCaseNumber";
     private static final String COURT_DETAIL = "courtDetails";
     private static final String APPLICANT_NAME = "applicantName";
@@ -103,9 +97,9 @@ public class GeneralApplicationDirectionsService {
 
     public String getEventPostState(CaseDetails caseDetails, String userAuthorisation) {
         List<String> eventDetailsOnCase = ccdService.getCcdEventDetailsOnCase(
-            userAuthorisation,
-            caseDetails,
-            EventType.GENERAL_APPLICATION_DIRECTIONS.getCcdType())
+                userAuthorisation,
+                caseDetails,
+                EventType.GENERAL_APPLICATION_DIRECTIONS.getCcdType())
             .stream()
             .map(CaseEventDetail::getEventName).toList();
 
@@ -165,27 +159,13 @@ public class GeneralApplicationDirectionsService {
         ).forEach(caseData::remove);
     }
 
-    public void submitInterimHearing(CaseDetails caseDetails, String authorisationToken) {
-        List<BulkPrintDocument> documents = prepareInterimHearingDocumentsToPrint(caseDetails, authorisationToken);
-        printInterimDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
-    }
-
-    private void printInterimDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
-                                                                         List<BulkPrintDocument> documents) {
-        Map<String, Object> caseData = caseDetails.getData();
-        if (isPaperApplication(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
-        }
-        if (isPaperApplication(caseData) || !isRespondentSolicitorAgreeToReceiveEmails(caseData)) {
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
-        }
-    }
-
-    private List<BulkPrintDocument> prepareInterimHearingDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
+    public List<BulkPrintDocument> prepareInterimHearingDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
         String caseId = caseDetails.getId().toString();
         List<BulkPrintDocument> documents = new ArrayList<>();
         CaseDocument interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails, authorisationToken);
+        caseData.put(INTERIM_HEARING_DOCUMENT, interimDocument);
+
         documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(interimDocument));
 
         if (!isNull(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT))) {
@@ -197,7 +177,7 @@ public class GeneralApplicationDirectionsService {
             caseData.put(INTERIM_HEARING_UPLOADED_DOCUMENT, additionalUploadedDocuments);
         }
 
-        caseData.put(INTERIM_HEARING_DOCUMENT, interimDocument);
+
         return documents;
     }
 
@@ -232,10 +212,6 @@ public class GeneralApplicationDirectionsService {
         }
     }
 
-    public void submitCollectionGeneralApplicationDirections(CaseDetails caseDetails, List<BulkPrintDocument> dirDocuments,
-                                                             String authorisationToken) {
-        printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, dirDocuments);
-    }
 
     public void submitGeneralApplicationDirections(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> documents = prepareDocumentsToPrint(caseDetails, authorisationToken);
@@ -250,7 +226,7 @@ public class GeneralApplicationDirectionsService {
             : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
     }
 
-    private List<BulkPrintDocument> prepareDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
+    public List<BulkPrintDocument> prepareDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
         List<BulkPrintDocument> documents = new ArrayList<>();
         CaseDocument directionsDocument = caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED).equals(YES_VALUE)
@@ -318,26 +294,6 @@ public class GeneralApplicationDirectionsService {
         }
     }
 
-    private boolean isPaperApplication(Map<String, Object> caseData) {
-        return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(PAPER_APPLICATION)));
-    }
-
-    private boolean isRespondentRepresentedByASolicitor(Map<String, Object> caseData) {
-        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))
-            || YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED)));
-    }
-
-    private boolean isApplicantSolicitorAgreeToReceiveEmails(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
-    }
-
-    private boolean isRespondentSolicitorAgreeToReceiveEmails(Map<String, Object> caseData) {
-        return !isPaperApplication(caseData)
-            && isRespondentRepresentedByASolicitor(caseData)
-            && isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)
-            && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
-    }
 
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
