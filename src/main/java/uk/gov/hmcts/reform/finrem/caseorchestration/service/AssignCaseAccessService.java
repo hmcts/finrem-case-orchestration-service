@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.searchuserrole.SearchCaseAssignedUserRolesRequest;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -260,5 +261,16 @@ public class AssignCaseAccessService {
             .caseRole(CREATOR_ROLE)
             .userId(userId)
             .build());
+    }
+
+
+
+    public List<CaseAssignmentUserRole> getAllCaseRole(final String caseId) {
+        log.info("retrieve all case role for caseId {}", caseId);
+        CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
+        if (rolesResource != null) {
+            return rolesResource.getCaseAssignmentUserRoles();
+        }
+        return Collections.emptyList();
     }
 }
