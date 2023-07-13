@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SolicitorRemovedLetterDetailsGeneratorTest extends AbstractLetterDetailsGeneratorTest {
+public class SolicitorRemovedLetterDetailsGeneratorTest extends AbstractLetterDetailsGeneratorTestSetup {
 
     @InjectMocks
     private SolicitorRemovedLetterDetailsGenerator solicitorRemovedLetterDetailsGenerator;

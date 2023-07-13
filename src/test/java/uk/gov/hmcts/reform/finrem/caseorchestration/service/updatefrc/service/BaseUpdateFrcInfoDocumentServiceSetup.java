@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
 
-public class BaseUpdateFrcInfoDocumentServiceTest {
+public class BaseUpdateFrcInfoDocumentServiceSetup {
 
     @Mock
     protected GenericDocumentService genericDocumentService;
