@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 public abstract class PartyDocumentsHandler extends DocumentHandler {
     private final CaseDocumentParty party;
 
-    public PartyDocumentsHandler(ManageCaseDocumentsCollectionType manageCaseDocumentsCollectionType,
+    public PartyDocumentsHandler(CaseDocumentCollectionType caseDocumentCollectionType,
                                  CaseDocumentParty party) {
-        super(manageCaseDocumentsCollectionType);
+        super(caseDocumentCollectionType);
         this.party = party;
     }
 

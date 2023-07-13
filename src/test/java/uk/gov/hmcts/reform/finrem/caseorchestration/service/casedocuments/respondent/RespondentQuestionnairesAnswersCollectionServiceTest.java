@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -64,7 +64,7 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION),
             hasSize(2));
     }
 
@@ -77,10 +77,10 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.REPLY_TO_QUESTIONNAIRE,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
@@ -92,7 +92,7 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION),
             hasSize(1));
     }
 }

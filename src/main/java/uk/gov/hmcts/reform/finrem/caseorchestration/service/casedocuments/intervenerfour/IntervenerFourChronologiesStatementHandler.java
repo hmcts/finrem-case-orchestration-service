@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ChronologiesStatementsHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_FOUR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType.INTV_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION;
 
 @Component
 public class IntervenerFourChronologiesStatementHandler extends ChronologiesStatementsHandler {
 
     @Autowired
     public IntervenerFourChronologiesStatementHandler() {
-        super(INTV_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION, INTERVENER_FOUR);
+        super(INTERVENER_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION, INTERVENER_FOUR);
     }
 }

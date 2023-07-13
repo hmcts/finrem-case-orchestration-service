@@ -20,7 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CORRESPONDENCE_DOCS_COLLECTION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UploadedDocumentHelperTest {
@@ -41,15 +41,15 @@ public class UploadedDocumentHelperTest {
 
     @Test
     public void givenValidCaseData_whenAddUploadDateToNewContestedDocs_thenAddDate() {
-        caseData.put(APP_CORRESPONDENCE_COLLECTION, List.of(
+        caseData.put(APP_CORRESPONDENCE_DOCS_COLLECTION, List.of(
             uploadedDocument("AppCorrespondenceOne.docx", UUID.randomUUID()),
             uploadedDocument("AppCorrespondenceTwo.docx", UUID.randomUUID())
         ));
 
         Map<String, Object> modifiedData =
-            uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore, APP_CORRESPONDENCE_COLLECTION);
+            uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore, APP_CORRESPONDENCE_DOCS_COLLECTION);
 
-        List<UploadCaseDocumentCollection> documentData = getContestedUploadedDocs(modifiedData, APP_CORRESPONDENCE_COLLECTION);
+        List<UploadCaseDocumentCollection> documentData = getContestedUploadedDocs(modifiedData, APP_CORRESPONDENCE_DOCS_COLLECTION);
 
         documentData.forEach(document ->
             assertThat(document.getUploadCaseDocument().getCaseDocumentUploadDateTime(), is(notNullValue())));
@@ -58,17 +58,17 @@ public class UploadedDocumentHelperTest {
     @Test
     public void givenValidCaseData_andOldDocsInCollection_whenAddUploadDate_thenAddDateToNewDocsOnly() {
         UUID oldId = UUID.randomUUID();
-        caseData.put(APP_CORRESPONDENCE_COLLECTION, List.of(
+        caseData.put(APP_CORRESPONDENCE_DOCS_COLLECTION, List.of(
             uploadedDocument("AppCorrespondenceOne.docx", UUID.randomUUID()),
             uploadedDocument("AppCorrespondenceTwo.docx", UUID.randomUUID()),
             uploadedDocument("AppCorrespondenceOld.docx", oldId)
         ));
-        caseDataBefore.put(APP_CORRESPONDENCE_COLLECTION, List.of(uploadedDocument("AppCorrespondenceOld.docx", oldId)));
+        caseDataBefore.put(APP_CORRESPONDENCE_DOCS_COLLECTION, List.of(uploadedDocument("AppCorrespondenceOld.docx", oldId)));
 
         Map<String, Object> modifiedData =
-            uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore, APP_CORRESPONDENCE_COLLECTION);
+            uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore, APP_CORRESPONDENCE_DOCS_COLLECTION);
 
-        List<UploadCaseDocumentCollection> documentData = getContestedUploadedDocs(modifiedData, APP_CORRESPONDENCE_COLLECTION);
+        List<UploadCaseDocumentCollection> documentData = getContestedUploadedDocs(modifiedData, APP_CORRESPONDENCE_DOCS_COLLECTION);
         assertThat(documentData, hasSize(3));
         assertThat(documentData.stream()
             .map(UploadCaseDocumentCollection::getUploadCaseDocument)
@@ -79,7 +79,7 @@ public class UploadedDocumentHelperTest {
     @Test
     public void givenEmptyCollections_whenAddUploadDateToDocuments_thenHandleGracefully() {
         Map<String, Object> modifiedData =
-            uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore, APP_CORRESPONDENCE_COLLECTION);
+            uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore, APP_CORRESPONDENCE_DOCS_COLLECTION);
 
         assertThat(modifiedData, is(notNullValue()));
     }

@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ExpertEvidenceHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_FOUR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType.INTV_FOUR_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_EXPERT_EVIDENCE_COLLECTION;
 
 @Component
 public class IntervenerFourExpertEvidenceHandler extends ExpertEvidenceHandler {
 
     @Autowired
     public IntervenerFourExpertEvidenceHandler() {
-        super(INTV_FOUR_EVIDENCE_COLLECTION, INTERVENER_FOUR);
+        super(INTERVENER_FOUR_EXPERT_EVIDENCE_COLLECTION, INTERVENER_FOUR);
     }
 }

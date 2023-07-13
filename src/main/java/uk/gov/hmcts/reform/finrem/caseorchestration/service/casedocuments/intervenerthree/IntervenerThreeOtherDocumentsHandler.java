@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.OtherDocumentsHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_THREE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType.INTV_THREE_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_OTHER_COLLECTION;
 
 @Component
 public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler {
 
     @Autowired
     public IntervenerThreeOtherDocumentsHandler() {
-        super(INTV_THREE_OTHER_COLLECTION, INTERVENER_THREE);
+        super(INTERVENER_THREE_OTHER_COLLECTION, INTERVENER_THREE);
     }
 }

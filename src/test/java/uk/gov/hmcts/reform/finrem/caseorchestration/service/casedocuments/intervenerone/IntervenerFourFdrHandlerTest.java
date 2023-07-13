@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.IntervenerFourFdrHandler;
 
@@ -37,7 +37,7 @@ public class IntervenerFourFdrHandlerTest extends BaseManageDocumentsHandlerTest
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_FOUR_FDR_DOCS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_FDR_DOCS_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -57,7 +57,7 @@ public class IntervenerFourFdrHandlerTest extends BaseManageDocumentsHandlerTest
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_FOUR_FDR_DOCS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_FDR_DOCS_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(1));
@@ -70,10 +70,10 @@ public class IntervenerFourFdrHandlerTest extends BaseManageDocumentsHandlerTest
             CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.YES, null);
         beforeEventDocList.add(removedDoc);
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_FOUR_FDR_DOCS_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_FDR_DOCS_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_FOUR_FDR_DOCS_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_FDR_DOCS_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
@@ -85,7 +85,7 @@ public class IntervenerFourFdrHandlerTest extends BaseManageDocumentsHandlerTest
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_FOUR_FDR_DOCS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_FDR_DOCS_COLLECTION),
             hasSize(0));
     }
 }

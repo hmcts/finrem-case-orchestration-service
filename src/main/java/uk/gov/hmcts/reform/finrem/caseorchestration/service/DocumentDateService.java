@@ -45,8 +45,8 @@ public abstract class DocumentDateService<T extends CaseDocumentTabData> {
     }
 
     public void addUploadDateToNewDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        List<T> allDocuments = (List<T>) caseData.getUploadCaseDocumentWrapper().getAllCollections();
-        List<T> documentsBeforeEvent = (List<T>) caseDataBefore.getUploadCaseDocumentWrapper().getAllCollections();
+        List<T> allDocuments = (List<T>) caseData.getUploadCaseDocumentWrapper().getAllManageableCollections();
+        List<T> documentsBeforeEvent = (List<T>) caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
 
         allDocuments.stream().forEach(document -> addDateToNewDocuments(documentsBeforeEvent, document));
     }

@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
@@ -115,13 +115,13 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_OTHER_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION),
             hasSize(4));
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(3));
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -154,7 +154,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_OTHER_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);

@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +15,7 @@ public class FdrDocumentsHandler extends DocumentHandler {
 
 
     public FdrDocumentsHandler() {
-        super(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION);
+        super(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION);
     }
 
     protected List<UploadCaseDocumentCollection> getTypedManagedDocumentCollections(

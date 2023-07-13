@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.QuestionnairesAnswersHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_THREE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType.INTV_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION;
 
 @Component
 public class IntervenerThreeQuestionnairesAnswersHandler extends QuestionnairesAnswersHandler {
 
     @Autowired
     public IntervenerThreeQuestionnairesAnswersHandler() {
-        super(INTV_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION, INTERVENER_THREE);
+        super(INTERVENER_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION, INTERVENER_THREE);
     }
 }

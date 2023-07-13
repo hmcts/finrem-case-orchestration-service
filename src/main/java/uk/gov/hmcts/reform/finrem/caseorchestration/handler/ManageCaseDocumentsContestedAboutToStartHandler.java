@@ -30,7 +30,7 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
                                                                               String userAuthorisation) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        caseData.setManageCaseDocumentCollection(caseData.getUploadCaseDocumentWrapper().getAllCollections());
+        caseData.setManageCaseDocumentCollection(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

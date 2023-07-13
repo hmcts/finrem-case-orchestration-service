@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_OTHER_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_OTHER_COLLECTION),
             hasSize(5));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -65,10 +65,10 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_OTHER_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_OTHER_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_OTHER_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_OTHER_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
@@ -80,7 +80,7 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_OTHER_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_OTHER_COLLECTION),
             hasSize(4));
     }
 }

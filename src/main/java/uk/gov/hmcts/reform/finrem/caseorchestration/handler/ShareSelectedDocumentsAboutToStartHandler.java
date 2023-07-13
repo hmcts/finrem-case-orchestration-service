@@ -75,7 +75,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         }
         List<CaseAssignmentUserRole> allCaseRole = accessService.getAllCaseRole(String.valueOf(caseId));
         log.info("caseAssignedUserRoles {} caseId {}", loggedInUserCaseRole, caseId);
-        if (loggedInUserCaseRole.equals(CaseRole.APP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.APP_BARRISTER.getValue())) {
+        if (loggedInUserCaseRole.equals(CaseRole.APP_SOLICITOR.getCcdCode()) || loggedInUserCaseRole.equals(CaseRole.APP_BARRISTER.getCcdCode())) {
             DynamicMultiSelectList sourceDocumentList = applicantDocumentsService.applicantSourceDocumentList(caseDetails);
             log.info("Applicant sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
             if (validateSourceDocments(caseData, sourceDocumentList, "applicant", caseId)) {
@@ -91,7 +91,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
                     .errors(List.of(PARTY_ERROR)).build();
             }
         }
-        if (loggedInUserCaseRole.equals(CaseRole.RESP_SOLICITOR.getValue()) || loggedInUserCaseRole.equals(CaseRole.RESP_BARRISTER.getValue())) {
+        if (loggedInUserCaseRole.equals(CaseRole.RESP_SOLICITOR.getCcdCode()) || loggedInUserCaseRole.equals(CaseRole.RESP_BARRISTER.getCcdCode())) {
             DynamicMultiSelectList sourceDocumentList = respondentShareDocumentsService.respondentSourceDocumentList(caseDetails);
             log.info("Respondent sourceDocumentList {} caseId {}", sourceDocumentList, caseId);
             if (validateSourceDocments(caseData, sourceDocumentList, "respondent", caseId)) {

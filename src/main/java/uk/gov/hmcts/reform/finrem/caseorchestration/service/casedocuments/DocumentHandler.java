@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.Comparator;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class DocumentHandler {
 
-    protected final ManageCaseDocumentsCollectionType collectionType;
+    protected final CaseDocumentCollectionType collectionType;
 
     protected abstract List<UploadCaseDocumentCollection> getTypedManagedDocumentCollections(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections);

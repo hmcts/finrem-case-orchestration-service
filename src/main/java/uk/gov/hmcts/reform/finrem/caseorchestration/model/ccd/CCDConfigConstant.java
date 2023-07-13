@@ -461,7 +461,7 @@ public class CCDConfigConstant {
 
     public static final String CONFIDENTIAL_DOCS_UPLOADED_COLLECTION = "confidentialDocumentsUploaded";
 
-    public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsCollection";
+    public static final String APP_CORRESPONDENCE_DOCS_COLLECTION = "appCorrespondenceDocsCollection";
 
     public static final String AMEND_CONSENT_ORDER = "AmendedConsentOrder";
 

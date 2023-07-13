@@ -4,13 +4,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 @Service
 public class IntervenerTwoFdrHandler extends PartyDocumentsHandler {
 
     public IntervenerTwoFdrHandler() {
-        super(ManageCaseDocumentsCollectionType.INTV_TWO_FDR_DOCS_COLLECTION, CaseDocumentParty.INTERVENER_TWO);
+        super(CaseDocumentCollectionType.INTERVENER_TWO_FDR_DOCS_COLLECTION, CaseDocumentParty.INTERVENER_TWO);
     }
 
     @Override

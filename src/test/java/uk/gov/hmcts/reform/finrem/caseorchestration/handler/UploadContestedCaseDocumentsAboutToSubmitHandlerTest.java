@@ -24,7 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
@@ -151,7 +151,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -174,7 +174,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -197,7 +197,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -221,7 +221,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(
-                    ManageCaseDocumentsCollectionType.INTV_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                    CaseDocumentCollectionType.INTERVENER_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -245,7 +245,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -268,7 +268,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -291,7 +291,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -314,7 +314,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -338,10 +338,10 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(
-                    ManageCaseDocumentsCollectionType.INTV_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                    CaseDocumentCollectionType.INTERVENER_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(1));
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.INTV_ONE_FDR_DOCS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_ONE_FDR_DOCS_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -364,7 +364,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));

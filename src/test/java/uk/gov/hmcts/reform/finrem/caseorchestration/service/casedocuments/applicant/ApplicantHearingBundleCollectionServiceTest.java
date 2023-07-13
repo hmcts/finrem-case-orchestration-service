@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class ApplicantHearingBundleCollectionServiceTest extends BaseManageDocum
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_HEARING_BUNDLES_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_HEARING_BUNDLES_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -56,7 +56,7 @@ public class ApplicantHearingBundleCollectionServiceTest extends BaseManageDocum
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_HEARING_BUNDLES_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_HEARING_BUNDLES_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(1));
@@ -69,10 +69,10 @@ public class ApplicantHearingBundleCollectionServiceTest extends BaseManageDocum
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null);
         beforeEventDocList.add(removedDoc);
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_HEARING_BUNDLES_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_HEARING_BUNDLES_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_HEARING_BUNDLES_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_HEARING_BUNDLES_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
@@ -84,7 +84,7 @@ public class ApplicantHearingBundleCollectionServiceTest extends BaseManageDocum
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_HEARING_BUNDLES_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_HEARING_BUNDLES_COLLECTION),
             hasSize(0));
     }
 }

@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -47,10 +47,10 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
             null, YesOrNo.NO, YesOrNo.YES, "Other Example");
         beforeEventDocList.add(removedDoc);
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
@@ -62,7 +62,7 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(0));
     }
 }

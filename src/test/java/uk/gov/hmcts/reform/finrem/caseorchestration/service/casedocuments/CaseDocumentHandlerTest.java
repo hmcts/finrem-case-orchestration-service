@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class CaseDocumentHandlerTest extends BaseManageDocumentsHandlerTest {
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
             hasSize(3));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -56,10 +56,10 @@ public class CaseDocumentHandlerTest extends BaseManageDocumentsHandlerTest {
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
@@ -71,7 +71,7 @@ public class CaseDocumentHandlerTest extends BaseManageDocumentsHandlerTest {
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
             hasSize(2));
     }
 

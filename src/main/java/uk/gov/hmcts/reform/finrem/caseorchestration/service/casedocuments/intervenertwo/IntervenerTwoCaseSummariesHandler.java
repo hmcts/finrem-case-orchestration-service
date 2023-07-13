@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseSummariesHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_TWO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType.INTV_TWO_CASE_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_SUMMARIES_COLLECTION;
 
 @Component
 public class IntervenerTwoCaseSummariesHandler extends CaseSummariesHandler {
 
     @Autowired
     public IntervenerTwoCaseSummariesHandler() {
-        super(INTV_TWO_CASE_SUMMARIES_COLLECTION, INTERVENER_TWO);
+        super(INTERVENER_TWO_SUMMARIES_COLLECTION, INTERVENER_TWO);
     }
 }

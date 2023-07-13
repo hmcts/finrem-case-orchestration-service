@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class ConfidentialDocumentsHandlerTest extends BaseManageDocumentsHandler
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONFIDENTIAL_DOCS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONFIDENTIAL_DOCS_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -49,10 +49,10 @@ public class ConfidentialDocumentsHandlerTest extends BaseManageDocumentsHandler
             CaseDocumentParty.APPLICANT, YesOrNo.YES, YesOrNo.YES, "Other Example");
         beforeEventDocList.add(removedDoc);
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
@@ -64,7 +64,7 @@ public class ConfidentialDocumentsHandlerTest extends BaseManageDocumentsHandler
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.CONFIDENTIAL_DOCS_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONFIDENTIAL_DOCS_COLLECTION),
             hasSize(0));
     }
 }

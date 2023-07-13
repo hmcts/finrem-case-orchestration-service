@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -128,7 +128,6 @@ public class UploadCaseDocumentWrapper {
     private List<UploadCaseDocumentCollection> intv2FdrCaseDocuments;
     private List<UploadCaseDocumentCollection> intv3FdrCaseDocuments;
     private List<UploadCaseDocumentCollection> intv4FdrCaseDocuments;
-
     private List<UploadCaseDocumentCollection> confidentialDocumentCollection;
 
 
@@ -191,7 +190,7 @@ public class UploadCaseDocumentWrapper {
 
 
     @JsonIgnore
-    public List<UploadCaseDocumentCollection> getAllCollections() {
+    public List<UploadCaseDocumentCollection> getAllManageableCollections() {
         return Stream.of(uploadCaseDocument, fdrCaseDocumentCollection, appCorrespondenceCollection,
                 appFrFormsCollection, appEvidenceCollection, appTrialBundleCollection, appConfidentialDocsCollection,
                 respCorrespondenceCollection, respFrFormsCollection, respEvidenceCollection, respTrialBundleCollection,
@@ -215,21 +214,24 @@ public class UploadCaseDocumentWrapper {
                 intv3FormEsExhibits, intv3FormHs, intv3HearingBundles, intv3Other, intv3Qa, intv3StmtsExhibits,
                 intv4Summaries, intv4Chronologies, intv4CorrespDocs, intv4ExpertEvidence, intv4FormEsExhibits,
                 intv4FormHs, intv4HearingBundles, intv4Other, intv4Qa, intv4StmtsExhibits, intv1FdrCaseDocuments,
-                intv2FdrCaseDocuments, intv3FdrCaseDocuments, intv4FdrCaseDocuments, confidentialDocumentCollection)
+                intv2FdrCaseDocuments, intv3FdrCaseDocuments, intv4FdrCaseDocuments)
             .filter(Objects::nonNull)
             .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     @JsonIgnore
     public List<UploadCaseDocumentCollection> getDocumentCollectionPerType(
-        ManageCaseDocumentsCollectionType collectionType) {
+        CaseDocumentCollectionType collectionType) {
 
         return switch (collectionType) {
+            case APPLICANT_CORRESPONDENCE_COLLECTION -> appCorrespondenceCollection = getNonNull(appCorrespondenceCollection);
+            case APPLICANT_CORRESPONDENCE_DOC_COLLECTION -> appCorrespondenceDocsCollection = getNonNull(appCorrespondenceDocsCollection);
             case APPLICANT_FR_FORM_COLLECTION -> appFrFormsCollection = getNonNull(appFrFormsCollection);
             case APPLICANT_EVIDENCE_COLLECTION -> appEvidenceCollection = getNonNull(appEvidenceCollection);
             case APPLICANT_TRIAL_BUNDLE_COLLECTION -> appTrialBundleCollection = getNonNull(appTrialBundleCollection);
             case APPLICANT_CONFIDENTIAL_DOCS_COLLECTION ->
                 appConfidentialDocsCollection = getNonNull(appConfidentialDocsCollection);
+            case RESPONDENT_CORRESPONDENCE_COLLECTION -> respCorrespondenceCollection = getNonNull(respCorrespondenceCollection);
             case RESPONDENT_FR_FORM_COLLECTION -> respFrFormsCollection = getNonNull(respFrFormsCollection);
             case RESPONDENT_EVIDENCE_COLLECTION -> respEvidenceCollection = getNonNull(respEvidenceCollection);
             case RESPONDENT_TRIAL_BUNDLE_COLLECTION ->
@@ -248,8 +250,6 @@ public class UploadCaseDocumentWrapper {
             case APP_FORMS_H_COLLECTION -> appFormsHCollection = getNonNull(appFormsHCollection);
             case APP_EXPERT_EVIDENCE_COLLECTION ->
                 appExpertEvidenceCollection = getNonNull(appExpertEvidenceCollection);
-            case APP_CORRESPONDENCE_COLLECTION ->
-                appCorrespondenceDocsCollection = getNonNull(appCorrespondenceDocsCollection);
             case APP_OTHER_COLLECTION -> appOtherCollection = getNonNull(appOtherCollection);
             case RESP_HEARING_BUNDLES_COLLECTION ->
                 respHearingBundlesCollection = getNonNull(respHearingBundlesCollection);
@@ -270,50 +270,50 @@ public class UploadCaseDocumentWrapper {
             case CONTESTED_UPLOADED_DOCUMENTS -> uploadCaseDocument = getNonNull(uploadCaseDocument);
             case CONTESTED_FDR_CASE_DOCUMENT_COLLECTION ->
                 fdrCaseDocumentCollection = getNonNull(fdrCaseDocumentCollection);
-            case INTV_ONE_CASE_SUMMARIES_COLLECTION -> intv1Summaries = getNonNull(intv1Summaries);
-            case INTV_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION -> intv1Chronologies = getNonNull(intv1Chronologies);
-            case INTV_ONE_CORRESPONDENCE_COLLECTION -> intv1CorrespDocs = getNonNull(intv1CorrespDocs);
-            case INTV_ONE_EVIDENCE_COLLECTION -> intv1ExpertEvidence = getNonNull(intv1ExpertEvidence);
-            case INTV_ONE_FORM_E_EXHIBITS_COLLECTION -> intv1FormEsExhibits = getNonNull(intv1FormEsExhibits);
-            case INTV_ONE_FORMS_H_COLLECTION -> intv1FormHs = getNonNull(intv1FormHs);
-            case INTV_ONE_HEARING_BUNDLES_COLLECTION -> intv1HearingBundles = getNonNull(intv1HearingBundles);
-            case INTV_ONE_OTHER_COLLECTION -> intv1Other = getNonNull(intv1Other);
-            case INTV_ONE_QUESTIONNAIRES_ANSWERS_COLLECTION -> intv1Qa = getNonNull(intv1Qa);
-            case INTV_ONE_STATEMENTS_EXHIBITS_COLLECTION -> intv1StmtsExhibits = getNonNull(intv1StmtsExhibits);
-            case INTV_TWO_CASE_SUMMARIES_COLLECTION -> intv2Summaries = getNonNull(intv2Summaries);
-            case INTV_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION -> intv2Chronologies = getNonNull(intv2Chronologies);
-            case INTV_TWO_CORRESPONDENCE_COLLECTION -> intv2CorrespDocs = getNonNull(intv2CorrespDocs);
-            case INTV_TWO_EVIDENCE_COLLECTION -> intv2ExpertEvidence = getNonNull(intv2ExpertEvidence);
-            case INTV_TWO_FORM_E_EXHIBITS_COLLECTION -> intv2FormEsExhibits = getNonNull(intv2FormEsExhibits);
-            case INTV_TWO_FORMS_H_COLLECTION -> intv2FormHs = getNonNull(intv2FormHs);
-            case INTV_TWO_HEARING_BUNDLES_COLLECTION -> intv2HearingBundles = getNonNull(intv2HearingBundles);
-            case INTV_TWO_OTHER_COLLECTION -> intv2Other = getNonNull(intv2Other);
-            case INTV_TWO_QUESTIONNAIRES_ANSWERS_COLLECTION -> intv2Qa = getNonNull(intv2Qa);
-            case INTV_TWO_STATEMENTS_EXHIBITS_COLLECTION -> intv2StmtsExhibits = getNonNull(intv2StmtsExhibits);
-            case INTV_THREE_CASE_SUMMARIES_COLLECTION -> intv3Summaries = getNonNull(intv3Summaries);
-            case INTV_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION -> intv3Chronologies = getNonNull(intv3Chronologies);
-            case INTV_THREE_CORRESPONDENCE_COLLECTION -> intv3CorrespDocs = getNonNull(intv3CorrespDocs);
-            case INTV_THREE_EVIDENCE_COLLECTION -> intv3ExpertEvidence = getNonNull(intv3ExpertEvidence);
-            case INTV_THREE_FORM_E_EXHIBITS_COLLECTION -> intv3FormEsExhibits = getNonNull(intv3FormEsExhibits);
-            case INTV_THREE_FORMS_H_COLLECTION -> intv3FormHs = getNonNull(intv3FormHs);
-            case INTV_THREE_HEARING_BUNDLES_COLLECTION -> intv3HearingBundles = getNonNull(intv3HearingBundles);
-            case INTV_THREE_OTHER_COLLECTION -> intv3Other = getNonNull(intv3Other);
-            case INTV_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION -> intv3Qa = getNonNull(intv3Qa);
-            case INTV_THREE_STATEMENTS_EXHIBITS_COLLECTION -> intv3StmtsExhibits = getNonNull(intv3StmtsExhibits);
-            case INTV_FOUR_CASE_SUMMARIES_COLLECTION -> intv4Summaries = getNonNull(intv4Summaries);
-            case INTV_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION -> intv4Chronologies = getNonNull(intv4Chronologies);
-            case INTV_FOUR_CORRESPONDENCE_COLLECTION -> intv4CorrespDocs = getNonNull(intv4CorrespDocs);
-            case INTV_FOUR_EVIDENCE_COLLECTION -> intv4ExpertEvidence = getNonNull(intv4ExpertEvidence);
-            case INTV_FOUR_FORM_E_EXHIBITS_COLLECTION -> intv4FormEsExhibits = getNonNull(intv4FormEsExhibits);
-            case INTV_FOUR_FORMS_H_COLLECTION -> intv4FormHs = getNonNull(intv4FormHs);
-            case INTV_FOUR_HEARING_BUNDLES_COLLECTION -> intv4HearingBundles = getNonNull(intv4HearingBundles);
-            case INTV_FOUR_OTHER_COLLECTION -> intv4Other = getNonNull(intv4Other);
-            case INTV_FOUR_QUESTIONNAIRES_ANSWERS_COLLECTION -> intv4Qa = getNonNull(intv4Qa);
-            case INTV_FOUR_STATEMENTS_EXHIBITS_COLLECTION -> intv4StmtsExhibits = getNonNull(intv4StmtsExhibits);
-            case INTV_ONE_FDR_DOCS_COLLECTION -> intv1FdrCaseDocuments = getNonNull(intv1FdrCaseDocuments);
-            case INTV_TWO_FDR_DOCS_COLLECTION -> intv2FdrCaseDocuments = getNonNull(intv2FdrCaseDocuments);
-            case INTV_THREE_FDR_DOCS_COLLECTION -> intv3FdrCaseDocuments = getNonNull(intv3FdrCaseDocuments);
-            case INTV_FOUR_FDR_DOCS_COLLECTION -> intv4FdrCaseDocuments = getNonNull(intv4FdrCaseDocuments);
+            case INTERVENER_ONE_SUMMARIES_COLLECTION -> intv1Summaries = getNonNull(intv1Summaries);
+            case INTERVENER_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION -> intv1Chronologies = getNonNull(intv1Chronologies);
+            case INTERVENER_ONE_CORRESPONDENCE_COLLECTION -> intv1CorrespDocs = getNonNull(intv1CorrespDocs);
+            case INTERVENER_ONE_EXPERT_EVIDENCE_COLLECTION -> intv1ExpertEvidence = getNonNull(intv1ExpertEvidence);
+            case INTERVENER_ONE_FORM_E_EXHIBITS_COLLECTION -> intv1FormEsExhibits = getNonNull(intv1FormEsExhibits);
+            case INTERVENER_ONE_FORM_H_COLLECTION -> intv1FormHs = getNonNull(intv1FormHs);
+            case INTERVENER_ONE_HEARING_BUNDLES_COLLECTION -> intv1HearingBundles = getNonNull(intv1HearingBundles);
+            case INTERVENER_ONE_OTHER_COLLECTION -> intv1Other = getNonNull(intv1Other);
+            case INTERVENER_ONE_QUESTIONNAIRES_ANSWERS_COLLECTION -> intv1Qa = getNonNull(intv1Qa);
+            case INTERVENER_ONE_STATEMENTS_EXHIBITS_COLLECTION -> intv1StmtsExhibits = getNonNull(intv1StmtsExhibits);
+            case INTERVENER_TWO_SUMMARIES_COLLECTION -> intv2Summaries = getNonNull(intv2Summaries);
+            case INTERVENER_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION -> intv2Chronologies = getNonNull(intv2Chronologies);
+            case INTERVENER_TWO_CORRESPONDENCE_COLLECTION -> intv2CorrespDocs = getNonNull(intv2CorrespDocs);
+            case INTERVENER_TWO_EXPERT_EVIDENCE_COLLECTION -> intv2ExpertEvidence = getNonNull(intv2ExpertEvidence);
+            case INTERVENER_TWO_FORM_E_EXHIBITS_COLLECTION -> intv2FormEsExhibits = getNonNull(intv2FormEsExhibits);
+            case INTERVENER_TWO_FORM_H_COLLECTION -> intv2FormHs = getNonNull(intv2FormHs);
+            case INTERVENER_TWO_HEARING_BUNDLES_COLLECTION -> intv2HearingBundles = getNonNull(intv2HearingBundles);
+            case INTERVENER_TWO_OTHER_COLLECTION -> intv2Other = getNonNull(intv2Other);
+            case INTERVENER_TWO_QUESTIONNAIRES_ANSWERS_COLLECTION -> intv2Qa = getNonNull(intv2Qa);
+            case INTERVENER_TWO_STATEMENTS_EXHIBITS_COLLECTION -> intv2StmtsExhibits = getNonNull(intv2StmtsExhibits);
+            case INTERVENER_THREE_SUMMARIES_COLLECTION -> intv3Summaries = getNonNull(intv3Summaries);
+            case INTERVENER_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION -> intv3Chronologies = getNonNull(intv3Chronologies);
+            case INTERVENER_THREE_CORRESPONDENCE_COLLECTION -> intv3CorrespDocs = getNonNull(intv3CorrespDocs);
+            case INTERVENER_THREE_EXPERT_EVIDENCE_COLLECTION -> intv3ExpertEvidence = getNonNull(intv3ExpertEvidence);
+            case INTERVENER_THREE_FORM_E_EXHIBITS_COLLECTION -> intv3FormEsExhibits = getNonNull(intv3FormEsExhibits);
+            case INTERVENER_THREE_FORM_H_COLLECTION -> intv3FormHs = getNonNull(intv3FormHs);
+            case INTERVENER_THREE_HEARING_BUNDLES_COLLECTION -> intv3HearingBundles = getNonNull(intv3HearingBundles);
+            case INTERVENER_THREE_OTHER_COLLECTION -> intv3Other = getNonNull(intv3Other);
+            case INTERVENER_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION -> intv3Qa = getNonNull(intv3Qa);
+            case INTERVENER_THREE_STATEMENTS_EXHIBITS_COLLECTION -> intv3StmtsExhibits = getNonNull(intv3StmtsExhibits);
+            case INTERVENER_FOUR_SUMMARIES_COLLECTION -> intv4Summaries = getNonNull(intv4Summaries);
+            case INTERVENER_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION -> intv4Chronologies = getNonNull(intv4Chronologies);
+            case INTERVENER_FOUR_CORRESPONDENCE_COLLECTION -> intv4CorrespDocs = getNonNull(intv4CorrespDocs);
+            case INTERVENER_FOUR_EXPERT_EVIDENCE_COLLECTION -> intv4ExpertEvidence = getNonNull(intv4ExpertEvidence);
+            case INTERVENER_FOUR_FORM_E_EXHIBITS_COLLECTION -> intv4FormEsExhibits = getNonNull(intv4FormEsExhibits);
+            case INTERVENER_FOUR_FORM_H_COLLECTION -> intv4FormHs = getNonNull(intv4FormHs);
+            case INTERVENER_FOUR_HEARING_BUNDLES_COLLECTION -> intv4HearingBundles = getNonNull(intv4HearingBundles);
+            case INTERVENER_FOUR_OTHER_COLLECTION -> intv4Other = getNonNull(intv4Other);
+            case INTERVENER_FOUR_QUESTIONNAIRES_ANSWERS_COLLECTION -> intv4Qa = getNonNull(intv4Qa);
+            case INTERVENER_FOUR_STATEMENTS_EXHIBITS_COLLECTION -> intv4StmtsExhibits = getNonNull(intv4StmtsExhibits);
+            case INTERVENER_ONE_FDR_DOCS_COLLECTION -> intv1FdrCaseDocuments = getNonNull(intv1FdrCaseDocuments);
+            case INTERVENER_TWO_FDR_DOCS_COLLECTION -> intv2FdrCaseDocuments = getNonNull(intv2FdrCaseDocuments);
+            case INTERVENER_THREE_FDR_DOCS_COLLECTION -> intv3FdrCaseDocuments = getNonNull(intv3FdrCaseDocuments);
+            case INTERVENER_FOUR_FDR_DOCS_COLLECTION -> intv4FdrCaseDocuments = getNonNull(intv4FdrCaseDocuments);
             case CONFIDENTIAL_DOCS_COLLECTION -> confidentialDocumentCollection =
                 getNonNull(confidentialDocumentCollection);
         };

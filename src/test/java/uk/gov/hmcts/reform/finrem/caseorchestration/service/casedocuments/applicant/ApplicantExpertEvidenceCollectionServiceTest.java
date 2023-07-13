@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class ApplicantExpertEvidenceCollectionServiceTest extends BaseManageDocu
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_EXPERT_EVIDENCE_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_EXPERT_EVIDENCE_COLLECTION),
             hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -53,10 +53,10 @@ public class ApplicantExpertEvidenceCollectionServiceTest extends BaseManageDocu
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.EXPERT_EVIDENCE,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_EXPERT_EVIDENCE_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_EXPERT_EVIDENCE_COLLECTION)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_EXPERT_EVIDENCE_COLLECTION)
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_EXPERT_EVIDENCE_COLLECTION)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
@@ -68,7 +68,7 @@ public class ApplicantExpertEvidenceCollectionServiceTest extends BaseManageDocu
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(ManageCaseDocumentsCollectionType.APP_EXPERT_EVIDENCE_COLLECTION),
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_EXPERT_EVIDENCE_COLLECTION),
             hasSize(1));
     }
 }

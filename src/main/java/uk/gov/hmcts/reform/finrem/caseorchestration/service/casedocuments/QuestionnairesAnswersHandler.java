@@ -4,13 +4,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 public class QuestionnairesAnswersHandler extends PartyDocumentsHandler {
 
-    public QuestionnairesAnswersHandler(ManageCaseDocumentsCollectionType manageCaseDocumentsCollectionType,
+    public QuestionnairesAnswersHandler(CaseDocumentCollectionType caseDocumentCollectionType,
                                         CaseDocumentParty party) {
-        super(manageCaseDocumentsCollectionType, party);
+        super(caseDocumentCollectionType, party);
     }
 
     @Override
