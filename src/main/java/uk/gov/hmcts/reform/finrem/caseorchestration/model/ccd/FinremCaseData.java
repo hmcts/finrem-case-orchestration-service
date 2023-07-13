@@ -114,6 +114,7 @@ public class FinremCaseData {
     private String pbaPaymentReference;
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
+    private CaseDocument additionalDocument;
     private String orderDirectionOpt2;
     private YesOrNo orderDirectionAbsolute;
     private YesOrNo servePensionProvider;
@@ -253,6 +254,12 @@ public class FinremCaseData {
     private List<DocumentCollection> hearingOrderOtherDocuments;
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;
+    private List<ApprovedOrderCollection> appOrderCollection;
+    private List<ApprovedOrderCollection> respOrderCollection;
+    private List<ApprovedOrderCollection> intv1OrderCollection;
+    private List<ApprovedOrderCollection> intv2OrderCollection;
+    private List<ApprovedOrderCollection> intv3OrderCollection;
+    private List<ApprovedOrderCollection> intv4OrderCollection;
     private List<JudgeNotApprovedReasonsCollection> judgeNotApprovedReasons;
     private JudgeType refusalOrderJudgeType;
     private String refusalOrderJudgeName;
@@ -279,6 +286,8 @@ public class FinremCaseData {
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
+    private DynamicMultiSelectList ordersToShare;
+    private DynamicMultiSelectList partiesOnCase;
     private List<UploadConfidentialDocumentCollection> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")

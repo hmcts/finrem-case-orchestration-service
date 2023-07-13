@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -11,6 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
@@ -201,6 +207,77 @@ public class GeneralOrderService {
             return "Respondent Solicitor";
         } else {
             return "";
+        }
+    }
+
+    public void setOrderList(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
+        List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
+
+        if (hearingOrderDocuments != null) {
+            hearingOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
+                "Case documents tab [Approved Order]" + " - " + obj.getValue().getUploadDraftDocument().getDocumentFilename())));
+        }
+
+        if (ObjectUtils.isNotEmpty(data.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
+            CaseDocument orderLatestDocument = data.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+            String orderLatestDocumentFilename = orderLatestDocument.getDocumentFilename();
+            dynamicListElements.add(getDynamicMultiSelectListElement(orderLatestDocumentFilename,
+                "Orders tab [Lastest general order]" + " - " + orderLatestDocumentFilename));
+        }
+
+        DynamicMultiSelectList selectedOrders = data.getOrdersToShare();
+
+        DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, selectedOrders);
+        data.setOrdersToShare(dynamicOrderList);
+    }
+
+    public DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
+        return DynamicMultiSelectListElement.builder()
+            .code(code)
+            .label(label)
+            .build();
+    }
+
+    private DynamicMultiSelectList getDynamicOrderList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
+                                                           DynamicMultiSelectList selectedOrders) {
+        if (selectedOrders != null) {
+            return DynamicMultiSelectList.builder()
+                .value(selectedOrders.getValue())
+                .listItems(dynamicMultiSelectListElement)
+                .build();
+        } else {
+            return DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListElement)
+                .build();
+        }
+    }
+
+    public List<String> getParties(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        DynamicMultiSelectList parties = data.getPartiesOnCase();
+        return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
+    }
+
+    public List<CaseDocument> hearingOrdersToShare(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {
+        FinremCaseData caseData = caseDetails.getData();
+        List<CaseDocument> orders = new ArrayList<>();
+        List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
+
+        if (selectedDocs != null) {
+            List<DynamicMultiSelectListElement> docs = selectedDocs.getValue();
+            docs.forEach(doc -> hearingOrders.forEach(obj -> addToList(doc, obj, orders, caseDetails.getId())));
+        }
+        return orders;
+    }
+
+    private void addToList(DynamicMultiSelectListElement doc, DirectionOrderCollection obj,
+                           List<CaseDocument> orders, Long caseId) {
+        if (obj.getId().equals(doc.getCode())) {
+            CaseDocument caseDocument = obj.getValue().getUploadDraftDocument();
+            log.info("Adding document to orders {} for caseId {}", caseDocument, caseId);
+            orders.add(caseDocument);
         }
     }
 }

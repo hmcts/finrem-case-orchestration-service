@@ -14,10 +14,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -27,8 +29,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -46,6 +46,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -60,8 +61,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
@@ -76,10 +75,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentHelperTest {
@@ -166,59 +165,75 @@ public class DocumentHelperTest {
 
     @Test
     public void hasAnotherHearing_shouldReturnTrue() {
-        Map<String, Object> caseData = new HashMap<>();
-        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(YES_VALUE).build();
-        DirectionDetailsCollectionData directionDetailsCollectionData
-            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        DirectionDetailCollection directionDetailsCollection = DirectionDetailCollection.builder()
+            .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build();
 
+        caseData.setDirectionDetailsCollection(singletonList(directionDetailsCollection));
         assertTrue(documentHelper.hasAnotherHearing(caseData));
+
+        directionDetailsCollection = DirectionDetailCollection.builder()
+            .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.NO).build()).build();
+
+        caseData.setDirectionDetailsCollection(singletonList(directionDetailsCollection));
+        assertFalse(documentHelper.hasAnotherHearing(caseData));
     }
 
     @Test
     public void hasAnotherHearing_noDirectionDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, emptyList());
-
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        caseData.setDirectionDetailsCollection(emptyList());
         assertFalse(documentHelper.hasAnotherHearing(caseData));
     }
 
     @Test
-    public void hasAnotherHearing_missingDirectionDetails() {
-        Map<String, Object> caseData = new HashMap<>();
+    public void getLatestAdditionalHearingDocument() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
-        assertFalse(documentHelper.hasAnotherHearing(caseData));
-    }
+        Optional<CaseDocument> latestDocumentNotAvailable = documentHelper.getLatestAdditionalHearingDocument(caseData);
+        assertFalse(latestDocumentNotAvailable.isPresent());
 
-    @Test
-    public void hasAnotherHearing_noNextHearing() {
-        Map<String, Object> caseData = new HashMap<>();
-        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(NO_VALUE).build();
-        DirectionDetailsCollectionData directionDetailsCollectionData
-            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = new ArrayList<>();
+        AdditionalHearingDocumentCollection doc1
+            = AdditionalHearingDocumentCollection.builder().value(AdditionalHearingDocument
+            .builder().document(caseDocument()).build()).build();
+        AdditionalHearingDocumentCollection doc2
+            = AdditionalHearingDocumentCollection.builder().value(AdditionalHearingDocument
+            .builder().document(caseDocument("url","abc.pdf","binaryURL")).build()).build();
 
-        assertFalse(documentHelper.hasAnotherHearing(caseData));
+        additionalHearingDocuments.add(doc1);
+        additionalHearingDocuments.add(doc2);
+
+        caseData.setAdditionalHearingDocuments(additionalHearingDocuments);
+
+        Optional<CaseDocument> latestDocumentAvailable = documentHelper.getLatestAdditionalHearingDocument(caseData);
+
+        assertTrue(latestDocumentAvailable.isPresent());
+        assertEquals("abc.pdf", latestDocumentAvailable.get().getDocumentFilename());
     }
 
     @Test
     public void getHearingDocumentsAsBulkPrintDocuments() {
-        Map<String, Object> caseData = new HashMap<>();
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+
         DocumentCollection dc = DocumentCollection
             .builder()
             .value(caseDocument(DOCUMENT_URL, FILE_NAME, BINARY_URL))
             .build();
         List<DocumentCollection> documentCollections = new ArrayList<>();
         documentCollections.add(dc);
-        caseData.put(HEARING_ORDER_OTHER_COLLECTION, documentCollections);
+        caseData.setHearingOrderOtherDocuments(documentCollections);
 
         when(service.convertDocumentIfNotPdfAlready(any(), any(), anyString())).thenReturn(caseDocument());
-        List<BulkPrintDocument> hearingDocuments =
-            documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER, TEST_CASE_ID);
-        assertEquals(hearingDocuments.get(0).getFileName(), "app_docs.pdf");
-        assertEquals(hearingDocuments.get(0).getBinaryFileUrl(), BINARY_URL);
+
+        List<CaseDocument> hearingDocuments2 = documentHelper.getHearingDocumentsAsPdfDocuments(caseDetails, AUTHORIZATION_HEADER);
+        assertEquals("app_docs.pdf", hearingDocuments2.get(0).getDocumentFilename());
+        assertEquals(BINARY_URL, hearingDocuments2.get(0).getDocumentBinaryUrl());
 
         verify(service).convertDocumentIfNotPdfAlready(any(), any(), anyString());
     }
@@ -450,107 +465,13 @@ public class DocumentHelperTest {
     }
 
     @Test
-    public void whenRecipientIsNondigitallyRepresentedApplicant_AndIntervenerRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-
-        Address address = Address.builder().addressLine1("Applicant Sol Address").postCode("SW11 6HL").build();
-        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorAddress(address);
-        caseDetails.getData().getContactDetailsWrapper().setApplicantFmName("Tracy");
-        caseDetails.getData().getContactDetailsWrapper().setApplicantLname("Applicant");
-
-        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
-        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
-        wrapper.setIntervenerName("name");
-        wrapper.setIntervenerRepresented(YesOrNo.YES);
-        wrapper.setIntervenerAddress(otherAddress);
-        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
-        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
-
-        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, APPLICANT);
-        Addressee expected = Addressee.builder().name("Tracy Applicant").formattedAddress("Applicant Sol Address" + "\nSW11 6HL").build();
-        assertEquals(result.getData().get(ADDRESSEE), expected);
-    }
-
-    @Test
-    public void whenRecipientIsNondigitallyRepresentedRespondent_AndIntervenerRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-
-        Address address = Address.builder().addressLine1("Respondent Sol Address").postCode("SW11 6HL").build();
-        caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorAddress(address);
-        caseDetails.getData().getContactDetailsWrapper().setRespondentFmName("Tracy");
-        caseDetails.getData().getContactDetailsWrapper().setRespondentLname("Respondent");
-        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-
-        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
-        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
-        wrapper.setIntervenerName("name");
-        wrapper.setIntervenerRepresented(YesOrNo.YES);
-        wrapper.setIntervenerAddress(otherAddress);
-        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
-        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
-
-        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, RESPONDENT);
-        Addressee expected = Addressee.builder().name("Tracy Respondent").formattedAddress("Respondent Sol Address" + "\nSW11 6HL").build();
-        assertEquals(result.getData().get(ADDRESSEE), expected);
-    }
-
-    @Test
-    public void whenRecipientIsUnrepresentedApplicant_AndIntervenerRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-
-        Address address = Address.builder().addressLine1("Applicant Address").postCode("SW11 6HL").build();
-        caseDetails.getData().getContactDetailsWrapper().setApplicantAddress(address);
-        caseDetails.getData().getContactDetailsWrapper().setApplicantFmName("Tracy");
-        caseDetails.getData().getContactDetailsWrapper().setApplicantLname("Applicant");
-
-        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
-        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
-        wrapper.setIntervenerName("name");
-        wrapper.setIntervenerRepresented(YesOrNo.YES);
-        wrapper.setIntervenerAddress(otherAddress);
-        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
-        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
-
-        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, APPLICANT);
-        Addressee expected = Addressee.builder().name("Tracy Applicant").formattedAddress("Applicant Address" + "\nSW11 6HL").build();
-        assertEquals(result.getData().get(ADDRESSEE), expected);
-    }
-
-    @Test
-    public void whenRecipientIsUnrepresentedRespondent_AndIntervenerRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
-
-        Address address = Address.builder().addressLine1("Respondent Address").postCode("SW11 6HL").build();
-        caseDetails.getData().getContactDetailsWrapper().setRespondentAddress(address);
-        caseDetails.getData().getContactDetailsWrapper().setRespondentFmName("Tracy");
-        caseDetails.getData().getContactDetailsWrapper().setRespondentLname("Respondent");
-
-        Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
-        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
-        wrapper.setIntervenerName("name");
-        wrapper.setIntervenerRepresented(YesOrNo.YES);
-        wrapper.setIntervenerAddress(otherAddress);
-        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
-        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
-
-        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, RESPONDENT);
-        Addressee expected = Addressee.builder().name("Tracy Respondent").formattedAddress("Respondent Address" + "\nSW11 6HL").build();
-        assertEquals(result.getData().get(ADDRESSEE), expected);
-    }
-
-    @Test
     public void whenRecipientIsIntervenerOne_AndIntervenerNotRepresented_setAddressee() {
-        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
-        wrapper.setIntervenerAddress(address);
-        wrapper.setIntervenerName("Name");
-        wrapper.setIntervenerRepresented(YesOrNo.NO);
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
-        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerName("Name")
+            .intervenerAddress(address).build();
+        caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
@@ -561,14 +482,12 @@ public class DocumentHelperTest {
 
     @Test
     public void whenRecipientIsIntervenerTwo_AndIntervenerNotRepresented_setAddressee() {
-        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerTwoWrapper wrapper = new IntervenerTwoWrapper();
-        wrapper.setIntervenerAddress(address);
-        wrapper.setIntervenerName("Name");
-        wrapper.setIntervenerRepresented(YesOrNo.NO);
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
-        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
+        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder()
+            .intervenerName("Name")
+            .intervenerAddress(address).build();
+        caseDetails.getData().setIntervenerTwoWrapper(intervenerTwoWrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
@@ -579,14 +498,12 @@ public class DocumentHelperTest {
 
     @Test
     public void whenRecipientIsIntervenerThree_AndIntervenerNotRepresented_setAddressee() {
-        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerThreeWrapper wrapper = new IntervenerThreeWrapper();
-        wrapper.setIntervenerAddress(address);
-        wrapper.setIntervenerName("Name");
-        wrapper.setIntervenerRepresented(YesOrNo.NO);
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
-        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
+        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder()
+            .intervenerName("Name")
+            .intervenerAddress(address).build();
+        caseDetails.getData().setIntervenerThreeWrapper(intervenerThreeWrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
@@ -597,14 +514,12 @@ public class DocumentHelperTest {
 
     @Test
     public void whenRecipientIsIntervenerFour_AndIntervenerNotRepresented_setAddressee() {
-        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerFourWrapper wrapper = new IntervenerFourWrapper();
-        wrapper.setIntervenerAddress(address);
-        wrapper.setIntervenerName("Name");
-        wrapper.setIntervenerRepresented(YesOrNo.NO);
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-        caseDetails.getData().setCurrentIntervenerChangeDetails(new IntervenerChangeDetails());
-        caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(wrapper);
+        Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
+        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder()
+            .intervenerName("Name")
+            .intervenerAddress(address).build();
+        caseDetails.getData().setIntervenerFourWrapper(intervenerFourWrapper);
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
@@ -676,5 +591,45 @@ public class DocumentHelperTest {
                 .caseDetails(finremCaseDetails)
                 .build();
         }
+    }
+
+    @Test
+    public void convertToCaseDocumentIfObjNotNull() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(CONSENT_ORDER));
+
+        assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
+        assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
+        assertThat(caseDocument.getDocumentFilename(), is("file1"));
+    }
+
+    @Test
+    public void convertToCaseDocumentIfObjNotNullIfNullReturnNull() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(GENERAL_ORDER_PREVIEW_DOCUMENT));
+        assertNull(caseDocument);
+    }
+
+    @Test
+    public void convertToCaseDocument() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+        CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER), CaseDocument.class);
+
+        assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
+        assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
+        assertThat(caseDocument.getDocumentFilename(), is("file1"));
+    }
+
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest.builder()
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())
+            .build();
     }
 }
