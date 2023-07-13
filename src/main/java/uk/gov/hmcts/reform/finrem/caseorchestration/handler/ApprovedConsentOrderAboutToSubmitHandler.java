@@ -61,11 +61,10 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         log.info("ConsentOrderApprovedAboutToSubmitHandle handle case Id {}", caseId);
 
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
-        CaseDocument pdfConsentOrder = genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder, userAuthorisation, caseId);
-        caseDetails.getData().put(LATEST_CONSENT_ORDER, pdfConsentOrder);
-
         if (!isEmpty(latestConsentOrder)) {
-            generateAndPrepareDocuments(userAuthorisation, caseDetails, latestConsentOrder);
+            CaseDocument pdfConsentOrder = genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder, userAuthorisation, caseId);
+            caseDetails.getData().put(LATEST_CONSENT_ORDER, pdfConsentOrder);
+            generateAndPrepareDocuments(userAuthorisation, caseDetails, pdfConsentOrder);
         } else {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for case: {}",
                 caseId);

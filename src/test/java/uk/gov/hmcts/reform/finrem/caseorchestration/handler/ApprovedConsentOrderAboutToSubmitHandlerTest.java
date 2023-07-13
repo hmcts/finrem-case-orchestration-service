@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.OngoingStubbing;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -28,8 +28,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -41,8 +41,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ApprovedConsentOrderAboutToSubmitHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
     private ApprovedConsentOrderAboutToSubmitHandler handler;
     @Mock
@@ -62,8 +62,8 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     private static final String NO_PENSION_VALID_JSON = "/fixtures/bulkprint/bulk-print-no-pension-collection.json";
 
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         handler = new ApprovedConsentOrderAboutToSubmitHandler(consentOrderApprovedDocumentService,
             genericDocumentService,
             consentOrderPrintService,
@@ -72,28 +72,28 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void given_case_whenEvent_type_is_approveOrder_thenCanHandle() {
+    void given_case_whenEvent_type_is_approveOrder_thenCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.APPROVE_ORDER),
             is(true));
     }
 
     @Test
-    public void given_case_when_wrong_callback_then_case_can_not_handle() {
+    void given_case_when_wrong_callback_then_case_can_not_handle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.APPROVE_ORDER),
             is(false));
     }
 
     @Test
-    public void given_case_when_wrong_casetype_then_case_can_not_handle() {
+    void given_case_when_wrong_casetype_then_case_can_not_handle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.APPROVE_ORDER),
             is(false));
     }
 
     @Test
-    public void given_case_when_wrong_eventtype_then_case_can_not_handle() {
+    void given_case_when_wrong_eventtype_then_case_can_not_handle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CLOSE),
             is(false));
@@ -101,7 +101,7 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
 
     @Test
-    public void given_case_when_consent_order_requested_then_create_consent_order() {
+    void given_case_when_consent_order_requested_then_create_consent_order() {
         CallbackRequest callbackRequest =
             doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
 
@@ -114,19 +114,21 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
     }
 
-    @Test(expected = FeignException.InternalServerError.class)
-    public void given_case_when_failed_to_generate_doc_then_should_throw_error() {
+    @Test
+    void given_case_when_failed_to_generate_doc_then_should_throw_error() {
         CallbackRequest callbackRequest =
             doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
         whenServiceGeneratesDocument().thenThrow(feignError());
 
-        handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThrows(FeignException.InternalServerError.class, () -> {
+            handler.handle(callbackRequest, AUTH_TOKEN);
+        });
+        ;
     }
 
     @Test
-    public void given_case_when_NotPaperApplication_then_shouldNotTriggerConsentOrderApprovedNotificationLetter() {
+    void given_case_when_NotPaperApplication_then_shouldNotTriggerConsentOrderApprovedNotificationLetter() {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
         when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
 
         CallbackRequest callbackRequest =
@@ -138,11 +140,10 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenCase_whenNoPendsion_thenShouldUpdateStateToConsentOrderMadeAndBulkPrint() {
+    void givenCase_whenNoPendsion_thenShouldUpdateStateToConsentOrderMadeAndBulkPrint() {
         CallbackRequest callbackRequest =
             doValidCaseDataSetUp(NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -152,11 +153,10 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void shouldUpdateStateToConsentOrderMadeAndBulkPrint_noEmails() {
+    void shouldUpdateStateToConsentOrderMadeAndBulkPrint_noEmails() {
         CallbackRequest callbackRequest =
             doValidCaseDataSetUp(APPROVE_ORDER_NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -175,10 +175,5 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
         return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(isA(CaseDetails.class), eq(AUTH_TOKEN)));
-    }
-
-    private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
-        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class),
-            eq(AUTH_TOKEN), any(), anyString()));
     }
 }
