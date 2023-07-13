@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.junit.Assert.assertEquals;
@@ -107,8 +105,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
-    @Captor
-    ArgumentCaptor<List<BulkPrintDocument>> printDocumentsRequestDocumentListCaptor;
 
     private CaseDetails caseDetails;
 
@@ -220,9 +216,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             documentGenerationRequestCaseDetailsCaptor.capture(),
             eq(documentConfiguration.getGeneralApplicationOrderTemplate(caseDetails)),
             eq(documentConfiguration.getGeneralApplicationOrderFileName()));
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
-            printDocumentsRequestDocumentListCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data, allOf(
@@ -235,7 +228,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
             hasKey("letterDate")));
 
-        assertDocumentPrintRequestContainsExpectedDocuments();
     }
 
     @Test
@@ -250,9 +242,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             documentGenerationRequestCaseDetailsCaptor.capture(),
             eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetails)),
             eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
-            printDocumentsRequestDocumentListCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
+
         verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), any());
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
@@ -288,9 +278,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             documentGenerationRequestCaseDetailsCaptor.capture(),
             eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetails)),
             eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
-            printDocumentsRequestDocumentListCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
         verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), any());
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
@@ -329,19 +316,4 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             is(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
     }
 
-    private void assertDocumentPrintRequestContainsExpectedDocuments() {
-        List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
-        assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-                GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
-            .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).fileName("app_docs.pdf").build())
-            .toArray()));
-    }
-
-
-    private BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
-        return BulkPrintDocument.builder()
-            .binaryFileUrl(caseDocument.getDocumentBinaryUrl())
-            .fileName(caseDocument.getDocumentFilename())
-            .build();
-    }
 }
