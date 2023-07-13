@@ -60,7 +60,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_WALES_FRC_COURT_LIST;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InterimHearingContestedAboutToSubmitHandlerTest extends BaseHandlerSetup {
+public class InterimHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     @InjectMocks
     private InterimHearingContestedAboutToSubmitHandler interimHearingContestedAboutToSubmitHandler;

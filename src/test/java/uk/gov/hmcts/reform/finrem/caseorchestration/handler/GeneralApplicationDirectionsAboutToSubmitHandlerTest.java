@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHandlerSetup {
+public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationDirectionsAboutToStartHandler startHandler;
     private GeneralApplicationDirectionsAboutToSubmitHandler submitHandler;

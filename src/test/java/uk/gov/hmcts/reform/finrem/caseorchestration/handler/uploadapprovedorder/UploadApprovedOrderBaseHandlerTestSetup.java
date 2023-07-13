@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UploadApprovedOrderBaseHandlerSetup {
+public class UploadApprovedOrderBaseHandlerTestSetup {
 
     protected static final String SUCCESS_KEY = "successKey";
     protected static final String SUCCESS_VALUE = "successValue";

@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Objects;
 
-public class BaseHandlerSetup {
+public class BaseHandlerTestSetup {
 
     protected JsonNode requestContent;
 

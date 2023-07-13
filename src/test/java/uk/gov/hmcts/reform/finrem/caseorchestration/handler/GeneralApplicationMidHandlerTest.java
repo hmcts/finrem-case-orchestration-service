@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationMidHandlerTest extends BaseHandlerSetup {
+public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationMidHandler handler;
     @Mock
