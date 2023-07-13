@@ -15,7 +15,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumentServiceTest {
+public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumentServiceSetup {
 
     private static final String APP_LITIGANT_URL = "appLitigantUrl";
     private static final String APP_SOLICITOR_URL = "appSolicitorUrl";
