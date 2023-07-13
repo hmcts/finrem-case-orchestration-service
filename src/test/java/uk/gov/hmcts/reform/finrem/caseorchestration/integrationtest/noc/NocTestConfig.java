@@ -8,6 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedIntermHearingCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
@@ -66,6 +68,12 @@ public class NocTestConfig {
     UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
     @MockBean
     AssignToJudgeCorresponder assignToJudgeCorresponder;
+
+    @MockBean
+    GeneralApplicationDirectionsService generalApplicationDirectionsService;
+
+    @MockBean
+    ContestedIntermHearingCorresponder contestedIntermHearingCorresponder;
 
 }
 
