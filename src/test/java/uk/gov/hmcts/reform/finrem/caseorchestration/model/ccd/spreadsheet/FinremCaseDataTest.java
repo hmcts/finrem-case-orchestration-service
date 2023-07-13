@@ -36,7 +36,7 @@ public class FinremCaseDataTest {
         if (isMaster(branch) || localMode) {
             testEnabled = false;
         }
-        if (localMode == false) {
+        if (!localMode) {
             consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
             if (consentedFileNameWithPath == null) {
                 consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
