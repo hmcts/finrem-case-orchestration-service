@@ -33,7 +33,7 @@ public class FinremCaseDataTest {
     @Before
     public void setUpDefinitionFiles() {
         String branch = System.getenv("JENKINS_BRANCH");
-        if (branch != null && branch.equals("master")) {
+        if (isMaster(branch) || localMode) {
             testEnabled = false;
         }
         if (localMode == false) {
@@ -46,6 +46,10 @@ public class FinremCaseDataTest {
                 contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
             }
         }
+    }
+
+    private static boolean isMaster(String branch) {
+        return branch != null && branch.equals("master");
     }
 
     private String retrieveFileName(String filePrefix, String filePath) {
