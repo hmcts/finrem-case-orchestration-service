@@ -13,7 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LitigantSolicitorAddedNocDocumentServiceTest extends NocDocumentServiceBaseTest {
+public class LitigantSolicitorAddedNocDocumentServiceTest extends NocDocumentServiceBaseSetup {
 
     public static final String CASE_ID = "1234";
     @InjectMocks

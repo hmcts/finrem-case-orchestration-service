@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InterimHearingContestedSubmittedHandlerTest extends BaseHandlerTest {
+public class InterimHearingContestedSubmittedHandlerTest extends BaseHandlerSetup {
 
     @InjectMocks
     private InterimHearingContestedSubmittedHandler interimHearingContestedSubmittedHandler;

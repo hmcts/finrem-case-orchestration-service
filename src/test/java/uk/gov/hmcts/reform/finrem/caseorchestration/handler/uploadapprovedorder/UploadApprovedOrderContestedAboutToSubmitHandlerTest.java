@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadApprovedOrderContestedAboutToSubmitHandlerTest extends UploadApprovedOrderBaseHandlerTest {
+public class UploadApprovedOrderContestedAboutToSubmitHandlerTest extends UploadApprovedOrderBaseHandlerSetup {
 
     @InjectMocks
     UploadApprovedOrderContestedAboutToSubmitHandler uploadApprovedOrderContestedAboutToSubmitHandler;

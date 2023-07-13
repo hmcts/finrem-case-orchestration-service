@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTest {
+public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerSetup {
 
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
     private static final String PERIODIC_PAYMENT_CHILD_JSON = "/fixtures/updatecase/amend-periodic-payment-order.json";

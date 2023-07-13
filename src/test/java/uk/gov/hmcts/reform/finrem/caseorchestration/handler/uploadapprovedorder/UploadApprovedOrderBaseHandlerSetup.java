@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UploadApprovedOrderBaseHandlerTest {
+public class UploadApprovedOrderBaseHandlerSetup {
 
     protected static final String SUCCESS_KEY = "successKey";
     protected static final String SUCCESS_VALUE = "successValue";
@@ -27,7 +27,7 @@ public class UploadApprovedOrderBaseHandlerTest {
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CaseType.CONTESTED.getCcdType()).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONTESTED.getCcdType()).build();
         caseDetails.setData(caseData);
         return caseDetails;
     }

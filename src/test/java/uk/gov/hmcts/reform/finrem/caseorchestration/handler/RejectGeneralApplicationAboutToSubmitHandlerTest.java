@@ -37,7 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RejectGeneralApplicationAboutToSubmitHandlerTest extends BaseHandlerTest {
+public class RejectGeneralApplicationAboutToSubmitHandlerTest extends BaseHandlerSetup {
 
     private RejectGeneralApplicationAboutToStartHandler startHandler;
     private RejectGeneralApplicationAboutToSubmitHandler submitHandler;

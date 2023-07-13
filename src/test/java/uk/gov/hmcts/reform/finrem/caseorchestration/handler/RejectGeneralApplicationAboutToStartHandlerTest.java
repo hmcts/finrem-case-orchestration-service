@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REJECT_REASON;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
+public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandlerSetup {
 
     private RejectGeneralApplicationAboutToStartHandler handler;
     @Mock

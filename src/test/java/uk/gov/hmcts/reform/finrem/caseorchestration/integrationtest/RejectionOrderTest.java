@@ -69,7 +69,7 @@ public class RejectionOrderTest extends AbstractDocumentTest {
         try {
             CaseDetails deepCopy = objectMapper
                 .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
-            return orderRefusalTranslatorService.translateOrderRefusalCollection(deepCopy);
+            return orderRefusalTranslatorService.translateOrderRefusals(deepCopy);
         } catch (IOException e) {
             throw new IllegalStateException();
         }

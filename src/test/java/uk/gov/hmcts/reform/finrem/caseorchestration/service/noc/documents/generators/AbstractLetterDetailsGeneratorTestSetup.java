@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator.LETTER_DATE_FORMAT;
 
-public class AbstractLetterDetailsGeneratorTest {
+public class AbstractLetterDetailsGeneratorTestSetup {
 
     protected static final String APPLICANT_FULL_NAME = "applicantFullName";
     protected static final String RESPONDENT_FULL_NAME_CONTESTED = "respondentFullNameContested";

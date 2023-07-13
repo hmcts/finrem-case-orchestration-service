@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadApprovedOrderContestedSubmittedHandlerTest extends UploadApprovedOrderBaseHandlerTest {
+public class UploadApprovedOrderContestedSubmittedHandlerTest extends UploadApprovedOrderBaseHandlerSetup {
 
     @InjectMocks
     UploadApprovedOrderContestedSubmittedHandler uploadApprovedOrderContestedSubmittedHandler;

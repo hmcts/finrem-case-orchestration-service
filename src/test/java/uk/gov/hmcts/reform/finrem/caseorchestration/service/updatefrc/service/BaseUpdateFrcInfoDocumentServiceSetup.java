@@ -1,6 +1,5 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -9,8 +8,10 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.frcupateinfo.UpdateFrcInfoLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -20,50 +21,59 @@ import java.util.Objects;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService.CASE_DATA;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService.CASE_DETAILS;
 
-public class NocDocumentServiceBaseTest {
+public class BaseUpdateFrcInfoDocumentServiceSetup {
 
-    @Mock
-    protected DocumentConfiguration documentConfiguration;
     @Mock
     protected GenericDocumentService genericDocumentService;
 
-    protected ObjectMapper objectMapper = new ObjectMapper();
+    @Mock
+    protected CaseDataService caseDataService;
+
+    @Mock
+    protected UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator;
+
+    @Mock
+    protected DocumentConfiguration documentConfiguration;
 
     protected static final String AUTH_TOKEN = "authToken";
-    protected static final String DOC_TEMPLATE = "docTemplate";
-    protected static final String DOC_FILENAME = "docFilename";
+    protected static final String SOL_DOC_TEMPLATE = "solDocTemplate";
+    protected static final String SOL_DOC_FILENAME = "solDocFilename";
+    protected static final String LIT_DOC_TEMPLATE = "litDocTemplate";
+    protected static final String LIT_DOC_FILENAME = "litDocFilename";
     protected static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
-    protected static final String APPLICANT_NAME = "applicantName";
-    protected static final String RESPONDENT_NAME = "respondentName";
-    protected static final String FORMATTED_ADDRESS = "formattedAddress";
-    protected static final String ADDRESSEE_NAME = "addresseeName";
+    private static final String APPLICANT_NAME = "applicantName";
+    private static final String RESPONDENT_NAME = "respondentName";
+    private static final String FORMATTED_ADDRESS = "formattedAddress";
+    private static final String ADDRESSEE_NAME = "addresseeName";
+    private static final String CASE_DETAILS = "caseDetails";
+    private static final String CASE_DATA = "case_data";
 
-    protected Map caseData = null;
+    private Map caseData = null;
     protected CaseDetails caseDetails = null;
 
-    protected NoticeOfChangeLetterDetails noticeOfChangeLetterDetails;
+    protected UpdateFrcInfoLetterDetails updateFrcInfoLetterDetails;
 
     @Captor
-    ArgumentCaptor<Map> notiicationLettersDetailsMapCaptor;
+    ArgumentCaptor<Map> updateFrcInfoLetterDetailsCaptor;
+
     private String letterDate;
 
     @Before
-    public void setUpTest() {
-
+    public void setUp() {
         caseData = Map.of(DIVORCE_CASE_NUMBER, "divCaseReference", SOLICITOR_REFERENCE,
             "solicitorReference");
         caseDetails = CaseDetails.builder().id(1234L).data(caseData).build();
 
         letterDate = DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now());
-        noticeOfChangeLetterDetails = NoticeOfChangeLetterDetails.builder()
+        updateFrcInfoLetterDetails = UpdateFrcInfoLetterDetails.builder()
             .letterDate(letterDate)
             .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
             .caseNumber(caseDetails.getId().toString())
@@ -73,14 +83,15 @@ public class NocDocumentServiceBaseTest {
             .courtDetails(buildConsentedFrcCourtDetails())
             .addressee(Addressee.builder().formattedAddress(FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build())
             .build();
-
-
     }
 
-    protected void assertAndVerifyDocumentsAreGenerated(CaseDocument caseDocument) {
+    protected void assertAndVerifyDocumentIsGenerated(CaseDocument caseDocument) {
         assertNotNull(caseDocument);
-        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), notiicationLettersDetailsMapCaptor.capture(),
-            eq(DOC_TEMPLATE), eq(DOC_FILENAME), eq("1234"));
+        verify(genericDocumentService, times(1))
+            .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+                updateFrcInfoLetterDetailsCaptor.capture(),
+                any(),
+                any(), eq("1234"));
     }
 
     protected void assertPlaceHoldersMap(Map placeholdersMap) {
@@ -104,5 +115,3 @@ public class NocDocumentServiceBaseTest {
         assertThat(addresseeMap.get("formattedAddress"), is("formattedAddress"));
     }
 }
-
-
