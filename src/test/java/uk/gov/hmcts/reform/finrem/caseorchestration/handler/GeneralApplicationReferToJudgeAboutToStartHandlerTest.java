@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseHandlerTest {
+public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationReferToJudgeAboutToStartHandler handler;
     @Mock

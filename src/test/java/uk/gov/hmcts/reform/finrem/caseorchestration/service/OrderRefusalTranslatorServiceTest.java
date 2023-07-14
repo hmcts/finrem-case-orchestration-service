@@ -34,7 +34,7 @@ public class OrderRefusalTranslatorServiceTest extends BaseServiceTest {
     public void shouldTranslateOrderRefusalCollection() throws Exception {
         setUpCaseDetails("/fixtures/model/case-details-multiple-orders.json");
 
-        CaseDetails result = orderRefusalTranslatorService.translateOrderRefusalCollection(caseDetails);
+        CaseDetails result = orderRefusalTranslatorService.translateOrderRefusals(caseDetails);
         Map<String, Object> data = result.getData();
         List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, "orderRefusalCollectionNew");
         List<String> orderRefusal = orderRefusalData.get(0).getOrderRefusal().getOrderRefusal();
