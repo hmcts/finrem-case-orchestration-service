@@ -287,16 +287,17 @@ public class IntervenerShareDocumentsService implements SharedService {
     }
 
     private String getIntervenerOtherCollection(String role, String collectionType) {
+        String result = null;
         if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_1.getValue())) {
-            return getIntervenerOneCollectionType(collectionType, role);
+            result =  getIntervenerOneCollectionType(collectionType, role);
         } else if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
-            return getIntervenerTwoCollectionType(collectionType, role);
+            result = getIntervenerTwoCollectionType(collectionType, role);
         } else if (role.equals(CaseRole.INTVR_SOLICITOR_3.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_3.getValue())) {
-            return getIntervenerThreeCollectionType(collectionType, role);
+            result = getIntervenerThreeCollectionType(collectionType, role);
         } else if (role.equals(CaseRole.INTVR_SOLICITOR_4.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
-            return getIntervenerFourCollectionType(collectionType, role);
+            result = getIntervenerFourCollectionType(collectionType, role);
         }
-        return null;
+        return result;
     }
 
     private String getIntervenerOneCollectionType(String collectionType, String role) {
