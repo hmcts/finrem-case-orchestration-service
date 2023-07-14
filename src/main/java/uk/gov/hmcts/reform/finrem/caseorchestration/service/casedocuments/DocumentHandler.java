@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentC
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -18,50 +17,47 @@ public abstract class DocumentHandler {
 
     protected final CaseDocumentCollectionType collectionType;
 
-    protected abstract List<UploadCaseDocumentCollection> getTypedManagedDocumentCollections(
+    protected abstract List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections);
 
-    public void addManagedDocumentToSelectedCollection(FinremCallbackRequest callbackRequest,
-                                                       List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
+    public void replaceManagedDocumentsInCollectionType(FinremCallbackRequest callbackRequest,
+                                                        List<UploadCaseDocumentCollection> screenCollection) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        List<UploadCaseDocumentCollection> typedOriginalDocumentCollections =
+        List<UploadCaseDocumentCollection> originalCollectionForType =
             caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
-        List<UploadCaseDocumentCollection> typedManagedDocumentCollections =
-            getTypedManagedDocumentCollections(allManagedDocumentCollections);
+        List<UploadCaseDocumentCollection> alteredCollectionForType =
+            getAlteredCollectionForType(screenCollection);
 
-        typedManagedDocumentCollections.stream()
-            .filter(managedDocumentCollection -> !typedOriginalDocumentCollections.contains(managedDocumentCollection))
-            .forEach(typedOriginalDocumentCollections::add);
+        originalCollectionForType.clear();
+        originalCollectionForType.addAll(alteredCollectionForType);
 
-        typedOriginalDocumentCollections.sort(Comparator.comparing(
+        originalCollectionForType.sort(Comparator.comparing(
             UploadCaseDocumentCollection::getUploadCaseDocument, Comparator.comparing(
                 UploadCaseDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
                     Comparator.reverseOrder()))));
-        log.info("Adding items: {}, to {} Collection", typedManagedDocumentCollections,
+        log.info("Adding items: {}, to {} Collection", alteredCollectionForType,
             collectionType);
-        allManagedDocumentCollections.removeAll(typedManagedDocumentCollections);
+        screenCollection.removeAll(alteredCollectionForType);
     }
 
-    public void removeManagedDocumentFromOriginalCollection(FinremCallbackRequest callbackRequest) {
+    public void addUploadedDocumentToDocumentCollectionType(FinremCallbackRequest callbackRequest,
+                                                            List<UploadCaseDocumentCollection> screenCollection) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        List<UploadCaseDocumentCollection> originalDocumentCollection =
-            caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
-        List<UploadCaseDocumentCollection> documentsToBeRemoved =
-            getDocumentsToBeRemovedFromOriginalCollection(caseData);
-        documentsToBeRemoved.forEach(originalDocumentCollection::remove);
-    }
 
-    private List<UploadCaseDocumentCollection> getDocumentsToBeRemovedFromOriginalCollection(FinremCaseData caseData) {
-        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
-        List<UploadCaseDocumentCollection> managedCollection = getTypedManagedDocumentCollections(managedCollections);
-        List<String> managedCollectionDocIds = managedCollection.stream()
-            .map(UploadCaseDocumentCollection::getId).toList();
-        List<UploadCaseDocumentCollection> originalDocumentCollection =
+        List<UploadCaseDocumentCollection> originalCollectionForType =
             caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
+        List<UploadCaseDocumentCollection> uploadedCollectionForType =
+            getAlteredCollectionForType(screenCollection);
 
-        return originalDocumentCollection.stream().filter(originalDoc ->
-                !managedCollectionDocIds.contains(originalDoc.getId()))
-            .collect(Collectors.toList());
+        originalCollectionForType.addAll(uploadedCollectionForType);
+
+        originalCollectionForType.sort(Comparator.comparing(
+            UploadCaseDocumentCollection::getUploadCaseDocument, Comparator.comparing(
+                UploadCaseDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
+                    Comparator.reverseOrder()))));
+        log.info("Adding items: {}, to {} Collection", uploadedCollectionForType,
+            collectionType);
+        screenCollection.removeAll(uploadedCollectionForType);
     }
 }

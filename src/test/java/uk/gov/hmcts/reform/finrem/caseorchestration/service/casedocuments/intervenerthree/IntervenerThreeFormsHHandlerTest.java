@@ -27,7 +27,7 @@ public class IntervenerThreeFormsHHandlerTest extends BaseManageDocumentsHandler
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        handler.addManagedDocumentToSelectedCollection(
+        handler.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 

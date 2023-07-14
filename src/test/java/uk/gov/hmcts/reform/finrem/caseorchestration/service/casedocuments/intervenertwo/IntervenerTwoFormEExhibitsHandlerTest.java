@@ -26,7 +26,7 @@ public class IntervenerTwoFormEExhibitsHandlerTest extends BaseManageDocumentsHa
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        handler.addManagedDocumentToSelectedCollection(
+        handler.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 

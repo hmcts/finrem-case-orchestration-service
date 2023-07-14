@@ -6,12 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -29,7 +25,7 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        handler.addManagedDocumentToSelectedCollection(
+        handler.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 
@@ -37,32 +33,6 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
-    }
-
-    @Test
-    public void givenRemovedDocFromScreenCollectionWhenDeleteRemovedDocumentFromCollectionThenRemoveScreenDocsFromCollectionType() {
-        List<UploadCaseDocumentCollection> beforeEventDocList = new ArrayList<>();
-        UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            null, YesOrNo.NO, YesOrNo.YES, "Other Example");
-        beforeEventDocList.add(removedDoc);
-        caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
-            .addAll(beforeEventDocList);
-        caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION)
-            .addAll(beforeEventDocList);
-        screenUploadDocumentList.addAll(beforeEventDocList);
-        screenUploadDocumentList.remove(removedDoc);
-
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        handler.removeManagedDocumentFromOriginalCollection(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build()
-        );
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(0));
     }
 }
