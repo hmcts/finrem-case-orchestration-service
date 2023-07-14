@@ -115,6 +115,7 @@ public class FinremCaseData {
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
     private CaseDocument additionalDocument;
+    private CaseDocument additionalConsentInContestedDocument;
     private String orderDirectionOpt2;
     private YesOrNo orderDirectionAbsolute;
     private YesOrNo servePensionProvider;
@@ -288,6 +289,7 @@ public class FinremCaseData {
     private SendOrderEventPostStateOption sendOrderPostStateOption;
     private DynamicMultiSelectList ordersToShare;
     private DynamicMultiSelectList partiesOnCase;
+    private DynamicMultiSelectList consentInContestedOrdersToShare;
     private List<UploadConfidentialDocumentCollection> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")

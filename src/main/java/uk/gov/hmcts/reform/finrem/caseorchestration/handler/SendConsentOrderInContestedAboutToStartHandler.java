@@ -31,13 +31,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 
 @Slf4j
 @Service
-public class UploadConsentOrderAboutToStartHandler extends FinremCallbackHandler {
+public class SendConsentOrderInContestedAboutToStartHandler extends FinremCallbackHandler {
 
     private final GeneralOrderService generalOrderService;
     private static final String CASE_ROLE_LABEL = "%s - %s";
 
-    public UploadConsentOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                 GeneralOrderService generalOrderService) {
+    public SendConsentOrderInContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                          GeneralOrderService generalOrderService) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
     }
@@ -46,7 +46,7 @@ public class UploadConsentOrderAboutToStartHandler extends FinremCallbackHandler
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.SEND_ORDER.equals(eventType);
+            && EventType.SEND_CONSENT_IN_CONTESTED_ORDER.equals(eventType);
     }
 
     @Override
@@ -56,19 +56,20 @@ public class UploadConsentOrderAboutToStartHandler extends FinremCallbackHandler
         log.info("Invoking contested {} about to start callback for case id: {}",
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
-        generalOrderService.setOrderList(caseDetails);
+        generalOrderService.setConsentInContestedOrderList(caseDetails);
 
         DynamicMultiSelectList roleList = getAllActivePartyList(caseDetails);
         finremCaseData.setPartiesOnCase(roleList);
 
-        finremCaseData.setAdditionalDocument(null);
+        finremCaseData.setAdditionalConsentInContestedDocument(null);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
     }
 
 
     private DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
-        log.info("Event {} fetching each party's solicitor case role for caseId {}", EventType.SEND_ORDER, caseDetails.getId());
+        log.info("Event {} fetching each party's solicitor case role for caseId {}",
+            EventType.SEND_CONSENT_IN_CONTESTED_ORDER, caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();

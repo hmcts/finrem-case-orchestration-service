@@ -20,15 +20,15 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-public class UploadConsentOrderSubmittedHandler extends FinremCallbackHandler {
+public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackHandler {
     private final NotificationService notificationService;
     private final GeneralOrderService generalOrderService;
     private final CcdService ccdService;
 
-    public UploadConsentOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                              NotificationService notificationService,
-                                              GeneralOrderService generalOrderService,
-                                              CcdService ccdService) {
+    public SendConsentOrderInContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                       NotificationService notificationService,
+                                                       GeneralOrderService generalOrderService,
+                                                       CcdService ccdService) {
         super(finremCaseDetailsMapper);
         this.notificationService = notificationService;
         this.generalOrderService = generalOrderService;
@@ -40,7 +40,7 @@ public class UploadConsentOrderSubmittedHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.SEND_ORDER.equals(eventType);
+            && EventType.SEND_CONSENT_IN_CONTESTED_ORDER.equals(eventType);
     }
 
     @Override
