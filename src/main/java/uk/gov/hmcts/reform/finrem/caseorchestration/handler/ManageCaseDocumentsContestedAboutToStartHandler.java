@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.LegacyConfidentialDocumentsService;
 
 import java.util.ArrayList;
@@ -49,5 +50,11 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
             legacyConfidentialDocumentsService.getConfidentialCaseDocumentCollection(
                 caseData.getConfidentialDocumentsUploaded()));
         caseData.setConfidentialDocumentsUploaded(new ArrayList<>());
+
+        caseData.getManageCaseDocumentCollection().stream()
+            .filter(documentCollection ->
+                documentCollection.getUploadCaseDocument().getCaseDocumentConfidential() == null)
+            .forEach(
+            documentCollection -> documentCollection.getUploadCaseDocument().setCaseDocumentConfidential(YesOrNo.NO));
     }
 }
