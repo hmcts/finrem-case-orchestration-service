@@ -13,7 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LitigantSolicitorRemovedDocumentServiceTest extends NocDocumentServiceBaseTest {
+public class LitigantSolicitorRemovedDocumentServiceTest extends NocDocumentServiceBaseTestSetup {
 
     @InjectMocks
     LitigantSolicitorRemovedNocDocumentService litigantSolicitorRemovedNocDocumentService;
