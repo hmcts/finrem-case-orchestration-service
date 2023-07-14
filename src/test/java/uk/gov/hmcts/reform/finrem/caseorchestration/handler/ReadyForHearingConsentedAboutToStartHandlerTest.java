@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_HEARING_COLLECTION_CONSENTED;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReadyForHearingConsentedAboutToStartHandlerTest extends BaseHandlerTest {
+public class ReadyForHearingConsentedAboutToStartHandlerTest extends BaseHandlerTestSetup {
 
     private ReadyForHearingConsentedAboutToStartHandler handler;
 

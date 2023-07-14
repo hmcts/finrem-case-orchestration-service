@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService.CASE_DATA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService.CASE_DETAILS;
 
-public class NocDocumentServiceBaseTest {
+public class NocDocumentServiceBaseTestSetup {
 
     @Mock
     protected DocumentConfiguration documentConfiguration;
