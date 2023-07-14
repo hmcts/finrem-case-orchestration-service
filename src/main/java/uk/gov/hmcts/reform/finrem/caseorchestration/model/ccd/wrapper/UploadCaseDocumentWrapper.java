@@ -214,7 +214,7 @@ public class UploadCaseDocumentWrapper {
                 intv3FormEsExhibits, intv3FormHs, intv3HearingBundles, intv3Other, intv3Qa, intv3StmtsExhibits,
                 intv4Summaries, intv4Chronologies, intv4CorrespDocs, intv4ExpertEvidence, intv4FormEsExhibits,
                 intv4FormHs, intv4HearingBundles, intv4Other, intv4Qa, intv4StmtsExhibits, intv1FdrCaseDocuments,
-                intv2FdrCaseDocuments, intv3FdrCaseDocuments, intv4FdrCaseDocuments)
+                intv2FdrCaseDocuments, intv3FdrCaseDocuments, intv4FdrCaseDocuments, confidentialDocumentCollection)
             .filter(Objects::nonNull)
             .flatMap(Collection::stream).collect(Collectors.toList());
     }

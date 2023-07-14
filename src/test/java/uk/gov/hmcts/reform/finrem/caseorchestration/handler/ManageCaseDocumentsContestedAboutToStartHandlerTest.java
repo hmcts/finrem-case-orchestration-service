@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.LegacyConfidentialDocumentsService;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +34,7 @@ public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
         manageCaseDocumentsAboutToStartCaseHandler =
             new ManageCaseDocumentsContestedAboutToStartHandler(
                 new FinremCaseDetailsMapper(
-                    new ObjectMapper().registerModule(new JavaTimeModule())));
+                    new ObjectMapper().registerModule(new JavaTimeModule())), new LegacyConfidentialDocumentsService());
     }
 
     @Test
