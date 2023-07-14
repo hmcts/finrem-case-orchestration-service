@@ -15,7 +15,7 @@ public class ConfidentialDocumentsHandler extends DocumentHandler {
         super(CaseDocumentCollectionType.CONFIDENTIAL_DOCS_COLLECTION);
     }
 
-    protected List<UploadCaseDocumentCollection> getTypedManagedDocumentCollections(
+    protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 
         return allManagedDocumentCollections.stream()

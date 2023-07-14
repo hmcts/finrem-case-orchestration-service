@@ -87,7 +87,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         }
 
         documentHandlers.forEach(documentCollectionService ->
-            documentCollectionService.addManagedDocumentToSelectedCollection(callbackRequest, managedCollections));
+            documentCollectionService.addUploadedDocumentToDocumentCollectionType(callbackRequest, managedCollections));
 
         managedCollections.sort(Comparator.comparing(
             UploadCaseDocumentCollection::getUploadCaseDocument, Comparator.comparing(

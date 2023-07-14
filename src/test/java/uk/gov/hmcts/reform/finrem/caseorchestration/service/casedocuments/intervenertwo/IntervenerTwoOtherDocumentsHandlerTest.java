@@ -34,7 +34,7 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        handler.addManagedDocumentToSelectedCollection(
+        handler.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 

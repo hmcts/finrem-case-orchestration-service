@@ -12,8 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,7 +33,7 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.addManagedDocumentToSelectedCollection(
+        collectionService.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 
@@ -59,40 +57,12 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.addManagedDocumentToSelectedCollection(
+        collectionService.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION),
             hasSize(2));
-    }
-
-    @Test
-    public void givenRemovedDocFromScreenCollectionWhenDeleteRemovedDocumentFromCollectionThenRemoveScreenDocsFromCollectionType() {
-        List<UploadCaseDocumentCollection> beforeEventDocList = new ArrayList<>();
-        UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.QUESTIONNAIRE,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null);
-        beforeEventDocList.add(removedDoc);
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.REPLY_TO_QUESTIONNAIRE,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
-        caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION)
-            .addAll(beforeEventDocList);
-        caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION)
-            .addAll(beforeEventDocList);
-        screenUploadDocumentList.addAll(beforeEventDocList);
-        screenUploadDocumentList.remove(removedDoc);
-
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        collectionService.removeManagedDocumentFromOriginalCollection(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build()
-        );
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION),
-            hasSize(1));
     }
 }

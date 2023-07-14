@@ -18,7 +18,7 @@ public class FdrDocumentsHandler extends DocumentHandler {
         super(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION);
     }
 
-    protected List<UploadCaseDocumentCollection> getTypedManagedDocumentCollections(
+    protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 
         return allManagedDocumentCollections.stream().filter(this::isFdr).collect(Collectors.toList());

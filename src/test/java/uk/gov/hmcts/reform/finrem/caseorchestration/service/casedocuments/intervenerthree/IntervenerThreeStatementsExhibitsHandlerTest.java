@@ -28,7 +28,7 @@ public class IntervenerThreeStatementsExhibitsHandlerTest extends BaseManageDocu
             CaseDocumentParty.INTERVENER_THREE, YesOrNo.NO, YesOrNo.NO, null));
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        handler.addManagedDocumentToSelectedCollection(
+        handler.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 

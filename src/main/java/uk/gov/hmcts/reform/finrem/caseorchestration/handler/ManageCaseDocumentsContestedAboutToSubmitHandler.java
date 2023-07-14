@@ -46,8 +46,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
         documentHandlers.forEach(documentCollectionService -> {
-            documentCollectionService.removeManagedDocumentFromOriginalCollection(callbackRequest);
-            documentCollectionService.addManagedDocumentToSelectedCollection(callbackRequest, managedCollections);
+            documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, managedCollections);
         });
         uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
 

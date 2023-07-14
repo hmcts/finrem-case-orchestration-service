@@ -28,7 +28,7 @@ public class IntervenerOneStatementsExhibitsHandlerTest extends BaseManageDocume
             CaseDocumentParty.INTERVENER_ONE, YesOrNo.NO, YesOrNo.NO, null));
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        handler.addManagedDocumentToSelectedCollection(
+        handler.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
             screenUploadDocumentList);
 
