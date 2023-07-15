@@ -173,10 +173,10 @@ public class DocumentHelper {
 
     /**
      * Return List Object for given Case with the given indentation used.
-     *
+     * <p>Please use @{@link #getFormADocumentsData(FinremCaseData)}</p>
      * @param caseData instance of Map
      * @return List Object
-     * @deprecated Use {@link FinremCaseData caseData}
+     * @deprecated Use {@link Map caseData}
      */
     @Deprecated(since = "15-june-2023")
     public List<CaseDocument> getFormADocumentsData(Map<String, Object> caseData) {
@@ -353,7 +353,7 @@ public class DocumentHelper {
 
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
-     *
+     * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, PaperNotificationRecipient)}</p>
      * @param caseDetails the casedetails
      * @param recipient instance of PaperNotificationRecipient
      * @return CaseDetails Object
@@ -425,6 +425,7 @@ public class DocumentHelper {
 
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
+     * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, String, String, Address)}</p>
      *
      * @param caseDetailsCopy the casedetails
      * @param reference String
@@ -432,7 +433,7 @@ public class DocumentHelper {
      * @param addressToSendTo map
      * @param isConsentedApplication boolean
      * @return CaseDetails Object
-     * @deprecated Use {@link FinremCaseDetails finremCaseDetails, String reference, String addresseeName,
+     * @deprecated Use {@link CaseDetails caseDetails, String reference, String addresseeName,
      *                                                   Address addressToSendTo}
      */
     @Deprecated(since = "15-june-2023")

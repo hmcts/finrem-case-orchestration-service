@@ -574,7 +574,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
         data.put(INTERVENER1_LAST_NAME, "Smith");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
         assertEquals(
-            caseDataService.buildFullIntervener1Name(caseDetails), "Sarah John Smith"
+            "Sarah John Smith", caseDataService.buildFullIntervener1Name(caseDetails)
         );
     }
 
@@ -585,7 +585,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
         data.put(INTERVENER2_LAST_NAME, "Fitzgerald");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
         assertEquals(
-            caseDataService.buildFullIntervener2Name(caseDetails), "John Taylor Fitzgerald"
+            "John Taylor Fitzgerald", caseDataService.buildFullIntervener2Name(caseDetails)
         );
     }
 
@@ -596,7 +596,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
         data.put(INTERVENER3_LAST_NAME, "Peters");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
         assertEquals(
-            caseDataService.buildFullIntervener3Name(caseDetails), "Sam Tyler Peters"
+            "Sam Tyler Peters", caseDataService.buildFullIntervener3Name(caseDetails)
         );
     }
 
@@ -607,7 +607,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
         data.put(INTERVENER4_LAST_NAME, "Brown");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
         assertEquals(
-            caseDataService.buildFullIntervener4Name(caseDetails), "Yousef Luke Brown"
+            "Yousef Luke Brown", caseDataService.buildFullIntervener4Name(caseDetails)
         );
     }
 
