@@ -156,7 +156,7 @@ public class DocumentHelper {
             .reduce((first, second) -> second);
         return reduce
             .map(consentOrderData -> consentOrderData.getValue().getAmendedConsentOrder())
-            .orElseGet(() -> caseData.getLatestConsentOrder());
+            .orElseGet(caseData::getLatestConsentOrder);
     }
 
 
@@ -168,10 +168,17 @@ public class DocumentHelper {
             .map(PensionTypeCollection::getTypedCaseDocument)
             .map(PensionType::getPensionDocument)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
-    @Deprecated
+    /**
+     * Return List Object for given Case with the given indentation used.
+     *
+     * @param caseData instance of Map
+     * @return List Object
+     * @deprecated Use {@link FinremCaseData caseData}
+     */
+    @Deprecated(since = "15-june-2023")
     public List<CaseDocument> getFormADocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(FORM_A_COLLECTION))
             .map(this::convertToPaymentDocumentCollectionList)
@@ -180,7 +187,7 @@ public class DocumentHelper {
             .map(PaymentDocumentCollection::getValue)
             .map(PaymentDocument::getUploadedDocument)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<CaseDocument> getFormADocumentsData(FinremCaseData caseData) {
@@ -191,7 +198,7 @@ public class DocumentHelper {
             .map(PaymentDocumentCollection::getValue)
             .map(PaymentDocument::getUploadedDocument)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<CaseDocument> getConsentedInContestedPensionDocumentsData(Map<String, Object> caseData) {
@@ -202,7 +209,7 @@ public class DocumentHelper {
             .map(PensionTypeCollection::getTypedCaseDocument)
             .map(PensionType::getPensionDocument)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public boolean hasAnotherHearing(Map<String, Object> caseData) {
@@ -330,7 +337,29 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-    @Deprecated
+
+
+    private String getAddresee(PaperNotificationRecipient recipient) {
+        return recipient == APPLICANT ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS;
+    }
+
+    private String getRespondentLastNameCcdFieldName(boolean isConsentedApplication) {
+        return isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME;
+    }
+
+    private String getRespondentFirstMiddleNameCcdFieldName(boolean isConsentedApplication) {
+        return isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
+    }
+
+    /**
+     * Return CaseDetails Object for given Case with the given indentation used.
+     *
+     * @param caseDetails the casedetails
+     * @param recipient instance of PaperNotificationRecipient
+     * @return CaseDetails Object
+     * @deprecated Use {@link FinremCaseDetails caseDetails, PaperNotificationRecipient recipient}
+     */
+    @Deprecated(since = "15-june-2023")
     public CaseDetails prepareLetterTemplateData(CaseDetails caseDetails, PaperNotificationRecipient recipient) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
         CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
@@ -339,31 +368,29 @@ public class DocumentHelper {
         boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
         String reference = "";
         String addresseeName;
-        Map addressToSendTo;
+        Map<String, Object> addressToSendTo;
 
         if (recipient == APPLICANT && caseDataService.isApplicantRepresentedByASolicitor(caseData)) {
-            log.info("Applicant is represented by a solicitor");
+            log.info("Applicant is represented by a solicitor caseId {}", caseDetails.getId());
             reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
             addresseeName = nullToEmpty((caseData.get(isConsentedApplication ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME)));
-            addressToSendTo = (Map) caseData.get(isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS);
+            addressToSendTo = (Map<String, Object>) caseData.get(isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS);
         } else if (recipient == RESPONDENT && caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
-            log.info("Respondent is represented by a solicitor");
+            log.info("Respondent is represented by a solicitor caseId {}", caseDetails.getId());
             reference = nullToEmpty((caseData.get(RESP_SOLICITOR_REFERENCE)));
             addresseeName = nullToEmpty((caseData.get(RESP_SOLICITOR_NAME)));
-            addressToSendTo = (Map) caseData.get(RESP_SOLICITOR_ADDRESS);
+            addressToSendTo = (Map<String, Object>) caseData.get(RESP_SOLICITOR_ADDRESS);
         } else {
-            log.info("{} is not represented by a solicitor", recipient);
+            log.info("{} is not represented by a solicitor for caseId {}", recipient, caseDetails.getId());
             addresseeName = recipient == APPLICANT
                 ? caseDataService.buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME)
-                : caseDataService.buildFullName(caseData,
-                isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
-                isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
-            addressToSendTo = (Map) caseData.get(recipient == APPLICANT ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS);
+                : caseDataService.buildFullName(caseData, getRespondentFirstMiddleNameCcdFieldName(isConsentedApplication),
+                getRespondentLastNameCcdFieldName(isConsentedApplication));
+            addressToSendTo = (Map) caseData.get(getAddresee(recipient));
         }
 
         return prepareLetterTemplateData(caseDetailsCopy, reference, addresseeName, addressToSendTo, isConsentedApplication);
     }
-
 
     public CaseDetails prepareLetterTemplateData(FinremCaseDetails caseDetails, PaperNotificationRecipient recipient) {
         FinremCaseData caseData = caseDetails.getData();
@@ -395,9 +422,22 @@ public class DocumentHelper {
         return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
     }
 
-    @Deprecated
+
+    /**
+     * Return CaseDetails Object for given Case with the given indentation used.
+     *
+     * @param caseDetailsCopy the casedetails
+     * @param reference String
+     * @param addresseeName String
+     * @param addressToSendTo map
+     * @param isConsentedApplication boolean
+     * @return CaseDetails Object
+     * @deprecated Use {@link FinremCaseDetails finremCaseDetails, String reference, String addresseeName,
+     *                                                   Address addressToSendTo}
+     */
+    @Deprecated(since = "15-june-2023")
     private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName,
-                                                  Map addressToSendTo,
+                                                  Map<String, Object> addressToSendTo,
                                                   boolean isConsentedApplication) {
 
         Map<String, Object> caseData = caseDetailsCopy.getData();
@@ -470,20 +510,8 @@ public class DocumentHelper {
 
         boolean isIntervenerRepresented = checkIfIntervenerRepresentedBySolicitor(caseData.getCurrentIntervenerChangeDetails());
 
-        if (recipient == INTERVENER_ONE && !isIntervenerRepresented) {
+        if (isIntervenerPresent(recipient) && !isIntervenerRepresented) {
             log.info("Intervener One is not represented by a solicitor on case {}", caseId);
-            addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
-            addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
-        } else if (recipient == INTERVENER_TWO && !isIntervenerRepresented) {
-            log.info("Intervener Two is not represented by a solicitor on case {}", caseId);
-            addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
-            addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
-        } else if (recipient == INTERVENER_THREE && !isIntervenerRepresented) {
-            log.info("Intervener Three is not represented by a solicitor on case {}", caseId);
-            addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
-            addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
-        } else if (recipient == INTERVENER_FOUR && !isIntervenerRepresented) {
-            log.info("Intervener Four is not represented by a solicitor on case {}", caseId);
             addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
             addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
         } else {
@@ -503,6 +531,10 @@ public class DocumentHelper {
         }
 
         return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
+    }
+
+    private boolean isIntervenerPresent(PaperNotificationRecipient recipient) {
+        return recipient == INTERVENER_ONE || recipient == INTERVENER_TWO || recipient == INTERVENER_THREE || recipient == INTERVENER_FOUR;
     }
 
     private boolean addressLineOneAndPostCodeAreBothNotEmpty(Address address) {
@@ -544,7 +576,7 @@ public class DocumentHelper {
             .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
                 .fileName(caseDocument.getDocumentFilename())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
