@@ -1251,6 +1251,7 @@ public class NotificationService {
         sendInterimNotificationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void sendInterimHearingNotificationEmailToRespondentSolicitor(CaseDetails caseDetails,
                                                                          Map<String, Object> interimHearingData) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
@@ -1706,6 +1707,7 @@ public class NotificationService {
         sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void sendNoticeOfChangeEmailCaseworker(CaseDetails caseDetails) {
         EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
         NotificationRequest notificationRequest = notificationRequestMapper
