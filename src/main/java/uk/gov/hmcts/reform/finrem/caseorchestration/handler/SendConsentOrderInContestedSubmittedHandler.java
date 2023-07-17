@@ -55,28 +55,8 @@ public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackH
 
         sendNotifications(callbackRequest, parties);
 
-        updateCaseWithPostStateOption(caseDetails, userAuthorisation);
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData()).build();
-    }
-
-    private void updateCaseWithPostStateOption(FinremCaseDetails caseDetails, String userAuthorisation) {
-
-        SendOrderEventPostStateOption sendOrderPostStateOption = caseDetails.getData().getSendOrderPostStateOption();
-        if (isOptionThatRequireUpdate(sendOrderPostStateOption)) {
-            caseDetails.getData().setSendOrderPostStateOption(null);
-            ccdService.executeCcdEventOnCase(
-                userAuthorisation,
-                String.valueOf(caseDetails.getId()),
-                caseDetails.getCaseType().getCcdType(),
-                sendOrderPostStateOption.getEventToTrigger().getCcdType());
-        }
-    }
-
-    private boolean isOptionThatRequireUpdate(SendOrderEventPostStateOption postStateOption) {
-        return postStateOption.getEventToTrigger().equals(EventType.PREPARE_FOR_HEARING)
-            || postStateOption.getEventToTrigger().equals(EventType.CLOSE);
     }
 
     private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties) {
@@ -87,13 +67,13 @@ public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackH
         if (Objects.nonNull(caseData.getFinalOrderCollection())) {
             log.info("Received request to send email for 'Order Approved' for Case ID: {}", caseId);
             if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
-                && parties.contains(CaseRole.APP_SOLICITOR.getValue())) {
+                && parties.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
                 log.info("Sending 'Order Approved' email notification to Applicant Solicitor for Case ID: {}", caseId);
                 notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
             }
 
             if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
-                && parties.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+                && parties.contains(CaseRole.RESP_SOLICITOR.getCcdCode())) {
                 log.info("Sending 'Order Approved' email notification to Respondent Solicitor for Case ID: {}", caseId);
                 notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
             }

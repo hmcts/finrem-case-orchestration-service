@@ -119,7 +119,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         List<BulkPrintDocument> bulkPrintPack = documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocumentPack);
 
         FinremCaseData caseData = caseDetails.getData();
-        if (partyList.contains(CaseRole.APP_SOLICITOR.getValue())) {
+        if (partyList.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
             log.info("Received request to send hearing pack to applicant for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getAppOrderCollection())
                 .orElse(new ArrayList<>());
@@ -131,7 +131,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             }
         }
 
-        if (partyList.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+        if (partyList.contains(CaseRole.RESP_SOLICITOR.getCcdCode())) {
             log.info("Received request to send hearing pack to respondent for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getRespOrderCollection())
                 .orElse(new ArrayList<>());
@@ -143,7 +143,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             }
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode())) {
             log.info("Received request to send hearing pack to intervener1 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv1OrderCollection())
                 .orElse(new ArrayList<>());
@@ -152,7 +152,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             //send to bulk print
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode())) {
             log.info("Received request to send hearing pack to intervener2 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv2OrderCollection())
                 .orElse(new ArrayList<>());
@@ -161,7 +161,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             //send to bulk print
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode())) {
             log.info("Received request to send hearing pack to intervener3 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv3OrderCollection())
                 .orElse(new ArrayList<>());
@@ -170,7 +170,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             //send to bulk print
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode())) {
             log.info("Received request to send hearing pack to intervener4 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv4OrderCollection())
                 .orElse(new ArrayList<>());
@@ -223,7 +223,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         if (isSelectedOrderMatches(selectedOrders, generalOrder)) {
             shareAndPrintGeneralOrderWithApplicant(caseDetails, partyList, userAuthorisation, caseId, caseData, generalOrder);
             shareAndPrintGeneralOrderWithRespondent(caseDetails, partyList, userAuthorisation, caseId, caseData, generalOrder);
-
             shareAndPrintOrderWithIntervenerOne(partyList, caseId, caseData, generalOrder);
             shareAndPrintOrderWithIntervenerTwo(partyList, caseId, caseData, generalOrder);
             shareAndPrintOrderWithIntervenerThree(partyList, caseId, caseData, generalOrder);
@@ -233,7 +232,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void shareAndPrintOrderWithIntervenerFour(List<String> partyList, Long caseId,
                                                       FinremCaseData caseData, CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode())) {
             log.info("Received request to send general to intervener4 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv4OrderCollection())
                 .orElse(new ArrayList<>());
@@ -246,7 +245,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void shareAndPrintOrderWithIntervenerThree(List<String> partyList, Long caseId,
                                                        FinremCaseData caseData, CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode())) {
             log.info("Received request to send general to intervener3 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv3OrderCollection())
                 .orElse(new ArrayList<>());
@@ -259,7 +258,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void shareAndPrintOrderWithIntervenerTwo(List<String> partyList, Long caseId,
                                                      FinremCaseData caseData, CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode())) {
             log.info("Received request to send general to intervener2 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv2OrderCollection())
                 .orElse(new ArrayList<>());
@@ -272,7 +271,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void shareAndPrintOrderWithIntervenerOne(List<String> partyList, Long caseId,
                                                      FinremCaseData caseData, CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode())) {
             log.info("Received request to send general to intervener1 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv1OrderCollection())
                 .orElse(new ArrayList<>());
@@ -286,7 +285,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void shareAndPrintGeneralOrderWithRespondent(FinremCaseDetails caseDetails, List<String> partyList,
                                                          String userAuthorisation, Long caseId,
                                                          FinremCaseData caseData, CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+        if (partyList.contains(CaseRole.RESP_SOLICITOR.getCcdCode())) {
             log.info("Received request to send general to respondent for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getRespOrderCollection())
                 .orElse(new ArrayList<>());
@@ -304,7 +303,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void shareAndPrintGeneralOrderWithApplicant(FinremCaseDetails caseDetails,
                                                         List<String> partyList, String userAuthorisation,
                                                         Long caseId, FinremCaseData caseData, CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.APP_SOLICITOR.getValue())) {
+        if (partyList.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
             log.info("Received request to send general to applicant for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getAppOrderCollection())
                 .orElse(new ArrayList<>());

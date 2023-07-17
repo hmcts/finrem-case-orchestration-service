@@ -12,12 +12,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderColle
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -36,6 +39,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
     private final DocumentHelper documentHelper;
     private final BulkPrintService bulkPrintService;
     private final NotificationService notificationService;
+    private final ConsentOrderPrintService consentOrderPrintService;
 
 
     public SendConsentOrderInContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -43,13 +47,15 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
                                                            GenericDocumentService genericDocumentService,
                                                            DocumentHelper documentHelper,
                                                            BulkPrintService bulkPrintService,
-                                                           NotificationService notificationService) {
+                                                           NotificationService notificationService,
+                                                           ConsentOrderPrintService consentOrderPrintService) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
         this.bulkPrintService = bulkPrintService;
         this.notificationService = notificationService;
+        this.consentOrderPrintService = consentOrderPrintService;
     }
 
     @Override
@@ -93,107 +99,6 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
             .data(caseDetails.getData()).build();
     }
 
-
-//    private void shareAndSendHearingDocuments(FinremCaseDetails caseDetails,
-//                                              List<CaseDocument> hearingOrders,
-//                                              List<String> partyList,
-//                                              String userAuthorisation) {
-//        Long caseId = caseDetails.getId();
-//
-//        List<CaseDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, hearingOrders, userAuthorisation);
-//        List<BulkPrintDocument> bulkPrintPack = documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocumentPack);
-//
-//        FinremCaseData caseData = caseDetails.getData();
-//        if (partyList.contains(CaseRole.APP_SOLICITOR.getValue())) {
-//            log.info("Received request to send hearing pack to applicant for case {}:", caseId);
-//            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getAppOrderCollection())
-//                .orElse(new ArrayList<>());
-//            hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
-//            caseData.setAppOrderCollection(orderColl);
-//            if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-//                log.info("Sending hearing pack to applicant for caseId {}", caseId);
-//                bulkPrintService.printApplicantDocuments(caseDetails, userAuthorisation, bulkPrintPack);
-//            }
-//        }
-//
-//        if (partyList.contains(CaseRole.RESP_SOLICITOR.getValue())) {
-//            log.info("Received request to send hearing pack to respondent for case {}:", caseId);
-//            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getRespOrderCollection())
-//                .orElse(new ArrayList<>());
-//            hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
-//            caseData.setRespOrderCollection(orderColl);
-//            if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
-//                log.info("Sending hearing pack to respondent for caseId {}", caseId);
-//                bulkPrintService.printRespondentDocuments(caseDetails, userAuthorisation, bulkPrintPack);
-//            }
-//        }
-//
-//        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
-//            log.info("Received request to send hearing pack to intervener1 for case {}:", caseId);
-//            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv1OrderCollection())
-//                .orElse(new ArrayList<>());
-//            hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
-//            caseData.setIntv1OrderCollection(orderColl);
-//            //send to bulk print
-//        }
-//
-//        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
-//            log.info("Received request to send hearing pack to intervener2 for case {}:", caseId);
-//            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv2OrderCollection())
-//                .orElse(new ArrayList<>());
-//            hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
-//            caseData.setIntv2OrderCollection(orderColl);
-//            //send to bulk print
-//        }
-//
-//        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
-//            log.info("Received request to send hearing pack to intervener3 for case {}:", caseId);
-//            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv3OrderCollection())
-//                .orElse(new ArrayList<>());
-//            hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
-//            caseData.setIntv3OrderCollection(orderColl);
-//            //send to bulk print
-//        }
-//
-//        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
-//            log.info("Received request to send hearing pack to intervener4 for case {}:", caseId);
-//            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv4OrderCollection())
-//                .orElse(new ArrayList<>());
-//            hearingDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
-//            caseData.setIntv4OrderCollection(orderColl);
-//            //send to bulk print
-//        }
-//
-//    }
-//
-//    private List<CaseDocument> createHearingDocumentPack(FinremCaseDetails caseDetails,
-//                                                         List<CaseDocument> hearingOrders,
-//                                                         String authorisationToken) {
-//
-//        String caseId = String.valueOf(caseDetails.getId());
-//        log.info("Creating hearing document pack for caseId {}", caseId);
-//        FinremCaseData caseData = caseDetails.getData();
-//        List<CaseDocument> orders = new ArrayList<>(hearingOrders);
-//        orders.add(caseData.getOrderApprovedCoverLetter());
-//        CaseDocument document = caseData.getAdditionalDocument();
-//        if (document != null) {
-//            orders.add(document);
-//        }
-//
-//        if (documentHelper.hasAnotherHearing(caseData)) {
-//            Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
-//            latestAdditionalHearingDocument.ifPresent(
-//                orders::add);
-//        }
-//
-//        List<CaseDocument> otherHearingDocuments = documentHelper.getHearingDocumentsAsPdfDocuments(caseDetails, authorisationToken);
-//        if (!otherHearingDocuments.isEmpty()) {
-//            orders.addAll(otherHearingDocuments);
-//        }
-//        return orders;
-//    }
-
-
     private void shareAndSendConsentOrderWithSelectedParties(FinremCaseDetails caseDetails,
                                                              List<String> partyList,
                                                              DynamicMultiSelectList selectedConsentOrders,
@@ -203,24 +108,31 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
         log.info("Sharing selected consent order with selected parties for case id {}", caseId);
 
         FinremCaseData caseData = caseDetails.getData();
-        List<ConsentOrderCollection> consentOrders = caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
+        ConsentOrderWrapper wrapper = caseData.getConsentOrderWrapper();
+        List<CaseDocument> approvedConsentOrders = new ArrayList<>();
+        List<CaseDocument> unapprovedConsentOrders = new ArrayList<>();
 
-        consentOrders.forEach(order -> {
-            if (isSelectedOrderMatches(selectedConsentOrders, order.getApprovedOrder().getConsentOrder())) {
-                shareAndPrintConsentOrderWithApplicant(caseDetails, partyList, userAuthorisation, caseId, caseData,
-                    order.getApprovedOrder().getConsentOrder());
-                shareAndPrintConsentOrderWithRespondent(caseDetails, partyList, userAuthorisation, caseId, caseData,
-                    order.getApprovedOrder().getConsentOrder());
-                shareAndPrintConsentOrderWithIntervenerOne(partyList, caseId, caseData,
-                    order.getApprovedOrder().getConsentOrder());
-                shareAndPrintConsentOrderWithIntervenerTwo(partyList, caseId, caseData,
-                    order.getApprovedOrder().getConsentOrder());
-                shareAndPrintConsentOrderWithIntervenerThree(partyList, caseId, caseData,
-                    order.getApprovedOrder().getConsentOrder());
-                shareAndPrintConsentOrderWithIntervenerFour(partyList, caseId, caseData,
-                    order.getApprovedOrder().getConsentOrder());
-            }
-        });
+        if (wrapper.getContestedConsentedApprovedOrders() != null
+            && !wrapper.getContestedConsentedApprovedOrders().isEmpty()) {
+            wrapper.getContestedConsentedApprovedOrders().forEach(order -> {
+                approvedConsentOrders.add(order.getApprovedOrder().getConsentOrder());
+            });
+        }
+        if (wrapper.getConsentedNotApprovedOrders() != null
+            && !wrapper.getConsentedNotApprovedOrders().isEmpty()) {
+            wrapper.getConsentedNotApprovedOrders().forEach(order -> {
+                unapprovedConsentOrders.add(order.getApprovedOrder().getConsentOrder());
+            });
+        }
+        List<CaseDocument> approvedConsentOrdersToShare = getMatchingSelectedOrders(selectedConsentOrders, approvedConsentOrders);
+        List<CaseDocument> unapprovedConsentOrdersToShare = getMatchingSelectedOrders(selectedConsentOrders, unapprovedConsentOrders);
+
+        shareAndPrintConsentOrdersWithApplicant(caseDetails, partyList, userAuthorisation, approvedConsentOrdersToShare, unapprovedConsentOrdersToShare);
+        shareAndPrintConsentOrdersWithRespondent(caseDetails, partyList, userAuthorisation, approvedConsentOrdersToShare, unapprovedConsentOrdersToShare);
+        shareAndPrintConsentOrdersWithIntervenerOne(caseDetails, partyList, userAuthorisation, approvedConsentOrdersToShare, unapprovedConsentOrdersToShare);
+        shareAndPrintConsentOrdersWithIntervenerTwo(caseDetails, partyList, userAuthorisation, approvedConsentOrdersToShare, unapprovedConsentOrdersToShare);
+        shareAndPrintConsentOrdersWithIntervenerThree(caseDetails, partyList, userAuthorisation, approvedConsentOrdersToShare, unapprovedConsentOrdersToShare);
+        shareAndPrintConsentOrdersWithIntervenerFour(caseDetails, partyList, userAuthorisation, approvedConsentOrdersToShare, unapprovedConsentOrdersToShare);
     }
 
 //    public void sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
@@ -240,102 +152,206 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
 //        }
 //    }
 
-    private void shareAndPrintConsentOrderWithIntervenerFour(List<String> partyList, Long caseId,
-                                                      FinremCaseData caseData, CaseDocument consentOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
-            log.info("Received request to send general to intervener4 for case {}", caseId);
-            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv4OrderCollection())
+    private void shareAndPrintConsentOrdersWithIntervenerFour(FinremCaseDetails caseDetails, List<String> partyList,
+                                                              String userAuthorisation, List<CaseDocument> approvedConsentOrders,
+                                                              List<CaseDocument> unapprovedConsentOrders) {
+        Long caseId = caseDetails.getId();
+        FinremCaseData caseData = caseDetails.getData();
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode())) {
+            log.info("Received request to send consent order to intervener4 for case {}", caseId);
+            List<ApprovedOrderCollection> approvedOrderColl = Optional.ofNullable(caseData.getIntv4OrderCollection())
                 .orElse(new ArrayList<>());
-            List<CaseDocument> documents = addOrderToCollection(caseData, consentOrder, orderColl);
-            caseData.setIntv4OrderCollection(orderColl);
-            log.info("Sending documents {} to intervener4 for case {}", documents, caseId);
-            //send documents to bulk print
+            List<UnapprovedOrderCollection> refusedOrderColl = Optional.ofNullable(caseData.getIntv4RefusedOrderCollection())
+                .orElse(new ArrayList<>());
+            if (!approvedConsentOrders.isEmpty()) {
+                List<CaseDocument> approvedDocuments = addApprovedOrdersToCollection(caseData, approvedConsentOrders, approvedOrderColl);
+                caseData.setIntv4OrderCollection(approvedOrderColl);
+            }
+            if (!unapprovedConsentOrders.isEmpty()) {
+                List<CaseDocument> unapprovedDocuments = addUnapprovedOrdersToCollection(caseData, unapprovedConsentOrders, refusedOrderColl);
+                caseData.setIntv4RefusedOrderCollection(refusedOrderColl);
+            }
+            // log.info("Sending documents {} to intervener4 for case {}", documents, caseId);
+            IntervenerWrapper wrapper = caseData.getIntervenerOneWrapper();
+//            if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(wrapper, caseDetails)) {
+//                log.info("Sending consent order to intervener4 for case {}", caseId);
+//                bulkPrintService.printIntervenerDocuments(wrapper, caseDetails,
+//                    userAuthorisation,
+//                    documentHelper.getCaseDocumentsAsBulkPrintDocuments(documents));
+//            }
         }
     }
 
-    private void shareAndPrintConsentOrderWithIntervenerThree(List<String> partyList, Long caseId,
-                                                       FinremCaseData caseData, CaseDocument consentOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
-            log.info("Received request to send general to intervener3 for case {}", caseId);
-            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv3OrderCollection())
+    private void shareAndPrintConsentOrdersWithIntervenerThree(FinremCaseDetails caseDetails, List<String> partyList,
+                                                               String userAuthorisation, List<CaseDocument> approvedConsentOrders,
+                                                               List<CaseDocument> unapprovedConsentOrders) {
+        Long caseId = caseDetails.getId();
+        FinremCaseData caseData = caseDetails.getData();
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode())) {
+            log.info("Received request to send consent order to intervener3 for case {}", caseId);
+            List<ApprovedOrderCollection> approvedOrderColl = Optional.ofNullable(caseData.getIntv3OrderCollection())
                 .orElse(new ArrayList<>());
-            List<CaseDocument> documents = addOrderToCollection(caseData, consentOrder, orderColl);
-            caseData.setIntv3OrderCollection(orderColl);
-            log.info("Sending documents {} to intervener3 for case {}", documents, caseId);
-            //send documents to bulk print
+            List<UnapprovedOrderCollection> refusedOrderColl = Optional.ofNullable(caseData.getIntv3RefusedOrderCollection())
+                .orElse(new ArrayList<>());
+            if (!approvedConsentOrders.isEmpty()) {
+                List<CaseDocument> approvedDocuments = addApprovedOrdersToCollection(caseData, approvedConsentOrders, approvedOrderColl);
+                caseData.setIntv3OrderCollection(approvedOrderColl);
+            }
+            if (!unapprovedConsentOrders.isEmpty()) {
+                List<CaseDocument> unapprovedDocuments = addUnapprovedOrdersToCollection(caseData, unapprovedConsentOrders, refusedOrderColl);
+                caseData.setIntv3RefusedOrderCollection(refusedOrderColl);
+            }
+            // log.info("Sending documents {} to intervener3 for case {}", documents, caseId);
+            IntervenerWrapper wrapper = caseData.getIntervenerThreeWrapper();
+//            if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(wrapper, caseDetails)) {
+//                log.info("Sending consent order to intervener3 for case {}", caseId);
+//                bulkPrintService.printIntervenerDocuments(wrapper, caseDetails,
+//                    userAuthorisation,
+//                    documentHelper.getCaseDocumentsAsBulkPrintDocuments(documents));
+//            }
         }
     }
 
-    private void shareAndPrintConsentOrderWithIntervenerTwo(List<String> partyList, Long caseId,
-                                                     FinremCaseData caseData, CaseDocument consentOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
-            log.info("Received request to send general to intervener2 for case {}", caseId);
-            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv2OrderCollection())
+    private void shareAndPrintConsentOrdersWithIntervenerTwo(FinremCaseDetails caseDetails, List<String> partyList,
+                                                             String userAuthorisation, List<CaseDocument> approvedConsentOrders,
+                                                             List<CaseDocument> unapprovedConsentOrders) {
+        Long caseId = caseDetails.getId();
+        FinremCaseData caseData = caseDetails.getData();
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode())) {
+            log.info("Received request to send consent order to intervener2 for case {}", caseId);
+            List<ApprovedOrderCollection> approvedOrderColl = Optional.ofNullable(caseData.getIntv2OrderCollection())
                 .orElse(new ArrayList<>());
-            List<CaseDocument> documents = addOrderToCollection(caseData, consentOrder, orderColl);
-            caseData.setIntv2OrderCollection(orderColl);
-            log.info("Sending documents {} to intervener2 for case {}", documents, caseId);
-            //send documents to bulk print
+            List<UnapprovedOrderCollection> refusedOrderColl = Optional.ofNullable(caseData.getIntv2RefusedOrderCollection())
+                .orElse(new ArrayList<>());
+            if (!approvedConsentOrders.isEmpty()) {
+                List<CaseDocument> approvedDocuments = addApprovedOrdersToCollection(caseData, approvedConsentOrders, approvedOrderColl);
+                caseData.setIntv2OrderCollection(approvedOrderColl);
+            }
+            if (!unapprovedConsentOrders.isEmpty()) {
+                List<CaseDocument> unapprovedDocuments = addUnapprovedOrdersToCollection(caseData, unapprovedConsentOrders, refusedOrderColl);
+                caseData.setIntv2RefusedOrderCollection(refusedOrderColl);
+            }
+            // log.info("Sending documents {} to intervener2 for case {}", documents, caseId);
+            IntervenerWrapper wrapper = caseData.getIntervenerTwoWrapper();
+//            if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(wrapper, caseDetails)) {
+//                log.info("Sending consent order to intervener2 for case {}", caseId);
+//                bulkPrintService.printIntervenerDocuments(wrapper, caseDetails,
+//                    userAuthorisation,
+//                    documentHelper.getCaseDocumentsAsBulkPrintDocuments(documents));
+//            }
         }
     }
 
-    private void shareAndPrintConsentOrderWithIntervenerOne(List<String> partyList, Long caseId,
-                                                     FinremCaseData caseData, CaseDocument consentOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+    private void shareAndPrintConsentOrdersWithIntervenerOne(FinremCaseDetails caseDetails, List<String> partyList,
+                                                             String userAuthorisation, List<CaseDocument> approvedConsentOrders,
+                                                             List<CaseDocument> unapprovedConsentOrders) {
+        Long caseId = caseDetails.getId();
+        FinremCaseData caseData = caseDetails.getData();
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode())) {
             log.info("Received request to send consent order to intervener1 for case {}", caseId);
-            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv1OrderCollection())
+            List<ApprovedOrderCollection> approvedOrderColl = Optional.ofNullable(caseData.getIntv1OrderCollection())
                 .orElse(new ArrayList<>());
-            List<CaseDocument> documents = addOrderToCollection(caseData, consentOrder, orderColl);
-            caseData.setIntv1OrderCollection(orderColl);
-            log.info("Sending documents {} to intervener1 for case {}", documents, caseId);
-            //send documents to bulk print
+            List<UnapprovedOrderCollection> refusedOrderColl = Optional.ofNullable(caseData.getIntv1RefusedOrderCollection())
+                .orElse(new ArrayList<>());
+            if (!approvedConsentOrders.isEmpty()) {
+                List<CaseDocument> approvedDocuments = addApprovedOrdersToCollection(caseData, approvedConsentOrders, approvedOrderColl);
+                caseData.setIntv1OrderCollection(approvedOrderColl);
+            }
+            if (!unapprovedConsentOrders.isEmpty()) {
+                List<CaseDocument> unapprovedDocuments = addUnapprovedOrdersToCollection(caseData, unapprovedConsentOrders, refusedOrderColl);
+                caseData.setIntv1RefusedOrderCollection(refusedOrderColl);
+            }
+            //log.info("Sending documents {} to intervener1 for case {}", documents, caseId);
+            IntervenerWrapper wrapper = caseData.getIntervenerOneWrapper();
+//            if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(wrapper, caseDetails)) {
+//                log.info("Sending consent order to intervener1 for case {}", caseId);
+//                bulkPrintService.printIntervenerDocuments(wrapper, caseDetails,
+//                    userAuthorisation,
+//                    documentHelper.getCaseDocumentsAsBulkPrintDocuments());
+//            }
         }
     }
 
-    private void shareAndPrintConsentOrderWithRespondent(FinremCaseDetails caseDetails, List<String> partyList,
-                                                         String userAuthorisation, Long caseId,
-                                                         FinremCaseData caseData, CaseDocument consentOrder) {
-        if (partyList.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+    private void shareAndPrintConsentOrdersWithRespondent(FinremCaseDetails caseDetails, List<String> partyList,
+                                                          String userAuthorisation, List<CaseDocument> approvedConsentOrders,
+                                                          List<CaseDocument> unapprovedConsentOrders) {
+        Long caseId = caseDetails.getId();
+        FinremCaseData caseData = caseDetails.getData();
+        if (partyList.contains(CaseRole.RESP_SOLICITOR.getCcdCode())) {
             log.info("Received request to send consent order to respondent for case {}:", caseId);
-            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getRespOrderCollection())
+            List<ApprovedOrderCollection> approvedOrderColl = Optional.ofNullable(caseData.getRespOrderCollection())
                 .orElse(new ArrayList<>());
-            List<CaseDocument> documents = addOrderToCollection(caseData, consentOrder, orderColl);
-            caseData.setRespOrderCollection(orderColl);
-            if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
-                log.info("Sending consent order to respondent for case {}", caseId);
-                bulkPrintService.printRespondentDocuments(caseDetails,
-                    userAuthorisation,
-                    documentHelper.getCaseDocumentsAsBulkPrintDocuments(documents));
+            List<UnapprovedOrderCollection> refusedOrderColl = Optional.ofNullable(caseData.getRespRefusedOrderCollection())
+                .orElse(new ArrayList<>());
+            if (!approvedConsentOrders.isEmpty()) {
+                List<CaseDocument> approvedDocuments = addApprovedOrdersToCollection(caseData, approvedConsentOrders, approvedOrderColl);
+                caseData.setAppOrderCollection(approvedOrderColl);
             }
+            if (!unapprovedConsentOrders.isEmpty()) {
+                List<CaseDocument> unapprovedDocuments = addUnapprovedOrdersToCollection(caseData, unapprovedConsentOrders, refusedOrderColl);
+                caseData.setAppRefusedOrderCollection(refusedOrderColl);
+            }
+//            if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
+//                log.info("Sending consent order to respondent for case {}", caseId);
+//                bulkPrintService.printRespondentDocuments(caseDetails,
+//                    userAuthorisation,
+//                    documentHelper.getCaseDocumentsAsBulkPrintDocuments(documents));
+//            }
         }
     }
 
-    private void shareAndPrintConsentOrderWithApplicant(FinremCaseDetails caseDetails,
-                                                        List<String> partyList, String userAuthorisation,
-                                                        Long caseId, FinremCaseData caseData, CaseDocument consentOrder) {
-        if (partyList.contains(CaseRole.APP_SOLICITOR.getValue())) {
-            log.info("Received request to send consent order to applicant for case {}:", caseId);
-            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getAppOrderCollection())
+    private void shareAndPrintConsentOrdersWithApplicant(FinremCaseDetails caseDetails,
+                                                         List<String> partyList, String userAuthorisation,
+                                                         List<CaseDocument> approvedConsentOrders,
+                                                         List<CaseDocument> unapprovedConsentOrders) {
+        FinremCaseData caseData = caseDetails.getData();
+        Long caseId = caseDetails.getId();
+        if (partyList.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
+            log.info("Received request to send approved consent order to applicant for case {}:", caseId);
+            List<ApprovedOrderCollection> approvedOrderColl = Optional.ofNullable(caseData.getAppOrderCollection())
                 .orElse(new ArrayList<>());
-            List<CaseDocument> documents = addOrderToCollection(caseData, consentOrder, orderColl);
-            caseData.setAppOrderCollection(orderColl);
-            if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-                log.info("Sending consent order to applicant for caseId {}", caseId);
-                bulkPrintService.printApplicantDocuments(caseDetails,
-                    userAuthorisation,
-                    documentHelper.getCaseDocumentsAsBulkPrintDocuments(documents));
+            List<UnapprovedOrderCollection> refusedOrderColl = Optional.ofNullable(caseData.getAppRefusedOrderCollection())
+                .orElse(new ArrayList<>());
+            if (!approvedConsentOrders.isEmpty()) {
+                List<CaseDocument> approvedDocuments = addApprovedOrdersToCollection(caseData, approvedConsentOrders, approvedOrderColl);
+                caseData.setAppOrderCollection(approvedOrderColl);
             }
+            if (!unapprovedConsentOrders.isEmpty()) {
+                List<CaseDocument> unapprovedDocuments = addUnapprovedOrdersToCollection(caseData, unapprovedConsentOrders, refusedOrderColl);
+                caseData.setAppRefusedOrderCollection(refusedOrderColl);
+            }
+//            if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
+//                log.info("Sending consent order to applicant for caseId {}", caseId);
+//                bulkPrintService.printApplicantDocuments(caseDetails,
+//                    userAuthorisation,
+//                    documentHelper.getCaseDocumentsAsBulkPrintDocuments(documents));
+//            }
         }
     }
 
-    private List<CaseDocument> addOrderToCollection(FinremCaseData caseData,
-                                                    CaseDocument consentOrder, List<ApprovedOrderCollection> orderColl) {
+    private List<CaseDocument> addApprovedOrdersToCollection(FinremCaseData caseData,
+                                                             List<CaseDocument> approvedConsentOrders,
+                                                             List<ApprovedOrderCollection> approvedOrderColl) {
         List<CaseDocument> documentsToPrint = new ArrayList<>();
-        orderColl.add(getApprovedOrderCollection(consentOrder));
-        documentsToPrint.add(consentOrder);
-        CaseDocument document = caseData.getAdditionalDocument();
+        approvedConsentOrders.forEach(order -> approvedOrderColl.add(getApprovedOrderCollection(order)));
+        documentsToPrint.addAll(approvedConsentOrders);
+        CaseDocument document = caseData.getAdditionalConsentInContestedDocument();
         if (document != null) {
-            orderColl.add(getApprovedOrderCollection(document));
+            approvedOrderColl.add(getApprovedOrderCollection(document));
+            documentsToPrint.add(document);
+        }
+        return documentsToPrint;
+    }
+
+    private List<CaseDocument> addUnapprovedOrdersToCollection(FinremCaseData caseData,
+                                                               List<CaseDocument> unapprovedConsentOrders,
+                                                               List<UnapprovedOrderCollection> unapprovedOrderColl) {
+        List<CaseDocument> documentsToPrint = new ArrayList<>();
+        unapprovedConsentOrders.forEach(order -> unapprovedOrderColl.add(getUnapprovedOrderCollection(order)));
+        documentsToPrint.addAll(unapprovedConsentOrders);
+        CaseDocument document = caseData.getAdditionalConsentInContestedDocument();
+        if (document != null) {
+            unapprovedOrderColl.add(getUnapprovedOrderCollection(document));
             documentsToPrint.add(document);
         }
         return documentsToPrint;
@@ -347,37 +363,17 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
                 .orderReceivedAt(LocalDateTime.now()).build()).build();
     }
 
-    private boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, CaseDocument caseDocument) {
-        if (caseDocument != null) {
-            Optional<DynamicMultiSelectListElement> listElement = selectedDocs.getValue().stream()
-                .filter(e -> e.getCode().equals(caseDocument.getDocumentFilename())).findAny();
-            return listElement.isPresent();
-        }
-        return false;
+    private UnapprovedOrderCollection getUnapprovedOrderCollection(CaseDocument consentOrder) {
+        return UnapprovedOrderCollection.builder()
+            .value(UnapproveOrder.builder().caseDocument(consentOrder)
+                .orderReceivedAt(LocalDateTime.now()).build()).build();
     }
 
-//    private void stampAndAddToCollection(FinremCaseDetails caseDetails, CaseDocument latestHearingOrder,
-//                                         String authToken) {
-//        String caseId = String.valueOf(caseDetails.getId());
-//        FinremCaseData caseData = caseDetails.getData();
-//
-//        StampType stampType = documentHelper.getStampType(caseData);
-//        CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, caseId);
-//        log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
-//
-//        List<DirectionOrderCollection> finalOrderCollection = Optional.ofNullable(caseData.getFinalOrderCollection())
-//            .orElse(new ArrayList<>());
-//
-//        finalOrderCollection.add(prepareFinalOrderList(stampedDocs));
-//        log.info("Existing final order collection = {}", finalOrderCollection);
-//
-//        caseData.setFinalOrderCollection(finalOrderCollection);
-//        log.info("Finished stamping final order for caseId {}", caseId);
-//    }
-
-//    private DirectionOrderCollection prepareFinalOrderList(CaseDocument document) {
-//        return DirectionOrderCollection.builder()
-//            .value(DirectionOrder.builder().uploadDraftDocument(document).build())
-//            .build();
-//    }
+    private List<CaseDocument> getMatchingSelectedOrders(DynamicMultiSelectList selectedDocs, List<CaseDocument> caseDocuments) {
+        if (caseDocuments != null && !caseDocuments.isEmpty()) {
+            return caseDocuments.stream().filter(doc ->
+                selectedDocs.getValue().stream().anyMatch(e -> e.getLabel().equals(doc.getDocumentFilename()))).toList();
+        }
+        return new ArrayList<>();
+    }
 }
