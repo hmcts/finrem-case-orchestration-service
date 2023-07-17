@@ -392,36 +392,36 @@ public class GeneralApplicationService {
                     ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue());
             }
         });
+        caseData.getGeneralApplicationWrapper().setGeneralApplications(
+            helper.convertToGeneralApplicationsCollection(generalApplications));
         List<GeneralApplicationCollectionData> intervener1GeneralApplications =
             generalApplications.stream().filter(ga -> INTERVENER1
                 .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
                 Collectors.toList());
-        List<GeneralApplicationCollectionData> intervener2GeneralApplications =
-            generalApplications.stream().filter(ga -> INTERVENER2
-                .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
-                Collectors.toList());
-        List<GeneralApplicationCollectionData> intervener3GeneralApplications =
-            generalApplications.stream().filter(ga -> INTERVENER3
-                .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
-                Collectors.toList());
-        List<GeneralApplicationCollectionData> intervener4GeneralApplications =
-            generalApplications.stream().filter(ga -> INTERVENER4
-                .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
-                Collectors.toList());
-        caseData.getGeneralApplicationWrapper().setGeneralApplications(
-            helper.convertToGeneralApplicationsCollection(generalApplications));
         if (!intervener1GeneralApplications.isEmpty()) {
             caseData.getGeneralApplicationWrapper().setIntervener1GeneralApplications(
                 helper.convertToGeneralApplicationsCollection(intervener1GeneralApplications));
         }
+        List<GeneralApplicationCollectionData> intervener2GeneralApplications =
+            generalApplications.stream().filter(ga -> INTERVENER2
+                .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
+                Collectors.toList());
         if (!intervener2GeneralApplications.isEmpty()) {
             caseData.getGeneralApplicationWrapper().setIntervener2GeneralApplications(
                 helper.convertToGeneralApplicationsCollection(intervener2GeneralApplications));
         }
+        List<GeneralApplicationCollectionData> intervener3GeneralApplications =
+            generalApplications.stream().filter(ga -> INTERVENER3
+                .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
+                Collectors.toList());
         if (!intervener3GeneralApplications.isEmpty()) {
             caseData.getGeneralApplicationWrapper().setIntervener3GeneralApplications(
                 helper.convertToGeneralApplicationsCollection(intervener3GeneralApplications));
         }
+        List<GeneralApplicationCollectionData> intervener4GeneralApplications =
+            generalApplications.stream().filter(ga -> INTERVENER4
+                .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
+                Collectors.toList());
         if (!intervener4GeneralApplications.isEmpty()) {
             caseData.getGeneralApplicationWrapper().setIntervener4GeneralApplications(
                 helper.convertToGeneralApplicationsCollection(intervener4GeneralApplications));
