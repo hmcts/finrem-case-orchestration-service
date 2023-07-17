@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class LegacyConfidentialDocumentsService {
 
-    public List<UploadCaseDocumentCollection> getConfidentialCaseDocumentCollection(
+    public List<UploadCaseDocumentCollection> mapLegacyConfidentialDocumentToConfidentialDocumentCollection(
         List<ConfidentialUploadedDocumentData> legacyConfidentialDocumentsUploaded) {
 
         return legacyConfidentialDocumentsUploaded != null

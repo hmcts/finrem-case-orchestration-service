@@ -8,10 +8,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.LegacyConfidentialDocumentsService;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -41,20 +42,34 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
         caseData.setManageCaseDocumentCollection(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
 
         migrateLegacyConfidentialCaseDocumentFormat(caseData);
+        populateMissingConfidentialFlag(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
     private void migrateLegacyConfidentialCaseDocumentFormat(FinremCaseData caseData) {
-        caseData.getManageCaseDocumentCollection().addAll(
-            legacyConfidentialDocumentsService.getConfidentialCaseDocumentCollection(
-                caseData.getConfidentialDocumentsUploaded()));
-        caseData.setConfidentialDocumentsUploaded(new ArrayList<>());
+        if (caseData.getConfidentialDocumentsUploaded() != null) {
+            caseData.getManageCaseDocumentCollection()
+                .addAll(getConfidentialCaseDocumentCollectionFromLegacyConfidentialDocs(caseData));
+            caseData.getConfidentialDocumentsUploaded().clear();
+        }
+    }
 
+    private void populateMissingConfidentialFlag(FinremCaseData caseData) {
         caseData.getManageCaseDocumentCollection().stream()
-            .filter(documentCollection ->
-                documentCollection.getUploadCaseDocument().getCaseDocumentConfidential() == null)
+            .filter(this::isConfidentialFlagMissing)
             .forEach(
-            documentCollection -> documentCollection.getUploadCaseDocument().setCaseDocumentConfidential(YesOrNo.NO));
+                documentCollection ->
+                    documentCollection.getUploadCaseDocument().setCaseDocumentConfidential(YesOrNo.NO));
+    }
+
+    private boolean isConfidentialFlagMissing(UploadCaseDocumentCollection documentCollection) {
+        return documentCollection.getUploadCaseDocument() != null
+            && documentCollection.getUploadCaseDocument().getCaseDocumentConfidential() == null;
+    }
+
+    private List<UploadCaseDocumentCollection> getConfidentialCaseDocumentCollectionFromLegacyConfidentialDocs(FinremCaseData caseData) {
+        return legacyConfidentialDocumentsService.mapLegacyConfidentialDocumentToConfidentialDocumentCollection(
+            caseData.getConfidentialDocumentsUploaded());
     }
 }

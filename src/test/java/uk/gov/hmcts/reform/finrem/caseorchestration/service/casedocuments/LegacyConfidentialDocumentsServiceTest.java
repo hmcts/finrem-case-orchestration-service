@@ -41,7 +41,7 @@ public class LegacyConfidentialDocumentsServiceTest {
                 .build();
 
         List<UploadCaseDocumentCollection> uploadCaseDocumentCollections =
-            service.getConfidentialCaseDocumentCollection(List.of(legacyConfidentialDocumentCollection));
+            service.mapLegacyConfidentialDocumentToConfidentialDocumentCollection(List.of(legacyConfidentialDocumentCollection));
 
         assertThat(uploadCaseDocumentCollections.get(0).getId(), equalTo(LEGACY_CONFIDENTIAL_ID));
         assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocumentOther(),
