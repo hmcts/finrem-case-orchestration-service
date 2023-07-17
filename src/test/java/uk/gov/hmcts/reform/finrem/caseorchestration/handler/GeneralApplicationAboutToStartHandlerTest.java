@@ -48,7 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
+public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationAboutToStartHandler handler;
     @Mock

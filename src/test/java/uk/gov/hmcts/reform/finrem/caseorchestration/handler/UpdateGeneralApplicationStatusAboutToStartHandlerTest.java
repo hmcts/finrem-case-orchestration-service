@@ -47,7 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Service
 @RunWith(SpringRunner.class)
-public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseHandlerTest {
+public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseHandlerTestSetup {
 
     private UpdateGeneralApplicationStatusAboutToStartHandler handler;
     @Mock

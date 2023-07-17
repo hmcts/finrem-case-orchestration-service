@@ -28,7 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RejectGeneralApplicationAboutToSubmitHandlerTest extends BaseHandlerTest {
+public class RejectGeneralApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     private RejectGeneralApplicationAboutToStartHandler startHandler;
     private RejectGeneralApplicationAboutToSubmitHandler submitHandler;

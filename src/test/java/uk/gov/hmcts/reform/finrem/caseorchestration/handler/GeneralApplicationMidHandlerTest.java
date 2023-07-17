@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
+public class GeneralApplicationMidHandlerTest {
     private GeneralApplicationMidHandler handler;
     @InjectMocks
     private GeneralApplicationService gaService;

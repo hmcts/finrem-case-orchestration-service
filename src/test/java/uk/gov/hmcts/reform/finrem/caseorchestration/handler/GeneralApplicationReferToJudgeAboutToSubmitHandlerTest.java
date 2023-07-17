@@ -40,7 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RunWith(MockitoJUnitRunner.class)
 @Service
-public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends BaseHandlerTest {
+public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationReferToJudgeAboutToStartHandler startHandler;
     private GeneralApplicationReferToJudgeAboutToSubmitHandler submitHandler;

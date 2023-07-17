@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
+public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandlerTestSetup {
 
     private RejectGeneralApplicationAboutToStartHandler handler;
     @Mock

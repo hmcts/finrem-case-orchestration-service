@@ -37,7 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandlerTest {
+public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationOutcomeAboutToStartHandler startHandler;
     private GeneralApplicationOutcomeAboutToSubmitHandler submitHandler;

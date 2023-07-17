@@ -9,8 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.Finrem
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Objects;
 
-public class BaseHandlerTest {
+public class BaseHandlerTestSetup {
 
     protected JsonNode requestContent;
 
@@ -28,8 +29,8 @@ public class BaseHandlerTest {
     private JsonNode readJsonNodeFromFile(String jsonPath) {
         try {
             return objectMapper.readTree(
-                new File(getClass()
-                    .getResource(jsonPath)
+                new File(Objects.requireNonNull(getClass()
+                        .getResource(jsonPath))
                     .toURI()));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

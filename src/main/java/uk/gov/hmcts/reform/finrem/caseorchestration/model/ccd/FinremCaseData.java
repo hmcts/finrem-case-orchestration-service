@@ -290,6 +290,8 @@ public class FinremCaseData {
     private String currentUserCaseRoleType;
     private CaseDocument outOfFamilyCourtResolution;
 
+    private DynamicMultiSelectList sourceDocumentList;
+    private DynamicMultiSelectList solicitorRoleList;
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
 
