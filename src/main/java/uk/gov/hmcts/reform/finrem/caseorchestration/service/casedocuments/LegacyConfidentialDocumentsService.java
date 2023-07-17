@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,10 +20,9 @@ public class LegacyConfidentialDocumentsService {
     public List<UploadCaseDocumentCollection> mapLegacyConfidentialDocumentToConfidentialDocumentCollection(
         List<ConfidentialUploadedDocumentData> legacyConfidentialDocumentsUploaded) {
 
-        return legacyConfidentialDocumentsUploaded != null
-            ? legacyConfidentialDocumentsUploaded.stream().map(this::getUploadCaseDocumentCollection)
-            .collect(Collectors.toList())
-            : new ArrayList<>();
+        return legacyConfidentialDocumentsUploaded.stream()
+            .map(this::getUploadCaseDocumentCollection)
+            .collect(Collectors.toList());
     }
 
     private UploadCaseDocumentCollection getUploadCaseDocumentCollection(
