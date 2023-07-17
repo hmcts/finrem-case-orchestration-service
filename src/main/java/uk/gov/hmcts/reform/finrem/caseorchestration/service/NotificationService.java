@@ -1143,13 +1143,13 @@ public class NotificationService {
     public boolean isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
         return intervenerWrapper.isIntervenerSolicitorPopulated()
             && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
+            intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode());
     }
 
     public boolean isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         return intervenerWrapper.isIntervenerSolicitorPopulated()
             && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
+            intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode());
     }
 
     private SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerOneSolicitor() {
