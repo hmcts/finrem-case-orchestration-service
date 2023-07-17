@@ -105,8 +105,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
             GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
         if (!isAnyDocumentPresent(caseData)) {
             response.getErrors().add(NO_DOCUMENT_ERROR);
-        }
-        if (isAnyTrialBundleDocumentPresent(caseData)) {
+        } else if (isAnyTrialBundleDocumentPresent(caseData)) {
             response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
         }
         return response;
