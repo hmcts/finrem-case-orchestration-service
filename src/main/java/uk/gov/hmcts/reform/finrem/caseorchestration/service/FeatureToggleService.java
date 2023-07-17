@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.Features;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 
 import javax.validation.constraints.NotNull;
 
@@ -19,7 +19,6 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASEWORKER_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.INTERVENER_ENABLED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
@@ -50,14 +49,6 @@ public class FeatureToggleService {
         return Optional.ofNullable(toggle.get(feature.getName()))
             .map(Boolean::parseBoolean)
             .orElse(false);
-    }
-
-    /*
-     * DFR-909
-     * DFR-908
-     */
-    public boolean isManageBundleEnabled() {
-        return isFeatureEnabled(MANAGE_BUNDLE);
     }
 
     /*
@@ -114,7 +105,7 @@ public class FeatureToggleService {
         Map<Class, List<String>> ignoredFields = Maps.newHashMap();
 
 
-        ignoredFields.put(ContestedUploadedDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
+        ignoredFields.put(UploadCaseDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
 
 
         return ignoredFields;

@@ -1,17 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ChronologiesStatementsHandler;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
-
-@Component
+@Service
 public class ApplicantChronologiesStatementHandler extends ChronologiesStatementsHandler {
 
     @Autowired
-    public ApplicantChronologiesStatementHandler(ObjectMapper mapper) {
-        super(APP_CHRONOLOGIES_STATEMENTS_COLLECTION, APPLICANT, mapper);
+    public ApplicantChronologiesStatementHandler() {
+        super(CaseDocumentCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION,
+                CaseDocumentParty.APPLICANT);
     }
 }
