@@ -118,7 +118,10 @@ public class CaseDataService {
     }
 
     public boolean addressLineOneNotEmpty(Map address) {
-        return StringUtils.isNotBlank((String) address.get(LINE_1));
+        if (address != null) {
+            return StringUtils.isNotBlank((String) address.get(LINE_1));
+        }
+        return false;
     }
 
     private boolean postcodeNotEmpty(Map address) {

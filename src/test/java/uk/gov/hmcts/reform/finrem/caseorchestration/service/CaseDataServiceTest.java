@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -184,13 +185,20 @@ public class CaseDataServiceTest extends BaseServiceTest {
     }
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private static String F_NAME = "f";
-    private static String L_NAME = "l";
+    private static final String F_NAME = "f";
+    private static final String L_NAME = "l";
 
     @Test
     public void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnTrueWhenLineOneAndPostCodeArePopulated() {
         assertThat(
             caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(asList("London Road", "sw2 3rf"))), is(true)
+        );
+    }
+
+    @Test
+    public void addressLineOneAndPostCodeAreBothEmptyShouldReturnFalse() {
+        assertThat(
+            caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(Collections.emptyMap()), is(false)
         );
     }
 
