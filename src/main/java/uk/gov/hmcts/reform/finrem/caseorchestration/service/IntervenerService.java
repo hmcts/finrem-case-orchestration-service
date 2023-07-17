@@ -35,7 +35,7 @@ public class IntervenerService {
             log.info("revoke case role for {} for case {}", intervenerWrapper.getIntervenerSolicitorCaseRole(), caseId);
             String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             String email = intervenerWrapper.getIntervenerSolEmail();
-            remokeIntervenerRole(caseId, email, orgId, intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
+            remokeIntervenerRole(caseId, email, orgId, intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode());
         }
 
         intervenerWrapper.removeIntervenerWrapperFromCaseData(caseData);
@@ -56,7 +56,7 @@ public class IntervenerService {
                 intervenerWrapper.setIntervenerDateAdded(LocalDate.now());
             }
 
-            final String caseRole = intervenerWrapper.getIntervenerSolicitorCaseRole().getValue();
+            final String caseRole = intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode();
             if (intervenerWrapper.getIntervenerRepresented().equals(YesOrNo.YES)) {
                 log.info("Add {} case role for case {}", caseRole, caseId);
                 String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
@@ -73,7 +73,7 @@ public class IntervenerService {
                     log.info("{} now not represented for case {}", intervenerWrapper.getIntervenerType(), caseId);
                     remokeIntervenerRole(caseId, beforeIntv.getIntervenerSolEmail(),
                         beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID(),
-                        intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
+                        intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode());
                     intervenerWrapper.setIntervenerSolEmail(null);
                     intervenerWrapper.setIntervenerSolName(null);
                     intervenerWrapper.setIntervenerSolPhone(null);
@@ -100,7 +100,7 @@ public class IntervenerService {
             if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervenerSolEmail().equals(email)) {
                 remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervenerSolEmail(),
                     beforeOrgId,
-                    intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
+                    intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode());
             }
         }
     }
@@ -137,7 +137,7 @@ public class IntervenerService {
     private void setDefaultOrgForintervener(IntervenerWrapper intervenerWrapper) {
         Organisation organisation = Organisation.builder().organisationID(null).organisationName(null).build();
         intervenerWrapper.getIntervenerOrganisation().setOrganisation(organisation);
-        intervenerWrapper.getIntervenerOrganisation().setOrgPolicyCaseAssignedRole(intervenerWrapper.getIntervenerSolicitorCaseRole().getValue());
+        intervenerWrapper.getIntervenerOrganisation().setOrgPolicyCaseAssignedRole(intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode());
         intervenerWrapper.getIntervenerOrganisation().setOrgPolicyReference(null);
     }
 
