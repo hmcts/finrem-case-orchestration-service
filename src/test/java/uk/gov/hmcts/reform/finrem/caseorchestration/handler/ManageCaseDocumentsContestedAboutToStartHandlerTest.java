@@ -24,12 +24,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Legacy
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
@@ -104,7 +102,7 @@ public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
                     .caseDocumentConfidential(YesOrNo.YES)
                     .build()).build()));
 
-        GenericAboutToStartOrSubmitCallbackResponse response =
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(((FinremCaseData) response.getData()).getUploadCaseDocumentWrapper()
@@ -115,7 +113,7 @@ public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
     @Test
     public void givenExistingLegacyConfidentialDocsWhenAboutToStartThenMapLegacyDocsIntoCaseDocumentConfidential() {
 
-        List legacyConfidentialDocList = new ArrayList<>();
+        List<ConfidentialUploadedDocumentData> legacyConfidentialDocList = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         legacyConfidentialDocList.add(ConfidentialUploadedDocumentData.builder()
             .id("Legacy doc id")
