@@ -261,6 +261,12 @@ public class FinremCaseData {
     private List<ApprovedOrderCollection> intv2OrderCollection;
     private List<ApprovedOrderCollection> intv3OrderCollection;
     private List<ApprovedOrderCollection> intv4OrderCollection;
+    private List<UnapprovedOrderCollection> appRefusedOrderCollection;
+    private List<UnapprovedOrderCollection> respRefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv1RefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv2RefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv3RefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv4RefusedOrderCollection;
     private List<JudgeNotApprovedReasonsCollection> judgeNotApprovedReasons;
     private JudgeType refusalOrderJudgeType;
     private String refusalOrderJudgeName;
@@ -290,7 +296,7 @@ public class FinremCaseData {
     private DynamicMultiSelectList ordersToShare;
     private DynamicMultiSelectList partiesOnCase;
     private DynamicMultiSelectList consentInContestedOrdersToShare;
-    private List<UploadConfidentialDocumentCollection> confidentialDocumentsUploaded;
+    private List<ConfidentialUploadedDocumentData> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")
     private OrganisationPolicy applicantOrganisationPolicy;
@@ -316,6 +322,8 @@ public class FinremCaseData {
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener3")
     private IntervenerThreeWrapper intervenerThreeWrapper;
+
+    private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener4")

@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
@@ -237,10 +238,17 @@ public class GeneralOrderService {
     public void setConsentInContestedOrderList(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
-        List<ConsentOrderCollection> consentOrderDocuments = data.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
+        ConsentOrderWrapper wrapper = data.getConsentOrderWrapper();
+        List<ConsentOrderCollection> approvedConsentOrderDocuments = wrapper.getContestedConsentedApprovedOrders();
+        List<ConsentOrderCollection> refusedConsentOrderDocuments = wrapper.getConsentedNotApprovedOrders();
 
-        if (consentOrderDocuments != null && !consentOrderDocuments.isEmpty()) {
-            consentOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
+        if (approvedConsentOrderDocuments != null && !approvedConsentOrderDocuments.isEmpty()) {
+            approvedConsentOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
+                obj.getApprovedOrder().getConsentOrder().getDocumentFilename())));
+        }
+
+        if (refusedConsentOrderDocuments != null && !refusedConsentOrderDocuments.isEmpty()) {
+            refusedConsentOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
                 obj.getApprovedOrder().getConsentOrder().getDocumentFilename())));
         }
 
