@@ -377,20 +377,7 @@ public class GeneralApplicationService {
 
     public void updateGeneralApplicationCollectionData(List<GeneralApplicationCollectionData> generalApplications,
                                                        FinremCaseData caseData) {
-        log.info("entering updateGeneralApplicationCollection Data for case Id 1688466084529064");
         helper.populateGeneralApplicationDataSender(caseData, generalApplications);
-        generalApplications.forEach(ga -> {
-            if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null) {
-                log.info("general application received from is {} on case id 1688466084529064 with status {}",
-                    ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom(),
-                    ga.getGeneralApplicationItems().getGeneralApplicationStatus());
-            }
-            if (ga.getGeneralApplicationItems().getGeneralApplicationSender() != null) {
-                log.info("general application sender is {} on case id 1688466084529064 with status {}",
-                    ga.getGeneralApplicationItems().getGeneralApplicationSender(),
-                    ga.getGeneralApplicationItems().getGeneralApplicationStatus());
-            }
-        });
         List<GeneralApplicationCollectionData> appRespGeneralApplications =
             generalApplications.stream().filter(ga ->
                 APPLICANT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())
@@ -405,7 +392,6 @@ public class GeneralApplicationService {
                     ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue());
             }
         });
-        log.info("reached intervener1GeneralApplications in updateGeneralApplicationCollection Data on case 1688466084529064");
         List<GeneralApplicationCollectionData> intervener1GeneralApplications =
             generalApplications.stream().filter(ga -> INTERVENER1
                 .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
@@ -424,28 +410,23 @@ public class GeneralApplicationService {
                 Collectors.toList());
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(generalApplications));
-        if (caseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications().isEmpty()) {
+        if (!intervener1GeneralApplications.isEmpty()) {
             caseData.getGeneralApplicationWrapper().setIntervener1GeneralApplications(
                 helper.convertToGeneralApplicationsCollection(intervener1GeneralApplications));
         }
-        if (caseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications().isEmpty()) {
+        if (!intervener2GeneralApplications.isEmpty()) {
             caseData.getGeneralApplicationWrapper().setIntervener2GeneralApplications(
                 helper.convertToGeneralApplicationsCollection(intervener2GeneralApplications));
         }
-        if (caseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications().isEmpty()) {
+        if (!intervener3GeneralApplications.isEmpty()) {
             caseData.getGeneralApplicationWrapper().setIntervener3GeneralApplications(
                 helper.convertToGeneralApplicationsCollection(intervener3GeneralApplications));
         }
-        if (caseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications().isEmpty()) {
+        if (!intervener4GeneralApplications.isEmpty()) {
             caseData.getGeneralApplicationWrapper().setIntervener4GeneralApplications(
                 helper.convertToGeneralApplicationsCollection(intervener4GeneralApplications));
         }
-        if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
+        if (!appRespGeneralApplications.isEmpty()) {
             caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(
                 helper.convertToGeneralApplicationsCollection(appRespGeneralApplications));
         }
