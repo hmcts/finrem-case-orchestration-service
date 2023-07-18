@@ -87,10 +87,10 @@ public class AddedSolicitorServiceTest {
             .build();
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd, changeRequest);
-        assertEquals(addedSolicitor.getName(), APP_SOL_NAME);
-        assertEquals(addedSolicitor.getEmail(), APP_SOL_EMAIL);
-        assertEquals(addedSolicitor.getOrganisation().getOrganisationID(), TEST_APP_ORG_ID);
-        assertEquals(addedSolicitor.getOrganisation().getOrganisationName(), TEST_APP_ORG_NAME);
+        assertEquals(APP_SOL_NAME, addedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, addedSolicitor.getEmail());
+        assertEquals(TEST_APP_ORG_ID, addedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_APP_ORG_NAME, addedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -105,10 +105,10 @@ public class AddedSolicitorServiceTest {
             .build();
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd, changeRequest);
-        assertEquals(addedSolicitor.getName(), RESP_SOL_NAME);
-        assertEquals(addedSolicitor.getEmail(), RESP_SOL_EMAIL);
-        assertEquals(addedSolicitor.getOrganisation().getOrganisationID(), TEST_RESP_ORG_ID);
-        assertEquals(addedSolicitor.getOrganisation().getOrganisationName(), TEST_RESP_ORG_NAME);
+        assertEquals(RESP_SOL_NAME, addedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, addedSolicitor.getEmail());
+        assertEquals(TEST_RESP_ORG_ID, addedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_RESP_ORG_NAME, addedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -126,10 +126,10 @@ public class AddedSolicitorServiceTest {
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
-        assertEquals(addedSolicitor.getName(), APP_SOL_NAME);
-        assertEquals(addedSolicitor.getEmail(), APP_SOL_EMAIL);
-        assertEquals(addedSolicitor.getOrganisation().getOrganisationID(), TEST_APP_ORG_ID);
-        assertEquals(addedSolicitor.getOrganisation().getOrganisationName(), TEST_APP_ORG_NAME);
+        assertEquals(APP_SOL_NAME, addedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, addedSolicitor.getEmail());
+        assertEquals(TEST_APP_ORG_ID, addedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_APP_ORG_NAME, addedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -148,10 +148,10 @@ public class AddedSolicitorServiceTest {
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
-        assertEquals(addedSolicitor.getName(), APP_SOL_NAME);
-        assertEquals(addedSolicitor.getEmail(), APP_SOL_EMAIL);
-        assertEquals(addedSolicitor.getOrganisation().getOrganisationID(), TEST_APP_ORG_ID);
-        assertEquals(addedSolicitor.getOrganisation().getOrganisationName(), TEST_APP_ORG_NAME);
+        assertEquals(APP_SOL_NAME, addedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, addedSolicitor.getEmail());
+        assertEquals(TEST_APP_ORG_ID, addedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_APP_ORG_NAME, addedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -169,10 +169,10 @@ public class AddedSolicitorServiceTest {
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
-        assertEquals(addedSolicitor.getName(), RESP_SOL_NAME);
-        assertEquals(addedSolicitor.getEmail(), RESP_SOL_EMAIL);
-        assertEquals(addedSolicitor.getOrganisation().getOrganisationID(), TEST_RESP_ORG_ID);
-        assertEquals(addedSolicitor.getOrganisation().getOrganisationName(), TEST_RESP_ORG_NAME);
+        assertEquals(RESP_SOL_NAME, addedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, addedSolicitor.getEmail());
+        assertEquals(TEST_RESP_ORG_ID, addedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_RESP_ORG_NAME, addedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -191,8 +191,8 @@ public class AddedSolicitorServiceTest {
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
-        assertEquals(addedSolicitor.getName(), APP_SOL_NAME);
-        assertEquals(addedSolicitor.getEmail(), APP_SOL_EMAIL);
+        assertEquals(APP_SOL_NAME, addedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, addedSolicitor.getEmail());
         assertNull(addedSolicitor.getOrganisation());
     }
 
@@ -211,8 +211,8 @@ public class AddedSolicitorServiceTest {
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
-        assertEquals(addedSolicitor.getName(), RESP_SOL_NAME);
-        assertEquals(addedSolicitor.getEmail(), RESP_SOL_EMAIL);
+        assertEquals(RESP_SOL_NAME, addedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, addedSolicitor.getEmail());
         assertNull(addedSolicitor.getOrganisation());
     }
 
