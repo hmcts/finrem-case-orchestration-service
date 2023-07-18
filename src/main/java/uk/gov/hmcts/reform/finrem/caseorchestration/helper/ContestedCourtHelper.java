@@ -148,7 +148,7 @@ public class ContestedCourtHelper {
         .put("FR_nw_yorkshire_hc_list_7", "Skipton County Court and Family Court")
         .put("FR_nw_yorkshire_hc_list_8", "Leeds Combined Court Centre")
         .build();
-    private static Map<String, String> humberMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> humberMap = ImmutableMap.<String, String>builder()
         .put("FR_humber_hc_list_1", "Sheffield Family Hearing Centre")
         .put("FR_humber_hc_list_2", "Kingston-upon-Hull Combined Court Centre")
         .put("FR_humber_hc_list_3", "Doncaster Justice Centre North")
@@ -190,29 +190,50 @@ public class ContestedCourtHelper {
     public static String getSelectedCourt(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        return switch (getSelectedFrc(caseDetails)) {
-            case BEDFORDSHIRE -> getBedfordshireCourt(caseData);
-            case BIRMINGHAM -> getBirminghamCourt(caseData);
-            case BRISTOLFRC -> getBristolCourt(caseData);
-            case CFC -> getLondonCourt(caseData);
-            case CLEAVELAND -> getCleavelandCourt(caseData);
-            case CLEVELAND -> getCleavelandCourt(caseData);
-            case DEVON -> getDevonCourt(caseData);
-            case DORSET -> getDorsetCourt(caseData);
-            case HSYORKSHIRE -> getHumberCourt(caseData);
-            case KENT -> getKentCourt(caseData);
-            case LANCASHIRE -> getLancashireCourt(caseData);
-            case LIVERPOOL -> getLiverpoolCourt(caseData);
-            case MANCHESTER -> getManchesterCourt(caseData);
-            case NEWPORT -> getNewportCourt(caseData);
-            case NORTHWALES -> getNorthWalesCourt(caseData);
-            case NOTTINGHAM -> getNottinghamCourt(caseData);
-            case NWYORKSHIRE -> getNwYorkshireCourt(caseData);
-            case SWANSEA -> getSwanseaCourt(caseData);
-            case THAMESVALLEY -> getThamesValleyCourt(caseData);
-            case HIGHCOURT -> getHighCourt(caseData);
-            default -> EMPTY;
-        };
+        switch (getSelectedFrc(caseDetails)) {
+            case BEDFORDSHIRE:
+                return getBedfordshireCourt(caseData);
+            case BIRMINGHAM:
+                return getBirminghamCourt(caseData);
+            case BRISTOLFRC:
+                return getBristolCourt(caseData);
+            case CFC:
+                return getLondonCourt(caseData);
+            case CLEAVELAND:
+                return getCleavelandCourt(caseData);
+            case CLEVELAND:
+                return getCleavelandCourt(caseData);
+            case DEVON:
+                return getDevonCourt(caseData);
+            case DORSET:
+                return getDorsetCourt(caseData);
+            case HSYORKSHIRE:
+                return getHumberCourt(caseData);
+            case KENT:
+                return getKentCourt(caseData);
+            case LANCASHIRE:
+                return getLancashireCourt(caseData);
+            case LIVERPOOL:
+                return getLiverpoolCourt(caseData);
+            case MANCHESTER:
+                return getManchesterCourt(caseData);
+            case NEWPORT:
+                return getNewportCourt(caseData);
+            case NORTHWALES:
+                return getNorthWalesCourt(caseData);
+            case NOTTINGHAM:
+                return getNottinghamCourt(caseData);
+            case NWYORKSHIRE:
+                return getNwYorkshireCourt(caseData);
+            case SWANSEA:
+                return getSwanseaCourt(caseData);
+            case THAMESVALLEY:
+                return getThamesValleyCourt(caseData);
+            case HIGHCOURT:
+                return getHighCourt(caseData);
+            default:
+                return EMPTY;
+        }
     }
 
     public static String getSelectedInterimHearingFrc(Map<String, Object> interimHearingData) {

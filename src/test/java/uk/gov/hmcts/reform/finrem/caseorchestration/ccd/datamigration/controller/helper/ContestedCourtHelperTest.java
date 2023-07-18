@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
 
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
@@ -102,7 +103,7 @@ public class ContestedCourtHelperTest {
             "FR_newport_hc_list_5", "");
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
     }
 
     @Test
