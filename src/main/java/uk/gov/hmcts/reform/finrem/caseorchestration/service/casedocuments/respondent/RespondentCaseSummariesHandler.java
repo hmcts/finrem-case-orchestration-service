@@ -1,17 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseSummariesHandler;
 
-@Service
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CASE_SUMMARIES_COLLECTION;
+
+@Component
 public class RespondentCaseSummariesHandler extends CaseSummariesHandler {
 
     @Autowired
-    public RespondentCaseSummariesHandler() {
-        super(CaseDocumentCollectionType.RESP_CASE_SUMMARIES_COLLECTION,
-                CaseDocumentParty.RESPONDENT);
+    public RespondentCaseSummariesHandler(ObjectMapper mapper) {
+        super(RESP_CASE_SUMMARIES_COLLECTION, RESPONDENT, mapper);
     }
 }

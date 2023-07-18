@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
@@ -101,7 +101,7 @@ public class ManageBarristerMidEventHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getErrors(), is(empty()));
+        assertThat(response.getErrors(), is(nullValue()));
     }
 
     @Test
