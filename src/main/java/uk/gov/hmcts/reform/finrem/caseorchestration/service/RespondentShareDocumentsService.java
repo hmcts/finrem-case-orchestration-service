@@ -13,16 +13,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESPONDENT_CORRESPONDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_CASE_SUMMARIES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_EXPERT_EVIDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_FORM_E_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_FORM_H_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_HEARING_BUNDLES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_OTHER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESPONDENT_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CASE_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_FORM_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_STATEMENTS_EXHIBITS_COLLECTION;
 
 @Service
 @Slf4j
@@ -40,7 +40,7 @@ public class RespondentShareDocumentsService implements SharedService {
 
         if (ObjectUtils.isNotEmpty(otherCollection)) {
             otherCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 log.info("otherCollection:: filename {} caseId {}", filename, caseId);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_OTHER_COLLECTION.getCcdKey(),
                     RESP_OTHER_COLLECTION.getCcdKey() + " -> " + filename));
@@ -51,7 +51,7 @@ public class RespondentShareDocumentsService implements SharedService {
             = caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection();
         if (ObjectUtils.isNotEmpty(chronologiesCollection)) {
             chronologiesCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 log.info("chronologiesCollection:: filename {} caseId {}", filename, caseId);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey(),
                     RESP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey() + " -> " + filename));
@@ -62,7 +62,7 @@ public class RespondentShareDocumentsService implements SharedService {
             = caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection();
         if (ObjectUtils.isNotEmpty(statementsExhibitsCollection)) {
             statementsExhibitsCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 log.info("statementsExhibitsCollection:: filename {} caseId {}", filename, caseId);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey(),
                     RESP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey() + " -> " + filename));
@@ -73,7 +73,7 @@ public class RespondentShareDocumentsService implements SharedService {
             = caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection();
         if (ObjectUtils.isNotEmpty(hearingBundlesCollection)) {
             hearingBundlesCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 log.info("hearingBundlesCollection:: filename {} caseId {}", filename, caseId);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_HEARING_BUNDLES_COLLECTION.getCcdKey(),
                     RESP_HEARING_BUNDLES_COLLECTION.getCcdKey() + " -> " + filename));
@@ -85,7 +85,7 @@ public class RespondentShareDocumentsService implements SharedService {
             = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection();
         if (ObjectUtils.isNotEmpty(formEExhibitsCollection)) {
             formEExhibitsCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 log.info("formEExhibitsCollection:: filename {} caseId {}", filename, caseId);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_FORM_E_EXHIBITS_COLLECTION.getCcdKey(),
                     RESP_FORM_E_EXHIBITS_COLLECTION.getCcdKey() + " -> " + filename));
@@ -96,7 +96,7 @@ public class RespondentShareDocumentsService implements SharedService {
             = caseData.getUploadCaseDocumentWrapper().getRespQaCollection();
         if (ObjectUtils.isNotEmpty(qaCollection)) {
             qaCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 log.info("qaCollection:: filename {} caseId {}", filename, caseId);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey(),
                     RESP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey() + " -> " + filename));
@@ -107,7 +107,7 @@ public class RespondentShareDocumentsService implements SharedService {
             = caseData.getUploadCaseDocumentWrapper().getRespCaseSummariesCollection();
         if (ObjectUtils.isNotEmpty(caseSummariesCollection)) {
             caseSummariesCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 log.info("caseSummariesCollection:: filename {} caseId {}", filename, caseId);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_CASE_SUMMARIES_COLLECTION.getCcdKey(),
                     RESP_CASE_SUMMARIES_COLLECTION.getCcdKey() + " -> " + filename));
@@ -118,7 +118,7 @@ public class RespondentShareDocumentsService implements SharedService {
             = caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection();
         if (ObjectUtils.isNotEmpty(formsHCollection)) {
             formsHCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 log.info("formsHCollection:: filename {} caseId {}", filename, caseId);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_FORM_H_COLLECTION.getCcdKey(),
                     RESP_FORM_H_COLLECTION.getCcdKey() + " -> " + filename));
@@ -130,7 +130,7 @@ public class RespondentShareDocumentsService implements SharedService {
             = caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollection();
         if (ObjectUtils.isNotEmpty(expertEvidenceCollection)) {
             expertEvidenceCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 log.info("expertEvidenceCollection:: filename {} caseId {}", filename, caseId);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_EXPERT_EVIDENCE_COLLECTION.getCcdKey(),
                     RESP_EXPERT_EVIDENCE_COLLECTION.getCcdKey() + " -> " + filename));
@@ -142,7 +142,7 @@ public class RespondentShareDocumentsService implements SharedService {
             = caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceDocsColl();
         if (ObjectUtils.isNotEmpty(correspondenceDocsCollection)) {
             correspondenceDocsCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 log.info("correspondenceDocsCollection:: filename {} caseId {}", filename, caseId);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESPONDENT_CORRESPONDENCE_COLLECTION.getCcdKey(),
                     RESPONDENT_CORRESPONDENCE_COLLECTION.getCcdKey() + " -> " + filename));

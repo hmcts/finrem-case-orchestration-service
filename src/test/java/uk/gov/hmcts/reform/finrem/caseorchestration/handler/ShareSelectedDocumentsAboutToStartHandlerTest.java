@@ -22,7 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApplicantShareDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
@@ -55,16 +55,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.STATEMENT_AFFIDAVIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.TRIAL_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APPLICANT_CORRESPONDENCE_DOC_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_CASE_SUMMARIES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_EXPERT_EVIDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_FORMS_H_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_FORM_E_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_HEARING_BUNDLES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_OTHER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APPLICANT_CORRESPONDENCE_DOC_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CASE_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_FORMS_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_STATEMENTS_EXHIBITS_COLLECTION;
 
 @ExtendWith(MockitoExtension.class)
 class ShareSelectedDocumentsAboutToStartHandlerTest {
@@ -336,7 +336,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
     private static DynamicMultiSelectListElement getSelectedDoc(List<UploadCaseDocumentCollection> coll,
                                                                 CaseDocument doc,
-                                                                CaseDocumentCollectionType type) {
+                                                                ContestedUploadCaseFilesCollectionType type) {
         return DynamicMultiSelectListElement.builder()
             .label(type.getCcdKey() + " -> " + doc.getDocumentFilename())
             .code(coll.get(0).getId() + "#" + type.getCcdKey())
@@ -353,7 +353,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
             .hearingDetails("UK 1400 hours")
             .caseDocumentFdr(YesOrNo.NO)
             .caseDocumentUploadDateTime(LocalDateTime.now()).build();
-        return List.of(UploadCaseDocumentCollection.builder().id(String.valueOf(uuid.get())).uploadCaseDocument(document).build());
+        return List.of(UploadCaseDocumentCollection.builder().id(uuid.get()).value(document).build());
     }
 
     private DynamicMultiSelectList getDynamicList(FinremCaseData data) {
@@ -371,7 +371,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
 
         List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getAppCorrespondenceDocsCollection();
-        CaseDocument doc = coll.get(0).getUploadCaseDocument().getCaseDocuments();
+        CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
         sourceDocumentList.setListItems(List.of(getSelectedDoc(coll, doc, APPLICANT_CORRESPONDENCE_DOC_COLLECTION),
             getSelectedDoc(coll, doc, APP_OTHER_COLLECTION),
             getSelectedDoc(coll, doc, APP_CHRONOLOGIES_STATEMENTS_COLLECTION),

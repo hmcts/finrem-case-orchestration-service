@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,10 +16,11 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Deprecated
 public class ConfidentialUploadedDocumentData implements CaseDocumentTabData {
+    @JsonProperty("id")
     private String id;
-    private UploadConfidentialDocument value;
+    @JsonProperty("value")
+    private ConfidentialUploadedDocument confidentialUploadedDocument;
 
     @Override
     @JsonIgnore
@@ -29,8 +31,9 @@ public class ConfidentialUploadedDocumentData implements CaseDocumentTabData {
     @Override
     @JsonIgnore
     public void setUploadDateTime(LocalDateTime date) {
-        if (value != null) {
-            value.setConfidentialDocumentUploadDateTime(date);
+        if (confidentialUploadedDocument != null) {
+            confidentialUploadedDocument.setConfidentialDocumentUploadDateTime(date);
         }
     }
 }
+

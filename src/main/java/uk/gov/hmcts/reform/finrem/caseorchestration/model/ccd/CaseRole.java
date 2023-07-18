@@ -24,16 +24,16 @@ public enum CaseRole {
 
 
 
-    private final String ccdCode;
+    private final String value;
 
     @JsonValue
-    public String getCcdCode() {
-        return ccdCode;
+    public String getValue() {
+        return value;
     }
 
-    public static CaseRole forValue(String ccdCode) {
+    public static CaseRole forValue(String value) {
         return Arrays.stream(CaseRole.values())
-            .filter(option -> option.getCcdCode().equalsIgnoreCase(ccdCode))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

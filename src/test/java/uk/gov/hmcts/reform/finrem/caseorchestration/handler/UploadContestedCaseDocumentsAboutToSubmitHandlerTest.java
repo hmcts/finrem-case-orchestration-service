@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
@@ -7,117 +8,71 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentsHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.IntervenerOneFdrHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerfour.IntervenerFourChronologiesStatementHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneChronologiesStatementHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerthree.IntervenerThreeChronologiesStatementHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenertwo.IntervenerTwoChronologiesStatementHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
+public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDocumentHandlerTest {
 
-    public static final String AUTH_TOKEN = "AuthTokien";
-
+    public static final String AUTH_TOKEN = "tokien:)";
     private static final String USER_ID = "testUserId";
     public static final String CASE_ID = "1234567890";
 
     @Mock
-    protected UploadedDocumentService uploadedDocumentHelper;
+    ApplicantCaseSummariesHandler applicantCaseSummariesHandler;
+
+    @Mock
+    ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
     @Mock
     private CaseAssignedRoleService caseAssignedRoleService;
+
     @Mock
-    private FeatureToggleService featureToggleService;
+    FeatureToggleService featureToggleService;
 
-    private ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
-    private RespondentChronologiesStatementHandler respondentChronologiesStatementHandler;
-
-    private IntervenerOneChronologiesStatementHandler intervenerOneChronologiesStatementHandler;
-    private IntervenerTwoChronologiesStatementHandler intervenerTwoChronologiesStatementHandler;
-
-    private IntervenerThreeChronologiesStatementHandler intervenerThreeChronologiesStatementHandler;
-
-    private IntervenerFourChronologiesStatementHandler intervenerFourChronologiesStatementHandler;
-
-    private IntervenerOneFdrHandler intervenerOneFdrHandler;
-
-    private CaseDocumentsHandler caseDocumentHandler;
-    private FdrDocumentsHandler fdrDocumentsHandler;
+    ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
-    private FinremCaseDetails caseDetails;
-    private FinremCaseDetails caseDetailsBefore;
-    private FinremCaseData caseData;
-    private final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
 
+    private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
+    private final List<ContestedUploadedDocumentData> existingDocumentList = new ArrayList<>();
+    private final List<String> expectedDocumentIdList = new ArrayList<>();
+    List<ContestedUploadedDocumentData> handledDocumentList = new ArrayList<>();
+    List<String> handledDocumentIdList = new ArrayList<>();
 
+    private final UploadedDocumentHelper uploadedDocumentHelper = new UploadedDocumentHelper(objectMapper);
 
     @Before
-    public void setup() {
-        caseDetails = buildCaseDetails();
-        caseDetailsBefore = buildCaseDetails();
-        caseData = caseDetails.getData();
-
-        applicantChronologiesStatementHandler = new ApplicantChronologiesStatementHandler();
-        respondentChronologiesStatementHandler = new RespondentChronologiesStatementHandler();
-        intervenerOneChronologiesStatementHandler = new IntervenerOneChronologiesStatementHandler();
-        intervenerTwoChronologiesStatementHandler = new IntervenerTwoChronologiesStatementHandler();
-        intervenerThreeChronologiesStatementHandler = new IntervenerThreeChronologiesStatementHandler();
-        intervenerFourChronologiesStatementHandler = new IntervenerFourChronologiesStatementHandler();
-        intervenerOneFdrHandler = new IntervenerOneFdrHandler();
-        caseDocumentHandler = new CaseDocumentsHandler();
-        fdrDocumentsHandler = new FdrDocumentsHandler();
-
-
-        List<DocumentHandler> documentHandlers =
-            Stream.of(applicantChronologiesStatementHandler, respondentChronologiesStatementHandler,
-                    intervenerOneChronologiesStatementHandler, intervenerTwoChronologiesStatementHandler,
-                    intervenerThreeChronologiesStatementHandler, intervenerFourChronologiesStatementHandler,
-                    intervenerOneFdrHandler, caseDocumentHandler, fdrDocumentsHandler)
-                .collect(Collectors.toList());
-        FinremCaseDetailsMapper finremCaseDetailsMapper =
-            new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        uploadContestedCaseDocumentsHandler =
-            new UploadContestedCaseDocumentsAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentHandlers, uploadedDocumentHelper, caseAssignedRoleService, featureToggleService);
-
-        when(featureToggleService.isIntervenerEnabled()).thenReturn(true);
+    public void setUpTest() {
+        when(featureToggleService.isManageBundleEnabled()).thenReturn(false);
+        uploadContestedCaseDocumentsHandler = new UploadContestedCaseDocumentsAboutToSubmitHandler(featureToggleService,
+            Arrays.asList(applicantCaseSummariesHandler, applicantChronologiesStatementHandler),
+            objectMapper, uploadedDocumentHelper, caseAssignedRoleService);
     }
 
     @Test
@@ -134,339 +89,144 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             is(false));
     }
 
+
     @Test
-    public void givenAnNonConfidentialUploadCaseFile_WhenFdr_thenFdrCollectionsSet() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
-            null, YesOrNo.NO, YesOrNo.YES, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            null, YesOrNo.NO, YesOrNo.YES, null));
+    public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandlers() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        when(featureToggleService.isIntervenerEnabled()).thenReturn(true);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "", "yes", "no", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        List<ContestedUploadedDocumentData> uploadedDocumentPost
+            = convertToUploadDocList(caseDetails.getData().get(CONTESTED_UPLOADED_DOCUMENTS));
 
-        uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
+        verify(applicantCaseSummariesHandler).handle(uploadedDocumentPost, caseDetails.getData());
+        verify(applicantChronologiesStatementHandler).handle(uploadedDocumentPost, caseDetails.getData());
     }
 
     @Test
-    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsApplicantAndScreenPartyIsNull_thenApplicantCollectionsSet() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            null, YesOrNo.NO, YesOrNo.NO, null));
+    public void givenUploadCaseDocument_whenDocIsValidAndUploadedByCaseRoleAndPartyChoosenApplicant_thenExecuteHandlers() {
 
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        when(featureToggleService.isIntervenerEnabled()).thenReturn(true);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(getCaseAssignedUserRolesResource(CASE_LEVEL_ROLE.toLowerCase()));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
+        List<ContestedUploadedDocumentData> uploadedDocumentPost
+            = convertToUploadDocList(caseDetails.getData().get(CONTESTED_UPLOADED_DOCUMENTS));
 
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
+        verify(applicantCaseSummariesHandler).handle(uploadedDocumentPost, caseDetails.getData());
+        verify(applicantChronologiesStatementHandler).handle(uploadedDocumentPost, caseDetails.getData());
+
     }
 
     @Test
-    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsRespondentAndScreenPartyIsNull_thenRespondentCollectionsSet() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            null, YesOrNo.NO, YesOrNo.NO, null));
+    public void givenUploadCaseDocument_whenDocIsValidAndUploadedByInterveners_thenExecuteHandlers() {
+        List<String> roles = List.of("[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]",
+            "[[INTVRBARRISTER1]]", "[[INTVRBARRISTER2]]", "[[INTVRBARRISTER3]]", "[[INTVRBARRISTER4]]", "[RESPSOLICITOR]", "");
+        when(featureToggleService.isIntervenerEnabled()).thenReturn(true);
+        for (String activeRole : roles) {
+            CallbackRequest callbackRequest = buildCallbackRequest();
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+                .thenReturn(getCaseAssignedUserRolesResource(activeRole));
+            uploadDocumentList.add(createContestedUploadDocumentItem("Other", "", "yes", "no", "Other Example"));
+            caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+            caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+            uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.RESP_SOLICITOR.getCcdCode()));
+            List<ContestedUploadedDocumentData> uploadedDocumentPost
+                = convertToUploadDocList(caseDetails.getData().get(CONTESTED_UPLOADED_DOCUMENTS));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
+            verify(applicantCaseSummariesHandler).handle(uploadedDocumentPost, caseDetails.getData());
+            verify(applicantChronologiesStatementHandler).handle(uploadedDocumentPost, caseDetails.getData());
+        }
     }
 
     @Test
-    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol1AndScreenPartyIsNull_thenIntervSol1CollectionsSet() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            null, YesOrNo.NO, YesOrNo.NO, null));
+    public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandler_And_ValidateDocumentOrder() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        ContestedUploadedDocumentData oldDoc = createContestedUploadDocumentItem("Other", "", "yes", "no", "Old Document Example");
+        existingDocumentList.add(oldDoc);
+        caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, existingDocumentList);
 
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        ContestedUploadedDocumentData newDoc = createContestedUploadDocumentItem("Other", "", "yes", "no", "New Document Example");
+        uploadDocumentList.addAll(List.of(newDoc, oldDoc));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        expectedDocumentIdList.add(newDoc.getId());
+        expectedDocumentIdList.add(oldDoc.getId());
 
-        uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
+        handledDocumentList.addAll(
+            (List<ContestedUploadedDocumentData>) uploadContestedCaseDocumentsHandler.handle(
+                callbackRequest, AUTH_TOKEN).getData().get(CONTESTED_UPLOADED_DOCUMENTS));
 
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(
-                    CaseDocumentCollectionType.INTERVENER_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
-    }
+        handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));
 
-
-    @Test
-    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol2AndScreenPartyIsNull_thenIntervSol2CollectionsSet() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
-
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
+        assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
     }
 
     @Test
-    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol3AndScreenPartyIsNull_thenIntervSol3CollectionsSet() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            null, YesOrNo.NO, YesOrNo.NO, null));
+    public void givenUploadFileTrialBundleSelectedWhenAboutToSubmitThenShowTrialBundleDeprecatedErrorMessage() {
 
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
+        when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "", "yes", "no", "Other Example"));
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
-    }
-
-    @Test
-    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol4AndScreenPartyIsNull_thenIntervSol4CollectionsSet() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
-
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
-    }
-
-    @Test
-    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsCaseWorkerScreenPartyIsNull_thenCaseCollectionsSet() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.CASEWORKER.getCcdCode()));
-
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
-    }
-
-    @Test
-    public void givenAnFdrCaseFile_WhenActiveUserIsIntervener1_thenIntv1FdrCollectionsSet() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
-            null, YesOrNo.NO, YesOrNo.YES, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            null, YesOrNo.NO, YesOrNo.NO, null));
-
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
-
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(
-                    CaseDocumentCollectionType.INTERVENER_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION),
-            hasSize(1));
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_ONE_FDR_DOCS_COLLECTION),
-            hasSize(1));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
-    }
-
-    @Test
-    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsApplicantAndScreenPartyIsRespondent_thenApplicantCollectionsSet() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
-
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
-
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
-    }
-
-    @Test
-    public void givenUploadFileTrialBundleSelected_WhenAboutToSubmit_ThenShowTrialBundleErrorMessage() {
-
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
-            null, YesOrNo.YES, YesOrNo.NO, "Other Example"));
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
             response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors().size(), is(1));
-        assertThat(response.getErrors().iterator().next(),
-            is(UploadContestedCaseDocumentsAboutToSubmitHandler.TRIAL_BUNDLE_SELECTED_ERROR));
+        assertThat(response.getErrors().iterator().next(), is(UploadContestedCaseDocumentsAboutToSubmitHandler.TRIAL_BUNDLE_SELECTED_ERROR));
     }
 
     @Test
-    public void givenUploadFileWithoutTrialBundle_WhenAboutToSubmit_ThenNoErrors() {
+    public void givenUploadFileWithoutTrialBundleWhenAboutToSubmitThenNoErrors() {
 
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "", "yes", "no", "Other Example"));
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
-            .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
-
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            null, YesOrNo.YES, YesOrNo.NO, "Other Example"));
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
             response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors().size(), is(0));
     }
 
-    @Test
-    public void givenUploadFileNoDocSelected_WhenAboutToSubmit_ThenShowNoDocErrorMessage() {
-
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>
-            response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors().size(), is(1));
-        assertThat(response.getErrors().iterator().next(),
-            is(UploadContestedCaseDocumentsAboutToSubmitHandler.NO_DOCUMENT_ERROR));
-    }
-
-    private FinremCallbackRequest buildCallbackRequest() {
-        FinremCaseData data = FinremCaseData.builder().build();
-        FinremCaseDetails caseDetails =
-            FinremCaseDetails.builder().data(data).id(Long.valueOf(CASE_ID)).build();
-        FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(data).id(123L).build();
-        return FinremCallbackRequest.builder().eventType(EventType.UPLOAD_CASE_FILES)
+    private CallbackRequest buildCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
+        caseDetails.setData(caseData);
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
+        caseDetailsBefore.setData(caseDataBefore);
+        return CallbackRequest.builder().eventId(EventType.UPLOAD_CASE_FILES.getCcdType())
             .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 
-    protected UploadCaseDocumentCollection createContestedUploadDocumentItem(CaseDocumentType type,
-                                                                             CaseDocumentParty party,
-                                                                             YesOrNo isConfidential,
-                                                                             YesOrNo isFdr,
-                                                                             String other) {
-        UUID uuid = UUID.randomUUID();
-
-        return UploadCaseDocumentCollection.builder()
-            .id(uuid.toString())
-            .uploadCaseDocument(UploadCaseDocument
-                .builder()
-                .caseDocuments(new CaseDocument())
-                .caseDocumentType(type)
-                .caseDocumentParty(party)
-                .caseDocumentConfidential(isConfidential)
-                .caseDocumentOther(other)
-                .caseDocumentFdr(isFdr)
-                .hearingDetails(null)
-                .caseDocumentUploadDateTime(LocalDateTime.now())
-                .build())
-            .build();
-    }
-
-    protected FinremCaseDetails buildCaseDetails() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder().build())
-            .build();
-        return FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CaseType.CONTESTED)
-            .data(finremCaseData).build();
+    public List<ContestedUploadedDocumentData> convertToUploadDocList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
     }
 
     private CaseAssignedUserRolesResource getCaseAssignedUserRolesResource(String caseRole) {

@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedConfidentialDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedConfidentialDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,7 +32,7 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler
     implements CallbackHandler<Map<String, Object>> {
 
     private final ObjectMapper objectMapper;
-    private final UploadedConfidentialDocumentService uploadedConfidentialDocumentHelper;
+    private final UploadedConfidentialDocumentHelper uploadedConfidentialDocumentHelper;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -50,8 +50,8 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler
 
         List<ConfidentialUploadedDocumentData> uploadedDocuments = getConfidentialDocumentCollection(caseData);
 
-        uploadedDocuments.sort(comparing(ConfidentialUploadedDocumentData::getValue,
-            comparing(UploadConfidentialDocument::getConfidentialDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
+        uploadedDocuments.sort(comparing(ConfidentialUploadedDocumentData::getConfidentialUploadedDocument,
+            comparing(ConfidentialUploadedDocument::getConfidentialDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
 
         caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, uploadedDocuments);
 
