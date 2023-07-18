@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,6 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @Slf4j
@@ -87,8 +89,8 @@ public class ConsentOrderApprovedController extends BaseController {
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDetails.getData())
-                .errors(List.of())
-                .warnings(List.of())
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
                 .build());
     }
 
@@ -115,17 +117,15 @@ public class ConsentOrderApprovedController extends BaseController {
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseData)
-                .errors(List.of())
-                .warnings(List.of())
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
                 .build());
     }
 
     @PostMapping(path = "/consent-in-contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @Operation(summary = """
-        Consent Order Approved' and 'Consent Order Not Approved' callback handler for consent in contested.
-        Checks state and if not/approved generates docs else puts latest general order into uploadOrder fields
-        Then sends the data to bulk print
-        """)
+    @Operation(summary = "'Consent Order Approved' and 'Consent Order Not Approved' callback handler for consent in contested. \"\n"
+        + "        + \"Checks state and if not/approved generates docs else puts latest general order into uploadOrder fields. \"\n"
+        + "        + \"Then sends the data to bulk print")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Callback was processed successfully or in case of an error message is attached to the case",
@@ -200,6 +200,11 @@ public class ConsentOrderApprovedController extends BaseController {
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER), new TypeReference<>() {
+        });
+    }
+
+    private List<PensionTypeCollection> getPensionDocuments(Map<String, Object> caseData) {
+        return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {
         });
     }
 }
