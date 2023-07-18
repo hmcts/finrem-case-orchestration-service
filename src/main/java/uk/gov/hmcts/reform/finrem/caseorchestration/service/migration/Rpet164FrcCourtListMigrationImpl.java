@@ -157,7 +157,7 @@ public class Rpet164FrcCourtListMigrationImpl implements MigrationHandler {
     public static final String WELSHPOOL_OLD = "FR_WList_2";
     public static final String WREXHAM_OLD = "FR_WList_3";
     public static final String MOLD_OLD = "FR_WList_4";
-    private final CaseDataService caseDataService = new CaseDataService(new ObjectMapper());
+    private CaseDataService caseDataService = new CaseDataService(new ObjectMapper());
 
     @Override
     public Map<String, Object> migrate(CaseDetails caseDetails) {
@@ -183,234 +183,249 @@ public class Rpet164FrcCourtListMigrationImpl implements MigrationHandler {
         String frcValue;
         String selectedHC;
         switch (region) {
-            case NORTHWEST -> {
+            case NORTHWEST:
                 frcValue = (String) caseData.getOrDefault(NORTHWEST_FRC_LIST, EMPTY_STRING);
-                setNorthWestRegionCourt(caseDetails, caseData, region, frcValue);
-            }
-            case SOUTHEAST -> {
+                if (frcValue.equals(OTHER)) {
+                    caseData.put(NORTHWEST_FRC_LIST, LANCASHIRE);
+                    selectedHC = (String) caseData.getOrDefault(NWOTHER_COURTLIST, EMPTY_STRING);
+                    caseData.remove(NWOTHER_COURTLIST);
+                    switch (selectedHC) {
+                        case WEST_CUMBRIA_OLD:
+                            caseData.put(LANCASHIRE_COURTLIST, WEST_CUMBRIA);
+                            break;
+                        case PRESTON_OLD:
+                            caseData.put(LANCASHIRE_COURTLIST, PRESTON);
+                            break;
+                        case LANCASTER_OLD:
+                            caseData.put(LANCASHIRE_COURTLIST, LANCASTER);
+                            break;
+                        case CARLISLE_OLD:
+                            caseData.put(LANCASHIRE_COURTLIST, CARLISLE);
+                            break;
+                        case BLACKPOOL_OLD:
+                            caseData.put(LANCASHIRE_COURTLIST, BLACKPOOL);
+                            break;
+                        case BLACKBURN_OLD:
+                            caseData.put(LANCASHIRE_COURTLIST, BLACKBURN);
+                            break;
+                        case BARROW_OLD:
+                            caseData.put(LANCASHIRE_COURTLIST, BARROW);
+                            break;
+                        default:
+                            caseData.remove(NORTHWEST_FRC_LIST);
+                            handleUnknown(caseDetails, caseData, region, frcValue, selectedHC);
+                            break;
+                    }
+                }
+                break;
+            case SOUTHEAST:
                 frcValue = (String) caseData.getOrDefault(SOUTHEAST_FRC_LIST, EMPTY_STRING);
-                setSouthEastRegionCourt(caseDetails, caseData, region, frcValue);
-            }
-            case SOUTHWEST -> {
+                if (frcValue.equals(OTHER)) {
+                    caseData.remove(SOUTHEAST_FRC_LIST);
+                    selectedHC = (String) caseData.getOrDefault(SEOTHER_COURTLIST, EMPTY_STRING);
+                    caseData.remove(SEOTHER_COURTLIST);
+                    switch (selectedHC) {
+                        case PETERBOROUGH_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, PETERBOROUGH);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case CAMBRIDGE_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, CAMBRIDGE);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case BURY_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, BURY);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case NORWICH_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, NORWICH);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case IPSWICH_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, IPSWICH);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case CHELMSFORD_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, CHELMSFORD);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case SOUTHEND_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, SOUTHEND);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case BEDFORD_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, BEDFORD);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case LUTON_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, LUTON);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case HERTFORD_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, HERTFORD);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case WATFORD_OLD:
+                            caseData.put(BEDFORDSHIRE_COURTLIST, WATFORD);
+                            caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+                            break;
+                        case OXFORD_OLD:
+                            caseData.put(THAMESVALLEY_COURTLIST, OXFORD);
+                            caseData.put(SOUTHEAST_FRC_LIST, THAMESVALLEY);
+                            break;
+                        case READING_OLD:
+                            caseData.put(THAMESVALLEY_COURTLIST, READING);
+                            caseData.put(SOUTHEAST_FRC_LIST, THAMESVALLEY);
+                            break;
+                        case MILTON_KEYNES_OLD:
+                            caseData.put(THAMESVALLEY_COURTLIST, MILTON_KEYNES);
+                            caseData.put(SOUTHEAST_FRC_LIST, THAMESVALLEY);
+                            break;
+                        case SLOUGH_OLD:
+                            caseData.put(THAMESVALLEY_COURTLIST, SLOUGH);
+                            caseData.put(SOUTHEAST_FRC_LIST, THAMESVALLEY);
+                            break;
+                        case BRIGHTON_OLD:
+                            caseData.put(SOUTHEAST_FRC_LIST, KENT);
+                            caseData.put(KENTFRC_COURTLIST, BRIGHTON);
+                            break;
+                        default:
+                            handleUnknown(caseDetails, caseData, region, frcValue, selectedHC);
+                            break;
+                    }
+                }
+                break;
+            case SOUTHWEST:
                 frcValue = (String) caseData.getOrDefault(SOUTHWEST_FRC_LIST, EMPTY_STRING);
                 if (frcValue.equals(OTHER)) {
                     caseData.remove(SOUTHWEST_FRC_LIST);
                     selectedHC = (String) caseData.getOrDefault(SWOTHER_COURTLIST, EMPTY_STRING);
                     caseData.remove(SWOTHER_COURTLIST);
                     switch (selectedHC) {
-                        case PLYMOUTH_OLD -> {
+                        case PLYMOUTH_OLD:
                             caseData.put(DEVON_COURTLIST, PLYMOUTH);
                             caseData.put(SOUTHWEST_FRC_LIST, DEVON);
-                        }
-                        case EXETER_OLD -> {
+                            break;
+                        case EXETER_OLD:
                             caseData.put(DEVON_COURTLIST, EXETER);
                             caseData.put(SOUTHWEST_FRC_LIST, DEVON);
-                        }
-                        case TAUNTON_OLD -> {
+                            break;
+                        case TAUNTON_OLD:
                             caseData.put(DEVON_COURTLIST, TAUNTON);
                             caseData.put(SOUTHWEST_FRC_LIST, DEVON);
-                        }
-                        case TORQUAY_OLD -> {
+                            break;
+                        case TORQUAY_OLD:
                             caseData.put(DEVON_COURTLIST, TORQUAY);
                             caseData.put(SOUTHWEST_FRC_LIST, DEVON);
-                        }
-                        case BARNSTAPLE_OLD -> {
+                            break;
+                        case BARNSTAPLE_OLD:
                             caseData.put(DEVON_COURTLIST, BARNSTAPLE);
                             caseData.put(SOUTHWEST_FRC_LIST, DEVON);
-                        }
-                        case TRURO_OLD -> {
+                            break;
+                        case TRURO_OLD:
                             caseData.put(DEVON_COURTLIST, TRURO);
                             caseData.put(SOUTHWEST_FRC_LIST, DEVON);
-                        }
-                        case YEOVIL_OLD -> {
+                            break;
+                        case YEOVIL_OLD:
                             caseData.put(DEVON_COURTLIST, YEOVIL);
                             caseData.put(SOUTHWEST_FRC_LIST, DEVON);
-                        }
-                        case BODMIN_OLD -> {
+                            break;
+                        case BODMIN_OLD:
                             caseData.put(DEVON_COURTLIST, BODMIN);
                             caseData.put(SOUTHWEST_FRC_LIST, DEVON);
-                        }
-                        case BOURNEMOUTH_OLD -> {
+                            break;
+                        case BOURNEMOUTH_OLD:
                             caseData.put(DORSET_COURTLIST, BOURNEMOUTH);
                             caseData.put(SOUTHWEST_FRC_LIST, DORSET);
-                        }
-                        case WEYMOUTH_OLD -> {
+                            break;
+                        case WEYMOUTH_OLD:
                             caseData.put(DORSET_COURTLIST, WEYMOUTH);
                             caseData.put(SOUTHWEST_FRC_LIST, DORSET);
-                        }
-                        case WINCHESTER_OLD -> {
+                            break;
+                        case WINCHESTER_OLD:
                             caseData.put(DORSET_COURTLIST, WINCHESTER);
                             caseData.put(SOUTHWEST_FRC_LIST, DORSET);
-                        }
-                        case PORTSMOUTH_OLD -> {
+                            break;
+                        case PORTSMOUTH_OLD:
                             caseData.put(DORSET_COURTLIST, PORTSMOUTH);
                             caseData.put(SOUTHWEST_FRC_LIST, DORSET);
-                        }
-                        case SOUTHAMPTON_OLD -> {
+                            break;
+                        case SOUTHAMPTON_OLD:
                             caseData.put(DORSET_COURTLIST, SOUTHAMPTON);
                             caseData.put(SOUTHWEST_FRC_LIST, DORSET);
-                        }
-                        case ALDERSHOT_OLD -> {
+                            break;
+                        case ALDERSHOT_OLD:
                             caseData.put(DORSET_COURTLIST, ALDERSHOT);
                             caseData.put(SOUTHWEST_FRC_LIST, DORSET);
-                        }
-                        case BASINGSTOKE_OLD -> {
+                            break;
+                        case BASINGSTOKE_OLD:
                             caseData.put(DORSET_COURTLIST, BASINGSTOKE);
                             caseData.put(SOUTHWEST_FRC_LIST, DORSET);
-                        }
-                        case NEWPORT_OLD -> {
+                            break;
+                        case NEWPORT_OLD:
                             caseData.put(DORSET_COURTLIST, ISLE_OF_WIGHT);
                             caseData.put(SOUTHWEST_FRC_LIST, DORSET);
-                        }
-                        case BRISTOL_OLD -> {
+                            break;
+                        case BRISTOL_OLD:
                             caseData.put(BRISTOL_COURTLIST, BRISTOL);
                             caseData.put(SOUTHWEST_FRC_LIST, BRISTOLFRC);
-                        }
-                        case GLOUCESTER_OLD -> {
+                            break;
+                        case GLOUCESTER_OLD:
                             caseData.put(BRISTOL_COURTLIST, GLOUCESTER);
                             caseData.put(SOUTHWEST_FRC_LIST, BRISTOLFRC);
-                        }
-                        case SWINDON_OLD -> {
+                            break;
+                        case SWINDON_OLD:
                             caseData.put(BRISTOL_COURTLIST, SWINDON);
                             caseData.put(SOUTHWEST_FRC_LIST, BRISTOLFRC);
-                        }
-                        case SALISBURY_OLD -> {
+                            break;
+                        case SALISBURY_OLD:
                             caseData.put(BRISTOL_COURTLIST, SALISBURY);
                             caseData.put(SOUTHWEST_FRC_LIST, BRISTOLFRC);
-                        }
-                        case BATH_OLD -> {
+                            break;
+                        case BATH_OLD:
                             caseData.put(BRISTOL_COURTLIST, BATH);
                             caseData.put(SOUTHWEST_FRC_LIST, BRISTOLFRC);
-                        }
-                        case WESTON_OLD -> {
+                            break;
+                        case WESTON_OLD:
                             caseData.put(BRISTOL_COURTLIST, WESTON);
                             caseData.put(SOUTHWEST_FRC_LIST, BRISTOLFRC);
-                        }
-                        default -> handleUnknown(caseDetails, caseData, region, frcValue, selectedHC);
+                            break;
+                        default:
+                            handleUnknown(caseDetails, caseData, region, frcValue, selectedHC);
+                            break;
                     }
                 }
-            }
-            case WALES -> {
+                break;
+            case WALES:
                 frcValue = (String) caseData.getOrDefault(WALES_FRC_LIST, EMPTY_STRING);
                 if (frcValue.equals(OTHER)) {
                     caseData.put(WALES_FRC_LIST, NORTHWALES);
                     selectedHC = (String) caseData.getOrDefault(WALES_OTHER_COURTLIST, EMPTY_STRING);
                     caseData.remove(WALES_OTHER_COURTLIST);
                     switch (selectedHC) {
-                        case WREXHAM_OLD -> caseData.put(NORTH_WALES_COURTLIST, WREXHAM);
-                        case PRESTATYN_OLD -> caseData.put(NORTH_WALES_COURTLIST, PRESTATYN);
-                        case WELSHPOOL_OLD -> caseData.put(NORTH_WALES_COURTLIST, WELSHPOOL);
-                        case MOLD_OLD -> caseData.put(NORTH_WALES_COURTLIST, MOLD);
-                        default -> {
+                        case WREXHAM_OLD:
+                            caseData.put(NORTH_WALES_COURTLIST, WREXHAM);
+                            break;
+                        case PRESTATYN_OLD:
+                            caseData.put(NORTH_WALES_COURTLIST, PRESTATYN);
+                            break;
+                        case WELSHPOOL_OLD:
+                            caseData.put(NORTH_WALES_COURTLIST, WELSHPOOL);
+                            break;
+                        case MOLD_OLD:
+                            caseData.put(NORTH_WALES_COURTLIST, MOLD);
+                            break;
+                        default:
                             caseData.remove(WALES_FRC_LIST);
                             handleUnknown(caseDetails, caseData, region, frcValue, selectedHC);
-                        }
+                            break;
                     }
                 }
-            }
-            default -> {
+                break;
+            default:
                 return caseData;
-            }
         }
         return caseData;
-    }
-
-    private void setSouthEastRegionCourt(CaseDetails caseDetails, Map<String, Object> caseData, String region, String frcValue) {
-        String selectedHC;
-        if (frcValue.equals(OTHER)) {
-            caseData.remove(SOUTHEAST_FRC_LIST);
-            selectedHC = (String) caseData.getOrDefault(SEOTHER_COURTLIST, EMPTY_STRING);
-            caseData.remove(SEOTHER_COURTLIST);
-            switch (selectedHC) {
-                case PETERBOROUGH_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, PETERBOROUGH);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case CAMBRIDGE_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, CAMBRIDGE);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case BURY_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, BURY);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case NORWICH_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, NORWICH);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case IPSWICH_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, IPSWICH);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case CHELMSFORD_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, CHELMSFORD);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case SOUTHEND_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, SOUTHEND);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case BEDFORD_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, BEDFORD);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case LUTON_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, LUTON);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case HERTFORD_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, HERTFORD);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case WATFORD_OLD -> {
-                    caseData.put(BEDFORDSHIRE_COURTLIST, WATFORD);
-                    caseData.put(SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-                }
-                case OXFORD_OLD -> {
-                    caseData.put(THAMESVALLEY_COURTLIST, OXFORD);
-                    caseData.put(SOUTHEAST_FRC_LIST, THAMESVALLEY);
-                }
-                case READING_OLD -> {
-                    caseData.put(THAMESVALLEY_COURTLIST, READING);
-                    caseData.put(SOUTHEAST_FRC_LIST, THAMESVALLEY);
-                }
-                case MILTON_KEYNES_OLD -> {
-                    caseData.put(THAMESVALLEY_COURTLIST, MILTON_KEYNES);
-                    caseData.put(SOUTHEAST_FRC_LIST, THAMESVALLEY);
-                }
-                case SLOUGH_OLD -> {
-                    caseData.put(THAMESVALLEY_COURTLIST, SLOUGH);
-                    caseData.put(SOUTHEAST_FRC_LIST, THAMESVALLEY);
-                }
-                case BRIGHTON_OLD -> {
-                    caseData.put(SOUTHEAST_FRC_LIST, KENT);
-                    caseData.put(KENTFRC_COURTLIST, BRIGHTON);
-                }
-                default -> handleUnknown(caseDetails, caseData, region, frcValue, selectedHC);
-            }
-        }
-    }
-
-    private void setNorthWestRegionCourt(CaseDetails caseDetails, Map<String, Object> caseData, String region, String frcValue) {
-        String selectedHC;
-        if (frcValue.equals(OTHER)) {
-            caseData.put(NORTHWEST_FRC_LIST, LANCASHIRE);
-            selectedHC = (String) caseData.getOrDefault(NWOTHER_COURTLIST, EMPTY_STRING);
-            caseData.remove(NWOTHER_COURTLIST);
-            switch (selectedHC) {
-                case WEST_CUMBRIA_OLD -> caseData.put(LANCASHIRE_COURTLIST, WEST_CUMBRIA);
-                case PRESTON_OLD -> caseData.put(LANCASHIRE_COURTLIST, PRESTON);
-                case LANCASTER_OLD -> caseData.put(LANCASHIRE_COURTLIST, LANCASTER);
-                case CARLISLE_OLD -> caseData.put(LANCASHIRE_COURTLIST, CARLISLE);
-                case BLACKPOOL_OLD -> caseData.put(LANCASHIRE_COURTLIST, BLACKPOOL);
-                case BLACKBURN_OLD -> caseData.put(LANCASHIRE_COURTLIST, BLACKBURN);
-                case BARROW_OLD -> caseData.put(LANCASHIRE_COURTLIST, BARROW);
-                default -> {
-                    caseData.remove(NORTHWEST_FRC_LIST);
-                    handleUnknown(caseDetails, caseData, region, frcValue, selectedHC);
-                }
-            }
-        }
     }
 
     private void handleUnknown(CaseDetails caseDetails, Map<String, Object> caseData, String region, String frcValue, String selectedHC) {

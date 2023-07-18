@@ -9,7 +9,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
@@ -99,8 +98,6 @@ public class NotificationService {
 
     private final EmailService emailService;
     private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
-    private static final String HWF_LOG = "Received request for notification email for HWFSuccessful. Case ID : {}";
-    private static final String BARRISTER_ACCESS_LOG = "Received request for notification email for Barrister Access Added event. Case ID : {}";
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final FeatureToggleService featureToggleService;
     private final ObjectMapper objectMapper;
@@ -110,37 +107,25 @@ public class NotificationService {
     private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     private final EvidenceManagementDownloadService evidenceManagementDownloadService;
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentedHWFSuccessfulConfirmationEmail(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentedHWFSuccessfulConfirmationEmail(CaseDetails caseDetails) {
         NotificationRequest notificationRequest =
             notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        log.info(HWF_LOG, notificationRequest.getCaseReferenceNumber());
+        log.info("Received request for notification email for HWFSuccessful. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
         sendNotificationEmail(notificationRequest, FR_HWF_SUCCESSFUL);
     }
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest =
             finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        log.info(HWF_LOG, notificationRequest.getCaseReferenceNumber());
+        log.info("Received request for notification email for HWFSuccessful. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
         sendNotificationEmail(notificationRequest, FR_HWF_SUCCESSFUL);
 
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendAssignToJudgeConfirmationEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -149,14 +134,7 @@ public class NotificationService {
         sendAssignToJudgeConfirmationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -167,15 +145,7 @@ public class NotificationService {
         sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(CaseDetails caseDetails,
                                                                         SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
@@ -194,14 +164,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_ASSIGNED_TO_JUDGE);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendConsentOrderMadeConfirmationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -210,14 +173,7 @@ public class NotificationService {
         sendConsentOrderMadeConfirmationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendConsentOrderMadeConfirmationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -228,19 +184,11 @@ public class NotificationService {
         sendConsentOrderMadeConfirmationEmail(notificationRequestForRespondentSolicitor);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(CaseDetails caseDetails,
-                                                                           SolicitorCaseDataKeysWrapper dataKeysWrapper) {
+                                                                           SolicitorCaseDataKeysWrapper dataKeysWrappe) {
         sendConsentOrderMadeConfirmationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            dataKeysWrapper));
+            dataKeysWrappe));
     }
 
     public void sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails caseDetails,
@@ -256,14 +204,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_MADE);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderNotApprovedEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderNotApprovedEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendConsentOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -272,14 +213,7 @@ public class NotificationService {
         sendConsentOrderNotApprovedEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderNotApprovedEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderNotApprovedEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendConsentOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -297,14 +231,7 @@ public class NotificationService {
 
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderAvailableEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderAvailableEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -313,14 +240,7 @@ public class NotificationService {
         sendConsentOrderAvailableEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderAvailableEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderAvailableEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -331,15 +251,7 @@ public class NotificationService {
         sendConsentOrderAvailableEmail(notificationRequestForRespondentSolicitor);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderAvailableEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderAvailableEmailToIntervenerSolicitor(CaseDetails caseDetails,
                                                                     SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
@@ -359,14 +271,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderAvailableCtscEmail(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderAvailableCtscEmail(CaseDetails caseDetails) {
         NotificationRequest ctscNotificationRequest = notificationRequestMapper
             .getNotificationRequestForApplicantSolicitor(caseDetails);
@@ -385,36 +290,24 @@ public class NotificationService {
         emailService.sendConfirmationEmail(ctscNotificationRequest, FR_CONSENT_ORDER_AVAILABLE_CTSC);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedHwfSuccessfulConfirmationEmail(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedHwfSuccessfulConfirmationEmail(CaseDetails caseDetails) {
         NotificationRequest notificationRequest =
             notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        log.info(HWF_LOG, notificationRequest.getCaseReferenceNumber());
+        log.info("Received request for notification email for HWFSuccessful. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL);
     }
 
     public void sendContestedHwfSuccessfulConfirmationEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest =
             finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        log.info(HWF_LOG, notificationRequest.getCaseReferenceNumber());
+        log.info("Received request for notification email for HWFSuccessful. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedApplicationIssuedEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedApplicationIssuedEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendContestedApplicationIssuedEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -441,14 +334,7 @@ public class NotificationService {
                 finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails)));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestOrderApprovedEmailRespondent(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestOrderApprovedEmailRespondent(CaseDetails caseDetails) {
         CompletableFuture.runAsync(() ->
             sendContestOrderApprovedEmail(
@@ -461,15 +347,7 @@ public class NotificationService {
                 finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails)));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestOrderApprovedEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestOrderApprovedEmailIntervener(CaseDetails caseDetails,
                                                         SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         CompletableFuture.runAsync(() ->
@@ -490,14 +368,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendPrepareForHearingEmailApplicant(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendPrepareForHearingEmailApplicant(CaseDetails caseDetails) {
         sendPrepareForHearingEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -506,14 +377,7 @@ public class NotificationService {
         sendPrepareForHearingEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendPrepareForHearingEmailRespondent(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendPrepareForHearingEmailRespondent(CaseDetails caseDetails) {
         sendPrepareForHearingEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -522,15 +386,7 @@ public class NotificationService {
         sendPrepareForHearingEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendPrepareForHearingEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendPrepareForHearingEmailIntervener(CaseDetails caseDetails,
                                                      SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendPrepareForHearingEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
@@ -549,14 +405,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendPrepareForHearingOrderSentEmailApplicant(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendPrepareForHearingOrderSentEmailApplicant(CaseDetails caseDetails) {
         sendPrepareForHearingOrderSentEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -565,14 +414,7 @@ public class NotificationService {
         sendPrepareForHearingOrderSentEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendPrepareForHearingOrderSentEmailRespondent(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendPrepareForHearingOrderSentEmailRespondent(CaseDetails caseDetails) {
         sendPrepareForHearingOrderSentEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -587,14 +429,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendSolicitorToDraftOrderEmailApplicant(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendSolicitorToDraftOrderEmailApplicant(CaseDetails caseDetails) {
         sendSolicitorToDraftOrderEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -604,14 +439,7 @@ public class NotificationService {
         sendSolicitorToDraftOrderEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendSolicitorToDraftOrderEmailRespondent(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendSolicitorToDraftOrderEmailRespondent(CaseDetails caseDetails) {
         sendSolicitorToDraftOrderEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -620,15 +448,7 @@ public class NotificationService {
         sendSolicitorToDraftOrderEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendSolicitorToDraftOrderEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param dataKeysWrapper of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendSolicitorToDraftOrderEmailIntervener(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendSolicitorToDraftOrderEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
@@ -645,14 +465,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentGeneralEmail(FinremCaseDetails, String)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentGeneralEmail(CaseDetails caseDetails) {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_RECIPIENT)));
@@ -682,7 +495,7 @@ public class NotificationService {
             if (response.getStatusCode() != HttpStatus.OK) {
                 log.error("Download failed for url {}, filename {} and Case ID: {}", caseDocument.getDocumentBinaryUrl(),
                     caseDocument.getDocumentFilename(), caseDetails.getId());
-                throw new HttpClientErrorException(response.getStatusCode());
+                throw new RuntimeException(String.format("Unexpected error DM store: %s ", response.getStatusCode()));
             }
             ByteArrayResource resource = (ByteArrayResource) response.getBody();
             notificationRequest.setDocumentContents((resource != null) ? resource.getByteArray() : new byte[0]);
@@ -691,14 +504,7 @@ public class NotificationService {
         return false;
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedGeneralEmail(FinremCaseDetails, String)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedGeneralEmail(CaseDetails caseDetails) {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_RECIPIENT)));
@@ -718,14 +524,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestOrderNotApprovedEmailRespondent(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestOrderNotApprovedEmailApplicant(CaseDetails caseDetails) {
         sendContestOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -734,14 +533,7 @@ public class NotificationService {
         sendContestOrderNotApprovedEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestOrderNotApprovedEmailRespondent(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestOrderNotApprovedEmailRespondent(CaseDetails caseDetails) {
         sendContestOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -750,15 +542,7 @@ public class NotificationService {
         sendContestOrderNotApprovedEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestOrderNotApprovedEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestOrderNotApprovedEmailIntervener(CaseDetails caseDetails,
                                                            SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         sendContestOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
@@ -777,14 +561,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_NOT_APPROVED);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedConsentOrderApprovedEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedConsentOrderApprovedEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendContestedConsentOrderApprovedEmailToSolicitor(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -793,14 +570,7 @@ public class NotificationService {
         sendContestedConsentOrderApprovedEmailToSolicitor(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedConsentOrderApprovedEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedConsentOrderApprovedEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendContestedConsentOrderApprovedEmailToSolicitor(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -809,15 +579,7 @@ public class NotificationService {
         sendContestedConsentOrderApprovedEmailToSolicitor(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedConsentOrderApprovedEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedConsentOrderApprovedEmailToIntervenerSolicitor(CaseDetails caseDetails,
                                                                             SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         sendContestedConsentOrderApprovedEmailToSolicitor(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
@@ -836,14 +598,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_CONSENT_ORDER_APPROVED);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(CaseDetails caseDetails) {
         sendContestedConsentOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -852,14 +607,7 @@ public class NotificationService {
         sendContestedConsentOrderNotApprovedEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(CaseDetails caseDetails) {
         sendContestedConsentOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -868,16 +616,7 @@ public class NotificationService {
         sendContestedConsentOrderNotApprovedEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     *
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(CaseDetails caseDetails,
                                                                              SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         sendContestedConsentOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
@@ -896,14 +635,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedConsentGeneralOrderEmailApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedConsentGeneralOrderEmailApplicantSolicitor(CaseDetails caseDetails) {
         sendContestedConsentGeneralOrderEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -912,14 +644,7 @@ public class NotificationService {
         sendContestedConsentGeneralOrderEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedConsentGeneralOrderEmailRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedConsentGeneralOrderEmailRespondentSolicitor(CaseDetails caseDetails) {
         sendContestedConsentGeneralOrderEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -928,15 +653,7 @@ public class NotificationService {
         sendContestedConsentGeneralOrderEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedConsentGeneralOrderEmailIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedConsentGeneralOrderEmailIntervenerSolicitor(CaseDetails caseDetails,
                                                                          SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         sendContestedConsentGeneralOrderEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
@@ -955,14 +672,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER_CONSENT);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentedGeneralOrderEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentedGeneralOrderEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendConsentedGeneralOrderEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -971,14 +681,7 @@ public class NotificationService {
         sendConsentedGeneralOrderEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentedGeneralOrderEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentedGeneralOrderEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendConsentedGeneralOrderEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -993,14 +696,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENTED_GENERAL_ORDER);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedGeneralOrderEmailApplicant(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedGeneralOrderEmailApplicant(CaseDetails caseDetails) {
         sendContestedGeneralOrderEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -1009,14 +705,7 @@ public class NotificationService {
         sendContestedGeneralOrderEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedGeneralOrderEmailRespondent(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedGeneralOrderEmailRespondent(CaseDetails caseDetails) {
         sendContestedGeneralOrderEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -1025,15 +714,7 @@ public class NotificationService {
         sendContestedGeneralOrderEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedGeneralOrderEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedGeneralOrderEmailIntervener(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         sendContestedGeneralOrderEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
@@ -1052,15 +733,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedGeneralApplicationReferToJudgeEmail(FinremCaseDetails)}</p>
-
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedGeneralApplicationReferToJudgeEmail(CaseDetails caseDetails) {
         NotificationRequest judgeNotificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         judgeNotificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL)));
@@ -1084,14 +757,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendContestedGeneralApplicationOutcomeEmail(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendContestedGeneralApplicationOutcomeEmail(CaseDetails caseDetails) throws IOException {
         String recipientEmail = DEFAULT_EMAIL;
         if (featureToggleService.isSendToFRCEnabled()) {
@@ -1125,14 +791,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_APPLICATION_OUTCOME);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -1141,14 +800,7 @@ public class NotificationService {
         sendConsentOrderNotApprovedSentEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -1157,15 +809,7 @@ public class NotificationService {
         sendConsentOrderNotApprovedSentEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(CaseDetails caseDetails,
                                                                           SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
@@ -1184,16 +828,7 @@ public class NotificationService {
             interimHearingData));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentHearingNotificationEmailToApplicantSolicitor(FinremCaseDetails, Map)}</p>
-
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param hearingData instance of Map
-     * @deprecated Use {@link CaseDetails caseDetails, Map hearingData}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentHearingNotificationEmailToApplicantSolicitor(CaseDetails caseDetails,
                                                                         Map<String, Object> hearingData) {
         sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(caseDetails,
@@ -1212,15 +847,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENTED_LIST_FOR_HEARING);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentHearingNotificationEmailToRespondentSolicitor(FinremCaseDetails, Map)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param hearingData instance of Map
-     * @deprecated Use {@link CaseDetails caseDetails, Map hearingData}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendConsentHearingNotificationEmailToRespondentSolicitor(CaseDetails caseDetails,
                                                                          Map<String, Object> hearingData) {
         sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
@@ -1234,15 +861,7 @@ public class NotificationService {
     }
 
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendInterimNotificationEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     *
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendInterimNotificationEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -1251,7 +870,6 @@ public class NotificationService {
         sendInterimNotificationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void sendInterimHearingNotificationEmailToRespondentSolicitor(CaseDetails caseDetails,
                                                                          Map<String, Object> interimHearingData) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
@@ -1265,14 +883,7 @@ public class NotificationService {
             interimHearingData, dataKeysWrapper));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendInterimNotificationEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendInterimNotificationEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -1281,15 +892,7 @@ public class NotificationService {
         sendInterimNotificationEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendInterimNotificationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendInterimNotificationEmailToIntervenerSolicitor(CaseDetails caseDetails,
                                                                   SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
@@ -1312,14 +915,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendTransferToLocalCourtEmail(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendTransferToLocalCourtEmail(CaseDetails caseDetails) {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         //Overwrite the email, set to the court provided, and use general body to include the Events "Free Text" field
@@ -1343,15 +939,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_TRANSFER_TO_LOCAL_COURT);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendUpdateFrcInformationEmailToAppSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     *
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendUpdateFrcInformationEmailToAppSolicitor(CaseDetails caseDetails) {
         sendUpdateFrcInformationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -1360,15 +948,7 @@ public class NotificationService {
         sendUpdateFrcInformationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendUpdateFrcInformationEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendUpdateFrcInformationEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendUpdateFrcInformationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -1377,15 +957,7 @@ public class NotificationService {
         sendUpdateFrcInformationEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendUpdateFrcInformationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendUpdateFrcInformationEmailToIntervenerSolicitor(CaseDetails caseDetails,
                                                                    SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendUpdateFrcInformationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
@@ -1401,14 +973,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_UPDATE_FRC_SOL);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendUpdateFrcInformationEmailToCourt(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendUpdateFrcInformationEmailToCourt(CaseDetails caseDetails) throws JsonProcessingException {
         String recipientEmail = getRecipientEmail(caseDetails);
 
@@ -1427,14 +992,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_UPDATE_FRC_COURT);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendGeneralApplicationRejectionEmailToAppSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendGeneralApplicationRejectionEmailToAppSolicitor(CaseDetails caseDetails) {
         sendGeneralApplicationRejectionEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -1443,14 +1001,7 @@ public class NotificationService {
         sendGeneralApplicationRejectionEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendGeneralApplicationRejectionEmailToResSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendGeneralApplicationRejectionEmailToResSolicitor(CaseDetails caseDetails) {
         sendGeneralApplicationRejectionEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
@@ -1465,43 +1016,33 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_REJECT_GENERAL_APPLICATION);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendBarristerRemovedEmail(FinremCaseDetails, Barrister)}</p>
-     * @param caseDetails instance of CaseDetails
-     * @param barrister instance of Barrister
-     * @deprecated Use {@link CaseDetails caseDetails, Barrister barrister}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendBarristerAddedEmail(CaseDetails caseDetails, Barrister barrister) {
         NotificationRequest notificationRequest = notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister);
-        log.info(BARRISTER_ACCESS_LOG, notificationRequest.getCaseReferenceNumber());
+        log.info("Received request for notification email for Barrister Access Added event. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_BARRISTER_ACCESS_ADDED);
     }
 
     public void sendBarristerAddedEmail(FinremCaseDetails caseDetails, Barrister barrister) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
-        log.info(BARRISTER_ACCESS_LOG, notificationRequest.getCaseReferenceNumber());
+        log.info("Received request for notification email for Barrister Access Added event. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_BARRISTER_ACCESS_ADDED);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendBarristerRemovedEmail(FinremCaseDetails, Barrister)}</p>
-     * @param caseDetails instance of CaseDetails
-     * @param barrister instance of Barrister
-     * @deprecated Use {@link CaseDetails caseDetails, Barrister barrister}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendBarristerRemovedEmail(CaseDetails caseDetails, Barrister barrister) {
         NotificationRequest notificationRequest = notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister);
-        log.info(BARRISTER_ACCESS_LOG, notificationRequest.getCaseReferenceNumber());
+        log.info("Received request for notification email for Barrister Access Added event. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_BARRISTER_ACCESS_REMOVED);
     }
 
     public void sendBarristerRemovedEmail(FinremCaseDetails caseDetails, Barrister barrister) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
-        log.info(BARRISTER_ACCESS_LOG, notificationRequest.getCaseReferenceNumber());
+        log.info("Received request for notification email for Barrister Access Added event. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_BARRISTER_ACCESS_REMOVED);
     }
 
@@ -1664,7 +1205,7 @@ public class NotificationService {
             .build();
     }
 
-
+    @Deprecated
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return shouldEmailRespondentSolicitor(caseDetails.getData())
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
@@ -1685,13 +1226,7 @@ public class NotificationService {
         return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData());
     }
 
-    /**
-     * Do not expect any return.
-     * <p>Please use @{@link #sendNoticeOfChangeEmail(FinremCaseDetails)}</p>
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {
         EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
         NotificationRequest notificationRequest = notificationRequestMapper
@@ -1707,7 +1242,6 @@ public class NotificationService {
         sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void sendNoticeOfChangeEmailCaseworker(CaseDetails caseDetails) {
         EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
         NotificationRequest notificationRequest = notificationRequestMapper
@@ -1734,15 +1268,7 @@ public class NotificationService {
         return caseDataService.isContestedApplication(caseDetails);
     }
 
-    /**
-     * Return String Object for given Case with the given indentation used.
-     * <p>Please use @{@link #sendEmailIfSolicitorIsDigital(FinremCaseDetails, NotificationRequest, EmailTemplateNames)}</p>
-     * @param caseDetails instance of CaseDetails
-     * @param notificationRequest instance of NotificationRequest
-     * @param template instance of EmailTemplateNames
-     * @deprecated Use {@link CaseDetails caseDetails, NotificationRequest notificationRequest, EmailTemplateNames template}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     private void sendEmailIfSolicitorIsDigital(
         CaseDetails caseDetails,
         NotificationRequest notificationRequest,
@@ -1777,14 +1303,7 @@ public class NotificationService {
         }
     }
 
-    /**
-     * Return EmailTemplateNames Object for given Case with the given indentation used.
-     * <p>Please use @{@link #getNoticeOfChangeTemplate(FinremCaseDetails)}</p>
-     * @param caseDetails instance of CaseDetails
-     * @return EmailTemplateNames Object
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     private EmailTemplateNames getNoticeOfChangeTemplate(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
             ? FR_CONSENTED_NOTICE_OF_CHANGE
@@ -1798,14 +1317,7 @@ public class NotificationService {
     }
 
 
-    /**
-     * Return String Object for given Case with the given indentation used.
-     *
-     * @param caseDetails instance of CaseDetails
-     * @return EmailTemplateNames Object
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     private EmailTemplateNames getNoticeOfChangeTemplateCaseworker(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
             ? FR_CONSENTED_NOC_CASEWORKER
@@ -1820,14 +1332,7 @@ public class NotificationService {
 
     }
 
-    /**
-     * Return boolean true or false for given Case.
-     *
-     * @param caseDetails instance of CaseDetails
-     * @return boolean primitive
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     private boolean isApplicantNoticeOfChangeRequest(NotificationRequest notificationRequest,
                                                      CaseDetails caseDetails) {
         return notificationRequest.getName().equalsIgnoreCase(
@@ -1841,20 +1346,14 @@ public class NotificationService {
                 : caseDetails.getData().getContactDetailsWrapper().getApplicantSolicitorName()));
     }
 
+    @Deprecated
     private String getSolicitorNameKey(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
             ? CONSENTED_SOLICITOR_NAME
             : CONTESTED_SOLICITOR_NAME;
     }
 
-    /**
-     * Return Recipient Email for given Case .
-     * <p>Please use @{@link #getRecipientEmail(FinremCaseDetails)}</p>
-     * @param caseDetails instance of CaseDetails
-     * @return List Object
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
+    @Deprecated
     private String getRecipientEmail(CaseDetails caseDetails) throws JsonProcessingException {
         if (featureToggleService.isSendToFRCEnabled()) {
             Map<String, Object> data = caseDetails.getData();

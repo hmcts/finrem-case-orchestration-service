@@ -237,53 +237,123 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertEquals(actualChangeOfRep.getRemoved(), expectedChangeOfRep.getRemoved());
 
         Address solicitorAddress = mapper.convertValue(actualData.get(CONTESTED_SOLICITOR_ADDRESS), Address.class);
-        assertEquals(ADDRESS_LINE_1, solicitorAddress.getAddressLine1());
-        assertEquals(TOWN_CITY, solicitorAddress.getPostTown());
-        assertEquals(COUNTY, solicitorAddress.getCounty());
-        assertEquals(COUNTRY, solicitorAddress.getCountry());
-        assertEquals(POSTCODE, solicitorAddress.getPostCode());
+        assertEquals(solicitorAddress.getAddressLine1(), ADDRESS_LINE_1);
+        assertEquals(solicitorAddress.getPostTown(), TOWN_CITY);
+        assertEquals(solicitorAddress.getCounty(), COUNTY);
+        assertEquals(solicitorAddress.getCountry(), COUNTRY);
+        assertEquals(solicitorAddress.getPostCode(), POSTCODE);
     }
 
     @Test
-    public void givenContestedCaseAndEmptyChangeOfRepsForInterveners_WhenUpdateRepresentation_thenReturnCorrectCaseData() {
-        Map<String, String> intervenersJson = Map.of("contestedIntvr1SolicitorAdding/after-update-details.json",
-            "contestedIntvr1SolicitorAdding/change-of-representatives-before.json",
-            "contestedIntvr2SolicitorAdding/after-update-details.json",
-            "contestedIntvr2SolicitorAdding/change-of-representatives-before.json",
-            "contestedIntvr3SolicitorAdding/after-update-details.json",
-            "contestedIntvr3SolicitorAdding/change-of-representatives-before.json",
-            "contestedIntvr4SolicitorAdding/after-update-details.json",
-            "contestedIntvr4SolicitorAdding/change-of-representatives-before.json");
+    public void givenContestedCaseAndEmptyChangeOfRepsForIntervener1_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
+        setUpDefaultMockContext();
+        setUpCaseDetails("contestedIntvr1SolicitorAdding/after-update-details.json");
 
-        intervenersJson.forEach((key, value) -> {
-            try {
-                setUpDefaultMockContext();
-                setUpCaseDetails(key);
-                InputStream resourceAsStream = getClass().getResourceAsStream(PATH + value);
-                initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+            + "contestedIntvr1SolicitorAdding/change-of-representatives-before.json");
+        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
-                Map<String, Object> actualData = updateRepresentationService
-                    .updateRepresentationAsSolicitor(initialDetails, "bebe");
+        Map<String, Object> actualData = updateRepresentationService
+            .updateRepresentationAsSolicitor(initialDetails, "bebe");
 
-                assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
-                assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
-                assertNull(actualData.get(CONTESTED_SOLICITOR_DX_NUMBER));
-                assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
-                assertNull(actualData.get(SOLICITOR_PHONE));
+        assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
+        assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
+        assertNull(actualData.get(CONTESTED_SOLICITOR_DX_NUMBER));
+        assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
+        assertNull(actualData.get(SOLICITOR_PHONE));
 
-                RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
-                RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
+        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
+        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
 
-                assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
-                assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
-                assertEquals(actualChangeOfRep.getBy(), expectedChangeOfRep.getBy());
-                assertEquals(actualChangeOfRep.getAdded(), expectedChangeOfRep.getAdded());
-                assertEquals(actualChangeOfRep.getRemoved(), expectedChangeOfRep.getRemoved());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+        assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
+        assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
+        assertEquals(actualChangeOfRep.getBy(), expectedChangeOfRep.getBy());
+        assertEquals(actualChangeOfRep.getAdded(), expectedChangeOfRep.getAdded());
+        assertEquals(actualChangeOfRep.getRemoved(), expectedChangeOfRep.getRemoved());
+    }
 
+    @Test
+    public void givenContestedCaseAndEmptyChangeOfRepsForIntervener2_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
+        setUpDefaultMockContext();
+        setUpCaseDetails("contestedIntvr2SolicitorAdding/after-update-details.json");
+
+        InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+            + "contestedIntvr2SolicitorAdding/change-of-representatives-before.json");
+        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+
+        Map<String, Object> actualData = updateRepresentationService
+            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+
+        assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
+        assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
+        assertNull(actualData.get(CONTESTED_SOLICITOR_DX_NUMBER));
+        assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
+        assertNull(actualData.get(SOLICITOR_PHONE));
+
+        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
+        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
+
+        assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
+        assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
+        assertEquals(actualChangeOfRep.getBy(), expectedChangeOfRep.getBy());
+        assertEquals(actualChangeOfRep.getAdded(), expectedChangeOfRep.getAdded());
+        assertEquals(actualChangeOfRep.getRemoved(), expectedChangeOfRep.getRemoved());
+    }
+
+    @Test
+    public void givenContestedCaseAndEmptyChangeOfRepsForIntervener3_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
+        setUpDefaultMockContext();
+        setUpCaseDetails("contestedIntvr3SolicitorAdding/after-update-details.json");
+
+        InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+            + "contestedIntvr3SolicitorAdding/change-of-representatives-before.json");
+        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+
+        Map<String, Object> actualData = updateRepresentationService
+            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+
+        assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
+        assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
+        assertNull(actualData.get(CONTESTED_SOLICITOR_DX_NUMBER));
+        assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
+        assertNull(actualData.get(SOLICITOR_PHONE));
+
+        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
+        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
+
+        assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
+        assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
+        assertEquals(actualChangeOfRep.getBy(), expectedChangeOfRep.getBy());
+        assertEquals(actualChangeOfRep.getAdded(), expectedChangeOfRep.getAdded());
+        assertEquals(actualChangeOfRep.getRemoved(), expectedChangeOfRep.getRemoved());
+    }
+
+    @Test
+    public void givenContestedCaseAndEmptyChangeOfRepsForIntervener4_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
+        setUpDefaultMockContext();
+        setUpCaseDetails("contestedIntvr4SolicitorAdding/after-update-details.json");
+
+        InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+            + "contestedIntvr4SolicitorAdding/change-of-representatives-before.json");
+        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+
+        Map<String, Object> actualData = updateRepresentationService
+            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+
+        assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
+        assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
+        assertNull(actualData.get(CONTESTED_SOLICITOR_DX_NUMBER));
+        assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
+        assertNull(actualData.get(SOLICITOR_PHONE));
+
+        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
+        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
+
+        assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
+        assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
+        assertEquals(actualChangeOfRep.getBy(), expectedChangeOfRep.getBy());
+        assertEquals(actualChangeOfRep.getAdded(), expectedChangeOfRep.getAdded());
+        assertEquals(actualChangeOfRep.getRemoved(), expectedChangeOfRep.getRemoved());
     }
 
     @Test
@@ -326,11 +396,11 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertEquals(actualChangeOfRep.getRemoved(), expectedChangeOfRep.getRemoved());
 
         Address solicitorAddress = mapper.convertValue(actualData.get(CONSENTED_SOLICITOR_ADDRESS), Address.class);
-        assertEquals(ADDRESS_LINE_1, solicitorAddress.getAddressLine1());
-        assertEquals(TOWN_CITY, solicitorAddress.getPostTown());
-        assertEquals(COUNTY, solicitorAddress.getCounty());
-        assertEquals(COUNTRY, solicitorAddress.getCountry());
-        assertEquals(POSTCODE, solicitorAddress.getPostCode());
+        assertEquals(solicitorAddress.getAddressLine1(), ADDRESS_LINE_1);
+        assertEquals(solicitorAddress.getPostTown(), TOWN_CITY);
+        assertEquals(solicitorAddress.getCounty(), COUNTY);
+        assertEquals(solicitorAddress.getCountry(), COUNTRY);
+        assertEquals(solicitorAddress.getPostCode(), POSTCODE);
     }
 
     @Test
@@ -371,11 +441,11 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertEquals(actualChangeOfRep.getRemoved(), expectedChangeOfRep.getRemoved());
 
         Address solicitorAddress = mapper.convertValue(actualData.get(RESP_SOLICITOR_ADDRESS), Address.class);
-        assertEquals(ADDRESS_LINE_1, solicitorAddress.getAddressLine1());
-        assertEquals(TOWN_CITY, solicitorAddress.getPostTown());
-        assertEquals(COUNTY, solicitorAddress.getCounty());
-        assertEquals(COUNTRY, solicitorAddress.getCountry());
-        assertEquals(POSTCODE, solicitorAddress.getPostCode());
+        assertEquals(solicitorAddress.getAddressLine1(), ADDRESS_LINE_1);
+        assertEquals(solicitorAddress.getPostTown(), TOWN_CITY);
+        assertEquals(solicitorAddress.getCounty(), COUNTY);
+        assertEquals(solicitorAddress.getCountry(), COUNTRY);
+        assertEquals(solicitorAddress.getPostCode(), POSTCODE);
 
     }
 
@@ -417,8 +487,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         Map<String, Object> actualData = updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "someAuthToken");
 
-        assertEquals("Test Applicant Solicitor", actualData.get(CONTESTED_SOLICITOR_NAME));
-        assertEquals("appsolicitor1@yahoo.com", actualData.get(CONTESTED_SOLICITOR_EMAIL));
+        assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), "Test Applicant Solicitor");
+        assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), "appsolicitor1@yahoo.com");
         assertNull(actualData.get(CONTESTED_SOLICITOR_DX_NUMBER));
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
@@ -433,11 +503,11 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertEquals(actualChangeOfRep.getRemoved(), expectedChangeOfRep.getRemoved());
 
         Address solicitorAddress = mapper.convertValue(actualData.get(CONTESTED_SOLICITOR_ADDRESS), Address.class);
-        assertEquals(ADDRESS_LINE_1, solicitorAddress.getAddressLine1());
-        assertEquals(TOWN_CITY, solicitorAddress.getPostTown());
-        assertEquals(COUNTY, solicitorAddress.getCounty());
-        assertEquals(COUNTRY, solicitorAddress.getCountry());
-        assertEquals(POSTCODE, solicitorAddress.getPostCode());
+        assertEquals(solicitorAddress.getAddressLine1(), ADDRESS_LINE_1);
+        assertEquals(solicitorAddress.getPostTown(), TOWN_CITY);
+        assertEquals(solicitorAddress.getCounty(), COUNTY);
+        assertEquals(solicitorAddress.getCountry(), COUNTRY);
+        assertEquals(solicitorAddress.getPostCode(), POSTCODE);
     }
 
     @Test

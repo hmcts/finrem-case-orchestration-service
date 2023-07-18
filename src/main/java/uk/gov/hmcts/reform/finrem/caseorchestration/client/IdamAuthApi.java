@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import uk.gov.hmcts.reform.idam.client.CoreFeignConfiguration;
 import uk.gov.hmcts.reform.idam.client.models.TokenRequest;
 import uk.gov.hmcts.reform.idam.client.models.TokenResponse;
@@ -33,7 +35,7 @@ public interface IdamAuthApi {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation
     );
 
-    @GetMapping("/details")
+    @RequestMapping(method = RequestMethod.GET, value = "/details")
     UserDetails retrieveUserDetails(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation);
 
 }

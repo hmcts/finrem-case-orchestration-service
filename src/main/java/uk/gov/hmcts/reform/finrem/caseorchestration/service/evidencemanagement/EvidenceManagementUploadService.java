@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.StreamSupport.stream;
@@ -89,7 +90,8 @@ public class EvidenceManagementUploadService {
         }
 
         log.info("EMSDocStore Uploaded files are: {} and case id: {}",
-            uploadResponse.getDocuments().stream().map(e -> e.links.binary.href).toList(), caseTypeId);
+            uploadResponse.getDocuments().stream().map(e -> e.links.binary.href).collect(Collectors.toList()),
+            caseTypeId);
 
         return toUploadResponse(uploadResponse);
     }
@@ -128,13 +130,13 @@ public class EvidenceManagementUploadService {
 
         return filesStream
             .map(this::createUploadResponse)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private List<FileUploadResponse> toUploadResponse(UploadResponse uploadResponse) {
         Stream<Document> documentStream = stream(uploadResponse.getDocuments().spliterator(), false);
 
-        return documentStream.map(this::createUploadResponse).toList();
+        return documentStream.map(this::createUploadResponse).collect(Collectors.toList());
     }
 
     private String getTextFromJsonNode(JsonNode document, String attribute) {

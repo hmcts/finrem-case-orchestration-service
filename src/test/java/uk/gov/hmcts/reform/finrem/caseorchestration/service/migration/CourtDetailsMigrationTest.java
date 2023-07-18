@@ -1,32 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.migration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 
-import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
+public class CourtDetailsMigrationTest extends BaseServiceTest {
 
-class CourtDetailsMigrationTest extends BaseServiceTest {
-
+    @Autowired
     private ObjectMapper mapper;
 
-    @BeforeEach
-    void setup() {
-        mapper = new ObjectMapper();
-    }
-
-
     @Test
-    void shouldMigrateCase_newport() {
+    public void shouldMigrateCase_newport() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-newport.json",
             mapper
@@ -35,10 +28,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("wales", migratedCaseData.get("regionList"));
-        assertEquals("newport", migratedCaseData.get("walesFRCList"));
-        assertEquals("FR_newport_hc_list_1", migratedCaseData.get("newportCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("wales"));
+        assertThat(migratedCaseData.get("walesFRCList"), is("newport"));
+        assertThat(migratedCaseData.get("newportCourtList"), is("FR_newport_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("walesFRCListSL"));
         assertNull(migratedCaseData.get("newportCourtListSL"));
@@ -48,7 +40,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_newport_ac() {
+    public void shouldMigrateCase_newport_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-newport-ac.json",
             mapper
@@ -57,10 +49,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("wales", migratedCaseData.get("regionList"));
-        assertEquals("newport", migratedCaseData.get("walesFRCList"));
-        assertEquals("FR_newport_hc_list_1", migratedCaseData.get("newportCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("wales"));
+        assertThat(migratedCaseData.get("walesFRCList"), is("newport"));
+        assertThat(migratedCaseData.get("newportCourtList"), is("FR_newport_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("walesFRCListSL"));
         assertNull(migratedCaseData.get("newportCourtListSL"));
@@ -70,7 +61,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_newport_ga() {
+    public void shouldMigrateCase_newport_ga() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-newport-ga.json",
             mapper
@@ -79,10 +70,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-
-        assertEquals("wales", migratedCaseData.get("regionList"));
-        assertEquals("newport", migratedCaseData.get("walesFRCList"));
-        assertEquals("FR_newport_hc_list_1", migratedCaseData.get("newportCourtList"));
+        assertThat(migratedCaseData.get("regionList"), is("wales"));
+        assertThat(migratedCaseData.get("walesFRCList"), is("newport"));
+        assertThat(migratedCaseData.get("newportCourtList"), is("FR_newport_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("walesFRCListSL"));
         assertNull(migratedCaseData.get("newportCourtListSL"));
@@ -92,7 +82,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_swansea() {
+    public void shouldMigrateCase_swansea() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-swansea.json",
             mapper
@@ -101,10 +91,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("wales", migratedCaseData.get("regionList"));
-        assertEquals("swansea", migratedCaseData.get("walesFRCList"));
-        assertEquals("FR_swansea_hc_list_1", migratedCaseData.get("swanseaCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("wales"));
+        assertThat(migratedCaseData.get("walesFRCList"), is("swansea"));
+        assertThat(migratedCaseData.get("swanseaCourtList"), is("FR_swansea_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("walesFRCListSL"));
         assertNull(migratedCaseData.get("swanseaCourtListSL"));
@@ -114,7 +103,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_swansea_ac() {
+    public void shouldMigrateCase_swansea_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-swansea-ac.json",
             mapper
@@ -123,10 +112,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("wales", migratedCaseData.get("regionList"));
-        assertEquals("swansea", migratedCaseData.get("walesFRCList"));
-        assertEquals("FR_swansea_hc_list_6", migratedCaseData.get("swanseaCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("wales"));
+        assertThat(migratedCaseData.get("walesFRCList"), is("swansea"));
+        assertThat(migratedCaseData.get("swanseaCourtList"), is("FR_swansea_hc_list_6"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("walesFRCListSL"));
         assertNull(migratedCaseData.get("swanseaCourtListSL"));
@@ -136,7 +124,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_swansea_ga() {
+    public void shouldMigrateCase_swansea_ga() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-swansea-ga.json",
             mapper
@@ -145,10 +133,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("wales", migratedCaseData.get("regionList"));
-        assertEquals("swansea", migratedCaseData.get("walesFRCList"));
-        assertEquals("FR_swansea_hc_list_6", migratedCaseData.get("swanseaCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("wales"));
+        assertThat(migratedCaseData.get("walesFRCList"), is("swansea"));
+        assertThat(migratedCaseData.get("swanseaCourtList"), is("FR_swansea_hc_list_6"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("walesFRCListSL"));
         assertNull(migratedCaseData.get("swanseaCourtListSL"));
@@ -158,7 +145,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_cfc() {
+    public void shouldMigrateCase_cfc() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-cfc.json",
             mapper
@@ -167,10 +154,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("london", migratedCaseData.get("regionList"));
-        assertEquals("cfc", migratedCaseData.get("londonFRCList"));
-        assertEquals("FR_s_CFCList_9", migratedCaseData.get("cfcCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("london"));
+        assertThat(migratedCaseData.get("londonFRCList"), is("cfc"));
+        assertThat(migratedCaseData.get("cfcCourtList"), is("FR_s_CFCList_9"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("londonFRCListSL"));
         assertNull(migratedCaseData.get("cfcCourtListSL"));
@@ -180,7 +166,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_cfc_ac() {
+    public void shouldMigrateCase_cfc_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-cfc-ac.json",
             mapper
@@ -189,9 +175,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("london", migratedCaseData.get("regionList"));
-        assertEquals("cfc", migratedCaseData.get("londonFRCList"));
-        assertEquals("FR_s_CFCList_9", migratedCaseData.get("cfcCourtList"));
+        assertThat(migratedCaseData.get("regionList"), is("london"));
+        assertThat(migratedCaseData.get("londonFRCList"), is("cfc"));
+        assertThat(migratedCaseData.get("cfcCourtList"), is("FR_s_CFCList_9"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("londonFRCListSL"));
         assertNull(migratedCaseData.get("cfcCourtListSL"));
@@ -201,7 +187,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_cfc_ga() {
+    public void shouldMigrateCase_cfc_ga() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-cfc-ac.json",
             mapper
@@ -210,10 +196,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("london", migratedCaseData.get("regionList"));
-        assertEquals("cfc", migratedCaseData.get("londonFRCList"));
-        assertEquals("FR_s_CFCList_9", migratedCaseData.get("cfcCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("london"));
+        assertThat(migratedCaseData.get("londonFRCList"), is("cfc"));
+        assertThat(migratedCaseData.get("cfcCourtList"), is("FR_s_CFCList_9"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("londonFRCListSL"));
         assertNull(migratedCaseData.get("cfcCourtListSL"));
@@ -223,7 +208,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_nottingham() {
+    public void shouldMigrateCase_nottingham() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-nottingham.json",
             mapper
@@ -232,11 +217,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("midlands", migratedCaseData.get("regionList"));
-        assertEquals("nottingham", migratedCaseData.get("midlandsFRCList"));
-        assertEquals("FR_nottingham_hc_list_1", migratedCaseData.get("nottinghamCourtList"));
-
-
+        assertThat(migratedCaseData.get("regionList"), is("midlands"));
+        assertThat(migratedCaseData.get("midlandsFRCList"), is("nottingham"));
+        assertThat(migratedCaseData.get("nottinghamCourtList"), is("FR_nottingham_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("midlandsFRCListSL"));
         assertNull(migratedCaseData.get("nottinghamCourtListSL"));
@@ -246,7 +229,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_nottingham_ac() {
+    public void shouldMigrateCase_nottingham_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-nottingham-ac.json",
             mapper
@@ -255,10 +238,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("midlands", migratedCaseData.get("regionList"));
-        assertEquals("nottingham", migratedCaseData.get("midlandsFRCList"));
-        assertEquals("FR_nottingham_hc_list_1", migratedCaseData.get("nottinghamCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("midlands"));
+        assertThat(migratedCaseData.get("midlandsFRCList"), is("nottingham"));
+        assertThat(migratedCaseData.get("nottinghamCourtList"), is("FR_nottingham_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("midlandsFRCListSL"));
         assertNull(migratedCaseData.get("nottinghamCourtListSL"));
@@ -268,7 +250,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_nottingham_ga() {
+    public void shouldMigrateCase_nottingham_ga() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-nottingham-ga.json",
             mapper
@@ -277,10 +259,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("midlands", migratedCaseData.get("regionList"));
-        assertEquals("nottingham", migratedCaseData.get("midlandsFRCList"));
-        assertEquals("FR_nottingham_hc_list_1", migratedCaseData.get("nottinghamCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("midlands"));
+        assertThat(migratedCaseData.get("midlandsFRCList"), is("nottingham"));
+        assertThat(migratedCaseData.get("nottinghamCourtList"), is("FR_nottingham_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("midlandsFRCListSL"));
         assertNull(migratedCaseData.get("nottinghamCourtListSL"));
@@ -290,7 +271,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_birmingham() {
+    public void shouldMigrateCase_birmingham() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-birmingham.json",
             mapper
@@ -299,11 +280,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("midlands", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("midlandsFRCList"));
-        assertEquals("FR_birmingham_hc_list_1", migratedCaseData.get("birminghamCourtList"));
-
-
+        assertThat(migratedCaseData.get("regionList"), is("midlands"));
+        assertThat(migratedCaseData.get("midlandsFRCList"), is("birmingham"));
+        assertThat(migratedCaseData.get("birminghamCourtList"), is("FR_birmingham_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("midlandsFRCListSL"));
         assertNull(migratedCaseData.get("birminghamCourtListSL"));
@@ -313,7 +292,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_birmingham_ac() {
+    public void shouldMigrateCase_birmingham_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-birmingham-ac.json",
             mapper
@@ -322,10 +301,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("midlands", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("midlandsFRCList"));
-        assertEquals("FR_birmingham_hc_list_1", migratedCaseData.get("birminghamCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("midlands"));
+        assertThat(migratedCaseData.get("midlandsFRCList"), is("birmingham"));
+        assertThat(migratedCaseData.get("birminghamCourtList"), is("FR_birmingham_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("midlandsFRCListSL"));
         assertNull(migratedCaseData.get("birminghamCourtListSL"));
@@ -335,7 +313,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_birmingham_ga() {
+    public void shouldMigrateCase_birmingham_ga() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-birmingham-ga.json",
             mapper
@@ -344,10 +322,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("midlands", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("midlandsFRCList"));
-        assertEquals("FR_birmingham_hc_list_1", migratedCaseData.get("birminghamCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("midlands"));
+        assertThat(migratedCaseData.get("midlandsFRCList"), is("birmingham"));
+        assertThat(migratedCaseData.get("birminghamCourtList"), is("FR_birmingham_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("midlandsFRCListSL"));
         assertNull(migratedCaseData.get("birminghamCourtListSL"));
@@ -357,7 +334,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_liverpool() {
+    public void shouldMigrateCase_liverpool() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-liverpool.json",
             mapper
@@ -366,10 +343,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northwest", migratedCaseData.get("regionList"));
-        assertEquals("liverpool", migratedCaseData.get("northWestFRCList"));
-        assertEquals("FR_liverpool_hc_list_1", migratedCaseData.get("liverpoolCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northwest"));
+        assertThat(migratedCaseData.get("northWestFRCList"), is("liverpool"));
+        assertThat(migratedCaseData.get("liverpoolCourtList"), is("FR_liverpool_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northWestFRCListSL"));
         assertNull(migratedCaseData.get("liverpoolCourtListSL"));
@@ -379,7 +355,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_liverpool_ac() {
+    public void shouldMigrateCase_liverpool_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-liverpool-ac.json",
             mapper
@@ -388,10 +364,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northwest", migratedCaseData.get("regionList"));
-        assertEquals("liverpool", migratedCaseData.get("northWestFRCList"));
-        assertEquals("FR_liverpool_hc_list_1", migratedCaseData.get("liverpoolCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northwest"));
+        assertThat(migratedCaseData.get("northWestFRCList"), is("liverpool"));
+        assertThat(migratedCaseData.get("liverpoolCourtList"), is("FR_liverpool_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northWestFRCListSL"));
         assertNull(migratedCaseData.get("liverpoolCourtListSL"));
@@ -401,7 +376,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_liverpool_ga() {
+    public void shouldMigrateCase_liverpool_ga() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-liverpool-ga.json",
             mapper
@@ -410,10 +385,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northwest", migratedCaseData.get("regionList"));
-        assertEquals("liverpool", migratedCaseData.get("northWestFRCList"));
-        assertEquals("FR_liverpool_hc_list_1", migratedCaseData.get("liverpoolCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northwest"));
+        assertThat(migratedCaseData.get("northWestFRCList"), is("liverpool"));
+        assertThat(migratedCaseData.get("liverpoolCourtList"), is("FR_liverpool_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northWestFRCListSL"));
         assertNull(migratedCaseData.get("liverpoolCourtListSL"));
@@ -423,7 +397,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_manchester() {
+    public void shouldMigrateCase_manchester() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-manchester.json",
             mapper
@@ -432,10 +406,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northwest", migratedCaseData.get("regionList"));
-        assertEquals("manchester", migratedCaseData.get("northWestFRCList"));
-        assertEquals("FR_manchester_hc_list_1", migratedCaseData.get("manchesterCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northwest"));
+        assertThat(migratedCaseData.get("northWestFRCList"), is("manchester"));
+        assertThat(migratedCaseData.get("manchesterCourtList"), is("FR_manchester_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northWestFRCListSL"));
         assertNull(migratedCaseData.get("manchesterCourtListSL"));
@@ -445,7 +418,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_manchester_ac() {
+    public void shouldMigrateCase_manchester_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-manchester-ac.json",
             mapper
@@ -454,10 +427,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northwest", migratedCaseData.get("regionList"));
-        assertEquals("manchester", migratedCaseData.get("northWestFRCList"));
-        assertEquals("FR_manchester_hc_list_1", migratedCaseData.get("manchesterCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northwest"));
+        assertThat(migratedCaseData.get("northWestFRCList"), is("manchester"));
+        assertThat(migratedCaseData.get("manchesterCourtList"), is("FR_manchester_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northWestFRCListSL"));
         assertNull(migratedCaseData.get("manchesterCourtListSL"));
@@ -467,7 +439,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_manchester_ga() {
+    public void shouldMigrateCase_manchester_ga() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-manchester-ga.json",
             mapper
@@ -476,10 +448,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northwest", migratedCaseData.get("regionList"));
-        assertEquals("manchester", migratedCaseData.get("northWestFRCList"));
-        assertEquals("FR_manchester_hc_list_1", migratedCaseData.get("manchesterCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northwest"));
+        assertThat(migratedCaseData.get("northWestFRCList"), is("manchester"));
+        assertThat(migratedCaseData.get("manchesterCourtList"), is("FR_manchester_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northWestFRCListSL"));
         assertNull(migratedCaseData.get("manchesterCourtListSL"));
@@ -489,7 +460,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_cleaveland() {
+    public void shouldMigrateCase_cleaveland() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-cleaveland.json",
             mapper
@@ -498,12 +469,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-
-        assertEquals("northeast", migratedCaseData.get("regionList"));
-        assertEquals("cleaveland", migratedCaseData.get("northEastFRCList"));
-        assertEquals("FR_cleaveland_hc_list_1", migratedCaseData.get("cleavelandCourtList"));
-
-
+        assertThat(migratedCaseData.get("regionList"), is("northeast"));
+        assertThat(migratedCaseData.get("northEastFRCList"), is("cleaveland"));
+        assertThat(migratedCaseData.get("cleavelandCourtList"), is("FR_cleaveland_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("cleavelandCourtListSL"));
@@ -513,7 +481,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_cleaveland_ac() {
+    public void shouldMigrateCase_cleaveland_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-cleaveland-ac.json",
             mapper
@@ -522,10 +490,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northeast", migratedCaseData.get("regionList"));
-        assertEquals("cleaveland", migratedCaseData.get("northEastFRCList"));
-        assertEquals("FR_cleaveland_hc_list_1", migratedCaseData.get("cleavelandCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northeast"));
+        assertThat(migratedCaseData.get("northEastFRCList"), is("cleaveland"));
+        assertThat(migratedCaseData.get("cleavelandCourtList"), is("FR_cleaveland_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("cleavelandCourtListSL"));
@@ -535,7 +502,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_nwyorkshire() {
+    public void shouldMigrateCase_nwyorkshire() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-nwyorkshire.json",
             mapper
@@ -544,10 +511,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northeast", migratedCaseData.get("regionList"));
-        assertEquals("nwyorkshire", migratedCaseData.get("northEastFRCList"));
-        assertEquals("FR_nwyorkshire_hc_list_1", migratedCaseData.get("nwyorkshireCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northeast"));
+        assertThat(migratedCaseData.get("northEastFRCList"), is("nwyorkshire"));
+        assertThat(migratedCaseData.get("nwyorkshireCourtList"), is("FR_nwyorkshire_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("nwyorkshireCourtListSL"));
@@ -557,7 +523,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_nwyorkshire_ac() {
+    public void shouldMigrateCase_nwyorkshire_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-nwyorkshire-ac.json",
             mapper
@@ -566,10 +532,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northeast", migratedCaseData.get("regionList"));
-        assertEquals("nwyorkshire", migratedCaseData.get("northEastFRCList"));
-        assertEquals("FR_nwyorkshire_hc_list_1", migratedCaseData.get("nwyorkshireCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northeast"));
+        assertThat(migratedCaseData.get("northEastFRCList"), is("nwyorkshire"));
+        assertThat(migratedCaseData.get("nwyorkshireCourtList"), is("FR_nwyorkshire_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("nwyorkshireCourtListSL"));
@@ -579,7 +544,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_nwyorkshire_ga() {
+    public void shouldMigrateCase_nwyorkshire_ga() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-nwyorkshire-ga.json",
             mapper
@@ -588,10 +553,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northeast", migratedCaseData.get("regionList"));
-        assertEquals("nwyorkshire", migratedCaseData.get("northEastFRCList"));
-        assertEquals("FR_nwyorkshire_hc_list_1", migratedCaseData.get("nwyorkshireCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northeast"));
+        assertThat(migratedCaseData.get("northEastFRCList"), is("nwyorkshire"));
+        assertThat(migratedCaseData.get("nwyorkshireCourtList"), is("FR_nwyorkshire_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("nwyorkshireCourtListSL"));
@@ -601,7 +565,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_hsyorkshire() {
+    public void shouldMigrateCase_hsyorkshire() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-hsyorkshire.json",
             mapper
@@ -610,10 +574,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northeast", migratedCaseData.get("regionList"));
-        assertEquals("hsyorkshire", migratedCaseData.get("northEastFRCList"));
-        assertEquals("FR_hsyorkshire_hc_list_1", migratedCaseData.get("humberCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northeast"));
+        assertThat(migratedCaseData.get("northEastFRCList"), is("hsyorkshire"));
+        assertThat(migratedCaseData.get("humberCourtList"), is("FR_hsyorkshire_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("humberCourtListSL"));
@@ -623,7 +586,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_hsyorkshire_ac() {
+    public void shouldMigrateCase_hsyorkshire_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-hsyorkshire-ac.json",
             mapper
@@ -632,10 +595,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northeast", migratedCaseData.get("regionList"));
-        assertEquals("hsyorkshire", migratedCaseData.get("northEastFRCList"));
-        assertEquals("FR_hsyorkshire_hc_list_1", migratedCaseData.get("humberCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("northeast"));
+        assertThat(migratedCaseData.get("northEastFRCList"), is("hsyorkshire"));
+        assertThat(migratedCaseData.get("humberCourtList"), is("FR_hsyorkshire_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("humberCourtListSL"));
@@ -645,7 +607,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_hsyorkshire_ga() {
+    public void shouldMigrateCase_hsyorkshire_ga() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-hsyorkshire-ga.json",
             mapper
@@ -654,9 +616,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("northeast", migratedCaseData.get("regionList"));
-        assertEquals("hsyorkshire", migratedCaseData.get("northEastFRCList"));
-        assertEquals("FR_hsyorkshire_hc_list_1", migratedCaseData.get("humberCourtList"));
+        assertThat(migratedCaseData.get("regionList"), is("northeast"));
+        assertThat(migratedCaseData.get("northEastFRCList"), is("hsyorkshire"));
+        assertThat(migratedCaseData.get("humberCourtList"), is("FR_hsyorkshire_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("humberCourtListSL"));
@@ -666,7 +628,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_kent() {
+    public void shouldMigrateCase_kent() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-kent.json",
             mapper
@@ -675,9 +637,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("southeast", migratedCaseData.get("regionList"));
-        assertEquals("kentfrc", migratedCaseData.get("southEastFRCList"));
-        assertEquals("FR_kent_surrey_hc_list_1", migratedCaseData.get("kentSurreyCourtList"));
+        assertThat(migratedCaseData.get("regionList"), is("southeast"));
+        assertThat(migratedCaseData.get("southEastFRCList"), is("kentfrc"));
+        assertThat(migratedCaseData.get("kentSurreyCourtList"), is("FR_kent_surrey_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("kentSurreyCourtListSL"));
@@ -687,7 +649,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_kent_ac() {
+    public void shouldMigrateCase_kent_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-kent-ac.json",
             mapper
@@ -696,10 +658,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("southeast", migratedCaseData.get("regionList"));
-        assertEquals("kentfrc", migratedCaseData.get("southEastFRCList"));
-        assertEquals("FR_kent_surrey_hc_list_1", migratedCaseData.get("kentSurreyCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("southeast"));
+        assertThat(migratedCaseData.get("southEastFRCList"), is("kentfrc"));
+        assertThat(migratedCaseData.get("kentSurreyCourtList"), is("FR_kent_surrey_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("kentSurreyCourtListSL"));
@@ -709,7 +670,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_kent_ga() {
+    public void shouldMigrateCase_kent_ga() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-kent-ga.json",
             mapper
@@ -718,10 +679,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-        assertEquals("southeast", migratedCaseData.get("regionList"));
-        assertEquals("kentfrc", migratedCaseData.get("southEastFRCList"));
-        assertEquals("FR_kent_surrey_hc_list_1", migratedCaseData.get("kentSurreyCourtList"));
-
+        assertThat(migratedCaseData.get("regionList"), is("southeast"));
+        assertThat(migratedCaseData.get("southEastFRCList"), is("kentfrc"));
+        assertThat(migratedCaseData.get("kentSurreyCourtList"), is("FR_kent_surrey_hc_list_1"));
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
         assertNull(migratedCaseData.get("kentSurreyCourtListSL"));
@@ -731,7 +691,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     }
 
     @Test
-    void shouldMigrateCase_invalidRegion() {
+    public void shouldMigrateCase_invalidRegion() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-region.json",
             mapper
@@ -741,14 +701,14 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
         assertNull(migratedCaseData.get("regionListSL"));
-        assertEquals("error", migratedCaseData.get("regionList"));
+        assertThat(migratedCaseData.get("regionList"), is("error"));
         assertNull(migratedCaseData.get("allocatedCourtList"));
         assertNull(migratedCaseData.get("allocatedCourtListGA"));
         assertNull(migratedCaseData.get("warnings"));
     }
 
     @Test
-    void shouldMigrateCase_invalidRegion_ac() {
+    public void shouldMigrateCase_invalidRegion_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-region-ac.json",
             mapper
@@ -758,11 +718,11 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
         assertNull(migratedCaseData.get("regionListSL"));
-        assertEquals("error", migratedCaseData.get("regionList"));
+        assertThat(migratedCaseData.get("regionList"), is("error"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcWales() {
+    public void shouldMigrateCase_invalidFrcWales() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-wales.json",
             mapper
@@ -773,12 +733,12 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("walesFRCListSL"));
-        assertEquals("wales", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("walesFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("wales"));
+        assertThat(migratedCaseData.get("walesFRCList"), is("birmingham"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcWales_ac() {
+    public void shouldMigrateCase_invalidFrcWales_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-wales-ac.json",
             mapper
@@ -789,12 +749,12 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("walesFRCListSL"));
-        assertEquals("wales", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("walesFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("wales"));
+        assertThat(migratedCaseData.get("walesFRCList"), is("birmingham"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcMidlands() {
+    public void shouldMigrateCase_invalidFrcMidlands() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-midlands.json",
             mapper
@@ -805,13 +765,12 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("midlandsFRCListSL"));
-
-        assertEquals("midlands", migratedCaseData.get("regionList"));
-        assertEquals("london", migratedCaseData.get("midlandsFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("midlands"));
+        assertThat(migratedCaseData.get("midlandsFRCList"), is("london"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcMidlands_ac() {
+    public void shouldMigrateCase_invalidFrcMidlands_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-midlands-ac.json",
             mapper
@@ -822,12 +781,12 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("midlandsFRCListSL"));
-        assertEquals("midlands", migratedCaseData.get("regionList"));
-        assertEquals("london", migratedCaseData.get("midlandsFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("midlands"));
+        assertThat(migratedCaseData.get("midlandsFRCList"), is("london"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcLondon() {
+    public void shouldMigrateCase_invalidFrcLondon() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-london.json",
             mapper
@@ -838,12 +797,12 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("londonFRCListSL"));
-        assertEquals("london", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("londonFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("london"));
+        assertThat(migratedCaseData.get("londonFRCList"), is("birmingham"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcLondon_ac() {
+    public void shouldMigrateCase_invalidFrcLondon_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-london-ac.json",
             mapper
@@ -854,13 +813,12 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("londonFRCListSL"));
-
-        assertEquals("london", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("londonFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("london"));
+        assertThat(migratedCaseData.get("londonFRCList"), is("birmingham"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcNorthwest() {
+    public void shouldMigrateCase_invalidFrcNorthwest() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-northwest.json",
             mapper
@@ -871,12 +829,12 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northWestFRCListSL"));
-        assertEquals("northwest", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("northWestFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("northwest"));
+        assertThat(migratedCaseData.get("northWestFRCList"), is("birmingham"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcNorthwest_ac() {
+    public void shouldMigrateCase_invalidFrcNorthwest_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-northwest-ac.json",
             mapper
@@ -887,12 +845,12 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northWestFRCListSL"));
-        assertEquals("northwest", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("northWestFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("northwest"));
+        assertThat(migratedCaseData.get("northWestFRCList"), is("birmingham"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcNortheast() {
+    public void shouldMigrateCase_invalidFrcNortheast() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-northeast.json",
             mapper
@@ -903,15 +861,15 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
-        assertEquals("northeast", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("northEastFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("northeast"));
+        assertThat(migratedCaseData.get("northEastFRCList"), is("birmingham"));
         assertNull(migratedCaseData.get("allocatedCourtList"));
         assertNull(migratedCaseData.get("allocatedCourtListGA"));
         assertNull(migratedCaseData.get("warnings"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcNortheast_ac() {
+    public void shouldMigrateCase_invalidFrcNortheast_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-northeast-ac.json",
             mapper
@@ -922,27 +880,28 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));
-        assertEquals("northeast", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("northEastFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("northeast"));
+        assertThat(migratedCaseData.get("northEastFRCList"), is("birmingham"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcSoutheast() {
+    public void shouldMigrateCase_invalidFrcSoutheast() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-southeast.json",
             mapper
         );
         CourtDetailsMigration classUnderTest = new CourtDetailsMigration();
+
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("southEastFRCListSL"));
-        assertEquals("southeast", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("southEastFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("southeast"));
+        assertThat(migratedCaseData.get("southEastFRCList"), is("birmingham"));
     }
 
     @Test
-    void shouldMigrateCase_invalidFrcSoutheast_ac() {
+    public void shouldMigrateCase_invalidFrcSoutheast_ac() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-invalid-frc-southeast-ac.json",
             mapper
@@ -953,22 +912,72 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("southEastFRCListSL"));
-        assertEquals("southeast", migratedCaseData.get("regionList"));
-        assertEquals("birmingham", migratedCaseData.get("southEastFRCList"));
+        assertThat(migratedCaseData.get("regionList"), is("southeast"));
+        assertThat(migratedCaseData.get("southEastFRCList"), is("birmingham"));
     }
 
     @Test
-    void migrateWithDifferentSenarios() {
-        List<String> jsonData = List.of("/fixtures/migration/courtDetailsMigration/ccd-migrate-request-already-migrated.json",
+    public void shouldNotMigrateCase() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
+            "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-already-migrated.json",
+            mapper
+        );
+        CourtDetailsMigration classUnderTest = new CourtDetailsMigration();
+
+        Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
+
+        assertNull(migratedCaseData);
+    }
+
+    @Test
+    public void shouldNotMigrateCaseConsented() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-consented.json",
+            mapper
+        );
+        CourtDetailsMigration classUnderTest = new CourtDetailsMigration();
+
+        Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
+
+        assertNull(migratedCaseData);
+    }
+
+    @Test
+    public void shouldNotMigrateCaseInvalidCourtData() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-invalid-court-data.json",
+            mapper
+        );
+        CourtDetailsMigration classUnderTest = new CourtDetailsMigration();
+
+        Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
+
+        assertNull(migratedCaseData);
+    }
+
+    @Test
+    public void shouldNotMigrateCaseInvalidCourtDataGA() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
             "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-invalid-court-data-ga.json",
-            "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-no-court-data.json");
-        jsonData.forEach(data -> {
-            CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(data, mapper);
-            CourtDetailsMigration classUnderTest = new CourtDetailsMigration();
-            Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
-            assertTrue(migratedCaseData.isEmpty());
-        });
+            mapper
+        );
+        CourtDetailsMigration classUnderTest = new CourtDetailsMigration();
+
+        Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
+
+        assertNull(migratedCaseData);
+    }
+
+    @Test
+    public void shouldNotMigrateCaseNoCourtData() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
+            "/fixtures/migration/courtDetailsMigration/ccd-migrate-request-no-court-data.json",
+            mapper
+        );
+        CourtDetailsMigration classUnderTest = new CourtDetailsMigration();
+
+        Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
+
+        assertNull(migratedCaseData);
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.google.common.collect.ImmutableList;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +16,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HELP_WITH_FEES_QUESTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 
 @RestController
@@ -44,14 +43,13 @@ public class PBAValidateController extends BaseController {
         validateCaseData(callbackRequest);
 
         Map<String, Object> caseData = caseDetails.getData();
-        boolean helpWithFeeQuestion = Objects.toString(caseData.get(HELP_WITH_FEES_QUESTION)).equalsIgnoreCase("no");
-        if (helpWithFeeQuestion) {
+        if (isPBAPayment(caseData)) {
             String pbaNumber = Objects.toString(caseData.get(PBA_NUMBER));
             log.info("Validating PBA Number: {}", pbaNumber);
             if (!pbaValidationService.isValidPBA(authToken, pbaNumber)) {
                 log.info("PBA number for is invalid for Case ID: {}", caseDetails.getId());
                 return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(List.of("PBA Account Number is not valid, please enter a valid one."))
+                    .errors(ImmutableList.of("PBA Account Number is not valid, please enter a valid one."))
                     .build());
             }
             log.info("PBA number is valid.");

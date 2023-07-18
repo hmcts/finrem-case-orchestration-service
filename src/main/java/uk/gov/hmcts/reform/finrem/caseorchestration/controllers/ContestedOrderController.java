@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundle;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleItems;
@@ -36,6 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -49,6 +51,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ContestedOrderController extends BaseController {
 
     private final ObjectMapper objectMapper;
+    private final SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
 
     @PostMapping(path = "/contested/validateHearingDate", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "check hearing date")
@@ -104,7 +107,7 @@ public class ContestedOrderController extends BaseController {
                     .build())
                 .sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getHearingBundleDate()
                     .compareTo(e1.getValue().getHearingBundleDate())))
-                .toList();
+                .collect(Collectors.toList());
             caseData.put(HEARING_UPLOAD_BUNDLE_COLLECTION, updateUploadDateList);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
@@ -121,7 +124,7 @@ public class ContestedOrderController extends BaseController {
             .hearingBundleDocuments(hd.getValue().getHearingBundleDocuments().stream()
                 .map(getHearingUploadBundleFunction(errors))
                 .sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getBundleUploadDate()
-                    .compareTo(e1.getValue().getBundleUploadDate()))).toList())
+                    .compareTo(e1.getValue().getBundleUploadDate()))).collect(Collectors.toList()))
             .hearingBundleDescription(hd.getValue().getHearingBundleDescription())
             .build();
     }
