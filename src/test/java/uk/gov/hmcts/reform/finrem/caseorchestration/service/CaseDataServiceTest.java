@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 
@@ -198,7 +199,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void addressLineOneAndPostCodeAreBothEmptyShouldReturnFalse() {
         assertThat(
-            caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(Collections.emptyMap()), is(false)
+            caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(null), is(false)
         );
     }
 
@@ -584,6 +585,13 @@ public class CaseDataServiceTest extends BaseServiceTest {
         assertEquals(
             "Sarah John Smith", caseDataService.buildFullIntervener1Name(caseDetails)
         );
+    }
+
+    @Test
+    public void isContestedFinremCaseDetailsApplication() {
+        FinremCaseDetails finremCaseDetails
+            = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L).build();
+        assertTrue(caseDataService.isContestedFinremCaseDetailsApplication(finremCaseDetails));
     }
 
     @Test
