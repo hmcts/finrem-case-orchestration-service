@@ -1,47 +1,32 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenertwo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV_TWO_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
-@RunWith(MockitoJUnitRunner.class)
-public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
-    @InjectMocks
-    IntervenerTwoOtherDocumentsHandler handler;
+public class IntervenerTwoOtherDocumentsHandlerTest extends CaseDocumentHandlerTest {
+
+    IntervenerTwoOtherDocumentsHandler handler = new IntervenerTwoOtherDocumentsHandler(new ObjectMapper());
+
 
     @Test
-    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_B,
-            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_F,
-            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CARE_PLAN,
-            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
-            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
+    public void appOtherDocsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", INTERVENER_TWO, "no", "no", "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", INTERVENER_TWO, "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", INTERVENER_TWO, "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", INTERVENER_TWO, "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", INTERVENER_TWO, "no", "no", null));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        handler.replaceManagedDocumentsInCollectionType(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+        handler.handle(uploadDocumentList, caseData);
 
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_TWO_OTHER_COLLECTION),
-            hasSize(5));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
+        assertThat(getDocumentCollection(caseData, INTV_TWO_OTHER_COLLECTION), hasSize(5));
     }
 }

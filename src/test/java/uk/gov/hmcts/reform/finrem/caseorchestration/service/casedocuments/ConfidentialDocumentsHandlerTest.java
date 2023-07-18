@@ -1,40 +1,56 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONFIDENTIAL_DOCS_UPLOADED_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
+public class ConfidentialDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConfidentialDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
-
-    @InjectMocks
-    ConfidentialDocumentsHandler handler;
+    ConfidentialDocumentsHandler confidentialDocumentsHandler = new ConfidentialDocumentsHandler(new ObjectMapper());
 
     @Test
-    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            CaseDocumentParty.RESPONDENT, YesOrNo.YES, YesOrNo.YES, "Other Example"));
+    public void respondentConfidentialDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "no", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        confidentialDocumentsHandler.handle(uploadDocumentList, caseData);
 
-        handler.replaceManagedDocumentsInCollectionType(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+        List<ContestedUploadedDocumentData> documentCollection
+            = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        assertThat(documentCollection, hasSize(1));
+    }
 
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONFIDENTIAL_DOCS_COLLECTION),
-            hasSize(1));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
+    @Test
+    public void shouldNotAddConfidentialDocumentsFiltered() {
+
+        List<ConfidentialUploadedDocumentData> confidentialUploadedDocumentData = new ArrayList<>();
+        confidentialUploadedDocumentData.add(createConfidentialUploadedDocumentDataItem());
+        caseDetails.getData().put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, confidentialUploadedDocumentData);
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        confidentialDocumentsHandler.handle(uploadDocumentList, caseData);
+
+        assertThat(getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION), hasSize(1));
+    }
+
+    protected ConfidentialUploadedDocumentData createConfidentialUploadedDocumentDataItem() {
+        return ConfidentialUploadedDocumentData.builder().confidentialUploadedDocument(
+            (ConfidentialUploadedDocument
+                .builder()
+                .documentType("Other")
+                .documentLink(CaseDocument.builder().documentUrl("url").documentFilename("filename").build())
+                .documentComment("Comment")
+                .build())).build();
     }
 }

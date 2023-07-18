@@ -1,44 +1,48 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerfour;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV_FOUR_CASE_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
 
-@RunWith(MockitoJUnitRunner.class)
-public class IntervenerFourCaseSummariesHandlerTest extends BaseManageDocumentsHandlerTest {
+public class IntervenerFourCaseSummariesHandlerTest extends CaseDocumentHandlerTest {
 
-    @InjectMocks
-    IntervenerFourCaseSummariesHandler handler;
+    private CaseDetails caseDetails;
+    private Map<String, Object> caseData;
+    private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    IntervenerFourCaseSummariesHandler handler = new IntervenerFourCaseSummariesHandler(mapper);
+
+    @Before
+    public void setUp() {
+        caseDetails = buildCaseDetails();
+        caseData = caseDetails.getData();
+    }
 
     @Test
-    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT,
-            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.SKELETON_ARGUMENT,
-            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
-            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
+    public void appCaseSummariesFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", INTERVENER_FOUR, "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", INTERVENER_FOUR, "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", INTERVENER_FOUR, "no", "no", null));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        handler.replaceManagedDocumentsInCollectionType(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+        handler.handle(uploadDocumentList, caseData);
 
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_SUMMARIES_COLLECTION),
-            hasSize(3));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
+        assertThat(getDocumentCollection(caseData, INTV_FOUR_CASE_SUMMARIES_COLLECTION), hasSize(3));
     }
+
 }

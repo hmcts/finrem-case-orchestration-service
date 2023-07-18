@@ -9,7 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -40,7 +40,7 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
     List<GeneralUploadedDocumentData> handledDocumentList = new ArrayList<>();
     List<String> handledDocumentIdList = new ArrayList<>();
 
-    private final UploadedGeneralDocumentService uploadedGeneralDocumentHelper = new UploadedGeneralDocumentService(objectMapper);
+    private final UploadedGeneralDocumentHelper uploadedGeneralDocumentHelper = new UploadedGeneralDocumentHelper(objectMapper);
 
     protected GeneralUploadedDocumentData createGeneralUploadDocumentItem(String type, String emailContent,
                                                                           CaseDocument link, String dateAdded, String comment,
