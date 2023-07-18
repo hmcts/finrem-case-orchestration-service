@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
@@ -106,7 +106,7 @@ public class ReGenerateFormCAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
 
-        assertThat(response.getErrors(), is(empty()));
+        assertThat(response.getErrors(), is(nullValue()));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class ReGenerateFormCAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
 
-        assertThat(response.getErrors(), is(empty()));
+        assertThat(response.getErrors(), is(nullValue()));
     }
 
     @Test

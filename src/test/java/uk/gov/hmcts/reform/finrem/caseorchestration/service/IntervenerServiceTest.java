@@ -120,7 +120,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerSolicitorFirm());
         assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_1.getValue(), SOME_ORG_ID);
     }
 
 
@@ -170,7 +170,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerSolicitorFirm());
         assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_2.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -218,7 +218,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerSolicitorFirm());
         assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_3.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -265,7 +265,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerSolicitorFirm());
         assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_4.getValue(), SOME_ORG_ID);
 
     }
 
@@ -299,7 +299,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         assertNotNull(finremCaseData.getIntervenerOneWrapper().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_1.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -351,7 +351,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_1.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -412,9 +412,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_1.getValue(), SOME_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_1.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -476,9 +476,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), CHANGE_ORG_ID);
+            INTVR_SOLICITOR_1.getValue(), CHANGE_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_1.getValue(), SOME_ORG_ID);
     }
 
 
@@ -531,7 +531,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_1.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -615,7 +615,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         assertNotNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_2.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -665,7 +665,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_2.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -726,9 +726,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), CHANGE_ORG_ID);
+            INTVR_SOLICITOR_2.getValue(), CHANGE_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_2.getValue(), SOME_ORG_ID);
     }
 
 
@@ -789,9 +789,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_2.getValue(), SOME_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_2.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -840,7 +840,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_2.getValue(), SOME_ORG_ID);
     }
 
 
@@ -900,7 +900,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         assertNotNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_3.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -952,7 +952,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_3.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -1012,9 +1012,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_3.getValue(), SOME_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_3.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -1075,9 +1075,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), CHANGE_ORG_ID);
+            INTVR_SOLICITOR_3.getValue(), CHANGE_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_3.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -1127,7 +1127,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_3.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -1186,7 +1186,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_4.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -1238,7 +1238,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_4.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -1288,7 +1288,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_4.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -1348,9 +1348,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_4.getValue(), SOME_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_4.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -1412,9 +1412,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), CHANGE_ORG_ID);
+            INTVR_SOLICITOR_4.getValue(), CHANGE_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+            INTVR_SOLICITOR_4.getValue(), SOME_ORG_ID);
     }
 
     @Test
