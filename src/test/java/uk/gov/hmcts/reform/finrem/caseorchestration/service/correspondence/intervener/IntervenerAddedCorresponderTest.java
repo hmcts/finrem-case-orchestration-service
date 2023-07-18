@@ -386,4 +386,5 @@ public class IntervenerAddedCorresponderTest {
         verify(notificationService).sendIntervenerSolicitorAddedEmail(eq(finremCaseDetails), eq(intervenerDetails),
             anyString(), anyString(), anyString());
     }
+
 }
