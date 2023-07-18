@@ -1,16 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.migration;
 
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BARROW;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BLACKBURN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BLACKPOOL;
@@ -38,13 +37,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpe
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.PRESTON_OLD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.WEST_CUMBRIA_OLD;
 
-class Rpet164FrcCourtListMigrationImplNwTests {
+public class Rpet164FrcCourtListMigrationImplNwTests {
     Map<String, Object> caseData = new HashMap<>();
     CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
     Rpet164FrcCourtListMigrationImpl classUnderTest = new Rpet164FrcCourtListMigrationImpl();
 
-    @BeforeEach
-    void setup() {
+    @Before
+    public void setup() {
         //Given
         caseData.clear();
         caseData.put(REGION, NORTHWEST);
@@ -52,7 +51,7 @@ class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    void shouldMigrateCase_preston() {
+    public void shouldMigrateCase_preston() {
         //Given
         caseData.put(NWOTHER_COURTLIST, PRESTON_OLD);
 
@@ -67,7 +66,7 @@ class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    void shouldMigrateCase_blackburn() {
+    public void shouldMigrateCase_blackburn() {
         //Given
         caseData.put(NWOTHER_COURTLIST, BLACKBURN_OLD);
 
@@ -82,7 +81,7 @@ class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    void shouldMigrateCase_blackpool() {
+    public void shouldMigrateCase_blackpool() {
         //Given
         caseData.put(NWOTHER_COURTLIST, BLACKPOOL_OLD);
 
@@ -97,7 +96,7 @@ class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    void shouldMigrateCase_lancaster() {
+    public void shouldMigrateCase_lancaster() {
         //Given
         caseData.put(NWOTHER_COURTLIST, LANCASTER_OLD);
 
@@ -112,7 +111,7 @@ class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    void shouldMigrateCase_barrow() {
+    public void shouldMigrateCase_barrow() {
         //Given
         caseData.put(NWOTHER_COURTLIST, BARROW_OLD);
 
@@ -127,7 +126,7 @@ class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    void shouldMigrateCase_carlisle() {
+    public void shouldMigrateCase_carlisle() {
         //Given
         caseData.put(NWOTHER_COURTLIST, CARLISLE_OLD);
 
@@ -142,7 +141,7 @@ class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    void shouldMigrateCase_westCumbria() {
+    public void shouldMigrateCase_westCumbria() {
         //Given
         caseData.put(NWOTHER_COURTLIST, WEST_CUMBRIA_OLD);
 
@@ -157,7 +156,7 @@ class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    void shouldMigrateCase_burnley_to_temp() {
+    public void shouldMigrateCase_burnley_to_temp() {
         //Given
         caseData.put(NWOTHER_COURTLIST, BURNLEY_OLD);
 
@@ -174,7 +173,7 @@ class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    void shouldNotMigrateCase_unknown_to_temp() {
+    public void shouldNotMigrateCase_unknown_to_temp() {
         //Given
         caseData.put(NWOTHER_COURTLIST, "some_unknown_code");
 

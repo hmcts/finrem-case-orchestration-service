@@ -117,13 +117,16 @@ public class UpdateConsentedCaseController extends BaseController {
         updateRespondentSolicitorAddress(caseData);
         updateApplicantOrSolicitorContactDetails(caseData);
 
-        if (featureToggleService.isCaseworkerNoCEnabled()
-            && ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
-            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
-            CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
-            return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
-                authToken,
-                originalCaseDetails));
+        if (featureToggleService.isCaseworkerNoCEnabled()) {
+
+            if (ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+                && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+                CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
+                return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
+                    authToken,
+                    originalCaseDetails));
+            }
+
         }
 
         persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
@@ -167,7 +170,7 @@ public class UpdateConsentedCaseController extends BaseController {
     }
 
     private void updatePeriodicPaymentData(Map<String, Object> caseData) {
-        List<String> natureOfApplication2 = (List) caseData.get("natureOfApplication2");
+        List natureOfApplication2 = (List) caseData.get("natureOfApplication2");
 
         if (hasNotSelected(natureOfApplication2, "Periodical Payment Order")) {
             removePeriodicPaymentData(caseData);
@@ -181,7 +184,7 @@ public class UpdateConsentedCaseController extends BaseController {
     }
 
     private void updatePropertyDetails(Map<String, Object> caseData) {
-        List<String> natureOfApplication2 = (List) caseData.get("natureOfApplication2");
+        List natureOfApplication2 = (List) caseData.get("natureOfApplication2");
 
         if (hasNotSelected(natureOfApplication2, "Property Adjustment Order")) {
             removePropertyAdjustmentDetails(caseData);

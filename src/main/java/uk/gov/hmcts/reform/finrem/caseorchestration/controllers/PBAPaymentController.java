@@ -33,11 +33,9 @@ import java.util.Objects;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMOUNT_TO_PAY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HELP_WITH_FEES_QUESTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
@@ -75,10 +73,9 @@ public class PBAPaymentController extends BaseController {
 
         final Map<String, Object> mapOfCaseData = caseDetails.getData();
         feeLookup(authToken, callbackRequest, mapOfCaseData);
-        boolean helpWithFeeQuestion = Objects.toString(mapOfCaseData.get(HELP_WITH_FEES_QUESTION)).equalsIgnoreCase("no");
-        if (helpWithFeeQuestion) {
-            boolean pbaPaymentReference = isEmpty((String) mapOfCaseData.get(PBA_PAYMENT_REFERENCE));
-            if (pbaPaymentReference) {
+
+        if (isPBAPayment(mapOfCaseData)) {
+            if (isPBAPaymentReferenceDoesNotExists(mapOfCaseData)) {
                 PaymentResponse paymentResponse = pbaPaymentService.makePayment(authToken, caseDetails);
                 if (!paymentResponse.isPaymentSuccess()) {
                     return paymentFailure(mapOfCaseData, paymentResponse);
@@ -188,7 +185,7 @@ public class PBAPaymentController extends BaseController {
         log.info("Payment by PBA number {} failed, payment error : {} ", caseData.get(PBA_NUMBER), paymentResponse.getPaymentError());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-            .errors(List.of(paymentError))
+            .errors(ImmutableList.of(paymentError))
             .build());
     }
 }
