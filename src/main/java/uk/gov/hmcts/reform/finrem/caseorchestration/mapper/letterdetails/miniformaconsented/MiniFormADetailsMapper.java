@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.MiniForm
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
@@ -98,7 +97,7 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
             .orElse(new ArrayList<>())
             .stream()
             .map(NatureApplication::getText)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<String> getNatureOfApplication6ListAsString(FinremCaseData caseData) {
@@ -107,6 +106,6 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
             .orElse(new ArrayList<>())
             .stream()
             .map(ChildrenOrder::getValue)
-            .collect(Collectors.toList());
+            .toList();
     }
 }

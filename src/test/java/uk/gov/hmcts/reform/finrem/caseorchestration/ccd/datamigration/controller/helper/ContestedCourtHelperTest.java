@@ -81,8 +81,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class ContestedCourtHelperTest {
 
-    private CaseDetails details;
-
     @Test
     public void newportCourts() {
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURTLIST,
@@ -453,7 +451,7 @@ public class ContestedCourtHelperTest {
 
     private void verifyCorrectCourtReturned(String region, String subRegionListName, String subRegion,
                                             String courtListName, String court, String expectedValue) {
-        details = getCaseDetailsWithAllocatedValues(region, subRegionListName, subRegion, courtListName,
+        CaseDetails details = getCaseDetailsWithAllocatedValues(region, subRegionListName, subRegion, courtListName,
             court);
         String selectedCourt = ContestedCourtHelper.getSelectedCourt(details);
         MatcherAssert.assertThat(selectedCourt, is(expectedValue));

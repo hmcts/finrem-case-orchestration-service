@@ -57,7 +57,15 @@ public class NotificationRequestMapper {
     private final ConsentedApplicationHelper consentedApplicationHelper;
     private final ObjectMapper objectMapper;
 
-    @Deprecated
+    /**
+     * Return NotificationRequest .
+     * <p>Please use @{@link #getNotificationRequestForRespondentSolicitor(FinremCaseDetails, Map)}</p>
+     *
+     * @param caseDetails instance of CaseDetails
+     * @param interimHearingData instance of Map
+     * @deprecated Use {@link CaseDetails caseDetails, Map interimHearingData}
+     */
+    @Deprecated(since = "15-june-2023")
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails,
                                                                             Map<String, Object> interimHearingData) {
         return buildInterimHearingNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(), interimHearingData);
@@ -77,13 +85,22 @@ public class NotificationRequestMapper {
         return buildInterimHearingNotificationRequest(caseDetails, caseDataKeysWrapper);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public NotificationRequest getNotificationRequestForIntervenerSolicitor(CaseDetails caseDetails,
                                                                             Map<String, Object> interimHearingData,
                                                                             SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         return buildInterimHearingNotificationRequest(caseDetails, dataKeysWrapper, interimHearingData);
     }
 
-    @Deprecated
+    /**
+     * Return NotificationRequest .
+     * <p>Please use @{@link #getNotificationRequestForConsentApplicantSolicitor(FinremCaseDetails, Map)}</p>
+     *
+     * @param caseDetails instance of CaseDetails
+     * @param hearingData instance of Map
+     * @deprecated Use {@link CaseDetails caseDetails, Map hearingData}
+     */
+    @Deprecated(since = "15-june-2023")
     public NotificationRequest getNotificationRequestForConsentApplicantSolicitor(CaseDetails caseDetails,
                                                                            Map<String, Object> hearingData) {
         return buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(), hearingData);
@@ -94,6 +111,7 @@ public class NotificationRequestMapper {
         return buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(), hearingData);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails,
                                                                            Map<String, Object> interimHearingData) {
         return buildInterimHearingNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(), interimHearingData);
@@ -158,6 +176,7 @@ public class NotificationRequestMapper {
         return caseType;
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private NotificationRequest buildInterimHearingNotificationRequest(CaseDetails caseDetails,
                                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
 
@@ -171,7 +190,16 @@ public class NotificationRequestMapper {
         return notificationRequest;
     }
 
-    @Deprecated
+    /**
+     * Return NotificationRequest .
+     * <p>Please use @{@link #buildInterimHearingNotificationRequest(FinremCaseDetails, SolicitorCaseDataKeysWrapper, Map)}</p>
+     *
+     * @param caseDetails instance of CaseDetails
+     * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
+     * @param interimHearingData instance of Map
+     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper, Map interimHearingData}
+     */
+    @Deprecated(since = "15-june-2023")
     private NotificationRequest buildInterimHearingNotificationRequest(CaseDetails caseDetails,
                                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
                                                                        Map<String, Object> interimHearingData) {
@@ -218,7 +246,15 @@ public class NotificationRequestMapper {
             .build();
     }
 
-    @Deprecated
+    /**
+     * No Return.
+     * <p>Please use @{@link #getNotificationCoreData(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
+     *
+     * @param caseDetails instance of CaseDetails
+     * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
+     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
+     */
+    @Deprecated(since = "15-june-2023")
     private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> caseData = caseDetails.getData();

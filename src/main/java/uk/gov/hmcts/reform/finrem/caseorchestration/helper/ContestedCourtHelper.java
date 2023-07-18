@@ -77,7 +77,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class ContestedCourtHelper {
 
-    private static Map<String, String> nottinghamMap = ImmutableMap.<String, String>builder()
+    private ContestedCourtHelper() {
+    }
+
+    private static final Map<String, String> nottinghamMap = ImmutableMap.<String, String>builder()
         .put("FR_s_NottinghamList_1", "Nottingham County Court and Family Court")
         .put("FR_s_NottinghamList_2", "Derby Combined Court Centre")
         .put("FR_s_NottinghamList_3", "Leicester County Court and Family Court")
@@ -87,7 +90,7 @@ public class ContestedCourtHelper {
         .put("FR_s_NottinghamList_7", "Mansfield Magistrates and County Court")
         .put("FR_s_NottinghamList_8", "Boston County Court and Family Court")
         .build();
-    private static Map<String, String> birminghamMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> birminghamMap = ImmutableMap.<String, String>builder()
         .put("FR_birmingham_hc_list_1", "Birmingham Civil and Family Justice Centre")
         .put("FR_birmingham_hc_list_2", "Coventry Combined Court Centre")
         .put("FR_birmingham_hc_list_3", "Telford County Court and Family Court")
@@ -99,7 +102,7 @@ public class ContestedCourtHelper {
         .put("FR_birmingham_hc_list_9", "Stafford Combined Court")
         .put("FR_birmingham_hc_list_10", "Hereford County Court and Family Court")
         .build();
-    private static Map<String, String> londonMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> londonMap = ImmutableMap.<String, String>builder()
         .put("FR_s_CFCList_1", "Bromley County Court and Family Court")
         .put("FR_s_CFCList_2", "Croydon County Court and Family Court")
         .put("FR_s_CFCList_3", "Edmonton County Court and Family Court")
@@ -113,19 +116,19 @@ public class ContestedCourtHelper {
         .put("FR_s_CFCList_16", "Willesden County Court and Family Court")
         .put("FR_s_CFCList_17", "The Royal Courts of Justice")
         .build();
-    private static Map<String, String> liverpoolMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> liverpoolMap = ImmutableMap.<String, String>builder()
         .put("FR_liverpool_hc_list_1", "Liverpool Civil and Family Court")
         .put("FR_liverpool_hc_list_2", "Chester Civil and Family Justice Centre")
         .put("FR_liverpool_hc_list_3", "Crewe County Court and Family Court")
         .put("FR_liverpool_hc_list_4", "St. Helens County Court and Family Court")
         .put("FR_liverpool_hc_list_5", "Birkenhead County Court and Family Court")
         .build();
-    private static Map<String, String> manchesterMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> manchesterMap = ImmutableMap.<String, String>builder()
         .put("FR_manchester_hc_list_1", "Manchester County and Family Court")
         .put("FR_manchester_hc_list_2", "Stockport County Court and Family Court")
         .put("FR_manchester_hc_list_3", "Wigan County Court and Family Court")
         .build();
-    private static Map<String, String> cleavelandMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> cleavelandMap = ImmutableMap.<String, String>builder()
         .put("FR_cleaveland_hc_list_1", "Newcastle Civil and Family Courts and Tribunals Centre")
         .put("FR_cleaveland_hc_list_2", "Durham Justice Centre")
         .put("FR_cleaveland_hc_list_3", "Sunderland County and Family Court")
@@ -135,7 +138,7 @@ public class ContestedCourtHelper {
         .put("FR_cleaveland_hc_list_7", "North Shields County Court and Family Court")
         .put("FR_cleaveland_hc_list_8", "Darlington County Court and Family Court")
         .build();
-    private static Map<String, String> yorkshireMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> yorkshireMap = ImmutableMap.<String, String>builder()
         .put("FR_nw_yorkshire_hc_list_1", "Harrogate Justice Centre")
         .put("FR_nw_yorkshire_hc_list_2", "Bradford Combined Court Centre")
         .put("FR_nw_yorkshire_hc_list_3", "Huddersfield County Court and Family Court")
@@ -152,7 +155,7 @@ public class ContestedCourtHelper {
         .put("FR_humber_hc_list_4", "Great Grimsby Combined Court Centre")
         .put("FR_humber_hc_list_5", "Barnsley Law Courts")
         .build();
-    private static Map<String, String> kentMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> kentMap = ImmutableMap.<String, String>builder()
         .put("FR_kent_surrey_hc_list_1", "Canterbury Family Court Hearing Centre")
         .put("FR_kent_surrey_hc_list_2", "Maidstone Combined Court Centre")
         .put("FR_kent_surrey_hc_list_3", "Dartford County Court and Family Court")
@@ -164,14 +167,14 @@ public class ContestedCourtHelper {
         .put("FR_kent_surrey_hc_list_9", "Hastings County Court and Family Court Hearing Centre")
         .put("FR_kent_surrey_hc_list_10", "Horsham County Court and Family Court")
         .build();
-    private static Map<String, String> newportMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> newportMap = ImmutableMap.<String, String>builder()
         .put("FR_newport_hc_list_1", "Newport Civil and Family Court")
         .put("FR_newport_hc_list_2", "Cardiff Civil and Family Justice Centre")
         .put("FR_newport_hc_list_3", "Merthyr Tydfil Combined Court Centre")
         .put("FR_newport_hc_list_4", "Pontypridd County and Family Court")
         .put("FR_newport_hc_list_5", "Blackwood Civil and Family Court")
         .build();
-    private static Map<String, String> swanseaMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> swanseaMap = ImmutableMap.<String, String>builder()
         .put("FR_swansea_hc_list_1", "Swansea Civil and Family Justice Centre")
         .put("FR_swansea_hc_list_2", "Aberystwyth Justice Centre")
         .put("FR_swansea_hc_list_3", "Haverfordwest County and Family Court")
@@ -180,57 +183,36 @@ public class ContestedCourtHelper {
         .put("FR_swansea_hc_list_6", "Port Talbot Justice Centre")
         .build();
 
-    private static Map<String, String> highCourtMap = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> highCourtMap = ImmutableMap.<String, String>builder()
         .put("FR_highCourtList_1", "High Court Family Division")
         .build();
 
     public static String getSelectedCourt(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        switch (getSelectedFrc(caseDetails)) {
-            case BEDFORDSHIRE:
-                return getBedfordshireCourt(caseData);
-            case BIRMINGHAM:
-                return getBirminghamCourt(caseData);
-            case BRISTOLFRC:
-                return getBristolCourt(caseData);
-            case CFC:
-                return getLondonCourt(caseData);
-            case CLEAVELAND:
-                return getCleavelandCourt(caseData);
-            case CLEVELAND:
-                return getCleavelandCourt(caseData);
-            case DEVON:
-                return getDevonCourt(caseData);
-            case DORSET:
-                return getDorsetCourt(caseData);
-            case HSYORKSHIRE:
-                return getHumberCourt(caseData);
-            case KENT:
-                return getKentCourt(caseData);
-            case LANCASHIRE:
-                return getLancashireCourt(caseData);
-            case LIVERPOOL:
-                return getLiverpoolCourt(caseData);
-            case MANCHESTER:
-                return getManchesterCourt(caseData);
-            case NEWPORT:
-                return getNewportCourt(caseData);
-            case NORTHWALES:
-                return getNorthWalesCourt(caseData);
-            case NOTTINGHAM:
-                return getNottinghamCourt(caseData);
-            case NWYORKSHIRE:
-                return getNwYorkshireCourt(caseData);
-            case SWANSEA:
-                return getSwanseaCourt(caseData);
-            case THAMESVALLEY:
-                return getThamesValleyCourt(caseData);
-            case HIGHCOURT:
-                return getHighCourt(caseData);
-            default:
-                return EMPTY;
-        }
+        return switch (getSelectedFrc(caseDetails)) {
+            case BEDFORDSHIRE -> getBedfordshireCourt(caseData);
+            case BIRMINGHAM -> getBirminghamCourt(caseData);
+            case BRISTOLFRC -> getBristolCourt(caseData);
+            case CFC -> getLondonCourt(caseData);
+            case CLEAVELAND -> getCleavelandCourt(caseData);
+            case CLEVELAND -> getCleavelandCourt(caseData);
+            case DEVON -> getDevonCourt(caseData);
+            case DORSET -> getDorsetCourt(caseData);
+            case HSYORKSHIRE -> getHumberCourt(caseData);
+            case KENT -> getKentCourt(caseData);
+            case LANCASHIRE -> getLancashireCourt(caseData);
+            case LIVERPOOL -> getLiverpoolCourt(caseData);
+            case MANCHESTER -> getManchesterCourt(caseData);
+            case NEWPORT -> getNewportCourt(caseData);
+            case NORTHWALES -> getNorthWalesCourt(caseData);
+            case NOTTINGHAM -> getNottinghamCourt(caseData);
+            case NWYORKSHIRE -> getNwYorkshireCourt(caseData);
+            case SWANSEA -> getSwanseaCourt(caseData);
+            case THAMESVALLEY -> getThamesValleyCourt(caseData);
+            case HIGHCOURT -> getHighCourt(caseData);
+            default -> EMPTY;
+        };
     }
 
     public static String getSelectedInterimHearingFrc(Map<String, Object> interimHearingData) {
@@ -517,7 +499,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getWalesFRC(Map mapOfCaseData) {
+    private static String getWalesFRC(Map<String, Object> mapOfCaseData) {
         String walesList = (String) mapOfCaseData.get(WALES_FRC_LIST);
         if (NEWPORT.equalsIgnoreCase(walesList)) {
             return NEWPORT;
@@ -529,7 +511,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getHighCourtFRC(Map mapOfCaseData) {
+    private static String getHighCourtFRC(Map<String, Object> mapOfCaseData) {
         String highCourtList = (String) mapOfCaseData.get(HIGHCOURT_FRC_LIST);
         if (HIGHCOURT.equalsIgnoreCase(highCourtList)) {
             return HIGHCOURT;
@@ -537,7 +519,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getSouthWestFRC(Map mapOfCaseData) {
+    private static String getSouthWestFRC(Map<String, Object> mapOfCaseData) {
         String southWestList = (String) mapOfCaseData.get(SOUTHWEST_FRC_LIST);
         if (DEVON.equalsIgnoreCase(southWestList)) {
             return DEVON;
@@ -549,7 +531,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getSouthEastFRC(Map mapOfCaseData) {
+    private static String getSouthEastFRC(Map<String, Object> mapOfCaseData) {
         String southEastList = (String) mapOfCaseData.get(SOUTHEAST_FRC_LIST);
         if (KENT.equalsIgnoreCase(southEastList)) {
             return KENT;
@@ -561,7 +543,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getNorthEastFRC(Map mapOfCaseData) {
+    private static String getNorthEastFRC(Map<String, Object> mapOfCaseData) {
         String northEastList = (String) mapOfCaseData.get(NORTHEAST_FRC_LIST);
         if (CLEAVELAND.equalsIgnoreCase(northEastList) || CLEVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND;
@@ -573,7 +555,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getNorthWestFRC(Map mapOfCaseData) {
+    private static String getNorthWestFRC(Map<String, Object> mapOfCaseData) {
         String northWestList = (String) mapOfCaseData.get(NORTHWEST_FRC_LIST);
         if (LIVERPOOL.equalsIgnoreCase(northWestList)) {
             return LIVERPOOL;
@@ -585,7 +567,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getLondonFRC(Map mapOfCaseData) {
+    private static String getLondonFRC(Map<String, Object> mapOfCaseData) {
         String londonList = (String) mapOfCaseData.get(LONDON_FRC_LIST);
         if (CFC.equalsIgnoreCase(londonList)) {
             return CFC;
@@ -594,7 +576,7 @@ public class ContestedCourtHelper {
     }
 
 
-    private static String getMidlandFRC(Map mapOfCaseData) {
+    private static String getMidlandFRC(Map<String, Object> mapOfCaseData) {
         String midlandsList = (String) mapOfCaseData.get(MIDLANDS_FRC_LIST);
         return getMidlandsCourtName(midlandsList);
     }
