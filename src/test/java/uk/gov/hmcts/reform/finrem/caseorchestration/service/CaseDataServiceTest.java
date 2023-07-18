@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 
@@ -184,13 +185,20 @@ public class CaseDataServiceTest extends BaseServiceTest {
     }
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private static String F_NAME = "f";
-    private static String L_NAME = "l";
+    private static final String F_NAME = "f";
+    private static final String L_NAME = "l";
 
     @Test
     public void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnTrueWhenLineOneAndPostCodeArePopulated() {
         assertThat(
             caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(asList("London Road", "sw2 3rf"))), is(true)
+        );
+    }
+
+    @Test
+    public void addressLineOneAndPostCodeAreBothEmptyShouldReturnFalse() {
+        assertThat(
+            caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(null), is(false)
         );
     }
 
@@ -574,8 +582,15 @@ public class CaseDataServiceTest extends BaseServiceTest {
         data.put(INTERVENER1_LAST_NAME, "Smith");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
         assertEquals(
-            caseDataService.buildFullIntervener1Name(caseDetails), "Sarah John Smith"
+            "Sarah John Smith", caseDataService.buildFullIntervener1Name(caseDetails)
         );
+    }
+
+    @Test
+    public void isContestedFinremCaseDetailsApplication() {
+        FinremCaseDetails finremCaseDetails
+            = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L).build();
+        assertTrue(caseDataService.isContestedFinremCaseDetailsApplication(finremCaseDetails));
     }
 
     @Test
@@ -585,7 +600,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
         data.put(INTERVENER2_LAST_NAME, "Fitzgerald");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
         assertEquals(
-            caseDataService.buildFullIntervener2Name(caseDetails), "John Taylor Fitzgerald"
+            "John Taylor Fitzgerald", caseDataService.buildFullIntervener2Name(caseDetails)
         );
     }
 
@@ -596,7 +611,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
         data.put(INTERVENER3_LAST_NAME, "Peters");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
         assertEquals(
-            caseDataService.buildFullIntervener3Name(caseDetails), "Sam Tyler Peters"
+            "Sam Tyler Peters", caseDataService.buildFullIntervener3Name(caseDetails)
         );
     }
 
@@ -607,7 +622,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
         data.put(INTERVENER4_LAST_NAME, "Brown");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
         assertEquals(
-            caseDataService.buildFullIntervener4Name(caseDetails), "Yousef Luke Brown"
+            "Yousef Luke Brown", caseDataService.buildFullIntervener4Name(caseDetails)
         );
     }
 

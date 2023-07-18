@@ -25,6 +25,9 @@ public class AddresseeGeneratorHelper {
     public static final String ADDRESS_MAP = "addressMap";
     public static final String NAME_MAP = "nameMap";
 
+    private AddresseeGeneratorHelper() {
+    }
+
     public static Addressee generateAddressee(FinremCaseDetails caseDetails,
                                               DocumentHelper.PaperNotificationRecipient recipient) {
 
@@ -94,16 +97,6 @@ public class AddresseeGeneratorHelper {
             .name(intervenerWrapper.getIntervenerName())
             .formattedAddress(formatAddressForLetterPrinting(intervenerWrapper.getIntervenerAddress()))
             .build();
-    }
-
-    private static String getIntvrName(IntervenerWrapper wrapper) {
-        return wrapper.isIntervenerSolicitorPopulated()
-            ? wrapper.getIntervenerSolName()
-            : wrapper.getIntervenerName();
-    }
-
-    private static Address getIntvrAddress(IntervenerWrapper wrapper) {
-        return wrapper.getIntervenerAddress();
     }
 
     public static String formatAddressForLetterPrinting(Address address) {

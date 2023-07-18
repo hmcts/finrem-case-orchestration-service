@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.google.common.collect.ImmutableList;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -52,8 +52,8 @@ public class RejectedOrderDocumentController {
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseData)
-                .errors(ImmutableList.of())
-                .warnings(ImmutableList.of())
+                .errors(List.of())
+                .warnings(List.of())
                 .build()
         );
     }
@@ -75,8 +75,8 @@ public class RejectedOrderDocumentController {
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseData)
-                .errors(ImmutableList.of())
-                .warnings(ImmutableList.of())
+                .errors(List.of())
+                .warnings(List.of())
                 .build()
         );
     }

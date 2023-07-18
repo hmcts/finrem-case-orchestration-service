@@ -1,15 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.migration;
 
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BARROW;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BLACKBURN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BLACKPOOL;
@@ -37,13 +38,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpe
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.PRESTON_OLD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.WEST_CUMBRIA_OLD;
 
-public class Rpet164FrcCourtListMigrationImplNwTests {
+class Rpet164FrcCourtListMigrationImplNwTests {
     Map<String, Object> caseData = new HashMap<>();
     CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
     Rpet164FrcCourtListMigrationImpl classUnderTest = new Rpet164FrcCourtListMigrationImpl();
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         //Given
         caseData.clear();
         caseData.put(REGION, NORTHWEST);
@@ -51,7 +52,7 @@ public class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    public void shouldMigrateCase_preston() {
+    void shouldMigrateCase_preston() {
         //Given
         caseData.put(NWOTHER_COURTLIST, PRESTON_OLD);
 
@@ -66,7 +67,7 @@ public class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    public void shouldMigrateCase_blackburn() {
+    void shouldMigrateCase_blackburn() {
         //Given
         caseData.put(NWOTHER_COURTLIST, BLACKBURN_OLD);
 
@@ -81,7 +82,7 @@ public class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    public void shouldMigrateCase_blackpool() {
+    void shouldMigrateCase_blackpool() {
         //Given
         caseData.put(NWOTHER_COURTLIST, BLACKPOOL_OLD);
 
@@ -96,7 +97,7 @@ public class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    public void shouldMigrateCase_lancaster() {
+    void shouldMigrateCase_lancaster() {
         //Given
         caseData.put(NWOTHER_COURTLIST, LANCASTER_OLD);
 
@@ -111,7 +112,7 @@ public class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    public void shouldMigrateCase_barrow() {
+    void shouldMigrateCase_barrow() {
         //Given
         caseData.put(NWOTHER_COURTLIST, BARROW_OLD);
 
@@ -126,7 +127,7 @@ public class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    public void shouldMigrateCase_carlisle() {
+    void shouldMigrateCase_carlisle() {
         //Given
         caseData.put(NWOTHER_COURTLIST, CARLISLE_OLD);
 
@@ -141,7 +142,7 @@ public class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    public void shouldMigrateCase_westCumbria() {
+    void shouldMigrateCase_westCumbria() {
         //Given
         caseData.put(NWOTHER_COURTLIST, WEST_CUMBRIA_OLD);
 
@@ -156,7 +157,7 @@ public class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    public void shouldMigrateCase_burnley_to_temp() {
+    void shouldMigrateCase_burnley_to_temp() {
         //Given
         caseData.put(NWOTHER_COURTLIST, BURNLEY_OLD);
 
@@ -173,7 +174,7 @@ public class Rpet164FrcCourtListMigrationImplNwTests {
     }
 
     @Test
-    public void shouldNotMigrateCase_unknown_to_temp() {
+    void shouldNotMigrateCase_unknown_to_temp() {
         //Given
         caseData.put(NWOTHER_COURTLIST, "some_unknown_code");
 

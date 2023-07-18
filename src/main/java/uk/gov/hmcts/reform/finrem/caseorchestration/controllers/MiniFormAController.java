@@ -38,12 +38,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class MiniFormAController extends BaseController {
 
-    public static final String assignedToJudgeReason = "assignedToJudgeReason";
-    public static final String assignedToJudgeReasonDefault = "Draft consent order";
-    public static final String assignedToJudge = "assignedToJudge";
-    public static final String referToJudgeDate = "referToJudgeDate";
-    public static final String referToJudgeText = "referToJudgeText";
-    public static final String referToJudgeTextDefault = "consent for approval";
+    public static final String ASSIGNED_TO_JUDGE_REASON = "assignedToJudgeReason";
+    public static final String ASSIGNED_TO_JUDGE_REASON_DEFAULT = "Draft consent order";
+    public static final String ASSIGNED_TO_JUDGE = "assignedToJudge";
+    public static final String REFER_TO_JUDGE_DATE = "referToJudgeDate";
+    public static final String REFER_TO_JUDGE_TEXT = "referToJudgeText";
+    public static final String REFER_TO_JUDGE_TEXT_DEFAULT = "consent for approval";
     @Autowired
     private OnlineFormDocumentService service;
     @Autowired
@@ -82,11 +82,11 @@ public class MiniFormAController extends BaseController {
     }
 
     private void populateAssignToJudgeFields(Map<String, Object> caseData, CaseDetails caseDetails) {
-        caseData.put(assignedToJudge, defaultsConfiguration.getAssignedToJudgeDefault());
+        caseData.put(ASSIGNED_TO_JUDGE, defaultsConfiguration.getAssignedToJudgeDefault());
         if (caseDataService.isConsentedApplication(caseDetails)) {
-            caseData.put(assignedToJudgeReason, assignedToJudgeReasonDefault);
-            caseData.put(referToJudgeDate, LocalDate.now());
-            caseData.put(referToJudgeText, referToJudgeTextDefault);
+            caseData.put(ASSIGNED_TO_JUDGE_REASON, ASSIGNED_TO_JUDGE_REASON_DEFAULT);
+            caseData.put(REFER_TO_JUDGE_DATE, LocalDate.now());
+            caseData.put(REFER_TO_JUDGE_TEXT, REFER_TO_JUDGE_TEXT_DEFAULT);
         }
     }
 }

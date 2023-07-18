@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -80,7 +80,7 @@ public class FeeLookupController extends BaseController {
         return OrderSummary.builder()
             .paymentTotal(feeItem.getValue().getFeeAmount())
             .paymentReference(Objects.toString(caseRequestData.get(PBA_REFERENCE)))
-            .fees(ImmutableList.of(feeItem))
+            .fees(List.of(feeItem))
             .build();
     }
 
