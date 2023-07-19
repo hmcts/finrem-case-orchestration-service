@@ -118,6 +118,7 @@ public class SendOrderContestedAboutToSubmitHandler
             }
         }
     }
+
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void printAndMailHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
 
