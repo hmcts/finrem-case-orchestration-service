@@ -288,7 +288,7 @@ public class FinremCaseData {
     private SendOrderEventPostStateOption sendOrderPostStateOption;
     private DynamicMultiSelectList ordersToShare;
     private DynamicMultiSelectList partiesOnCase;
-    private List<UploadConfidentialDocumentCollection> confidentialDocumentsUploaded;
+    private List<ConfidentialUploadedDocumentData> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")
     private OrganisationPolicy applicantOrganisationPolicy;
@@ -314,6 +314,8 @@ public class FinremCaseData {
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener3")
     private IntervenerThreeWrapper intervenerThreeWrapper;
+
+    private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener4")

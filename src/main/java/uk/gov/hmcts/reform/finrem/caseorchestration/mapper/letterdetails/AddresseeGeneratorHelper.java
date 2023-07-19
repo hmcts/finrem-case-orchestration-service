@@ -25,6 +25,9 @@ public class AddresseeGeneratorHelper {
     public static final String ADDRESS_MAP = "addressMap";
     public static final String NAME_MAP = "nameMap";
 
+    private AddresseeGeneratorHelper() {
+    }
+
     public static Addressee generateAddressee(FinremCaseDetails caseDetails,
                                               DocumentHelper.PaperNotificationRecipient recipient) {
 

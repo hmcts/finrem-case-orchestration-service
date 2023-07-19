@@ -15,46 +15,46 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_CORRESPONDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_EXPERT_EVIDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_FORM_E_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_FORM_H_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_HEARING_BUNDLES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_OTHER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_QUESTIONNAIRES_ANSWERS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_STATEMENTS_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_FOUR_SUMMARIES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_CORRESPONDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_EXPERT_EVIDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_FORM_E_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_FORM_H_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_HEARING_BUNDLES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_OTHER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_QUESTIONNAIRES_ANSWERS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_STATEMENTS_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_ONE_SUMMARIES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_CORRESPONDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_EXPERT_EVIDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_FORM_E_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_FORM_H_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_HEARING_BUNDLES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_OTHER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_STATEMENTS_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_THREE_SUMMARIES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_CORRESPONDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_EXPERT_EVIDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_FORM_E_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_FORM_H_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_HEARING_BUNDLES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_OTHER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_QUESTIONNAIRES_ANSWERS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_STATEMENTS_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.INTERVENER_TWO_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_FORM_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_FORM_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_FORM_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_FORM_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_SUMMARIES_COLLECTION;
 
 @Service
 @Slf4j
@@ -97,7 +97,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                                                  List<UploadCaseDocumentCollection> collection, String other) {
         if (ObjectUtils.isNotEmpty(collection)) {
             collection.forEach(doc -> {
-                final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
+                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
                 String collectionType = getIntervenerOtherCollection(role, other);
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + collectionType,
                     collectionType + " -> " + filename));
@@ -106,21 +106,21 @@ public class IntervenerShareDocumentsService implements SharedService {
     }
 
     private List<UploadCaseDocumentCollection> getIntervenerCollection(FinremCaseData caseData, String role, String collectionType) {
-        log.info("role {}, collectionType {} INTVR_SOLICITOR_2 {}", role, collectionType, CaseRole.INTVR_SOLICITOR_2.getValue());
-        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_1.getValue())) {
+        log.info("role {}, collectionType {} INTVR_SOLICITOR_2 {}", role, collectionType, CaseRole.INTVR_SOLICITOR_2.getCcdCode());
+        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
             return getIntervenerOneList(caseData, role, collectionType);
-        } else if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
+        } else if (role.equals(CaseRole.INTVR_SOLICITOR_2.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_2.getCcdCode())) {
             return getIntervenerTwoList(caseData, role, collectionType);
-        } else if (role.equals(CaseRole.INTVR_SOLICITOR_3.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_3.getValue())) {
+        } else if (role.equals(CaseRole.INTVR_SOLICITOR_3.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_3.getCcdCode())) {
             return getIntervenerThreeList(caseData, role, collectionType);
-        } else if (role.equals(CaseRole.INTVR_SOLICITOR_4.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
+        } else if (role.equals(CaseRole.INTVR_SOLICITOR_4.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_4.getCcdCode())) {
             return getIntervenerFourList(caseData, role, collectionType);
         }
         return Collections.emptyList();
     }
 
     private List<UploadCaseDocumentCollection> getIntervenerOneList(FinremCaseData caseData, String role, String collectionType) {
-        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_1.getValue())) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv1Other();
@@ -161,7 +161,7 @@ public class IntervenerShareDocumentsService implements SharedService {
 
     private List<UploadCaseDocumentCollection> getIntervenerTwoList(FinremCaseData caseData, String role, String collectionType) {
         log.info("getIntervenerTwoList role {}, collectionType {}", role, collectionType);
-        if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_2.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_2.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv2Other();
@@ -207,7 +207,7 @@ public class IntervenerShareDocumentsService implements SharedService {
     }
 
     private List<UploadCaseDocumentCollection> getIntervenerThreeList(FinremCaseData caseData, String role, String collectionType) {
-        if (role.equals(CaseRole.INTVR_SOLICITOR_3.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_3.getValue())) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_3.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_3.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv3Other();
@@ -247,7 +247,7 @@ public class IntervenerShareDocumentsService implements SharedService {
     }
 
     private List<UploadCaseDocumentCollection> getIntervenerFourList(FinremCaseData caseData, String role, String collectionType) {
-        if (role.equals(CaseRole.INTVR_SOLICITOR_4.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_4.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_4.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv4Other();
@@ -288,20 +288,20 @@ public class IntervenerShareDocumentsService implements SharedService {
 
     private String getIntervenerOtherCollection(String role, String collectionType) {
         String result = null;
-        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_1.getValue())) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
             result =  getIntervenerOneCollectionType(collectionType, role);
-        } else if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
+        } else if (role.equals(CaseRole.INTVR_SOLICITOR_2.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_2.getCcdCode())) {
             result = getIntervenerTwoCollectionType(collectionType, role);
-        } else if (role.equals(CaseRole.INTVR_SOLICITOR_3.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_3.getValue())) {
+        } else if (role.equals(CaseRole.INTVR_SOLICITOR_3.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_3.getCcdCode())) {
             result = getIntervenerThreeCollectionType(collectionType, role);
-        } else if (role.equals(CaseRole.INTVR_SOLICITOR_4.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
+        } else if (role.equals(CaseRole.INTVR_SOLICITOR_4.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_4.getCcdCode())) {
             result = getIntervenerFourCollectionType(collectionType, role);
         }
         return result;
     }
 
     private String getIntervenerOneCollectionType(String collectionType, String role) {
-        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_1.getValue())) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
                     return INTERVENER_ONE_OTHER_COLLECTION.getCcdKey();
@@ -341,7 +341,7 @@ public class IntervenerShareDocumentsService implements SharedService {
     }
 
     private String getIntervenerTwoCollectionType(String collectionType, String role) {
-        if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_2.getValue())) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_2.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_2.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
                     return INTERVENER_TWO_OTHER_COLLECTION.getCcdKey();
@@ -381,7 +381,7 @@ public class IntervenerShareDocumentsService implements SharedService {
     }
 
     private String getIntervenerThreeCollectionType(String collectionType, String role) {
-        if (role.equals(CaseRole.INTVR_SOLICITOR_3.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_3.getValue())) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_3.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_3.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
                     return INTERVENER_THREE_OTHER_COLLECTION.getCcdKey();
@@ -420,7 +420,7 @@ public class IntervenerShareDocumentsService implements SharedService {
     }
 
     private String getIntervenerFourCollectionType(String collectionType, String role) {
-        if (role.equals(CaseRole.INTVR_SOLICITOR_4.getValue()) || role.equals(CaseRole.INTVR_BARRISTER_4.getValue())) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_4.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_4.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
                     return INTERVENER_FOUR_OTHER_COLLECTION.getCcdKey();
