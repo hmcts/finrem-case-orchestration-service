@@ -66,6 +66,7 @@ public class RejectGeneralApplicationSubmittedHandler
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void sendApplicantNotifications(String userAuthorisation, CaseDetails caseDetails) {
         if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
             notificationService.sendGeneralApplicationRejectionEmailToAppSolicitor(caseDetails);
@@ -74,6 +75,7 @@ public class RejectGeneralApplicationSubmittedHandler
         }
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void sendRespondentNotifications(String userAuthorisation, CaseDetails caseDetails) {
         if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
             notificationService.sendGeneralApplicationRejectionEmailToResSolicitor(caseDetails);
