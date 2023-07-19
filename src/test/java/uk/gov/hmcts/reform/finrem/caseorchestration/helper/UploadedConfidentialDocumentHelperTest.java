@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class UploadedConfidentialDocumentHelperTest {
 
-    private UploadedConfidentialDocumentService uploadedConfidentialDocumentHelper;
+    private UploadedConfidentialDocumentHelper uploadedConfidentialDocumentHelper;
     private ObjectMapper mapper = new ObjectMapper();
 
     private Map<String, Object> caseData;
@@ -29,7 +29,7 @@ public class UploadedConfidentialDocumentHelperTest {
 
     @Before
     public void setUp() {
-        uploadedConfidentialDocumentHelper = new UploadedConfidentialDocumentService(mapper);
+        uploadedConfidentialDocumentHelper = new UploadedConfidentialDocumentHelper(mapper);
 
         caseData = new HashMap<>();
         caseDataBefore = new HashMap<>();
@@ -46,11 +46,10 @@ public class UploadedConfidentialDocumentHelperTest {
             caseDataBefore,
             CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
-        List<ConfidentialUploadedDocumentData> documentData =
-            getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        List<ConfidentialUploadedDocumentData> documentData = getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
         documentData.forEach(document ->
-            assertThat(document.getValue().getConfidentialDocumentUploadDateTime(), is(notNullValue())));
+            assertThat(document.getConfidentialUploadedDocument().getConfidentialDocumentUploadDateTime(), is(notNullValue())));
     }
 
     @Test
@@ -73,8 +72,8 @@ public class UploadedConfidentialDocumentHelperTest {
 
         assertThat(documentData, hasSize(3));
         assertThat(documentData.stream()
-            .map(ConfidentialUploadedDocumentData::getValue)
-            .map(UploadConfidentialDocument::getConfidentialDocumentUploadDateTime)
+            .map(ConfidentialUploadedDocumentData::getConfidentialUploadedDocument)
+            .map(ConfidentialUploadedDocument::getConfidentialDocumentUploadDateTime)
             .filter(Objects::nonNull)
             .toList(), hasSize(2));
     }
@@ -90,7 +89,7 @@ public class UploadedConfidentialDocumentHelperTest {
     private ConfidentialUploadedDocumentData confidentialDocument(String filename, UUID id) {
         return ConfidentialUploadedDocumentData.builder()
             .id(id.toString())
-            .value(UploadConfidentialDocument.builder()
+            .confidentialUploadedDocument(ConfidentialUploadedDocument.builder()
                 .documentFileName(filename)
                 .build())
             .build();

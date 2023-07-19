@@ -66,7 +66,6 @@ public class SendConsentOrderInContestedAboutToStartHandler extends FinremCallba
             .data(finremCaseData).build();
     }
 
-
     private DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
         log.info("Event {} fetching each party's solicitor case role for caseId {}",
             EventType.SEND_CONSENT_IN_CONTESTED_ORDER, caseDetails.getId());

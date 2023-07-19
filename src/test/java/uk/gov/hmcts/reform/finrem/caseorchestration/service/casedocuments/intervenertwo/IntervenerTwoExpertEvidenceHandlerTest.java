@@ -1,42 +1,27 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenertwo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV_TWO_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
-@RunWith(MockitoJUnitRunner.class)
-public class IntervenerTwoExpertEvidenceHandlerTest extends BaseManageDocumentsHandlerTest {
+public class IntervenerTwoExpertEvidenceHandlerTest extends CaseDocumentHandlerTest {
 
-    @InjectMocks
-    IntervenerTwoExpertEvidenceHandler handler;
+    IntervenerTwoExpertEvidenceHandler handler = new IntervenerTwoExpertEvidenceHandler(new ObjectMapper());
 
     @Test
-    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.VALUATION_REPORT,
-            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.EXPERT_EVIDENCE,
-            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
+    public void appExpertEvidenceFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", INTERVENER_TWO, "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", INTERVENER_TWO, "no", "no", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        handler.handle(uploadDocumentList, caseData);
 
-        handler.replaceManagedDocumentsInCollectionType(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_TWO_EXPERT_EVIDENCE_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
+        assertThat(getDocumentCollection(caseData, INTV_TWO_EVIDENCE_COLLECTION), hasSize(2));
     }
 }

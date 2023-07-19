@@ -67,16 +67,17 @@ public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackH
         if (Objects.nonNull(caseData.getFinalOrderCollection())) {
             log.info("Received request to send email for 'Order Approved' for Case ID: {}", caseId);
             if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
-                && parties.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
+                && parties.contains(CaseRole.APP_SOLICITOR.getValue())) {
                 log.info("Sending 'Order Approved' email notification to Applicant Solicitor for Case ID: {}", caseId);
                 notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
             }
 
             if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
-                && parties.contains(CaseRole.RESP_SOLICITOR.getCcdCode())) {
+                && parties.contains(CaseRole.RESP_SOLICITOR.getValue())) {
                 log.info("Sending 'Order Approved' email notification to Respondent Solicitor for Case ID: {}", caseId);
                 notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
             }
+            // TODO: Check applicant and respondent sending correct notifications, add notifications for interveners
         }
     }
 }

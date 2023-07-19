@@ -1,41 +1,29 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenertwo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV_TWO_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
-@RunWith(MockitoJUnitRunner.class)
-public class IntervenerTwoStatementsExhibitsHandlerTest extends BaseManageDocumentsHandlerTest {
+public class IntervenerTwoStatementsExhibitsHandlerTest extends CaseDocumentHandlerTest {
 
-    @InjectMocks
-    IntervenerTwoStatementsExhibitsHandler handler;
+    IntervenerTwoStatementsExhibitsHandler handler = new IntervenerTwoStatementsExhibitsHandler(new ObjectMapper());
+
 
     @Test
-    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_AFFIDAVIT,
-            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT,
-            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+    public void appStatementsExhibitsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement/Affidavit", INTERVENER_TWO, "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", INTERVENER_TWO, "no", "no", null));
 
-        handler.replaceManagedDocumentsInCollectionType(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_TWO_STATEMENTS_EXHIBITS_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
+        handler.handle(uploadDocumentList, caseData);
+
+        assertThat(getDocumentCollection(caseData, INTV_TWO_STATEMENTS_EXHIBITS_COLLECTION), hasSize(2));
     }
 }

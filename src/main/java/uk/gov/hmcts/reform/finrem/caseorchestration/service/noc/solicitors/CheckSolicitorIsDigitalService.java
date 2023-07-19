@@ -27,7 +27,7 @@ public class CheckSolicitorIsDigitalService {
     }
 
     public boolean isIntervenerSolicitorDigital(String caseId, CaseRole caseRole) {
-        return isSolicitorDigital(caseId, caseRole.getCcdCode());
+        return isSolicitorDigital(caseId, caseRole.getValue());
     }
 
     public boolean isIntervenerSolicitorDigital(String caseId, String caseRole) {

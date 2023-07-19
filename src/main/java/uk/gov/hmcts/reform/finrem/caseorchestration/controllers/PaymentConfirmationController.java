@@ -20,12 +20,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationS
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HELP_WITH_FEES_QUESTION;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,13 +61,14 @@ public class PaymentConfirmationController extends BaseController {
         log.info("Application type isConsentedApplication : {}", isConsentedApplication);
 
         String confirmationBody;
+        boolean helpWithFeeQuestion = Objects.toString(caseData.get(HELP_WITH_FEES_QUESTION)).equalsIgnoreCase("no");
         if (isConsentedApplication) {
             log.info("Consented confirmation page to show");
-            confirmationBody = isPBAPayment(caseData) ? paymentConfirmationService.consentedPbaPaymentConfirmation()
+            confirmationBody = helpWithFeeQuestion ? paymentConfirmationService.consentedPbaPaymentConfirmation()
                 : paymentConfirmationService.consentedHwfPaymentConfirmation();
         } else {
             log.info("Contested confirmation page to show");
-            confirmationBody = isPBAPayment(caseData) ? paymentConfirmationService.contestedPbaPaymentConfirmation()
+            confirmationBody = helpWithFeeQuestion ? paymentConfirmationService.contestedPbaPaymentConfirmation()
                 : paymentConfirmationService.contestedHwfPaymentConfirmation();
             confirmationBody = addCourtContactInformation(confirmationBody, caseDetails);
         }

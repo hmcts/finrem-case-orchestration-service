@@ -23,14 +23,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class UploadedGeneralDocumentHelperTest {
 
-    private UploadedGeneralDocumentService uploadedGeneralDocumentHelper;
+    private UploadedGeneralDocumentHelper uploadedGeneralDocumentHelper;
 
     private Map<String, Object> caseData;
     private Map<String, Object> caseDataBefore;
 
     @Before
     public void setUp() {
-        uploadedGeneralDocumentHelper = new UploadedGeneralDocumentService(new ObjectMapper());
+        uploadedGeneralDocumentHelper = new UploadedGeneralDocumentHelper(new ObjectMapper());
 
         caseData = new HashMap<>();
         caseDataBefore = new HashMap<>();

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -8,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,28 +30,4 @@ public class GenericAboutToStartOrSubmitCallbackResponse<D> {
     private List<String> warnings;
 
     private String state;
-
-    public List<String> getErrors() {
-        if (errors == null) {
-            errors = new ArrayList<>();
-        }
-        return errors;
-    }
-
-    public List<String> getWarnings() {
-        if (warnings == null) {
-            warnings = new ArrayList<>();
-        }
-        return warnings;
-    }
-
-    @JsonIgnore
-    public boolean hasErrors() {
-        return !getErrors().isEmpty();
-    }
-
-    @JsonIgnore
-    public boolean hasWarnings() {
-        return !getWarnings().isEmpty();
-    }
 }

@@ -244,12 +244,12 @@ public class GeneralOrderService {
 
         if (approvedConsentOrderDocuments != null && !approvedConsentOrderDocuments.isEmpty()) {
             approvedConsentOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
-                obj.getApprovedOrder().getConsentOrder().getDocumentFilename())));
+                "[Approved Order]" + " - " + obj.getApprovedOrder().getConsentOrder().getDocumentFilename())));
         }
 
         if (refusedConsentOrderDocuments != null && !refusedConsentOrderDocuments.isEmpty()) {
             refusedConsentOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
-                obj.getApprovedOrder().getConsentOrder().getDocumentFilename())));
+                "[Refused Order]" + " - " + obj.getApprovedOrder().getConsentOrder().getDocumentFilename())));
         }
 
         DynamicMultiSelectList selectedConsentOrders = data.getConsentInContestedOrdersToShare();

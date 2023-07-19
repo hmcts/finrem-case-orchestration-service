@@ -323,8 +323,6 @@ public class FinremCaseData {
     @JsonProperty("intervener3")
     private IntervenerThreeWrapper intervenerThreeWrapper;
 
-    private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
-
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener4")
     private IntervenerFourWrapper intervenerFourWrapper;

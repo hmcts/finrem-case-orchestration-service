@@ -1,42 +1,29 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerfour;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV_FOUR_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
 
-@RunWith(MockitoJUnitRunner.class)
-public class IntervenerFourCorrespondenceHandlerTest extends BaseManageDocumentsHandlerTest {
+public class IntervenerFourCorrespondenceHandlerTest extends CaseDocumentHandlerTest {
 
-    @InjectMocks
-    IntervenerFourCorrespondenceHandler handler;
+    IntervenerFourCorrespondenceHandler handler = new IntervenerFourCorrespondenceHandler(new ObjectMapper());
 
     @Test
-    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OFFERS,
-            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.LETTER_FROM_APPLICANT,
-            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
+    public void appCorrespondenceDocsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", INTERVENER_FOUR, "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", INTERVENER_FOUR, "no", "no", null));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        handler.replaceManagedDocumentsInCollectionType(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+        handler.handle(uploadDocumentList, caseData);
 
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_CORRESPONDENCE_COLLECTION),
-            hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(0));
+        assertThat(getDocumentCollection(caseData, INTV_FOUR_CORRESPONDENCE_COLLECTION), hasSize(2));
     }
+
 }
