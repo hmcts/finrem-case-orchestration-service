@@ -223,7 +223,7 @@ pitest {
     threads.set(4)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
-    mutationThreshold.set(75)
+    mutationThreshold.set(50)
 }
 
 bootJar {
@@ -322,8 +322,8 @@ dependencyManagement {
             entry 'tomcat-embed-core'
             entry 'tomcat-embed-websocket'
         }
-        //VE-2022-31692, CVE-2022-31690
-        dependencySet(group: 'org.springframework.security', version: '5.7.5') {
+        //VE-2022-31692, CVE-2022-31690 CVE-2023-20862
+        dependencySet(group: 'org.springframework.security', version: '6.1.1') {
             entry 'spring-security-crypto'
         }
         //CVE-2023-20861

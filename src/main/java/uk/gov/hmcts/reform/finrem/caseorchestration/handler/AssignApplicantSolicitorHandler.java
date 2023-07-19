@@ -18,7 +18,7 @@ public abstract class AssignApplicantSolicitorHandler extends FinremCallbackHand
 
     private final AssignApplicantSolicitorService assignApplicantSolicitorService;
 
-    public AssignApplicantSolicitorHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    protected AssignApplicantSolicitorHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                            AssignApplicantSolicitorService assignApplicantSolicitorService) {
         super(finremCaseDetailsMapper);
         this.assignApplicantSolicitorService = assignApplicantSolicitorService;

@@ -108,6 +108,24 @@ public class CaseAssignedRoleServiceTest {
         assertEquals(OTHER_ROLES, returnedValue.get(CASE_ROLE));
     }
 
+    @Test
+    public void getCaseAssignedUserRoleWhenCaseIdPassed() {
+        mockMethodCalls(OTHER_ROLES, false);
+
+        CaseAssignedUserRolesResource caseAssignedUserRole1 =
+            caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN);
+        assertEquals(OTHER_ROLES, caseAssignedUserRole1.getCaseAssignedUserRoles().get(0).getCaseRole());
+    }
+
+    @Test
+    public void getCaseAssignedUserRole() {
+        mockMethodCalls(OTHER_ROLES, false);
+
+        CaseAssignedUserRolesResource caseAssignedUserRole1 =
+            caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN);
+        assertEquals(OTHER_ROLES, caseAssignedUserRole1.getCaseAssignedUserRoles().get(0).getCaseRole());
+    }
+
     private void mockMethodCalls(String role, boolean isConsentedApplication) {
         when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
         when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn("123");
