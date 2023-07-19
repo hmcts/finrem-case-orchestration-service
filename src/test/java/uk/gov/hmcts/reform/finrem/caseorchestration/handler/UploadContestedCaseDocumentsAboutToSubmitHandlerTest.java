@@ -69,7 +69,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
     @Before
     public void setUpTest() {
-        when(featureToggleService.isManageBundleEnabled()).thenReturn(false);
         uploadContestedCaseDocumentsHandler = new UploadContestedCaseDocumentsAboutToSubmitHandler(featureToggleService,
             Arrays.asList(applicantCaseSummariesHandler, applicantChronologiesStatementHandler),
             objectMapper, uploadedDocumentHelper, caseAssignedRoleService);
@@ -186,7 +185,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
     @Test
     public void givenUploadFileTrialBundleSelectedWhenAboutToSubmitThenShowTrialBundleDeprecatedErrorMessage() {
 
-        when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
+
 
         uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "", "yes", "no", "Other Example"));
         CallbackRequest callbackRequest = buildCallbackRequest();
@@ -202,7 +201,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
     @Test
     public void givenUploadFileWithoutTrialBundleWhenAboutToSubmitThenNoErrors() {
 
-        when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
+
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "", "yes", "no", "Other Example"));
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);

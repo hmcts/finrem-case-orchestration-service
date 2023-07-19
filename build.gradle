@@ -308,7 +308,6 @@ bootWithCCD {
 
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
 
-    environment("FEATURE_MANAGE_BUNDLE", "true")
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
 }
 

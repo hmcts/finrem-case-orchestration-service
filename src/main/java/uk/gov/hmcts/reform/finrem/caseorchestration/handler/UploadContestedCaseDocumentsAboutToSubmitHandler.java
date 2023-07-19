@@ -174,8 +174,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
     }
 
     private void setWarningsAndErrors(Map<String, Object> caseData, GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response) {
-        if (featureToggleService.isManageBundleEnabled()
-            && isTrialBundleSelectedInAnyUploadedFile(caseData)) {
+        if (isTrialBundleSelectedInAnyUploadedFile(caseData)) {
             response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
         }
 
