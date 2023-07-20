@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,8 +58,8 @@ public class OptionIdToValueTranslator {
     private void handleTranslation(Map<String, Object> data, String optionKey) {
         Object option = data.get(optionKey);
 
-        if (option instanceof String optn) {
-            String optionValue = optionsMap(optionKey).getOrDefault(option, optn);
+        if (option instanceof String opt) {
+            String optionValue = optionsMap(optionKey).getOrDefault(option, opt);
             data.put(optionKey, optionValue);
         }
 
@@ -66,9 +67,8 @@ public class OptionIdToValueTranslator {
             List<String> originalOptionsList = (List<String>) option;
             Map<String, String> optionMap = optionsMap(optionKey);
 
-            List<String> collect = originalOptionsList.stream()
-                .map(key -> optionMap.getOrDefault(key, key))
-                .toList();
+            List<String> collect = new ArrayList<>();
+            originalOptionsList.forEach(key -> collect.add(optionMap.getOrDefault(key, key)));
 
             data.put(optionKey, collect);
         }
