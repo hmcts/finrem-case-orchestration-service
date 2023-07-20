@@ -31,7 +31,7 @@ public class AdditionalHearingDetailsMapperTest extends AbstractLetterDetailsMap
     @Test
     public void mapBulkPrintDetails() {
         assertNotNull(caseDetails);
-        Assert.assertEquals(caseDetails.getData().getContactDetailsWrapper().getApplicantFmName(), "Test");
+        Assert.assertEquals("Test", caseDetails.getData().getContactDetailsWrapper().getApplicantFmName());
     }
 
     @Test

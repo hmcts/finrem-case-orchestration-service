@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.getYesOrNo;
@@ -215,7 +214,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
         return Optional.ofNullable(benefitPaymentChecklist).orElse(Collections.emptyList()).stream()
             .map(BenefitPayment::getText)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<String> getMiamExemptionsChecklist(FinremCaseData caseData) {
@@ -223,7 +222,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
         return Optional.ofNullable(miamExemptions).orElse(Collections.emptyList()).stream()
             .map(MiamExemption::getText)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<String> getMiamDomesticViolenceChecklist(FinremCaseData caseData) {
@@ -231,7 +230,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
         return Optional.ofNullable(domesticViolenceCheklist).orElse(Collections.emptyList()).stream()
             .map(MiamDomesticViolence::getText)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<String> getMiamUrgencyReasonsChecklist(FinremCaseData caseData) {
@@ -239,7 +238,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
         return Optional.ofNullable(miamUrgencyReasons).orElse(Collections.emptyList()).stream()
             .map(MiamUrgencyReason::getText)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<PropertyAdjustmentOrderCollection> getPropertyAdjustmentOrderDetailCollection(FinremCaseData caseData) {
