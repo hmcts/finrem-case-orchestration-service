@@ -25,7 +25,7 @@ public abstract class ConsentOrderPartyDocumentHandler {
         if (partyList.contains(caseRoleCode)) {
             final Long caseId = finremCaseDetails.getId();
             FinremCaseData caseData = finremCaseDetails.getData();
-            log.info("Received request to send hearing pack to applicant for case {}:", caseId);
+            log.info("Received request to send hearing pack to {} for case {}:", caseRoleCode,  caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData))
                 .orElse(new ArrayList<>());
             orderDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
