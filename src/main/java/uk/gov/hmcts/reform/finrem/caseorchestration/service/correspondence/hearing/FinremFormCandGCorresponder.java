@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,15 +21,13 @@ import java.util.stream.Collectors;
 public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
 
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
 
     @Autowired
     public FinremFormCandGCorresponder(BulkPrintService bulkPrintService,
                                        NotificationService notificationService,
-                                       DocumentHelper documentHelper, ObjectMapper objectMapper) {
+                                       DocumentHelper documentHelper) {
         super(bulkPrintService, notificationService);
         this.documentHelper = documentHelper;
-        this.objectMapper = objectMapper;
     }
 
     @Override

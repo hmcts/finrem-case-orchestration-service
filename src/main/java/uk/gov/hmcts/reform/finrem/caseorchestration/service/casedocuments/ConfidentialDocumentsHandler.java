@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ConfidentialDocumentsHandler extends DocumentHandler {
@@ -21,6 +20,6 @@ public class ConfidentialDocumentsHandler extends DocumentHandler {
         return allManagedDocumentCollections.stream()
             .filter(managedDocumentCollection ->
                 YesOrNo.isYes(managedDocumentCollection.getUploadCaseDocument().getCaseDocumentConfidential()))
-            .collect(Collectors.toList());
+            .toList();
     }
 }

@@ -144,7 +144,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
             .handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
 
         assertThat(response.getErrors(), hasSize(1));
-        assertEquals(response.getErrors().get(0), COURT_DETAILS_PARSE_EXCEPTION_MESSAGE);
+        assertEquals(COURT_DETAILS_PARSE_EXCEPTION_MESSAGE, response.getErrors().get(0));
 
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);

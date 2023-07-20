@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -58,8 +57,8 @@ public class OptionIdToValueTranslator {
     private void handleTranslation(Map<String, Object> data, String optionKey) {
         Object option = data.get(optionKey);
 
-        if (option instanceof String) {
-            String optionValue = optionsMap(optionKey).getOrDefault(option, (String) option);
+        if (option instanceof String optn) {
+            String optionValue = optionsMap(optionKey).getOrDefault(option, optn);
             data.put(optionKey, optionValue);
         }
 
@@ -69,7 +68,7 @@ public class OptionIdToValueTranslator {
 
             List<String> collect = originalOptionsList.stream()
                 .map(key -> optionMap.getOrDefault(key, key))
-                .collect(Collectors.toList());
+                .toList();
 
             data.put(optionKey, collect);
         }

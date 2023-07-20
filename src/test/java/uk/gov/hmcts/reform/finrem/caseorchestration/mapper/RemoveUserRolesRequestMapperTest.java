@@ -23,8 +23,8 @@ public class RemoveUserRolesRequestMapperTest extends BaseServiceTest {
         RemoveUserRolesRequest assignCaseAccessRequest =
             removeUserRolesRequestMapper.mapToRemoveUserRolesRequest(caseDetails, TEST_USER_ID, TEST_CASE_ROLE);
 
-        Assert.assertEquals(assignCaseAccessRequest.getCase_users().get(0).getUser_id(), TEST_USER_ID);
-        Assert.assertEquals(assignCaseAccessRequest.getCase_users().get(0).getCase_role(), TEST_CASE_ROLE);
+        Assert.assertEquals(TEST_USER_ID, assignCaseAccessRequest.getCase_users().get(0).getUser_id());
+        Assert.assertEquals(TEST_CASE_ROLE, assignCaseAccessRequest.getCase_users().get(0).getCase_role());
         Assert.assertEquals(assignCaseAccessRequest.getCase_users().get(0).getCase_id(), caseDetails.getId().toString());
     }
 
@@ -35,8 +35,8 @@ public class RemoveUserRolesRequestMapperTest extends BaseServiceTest {
         RemoveUserRolesRequest assignCaseAccessRequest =
             removeUserRolesRequestMapper.mapToRemoveUserRolesRequest(caseDetails, TEST_USER_ID, TEST_CASE_ROLE);
 
-        Assert.assertEquals(assignCaseAccessRequest.getCase_users().get(0).getUser_id(), TEST_USER_ID);
-        Assert.assertEquals(assignCaseAccessRequest.getCase_users().get(0).getCase_role(), TEST_CASE_ROLE);
+        Assert.assertEquals(TEST_USER_ID, assignCaseAccessRequest.getCase_users().get(0).getUser_id());
+        Assert.assertEquals(TEST_CASE_ROLE, assignCaseAccessRequest.getCase_users().get(0).getCase_role());
         Assert.assertEquals(assignCaseAccessRequest.getCase_users().get(0).getCase_id(), caseDetails.getId().toString());
     }
 }

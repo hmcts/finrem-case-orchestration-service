@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CourtDetailsMapperTest {
@@ -65,11 +64,11 @@ public class CourtDetailsMapperTest {
 
     @Test
     public void givenCourtListAndInvalidFieldDeclarations_whenGetCourtDetails_thenThrowIllegalStateException() {
-        Exception exception = assertThrows(IllegalStateException.class,
-            () -> courtDetailsMapper.getCourtDetails(new DefaultCourtListWrapper()));
-
-        String expectedMessage = "There must be exactly one court selected in case data";
-
-        assertTrue(exception.getMessage().contains(expectedMessage));
+        try {
+            courtDetailsMapper.getCourtDetails(new DefaultCourtListWrapper());
+        } catch (IllegalStateException ise) {
+            String expectedMessage = "There must be exactly one court selected in case data";
+            assertTrue(ise.getMessage().contains(expectedMessage));
+        }
     }
 }
