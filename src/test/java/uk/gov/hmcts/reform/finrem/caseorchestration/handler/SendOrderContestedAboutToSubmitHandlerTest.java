@@ -1,14 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.Assert;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -20,6 +21,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderApplicantDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderIntervenerFourDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderIntervenerOneDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderIntervenerThreeDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderIntervenerTwoDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderRespondentDocumentHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +51,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 class SendOrderContestedAboutToSubmitHandlerTest {
 
     private static final String uuid = UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString();
-    @InjectMocks
+
     private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
     @Mock
     private GeneralOrderService generalOrderService;
@@ -52,6 +59,21 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private GenericDocumentService genericDocumentService;
     @Mock
     private DocumentHelper documentHelper;
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @BeforeEach
+    public void setUpTest() {
+        sendOrderContestedAboutToSubmitHandler = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper, generalOrderService,
+            genericDocumentService, documentHelper, List.of(
+                new ConsentOrderApplicantDocumentHandler(),
+                new ConsentOrderRespondentDocumentHandler(),
+                new ConsentOrderIntervenerOneDocumentHandler(),
+                new ConsentOrderIntervenerTwoDocumentHandler(),
+                new ConsentOrderIntervenerThreeDocumentHandler(),
+                new ConsentOrderIntervenerFourDocumentHandler())
+        );
+    }
 
     @Test
     void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
@@ -131,7 +153,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.setOrdersToShare(selectedDocs);
         data.setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
-        List<CaseDocument> caseDocuments  = new ArrayList<>();
+        List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
         data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
 
@@ -180,7 +202,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.setOrdersToShare(selectedDocs);
         data.setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
-        List<CaseDocument> caseDocuments  = new ArrayList<>();
+        List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
         data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
 
@@ -251,7 +273,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
     private DynamicMultiSelectList getParties() {
 
-        List<DynamicMultiSelectListElement> list =  new ArrayList<>();
+        List<DynamicMultiSelectListElement> list = new ArrayList<>();
         partyList().forEach(role -> list.add(getElementList(role)));
 
         return DynamicMultiSelectList.builder()
@@ -261,12 +283,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     private List<String> partyList() {
-        return of(CaseRole.APP_SOLICITOR.getCcdCode(),CaseRole.APP_BARRISTER.getCcdCode(),
-            CaseRole.RESP_SOLICITOR.getCcdCode(),CaseRole.RESP_BARRISTER.getCcdCode(),
-            CaseRole.INTVR_SOLICITOR_1.getCcdCode(),CaseRole.INTVR_BARRISTER_1.getCcdCode(),
-            CaseRole.INTVR_SOLICITOR_2.getCcdCode(),CaseRole.INTVR_BARRISTER_2.getCcdCode(),
-            CaseRole.INTVR_SOLICITOR_3.getCcdCode(),CaseRole.INTVR_BARRISTER_3.getCcdCode(),
-            CaseRole.INTVR_SOLICITOR_4.getCcdCode(),CaseRole.INTVR_BARRISTER_4.getCcdCode());
+        return of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode(),
+            CaseRole.RESP_SOLICITOR.getCcdCode(), CaseRole.RESP_BARRISTER.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode(), CaseRole.INTVR_BARRISTER_1.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode(), CaseRole.INTVR_BARRISTER_2.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode(), CaseRole.INTVR_BARRISTER_3.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_4.getCcdCode(), CaseRole.INTVR_BARRISTER_4.getCcdCode());
     }
 
     private DynamicMultiSelectListElement getElementList(String role) {
