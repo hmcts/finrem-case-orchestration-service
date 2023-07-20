@@ -25,7 +25,7 @@ class AddresseeGeneratorHelperTest {
 
 
     @Test
-    public void givenUnknownRecipient_whenGetAddressee_thenReturnNull() {
+    void givenUnknownRecipient_whenGetAddressee_thenReturnNull() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).build();
         assertNull(AddresseeGeneratorHelper.generateAddressee(caseDetails, null));
     }
