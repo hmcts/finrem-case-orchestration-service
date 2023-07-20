@@ -168,7 +168,7 @@ class SendOrderContestedSubmittedHandlerTest {
         data.setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
-            .thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
+            .thenReturn(List.of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.RESP_SOLICITOR.getCcdCode()));
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verifyNoInteractions(ccdService);
@@ -200,7 +200,7 @@ class SendOrderContestedSubmittedHandlerTest {
         data.setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
-            .thenReturn(singletonList(CaseRole.RESP_SOLICITOR.getValue()));
+            .thenReturn(singletonList(CaseRole.RESP_SOLICITOR.getCcdCode()));
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verifyNoInteractions(ccdService);
@@ -218,7 +218,7 @@ class SendOrderContestedSubmittedHandlerTest {
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
         data.setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
-            .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getValue()));
+            .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getCcdCode()));
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -241,7 +241,7 @@ class SendOrderContestedSubmittedHandlerTest {
         data.setDirectionDetailsCollection(singletonList(DirectionDetailCollection.builder()
             .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build()));
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
-            .thenReturn(of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
+            .thenReturn(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.RESP_SOLICITOR.getCcdCode()));
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -267,7 +267,7 @@ class SendOrderContestedSubmittedHandlerTest {
             .build()));
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
-            .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getValue()));
+            .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getCcdCode()));
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
@@ -295,7 +295,7 @@ class SendOrderContestedSubmittedHandlerTest {
             .solicitorEmail("app@sol.com").respondentSolicitorEmail("res@sol.com").build());
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
-            .thenReturn(of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
+            .thenReturn(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.RESP_SOLICITOR.getCcdCode()));
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
@@ -309,17 +309,17 @@ class SendOrderContestedSubmittedHandlerTest {
 
         return DynamicMultiSelectList.builder()
             .value(of(DynamicMultiSelectListElement.builder()
-                .code(CaseRole.APP_SOLICITOR.getValue())
-                .label(CaseRole.APP_SOLICITOR.getValue())
+                .code(CaseRole.APP_SOLICITOR.getCcdCode())
+                .label(CaseRole.APP_SOLICITOR.getCcdCode())
                 .build()))
             .listItems(list)
             .build();
     }
 
     private List<String> partyList() {
-        return of(CaseRole.APP_SOLICITOR.getValue(),
-            CaseRole.RESP_SOLICITOR.getValue(), CaseRole.INTVR_SOLICITOR_1.getValue(), CaseRole.INTVR_SOLICITOR_2.getValue(),
-            CaseRole.INTVR_SOLICITOR_3.getValue(), CaseRole.INTVR_SOLICITOR_4.getValue());
+        return of(CaseRole.APP_SOLICITOR.getCcdCode(),
+            CaseRole.RESP_SOLICITOR.getCcdCode(), CaseRole.INTVR_SOLICITOR_1.getCcdCode(), CaseRole.INTVR_SOLICITOR_2.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode(), CaseRole.INTVR_SOLICITOR_4.getCcdCode());
     }
 
     private DynamicMultiSelectListElement getElementList(String role) {

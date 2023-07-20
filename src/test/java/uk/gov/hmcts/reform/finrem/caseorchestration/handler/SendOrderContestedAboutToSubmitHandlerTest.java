@@ -261,12 +261,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     private List<String> partyList() {
-        return of(CaseRole.APP_SOLICITOR.getValue(),CaseRole.APP_BARRISTER.getValue(),
-            CaseRole.RESP_SOLICITOR.getValue(),CaseRole.RESP_BARRISTER.getValue(),
-            CaseRole.INTVR_SOLICITOR_1.getValue(),CaseRole.INTVR_BARRISTER_1.getValue(),
-            CaseRole.INTVR_SOLICITOR_2.getValue(),CaseRole.INTVR_BARRISTER_2.getValue(),
-            CaseRole.INTVR_SOLICITOR_3.getValue(),CaseRole.INTVR_BARRISTER_3.getValue(),
-            CaseRole.INTVR_SOLICITOR_4.getValue(),CaseRole.INTVR_BARRISTER_4.getValue());
+        return of(CaseRole.APP_SOLICITOR.getCcdCode(),CaseRole.APP_BARRISTER.getCcdCode(),
+            CaseRole.RESP_SOLICITOR.getCcdCode(),CaseRole.RESP_BARRISTER.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode(),CaseRole.INTVR_BARRISTER_1.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode(),CaseRole.INTVR_BARRISTER_2.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode(),CaseRole.INTVR_BARRISTER_3.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_4.getCcdCode(),CaseRole.INTVR_BARRISTER_4.getCcdCode());
     }
 
     private DynamicMultiSelectListElement getElementList(String role) {

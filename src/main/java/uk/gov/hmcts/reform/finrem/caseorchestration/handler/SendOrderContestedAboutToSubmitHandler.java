@@ -116,7 +116,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         hearingDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
 
         FinremCaseData caseData = caseDetails.getData();
-        if (partyList.contains(CaseRole.APP_SOLICITOR.getValue())) {
+        if (partyList.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
             log.info("Received request to send hearing pack to applicant for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getAppOrderCollection())
                 .orElse(new ArrayList<>());
@@ -125,7 +125,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setAppOrderCollection(orderColl);
         }
 
-        if (partyList.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+        if (partyList.contains(CaseRole.RESP_SOLICITOR.getCcdCode())) {
             log.info("Received request to send hearing pack to respondent for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getRespOrderCollection())
                 .orElse(new ArrayList<>());
@@ -134,7 +134,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setRespOrderCollection(orderColl);
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode())) {
             log.info("Received request to send hearing pack to intervener1 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv1OrderCollection())
                 .orElse(new ArrayList<>());
@@ -143,7 +143,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setIntv1OrderCollection(orderColl);
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode())) {
             log.info("Received request to send hearing pack to intervener2 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv2OrderCollection())
                 .orElse(new ArrayList<>());
@@ -152,7 +152,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setIntv2OrderCollection(orderColl);
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode())) {
             log.info("Received request to send hearing pack to intervener3 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv3OrderCollection())
                 .orElse(new ArrayList<>());
@@ -161,7 +161,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setIntv3OrderCollection(orderColl);
         }
 
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode())) {
             log.info("Received request to send hearing pack to intervener4 for case {}:", caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(caseData.getIntv4OrderCollection())
                 .orElse(new ArrayList<>());
@@ -222,7 +222,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void shareAndPrintOrderWithIntervenerFour(FinremCaseDetails caseDetails,
                                                       List<String> partyList,
                                                       CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode())) {
             final Long caseId = caseDetails.getId();
             FinremCaseData caseData = caseDetails.getData();
             log.info("Received request to send general to intervener4 for case {}:", caseId);
@@ -237,7 +237,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void shareAndPrintOrderWithIntervenerThree(FinremCaseDetails caseDetails,
                                                        List<String> partyList,
                                                        CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode())) {
             final Long caseId = caseDetails.getId();
             FinremCaseData caseData = caseDetails.getData();
             log.info("Received request to send general to intervener3 for case {}:", caseId);
@@ -252,7 +252,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void shareAndPrintOrderWithIntervenerTwo(FinremCaseDetails caseDetails,
                                                      List<String> partyList,
                                                      CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode())) {
             final Long caseId = caseDetails.getId();
             FinremCaseData caseData = caseDetails.getData();
             log.info("Received request to send general to intervener2 for case {}:", caseId);
@@ -267,7 +267,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void shareAndPrintOrderWithIntervenerOne(FinremCaseDetails caseDetails,
                                                      List<String> partyList,
                                                      CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+        if (partyList.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode())) {
             final Long caseId = caseDetails.getId();
             FinremCaseData caseData = caseDetails.getData();
             log.info("Received request to send general to intervener1 for case {}:", caseId);
@@ -282,7 +282,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void shareAndPrintGeneralOrderWithRespondent(FinremCaseDetails caseDetails,
                                                          List<String> partyList,
                                                          CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+        if (partyList.contains(CaseRole.RESP_SOLICITOR.getCcdCode())) {
             final Long caseId = caseDetails.getId();
             FinremCaseData caseData = caseDetails.getData();
             log.info("Received request to send general to respondent for case {}:", caseId);
@@ -297,7 +297,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void shareAndPrintGeneralOrderWithApplicant(FinremCaseDetails caseDetails,
                                                         List<String> partyList,
                                                         CaseDocument generalOrder) {
-        if (partyList.contains(CaseRole.APP_SOLICITOR.getValue())) {
+        if (partyList.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
             final Long caseId = caseDetails.getId();
             FinremCaseData caseData = caseDetails.getData();
             log.info("Received request to send general to applicant for case {}:", caseId);

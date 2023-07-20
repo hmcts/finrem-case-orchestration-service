@@ -56,23 +56,24 @@ class SendOrderContestedAboutToStartHandlerTest {
         FinremCaseData data = caseDetails.getData();
 
         data.setApplicantOrganisationPolicy(getOrganisation("ORGAPP","applicant",
-            CaseRole.APP_SOLICITOR.getValue()));
+            CaseRole.APP_SOLICITOR.getCcdCode()));
         data.setRespondentOrganisationPolicy(getOrganisation("ORGRESP","respondent",
-            CaseRole.RESP_SOLICITOR.getValue()));
+            CaseRole.RESP_SOLICITOR.getCcdCode()));
         data.getIntervenerOneWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV1","intervener1",
-            CaseRole.INTVR_SOLICITOR_1.getValue()));
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
         data.getIntervenerTwoWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV2","intervener2",
-            CaseRole.INTVR_SOLICITOR_2.getValue()));
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
         data.getIntervenerThreeWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV3","intervener3",
-            CaseRole.INTVR_SOLICITOR_3.getValue()));
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
         data.getIntervenerFourWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV4","intervener4",
-            CaseRole.INTVR_SOLICITOR_4.getValue()));
+            CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
 
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         DynamicMultiSelectList partiesOnCase = resp.getData().getPartiesOnCase();
         assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
+        assertEquals(2, partiesOnCase.getValue().size(), "pre-selected parties");
         verify(generalOrderService).setOrderList(caseDetails);
     }
 
@@ -83,25 +84,25 @@ class SendOrderContestedAboutToStartHandlerTest {
         FinremCaseData data = caseDetails.getData();
 
         data.setApplicantOrganisationPolicy(getOrganisation("ORGAPP","applicant",
-            CaseRole.APP_SOLICITOR.getValue()));
+            CaseRole.APP_SOLICITOR.getCcdCode()));
         data.setRespondentOrganisationPolicy(getOrganisation("ORGRESP","respondent",
-            CaseRole.RESP_SOLICITOR.getValue()));
+            CaseRole.RESP_SOLICITOR.getCcdCode()));
         data.getIntervenerOneWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV1","intervener1",
-            CaseRole.INTVR_SOLICITOR_1.getValue()));
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
         data.getIntervenerTwoWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV2","intervener2",
-            CaseRole.INTVR_SOLICITOR_2.getValue()));
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
         data.getIntervenerThreeWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV3","intervener3",
-            CaseRole.INTVR_SOLICITOR_3.getValue()));
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
         data.getIntervenerFourWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV4","intervener4",
-            CaseRole.INTVR_SOLICITOR_4.getValue()));
+            CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
 
 
-        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getValue()),
-            getDynamicElementList(CaseRole.RESP_SOLICITOR.getValue()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getValue()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getValue()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getValue()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getValue()));
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()),
+            getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
 
         DynamicMultiSelectList parties = DynamicMultiSelectList.builder()
             .value(dynamicElementList)
@@ -127,33 +128,34 @@ class SendOrderContestedAboutToStartHandlerTest {
         data.getContactDetailsWrapper().setApplicantFmName("Tony");
         data.getContactDetailsWrapper().setApplicantLname("B");
         data.setApplicantOrganisationPolicy(getOrganisation(null,null,
-            CaseRole.APP_SOLICITOR.getValue()));
+            CaseRole.APP_SOLICITOR.getCcdCode()));
 
         data.getContactDetailsWrapper().setRespondentFmName("Tony");
         data.getContactDetailsWrapper().setRespondentLname("C");
         data.setRespondentOrganisationPolicy(getOrganisation(null,null,
-            CaseRole.RESP_SOLICITOR.getValue()));
+            CaseRole.RESP_SOLICITOR.getCcdCode()));
 
         data.getIntervenerOneWrapper().setIntervenerName("Intv1");
         data.getIntervenerOneWrapper().setIntervenerOrganisation(getOrganisation(null,null,
-            CaseRole.INTVR_SOLICITOR_1.getValue()));
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
 
         data.getIntervenerTwoWrapper().setIntervenerOrganisation(getOrganisation(null,null,
-            CaseRole.INTVR_SOLICITOR_2.getValue()));
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
         data.getIntervenerTwoWrapper().setIntervenerName("Intv2");
 
         data.getIntervenerThreeWrapper().setIntervenerOrganisation(getOrganisation(null,null,
-            CaseRole.INTVR_SOLICITOR_3.getValue()));
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
         data.getIntervenerThreeWrapper().setIntervenerName("Intv3");
 
         data.getIntervenerFourWrapper().setIntervenerOrganisation(getOrganisation(null,null,
-            CaseRole.INTVR_SOLICITOR_4.getValue()));
+            CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
         data.getIntervenerFourWrapper().setIntervenerName("Intv4");
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         DynamicMultiSelectList partiesOnCase = resp.getData().getPartiesOnCase();
         assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
+        assertEquals(2, partiesOnCase.getValue().size(), "pre-selected parties");
         verify(generalOrderService).setOrderList(caseDetails);
     }
 

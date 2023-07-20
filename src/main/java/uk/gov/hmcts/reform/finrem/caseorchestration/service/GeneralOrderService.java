@@ -263,38 +263,38 @@ public class GeneralOrderService {
 
     public boolean isOrderSharedWithApplicant(FinremCaseDetails caseDetails) {
         List<String> parties = getParties(caseDetails);
-        return (parties.contains(CaseRole.APP_SOLICITOR.getValue())
-            || parties.contains(CaseRole.APP_BARRISTER.getValue()));
+        return (parties.contains(CaseRole.APP_SOLICITOR.getCcdCode())
+            || parties.contains(CaseRole.APP_BARRISTER.getCcdCode()));
     }
 
     public boolean isOrderSharedWithRespondent(FinremCaseDetails caseDetails) {
         List<String> parties = getParties(caseDetails);
-        return (parties.contains(CaseRole.RESP_SOLICITOR.getValue())
-            || parties.contains(CaseRole.RESP_BARRISTER.getValue()));
+        return (parties.contains(CaseRole.RESP_SOLICITOR.getCcdCode())
+            || parties.contains(CaseRole.RESP_BARRISTER.getCcdCode()));
     }
 
     public boolean isOrderSharedWithIntervener1(FinremCaseDetails caseDetails) {
         List<String> parties = getParties(caseDetails);
-        return (parties.contains(CaseRole.INTVR_BARRISTER_1.getValue())
-            || parties.contains(CaseRole.INTVR_SOLICITOR_1.getValue()));
+        return (parties.contains(CaseRole.INTVR_BARRISTER_1.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
     }
 
     public boolean isOrderSharedWithIntervener2(FinremCaseDetails caseDetails) {
         List<String> parties = getParties(caseDetails);
-        return (parties.contains(CaseRole.INTVR_BARRISTER_2.getValue())
-            || parties.contains(CaseRole.INTVR_SOLICITOR_2.getValue()));
+        return (parties.contains(CaseRole.INTVR_BARRISTER_2.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
     }
 
     public boolean isOrderSharedWithIntervener3(FinremCaseDetails caseDetails) {
         List<String> parties = getParties(caseDetails);
-        return (parties.contains(CaseRole.INTVR_BARRISTER_3.getValue())
-            || parties.contains(CaseRole.INTVR_SOLICITOR_3.getValue()));
+        return (parties.contains(CaseRole.INTVR_BARRISTER_3.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
     }
 
     public boolean isOrderSharedWithIntervener4(FinremCaseDetails caseDetails) {
         List<String> parties = getParties(caseDetails);
-        return (parties.contains(CaseRole.INTVR_BARRISTER_4.getValue())
-            || parties.contains(CaseRole.INTVR_SOLICITOR_4.getValue()));
+        return (parties.contains(CaseRole.INTVR_BARRISTER_4.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
     }
 
     public List<CaseDocument> hearingOrdersToShare(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {

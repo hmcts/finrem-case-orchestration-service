@@ -68,21 +68,30 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
 
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
+        List<DynamicMultiSelectListElement> defaultDynamicListElements = new ArrayList<>();
 
-        String assignedAppRole = caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole();
-        dynamicListElements.add(generalOrderService.getDynamicMultiSelectListElement(assignedAppRole,
-            DISPLAY_LABEL.formatted(APPLICANT, caseData.getFullApplicantName())));
+        if (caseData.getApplicantOrganisationPolicy() != null && caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole() != null) {
+            String assignedAppRole = caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole();
+            DynamicMultiSelectListElement appMultiSelectListElement = generalOrderService.getDynamicMultiSelectListElement(assignedAppRole,
+                DISPLAY_LABEL.formatted(APPLICANT, caseData.getFullApplicantName()));
+            dynamicListElements.add(appMultiSelectListElement);
+            defaultDynamicListElements.add(appMultiSelectListElement);
+        }
 
-        String assignedRespRole = caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole();
-        dynamicListElements.add(generalOrderService.getDynamicMultiSelectListElement(assignedRespRole,
-            DISPLAY_LABEL.formatted(RESPONDENT, caseData.getRespondentFullName())));
-
+        if (caseData.getRespondentOrganisationPolicy() != null && caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole() != null) {
+            String assignedRespRole = caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole();
+            DynamicMultiSelectListElement respMultiSelectListElement = generalOrderService.getDynamicMultiSelectListElement(assignedRespRole,
+                DISPLAY_LABEL.formatted(RESPONDENT, caseData.getRespondentFullName()));
+            dynamicListElements.add(respMultiSelectListElement);
+            defaultDynamicListElements.add(respMultiSelectListElement);
+        }
         return getRoleList(intervenerCaseRoleList(caseData, dynamicListElements),
-            caseDetails.getData().getPartiesOnCase());
+            caseDetails.getData().getPartiesOnCase(), defaultDynamicListElements);
     }
 
     private DynamicMultiSelectList getRoleList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
-                                               DynamicMultiSelectList selectedRoles) {
+                                               DynamicMultiSelectList selectedRoles,
+                                               List<DynamicMultiSelectListElement> defaultDynamicListElements) {
         if (selectedRoles != null) {
             return DynamicMultiSelectList.builder()
                 .value(selectedRoles.getValue())
@@ -90,6 +99,7 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
                 .build();
         } else {
             return DynamicMultiSelectList.builder()
+                .value(defaultDynamicListElements)
                 .listItems(dynamicMultiSelectListElement)
                 .build();
         }
