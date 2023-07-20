@@ -41,19 +41,5 @@ public class IntervenerConstant {
     public static final String DEL_INTERVENER_TWO_VALUE = "Remove Intervener 2";
     public static final String DEL_INTERVENER_THREE_VALUE = "Remove Intervener 3";
     public static final String DEL_INTERVENER_FOUR_VALUE = "Remove Intervener 4";
-
-    public static final String INTV1_SOLICITOR_EMAIL = "intervener1SolEmail";
-    public static final String INTV2_SOLICITOR_EMAIL = "intervener2SolEmail";
-    public static final String INTV3_SOLICITOR_EMAIL = "intervener3SolEmail";
-    public static final String INTV4_SOLICITOR_EMAIL = "intervener4SolEmail";
-
-    public static final String INTV1_FINAL_ORDER_COLLECTION = "intv1OrderCollection";
-    public static final String INTV2_FINAL_ORDER_COLLECTION = "intv2OrderCollection";
-    public static final String INTV3_FINAL_ORDER_COLLECTION = "intv3OrderCollection";
-    public static final String INTV4_FINAL_ORDER_COLLECTION = "intv4OrderCollection";
-
-    public static final String INTV1_ADDITIONAL_DOC_ORDER_COLLECTION = "intv1AdditionalOrderDocsColl";
-    public static final String INTV2_ADDITIONAL_DOC_ORDER_COLLECTION = "intv2AdditionalOrderDocsColl";
-    public static final String INTV3_ADDITIONAL_DOC_ORDER_COLLECTION = "intv3AdditionalOrderDocsColl";
-    public static final String INTV4_ADDITIONAL_DOC_ORDER_COLLECTION = "intv4AdditionalOrderDocsColl";
+    public static final String DISPLAY_LABEL = "%s - %s";
 }

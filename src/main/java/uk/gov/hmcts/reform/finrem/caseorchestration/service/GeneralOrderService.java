@@ -58,6 +58,7 @@ public class GeneralOrderService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
+    private final PartyService partyService;
     private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
@@ -93,6 +94,7 @@ public class GeneralOrderService {
         return new GeneralOrderPreviewDocument(caseDocument);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -217,14 +219,14 @@ public class GeneralOrderService {
         List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
 
         if (hearingOrderDocuments != null) {
-            hearingOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
+            hearingOrderDocuments.forEach(obj -> dynamicListElements.add(partyService.getDynamicMultiSelectListElement(obj.getId(),
                 "Case documents tab [Approved Order]" + " - " + obj.getValue().getUploadDraftDocument().getDocumentFilename())));
         }
 
         if (ObjectUtils.isNotEmpty(data.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
             CaseDocument orderLatestDocument = data.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
             String orderLatestDocumentFilename = orderLatestDocument.getDocumentFilename();
-            dynamicListElements.add(getDynamicMultiSelectListElement(orderLatestDocumentFilename,
+            dynamicListElements.add(partyService.getDynamicMultiSelectListElement(orderLatestDocumentFilename,
                 "Orders tab [Lastest general order]" + " - " + orderLatestDocumentFilename));
         }
 
@@ -232,13 +234,6 @@ public class GeneralOrderService {
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, selectedOrders);
         data.setOrdersToShare(dynamicOrderList);
-    }
-
-    public DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
-        return DynamicMultiSelectListElement.builder()
-            .code(code)
-            .label(label)
-            .build();
     }
 
     private DynamicMultiSelectList getDynamicOrderList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
