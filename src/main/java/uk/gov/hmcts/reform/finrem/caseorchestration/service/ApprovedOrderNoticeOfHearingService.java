@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
@@ -172,7 +171,7 @@ public class ApprovedOrderNoticeOfHearingService {
     private List<Element<CaseDocument>> convertHearingNoticeDocumentPackToCcdCollection(List<CaseDocument> hearingNoticePack) {
         return hearingNoticePack.stream()
             .map(document -> element(UUID.randomUUID(), document))
-            .collect(Collectors.toList());
+            .toList();
     }
 
 }

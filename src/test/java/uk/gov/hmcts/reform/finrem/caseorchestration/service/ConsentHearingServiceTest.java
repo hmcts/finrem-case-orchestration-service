@@ -30,7 +30,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 public class ConsentHearingServiceTest extends BaseServiceTest  {
@@ -122,24 +121,6 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
 
     @Test
-    public void givenConsentedPaperCase_WhenPaperCase_ThenItShouldNotSendNotification() {
-        CaseDetails caseDetails = buildCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
-        CaseDetails caseDetailsBefore = buildCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
-
-        caseDetails.getData().put("paperApplication", "Yes");
-
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
-
-        service.sendNotification(caseDetails, caseDetailsBefore);
-
-        verify(caseDataService).isPaperApplication(any());
-        verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
-        verify(notificationService, never()).isRespondentSolicitorEmailCommunicationEnabled(any());
-        verify(notificationService, never()).sendConsentHearingNotificationEmailToApplicantSolicitor(any(CaseDetails.class), anyMap());
-        verify(notificationService, never()).sendConsentHearingNotificationEmailToRespondentSolicitor(any(CaseDetails.class), anyMap());
-    }
-
-    @Test
     public void givenFinremCaseDetailsConsentedPaperCase_WhenPaperCase_ThenItShouldNotSendNotification() {
         FinremCaseDetails caseDetails = buildFinremCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
         FinremCaseDetails caseDetailsBefore = buildFinremCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
@@ -154,26 +135,6 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
             .sendConsentHearingNotificationEmailToApplicantSolicitor(any(FinremCaseDetails.class), anyMap());
         verify(notificationService, never())
             .sendConsentHearingNotificationEmailToRespondentSolicitor(any(FinremCaseDetails.class), anyMap());
-    }
-
-    @Test
-    public void givenConsentedNotPaperCase_WhenPaperCase_ThenItShouldSendNotification() {
-        CaseDetails caseDetails = buildCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
-        caseDetails.getData().put("paperApplication", NO_VALUE);
-
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
-        CaseDetails caseDetailsBefore = buildCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
-        service.sendNotification(caseDetails, caseDetailsBefore);
-
-        verify(caseDataService).isPaperApplication(any());
-
-        verify(caseDataService, times(2)).isApplicantSolicitorAgreeToReceiveEmails(any());
-        verify(notificationService, times(2)).isRespondentSolicitorEmailCommunicationEnabled(any());
-        verify(notificationService, times(2)).sendConsentHearingNotificationEmailToApplicantSolicitor(any(CaseDetails.class), anyMap());
-        verify(notificationService, times(2)).sendConsentHearingNotificationEmailToRespondentSolicitor(any(CaseDetails.class), anyMap());
     }
 
     @Test

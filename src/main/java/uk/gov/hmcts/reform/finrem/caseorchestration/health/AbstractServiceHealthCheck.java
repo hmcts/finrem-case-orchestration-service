@@ -13,7 +13,7 @@ public abstract class AbstractServiceHealthCheck implements HealthIndicator {
     private final String uri;
     private final RestTemplate restTemplate;
 
-    public AbstractServiceHealthCheck(String uri, RestTemplate restTemplate) {
+    protected AbstractServiceHealthCheck(String uri, RestTemplate restTemplate) {
         this.uri = uri;
         this.restTemplate = restTemplate;
     }

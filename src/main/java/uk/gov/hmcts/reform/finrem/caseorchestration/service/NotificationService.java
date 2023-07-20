@@ -1689,7 +1689,7 @@ public class NotificationService {
      * Do not expect any return.
      * <p>Please use @{@link #sendNoticeOfChangeEmail(FinremCaseDetails)}</p>
      * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
+     * @deprecated Use {@link CaseDetails caseDetails}
      */
     @Deprecated(since = "15-june-2023")
     public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {

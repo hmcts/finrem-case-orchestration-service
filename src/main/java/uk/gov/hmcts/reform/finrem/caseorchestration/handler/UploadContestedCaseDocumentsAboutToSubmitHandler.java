@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Docume
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.CASE;
@@ -111,10 +110,10 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         List<UploadCaseDocumentCollection> confidentialDocsUploaded =
             managedCollections.stream().filter(documentCollection ->
                     documentCollection.getUploadCaseDocument().getCaseDocumentConfidential().isYes())
-                .collect(Collectors.toList());
+                .toList();
 
         List<ConfidentialUploadedDocumentData> legacyConfidentialDocsUploaded =
-            confidentialDocsUploaded.stream().map(this::mapToLegacyConfidentialDocs).collect(Collectors.toList());
+            confidentialDocsUploaded.stream().map(this::mapToLegacyConfidentialDocs).toList();
 
         if (caseData.getConfidentialDocumentsUploaded() != null) {
             caseData.getConfidentialDocumentsUploaded().addAll(legacyConfidentialDocsUploaded);

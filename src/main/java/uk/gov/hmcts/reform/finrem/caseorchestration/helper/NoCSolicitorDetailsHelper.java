@@ -32,6 +32,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class NoCSolicitorDetailsHelper {
 
+    private NoCSolicitorDetailsHelper() {
+    }
+
     public static Map<String, Object> removeSolicitorAddress(CaseDetails caseDetails, boolean isContested) {
         Map<String, Object> caseData = caseDetails.getData();
 

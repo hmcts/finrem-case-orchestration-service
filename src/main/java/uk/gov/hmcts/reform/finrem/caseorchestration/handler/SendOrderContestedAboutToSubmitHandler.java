@@ -99,6 +99,7 @@ public class SendOrderContestedAboutToSubmitHandler
         }
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
         String caseId = String.valueOf(caseDetails.getId());
         log.info("In request to send general order for case {}:", caseId);
@@ -118,6 +119,7 @@ public class SendOrderContestedAboutToSubmitHandler
         }
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void printAndMailHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
 
         String caseId = String.valueOf(caseDetails.getId());
