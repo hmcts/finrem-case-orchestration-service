@@ -238,13 +238,16 @@ public class BulkPrintService {
 
 
     /**
-     * Please upgrade your code.
-     * This method will be removed in future versions.
-     *
-     * @return UUID to be return
-     * @deprecated deprecated since 15-Feb-2023
+     * Return BulkPrintDocument.
+     * <p>Please use @{@link #printIntervenerDocuments(IntervenerWrapper, FinremCaseDetails, String, List)}</p>
+     * @param intervenerWrapper instance of IntervenerWrapper
+     * @param caseDetails instance of CaseDetails
+     * @param authorisationToken instance of String
+     * @param caseDocuments instance of List
+     * @deprecated Use {@link IntervenerWrapper intervenerWrapper, CaseDetails caseDetails,
+     *                                          String authorisationToken,
+     *                                          List caseDocuments}
      */
-    @Deprecated(since = "15-Feb-2023")
     public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails,
                                          String authorisationToken,
                                          List<BulkPrintDocument> caseDocuments) {
@@ -266,14 +269,15 @@ public class BulkPrintService {
     }
 
     /**
-     * Please upgrade your code.
-     * This method will be removed in future versions.
-     * <p>Use @link generateIntervenerCoverSheet(FinremCaseDetails caseDetails, String authorisationToken,
-     *                                                            DocumentHelper.PaperNotificationRecipient recipient) instead </p>
-     * @return UUID to be return
-     * @deprecated deprecated since 15-Feb-2023
+     * Return BulkPrintDocument.
+     * <p>Please use @{@link #generateIntervenerCoverSheet(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}</p>
+     * @param caseDetails instance of CaseDetails
+     * @param authorisationToken instance of String
+     * @param recipient instance of DocumentHelper.PaperNotificationRecipient
+     * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken,
+     *                                                            DocumentHelper.PaperNotificationRecipient recipient}
      */
-    @Deprecated(since = "15-Feb-2023")
+    @Deprecated(since = "15-june-2023")
     private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken,
                                                            DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);

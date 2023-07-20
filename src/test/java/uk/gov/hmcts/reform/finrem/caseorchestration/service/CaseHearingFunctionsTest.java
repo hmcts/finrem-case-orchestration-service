@@ -28,7 +28,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -520,7 +520,7 @@ public class CaseHearingFunctionsTest {
             HIGHCOURT_COURTLIST, HIGHCOURT_COURT);
 
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
-        assertThat(stringObjectMap, is(nullValue()));
+        assertTrue(stringObjectMap.isEmpty());
     }
 
     @Test

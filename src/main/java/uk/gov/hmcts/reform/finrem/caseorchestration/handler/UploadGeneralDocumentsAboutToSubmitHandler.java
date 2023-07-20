@@ -41,6 +41,7 @@ public class UploadGeneralDocumentsAboutToSubmitHandler
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
 
