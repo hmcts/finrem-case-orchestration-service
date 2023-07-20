@@ -33,19 +33,19 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private final GeneralOrderService generalOrderService;
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
-    private final List<SendOrderPartyDocumentHandler> consentOrderPartyDocumentHandlers;
+    private final List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList;
 
 
     public SendOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                   GeneralOrderService generalOrderService,
                                                   GenericDocumentService genericDocumentService,
                                                   DocumentHelper documentHelper,
-                                                  List<SendOrderPartyDocumentHandler> consentOrderPartyDocumentHandlers) {
+                                                  List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
-        this.consentOrderPartyDocumentHandlers = consentOrderPartyDocumentHandlers;
+        this.sendOrderPartyDocumentList = sendOrderPartyDocumentList;
     }
 
     @Override
@@ -114,7 +114,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         log.info("Share Hearing Documents for case {}:", caseId);
         List<CaseDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, hearingOrders, userAuthorisation);
         hearingDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
-        consentOrderPartyDocumentHandlers.forEach(
+        sendOrderPartyDocumentList.forEach(
             handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, hearingDocumentPack));
 
     }
@@ -156,7 +156,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         CaseDocument generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
 
         if (generalOrderService.isSelectedOrderMatches(selectedOrders, generalOrder)) {
-            consentOrderPartyDocumentHandlers.forEach(
+            sendOrderPartyDocumentList.forEach(
                 handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, List.of(generalOrder)));
             printOrderCollection.add(addToPrintOrderCollection(generalOrder));
         }
