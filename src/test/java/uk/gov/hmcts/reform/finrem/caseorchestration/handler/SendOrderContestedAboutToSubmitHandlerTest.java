@@ -21,12 +21,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderApplicantDocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderIntervenerFourDocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderIntervenerOneDocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderIntervenerThreeDocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderIntervenerTwoDocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder.ConsentOrderRespondentDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerFourDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerOneDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerThreeDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerTwoDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderRespondentDocumentHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,12 +66,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     public void setUpTest() {
         sendOrderContestedAboutToSubmitHandler = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper, generalOrderService,
             genericDocumentService, documentHelper, List.of(
-                new ConsentOrderApplicantDocumentHandler(),
-                new ConsentOrderRespondentDocumentHandler(),
-                new ConsentOrderIntervenerOneDocumentHandler(),
-                new ConsentOrderIntervenerTwoDocumentHandler(),
-                new ConsentOrderIntervenerThreeDocumentHandler(),
-                new ConsentOrderIntervenerFourDocumentHandler())
+                new SendOrderApplicantDocumentHandler(),
+                new SendOrderRespondentDocumentHandler(),
+                new SendOrderIntervenerOneDocumentHandler(),
+                new SendOrderIntervenerTwoDocumentHandler(),
+                new SendOrderIntervenerThreeDocumentHandler(),
+                new SendOrderIntervenerFourDocumentHandler())
         );
     }
 

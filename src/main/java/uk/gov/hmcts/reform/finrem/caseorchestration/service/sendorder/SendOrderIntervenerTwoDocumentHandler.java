@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
@@ -10,19 +10,19 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class ConsentOrderIntervenerFourDocumentHandler extends ConsentOrderPartyDocumentHandler {
-    public ConsentOrderIntervenerFourDocumentHandler() {
-        super(CaseRole.INTVR_SOLICITOR_4.getCcdCode());
+public class SendOrderIntervenerTwoDocumentHandler extends SendOrderPartyDocumentHandler {
+    public SendOrderIntervenerTwoDocumentHandler() {
+        super(CaseRole.INTVR_SOLICITOR_2.getCcdCode());
     }
 
     @Override
     protected List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getIntv4OrderCollection())
+        return Optional.ofNullable(caseData.getIntv2OrderCollection())
             .orElse(new ArrayList<>());
     }
 
     @Override
     protected void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl) {
-        caseData.setIntv4OrderCollection(orderColl);
+        caseData.setIntv2OrderCollection(orderColl);
     }
 }

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class ConsentOrderRespondentDocumentHandler extends ConsentOrderPartyDocumentHandler {
+public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHandler {
 
-    public ConsentOrderRespondentDocumentHandler() {
+    public SendOrderRespondentDocumentHandler() {
         super(CaseRole.RESP_SOLICITOR.getCcdCode());
     }
 

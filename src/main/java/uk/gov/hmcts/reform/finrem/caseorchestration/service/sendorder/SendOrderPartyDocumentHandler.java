@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.consentorder;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrder;
@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public abstract class ConsentOrderPartyDocumentHandler {
+public abstract class SendOrderPartyDocumentHandler {
     private final String caseRoleCode;
 
-    public ConsentOrderPartyDocumentHandler(String caseRoleCode) {
+    protected SendOrderPartyDocumentHandler(String caseRoleCode) {
         this.caseRoleCode = caseRoleCode;
     }
 
