@@ -56,6 +56,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
     }
 
     @Override
+    @SuppressWarnings("java:S3776")
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -69,11 +70,14 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         log.info("logged-in user role {} in case {}", caseAssignedUserRoleList, caseId);
         String loggedInUserCaseRole = caseAssignedUserRoleList.get(0).getCaseRole();
         FinremCaseData caseData = caseDetails.getData();
+
         if (loggedInUserCaseRole == null) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                 .errors(List.of("Logged in user do not have sufficient role to execute this event")).build();
         }
+
         List<CaseAssignmentUserRole> allCaseRole = accessService.getAllCaseRole(String.valueOf(caseId));
+
         log.info("caseAssignedUserRoles {} caseId {}", loggedInUserCaseRole, caseId);
         if (loggedInUserCaseRole.equals(CaseRole.APP_SOLICITOR.getCcdCode()) || loggedInUserCaseRole.equals(CaseRole.APP_BARRISTER.getCcdCode())) {
             DynamicMultiSelectList sourceDocumentList = applicantDocumentsService.applicantSourceDocumentList(caseDetails);
