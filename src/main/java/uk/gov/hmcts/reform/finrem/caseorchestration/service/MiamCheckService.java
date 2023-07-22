@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableList;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -24,8 +23,8 @@ public class MiamCheckService {
 
         if (applicantAttended.equalsIgnoreCase("no")
             && claimingExemption.equalsIgnoreCase("no")) {
-            return ImmutableList.of(MIAM_EXEMPT_ERROR);
+            return List.of(MIAM_EXEMPT_ERROR);
         }
-        return ImmutableList.of();
+        return List.of();
     }
 }

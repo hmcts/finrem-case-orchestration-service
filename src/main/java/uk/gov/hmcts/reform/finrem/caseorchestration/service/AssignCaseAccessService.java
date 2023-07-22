@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.USER_ROLES_CACHE;
@@ -117,7 +116,7 @@ public class AssignCaseAccessService {
     private CaseAssignmentUserRolesRequest getCaseAssignmentUserRolesRequest(Long caseId, Set<String> users, String caseRole, String orgId) {
         final List<CaseAssignmentUserRoleWithOrganisation> caseAssignedRoles = users.stream()
             .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
-            .collect(Collectors.toList());
+            .toList();
 
         return CaseAssignmentUserRolesRequest.builder()
             .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
@@ -226,7 +225,7 @@ public class AssignCaseAccessService {
     private List<CaseAssignmentUserRole> getCreatorRoles(List<CaseAssignmentUserRole> allRoles) {
         return allRoles.stream()
             .filter(role -> role.getCaseRole().equalsIgnoreCase(CREATOR_ROLE))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private Optional<CaseAssignmentUserRole> getUserToRemove(List<CaseAssignmentUserRole> creatorRoles,
