@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
+@SuppressWarnings({"java:S6204", "java:S110"})
 public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
 
     private final DocumentHelper documentHelper;
