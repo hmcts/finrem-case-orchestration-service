@@ -86,7 +86,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
                     .orderRefusalOther(refusalOrder.getValue().getOrderRefusalOther())
                     .build())
                 .build()
-            ).collect(toList());
+            ).toList();
     }
 
     private List<String> getReasonsAsStringAndTranslate(OrderRefusalCollection refusalOrder) {

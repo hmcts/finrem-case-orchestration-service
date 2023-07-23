@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CourtList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
-
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 
-import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
@@ -62,7 +60,7 @@ public class CourtDetailsMapper {
     private List<Field> filterEmptyFields(List<Field> allFields, CourtListWrapper courtListWrapper) {
         return allFields.stream()
             .filter(field -> fieldIsNotNullOrEmpty.test(field, courtListWrapper))
-            .collect(toList());
+            .toList();
     }
 
     private FrcCourtDetails convertToFrcCourtDetails(Field initialisedCourtField,

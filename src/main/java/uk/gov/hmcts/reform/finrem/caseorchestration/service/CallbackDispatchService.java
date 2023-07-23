@@ -43,9 +43,9 @@ public class CallbackDispatchService {
                     callbackHandler.handle(callbackRequest, userAuthorisation);
 
                 callbackResponse.setData(handlerCallbackResponse.getData());
-                List<String> errors = Optional.ofNullable(handlerCallbackResponse.getErrors()).orElse(Collections.EMPTY_LIST);
+                List<String> errors = Optional.ofNullable(handlerCallbackResponse.getErrors()).orElse(Collections.emptyList());
                 callbackResponse.getErrors().addAll(errors);
-                List<String> warnings = Optional.ofNullable(handlerCallbackResponse.getWarnings()).orElse(Collections.EMPTY_LIST);
+                List<String> warnings = Optional.ofNullable(handlerCallbackResponse.getWarnings()).orElse(Collections.emptyList());
                 callbackResponse.getWarnings().addAll(warnings);
                 callbackResponse.setState(handlerCallbackResponse.getState());
             }

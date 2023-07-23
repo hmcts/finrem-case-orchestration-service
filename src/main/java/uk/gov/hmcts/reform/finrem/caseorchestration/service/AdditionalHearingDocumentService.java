@@ -220,6 +220,7 @@ public class AdditionalHearingDocumentService {
         caseData.put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, additionalHearingDocumentDataList);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<AdditionalHearingDocumentData> additionalHearingDocumentData =
             documentHelper.convertToAdditionalHearingDocumentData(

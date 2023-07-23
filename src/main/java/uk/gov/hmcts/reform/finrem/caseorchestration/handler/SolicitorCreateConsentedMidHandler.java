@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class SolicitorCreateConsentedMidHandler
     implements CallbackHandler<Map<String, Object>> {
 
-    private final ConsentedApplicationHelper contsentedApplicatonHelper;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -41,7 +41,7 @@ public class SolicitorCreateConsentedMidHandler
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        contsentedApplicatonHelper.setConsentVariationOrderLabelField(caseData);
+        consentedApplicationHelper.setConsentVariationOrderLabelField(caseData);
 
         String camelCaseLabel = (String) caseData.get(CV_ORDER_CAMELCASE_LABEL_FIELD);
         String lowerCaseLabel = (String) caseData.get(CV_LOWERCASE_LABEL_FIELD);

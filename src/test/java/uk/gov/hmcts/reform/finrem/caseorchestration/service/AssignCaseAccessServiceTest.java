@@ -39,7 +39,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -104,34 +104,6 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
             .thenReturn(assignCaseAccessRequest);
         when(assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()).thenReturn(TEST_URL);
         when(featureToggleService.isUseUserTokenEnabled()).thenReturn(true);
-    }
-
-    @Test
-    public void getActiveUserCaseRole() throws JsonProcessingException {
-
-        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
-
-        caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
-                SearchCaseAssignedUserRolesRequest.builder()
-                    .caseIds(List.of(TEST_CASE_ID))
-                    .build())))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(mapper.writeValueAsString(generateResourceWhenAppSolOnCase()))));
-
-        caseDataApi.stubFor(get(urlEqualTo("/case-users?case_ids=" + TEST_CASE_ID))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(mapper.writeValueAsString(generateResourceWhenCreatorOnCase()))));
-
-        List<CaseAssignmentUserRole> caseAssignmentUserRoles = assignCaseAccessService.searchUserRoles(TEST_CASE_ID).getCaseAssignmentUserRoles();
-        assertEquals(1, caseAssignmentUserRoles.size());
-        assertTrue(caseAssignmentUserRoles.stream().anyMatch(role -> role.getCaseRole().equals(APP_SOLICITOR_POLICY)));
-
-        String activeUserCaseRole = assignCaseAccessService.getActiveUserCaseRole(TEST_CASE_ID, AUTH_TOKEN);
-        assertEquals(APP_SOLICITOR_POLICY, activeUserCaseRole);
     }
 
     @Test

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -50,9 +48,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_TITLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 
 @Service
 @RequiredArgsConstructor
@@ -94,6 +89,7 @@ public class ConsentOrderApprovedDocumentService {
             fileName);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public CaseDocument generateApprovedConsentOrderCoverLetter(CaseDetails caseDetails, String authToken) {
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, APPLICANT);
         String approvedOrderNotificationFileName;
@@ -121,7 +117,7 @@ public class ConsentOrderApprovedDocumentService {
         return pensionList.stream()
             .filter(pensionCollectionData -> pensionCollectionData.getTypedCaseDocument().getPensionDocument() != null)
             .map(pensionCollectionData -> stampPensionDocuments(pensionCollectionData, authToken, stampType, caseId))
-            .collect(toList());
+            .toList();
     }
 
     private PensionTypeCollection stampPensionDocuments(PensionTypeCollection pensionDocument,
@@ -215,10 +211,9 @@ public class ConsentOrderApprovedDocumentService {
     }
 
     private List<PensionTypeCollection> getContestedConsentPensionDocuments(Map<String, Object> caseData) {
-        if (StringUtils.isEmpty(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))) {
+        if (ObjectUtils.isEmpty(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))) {
             return new ArrayList<>();
         }
-
         return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION), new TypeReference<>() {
         });
     }
@@ -249,7 +244,11 @@ public class ConsentOrderApprovedDocumentService {
             ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
 
         List<ConsentOrderCollection> convertedData = new ArrayList<>();
-        List<ConsentOrderCollection> approvedOrderList = covert(caseData.get(approvedOrderCollectionFieldName));
+        Object approveOderColl = caseData.get(approvedOrderCollectionFieldName);
+        List<ConsentOrderCollection> approvedOrderList = mapper.registerModule(new JavaTimeModule())
+            .convertValue(approveOderColl != null ? approveOderColl : Collections.emptyList(), new TypeReference<>() {
+            });
+
         if (!approvedOrderList.isEmpty()) {
             approvedOrderList.forEach(order -> bulkPrintDocuments(order,
                 caseData, documents, convertedData, approvedOrderCollectionFieldName,
@@ -310,48 +309,12 @@ public class ConsentOrderApprovedDocumentService {
         caseData.put(approvedOrderCollectionFieldName, convertedData);
     }
 
-    private List<ConsentOrderCollection> covert(Object object) {
-        if (object == null) {
-            return Collections.emptyList();
-        }
-        return mapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
-        });
-    }
-
     private List<PensionTypeCollection> covertPensionType(Object object) {
         if (object == null) {
             return Collections.emptyList();
         }
         return mapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
         });
-    }
-
-    public List<CaseDocument> approvedOrderCollection(CaseDetails caseDetails, String authorisationToken) {
-        Map<String, Object> data = caseDetails.getData();
-        List<CaseDocument> documents = new ArrayList<>();
-        String approvedOrderCollectionFieldName = caseDataService.isConsentedInContestedCase(caseDetails)
-            ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
-
-        List<Map> approvedOrderCollectionData = ofNullable(data.get(approvedOrderCollectionFieldName))
-            .map(List.class::cast)
-            .orElse(new ArrayList<>());
-
-        if (!approvedOrderCollectionData.isEmpty()) {
-            log.info("Extracting '{}' from case data for bulk print, case {}", approvedOrderCollectionFieldName, caseDetails.getId());
-            Map<String, Object> lastApprovedOrder = (Map<String, Object>) (approvedOrderCollectionData.get(approvedOrderCollectionData.size() - 1)
-                .get(VALUE));
-            documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, ORDER_LETTER).ifPresent(documents::add);
-            documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, CONSENT_ORDER).ifPresent(documents::add);
-            documents.addAll(documentHelper.getDocumentLinksFromCustomCollectionAsCaseDocuments(
-                lastApprovedOrder,
-                PENSION_DOCUMENTS,
-                "uploadedDocument"));
-        } else {
-            log.info("Failed to extract '{}' from case data for bulk print as document list was empty, case {}",
-                approvedOrderCollectionFieldName, caseDetails.getId());
-        }
-
-        return documents;
     }
 
     public void addGeneratedApprovedConsentOrderDocumentsToCase(String userAuthorisation,

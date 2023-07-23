@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.ObjectUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,7 +23,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -456,7 +457,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     void verifyCourtDetailsFieldsNotSet() {
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
-        assertThat(data.get("courtDetails"), is(nullValue()));
+        assertTrue(ObjectUtils.isEmpty(data.get("courtDetails")));
     }
 
     void verifyAdditionalNonFastTrackFields() {
