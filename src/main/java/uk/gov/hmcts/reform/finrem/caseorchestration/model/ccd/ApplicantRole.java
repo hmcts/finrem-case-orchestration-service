@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@SuppressWarnings("java:S115")
 public enum ApplicantRole {
-    FR_APPLICANTS_ROLE_IN_DIVORCE_1,
-    FR_APPLICANTS_ROLE_IN_DIVORCE_2
+    FR_ApplicantsRoleInDivorce_1,
+    FR_ApplicantsRoleInDivorce_2
 }
