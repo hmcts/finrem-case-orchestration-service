@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
+@SuppressWarnings("java:S3740")
 public class CcdCallbackController {
 
     private final CallbackDispatchService callbackDispatchService;

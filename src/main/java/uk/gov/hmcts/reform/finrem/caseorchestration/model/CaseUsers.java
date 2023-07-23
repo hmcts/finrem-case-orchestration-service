@@ -6,7 +6,7 @@ import lombok.Getter;
 @Builder
 @Getter
 public class CaseUsers {
-    private String case_id;
-    private String user_id;
-    private String case_role;
+    private String caseId;
+    private String userId;
+    private String caseRole;
 }

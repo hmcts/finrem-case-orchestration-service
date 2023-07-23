@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public enum ApplicantRepresentedPaper {
-    FR_applicant_represented_1,
-    FR_applicant_represented_2,
-    FR_applicant_represented_3
+    FR_APPLICANT_REPRESENTED_1,
+    FR_APPLICANT_REPRESENTED_2,
+    FR_APPLICANT_REPRESENTED_3
 }

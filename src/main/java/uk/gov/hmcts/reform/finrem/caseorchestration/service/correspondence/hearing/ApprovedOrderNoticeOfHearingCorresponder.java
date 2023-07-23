@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
+@SuppressWarnings("java:S110")
 public class ApprovedOrderNoticeOfHearingCorresponder extends HearingCorresponder {
 
     private final ObjectMapper objectMapper;

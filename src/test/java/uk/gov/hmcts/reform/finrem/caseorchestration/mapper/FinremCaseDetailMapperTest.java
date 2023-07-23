@@ -367,8 +367,8 @@ class FinremCaseDetailMapperTest {
     }
 
     private void assertEnums(FinremCaseData caseData) {
-        assertEquals(ApplicantRole.FR_ApplicantsRoleInDivorce_1, caseData.getDivRoleOfFrApplicant());
-        assertEquals(ApplicantRepresentedPaper.FR_applicant_represented_1, caseData.getApplicantRepresentedPaper());
+        assertEquals(ApplicantRole.FR_APPLICANTS_ROLE_IN_DIVORCE_1, caseData.getDivRoleOfFrApplicant());
+        assertEquals(ApplicantRepresentedPaper.FR_APPLICANT_REPRESENTED_1, caseData.getApplicantRepresentedPaper());
         assertEquals(AuthorisationSignedBy.LITIGATION_FRIEND, caseData.getAuthorisationSignedBy());
         assertEquals(HearingTypeDirection.DIR, caseData.getHearingType());
         assertTrue(caseData.getJudgeAllocated().containsAll(List.of(

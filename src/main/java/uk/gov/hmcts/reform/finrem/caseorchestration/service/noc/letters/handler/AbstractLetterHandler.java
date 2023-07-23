@@ -107,6 +107,7 @@ public abstract class AbstractLetterHandler implements LetterHandler {
         return StringUtils.isNotEmpty(nullToEmpty(caseDetails.getData().get(caseDataField)));
     }
 
+    @SuppressWarnings("java:S3740")
     protected boolean isAddressFieldPopulated(CaseDetails caseDetails, String addressField) {
         Map addressMap = (Map) caseDetails.getData().get(addressField);
         return ObjectUtils.isNotEmpty(addressMap)

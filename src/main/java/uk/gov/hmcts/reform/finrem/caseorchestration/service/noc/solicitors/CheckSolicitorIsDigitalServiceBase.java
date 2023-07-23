@@ -14,7 +14,7 @@ public abstract class CheckSolicitorIsDigitalServiceBase {
     @Autowired
     protected final CaseDataService caseDataService;
 
-    public CheckSolicitorIsDigitalServiceBase(CaseDataService caseDataService) {
+    protected CheckSolicitorIsDigitalServiceBase(CaseDataService caseDataService) {
         this.caseDataService = caseDataService;
     }
 

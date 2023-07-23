@@ -12,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@SuppressWarnings({"java:S2387"})
 public class BarristerCollectionItem extends CollectionElement<Barrister> {
 
     @JsonProperty("value")

@@ -170,6 +170,7 @@ public class GeneralApplicationDirectionsService {
         printInterimDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
     }
 
+    @SuppressWarnings("java:S1874")
     private void printInterimDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
                                                                          List<BulkPrintDocument> documents) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -261,6 +262,7 @@ public class GeneralApplicationDirectionsService {
         return documents;
     }
 
+    @SuppressWarnings("java:S1874")
     private void printDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
                                                                   List<BulkPrintDocument> documents) {
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
@@ -277,6 +279,7 @@ public class GeneralApplicationDirectionsService {
         }
     }
 
+    @SuppressWarnings("java:S1874")
     private CaseDocument prepareGeneralApplicationDirectionsOrderDocument(CaseDetails caseDetails, String authorisationToken) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
@@ -291,6 +294,7 @@ public class GeneralApplicationDirectionsService {
             documentConfiguration.getGeneralApplicationOrderFileName());
     }
 
+    @SuppressWarnings("java:S1874")
     private CaseDocument prepareHearingRequiredNoticeDocument(CaseDetails caseDetails, String authorisationToken) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
