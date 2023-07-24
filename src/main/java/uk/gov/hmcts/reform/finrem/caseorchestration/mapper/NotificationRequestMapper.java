@@ -61,7 +61,7 @@ public class NotificationRequestMapper {
      * Return NotificationRequest .
      * <p>Please use @{@link #getNotificationRequestForRespondentSolicitor(FinremCaseDetails, Map)}</p>
      *
-     * @param caseDetails        instance of CaseDetails
+     * @param caseDetails instance of CaseDetails
      * @param interimHearingData instance of Map
      * @deprecated Use {@link CaseDetails caseDetails, Map interimHearingData}
      */
@@ -102,7 +102,7 @@ public class NotificationRequestMapper {
      */
     @Deprecated(since = "15-june-2023")
     public NotificationRequest getNotificationRequestForConsentApplicantSolicitor(CaseDetails caseDetails,
-                                                                                  Map<String, Object> hearingData) {
+                                                                           Map<String, Object> hearingData) {
         return buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(), hearingData);
     }
 
@@ -194,9 +194,9 @@ public class NotificationRequestMapper {
      * Return NotificationRequest .
      * <p>Please use @{@link #buildInterimHearingNotificationRequest(FinremCaseDetails, SolicitorCaseDataKeysWrapper, Map)}</p>
      *
-     * @param caseDetails         instance of CaseDetails
+     * @param caseDetails instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @param interimHearingData  instance of Map
+     * @param interimHearingData instance of Map
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper, Map interimHearingData}
      */
     @Deprecated(since = "15-june-2023")
@@ -250,7 +250,7 @@ public class NotificationRequestMapper {
      * No Return.
      * <p>Please use @{@link #getNotificationCoreData(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails         instance of CaseDetails
+     * @param caseDetails instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
      */
@@ -306,7 +306,7 @@ public class NotificationRequestMapper {
         notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
         notificationRequest.setSolicitorReferenceNumber(
             Objects.toString(notificationRequestPayload.get(caseDataKeysWrapper.getSolicitorReferenceKey()),
-                EMPTY_STRING));
+            EMPTY_STRING));
         notificationRequest.setDivorceCaseNumber(
             Objects.toString(notificationRequestPayload.get(DIVORCE_CASE_NUMBER)));
         notificationRequest.setName(
