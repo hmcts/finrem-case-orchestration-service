@@ -92,7 +92,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
             any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.getFinremCaseDataKeysForIntervenerSolicitor(intervenerOneWrapper))
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerOneWrapper))
             .thenReturn(SolicitorCaseDataKeysWrapper.builder().build());
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");

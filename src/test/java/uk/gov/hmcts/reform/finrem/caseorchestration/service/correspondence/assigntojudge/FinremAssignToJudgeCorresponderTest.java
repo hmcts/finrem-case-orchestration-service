@@ -96,13 +96,13 @@ public class FinremAssignToJudgeCorresponderTest {
             .builder().build();
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOneWrapper(),
             caseDetails)).thenReturn(true);
-        when(notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerOneWrapper()))
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerOneWrapper()))
             .thenReturn(dataKeysWrapper);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOneWrapper(),
             caseDetails);
-        verify(notificationService).getFinremCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerOneWrapper());
+        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerOneWrapper());
         verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
     }
 
@@ -114,13 +114,13 @@ public class FinremAssignToJudgeCorresponderTest {
             .builder().build();
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerTwoWrapper(),
             caseDetails)).thenReturn(true);
-        when(notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerTwoWrapper()))
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerTwoWrapper()))
             .thenReturn(dataKeysWrapper);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerTwoWrapper(),
             caseDetails);
-        verify(notificationService).getFinremCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerTwoWrapper());
+        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerTwoWrapper());
         verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
     }
 
@@ -132,13 +132,13 @@ public class FinremAssignToJudgeCorresponderTest {
             .builder().build();
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerThreeWrapper(),
             caseDetails)).thenReturn(true);
-        when(notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerThreeWrapper()))
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerThreeWrapper()))
             .thenReturn(dataKeysWrapper);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerThreeWrapper(),
             caseDetails);
-        verify(notificationService).getFinremCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerThreeWrapper());
+        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerThreeWrapper());
         verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
     }
 
@@ -150,13 +150,13 @@ public class FinremAssignToJudgeCorresponderTest {
             .builder().build();
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFourWrapper(),
             caseDetails)).thenReturn(true);
-        when(notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerFourWrapper()))
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerFourWrapper()))
             .thenReturn(dataKeysWrapper);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFourWrapper(),
             caseDetails);
-        verify(notificationService).getFinremCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerFourWrapper());
+        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerFourWrapper());
         verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
     }
 
