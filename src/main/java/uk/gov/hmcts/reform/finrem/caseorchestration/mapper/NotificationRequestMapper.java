@@ -43,6 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
 @Slf4j
@@ -61,23 +62,23 @@ public class NotificationRequestMapper {
      * Return NotificationRequest .
      * <p>Please use @{@link #getNotificationRequestForRespondentSolicitor(FinremCaseDetails, Map)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails        instance of CaseDetails
      * @param interimHearingData instance of Map
      * @deprecated Use {@link CaseDetails caseDetails, Map interimHearingData}
      */
     @Deprecated(since = "15-june-2023")
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails,
                                                                             Map<String, Object> interimHearingData) {
-        return buildInterimHearingNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(), interimHearingData);
+        return buildInterimHearingNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(caseDetails.getData()), interimHearingData);
     }
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails,
                                                                             Map<String, Object> interimHearingData) {
-        return buildInterimHearingNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(), interimHearingData);
+        return buildInterimHearingNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(caseDetails.getData()), interimHearingData);
     }
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails) {
-        return buildInterimHearingNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor());
+        return buildInterimHearingNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(caseDetails.getData()));
     }
 
     public NotificationRequest getNotificationRequestForIntervenerSolicitor(CaseDetails caseDetails,
@@ -102,25 +103,26 @@ public class NotificationRequestMapper {
      */
     @Deprecated(since = "15-june-2023")
     public NotificationRequest getNotificationRequestForConsentApplicantSolicitor(CaseDetails caseDetails,
-                                                                           Map<String, Object> hearingData) {
-        return buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(), hearingData);
+                                                                                  Map<String, Object> hearingData) {
+        return buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(caseDetails.getData()), hearingData);
     }
 
     public NotificationRequest getNotificationRequestForConsentApplicantSolicitor(FinremCaseDetails caseDetails,
                                                                                   Map<String, Object> hearingData) {
-        return buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(), hearingData);
+        return buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(caseDetails.getData()), hearingData);
     }
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails,
                                                                            Map<String, Object> interimHearingData) {
-        return buildInterimHearingNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(), interimHearingData);
+        return buildInterimHearingNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(caseDetails.getData()),
+            interimHearingData);
     }
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
-            ? buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor())
-            : buildInterimHearingNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor());
+            ? buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(caseDetails.getData()))
+            : buildInterimHearingNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(caseDetails.getData()));
     }
 
     public NotificationRequest getNotificationRequestForNoticeOfChange(CaseDetails caseDetails) {
@@ -129,29 +131,54 @@ public class NotificationRequestMapper {
             : getNotificationRequestForApplicantSolicitor(caseDetails);
     }
 
-    private SolicitorCaseDataKeysWrapper getContestedCaseDataKeysForApplicantSolicitor() {
+    private SolicitorCaseDataKeysWrapper getContestedCaseDataKeysForApplicantSolicitor(FinremCaseData finremCaseData) {
         return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(CONTESTED_SOLICITOR_EMAIL)
-            .solicitorNameKey(CONTESTED_SOLICITOR_NAME)
-            .solicitorReferenceKey(SOLICITOR_REFERENCE)
+            .solicitorEmailKey(nullToEmpty(finremCaseData.getAppSolicitorEmail()))
+            .solicitorNameKey(nullToEmpty(finremCaseData.getAppSolicitorName()))
+            .solicitorReferenceKey(nullToEmpty(finremCaseData.getContactDetailsWrapper().getSolicitorReference()))
             .build();
     }
 
-    private SolicitorCaseDataKeysWrapper getConsentedCaseDataKeysForApplicantSolicitor() {
+    private SolicitorCaseDataKeysWrapper getContestedCaseDataKeysForApplicantSolicitor(Map<String, Object> caseData) {
         return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(SOLICITOR_EMAIL)
-            .solicitorNameKey(CONSENTED_SOLICITOR_NAME)
-            .solicitorReferenceKey(SOLICITOR_REFERENCE)
+            .solicitorEmailKey(nullToEmpty(caseData.get(CONTESTED_SOLICITOR_EMAIL)))
+            .solicitorNameKey(nullToEmpty(caseData.get(CONTESTED_SOLICITOR_NAME)))
+            .solicitorReferenceKey(nullToEmpty(caseData.get(SOLICITOR_REFERENCE)))
             .build();
     }
 
-    private SolicitorCaseDataKeysWrapper getCaseDataKeysForRespondentSolicitor() {
+    private SolicitorCaseDataKeysWrapper getConsentedCaseDataKeysForApplicantSolicitor(FinremCaseData finremCaseData) {
         return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(RESP_SOLICITOR_EMAIL)
-            .solicitorNameKey(RESP_SOLICITOR_NAME)
-            .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE)
+            .solicitorEmailKey(nullToEmpty(finremCaseData.getAppSolicitorEmail()))
+            .solicitorNameKey(nullToEmpty(finremCaseData.getAppSolicitorName()))
+            .solicitorReferenceKey(nullToEmpty(finremCaseData.getContactDetailsWrapper().getSolicitorReference()))
             .build();
     }
+
+    private SolicitorCaseDataKeysWrapper getConsentedCaseDataKeysForApplicantSolicitor(Map<String, Object> caseData) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(nullToEmpty(caseData.get(SOLICITOR_EMAIL)))
+            .solicitorNameKey(nullToEmpty(caseData.get(CONSENTED_SOLICITOR_NAME)))
+            .solicitorReferenceKey(nullToEmpty(caseData.get(SOLICITOR_REFERENCE)))
+            .build();
+    }
+
+    private SolicitorCaseDataKeysWrapper getCaseDataKeysForRespondentSolicitor(FinremCaseData finremCaseData) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorEmail()))
+            .solicitorNameKey(nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorName()))
+            .solicitorReferenceKey(nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
+            .build();
+    }
+
+    private SolicitorCaseDataKeysWrapper getCaseDataKeysForRespondentSolicitor(Map<String, Object> caseData) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(nullToEmpty(caseData.get(RESP_SOLICITOR_EMAIL)))
+            .solicitorNameKey(nullToEmpty(caseData.get(RESP_SOLICITOR_NAME)))
+            .solicitorReferenceKey(nullToEmpty(caseData.get(RESP_SOLICITOR_REFERENCE)))
+            .build();
+    }
+
 
     private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(CaseDetails caseDetails) {
         return getLastRepresentationUpdate(caseDetails).getParty().equals(RESPONDENT);
@@ -194,9 +221,9 @@ public class NotificationRequestMapper {
      * Return NotificationRequest .
      * <p>Please use @{@link #buildInterimHearingNotificationRequest(FinremCaseDetails, SolicitorCaseDataKeysWrapper, Map)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @param interimHearingData instance of Map
+     * @param interimHearingData  instance of Map
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper, Map interimHearingData}
      */
     @Deprecated(since = "15-june-2023")
@@ -250,7 +277,7 @@ public class NotificationRequestMapper {
      * No Return.
      * <p>Please use @{@link #getNotificationCoreData(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
      */
@@ -260,11 +287,10 @@ public class NotificationRequestMapper {
         Map<String, Object> caseData = caseDetails.getData();
 
         notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
-        notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseData.get(caseDataKeysWrapper.getSolicitorReferenceKey()),
-            EMPTY_STRING));
+        notificationRequest.setSolicitorReferenceNumber(caseDataKeysWrapper.getSolicitorReferenceKey());
         notificationRequest.setDivorceCaseNumber(Objects.toString(caseData.get(DIVORCE_CASE_NUMBER)));
-        notificationRequest.setName(Objects.toString(caseData.get(caseDataKeysWrapper.getSolicitorNameKey())));
-        notificationRequest.setNotificationEmail(Objects.toString(caseData.get(caseDataKeysWrapper.getSolicitorEmailKey())));
+        notificationRequest.setName(Objects.toString(caseDataKeysWrapper.getSolicitorNameKey()));
+        notificationRequest.setNotificationEmail(caseDataKeysWrapper.getSolicitorEmailKey());
         notificationRequest.setGeneralEmailBody(Objects.toString(caseData.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
@@ -305,14 +331,13 @@ public class NotificationRequestMapper {
 
         notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
         notificationRequest.setSolicitorReferenceNumber(
-            Objects.toString(notificationRequestPayload.get(caseDataKeysWrapper.getSolicitorReferenceKey()),
-            EMPTY_STRING));
+            caseDataKeysWrapper.getSolicitorReferenceKey());
         notificationRequest.setDivorceCaseNumber(
             Objects.toString(notificationRequestPayload.get(DIVORCE_CASE_NUMBER)));
         notificationRequest.setName(
-            Objects.toString(notificationRequestPayload.get(caseDataKeysWrapper.getSolicitorNameKey())));
+            Objects.toString(caseDataKeysWrapper.getSolicitorNameKey()));
         notificationRequest.setNotificationEmail(
-            Objects.toString(notificationRequestPayload.get(caseDataKeysWrapper.getSolicitorEmailKey())));
+            Objects.toString(caseDataKeysWrapper.getSolicitorEmailKey()));
         notificationRequest.setGeneralEmailBody(
             Objects.toString(notificationRequestPayload.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(caseDetails.getCaseType().toString().toLowerCase());
