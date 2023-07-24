@@ -11,7 +11,6 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -28,7 +27,7 @@ public abstract class AbstractServiceHealthCheckTest {
     @Test
     public void statusHealthy() {
         String uri = uri();
-        when(restTemplate.getForEntity(eq(uri), eq(Object.class))).thenReturn(ResponseEntity.ok(""));
+        when(restTemplate.getForEntity(uri, Object.class)).thenReturn(ResponseEntity.ok(""));
         assertThat(healthCheckInstance().health(), is(Health.up().withDetail("uri", uri()).build()));
     }
 
@@ -46,7 +45,7 @@ public abstract class AbstractServiceHealthCheckTest {
     public void statusUnknown() {
         String uri = uri();
 
-        when(restTemplate.getForEntity(eq(uri), eq(Object.class)))
+        when(restTemplate.getForEntity(uri, Object.class))
             .thenReturn(ResponseEntity.accepted().build());
         assertThat(healthCheckInstance().health(), is(Health.unknown().withDetail("uri", uri).build()));
     }
@@ -54,7 +53,7 @@ public abstract class AbstractServiceHealthCheckTest {
     private void doHealthDownTest(Exception ex) {
         String uri = uri();
 
-        when(restTemplate.getForEntity(eq(uri), eq(Object.class)))
+        when(restTemplate.getForEntity(uri, Object.class))
             .thenThrow(ex);
 
         assertThat(healthCheckInstance().health(), is(Health.down().withDetail("uri", uri).withException(ex).build()));
