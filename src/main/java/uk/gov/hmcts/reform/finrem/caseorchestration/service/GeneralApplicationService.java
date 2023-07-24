@@ -66,10 +66,10 @@ public class GeneralApplicationService {
 
         List<GeneralApplicationCollectionData> interimGeneralApplicationList = generalApplicationList.stream()
             .filter(f -> generalApplicationListBefore.stream().map(GeneralApplicationCollectionData::getId)
-                .noneMatch(i -> i.equals(f.getId()))).collect(Collectors.toList());
+                .noneMatch(i -> i.equals(f.getId()))).toList();
 
         List<GeneralApplicationCollectionData> processableList = interimGeneralApplicationList.stream()
-            .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).collect(Collectors.toList());
+            .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).toList();
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
@@ -96,7 +96,7 @@ public class GeneralApplicationService {
 
         List<GeneralApplicationCollectionData> applicationCollectionDataList = generalApplicationCollectionDataList.stream()
             .sorted(helper::getCompareTo)
-            .collect(Collectors.toList());
+                .toList();
 
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
         return caseData;
@@ -126,7 +126,7 @@ public class GeneralApplicationService {
             List<GeneralApplicationSupportingDocumentData> generalApplicationSupportingDocumentDataList
                 = gaSupportDocuments.stream()
                 .map(sd -> processSupportingDocuments(sd.getValue(), userAuthorisation, caseId))
-                .collect(Collectors.toList());
+                .toList();
             generalApplicationItems.setGaSupportDocuments(generalApplicationSupportingDocumentDataList);
         }
 

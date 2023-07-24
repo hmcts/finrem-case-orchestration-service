@@ -32,8 +32,8 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,7 +46,6 @@ public class EvidenceManagementAuditServiceTest {
     public static final String AUTH = "auth";
     public static final String IDAM_OAUTH_TOKEN = "idamOauthToken";
     public static final String SERVICE_AUTH = "serviceAuth";
-    public static final String DOC_UUID = "d607c045-878e-475f-ab8e-b2f667d8af64";
 
     @Mock
     private IdamAuthService idamAuthService;
@@ -135,8 +134,8 @@ public class EvidenceManagementAuditServiceTest {
         assertThat(response.get(0).getFileName(), is("PNGFile.png"));
         assertThat(response.get(0).getFileUrl(), is(DOC_URL));
         assertThat(response.get(0).getMimeType(), is("image/png"));
-        assertTrue(response.get(0).getCreatedOn().equals(FinremDateUtils.getLocalDateTime("2020-12-08T16:27:46")));
-        assertTrue(response.get(0).getModifiedOn().equals(FinremDateUtils.getLocalDateTime("2020-12-08T16:27:46")));
+        assertEquals(response.get(0).getCreatedOn(), FinremDateUtils.getLocalDateTime("2020-12-08T16:27:46"));
+        assertEquals(response.get(0).getModifiedOn(), FinremDateUtils.getLocalDateTime("2020-12-08T16:27:46"));
     }
 
     @SneakyThrows

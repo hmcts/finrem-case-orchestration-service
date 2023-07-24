@@ -311,12 +311,12 @@ public class FormAValidatorTest {
 
     @Test
     public void shouldValidateDivorceCaseNumber() {
-        OcrValidationResult ocrInvalidResult = formAValidator.validateBulkScanForm(asList(
+        OcrValidationResult ocrInvalidResult = formAValidator.validateBulkScanForm(List.of(
             new OcrDataField(DIVORCE_CASE_NUMBER, "1234567890")
         ));
         assertThat(ocrInvalidResult.getWarnings(), hasItem("divorceCaseNumber is not in a valid format"));
 
-        OcrValidationResult ocrValidResult = formAValidator.validateBulkScanForm(asList(
+        OcrValidationResult ocrValidResult = formAValidator.validateBulkScanForm(List.of(
             new OcrDataField(DIVORCE_CASE_NUMBER, "DD12D12345")
         ));
         assertThat(ocrValidResult.getWarnings(), not(hasItem("divorceCaseNumber is not in a valid format")));

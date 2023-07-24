@@ -11,13 +11,11 @@ import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -76,6 +74,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.help
 public class FormAValidator extends BulkScanFormValidator {
 
     private static final String HWF_NUMBER_6_DIGITS_REGEX = "\\d{6}";
+    private static final String FORM_A_LOG_MESSAGE = "Form A Validation of Scanned Documents failed.";
     private static final String DIVORCE_CASE_NUMBER_REGEX
         = "^([A-Z|a-z][A-Z|a-z])\\d{2}[D|d|J|j|N|n]\\d{5}$|\\b\\d{4}[ -]\\d{4}[ -]\\d{4}[ -]\\d{4}\\b|\\b\\d{4}\\d{4}\\d{4}\\d{4}\\b";
 
@@ -126,7 +125,7 @@ public class FormAValidator extends BulkScanFormValidator {
             "ApplyToVary",
             "ApplyToDischargePeriodicalPaymentOrder"
         ));
-        ALLOWED_VALUES_PER_FIELD.put(APPLYING_FOR_CONSENT_ORDER, asList("Yes"));
+        ALLOWED_VALUES_PER_FIELD.put(APPLYING_FOR_CONSENT_ORDER, List.of("Yes"));
         ALLOWED_VALUES_PER_FIELD.put(DIVORCE_STAGE_REACHED, asList("Decree Nisi", "Decree Absolute", "Petition Issued"));
         ALLOWED_VALUES_PER_FIELD.put(APPLICANT_REPRESENTED, asList(
             "I am not represented by a solicitor in these proceedings",
@@ -196,14 +195,14 @@ public class FormAValidator extends BulkScanFormValidator {
         return fieldValue != null && Arrays.stream(fieldValue.split(" "))
             .filter(StringUtils::isNotBlank)
             .count() < 2
-            ? asList(String.format("%s must contain a firstname and a lastname", fieldName))
+            ? Collections.singletonList(String.format("%s must contain a firstname and a lastname", fieldName))
             : emptyList();
     }
 
-    private static List<String> validateHwfNumber(Map<String, String> fieldsMap, String fieldName) {
-        String hwfNumber = fieldsMap.get(fieldName);
+    private static List<String> validateHwfNumber(Map<String, String> fieldsMap) {
+        String hwfNumber = fieldsMap.get(HWF_NUMBER);
         return hwfNumber != null && !hwfNumber.matches(HWF_NUMBER_6_DIGITS_REGEX)
-            ? asList("HWFNumber is usually 6 digits")
+            ? List.of("HWFNumber is usually 6 digits")
             : emptyList();
     }
 
@@ -218,32 +217,28 @@ public class FormAValidator extends BulkScanFormValidator {
 
     @Override
     protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
-        List<String> errorMessages = Stream.of(
-                validateHwfNumber(fieldsMap, HWF_NUMBER),
-                validateHasAtLeastTwoNames(fieldsMap, APPLICANT_FULL_NAME),
-                validateHasAtLeastTwoNames(fieldsMap, RESPONDENT_FULL_NAME),
-                validateNonMandatoryCommaSeparatedField(fieldsMap,
-                    NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames),
-                validateNonMandatoryCommaSeparatedField(
-                    fieldsMap,
-                    DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE,
-                    dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames
-                ),
-                validateField(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX),
-                validateField(fieldsMap, APPLICANT_EMAIL, CCD_EMAIL_REGEX),
-                validatePostcode(fieldsMap, APPLICANT_ADDRESS_POSTCODE),
-                validatePostcode(fieldsMap, RESPONDENT_ADDRESS_POSTCODE),
-                validateField(fieldsMap, DIVORCE_CASE_NUMBER, DIVORCE_CASE_NUMBER_REGEX)
-            )
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+        List<String> errorMessages = new ArrayList<>();
+        errorMessages.addAll(validateHwfNumber(fieldsMap));
+        errorMessages.addAll(validateHasAtLeastTwoNames(fieldsMap, APPLICANT_FULL_NAME));
+        errorMessages.addAll(validateHasAtLeastTwoNames(fieldsMap, RESPONDENT_FULL_NAME));
+        errorMessages.addAll(validateNonMandatoryCommaSeparatedField(fieldsMap,
+            NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames));
+        errorMessages.addAll(validateNonMandatoryCommaSeparatedField(
+            fieldsMap,
+            DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE,
+            dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames
+        ));
+        errorMessages.addAll(validateField(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX));
+        errorMessages.addAll(validateField(fieldsMap, APPLICANT_EMAIL, CCD_EMAIL_REGEX));
+        errorMessages.addAll(validatePostcode(fieldsMap, APPLICANT_ADDRESS_POSTCODE));
+        errorMessages.addAll(validatePostcode(fieldsMap, RESPONDENT_ADDRESS_POSTCODE));
+        errorMessages.addAll(validateField(fieldsMap, DIVORCE_CASE_NUMBER, DIVORCE_CASE_NUMBER_REGEX));
 
         validateFormDate(fieldsMap, AUTHORISATION_DATE).ifPresent(errorMessages::add);
         validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_1).ifPresent(errorMessages::add);
         validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_2).ifPresent(errorMessages::add);
 
         log.info("Form A Validation (Post-processing) returned the following errors: {}", errorMessages);
-
         return errorMessages;
     }
 
@@ -287,20 +282,17 @@ public class FormAValidator extends BulkScanFormValidator {
 
         if (numberOfFormADocumentsAttached != 1) {
             attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'FormA'");
-            log.info("Form A Validation of Scanned Documents failed."
-                + " Expected 1 Form A attached, received {}", numberOfFormADocumentsAttached);
+            log.info(FORM_A_LOG_MESSAGE + " Expected 1 Form A attached, received {}", numberOfFormADocumentsAttached);
         }
 
         if (numberOfDraftConsentOrderDocumentsAttached != 1) {
             attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'DraftConsentOrder'");
-            log.info("Form A Validation of Scanned Documents failed."
-                + " Expected 1 Draft Consent Order attached, received {}", numberOfDraftConsentOrderDocumentsAttached);
+            log.info(FORM_A_LOG_MESSAGE + " Expected 1 Draft Consent Order attached, received {}", numberOfDraftConsentOrderDocumentsAttached);
         }
 
         if (numberOfD81DocumentsAttached == 0) {
             attachedDocumentsValidationErrorMessages.add("Must be at least one document with subtype of 'D81'");
-            log.info("Form A Validation of Scanned Documents failed."
-                + " Expected at least 1 D81 attached, received {}", numberOfD81DocumentsAttached);
+            log.info(FORM_A_LOG_MESSAGE + " Expected at least 1 D81 attached, received {}", numberOfD81DocumentsAttached);
         }
 
         return attachedDocumentsValidationErrorMessages;
@@ -317,11 +309,11 @@ public class FormAValidator extends BulkScanFormValidator {
         List<String> incomingDocSubTypes =
             inputScannedDocs.stream()
                 .map(InputScannedDoc::getSubtype)
-                .collect(Collectors.toList());
+                .toList();
 
         return incomingDocSubTypes.stream()
             .filter(docSubType -> !ALLOWED_DOCUMENT_SUBTYPES.contains(docSubType))
             .map(docSubType -> String.format("Document sub-type not accepted: \"%s\"", docSubType))
-            .collect(Collectors.toList());
+            .toList();
     }
 }

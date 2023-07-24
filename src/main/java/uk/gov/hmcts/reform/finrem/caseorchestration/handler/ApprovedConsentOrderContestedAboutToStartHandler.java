@@ -16,6 +16,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("java:S3740")
 public class ApprovedConsentOrderContestedAboutToStartHandler implements CallbackHandler {
 
     private final OnStartDefaultValueService onStartDefaultValueService;

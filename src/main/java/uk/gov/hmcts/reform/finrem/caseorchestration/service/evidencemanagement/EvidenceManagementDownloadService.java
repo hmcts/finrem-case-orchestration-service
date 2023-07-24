@@ -55,7 +55,7 @@ public class EvidenceManagementDownloadService {
         if (featureToggleService.isSecureDocEnabled()) {
             return downloadFromSecDocInResponseWrapper(binaryFileUrl, auth);
         } else {
-            return downloadFromDmStoreInResponseWrapper(binaryFileUrl, auth);
+            return downloadFromDmStoreInResponseWrapper(binaryFileUrl);
         }
     }
 
@@ -96,7 +96,7 @@ public class EvidenceManagementDownloadService {
         return (resource != null) ? resource.getByteArray() : new byte[0];
     }
 
-    private ResponseEntity<Resource> downloadFromDmStoreInResponseWrapper(String binaryFileUrl, String auth) throws HttpClientErrorException {
+    private ResponseEntity<Resource> downloadFromDmStoreInResponseWrapper(String binaryFileUrl) throws HttpClientErrorException {
         ResponseEntity<byte[]> response = downloadFromDmStore(binaryFileUrl);
         ByteArrayResource byteArrayResource = (response.getBody() != null)
             ? new ByteArrayResource(response.getBody()) : new ByteArrayResource(new byte[0]);

@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Finre
 public abstract class FinremHearingCorresponder extends FinremMultiLetterOrEmailAllPartiesCorresponder {
 
     @Autowired
-    public FinremHearingCorresponder(BulkPrintService bulkPrintService,
+    protected FinremHearingCorresponder(BulkPrintService bulkPrintService,
                                      NotificationService notificationService) {
         super(bulkPrintService, notificationService);
     }

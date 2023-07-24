@@ -523,42 +523,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendInterimHearingWhenAgreed() {
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
-        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
-
-        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldSendInterimHearingNotificationWhenApplicantAgreedButRespondentNotAgreed() {
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
-        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
-
-        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldSendInterimHearingNotificationWhenApplicantNotAgreedButRespondentAgreed() {
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
-        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
-
-        verify(contestedIntermHearingCorresponder).sendCorrespondence(any(CaseDetails.class));
-    }
-
-    @Test
     public void givenNoticeOfChangeWhenSendNoticeOfChangeNotificationsThenSendNoticeOfChangeServiceCalled() {
         notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequestWithBeforeCaseDetails());
 

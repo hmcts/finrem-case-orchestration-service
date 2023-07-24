@@ -70,6 +70,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("java:S3740")
 public class CaseDataService {
 
     public final Function<List<Map>, Map> getLastMapValue = listMap -> listMap.stream().reduce((first, second) -> second).get();
@@ -106,6 +107,7 @@ public class CaseDataService {
         }
     }
 
+    @SuppressWarnings("java:S4201")
     private boolean canCollectionsBeCopiedFromTo(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
         return caseData.get(sourceFieldName) != null && (caseData.get(sourceFieldName) instanceof Collection)
             && (caseData.get(destinationFieldName) == null || (caseData.get(destinationFieldName) instanceof Collection));
@@ -163,6 +165,8 @@ public class CaseDataService {
         return buildFullName(caseDetails.getData(), INTERVENER4_FIRST_MIDDLE_NAME, INTERVENER4_LAST_NAME);
     }
 
+
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void setFinancialRemediesCourtDetails(CaseDetails caseDetails) {
         Map<String, Object> courtDetails = CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData());
         caseDetails.getData().put(CONSENT_ORDER_FRC_NAME, courtDetails.get(COURT_DETAILS_NAME_KEY));
@@ -271,6 +275,7 @@ public class CaseDataService {
             && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION)).isEmpty();
     }
 
+    @SuppressWarnings("java:S112")
     public Map<String, Object> getPayloadOffFinremCaseData(FinremCaseData data) {
         Map<String, Object> notificationRequestPayload;
         try {

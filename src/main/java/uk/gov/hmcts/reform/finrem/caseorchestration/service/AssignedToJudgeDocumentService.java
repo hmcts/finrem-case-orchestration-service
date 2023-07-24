@@ -28,6 +28,7 @@ public class AssignedToJudgeDocumentService {
      *                                                                   DocumentHelper.PaperNotificationRecipient recipient}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public CaseDocument generateAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken,
                                                                   DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Assigned To Judge Notification Letter {} from {} for bulk print for {}",
