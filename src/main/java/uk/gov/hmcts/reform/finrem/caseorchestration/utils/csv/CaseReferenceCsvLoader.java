@@ -14,6 +14,7 @@ import java.util.List;
 @Component
 public class CaseReferenceCsvLoader {
 
+    @SuppressWarnings({"java:S3740", "java:S1488"})
     public List<CaseReference> loadCaseReferenceList(String fileName) {
         try {
             CsvMapper csvMapper = new CsvMapper();

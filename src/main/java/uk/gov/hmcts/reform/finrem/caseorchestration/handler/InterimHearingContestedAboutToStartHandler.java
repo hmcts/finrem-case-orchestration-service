@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TRACKING;
@@ -73,7 +72,7 @@ public class InterimHearingContestedAboutToStartHandler
             interimHearingItemMapper.loadBulkPrintDocuments(caseData);
         } else {
             List<InterimHearingCollectionItemData> list = interimHearingList.stream()
-                .map(obj -> getTrackingObject(obj.getId())).collect(Collectors.toList());
+                .map(obj -> getTrackingObject(obj.getId())).toList();
             log.info("INTERIM_HEARING_TRACKING ELSE {}", list);
             caseData.put(INTERIM_HEARING_TRACKING, list);
         }

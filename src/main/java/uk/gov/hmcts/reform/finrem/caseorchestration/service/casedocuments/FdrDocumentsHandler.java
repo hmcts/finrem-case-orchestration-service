@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FdrDocumentsHandler extends DocumentHandler {
@@ -21,7 +20,7 @@ public class FdrDocumentsHandler extends DocumentHandler {
     protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 
-        return allManagedDocumentCollections.stream().filter(this::isFdr).collect(Collectors.toList());
+        return allManagedDocumentCollections.stream().filter(this::isFdr).toList();
     }
 
     private boolean isFdr(UploadCaseDocumentCollection managedDocumentCollection) {

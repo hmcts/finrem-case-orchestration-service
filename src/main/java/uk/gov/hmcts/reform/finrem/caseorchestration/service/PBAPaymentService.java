@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRes
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.PBAPaymentClient;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
@@ -110,7 +110,7 @@ public class PBAPaymentService {
                 .organisationName(CONSENTED_SOLICITOR_FIRM)
                 .caseType(CaseType.CONSENTED.getCcdType())
                 .amount(fee.getCalculatedAmount())
-                .feesList(ImmutableList.of(fee))
+                .feesList(List.of(fee))
                 .build();
         } else {
             return PaymentRequest.builder()
@@ -121,7 +121,7 @@ public class PBAPaymentService {
                 .organisationName(CONTESTED_SOLICITOR_FIRM)
                 .caseType(CaseType.CONTESTED.getCcdType())
                 .amount(fee.getCalculatedAmount())
-                .feesList(ImmutableList.of(fee))
+                .feesList(List.of(fee))
                 .build();
         }
     }
@@ -139,7 +139,7 @@ public class PBAPaymentService {
             .organisationName(dataJsonNode.path(CONSENTED_SOLICITOR_FIRM).asText())
             .siteId(siteId)
             .amount(fee.getCalculatedAmount())
-            .feesList(ImmutableList.of(fee))
+            .feesList(List.of(fee))
             .build();
     }
 }

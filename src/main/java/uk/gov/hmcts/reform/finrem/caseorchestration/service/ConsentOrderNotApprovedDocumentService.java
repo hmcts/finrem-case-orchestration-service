@@ -87,6 +87,7 @@ public class ConsentOrderNotApprovedDocumentService {
         return documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter);
     }
 
+    @SuppressWarnings("java:S3740")
     public List<CaseDocument> notApprovedConsentOrder(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 

@@ -6,6 +6,10 @@ import java.time.format.DateTimeFormatter;
 
 public class FinremDateUtils {
 
+    private FinremDateUtils() {
+
+    }
+
     public static LocalDateTime getLocalDateTime(String dateInString) {
         if (dateInString.contains("+")) {
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter

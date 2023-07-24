@@ -146,6 +146,7 @@ public final class CaseHearingFunctions {
         return caseDetails;
     };
 
+    @SuppressWarnings("java:S4276")
     static Function<Map<String, Object>, Boolean> isFastTrackApplication = caseData -> {
         String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION));
         String caseAllocatedTo = (String) caseData.get(CASE_ALLOCATED_TO);
@@ -179,6 +180,7 @@ public final class CaseHearingFunctions {
             NORTHEAST_FRC_LIST, SOUTHWEST_FRC_LIST, SOUTHEAST_FRC_LIST, WALES_FRC_LIST, HIGHCOURT_FRC_LIST);
     }
 
+    @SuppressWarnings("java:S107")
     private static String getSelectedCourt(Map<String, Object> mapOfCaseData, String regionListName, String midlandsListName,
                                            String londonListName, String northwestListName, String northeastListName,
                                            String southwestListName, String southeastListName, String walesListName,
@@ -298,6 +300,7 @@ public final class CaseHearingFunctions {
      * @deprecated Use {@link Map data}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public static Map<String, Object> buildFrcCourtDetails(Map<String, Object> data) {
         try {
             Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);

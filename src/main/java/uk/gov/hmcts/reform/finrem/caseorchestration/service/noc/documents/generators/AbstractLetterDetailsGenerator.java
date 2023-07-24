@@ -99,7 +99,8 @@ public abstract class AbstractLetterDetailsGenerator {
             documentHelper.getRespondentFullNameContested(caseDetails);
     }
 
-    private Map getCourtDetails(CaseDetails caseDetails) {
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
+    private Map<String, Object> getCourtDetails(CaseDetails caseDetails) {
         boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
         return isConsentedApplication ? buildConsentedFrcCourtDetails() : buildFrcCourtDetails(caseDetails.getData());
     }

@@ -30,22 +30,26 @@ public class AssignToJudgeCorresponder extends CaseDetailsSingleLetterOrEmailAll
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public CaseDocument getDocumentToPrint(CaseDetails caseDetails, String authorisationToken, DocumentHelper.PaperNotificationRecipient recipient) {
         return assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(
             caseDetails, authorisationToken, recipient);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails,
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));

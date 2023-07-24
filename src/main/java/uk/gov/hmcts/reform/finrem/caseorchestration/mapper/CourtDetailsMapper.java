@@ -28,6 +28,7 @@ public class CourtDetailsMapper {
 
     private final ObjectMapper objectMapper;
 
+    @SuppressWarnings("java:S3011")
     final BiPredicate<Field, CourtListWrapper> fieldIsNotNullOrEmpty = (field, courtListWrapper) -> {
         try {
             field.setAccessible(true);
@@ -63,6 +64,7 @@ public class CourtDetailsMapper {
             .toList();
     }
 
+    @SuppressWarnings("java:S112")
     private FrcCourtDetails convertToFrcCourtDetails(Field initialisedCourtField,
                                                      CourtListWrapper courtListWrapper) throws Exception {
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(),

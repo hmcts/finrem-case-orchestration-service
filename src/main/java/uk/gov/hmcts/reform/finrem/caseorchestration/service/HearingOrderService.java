@@ -111,6 +111,7 @@ public class HearingOrderService {
         return Optional.empty();
     }
 
+    @SuppressWarnings("java:S3358")
     private Optional<DraftDirectionOrder> getJudgeApprovedHearingOrder(CaseDetails caseDetails, String authorisationToken) {
         Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails, authorisationToken);
 

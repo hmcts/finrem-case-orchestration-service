@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Configuration
 @RequiredArgsConstructor
@@ -43,6 +42,7 @@ public class ObjectMapperConfiguration {
         return objectMapper;
     }
 
+    @SuppressWarnings("java:S3740")
     private void featureToggleSerialisation(ObjectMapper objectMapper) {
         Map<Class, List<String>> fieldsIgnoredDuringSerialisation =
             featureToggleService.getFieldsIgnoredDuringSerialisation();
@@ -68,6 +68,7 @@ public class ObjectMapperConfiguration {
         };
     }
 
+    @SuppressWarnings("java:S3740")
     private List<BeanPropertyWriter> removeIgnoredFieldsBeanProperties(List<BeanPropertyWriter> beanProperties) {
         Map<Class, List<String>> fieldsIgnoredDuringSerialisation =
             featureToggleService.getFieldsIgnoredDuringSerialisation();
@@ -77,6 +78,6 @@ public class ObjectMapperConfiguration {
             return !classesWithIgnoredFields.contains(beanDeclaringClass) || !fieldsIgnoredDuringSerialisation
                 .get(beanDeclaringClass)
                 .contains(beanPropertyWriter.getName());
-        }).collect(Collectors.toList());
+        }).toList();
     }
 }

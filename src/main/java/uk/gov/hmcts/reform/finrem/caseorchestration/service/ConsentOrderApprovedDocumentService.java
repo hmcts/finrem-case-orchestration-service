@@ -317,6 +317,7 @@ public class ConsentOrderApprovedDocumentService {
         });
     }
 
+    @SuppressWarnings("java:S112")
     public void addGeneratedApprovedConsentOrderDocumentsToCase(String userAuthorisation,
                                                                 FinremCaseDetails finremCaseDetails) {
 

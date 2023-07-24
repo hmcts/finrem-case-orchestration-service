@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -29,10 +28,8 @@ public class AddresseeGeneratorService {
     }
 
     private Map<DocumentHelper.PaperNotificationRecipient, AddresseeGenerator> addresseeGeneratorMap() {
-        ImmutableMap<DocumentHelper.PaperNotificationRecipient, AddresseeGenerator> map =
-            ImmutableMap.of(DocumentHelper.PaperNotificationRecipient.APPLICANT, applicantAddresseeGenerator,
+        return Map.of(DocumentHelper.PaperNotificationRecipient.APPLICANT, applicantAddresseeGenerator,
                 DocumentHelper.PaperNotificationRecipient.RESPONDENT, respondentAddresseeGenerator,
                 SOLICITOR, solicitorAddresseeGenerator);
-        return map;
     }
 }
