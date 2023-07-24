@@ -30,6 +30,7 @@ public class UpdateFrcInfoLetterDetailsGenerator extends BaseContestedLetterDeta
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public UpdateFrcInfoLetterDetails generate(CaseDetails caseDetails,
                                                DocumentHelper.PaperNotificationRecipient recipient,
                                                String additionalData) {

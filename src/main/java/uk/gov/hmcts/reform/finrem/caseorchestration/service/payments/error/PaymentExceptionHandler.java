@@ -29,11 +29,10 @@ public class PaymentExceptionHandler {
     public ResponseEntity<Object> handlePaymentException(PaymentException exception) {
         log.error("Exception occurred while making payment: {} ", exception.getMessage());
 
-        if (exception.getCause() instanceof HttpClientErrorException) {
-            HttpClientErrorException cause = (HttpClientErrorException) exception.getCause();
+        if (exception.getCause() instanceof HttpClientErrorException cause) {
             HttpStatus errorCode = cause.getStatusCode();
             try {
-                log.info("Payment error, exception: {} ", cause);
+                log.info("Payment error, exception: {} ", cause.getMessage(), cause);
                 if (errorCode == BAD_REQUEST || errorCode == NOT_FOUND || errorCode == UNPROCESSABLE_ENTITY) {
                     return ResponseEntity.ok(PaymentResponse.builder()
                             .error(errorCode.toString())

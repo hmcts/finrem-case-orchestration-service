@@ -57,6 +57,7 @@ public class FeeClient {
             .toUri();
     }
 
+    @SuppressWarnings("java:S5411")
     public String getKeyword(ApplicationType application) {
         log.info("Inside getKeyword for application type: {} and with use new keywords set to {}",
             application, serviceConfig.getFeePayNewKeywords());

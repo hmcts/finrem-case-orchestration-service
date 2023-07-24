@@ -146,6 +146,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("java:S2925")
     public void generateFormCAndFormGSuccess() throws Exception {
         idamServiceStub();
         UUID uuid = UUID.randomUUID();

@@ -104,6 +104,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         return response;
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void saveLegacyConfidentialDocumentsUploaded(List<UploadCaseDocumentCollection> managedCollections,
                                                          FinremCaseData caseData) {
 
@@ -124,6 +125,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         managedCollections.removeAll(confidentialDocsUploaded);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private ConfidentialUploadedDocumentData mapToLegacyConfidentialDocs(
         UploadCaseDocumentCollection documentCollection) {
 

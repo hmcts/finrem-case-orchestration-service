@@ -39,6 +39,7 @@ public class GeneralApplicationRejectionLetterGenerator extends BaseContestedLet
     }
 
     @Override
+    @SuppressWarnings("java:S112")
     public GeneralApplicationRejectionLetterDetails generate(CaseDetails caseDetails,
                                                              DocumentHelper.PaperNotificationRecipient recipient,
                                                              String additionalData) {

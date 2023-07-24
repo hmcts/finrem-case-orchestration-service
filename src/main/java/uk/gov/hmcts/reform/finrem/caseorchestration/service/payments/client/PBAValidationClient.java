@@ -35,6 +35,7 @@ public class PBAValidationClient {
     private final RestTemplate restTemplate;
     private final AuthTokenGenerator authTokenGenerator;
 
+    @SuppressWarnings("java:S3740")
     public PBAValidationResponse isPBAValid(String authToken, String pbaNumber) {
         String emailId = idamService.getUserEmailId(authToken);
         URI uri = buildUri();
@@ -55,6 +56,7 @@ public class PBAValidationClient {
         }
     }
 
+    @SuppressWarnings("java:S3740")
     private HttpEntity buildRequest(String authToken, String emailId) {
         HttpHeaders headers = new HttpHeaders();
         if (!authToken.matches("^Bearer .+")) {

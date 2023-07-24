@@ -17,6 +17,7 @@ public class HwfContestedApplicantCorresponder extends CaseDetailsEmailOnlyAppli
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void emailApplicantSolicitor(CaseDetails caseDetails) {
         log.info("Sending Contested HWF Successful email notification to Solicitor");
         notificationService.sendContestedHwfSuccessfulConfirmationEmail(caseDetails);

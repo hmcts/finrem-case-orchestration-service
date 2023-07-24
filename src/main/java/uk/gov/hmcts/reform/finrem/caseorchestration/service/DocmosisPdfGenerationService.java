@@ -52,6 +52,7 @@ public class DocmosisPdfGenerationService {
         }
     }
 
+    @SuppressWarnings("java:S6201")
     private void removePdfConfigEntriesFromCaseData(Map<String, Object> placeholders) {
         Object caseDetails = placeholders.get(CASE_DETAILS);
 
@@ -71,7 +72,7 @@ public class DocmosisPdfGenerationService {
                 .data(caseData(placeholders)).build();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("java:S6201")
     private Map<String, Object> caseData(Map<String, Object> placeholders) {
 
         Object caseDetails = placeholders.get(CASE_DETAILS);

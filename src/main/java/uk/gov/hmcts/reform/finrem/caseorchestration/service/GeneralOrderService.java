@@ -86,6 +86,7 @@ public class GeneralOrderService {
         return new GeneralOrderPreviewDocument(caseDocument);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 

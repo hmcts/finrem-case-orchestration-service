@@ -123,6 +123,7 @@ public class ManageBarristerService {
             sendNotifications(caseDetails, barrister, Pair.of(authToken, REMOVED), authToken));
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void sendNotifications(CaseDetails caseDetails,
                                    Barrister barrister,
                                    Pair<String, BarristerChangeType> letterData,
@@ -179,6 +180,7 @@ public class ManageBarristerService {
     /*Below is temporary solution while ref data has code freeze - findUserByEmail endpoint is secured
     Finrem's system user has required roles, so below can be permanent solution but not preferred
     TODO: create Ref Data (RDCC) Jira ticket to add finrem's caseworker to list of secured roles.*/
+    @SuppressWarnings("java:S1135")
     public String getAuthTokenToUse(CaseDetails caseDetails, String authToken) {
         String caseworkerParty = Objects.toString(caseDetails.getData().get(MANAGE_BARRISTER_PARTY), StringUtils.EMPTY);
         return caseworkerParty.isEmpty() ? authToken : systemUserService.getSysUserToken();

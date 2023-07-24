@@ -33,9 +33,8 @@ public class ConsentOrderService {
         return getCaseDocument(caseDetails, callbackRequest.getEventType().getCcdType());
     }
 
-    private CaseDocument getCaseDocument(CaseDetails caseDetails, String callbackRequest) {
+    private CaseDocument getCaseDocument(CaseDetails caseDetails, String eventId) {
         Map<String, Object> caseData = caseDetails.getData();
-        String eventId = callbackRequest;
         if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestRespondToOrderDocuments(caseData)
                 .orElseGet(() -> documentHelper.convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
@@ -50,7 +49,7 @@ public class ConsentOrderService {
         FinremCaseData caseData = caseDetails.getData();
         if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestRespondToOrderDocuments(caseData)
-                .orElseGet(() -> caseData.getLatestConsentOrder());
+                .orElseGet(caseData::getLatestConsentOrder);
         } else if (FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestAmendedConsentOrder(caseData);
         } else {

@@ -25,6 +25,7 @@ public class GeneralOrderRaisedCorresponder extends CaseDetailsEmailOnlyAllSolic
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         if (caseDataService.isConsentedApplication(caseDetails)) {
             log.info("Sending email notification to applicant Solicitor for 'Consented General Order' for case id: {}", caseDetails.getId());
@@ -43,6 +44,7 @@ public class GeneralOrderRaisedCorresponder extends CaseDetailsEmailOnlyAllSolic
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         if (caseDataService.isConsentedApplication(caseDetails)) {
             log.info("Sending email notification to respondent Solicitor for 'Consented General Order' for case id: {}", caseDetails.getId());
@@ -60,6 +62,7 @@ public class GeneralOrderRaisedCorresponder extends CaseDetailsEmailOnlyAllSolic
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         if (caseDataService.isConsentedInContestedCase(caseDetails)) {
             log.info("Sending email notification to intervener Solicitor for 'Contested consent General Order' for case id: {}",

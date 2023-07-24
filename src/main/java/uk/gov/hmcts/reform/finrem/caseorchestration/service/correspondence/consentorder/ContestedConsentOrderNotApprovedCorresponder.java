@@ -21,12 +21,14 @@ public class ContestedConsentOrderNotApprovedCorresponder extends CaseDetailsEma
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         log.info("Sending email notification to Applicant Solicitor for 'Contested Consent Order Not Approved' for case: {}", caseDetails.getId());
         notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(caseDetails);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         log.info("Sending email notification to Respondent Solicitor for 'Contested Consent Order Not Approved' for case: {}", caseDetails.getId());
         notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(caseDetails);
@@ -34,6 +36,7 @@ public class ContestedConsentOrderNotApprovedCorresponder extends CaseDetailsEma
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         log.info("Sending email notification to Intervener Solicitor for 'Contested Consent Order Not Approved' for case: {}", caseDetails.getId());
         notificationService.sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(caseDetails,

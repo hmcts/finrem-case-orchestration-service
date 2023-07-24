@@ -20,6 +20,7 @@ public class ContestedIntermHearingCorresponder extends CaseDetailsEmailOnlyAllS
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         if (notificationService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'interim hearing' for case: {}", caseDetails.getId());
@@ -28,6 +29,7 @@ public class ContestedIntermHearingCorresponder extends CaseDetailsEmailOnlyAllS
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
             log.info("Sending email notification to Respondent Solicitor for 'interim hearing' for case: {}", caseDetails.getId());
@@ -36,6 +38,7 @@ public class ContestedIntermHearingCorresponder extends CaseDetailsEmailOnlyAllS
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         log.info("Sending email notification to Intervener Solicitor for 'interim hearing' for case: {}", caseDetails.getId());
         notificationService.sendInterimNotificationEmailToIntervenerSolicitor(caseDetails,

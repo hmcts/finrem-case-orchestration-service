@@ -88,6 +88,8 @@ public class HearingDocumentService {
         return isFastTrackApplication.apply(pair.getLeft().getData());
     }
 
+
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     CaseDetails addCourtFields(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         data.put("courtDetails", buildFrcCourtDetails(data));

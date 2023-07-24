@@ -35,12 +35,11 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         if (callbackRequest.getCaseDetailsBefore() != null) {
             finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
         }
-        FinremCallbackRequest callbackRequestWithFinremCaseDetails = FinremCallbackRequest.builder()
+        return FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
             .eventType(EventType.getEventType(callbackRequest.getEventId()))
             .build();
-        return callbackRequestWithFinremCaseDetails;
     }
 
     public void validateCaseData(FinremCallbackRequest callbackRequest) {

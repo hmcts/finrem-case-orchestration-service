@@ -178,6 +178,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         return additionalCaseData;
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private ComplexTypeCollection<TypedCaseDocument> transformIntoTypedCaseDocuments(List<InputScannedDoc> inputScannedDocs,
                                                                                      Map<String, String> subTypeToDocumentTypeMap) {
         ComplexTypeCollection<TypedCaseDocument> documentCollection = new ComplexTypeCollection<>();
@@ -190,6 +191,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         return documentCollection;
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private TypedCaseDocument transformInputScannedDocIntoTypedCaseDocument(Map<String, String> subTypeToDocumentTypeMap, InputScannedDoc doc) {
         String typeOfDocument = subTypeToDocumentTypeMap.get(doc.getSubtype());
         CaseDocument caseDocument = transformInputScannedDocIntoCaseDocument(doc);

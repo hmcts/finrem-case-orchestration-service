@@ -76,6 +76,7 @@ public class PaymentConfirmationController extends BaseController {
         return confirmationBody;
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private String addCourtContactInformation(String confirmationBody, CaseDetails caseDetails) {
         Map<String, Object> courtDetails = CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData());
 

@@ -20,18 +20,21 @@ public class ConsentOrderAvailableCorresponder extends CaseDetailsEmailOnlyAllSo
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
         notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         log.info("case - {}: Sending email notification for to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
         notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         log.info("case - {}: Sending email notification for to Intervener Solicitor for 'Consent Order Available'", caseDetails.getId());
         notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(caseDetails,

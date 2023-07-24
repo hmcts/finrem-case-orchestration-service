@@ -59,6 +59,7 @@ public class EvidenceManagementDownloadService {
         }
     }
 
+    @SuppressWarnings("java:S112")
     private ResponseEntity<byte[]> downloadFromDmStore(@NonNull final String binaryFileUrl) {
         log.info("DmStore Download file: {}", binaryFileUrl);
         HttpHeaders headers = new HttpHeaders();

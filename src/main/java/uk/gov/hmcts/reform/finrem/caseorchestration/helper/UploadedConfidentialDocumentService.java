@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUpload
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentDateService;
 
 @Service
+@SuppressWarnings("squid:CallToDeprecatedMethod")
 public class UploadedConfidentialDocumentService extends DocumentDateService<ConfidentialUploadedDocumentData> {
 
     public UploadedConfidentialDocumentService(ObjectMapper objectMapper) {

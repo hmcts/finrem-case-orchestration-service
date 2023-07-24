@@ -28,6 +28,7 @@ public class ContestedSendOrderCorresponder extends CaseDetailsEmailOnlyAllSolic
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
             log.info("Sending email notification to Respondent Solicitor for 'Contest Order Approved' for case: {}", caseDetails.getId());
@@ -36,6 +37,7 @@ public class ContestedSendOrderCorresponder extends CaseDetailsEmailOnlyAllSolic
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         log.info("Sending email notification to Intervener Solicitor for 'Contest Order Approved' for case: {}", caseDetails.getId());
         notificationService.sendContestOrderApprovedEmailIntervener(caseDetails,

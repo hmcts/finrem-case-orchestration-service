@@ -20,6 +20,7 @@ public class ContestedDraftOrderCorresponder extends CaseDetailsEmailOnlyAllSoli
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         if (notificationService.isApplicantSolicitorResponsibleToDraftOrder(caseDetails.getData())
             && notificationService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
@@ -29,6 +30,7 @@ public class ContestedDraftOrderCorresponder extends CaseDetailsEmailOnlyAllSoli
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         if (notificationService.isRespondentSolicitorResponsibleToDraftOrder(caseDetails.getData())
             && notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {

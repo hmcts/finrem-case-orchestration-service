@@ -41,6 +41,7 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         Map<String, Object> caseData = uploadedConfidentialDocumentHelper.addUploadDateToNewDocuments(
@@ -61,6 +62,7 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler
             .build();
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private List<ConfidentialUploadedDocumentData> getConfidentialDocumentCollection(Map<String, Object> caseData) {
         objectMapper.registerModule(new JavaTimeModule());
 

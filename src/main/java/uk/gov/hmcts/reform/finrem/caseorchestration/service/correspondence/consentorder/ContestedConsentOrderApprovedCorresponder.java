@@ -20,18 +20,21 @@ public class ContestedConsentOrderApprovedCorresponder extends CaseDetailsEmailO
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         log.info("Sending email notification to Applicant Solicitor for 'Contested Consent Order Approved' for case: {}", caseDetails.getId());
         notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(caseDetails);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         log.info("Sending email notification to Respondent Solicitor for 'Contested Consent Order Approved' for case: {}", caseDetails.getId());
         notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(caseDetails);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         log.info("Sending email notification to Intervener Solicitor for 'Contested Consent Order Approved' for case: {}", caseDetails.getId());
         notificationService.sendContestedConsentOrderApprovedEmailToIntervenerSolicitor(caseDetails,

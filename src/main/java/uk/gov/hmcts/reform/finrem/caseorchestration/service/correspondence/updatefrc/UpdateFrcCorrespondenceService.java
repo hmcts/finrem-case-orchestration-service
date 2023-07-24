@@ -15,6 +15,7 @@ public class UpdateFrcCorrespondenceService {
     private final UpdateFrcLetterOrEmailAllSolicitorsCorresponder updateFrcLetterOrEmailAllSolicitorsCorresponder;
     private final NotificationService notificationService;
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void sendCorrespondence(CaseDetails caseDetails, String authToken) throws JsonProcessingException {
         log.info("Send Update FRC correspondence for case: {}", caseDetails.getId());
 

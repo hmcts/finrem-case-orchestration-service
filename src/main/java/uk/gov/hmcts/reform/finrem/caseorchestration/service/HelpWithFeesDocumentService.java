@@ -17,6 +17,7 @@ public class HelpWithFeesDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public CaseDocument generateHwfSuccessfulNotificationLetter(CaseDetails caseDetails, String authToken,
                                                                 DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Help With Fees Successful Notification Letter {} from {} for bulk print for {}",

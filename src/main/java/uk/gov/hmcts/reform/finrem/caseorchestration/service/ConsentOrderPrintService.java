@@ -52,6 +52,7 @@ public class ConsentOrderPrintService {
         }
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
         UUID respondentLetterId = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails, authorisationToken);
@@ -70,12 +71,14 @@ public class ConsentOrderPrintService {
             respondentCoverSheet, respondentLetterId);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private UUID printApplicantConsentOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
         return bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, applicantDocuments);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private UUID printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);

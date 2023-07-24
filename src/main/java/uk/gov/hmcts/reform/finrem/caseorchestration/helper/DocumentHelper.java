@@ -179,6 +179,7 @@ public class DocumentHelper {
      * @deprecated Use {@link Map caseData}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public List<CaseDocument> getFormADocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(FORM_A_COLLECTION))
             .map(this::convertToPaymentDocumentCollectionList)
@@ -360,6 +361,7 @@ public class DocumentHelper {
      * @deprecated Use {@link FinremCaseDetails caseDetails, PaperNotificationRecipient recipient}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public CaseDetails prepareLetterTemplateData(CaseDetails caseDetails, PaperNotificationRecipient recipient) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
         CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
@@ -437,6 +439,7 @@ public class DocumentHelper {
      *                                                   Address addressToSendTo}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName,
                                                   Map<String, Object> addressToSendTo,
                                                   boolean isConsentedApplication) {

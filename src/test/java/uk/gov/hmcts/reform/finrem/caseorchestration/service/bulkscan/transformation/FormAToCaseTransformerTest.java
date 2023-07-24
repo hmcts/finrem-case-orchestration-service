@@ -405,6 +405,7 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
+    @SuppressWarnings("java:S5961")
     public void shouldTransformScannedDocuments() {
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
         scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT)

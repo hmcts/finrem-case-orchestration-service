@@ -144,6 +144,7 @@ public class ConsentOrderApprovedController extends BaseController {
             .build());
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails) {
         String caseId = caseDetails.getId().toString();
         log.info("Generating and preparing documents for latest consent order, case {}", caseId);

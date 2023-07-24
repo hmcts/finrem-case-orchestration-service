@@ -15,6 +15,7 @@ import java.util.List;
 
 @Component
 @Slf4j
+@SuppressWarnings("java:S110")
 public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearingCorresponder {
 
     private final DocumentHelper documentHelper;

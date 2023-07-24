@@ -24,6 +24,7 @@ public class ValidateHearingService {
     public static final String REQUIRED_FIELD_EMPTY_ERROR = "Issue Date, fast track decision or hearingDate is empty";
 
     //TODO: Refactor as it is always used inverted
+    @SuppressWarnings("java:S1135")
     private static boolean isDateInBetweenIncludingEndPoints(final LocalDate min, final LocalDate max,
                                                              final LocalDate date) {
         return !(date.isBefore(min) || date.isAfter(max));

@@ -208,6 +208,7 @@ public class ConsentHearingService {
      * @deprecated Use {@link Map caseDetails, Map caseDataBefore}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     private List<String> getNewOrDateTimeModifiedHearingIdsList(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
         List<String> idsList = new ArrayList<>();
 
@@ -262,6 +263,7 @@ public class ConsentHearingService {
      * @deprecated Use {@link Map caseDetails, Map caseDataBefore}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     private List<String> getModifiedHearingIds(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
         Map<String, String> currentMap = new HashMap<>();
         Map<String, String> beforeMap = new HashMap<>();

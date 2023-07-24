@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("java:S110")
 public class FinremAdditionalHearingCorresponder extends FinremHearingCorresponder {
 
     private final DocumentHelper documentHelper;

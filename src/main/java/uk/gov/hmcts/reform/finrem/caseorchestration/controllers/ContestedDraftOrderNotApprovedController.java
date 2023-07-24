@@ -124,7 +124,7 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendRefusalReason(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {

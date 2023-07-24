@@ -208,6 +208,7 @@ public class UpdateContestedCaseController extends BaseController {
         }
     }
 
+    @SuppressWarnings("java:S3740")
     private void updateMiamExceptionDetails(Map<String, Object> caseData) {
         ArrayList miamExemptionsChecklist = (ArrayList) caseData.get("MIAMExemptionsChecklist");
         removeExemptionCheckLists(caseData, miamExemptionsChecklist,
@@ -223,6 +224,7 @@ public class UpdateContestedCaseController extends BaseController {
             "previousMIAMattendance", "MIAMPreviousAttendanceChecklist");
     }
 
+    @SuppressWarnings("java:S3740")
     private void removeExemptionCheckLists(Map<String, Object> caseData, ArrayList miamExemptionsChecklist,
                                            String other, String miamOtherGroundsChecklist) {
         if (hasNotSelected(miamExemptionsChecklist, other)) {
@@ -238,6 +240,7 @@ public class UpdateContestedCaseController extends BaseController {
         caseData.put("MIAMOtherGroundsChecklist", null);
     }
 
+    @SuppressWarnings("java:S3740")
     private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData, String typeOfApplication) {
         ArrayList natureOfApplicationList = typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)
             ? (ArrayList) caseData.get("natureOfApplicationChecklist") : (ArrayList) caseData.get("natureOfApplicationChecklistSchedule");
@@ -283,6 +286,7 @@ public class UpdateContestedCaseController extends BaseController {
         removeBenefitsDetails(caseData, typeOfApplication);
     }
 
+    @SuppressWarnings("java:S3740")
     private void updateContestedPropertyAdjustmentOrder(Map<String, Object> caseData) {
         ArrayList natureOfApplicationList = (ArrayList) caseData.get("natureOfApplicationChecklist");
         if (hasNotSelected(natureOfApplicationList, "propertyAdjustmentOrder")) {
