@@ -46,6 +46,7 @@ public class EvidenceManagementAuditService {
         }
     }
 
+    @SuppressWarnings("java:S3740")
     private List<FileUploadResponse> auditDmStore(List<String> fileUrls, String authorizationToken) {
         log.info("DMStore audit requested for documents: fileUrls={}", fileUrls);
 

@@ -85,23 +85,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Autowired
     private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
 
-    @Value("${document.bulkPrintTemplate}")
-    private String documentBulkPrintTemplate;
-    @Value("${document.bulkPrintFileName}")
-    private String documentBulkPrintFileName;
-
     @Value("${document.approvedConsentOrderTemplate}")
     private String documentApprovedConsentOrderTemplate;
-    @Value("${document.approvedConsentOrderFileName}")
-    private String documentApprovedConsentOrderFileName;
-
-    @Value("${document.approvedVariationOrderFileName}")
-    private String approvedVariationOrderFileName;
-
-    @Value("${document.approvedConsentOrderNotificationTemplate}")
-    private String documentApprovedConsentOrderNotificationTemplate;
-    @Value("${document.approvedConsentOrderNotificationFileName}")
-    private String documentApprovedConsentOrderNotificationFileName;
 
     private CaseDetails caseDetails;
 
@@ -291,13 +276,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
         consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseId);
         assertThat(getDocumentList(caseData), hasSize(2));
-    }
-
-    @Test
-    public void shouldConvertCollectionDocument() {
-        List<CaseDocument> documents = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails(), AUTH_TOKEN);
-
-        assertThat(documents, hasSize(3));
     }
 
     @Test

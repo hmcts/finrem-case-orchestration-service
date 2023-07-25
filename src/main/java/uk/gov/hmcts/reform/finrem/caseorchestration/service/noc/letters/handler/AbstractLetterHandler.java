@@ -41,7 +41,7 @@ public abstract class AbstractLetterHandler implements LetterHandler {
     private final NoticeType noticeType;
     private final DocumentHelper.PaperNotificationRecipient recipient;
 
-    public AbstractLetterHandler(
+    protected AbstractLetterHandler(
         AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator, NocDocumentService nocDocumentService,
         BulkPrintService bulkPrintService,
         NoticeType noticeType, DocumentHelper.PaperNotificationRecipient recipient) {
@@ -53,6 +53,7 @@ public abstract class AbstractLetterHandler implements LetterHandler {
         this.nocDocumentService = nocDocumentService;
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void handle(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authToken) {
         log.info("In the LetterHandler for Recipient {} and Notice Type {} ", recipient, noticeType);
         Optional<NoticeOfChangeLetterDetails> noticeOfChangeLetterDetails =
@@ -106,6 +107,7 @@ public abstract class AbstractLetterHandler implements LetterHandler {
         return StringUtils.isNotEmpty(nullToEmpty(caseDetails.getData().get(caseDataField)));
     }
 
+    @SuppressWarnings("java:S3740")
     protected boolean isAddressFieldPopulated(CaseDetails caseDetails, String addressField) {
         Map addressMap = (Map) caseDetails.getData().get(addressField);
         return ObjectUtils.isNotEmpty(addressMap)

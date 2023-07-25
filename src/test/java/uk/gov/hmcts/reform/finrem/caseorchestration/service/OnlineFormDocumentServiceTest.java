@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Before;
@@ -52,7 +53,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @MockBean
     private GenericDocumentService genericDocumentService;
@@ -96,11 +97,11 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN,
             emptyCaseDetails()));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
-            eq(AUTH_TOKEN),
-            eq(placeholdersMap),
-            eq(documentConfiguration.getContestedMiniFormTemplate(emptyCaseDetails())),
-            eq(documentConfiguration.getContestedMiniFormFileName()),
-            eq("1234"));
+            AUTH_TOKEN,
+            placeholdersMap,
+            documentConfiguration.getContestedMiniFormTemplate(emptyCaseDetails()),
+            documentConfiguration.getContestedMiniFormFileName(),
+            "1234");
     }
 
     @Test
@@ -112,11 +113,11 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, finremCaseDetails));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
-            eq(AUTH_TOKEN),
-            eq(placeholdersMap),
-            eq(documentConfiguration.getContestedMiniFormScheduleTemplate(finremCaseDetails)),
-            eq(documentConfiguration.getContestedMiniFormFileName()),
-            eq("1234"));
+            AUTH_TOKEN,
+            placeholdersMap,
+            documentConfiguration.getContestedMiniFormScheduleTemplate(finremCaseDetails),
+            documentConfiguration.getContestedMiniFormFileName(),
+            "1234");
     }
 
     @Test
@@ -128,11 +129,11 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, finremCaseDetails));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
-            eq(AUTH_TOKEN),
-            eq(placeholdersMap),
-            eq(documentConfiguration.getContestedMiniFormTemplate(finremCaseDetails)),
-            eq(documentConfiguration.getContestedMiniFormFileName()),
-            eq("1234"));
+            AUTH_TOKEN,
+            placeholdersMap,
+            documentConfiguration.getContestedMiniFormTemplate(finremCaseDetails),
+            documentConfiguration.getContestedMiniFormFileName(),
+            "1234");
     }
 
     @Test
@@ -209,7 +210,8 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get(CONSENTED_SOLICITOR_FIRM), is("Awesome Firm"));
 
         assertThat(data, IsMapContaining.hasKey(CONSENTED_SOLICITOR_ADDRESS));
-        Map<String, Object> addressObject = (Map<String, Object>) data.get(CONSENTED_SOLICITOR_ADDRESS);
+        Map<String, Object> addressObject = convertToMap(data.get(CONSENTED_SOLICITOR_ADDRESS));
+
         assertThat(addressObject.get("County").toString(), is("County"));
         assertThat(addressObject.get("Country").toString(), is("UK"));
         assertThat(addressObject.get("PostCode").toString(), is("SW1A 1AA"));
@@ -225,9 +227,9 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
         //Checklist
         assertThat(data, IsMapContaining.hasKey(CONSENTED_NATURE_OF_APPLICATION));
-        assertThat(((ArrayList) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(0).toString(), is("Periodical Payment Order"));
-        assertThat(((ArrayList) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(1).toString(), is("Lump Sum Order"));
-        assertThat(((ArrayList) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(2).toString(), is("Property Adjustment Order"));
+        assertThat(((ArrayList<?>) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(0).toString(), is("Periodical Payment Order"));
+        assertThat(((ArrayList<?>) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(1).toString(), is("Lump Sum Order"));
+        assertThat(((ArrayList<?>) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(2).toString(), is("Property Adjustment Order"));
 
         assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3A), is("test"));
         assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3B), is("test"));
@@ -237,8 +239,8 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_5), is("No"));
 
         assertThat(data, IsMapContaining.hasKey(CONSENTED_NATURE_OF_APPLICATION_6));
-        assertThat(((ArrayList) data.get(CONSENTED_NATURE_OF_APPLICATION_6)).get(0).toString(), is("item1"));
-        assertThat(((ArrayList) data.get(CONSENTED_NATURE_OF_APPLICATION_6)).get(1).toString(), is("item2"));
+        assertThat(((ArrayList<?>) data.get(CONSENTED_NATURE_OF_APPLICATION_6)).get(0).toString(), is("item1"));
+        assertThat(((ArrayList<?>) data.get(CONSENTED_NATURE_OF_APPLICATION_6)).get(1).toString(), is("item2"));
 
         assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_7), is("test"));
 
@@ -248,5 +250,10 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
     private FinremCaseDetails emptyCaseDetails() {
         return FinremCaseDetails.builder().id(1234L).data(new FinremCaseData()).build();
+    }
+
+    protected Map<String, Object> convertToMap(Object object) {
+        return mapper.convertValue(object, new TypeReference<>() {
+        });
     }
 }

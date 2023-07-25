@@ -50,7 +50,7 @@ public class ConsentOrderService {
         FinremCaseData caseData = caseDetails.getData();
         if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestRespondToOrderDocuments(caseData)
-                .orElseGet(() -> caseData.getLatestConsentOrder());
+                .orElseGet(caseData::getLatestConsentOrder);
         } else if (FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestAmendedConsentOrder(caseData);
         } else {

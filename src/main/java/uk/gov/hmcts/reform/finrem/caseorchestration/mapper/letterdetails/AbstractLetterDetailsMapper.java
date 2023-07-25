@@ -21,7 +21,7 @@ public abstract class AbstractLetterDetailsMapper {
     protected final CourtDetailsMapper courtDetailsMapper;
     protected final ObjectMapper objectMapper;
 
-    public AbstractLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+    protected AbstractLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         this.courtDetailsMapper = courtDetailsMapper;
         this.objectMapper = objectMapper;
         objectMapper.registerModule(new JavaTimeModule());

@@ -9,22 +9,25 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class LegacyConfidentialDocumentsService {
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public List<UploadCaseDocumentCollection> mapLegacyConfidentialDocumentToConfidentialDocumentCollection(
         List<ConfidentialUploadedDocumentData> legacyConfidentialDocumentsUploaded) {
 
-        return legacyConfidentialDocumentsUploaded.stream()
-            .map(this::getUploadCaseDocumentCollection)
-            .collect(Collectors.toList());
+        return legacyConfidentialDocumentsUploaded != null
+            ? legacyConfidentialDocumentsUploaded.stream().map(this::getUploadCaseDocumentCollection)
+            .toList()
+            : new ArrayList<>();
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private UploadCaseDocumentCollection getUploadCaseDocumentCollection(
         ConfidentialUploadedDocumentData legacyConfidentialDocumentsCollection) {
 

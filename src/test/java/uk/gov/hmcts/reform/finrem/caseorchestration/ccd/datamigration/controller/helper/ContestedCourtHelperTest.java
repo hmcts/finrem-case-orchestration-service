@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
 
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
@@ -81,8 +82,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class ContestedCourtHelperTest {
 
-    private CaseDetails details;
-
     @Test
     public void newportCourts() {
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURTLIST,
@@ -104,7 +103,7 @@ public class ContestedCourtHelperTest {
             "FR_newport_hc_list_5", "");
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
     }
 
     @Test
@@ -453,7 +452,7 @@ public class ContestedCourtHelperTest {
 
     private void verifyCorrectCourtReturned(String region, String subRegionListName, String subRegion,
                                             String courtListName, String court, String expectedValue) {
-        details = getCaseDetailsWithAllocatedValues(region, subRegionListName, subRegion, courtListName,
+        CaseDetails details = getCaseDetailsWithAllocatedValues(region, subRegionListName, subRegion, courtListName,
             court);
         String selectedCourt = ContestedCourtHelper.getSelectedCourt(details);
         MatcherAssert.assertThat(selectedCourt, is(expectedValue));

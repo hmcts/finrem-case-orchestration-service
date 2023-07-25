@@ -114,10 +114,10 @@ public class RemovedSolicitorServiceTest {
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
-        assertEquals(removedSolicitor.getName(), APP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), APP_SOL_EMAIL);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationID(), TEST_APP_ORG_ID);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationName(), TEST_APP_ORG_NAME);
+        assertEquals(APP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_APP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_APP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -134,10 +134,10 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
 
-        assertEquals(removedSolicitor.getName(), APP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), APP_SOL_EMAIL);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationID(), TEST_APP_ORG_ID);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationName(), TEST_APP_ORG_NAME);
+        assertEquals(APP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_APP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_APP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -154,8 +154,8 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
 
-        assertEquals(removedSolicitor.getName(), APP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), APP_SOL_EMAIL);
+        assertEquals(APP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, removedSolicitor.getEmail());
         assertNull(removedSolicitor.getOrganisation());
     }
 
@@ -173,10 +173,10 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
 
-        assertEquals(removedSolicitor.getName(), RESP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), RESP_SOL_EMAIL);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationID(), TEST_RESP_ORG_ID);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationName(), TEST_RESP_ORG_NAME);
+        assertEquals(RESP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_RESP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_RESP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -193,10 +193,10 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
 
-        assertEquals(removedSolicitor.getName(), RESP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), RESP_SOL_EMAIL);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationID(), TEST_RESP_ORG_ID);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationName(), TEST_RESP_ORG_NAME);
+        assertEquals(RESP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_RESP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_RESP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -213,8 +213,8 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
 
-        assertEquals(removedSolicitor.getName(), RESP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), RESP_SOL_EMAIL);
+        assertEquals(RESP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, removedSolicitor.getEmail());
         assertNull(removedSolicitor.getOrganisation());
     }
 
@@ -231,10 +231,10 @@ public class RemovedSolicitorServiceTest {
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
             true);
-        assertEquals(removedSolicitor.getName(), APP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), APP_SOL_EMAIL);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationID(), TEST_APP_ORG_ID);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationName(), TEST_APP_ORG_NAME);
+        assertEquals(APP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_APP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_APP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -251,10 +251,10 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
             true);
 
-        assertEquals(removedSolicitor.getName(), APP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), APP_SOL_EMAIL);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationID(), TEST_APP_ORG_ID);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationName(), TEST_APP_ORG_NAME);
+        assertEquals(APP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_APP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_APP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -271,8 +271,8 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
             true);
 
-        assertEquals(removedSolicitor.getName(), APP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), APP_SOL_EMAIL);
+        assertEquals(APP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, removedSolicitor.getEmail());
         assertNull(removedSolicitor.getOrganisation());
     }
 
@@ -290,10 +290,10 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
             false);
 
-        assertEquals(removedSolicitor.getName(), RESP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), RESP_SOL_EMAIL);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationID(), TEST_RESP_ORG_ID);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationName(), TEST_RESP_ORG_NAME);
+        assertEquals(RESP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_RESP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_RESP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -310,10 +310,10 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
             false);
 
-        assertEquals(removedSolicitor.getName(), RESP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), RESP_SOL_EMAIL);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationID(), TEST_RESP_ORG_ID);
-        assertEquals(removedSolicitor.getOrganisation().getOrganisationName(), TEST_RESP_ORG_NAME);
+        assertEquals(RESP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_RESP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_RESP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -330,8 +330,8 @@ public class RemovedSolicitorServiceTest {
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
             false);
 
-        assertEquals(removedSolicitor.getName(), RESP_SOL_NAME);
-        assertEquals(removedSolicitor.getEmail(), RESP_SOL_EMAIL);
+        assertEquals(RESP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, removedSolicitor.getEmail());
         assertNull(removedSolicitor.getOrganisation());
     }
 

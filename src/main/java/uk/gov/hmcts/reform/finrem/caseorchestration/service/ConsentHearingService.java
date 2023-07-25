@@ -49,18 +49,6 @@ public class ConsentHearingService {
     private final ObjectMapper objectMapper;
     private final ConsentedHearingHelper helper;
 
-    @Deprecated
-    public void sendNotification(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
-        log.info("Hearing notification for case id {}", caseDetails.getId());
-        Map<String, Object> caseData =  caseDetails.getData();
-
-        if (!caseDataService.isPaperApplication(caseData)) {
-            List<ConsentedHearingDataWrapper> hearingList = helper.getHearings(caseData);
-            List<String> hearingIdsToProcess =  getNewOrDateTimeModifiedHearingIdsList(caseDetails, caseDetailsBefore);
-            hearingList.forEach(hearingCaseData -> notify(caseDetails, hearingCaseData, hearingIdsToProcess));
-        }
-    }
-
     public void sendNotification(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
         log.info("Hearing notification for case id {}", caseDetails.getId());
 
@@ -80,23 +68,6 @@ public class ConsentHearingService {
         }
     }
 
-    @Deprecated
-    private void notify(CaseDetails caseDetails, ConsentedHearingDataWrapper hearingCaseData, List<String> hearingIdsToProcess) {
-        if (hearingIdsToProcess.contains(hearingCaseData.getId())) {
-            Map<String, Object> caseData = helper.convertToMap(hearingCaseData.getValue());
-            if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-                log.info("Sending email notification to Applicant Solicitor about hearing for case id {}", caseDetails.getId());
-                notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(caseDetails, caseData);
-                log.info("Email notification to Applicant Solicitor about hearing for case id {} sent.", caseDetails.getId());
-            }
-            if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
-                log.info("Sending email notification to Respondent Solicitor about hearing for case id {}", caseDetails.getId());
-                notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(caseDetails, caseData);
-                log.info("Email notification to Respondent Solicitor about hearing for case id {} sent", caseDetails.getId());
-            }
-        }
-    }
-
     private void notify(FinremCaseDetails caseDetails, ConsentedHearingDataWrapper hearingCaseData, List<String> hearingIdsToProcess) {
         if (hearingIdsToProcess.contains(hearingCaseData.getId())) {
             Map<String, Object> caseData = helper.convertToMap(hearingCaseData.getValue());
@@ -113,6 +84,7 @@ public class ConsentHearingService {
         }
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void submitHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
         log.info("In submit Hearing for case id {}", caseDetails.getId());
 
@@ -135,6 +107,7 @@ public class ConsentHearingService {
         sendToBulkPrint(caseDetails, caseData, authorisationToken, documents);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void sendToBulkPrint(CaseDetails caseDetails, Map<String, Object> caseData, String authorisationToken,
                                  List<BulkPrintDocument> documents) {
 
@@ -162,7 +135,7 @@ public class ConsentHearingService {
     }
 
 
-
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private ConsentedHearingDataWrapper generateHearingDocument(ConsentedHearingDataWrapper hearingData,
                                          CaseDetails caseDetails,
                                          List<BulkPrintDocument> documents,
@@ -227,7 +200,14 @@ public class ConsentHearingService {
         }
     }
 
-    @Deprecated
+    /**
+     * Do not expect any return.
+     * <p>Please use @{@link #getNewOrDateTimeModifiedHearingIdsList(List, List)}</p>
+     * @param caseDetails instance of CaseDetails
+     * @param caseDetailsBefore instance of CaseDetails
+     * @deprecated Use {@link Map caseDetails, Map caseDataBefore}
+     */
+    @Deprecated(since = "15-june-2023")
     private List<String> getNewOrDateTimeModifiedHearingIdsList(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
         List<String> idsList = new ArrayList<>();
 
@@ -274,7 +254,14 @@ public class ConsentHearingService {
         return idsList;
     }
 
-    @Deprecated
+    /**
+     * Do not expect any return.
+     * <p>Please use @{@link #getModifiedHearingIds(List, List)}</p>
+     * @param caseData instance of Map
+     * @param caseDataBefore instance of Map
+     * @deprecated Use {@link Map caseDetails, Map caseDataBefore}
+     */
+    @Deprecated(since = "15-june-2023")
     private List<String> getModifiedHearingIds(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
         Map<String, String> currentMap = new HashMap<>();
         Map<String, String> beforeMap = new HashMap<>();

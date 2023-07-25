@@ -33,6 +33,7 @@ public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends CaseDetails
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         log.info("Sending email notification to Applicant Solicitor for 'Update Frc information' for case: {}", caseDetails.getId());
         notificationService.sendUpdateFrcInformationEmailToAppSolicitor(caseDetails);
@@ -40,12 +41,14 @@ public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends CaseDetails
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void emailRespondentSolicitor(CaseDetails caseDetails) {
         log.info("Sending email notification to Respondent Solicitor for 'Update Frc information' for case: {}", caseDetails.getId());
         notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(caseDetails);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         log.info("Sending email notification to Intervener Solicitor for 'Update Frc information' for case: {}", caseDetails.getId());
         notificationService.sendUpdateFrcInformationEmailToIntervenerSolicitor(caseDetails,

@@ -88,8 +88,8 @@ public class MiniFormAControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
             .andExpect(jsonPath("$.data.assignedToJudge", is(defaultsConfiguration.getAssignedToJudgeDefault())))
-            .andExpect(jsonPath("$.data.assignedToJudgeReason", is(MiniFormAController.assignedToJudgeReasonDefault)))
-            .andExpect(jsonPath("$.data.referToJudgeText", is(MiniFormAController.referToJudgeTextDefault)))
+            .andExpect(jsonPath("$.data.assignedToJudgeReason", is(MiniFormAController.ASSIGNED_TO_JUDGE_REASON_DEFAULT)))
+            .andExpect(jsonPath("$.data.referToJudgeText", is(MiniFormAController.REFER_TO_JUDGE_TEXT_DEFAULT)))
             .andExpect(jsonPath("$.data.referToJudgeDate", is(LocalDate.now().toString())))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));

@@ -91,10 +91,8 @@ public class UpdateRepresentationService {
         log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
 
-        Map<String, Object> updatedCaseData = updateRepresentationUpdateHistory(caseDetails, addedSolicitor,
+        return updateRepresentationUpdateHistory(caseDetails, addedSolicitor,
             removedSolicitor, changeRequest);
-
-        return updatedCaseData;
     }
 
     private UserDetails getInvokerDetails(String authToken, CaseDetails caseDetails) {

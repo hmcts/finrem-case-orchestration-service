@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignApplicantSolicitorService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,13 +35,11 @@ public class SolicitorCreateConsentedSubmittedHandlerTest {
     private CreateCaseService createCaseService;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-    @Mock
-    private CaseDataService caseDataService;
 
     @Before
     public void setup() {
         handler =  new SolicitorCreateConsentedSubmittedHandler(finremCaseDetailsMapper, assignApplicantSolicitorService,
-            createCaseService, caseDataService);
+            createCaseService);
     }
 
     @Test

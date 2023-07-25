@@ -15,11 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListW
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.MiniFormADetails;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -107,7 +105,7 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
             .orElse(new ArrayList<>())
             .stream()
             .map(NatureApplication::getText)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<String> getNatureOfApplication6ListAsString(FinremCaseData caseData) {
@@ -115,6 +113,6 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
             .orElse(new ArrayList<>())
             .stream()
             .map(ConsentNatureOfApplication::getId)
-            .collect(Collectors.toList());
+            .toList();
     }
 }

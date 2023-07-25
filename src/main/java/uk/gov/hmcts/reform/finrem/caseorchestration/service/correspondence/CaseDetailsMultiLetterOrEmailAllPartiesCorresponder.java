@@ -21,6 +21,7 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
     protected final NotificationService notificationService;
     protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    @SuppressWarnings("java:S1874")
     protected void sendApplicantCorrespondence(String authorisationToken, CaseDetails caseDetails) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
@@ -31,6 +32,7 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
         }
     }
 
+    @SuppressWarnings("java:S1874")
     public void sendRespondentCorrespondence(String authorisationToken, CaseDetails caseDetails) {
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
@@ -41,6 +43,8 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
         }
     }
 
+
+    @SuppressWarnings("java:S1874")
     public void sendIntervenerCorrespondence(String authorisationToken, CaseDetails caseDetails) {
         if (notificationService.isContestedApplication(caseDetails)) {
             final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);

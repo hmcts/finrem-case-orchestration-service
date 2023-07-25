@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -72,6 +71,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.help
 public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
     private static final Map<String, String> ocrToCCDMapping;
+    private static final String NATURE_OF_APP_5B = "natureOfApplication5b";
 
     static {
         ocrToCCDMapping = formAExceptionRecordToCcdMap();
@@ -92,7 +92,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         // Section 1 - further details of application
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.ADDRESS_OF_PROPERTIES, "natureOfApplication3a");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.MORTGAGE_DETAILS, "natureOfApplication3b");
-        exceptionRecordToCcdFieldsMap.put(OcrFieldName.ORDER_FOR_CHILDREN, "natureOfApplication5b");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.ORDER_FOR_CHILDREN, NATURE_OF_APP_5B);
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "ChildSupportAgencyCalculationMade");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "ChildSupportAgencyCalculationReason");
 
@@ -140,7 +140,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .collect(Collectors.collectingAndThen(toList(), ComplexTypeCollection::new));
         additionalCaseData.put("scannedD81s", d81DocumentCollection);
 
-        additionalCaseData.put(PENSION_DOCS_COLLECTION, transformIntoTypedCaseDocuments(inputScannedDocs, ImmutableMap.of(
+        additionalCaseData.put(PENSION_DOCS_COLLECTION, transformIntoTypedCaseDocuments(inputScannedDocs, Map.of(
             P1_DOCUMENT, "Form P1",
             PPF1_DOCUMENT, "Form PPF1",
             P2_DOCUMENT, "Form P2",
@@ -148,7 +148,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             PPF_DOCUMENT, "Form PPF"
         )));
 
-        additionalCaseData.put(OTHER_DOCS_COLLECTION, transformIntoTypedCaseDocuments(inputScannedDocs, ImmutableMap.of(
+        additionalCaseData.put(OTHER_DOCS_COLLECTION, transformIntoTypedCaseDocuments(inputScannedDocs, Map.of(
             FORM_E_DOCUMENT, "Other",
             OTHER_SUPPORT_DOCUMENTS, "Other",
             COVER_LETTER_DOCUMENT, "Letter"
@@ -232,7 +232,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
         getValueFromOcrDataFields(OcrFieldName.ORDER_FOR_CHILDREN, ocrDataFields)
             .map(orderForChildrenToCcdFieldNames::get)
-            .ifPresent(value -> transformedCaseData.put("natureOfApplication5b", value));
+            .ifPresent(value -> transformedCaseData.put(NATURE_OF_APP_5B, value));
 
         getValueFromOcrDataFields(OcrFieldName.PROVISION_MADE_FOR, ocrDataFields)
             .map(provisionMadeForToCcdFieldNames::get)
@@ -255,7 +255,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         modifiedCaseData.put(CONSENTED_RESPONDENT_REPRESENTED, getRespondentRepresentedField(modifiedCaseData));
 
         // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
-        if (caseDataService.isNotEmpty("natureOfApplication5b", modifiedCaseData)) {
+        if (caseDataService.isNotEmpty(NATURE_OF_APP_5B, modifiedCaseData)) {
             modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
         }
 
@@ -265,7 +265,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     }
 
     private String getValueForIsRepresented(Map<String, Object> modifiedCaseData) {
-        String applicantRepresentedPaperValue = caseDataService.nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED_PAPER));
+        String applicantRepresentedPaperValue = CaseDataService.nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED_PAPER));
 
         return applicantRepresentedPaperValue.equalsIgnoreCase(FR_APPLICANT_REPRESENTED_3) ? YES_VALUE : NO_VALUE;
     }
@@ -277,7 +277,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
      * is provided in list of OCR fields.
      */
     private String getSolicitorAgreeToReceiveEmailsField(Map<String, Object> modifiedCaseData) {
-        return (YES_VALUE.equalsIgnoreCase(caseDataService.nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED)))
+        return (YES_VALUE.equalsIgnoreCase(CaseDataService.nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED)))
             && caseDataService.isNotEmpty(APPLICANT_EMAIL, modifiedCaseData)) ? YES_VALUE : NO_VALUE;
     }
 
@@ -330,7 +330,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
                     .stream()
                     .map(ocrValuesToCcdValues::get)
                     .filter(Objects::nonNull)
-                    .collect(toList());
+                    .toList();
 
             if (!transformedCommaSeparatedValue.isEmpty()) {
                 transformedCaseData.put(ccdName, transformedCommaSeparatedValue);
