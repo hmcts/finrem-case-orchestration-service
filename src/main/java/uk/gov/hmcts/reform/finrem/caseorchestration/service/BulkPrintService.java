@@ -41,7 +41,8 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     * <p>Use @link sendDocumentForPrint(final CaseDocument document, FinremCaseDetails caseDetails, final String recipient, String auth) instead </p>
+     *
      * @return letterId to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -72,7 +73,7 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     *
      * @return letterId to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -94,7 +95,7 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     *
      * @return letterId to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -132,7 +133,6 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
      * @return sendLetterResponse response to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -179,7 +179,8 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     * <p>Use @link generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) instead </p>
+     *
      * @return BulkPrintDocument to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -202,7 +203,7 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-
+     * <p>Use @link generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) instead </p>
      * @return BulkPrintDocument to be return
      * @deprecated deprecated since 15-Feb-2023
      */

@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DirectionOrderCollection {
+public class OrderSentToPartiesCollection {
 
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private DirectionOrder value;
+    private SendOrderDocuments value;
 }

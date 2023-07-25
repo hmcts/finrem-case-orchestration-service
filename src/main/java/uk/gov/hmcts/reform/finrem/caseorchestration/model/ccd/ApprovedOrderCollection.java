@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DirectionOrderCollection {
+public class ApprovedOrderCollection {
 
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private DirectionOrder value;
+    private ApproveOrder value;
 }

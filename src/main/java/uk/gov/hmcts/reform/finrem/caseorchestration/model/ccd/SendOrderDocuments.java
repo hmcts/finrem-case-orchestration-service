@@ -12,10 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DirectionOrderCollection {
+public class SendOrderDocuments {
 
-    @JsonProperty("id")
-    private String id;
-    @JsonProperty("value")
-    private DirectionOrder value;
+    @JsonProperty("bulkPrintDocument")
+    CaseDocument caseDocument;
 }
