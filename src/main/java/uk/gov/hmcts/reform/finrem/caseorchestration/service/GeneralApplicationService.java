@@ -78,6 +78,7 @@ public class GeneralApplicationService {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+
         helper.populateGeneralApplicationSender(caseDetailsBefore.getData(), caseDetailsBefore.getData()
             .getGeneralApplicationWrapper().getGeneralApplications());
 
@@ -109,6 +110,126 @@ public class GeneralApplicationService {
         String caseId = caseDetails.getId().toString();
         log.info("Processing general application for case id {}", caseId);
 
+        interimGeneralApplicationListForRoleType =
+            getGeneralApplicationCollectionData(caseDetails, loggedInUserCaseRole, interimGeneralApplicationListForRoleType, caseData,
+                caseDataBefore);
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList =
+            processableList.stream().map(items -> setUserAndDate(caseDetails, items, userAuthorisation))
+                .collect(Collectors.toList());
+
+        if (!generalApplicationListBefore.isEmpty()) {
+            generalApplicationCollectionDataList.addAll(generalApplicationListBefore);
+        }
+
+        if (initialCollectionId != null) {
+            GeneralApplicationCollectionData originalGeneralApplicationList
+                = helper.retrieveInitialGeneralApplicationData(
+                caseData,
+                initialCollectionId,
+                userAuthorisation,
+                caseId);
+            generalApplicationCollectionDataList.add(originalGeneralApplicationList);
+        }
+
+        if (!loggedInUserCaseRole.equalsIgnoreCase("Case")) {
+            processGeneralApplicationsForLitigants(userAuthorisation, caseDetails,
+                initialCollectionId, loggedInUserCaseRole, interimGeneralApplicationListForRoleType, caseData,
+                generalApplicationCollectionDataList);
+        }
+        List<GeneralApplicationCollectionData> applicationCollectionDataList =
+            generalApplicationCollectionDataList.stream()
+                .sorted(helper::getCompareTo)
+                .toList();
+
+        if (loggedInUserCaseRole.equalsIgnoreCase("Case")) {
+            updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
+            if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
+                && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
+                caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().forEach(
+                    ga -> ga.getValue().setGeneralApplicationSender(null));
+            }
+        }
+
+        applicationCollectionDataList.forEach(
+            ga -> ga.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(null));
+
+        caseData.getGeneralApplicationWrapper().setGeneralApplications(
+            helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
+        return caseData;
+    }
+
+    private void processGeneralApplicationsForLitigants(String userAuthorisation, FinremCaseDetails caseDetails,
+                                                        String initialCollectionId, String loggedInUserCaseRole,
+                                                        List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
+                                                        FinremCaseData caseData,
+                                                        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList) {
+        List<GeneralApplicationCollectionData> applicationsForRoleType;
+        List<GeneralApplicationCollectionData> processableListForRoleType =
+            interimGeneralApplicationListForRoleType.stream().filter(
+                f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).toList();
+        List<GeneralApplicationCollectionData> generalApplicationCollectionDataListForRoleType =
+            processableListForRoleType.stream().map(items -> setUserAndDate(caseDetails, items, userAuthorisation))
+                .toList();
+        generalApplicationCollectionDataList.addAll(generalApplicationCollectionDataListForRoleType);
+        if (!loggedInUserCaseRole.equalsIgnoreCase(APPLICANT)
+            && !loggedInUserCaseRole.equalsIgnoreCase(RESPONDENT)) {
+            applicationsForRoleType = generalApplicationCollectionDataList.stream()
+                .filter(ga -> ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode()
+                    .equalsIgnoreCase(loggedInUserCaseRole))
+                .collect(Collectors.toList());
+        } else {
+            applicationsForRoleType = generalApplicationCollectionDataList.stream()
+                .filter(ga -> APPLICANT.equals(
+                    ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())
+                    || RESPONDENT.equals(
+                    ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode()))
+                .collect(Collectors.toList());
+        }
+
+        List<GeneralApplicationCollectionData> applicationCollectionDataListForRoleType =
+            applicationsForRoleType.stream()
+                .sorted(helper::getCompareTo)
+                .collect(Collectors.toList());
+
+        List<GeneralApplicationsCollection> applicationCollection = helper.convertToGeneralApplicationsCollection(
+            applicationCollectionDataListForRoleType);
+
+        if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER1)) {
+            caseData.getGeneralApplicationWrapper().setIntervener1GeneralApplications(applicationCollection);
+        } else if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER2)) {
+            caseData.getGeneralApplicationWrapper().setIntervener2GeneralApplications(applicationCollection);
+        } else if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER3)) {
+            caseData.getGeneralApplicationWrapper().setIntervener3GeneralApplications(applicationCollection);
+        } else if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER4)) {
+            caseData.getGeneralApplicationWrapper().setIntervener4GeneralApplications(applicationCollection);
+        } else if (loggedInUserCaseRole.equalsIgnoreCase(APPLICANT)
+            || loggedInUserCaseRole.equalsIgnoreCase(RESPONDENT)) {
+            processGeneralApplicationForMainLititgants(caseData, applicationCollection);
+        }
+    }
+
+    private static void processGeneralApplicationForMainLititgants(FinremCaseData caseData,
+                                                                   List<GeneralApplicationsCollection> applicationCollection) {
+        List<GeneralApplicationsCollection> appRespCollection = new ArrayList<>();
+        appRespCollection.addAll(applicationCollection);
+        appRespCollection.forEach(ga -> {
+            String receivedFrom = ga.getValue().getGeneralApplicationSender().getValue().getCode();
+            if (APPLICANT.equals(receivedFrom)) {
+                ga.getValue().setAppRespGeneralApplicationReceivedFrom(
+                    ApplicantAndRespondentEvidenceParty.APPLICANT.getValue());
+            } else if (RESPONDENT.equals(receivedFrom)) {
+                ga.getValue().setAppRespGeneralApplicationReceivedFrom(
+                    ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue());
+            }
+        });
+        appRespCollection.forEach(ga -> ga.getValue().setGeneralApplicationSender(null));
+        caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(applicationCollection);
+    }
+
+    private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(FinremCaseDetails caseDetails, String loggedInUserCaseRole,
+         List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
+         FinremCaseData caseData, FinremCaseData caseDataBefore) {
         switch (loggedInUserCaseRole) {
             case INTERVENER1 -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
@@ -153,102 +274,7 @@ public class GeneralApplicationService {
             }
             default -> log.info("The current user is a caseworker on case {}", caseDetails.getId());
         }
-
-        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList =
-            processableList.stream().map(items -> setUserAndDate(caseDetails, items, userAuthorisation))
-                .collect(Collectors.toList());
-
-        if (!generalApplicationListBefore.isEmpty()) {
-            generalApplicationCollectionDataList.addAll(generalApplicationListBefore);
-        }
-
-        if (initialCollectionId != null) {
-            GeneralApplicationCollectionData originalGeneralApplicationList
-                = helper.retrieveInitialGeneralApplicationData(
-                caseData,
-                initialCollectionId,
-                userAuthorisation,
-                caseId);
-            generalApplicationCollectionDataList.add(originalGeneralApplicationList);
-        }
-
-        if (!loggedInUserCaseRole.equalsIgnoreCase("Case")) {
-            List<GeneralApplicationCollectionData> processableListForRoleType =
-                interimGeneralApplicationListForRoleType.stream().filter(
-                    f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).toList();
-            List<GeneralApplicationCollectionData> generalApplicationCollectionDataListForRoleType =
-                processableListForRoleType.stream().map(items -> setUserAndDate(caseDetails, items, userAuthorisation))
-                    .toList();
-            generalApplicationCollectionDataList.addAll(generalApplicationCollectionDataListForRoleType);
-            if (!loggedInUserCaseRole.equalsIgnoreCase(APPLICANT)
-                && !loggedInUserCaseRole.equalsIgnoreCase(RESPONDENT)) {
-                applicationsForRoleType = generalApplicationCollectionDataList.stream()
-                    .filter(ga -> ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode()
-                        .equalsIgnoreCase(loggedInUserCaseRole))
-                    .collect(Collectors.toList());
-            } else {
-                applicationsForRoleType = generalApplicationCollectionDataList.stream()
-                    .filter(ga -> APPLICANT.equals(
-                        ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())
-                        || RESPONDENT.equals(
-                        ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode()))
-                    .collect(Collectors.toList());
-            }
-
-            List<GeneralApplicationCollectionData> applicationCollectionDataListForRoleType =
-                applicationsForRoleType.stream()
-                .sorted(helper::getCompareTo)
-                .collect(Collectors.toList());
-
-            List<GeneralApplicationsCollection> applicationCollection = helper.convertToGeneralApplicationsCollection(
-                applicationCollectionDataListForRoleType);
-
-            if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER1)) {
-                caseData.getGeneralApplicationWrapper().setIntervener1GeneralApplications(applicationCollection);
-            } else if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER2)) {
-                caseData.getGeneralApplicationWrapper().setIntervener2GeneralApplications(applicationCollection);
-            } else if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER3)) {
-                caseData.getGeneralApplicationWrapper().setIntervener3GeneralApplications(applicationCollection);
-            } else if (loggedInUserCaseRole.equalsIgnoreCase(INTERVENER4)) {
-                caseData.getGeneralApplicationWrapper().setIntervener4GeneralApplications(applicationCollection);
-            } else if (loggedInUserCaseRole.equalsIgnoreCase(APPLICANT)
-                || loggedInUserCaseRole.equalsIgnoreCase(RESPONDENT)) {
-                List<GeneralApplicationsCollection> appRespCollection = new ArrayList<>();
-                appRespCollection.addAll(applicationCollection);
-                appRespCollection.forEach(ga -> {
-                    String receivedFrom = ga.getValue().getGeneralApplicationSender().getValue().getCode();
-                    if (APPLICANT.equals(receivedFrom)) {
-                        ga.getValue().setAppRespGeneralApplicationReceivedFrom(
-                            ApplicantAndRespondentEvidenceParty.APPLICANT.getValue());
-                    } else if (RESPONDENT.equals(receivedFrom)) {
-                        ga.getValue().setAppRespGeneralApplicationReceivedFrom(
-                            ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue());
-                    }
-                });
-                appRespCollection.forEach(ga -> ga.getValue().setGeneralApplicationSender(null));
-                caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(applicationCollection);
-            }
-        }
-        List<GeneralApplicationCollectionData> applicationCollectionDataList =
-            generalApplicationCollectionDataList.stream()
-            .sorted(helper::getCompareTo)
-                .toList();
-
-        if (loggedInUserCaseRole.equalsIgnoreCase("Case")) {
-            updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
-            if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
-                && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
-                caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().forEach(
-                    ga -> ga.getValue().setGeneralApplicationSender(null));
-            }
-        }
-
-        applicationCollectionDataList.forEach(
-            ga -> ga.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(null));
-
-        caseData.getGeneralApplicationWrapper().setGeneralApplications(
-            helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
-        return caseData;
+        return interimGeneralApplicationListForRoleType;
     }
 
     public List<GeneralApplicationCollectionData> getInterimGeneralApplicationList(
@@ -344,7 +370,7 @@ public class GeneralApplicationService {
             .generalApplicationDocument(applicationDocument).build();
 
         List<GeneralApplicationData> generalApplicationList = Optional.ofNullable(
-            caseData.get(GENERAL_APPLICATION_DOCUMENT_COLLECTION))
+                caseData.get(GENERAL_APPLICATION_DOCUMENT_COLLECTION))
             .map(this::convertToGeneralApplicationDataList)
             .orElse(new ArrayList<>());
 
@@ -377,79 +403,30 @@ public class GeneralApplicationService {
 
     public void updateGeneralApplicationCollectionData(List<GeneralApplicationCollectionData> generalApplications,
                                                        FinremCaseData caseData) {
-        log.info("entering updateGeneralApplicationCollection Data for case Id 1688466084529064");
+        log.info("entering updateGeneralApplicationCollection Data for case Id {}", caseData.getCcdCaseId());
         helper.populateGeneralApplicationDataSender(caseData, generalApplications);
-        generalApplications.forEach(ga -> {
-            if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null) {
-                log.info("general application received from is {} on case id 1688466084529064 with status {}",
-                    ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom(),
-                    ga.getGeneralApplicationItems().getGeneralApplicationStatus());
-            }
-            if (ga.getGeneralApplicationItems().getGeneralApplicationSender() != null) {
-                log.info("general application sender is {} on case id 1688466084529064 with status {}",
-                    ga.getGeneralApplicationItems().getGeneralApplicationSender(),
-                    ga.getGeneralApplicationItems().getGeneralApplicationStatus());
-            }
-        });
+        logGeneralApplications(generalApplications);
+
         List<GeneralApplicationCollectionData> appRespGeneralApplications =
-            generalApplications.stream().filter(ga ->
-                APPLICANT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())
-                || RESPONDENT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode()
-                )).collect(Collectors.toList());
-        appRespGeneralApplications.forEach(ga -> {
-            if (APPLICANT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())) {
-                ga.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(
-                    ApplicantAndRespondentEvidenceParty.APPLICANT.getValue());
-            } else if (RESPONDENT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())) {
-                ga.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(
-                    ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue());
-            }
-        });
-        log.info("reached intervener1GeneralApplications in updateGeneralApplicationCollection Data on case 1688466084529064");
+            setGeneralApplicationEvidenceRecievedFrom(generalApplications);
+
         List<GeneralApplicationCollectionData> intervener1GeneralApplications =
-            generalApplications.stream().filter(ga -> INTERVENER1
-                .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
-                Collectors.toList());
+            getIntervenerGeneralApplications(generalApplications, INTERVENER1);
         List<GeneralApplicationCollectionData> intervener2GeneralApplications =
-            generalApplications.stream().filter(ga -> INTERVENER2
-                .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
-                Collectors.toList());
+            getIntervenerGeneralApplications(generalApplications, INTERVENER2);
         List<GeneralApplicationCollectionData> intervener3GeneralApplications =
-            generalApplications.stream().filter(ga -> INTERVENER3
-                .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
-                Collectors.toList());
+            getIntervenerGeneralApplications(generalApplications, INTERVENER3);
         List<GeneralApplicationCollectionData> intervener4GeneralApplications =
-            generalApplications.stream().filter(ga -> INTERVENER4
-                .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).collect(
-                Collectors.toList());
+            getIntervenerGeneralApplications(generalApplications, INTERVENER4);
+
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(generalApplications));
-        if (caseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications().isEmpty()) {
-            caseData.getGeneralApplicationWrapper().setIntervener1GeneralApplications(
-                helper.convertToGeneralApplicationsCollection(intervener1GeneralApplications));
-        }
-        if (caseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications().isEmpty()) {
-            caseData.getGeneralApplicationWrapper().setIntervener2GeneralApplications(
-                helper.convertToGeneralApplicationsCollection(intervener2GeneralApplications));
-        }
-        if (caseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications().isEmpty()) {
-            caseData.getGeneralApplicationWrapper().setIntervener3GeneralApplications(
-                helper.convertToGeneralApplicationsCollection(intervener3GeneralApplications));
-        }
-        if (caseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications().isEmpty()) {
-            caseData.getGeneralApplicationWrapper().setIntervener4GeneralApplications(
-                helper.convertToGeneralApplicationsCollection(intervener4GeneralApplications));
-        }
-        if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
-            caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(
-                helper.convertToGeneralApplicationsCollection(appRespGeneralApplications));
-        }
+
+        convertToGeneralApplicationsCollections(caseData, appRespGeneralApplications, intervener1GeneralApplications, intervener2GeneralApplications,
+            intervener3GeneralApplications,
+            intervener4GeneralApplications);
     }
+
 
     public void checkIfApplicationCompleted(FinremCaseDetails caseDetails, List<String> errors,
                                             List<GeneralApplicationsCollection> generalApplications,
@@ -489,4 +466,78 @@ public class GeneralApplicationService {
             wrapper.setGeneralApplicationIntvrDocuments(gaDocumentCollectionList);
         }
     }
+
+    private void convertToGeneralApplicationsCollections(FinremCaseData caseData, List<GeneralApplicationCollectionData> appRespGeneralApplications,
+                                                         List<GeneralApplicationCollectionData> intervener1GeneralApplications,
+                                                         List<GeneralApplicationCollectionData> intervener2GeneralApplications,
+                                                         List<GeneralApplicationCollectionData> intervener3GeneralApplications,
+                                                         List<GeneralApplicationCollectionData> intervener4GeneralApplications) {
+        if (caseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications() != null
+            && !caseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications().isEmpty()) {
+            caseData.getGeneralApplicationWrapper().setIntervener1GeneralApplications(
+                helper.convertToGeneralApplicationsCollection(intervener1GeneralApplications));
+        }
+        if (caseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications() != null
+            && !caseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications().isEmpty()) {
+            caseData.getGeneralApplicationWrapper().setIntervener2GeneralApplications(
+                helper.convertToGeneralApplicationsCollection(intervener2GeneralApplications));
+        }
+        if (caseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications() != null
+            && !caseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications().isEmpty()) {
+            caseData.getGeneralApplicationWrapper().setIntervener3GeneralApplications(
+                helper.convertToGeneralApplicationsCollection(intervener3GeneralApplications));
+        }
+        if (caseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications() != null
+            && !caseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications().isEmpty()) {
+            caseData.getGeneralApplicationWrapper().setIntervener4GeneralApplications(
+                helper.convertToGeneralApplicationsCollection(intervener4GeneralApplications));
+        }
+        if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
+            && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
+            caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(
+                helper.convertToGeneralApplicationsCollection(appRespGeneralApplications));
+        }
+    }
+
+    private static List<GeneralApplicationCollectionData> getIntervenerGeneralApplications(List<GeneralApplicationCollectionData> generalApplications,
+                                                                                           String intervener1) {
+        return generalApplications.stream().filter(ga -> intervener1
+            .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).toList();
+    }
+
+    private static List<GeneralApplicationCollectionData> setGeneralApplicationEvidenceRecievedFrom(
+        List<GeneralApplicationCollectionData> generalApplications) {
+        List<GeneralApplicationCollectionData> appRespGeneralApplications =
+            generalApplications.stream().filter(ga ->
+                APPLICANT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())
+                    || RESPONDENT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode()
+                )).toList();
+
+        appRespGeneralApplications.forEach(ga -> {
+            if (APPLICANT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())) {
+                ga.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(
+                    ApplicantAndRespondentEvidenceParty.APPLICANT.getValue());
+            } else if (RESPONDENT.equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())) {
+                ga.getGeneralApplicationItems().setAppRespGeneralApplicationReceivedFrom(
+                    ApplicantAndRespondentEvidenceParty.RESPONDENT.getValue());
+            }
+        });
+        return appRespGeneralApplications;
+    }
+
+    private static void logGeneralApplications(List<GeneralApplicationCollectionData> generalApplications) {
+        generalApplications.forEach(ga -> {
+            if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null) {
+                log.info("general application received from is {} on case id 1688466084529064 with status {}",
+                    ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom(),
+                    ga.getGeneralApplicationItems().getGeneralApplicationStatus());
+            }
+            if (ga.getGeneralApplicationItems().getGeneralApplicationSender() != null) {
+                log.info("general application sender is {} on case id 1688466084529064 with status {}",
+                    ga.getGeneralApplicationItems().getGeneralApplicationSender(),
+                    ga.getGeneralApplicationItems().getGeneralApplicationStatus());
+            }
+        });
+    }
+
 }

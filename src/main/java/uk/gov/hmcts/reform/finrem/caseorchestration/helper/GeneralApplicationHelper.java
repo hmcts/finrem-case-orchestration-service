@@ -170,74 +170,6 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    public GeneralApplicationItems getApplicationItems(FinremCaseData caseData, String userAuthorisation, String caseId) {
-        GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
-            GeneralApplicationItems.builder();
-        if (caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom() != null
-            && !caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom().isEmpty()) {
-            List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
-            buildDynamicIntervenerList(dynamicListElements, caseData);
-            String existingValue = caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom();
-            DynamicRadioListElement listElement = DynamicRadioListElement.builder()
-                .code(existingValue).label(existingValue).build();
-            DynamicRadioList existingRadioList = DynamicRadioList.builder().value(listElement)
-                .listItems(dynamicListElements).build();
-            builder.generalApplicationSender(existingRadioList);
-        } else {
-            builder.generalApplicationSender(null);
-        }
-        builder.generalApplicationCreatedBy(Objects.toString(caseData.getGeneralApplicationWrapper()
-            .getGeneralApplicationCreatedBy(), null));
-        builder.generalApplicationHearingRequired(Objects.toString(caseData.getGeneralApplicationWrapper()
-            .getGeneralApplicationHearingRequired(), null));
-        builder.generalApplicationTimeEstimate(Objects.toString(caseData.getGeneralApplicationWrapper()
-            .getGeneralApplicationTimeEstimate(), null));
-        builder.generalApplicationSpecialMeasures(Objects.toString(caseData.getGeneralApplicationWrapper()
-            .getGeneralApplicationSpecialMeasures(), null));
-
-        CaseDocument caseDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDocument());
-        if (caseDocument != null) {
-            log.info("General Application Document before converting to Pdf {}", caseDocument);
-            CaseDocument pdfCaseDocument = getPdfDocument(caseDocument, userAuthorisation, caseId);
-            builder.generalApplicationDocument(pdfCaseDocument);
-            log.info("General Application Document after converting to Pdf {}", pdfCaseDocument);
-        }
-
-        CaseDocument draftDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDraftOrder());
-        if (draftDocument != null) {
-            log.info("General Application Draft Document before converting to Pdf {}", draftDocument);
-            CaseDocument draftCaseDocument = getPdfDocument(draftDocument, userAuthorisation, caseId);
-            builder.generalApplicationDraftOrder(draftCaseDocument);
-            log.info("General Application Draft Document after converting to Pdf {}", draftCaseDocument);
-        }
-        builder.generalApplicationCreatedDate(objectToDateTime(caseData.getGeneralApplicationWrapper().getGeneralApplicationLatestDocumentDate()));
-        builder.generalApplicationOutcomeOther(Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcomeOther(), null));
-        CaseDocument directionDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
-        if (directionDocument != null) {
-            log.info("General Application Direction Document before converting to Pdf {}", directionDocument);
-            CaseDocument directionCaseDocument = getPdfDocument(directionDocument, userAuthorisation, caseId);
-            builder.generalApplicationDirectionsDocument(directionCaseDocument);
-            log.info("General Application Direction Document after converting to Pdf {}", directionCaseDocument);
-        }
-        String outcome = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome(), null);
-        String directionGiven = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired(),null);
-        if (outcome != null) {
-            setStatus(builder, outcome, directionGiven);
-        } else {
-            builder.generalApplicationStatus(CREATED.getId());
-        }
-        return builder.build();
-    }
-
-    private void setStatus(GeneralApplicationItems.GeneralApplicationItemsBuilder builder, String outcome, String directionGiven) {
-        switch (outcome) {
-            case "APPROVED" -> builder.generalApplicationStatus(directionGiven == null ? APPROVED.getId() : DIRECTION_APPROVED.getId());
-            case "NOT_APPROVED" -> builder.generalApplicationStatus(directionGiven == null ? NOT_APPROVED.getId() : DIRECTION_NOT_APPROVED.getId());
-            case "OTHER" -> builder.generalApplicationStatus(directionGiven == null ? OTHER.getId() : DIRECTION_OTHER.getId());
-            default -> builder.generalApplicationStatus(OTHER.getId());
-        }
-    }
-
 
     public int getCompareTo(GeneralApplicationCollectionData e1, GeneralApplicationCollectionData e2) {
         if (e2 == null || e2.getGeneralApplicationItems() == null
@@ -326,7 +258,7 @@ public class GeneralApplicationHelper {
     }
 
     public void populateGeneralApplicationDataSender(FinremCaseData caseData,
-                                                 List<GeneralApplicationCollectionData> generalApplicationData) {
+                                                     List<GeneralApplicationCollectionData> generalApplicationData) {
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         buildDynamicIntervenerList(dynamicListElements, caseData);
         if (generalApplicationData != null && !generalApplicationData.isEmpty()) {
@@ -349,7 +281,7 @@ public class GeneralApplicationHelper {
     }
 
     public void buildDynamicIntervenerList(List<DynamicRadioListElement> dynamicListElements,
-                                            FinremCaseData caseData) {
+                                           FinremCaseData caseData) {
         dynamicListElements.addAll(List.of(getDynamicListElements(APPLICANT, APPLICANT),
             getDynamicListElements(RESPONDENT, RESPONDENT),
             getDynamicListElements(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
@@ -371,4 +303,93 @@ public class GeneralApplicationHelper {
             dynamicListElements.add(getDynamicListElements(INTERVENER4, INTERVENER4));
         }
     }
+
+    public GeneralApplicationItems getApplicationItems(FinremCaseData caseData, String userAuthorisation, String caseId) {
+        GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
+            GeneralApplicationItems.builder();
+
+        buildGeneralApplicantionSenderDynamicList(caseData, builder);
+
+        buildGeneralApplicationHearingDetails(caseData, builder);
+
+        buildGeneralApplicationDocuments(caseData, userAuthorisation, caseId, builder);
+
+
+        return builder.build();
+    }
+
+    private void buildGeneralApplicationDocuments(FinremCaseData caseData, String userAuthorisation, String caseId,
+                                                  GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
+        CaseDocument caseDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDocument());
+        if (caseDocument != null) {
+            log.info("General Application Document before converting to Pdf {}", caseDocument);
+            CaseDocument pdfCaseDocument = getPdfDocument(caseDocument, userAuthorisation, caseId);
+            builder.generalApplicationDocument(pdfCaseDocument);
+            log.info("General Application Document after converting to Pdf {}", pdfCaseDocument);
+        }
+
+        CaseDocument draftDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDraftOrder());
+        if (draftDocument != null) {
+            log.info("General Application Draft Document before converting to Pdf {}", draftDocument);
+            CaseDocument draftCaseDocument = getPdfDocument(draftDocument, userAuthorisation, caseId);
+            builder.generalApplicationDraftOrder(draftCaseDocument);
+            log.info("General Application Draft Document after converting to Pdf {}", draftCaseDocument);
+        }
+        CaseDocument directionDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
+        if (directionDocument != null) {
+            log.info("General Application Direction Document before converting to Pdf {}", directionDocument);
+            CaseDocument directionCaseDocument = getPdfDocument(directionDocument, userAuthorisation, caseId);
+            builder.generalApplicationDirectionsDocument(directionCaseDocument);
+            log.info("General Application Direction Document after converting to Pdf {}", directionCaseDocument);
+        }
+
+    }
+
+    private void buildGeneralApplicationHearingDetails(FinremCaseData caseData, GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
+        builder.generalApplicationCreatedBy(Objects.toString(caseData.getGeneralApplicationWrapper()
+            .getGeneralApplicationCreatedBy(), null));
+        builder.generalApplicationHearingRequired(Objects.toString(caseData.getGeneralApplicationWrapper()
+            .getGeneralApplicationHearingRequired(), null));
+        builder.generalApplicationTimeEstimate(Objects.toString(caseData.getGeneralApplicationWrapper()
+            .getGeneralApplicationTimeEstimate(), null));
+        builder.generalApplicationSpecialMeasures(Objects.toString(caseData.getGeneralApplicationWrapper()
+            .getGeneralApplicationSpecialMeasures(), null));
+        builder.generalApplicationCreatedDate(objectToDateTime(caseData.getGeneralApplicationWrapper().getGeneralApplicationLatestDocumentDate()));
+        builder.generalApplicationOutcomeOther(Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcomeOther(), null));
+
+        String outcome = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome(), null);
+        String directionGiven = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired(), null);
+        if (outcome != null) {
+            setStatus(builder, outcome, directionGiven);
+        } else {
+            builder.generalApplicationStatus(CREATED.getId());
+        }
+    }
+
+    private void buildGeneralApplicantionSenderDynamicList(FinremCaseData caseData, GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
+        if (caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom() != null) {
+            List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
+            buildDynamicIntervenerList(dynamicListElements, caseData);
+            String existingValue = caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom();
+            DynamicRadioListElement listElement = DynamicRadioListElement.builder()
+                .code(existingValue)
+                .label(caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom())
+                .build();
+            DynamicRadioList existingRadioList = DynamicRadioList.builder().value(listElement)
+                .listItems(dynamicListElements).build();
+            builder.generalApplicationSender(existingRadioList);
+        } else {
+            builder.generalApplicationSender(null);
+        }
+    }
+
+    private void setStatus(GeneralApplicationItems.GeneralApplicationItemsBuilder builder, String outcome, String directionGiven) {
+        switch (outcome) {
+            case "APPROVED" -> builder.generalApplicationStatus(directionGiven == null ? APPROVED.getId() : DIRECTION_APPROVED.getId());
+            case "NOT_APPROVED" -> builder.generalApplicationStatus(directionGiven == null ? NOT_APPROVED.getId() : DIRECTION_NOT_APPROVED.getId());
+            case "OTHER" -> builder.generalApplicationStatus(directionGiven == null ? OTHER.getId() : DIRECTION_OTHER.getId());
+            default -> builder.generalApplicationStatus(OTHER.getId());
+        }
+    }
+
 }

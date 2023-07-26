@@ -295,30 +295,31 @@ public class AssignCaseAccessService {
     public String getActiveUser(String caseId, String userAuthorisation) {
         String logMessage = "Logged in user role {} caseId {}";
         String activeUserCaseRole = getActiveUserCaseRole(caseId, userAuthorisation);
-        if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getValue())) {
+        if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
             log.info(logMessage, APPLICANT, caseId);
             return APPLICANT;
-        } else if (activeUserCaseRole.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+        } else if (activeUserCaseRole.contains(CaseRole.RESP_SOLICITOR.getCcdCode())) {
             log.info(logMessage, RESPONDENT, caseId);
             return RESPONDENT;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_1.getValue())
-            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_1.getValue())) {
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
             log.info(logMessage, INTERVENER_ONE, caseId);
             return INTERVENER1;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_2.getValue())
-            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_2.getValue())) {
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_2.getCcdCode())) {
             log.info(logMessage, INTERVENER_TWO, caseId);
             return INTERVENER2;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_3.getValue())
-            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_3.getValue())) {
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_3.getCcdCode())) {
             log.info(logMessage, INTERVENER_THREE, caseId);
             return INTERVENER3;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_4.getValue())
-            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_4.getValue())) {
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_4.getCcdCode())) {
             log.info(logMessage, INTERVENER_FOUR, caseId);
             return INTERVENER4;
         }
         return activeUserCaseRole;
+    }
 
     public List<CaseAssignmentUserRole> getAllCaseRole(final String caseId) {
         log.info("retrieve all case role for caseId {}", caseId);

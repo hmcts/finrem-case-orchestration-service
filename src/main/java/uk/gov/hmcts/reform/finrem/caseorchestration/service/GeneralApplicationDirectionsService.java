@@ -277,7 +277,7 @@ public class GeneralApplicationDirectionsService {
     }
 
     @SuppressWarnings("java:S1874")
-    private void printDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
+    private void printDocumentPackAndSendToRelevantParties(CaseDetails caseDetails, String authorisationToken,
                                                                   List<BulkPrintDocument> documents) {
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
         log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}", documents.size(), caseDetails.getId(),

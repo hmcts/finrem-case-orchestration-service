@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.List;
-import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.REFERRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
@@ -28,7 +27,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
     private final GeneralApplicationService service;
 
     public GeneralApplicationReferToJudgeAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-                                                        GeneralApplicationService service) {
+                                                              GeneralApplicationService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;

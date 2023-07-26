@@ -133,6 +133,7 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
+     *
      * @return sendLetterResponse response to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -204,6 +205,7 @@ public class BulkPrintService {
      * Please upgrade your code.
      * This method will be removed in future versions.
      * <p>Use @link generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) instead </p>
+     *
      * @return BulkPrintDocument to be return
      * @deprecated deprecated since 15-Feb-2023
      */
@@ -238,20 +240,32 @@ public class BulkPrintService {
         return documentHelper.getCaseDocumentAsBulkPrintDocument(respondentCoverSheet);
     }
 
-    @Deprecated(since = "15-Feb-2023")
-    private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken,
-                                                           DocumentHelper.PaperNotificationRecipient recipient) {
-        CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
-        log.info("Intervener cover sheet generated {}, for case Id {}",
-            intervenerCoverSheet, caseDetails.getId());
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
-    }
-
     private BulkPrintDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails, String authorisationToken,
                                                            DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDocument intervenerCoverSheet =
             coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
         log.info("Intervener cover sheet generated {}, for case Id {}", intervenerCoverSheet, caseDetails.getId());
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
+    }
+
+
+    /**
+     * Return BulkPrintDocument.
+     * <p>Please use @{@link #generateIntervenerCoverSheet(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}</p>
+     *
+     * @param caseDetails        instance of CaseDetails
+     * @param authorisationToken instance of String
+     * @param recipient          instance of DocumentHelper.PaperNotificationRecipient
+     * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken,
+     * DocumentHelper.PaperNotificationRecipient recipient}
+     */
+    @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
+    private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken,
+                                                           DocumentHelper.PaperNotificationRecipient recipient) {
+        CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
+        log.info("Intervener cover sheet generated {}, for case Id {}",
+            intervenerCoverSheet, caseDetails.getId());
         return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
     }
 
@@ -263,13 +277,14 @@ public class BulkPrintService {
     /**
      * Return BulkPrintDocument.
      * <p>Please use @{@link #printIntervenerDocuments(IntervenerWrapper, FinremCaseDetails, String, List)}</p>
-     * @param intervenerWrapper instance of IntervenerWrapper
-     * @param caseDetails instance of CaseDetails
+     *
+     * @param intervenerWrapper  instance of IntervenerWrapper
+     * @param caseDetails        instance of CaseDetails
      * @param authorisationToken instance of String
-     * @param caseDocuments instance of List
+     * @param caseDocuments      instance of List
      * @deprecated Use {@link IntervenerWrapper intervenerWrapper, CaseDetails caseDetails,
-     *                                          String authorisationToken,
-     *                                          List caseDocuments}
+     * String authorisationToken,
+     * List caseDocuments}
      */
     @Deprecated(since = "15-june-2023")
     @SuppressWarnings("java:S1133")
@@ -293,22 +308,5 @@ public class BulkPrintService {
             intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
     }
 
-    /**
-     * Return BulkPrintDocument.
-     * <p>Please use @{@link #generateIntervenerCoverSheet(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}</p>
-     * @param caseDetails instance of CaseDetails
-     * @param authorisationToken instance of String
-     * @param recipient instance of DocumentHelper.PaperNotificationRecipient
-     * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken,
-     *                                                            DocumentHelper.PaperNotificationRecipient recipient}
-     */
-    @Deprecated(since = "15-june-2023")
-    @SuppressWarnings("java:S1133")
-    private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken,
-                                                           DocumentHelper.PaperNotificationRecipient recipient) {
-        CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
-        log.info("Intervener cover sheet generated {}, for case Id {}",
-            intervenerCoverSheet, caseDetails.getId());
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
-    }
+}
 

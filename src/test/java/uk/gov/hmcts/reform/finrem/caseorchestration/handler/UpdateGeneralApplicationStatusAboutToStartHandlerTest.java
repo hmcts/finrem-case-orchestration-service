@@ -5,14 +5,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.springframework.stereotype.Service;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -168,8 +168,10 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
     }
 
     private void assertData(GeneralApplicationItems generalApplicationItems) {
-        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationSender().getValue().getCode());
-        assertEquals("Applicant", generalApplicationItems.getGeneralApplicationSender().getValue().getLabel());
+        assertEquals(ApplicantAndRespondentEvidenceParty.APPLICANT.getValue(),
+            generalApplicationItems.getGeneralApplicationSender().getValue().getCode());
+        assertEquals(ApplicantAndRespondentEvidenceParty.APPLICANT.getValue(),
+            generalApplicationItems.getGeneralApplicationSender().getValue().getLabel());
         assertEquals("Claire Mumford", generalApplicationItems.getGeneralApplicationCreatedBy());
         assertEquals("NO", generalApplicationItems.getGeneralApplicationHearingRequired());
         assertEquals(GeneralApplicationStatus.REFERRED.getId(), generalApplicationItems.getGeneralApplicationStatus());

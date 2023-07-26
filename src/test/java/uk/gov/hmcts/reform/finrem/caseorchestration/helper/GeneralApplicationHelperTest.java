@@ -245,7 +245,7 @@ public class GeneralApplicationHelperTest {
 
     private CallbackRequest callbackRequestForCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("caseDocument", caseDocument(DOC_URL,"app_docs.docx", BINARY_URL));
+        caseData.put("caseDocument", caseDocument(DOC_URL, "app_docs.docx", BINARY_URL));
         return CallbackRequest
             .builder()
             .caseDetails(CaseDetails.builder()
@@ -275,7 +275,7 @@ public class GeneralApplicationHelperTest {
     protected FinremCallbackRequest callbackRequest() {
         GeneralApplicationItems generalApplicationItems =
             GeneralApplicationItems.builder().generalApplicationSender(
-                buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
+                    buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
                     LocalDate.of(2022, 8, 2)).build();
@@ -286,7 +286,7 @@ public class GeneralApplicationHelperTest {
         generalApplications.setId(UUID.randomUUID());
         GeneralApplicationItems generalApplicationItemsAdded =
             GeneralApplicationItems.builder().generalApplicationSender(
-                buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
+                    buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours")
                 .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(LocalDate.now()).build();
         generalApplicationsBefore.setValue(generalApplicationItemsAdded);

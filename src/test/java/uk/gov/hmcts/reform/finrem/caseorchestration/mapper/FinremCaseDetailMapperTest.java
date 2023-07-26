@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDeta
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAsset;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -406,7 +407,7 @@ class FinremCaseDetailMapperTest {
             PeriodicalPaymentSubstitute.PENSION_SHARING_ORDER
         )));
         assertEquals(PensionProvider.THE_COURT, caseData.getServePensionProviderResponsibility());
-        assertEquals(EvidenceParty.CASE, caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom());
+        assertEquals(EvidenceParty.CASE.getValue(), caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom());
         assertEquals(JudgeType.DEPUTY_DISTRICT_JUDGE,
             caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsJudgeType());
         assertEquals(GeneralLetterAddressToType.APPLICANT_SOLICITOR, caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo());
