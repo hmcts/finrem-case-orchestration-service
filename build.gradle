@@ -20,7 +20,7 @@ def versions = [
         commonsIo            : '2.7',
         commonsLang3         : '3.11',
         hmctsNotify          : '3.17.0-RELEASE',
-        junit                : '4.13.1',
+        junit                : '4.13.2',
         lombok               : '1.18.22',
         mockito              : '3.4.4',
         pact                 : '4.4.0-beta.2',
