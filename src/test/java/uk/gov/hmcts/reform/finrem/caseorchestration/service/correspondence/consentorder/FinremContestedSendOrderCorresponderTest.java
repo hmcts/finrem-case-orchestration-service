@@ -71,7 +71,7 @@ class FinremContestedSendOrderCorresponderTest {
         data.getIntervenerFourWrapper().setIntervenerCorrespondenceEnabled(false);
         IntervenerWrapper wrapper = data.getIntervenerOneWrapper();
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
-        when(notificationService.getFinremCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
         verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
     }
@@ -84,7 +84,7 @@ class FinremContestedSendOrderCorresponderTest {
         data.getIntervenerFourWrapper().setIntervenerCorrespondenceEnabled(false);
         IntervenerWrapper wrapper = data.getIntervenerTwoWrapper();
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().solicitorEmailKey(TEST_SOLICITOR_EMAIL).build();
-        when(notificationService.getFinremCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
         verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
     }
@@ -97,7 +97,7 @@ class FinremContestedSendOrderCorresponderTest {
         data.getIntervenerFourWrapper().setIntervenerCorrespondenceEnabled(false);
         IntervenerWrapper wrapper = data.getIntervenerThreeWrapper();
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().solicitorEmailKey(TEST_SOLICITOR_EMAIL).build();
-        when(notificationService.getFinremCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
         verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
     }
@@ -112,7 +112,7 @@ class FinremContestedSendOrderCorresponderTest {
         wrapper.setIntervenerEmail(TEST_SOLICITOR_EMAIL);
         SolicitorCaseDataKeysWrapper dataKeysWrapper
             = SolicitorCaseDataKeysWrapper.builder().solicitorEmailKey(wrapper.getIntervenerEmail()).build();
-        when(notificationService.getFinremCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
         verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
     }
