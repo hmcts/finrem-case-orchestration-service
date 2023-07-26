@@ -238,6 +238,23 @@ public class BulkPrintService {
         return documentHelper.getCaseDocumentAsBulkPrintDocument(respondentCoverSheet);
     }
 
+    @Deprecated(since = "15-Feb-2023")
+    private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken,
+                                                           DocumentHelper.PaperNotificationRecipient recipient) {
+        CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
+        log.info("Intervener cover sheet generated {}, for case Id {}",
+            intervenerCoverSheet, caseDetails.getId());
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
+    }
+
+    private BulkPrintDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails, String authorisationToken,
+                                                           DocumentHelper.PaperNotificationRecipient recipient) {
+        CaseDocument intervenerCoverSheet =
+            coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
+        log.info("Intervener cover sheet generated {}, for case Id {}", intervenerCoverSheet, caseDetails.getId());
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
+    }
+
     public String getRecipient(String text) {
         return StringUtils.remove(WordUtils.capitalizeFully(text, '_'), "_");
     }
@@ -295,11 +312,3 @@ public class BulkPrintService {
         return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
     }
 
-    private BulkPrintDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails, String authorisationToken,
-                                                           DocumentHelper.PaperNotificationRecipient recipient) {
-        CaseDocument intervenerCoverSheet =
-            coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
-        log.info("Intervener cover sheet generated {}, for case Id {}", intervenerCoverSheet, caseDetails.getId());
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
-    }
-}

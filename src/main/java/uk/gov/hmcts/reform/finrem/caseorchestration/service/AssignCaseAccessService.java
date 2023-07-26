@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.searchuserrole.SearchCaseAssignedUserRolesRequest;
 
@@ -32,7 +33,17 @@ import java.util.function.Predicate;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.USER_ROLES_CACHE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
 
 @Service
 @Slf4j
@@ -262,7 +273,52 @@ public class AssignCaseAccessService {
             .build());
     }
 
+    public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
+        log.info("retrieve active user case role for caseId {}", caseId);
+        String idamUserId = idamService.getIdamUserId(userAuthorisation);
 
+        CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
+        if (rolesResource != null) {
+            List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
+            log.info("All roles {} for caseId {}", allRoles, caseId);
+            List<CaseAssignmentUserRole> activeRole = allRoles.stream().filter(role -> role.getUserId().equals(idamUserId)).toList();
+            if (!activeRole.isEmpty()) {
+                log.info("Active Role {} for caseId {}", activeRole, caseId);
+                String caseRole = activeRole.get(0).getCaseRole();
+                log.info("case role found {} for caseId {}", caseRole, caseId);
+                return caseRole;
+            }
+        }
+        return "case";
+    }
+
+    public String getActiveUser(String caseId, String userAuthorisation) {
+        String logMessage = "Logged in user role {} caseId {}";
+        String activeUserCaseRole = getActiveUserCaseRole(caseId, userAuthorisation);
+        if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getValue())) {
+            log.info(logMessage, APPLICANT, caseId);
+            return APPLICANT;
+        } else if (activeUserCaseRole.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+            log.info(logMessage, RESPONDENT, caseId);
+            return RESPONDENT;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_1.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_1.getValue())) {
+            log.info(logMessage, INTERVENER_ONE, caseId);
+            return INTERVENER1;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_2.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_2.getValue())) {
+            log.info(logMessage, INTERVENER_TWO, caseId);
+            return INTERVENER2;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_3.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_3.getValue())) {
+            log.info(logMessage, INTERVENER_THREE, caseId);
+            return INTERVENER3;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_4.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_4.getValue())) {
+            log.info(logMessage, INTERVENER_FOUR, caseId);
+            return INTERVENER4;
+        }
+        return activeUserCaseRole;
 
     public List<CaseAssignmentUserRole> getAllCaseRole(final String caseId) {
         log.info("retrieve all case role for caseId {}", caseId);

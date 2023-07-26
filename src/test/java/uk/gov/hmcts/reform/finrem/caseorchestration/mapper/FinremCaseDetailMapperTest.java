@@ -48,7 +48,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDeta
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAsset;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -196,7 +195,7 @@ class FinremCaseDetailMapperTest {
         assertNotNull(finremCaseDetails);
         assertEquals("Test", finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName());
     }
-    
+
     @Test
     void givenValidCallbackRequest_thenSuccessfullyMapped() {
         caseDetails = buildCaseDetailsFromJson(REFUSAL_ORDER_CALLBACK_REQUEST);
