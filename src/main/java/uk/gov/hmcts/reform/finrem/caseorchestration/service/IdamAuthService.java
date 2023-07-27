@@ -58,7 +58,7 @@ public class IdamAuthService {
     private TokenRequest buildTokenRequest(String username, String password) {
         return new TokenRequest(
             oAuth2Configuration.getClientId(),
-            "2QFX-7GOV-GVYN-A5CA",
+            oAuth2Configuration.getClientSecret(),
             OPENID_GRANT_TYPE,
             oAuth2Configuration.getRedirectUri(),
             username,
