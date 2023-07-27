@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHel
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -168,9 +167,9 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
     }
 
     private void assertData(GeneralApplicationItems generalApplicationItems) {
-        assertEquals(ApplicantAndRespondentEvidenceParty.APPLICANT.getValue(),
+        assertEquals(APPLICANT,
             generalApplicationItems.getGeneralApplicationSender().getValue().getCode());
-        assertEquals(ApplicantAndRespondentEvidenceParty.APPLICANT.getValue(),
+        assertEquals(APPLICANT,
             generalApplicationItems.getGeneralApplicationSender().getValue().getLabel());
         assertEquals("Claire Mumford", generalApplicationItems.getGeneralApplicationCreatedBy());
         assertEquals("NO", generalApplicationItems.getGeneralApplicationHearingRequired());
