@@ -403,7 +403,6 @@ public class GeneralApplicationService {
     public void updateGeneralApplicationCollectionData(List<GeneralApplicationCollectionData> generalApplications,
                                                        FinremCaseData caseData) {
         log.info("entering updateGeneralApplicationCollection Data for case Id {}", caseData.getCcdCaseId());
-        GeneralApplicationWrapper generalApplicationWrapper = caseData.getGeneralApplicationWrapper();
         helper.populateGeneralApplicationDataSender(caseData, generalApplications);
         logGeneralApplications(generalApplications);
 
@@ -421,6 +420,8 @@ public class GeneralApplicationService {
 
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(generalApplications));
+
+        GeneralApplicationWrapper generalApplicationWrapper = caseData.getGeneralApplicationWrapper();
 
         convertToGeneralApplicationsCollections(generalApplicationWrapper, appRespGeneralApplications,
             intervener1GeneralApplications, intervener2GeneralApplications,
@@ -467,7 +468,8 @@ public class GeneralApplicationService {
         }
     }
 
-    private void convertToGeneralApplicationsCollections(GeneralApplicationWrapper wrapper, List<GeneralApplicationCollectionData> appRespGeneralApplications,
+    private void convertToGeneralApplicationsCollections(GeneralApplicationWrapper wrapper,
+                                                         List<GeneralApplicationCollectionData> appRespGeneralApplications,
                                                          List<GeneralApplicationCollectionData> intervener1GeneralApplications,
                                                          List<GeneralApplicationCollectionData> intervener2GeneralApplications,
                                                          List<GeneralApplicationCollectionData> intervener3GeneralApplications,
