@@ -208,8 +208,17 @@ public class CaseDataService {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(PAPER_APPLICATION)));
     }
 
+    public boolean isPaperApplication(FinremCaseData caseData) {
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.getPaperApplication()));
+    }
+
+    @Deprecated(since = "15-Feb-2023")
     public boolean isConsentedInContestedCase(CaseDetails caseDetails) {
         return isContestedApplication(caseDetails) && caseDetails.getData().get(CONSENT_D81_QUESTION) != null;
+    }
+
+    public boolean isConsentedInContestedCase(FinremCaseDetails caseDetails) {
+        return isContestedApplication(caseDetails) && caseDetails.getData().getConsentOrderWrapper().getConsentD81Question() != null;
     }
 
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
@@ -232,29 +241,35 @@ public class CaseDataService {
         return CaseType.CONSENTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 
+    public boolean isConsentedApplication(FinremCaseDetails caseDetails) {
+        return CaseType.CONSENTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType()));
+    }
+
+    @Deprecated(since = "15-Feb-2023")
     public boolean isContestedApplication(CaseDetails caseDetails) {
         return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 
-    public boolean isContestedFinremCaseDetailsApplication(FinremCaseDetails caseDetails) {
-        return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType().getCcdType()));
+    public boolean isContestedApplication(FinremCaseDetails caseDetails) {
+        return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType()));
     }
 
     public boolean isContestedPaperApplication(CaseDetails caseDetails) {
         return isContestedApplication(caseDetails) && isPaperApplication(caseDetails.getData());
     }
 
-    public boolean isOrderApprovedCollectionPresent(Map<String, Object> caseData) {
+    public boolean isOrderApprovedCollectionPresent(FinremCaseData caseData) {
         return isConsentedApprovedOrderCollectionPresent(caseData)
             || isContestedApprovedOrderCollectionPresent(caseData);
     }
 
-    private boolean isConsentedApprovedOrderCollectionPresent(Map<String, Object> caseData) {
-        return caseData.get(APPROVED_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(APPROVED_ORDER_COLLECTION)).isEmpty();
+    private boolean isConsentedApprovedOrderCollectionPresent(FinremCaseData caseData) {
+        return caseData.getApprovedOrderCollection() != null && !caseData.getApprovedOrderCollection().isEmpty();
     }
 
-    private boolean isContestedApprovedOrderCollectionPresent(Map<String, Object> caseData) {
-        return caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty();
+    private boolean isContestedApprovedOrderCollectionPresent(FinremCaseData caseData) {
+        return caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders() != null
+            && !caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders().isEmpty();
     }
 
     public boolean isApplicantAddressConfidential(Map<String, Object> caseData) {
@@ -270,9 +285,9 @@ public class CaseDataService {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(address)));
     }
 
-    public boolean isContestedOrderNotApprovedCollectionPresent(Map<String, Object> caseData) {
-        return caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION) != null
-            && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION)).isEmpty();
+    public boolean isContestedOrderNotApprovedCollectionPresent(FinremCaseData caseData) {
+        return caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders() != null
+            && !caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders().isEmpty();
     }
 
     @SuppressWarnings("java:S112")

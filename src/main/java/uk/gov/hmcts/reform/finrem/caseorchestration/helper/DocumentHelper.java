@@ -240,8 +240,12 @@ public class DocumentHelper {
         return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
     }
 
-    public CaseDocument convertToCaseDocumentIfObjNotNull(Object object) {
-        return object != null ? objectMapper.convertValue(object, CaseDocument.class) : null;
+    public CaseDocument getLatestGeneralOrder(FinremCaseData caseData) {
+        if (isNull(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
+            log.warn("Latest general order not found for printing for case");
+            return null;
+        }
+        return convertToCaseDocument(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument());
     }
 
     public CaseDocument convertToCaseDocument(Object object) {
@@ -614,6 +618,7 @@ public class DocumentHelper {
             .fileName(caseDocument.getDocumentFilename()).build())
             : Optional.empty();
     }
+
 
     public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data,
                                                                            String authorisationToken,

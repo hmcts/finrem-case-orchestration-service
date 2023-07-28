@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
@@ -234,6 +236,36 @@ public class GeneralOrderService {
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, selectedOrders);
         data.setOrdersToShare(dynamicOrderList);
+    }
+
+    public void setConsentInContestedOrderList(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
+        ConsentOrderWrapper wrapper = data.getConsentOrderWrapper();
+        List<ConsentOrderCollection> approvedConsentOrderDocuments = wrapper.getContestedConsentedApprovedOrders();
+        List<ConsentOrderCollection> refusedConsentOrderDocuments = wrapper.getConsentedNotApprovedOrders();
+
+        if (approvedConsentOrderDocuments != null && !approvedConsentOrderDocuments.isEmpty()) {
+            approvedConsentOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
+                "[Approved Order]" + " - " + obj.getApprovedOrder().getConsentOrder().getDocumentFilename())));
+        }
+
+        if (refusedConsentOrderDocuments != null && !refusedConsentOrderDocuments.isEmpty()) {
+            refusedConsentOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
+                "[Refused Order]" + " - " + obj.getApprovedOrder().getConsentOrder().getDocumentFilename())));
+        }
+
+        DynamicMultiSelectList selectedConsentOrders = data.getConsentInContestedOrdersToShare();
+
+        DynamicMultiSelectList dynamicConsentOrderList = getDynamicOrderList(dynamicListElements, selectedConsentOrders);
+        data.setConsentInContestedOrdersToShare(dynamicConsentOrderList);
+    }
+
+    public DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
+        return DynamicMultiSelectListElement.builder()
+            .code(code)
+            .label(label)
+            .build();
     }
 
     private DynamicMultiSelectList getDynamicOrderList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
