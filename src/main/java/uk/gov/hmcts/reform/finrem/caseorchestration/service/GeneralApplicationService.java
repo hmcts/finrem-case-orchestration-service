@@ -498,6 +498,7 @@ public class GeneralApplicationService {
             && !appRespGeneralApplications.isEmpty()) {
             wrapper.setAppRespGeneralApplications(
                 helper.convertToGeneralApplicationsCollection(appRespGeneralApplications));
+            wrapper.getAppRespGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(null));
         }
     }
 
