@@ -41,7 +41,7 @@ def versions = [
         sendLetterClient     : '3.0.23',
         elasticSearch        : '7.17.12',
         jacksonDatabind      : '2.13.2',
-        retry                : '1.3.1'
+        retry                : '1.3.4'
 ]
 
 project.ext {
