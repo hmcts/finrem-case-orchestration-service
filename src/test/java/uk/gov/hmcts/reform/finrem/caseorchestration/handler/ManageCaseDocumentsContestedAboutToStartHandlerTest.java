@@ -87,7 +87,7 @@ public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
             manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(((FinremCaseData) response.getData()).getUploadCaseDocumentWrapper()
-            .getConfidentialDocumentCollection().get(0).getUploadCaseDocument().getCaseDocumentConfidential(),
+            .getConfidentialDocumentCollection().get(0).getUploadCaseDocument().getCaseDocumentConfidentiality(),
             is(YesOrNo.NO));
     }
 
@@ -99,14 +99,14 @@ public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
         callbackRequest.getCaseDetails().getData().getUploadCaseDocumentWrapper().setConfidentialDocumentCollection(
             List.of(UploadCaseDocumentCollection.builder()
                 .uploadCaseDocument(UploadCaseDocument.builder()
-                    .caseDocumentConfidential(YesOrNo.YES)
+                    .caseDocumentConfidentiality(YesOrNo.YES)
                     .build()).build()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(((FinremCaseData) response.getData()).getUploadCaseDocumentWrapper()
-                .getConfidentialDocumentCollection().get(0).getUploadCaseDocument().getCaseDocumentConfidential(),
+                .getConfidentialDocumentCollection().get(0).getUploadCaseDocument().getCaseDocumentConfidentiality(),
             is(YesOrNo.YES));
     }
 

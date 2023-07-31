@@ -39,7 +39,7 @@ public class LegacyConfidentialDocumentsService {
                     .caseDocuments(legacyConfidentialDocument.getDocumentLink())
                     .caseDocumentType(legacyConfidentialDocument.getDocumentType())
                     .hearingDetails(legacyConfidentialDocument.getDocumentComment())
-                    .caseDocumentConfidential(YesOrNo.YES)
+                    .caseDocumentConfidentiality(YesOrNo.YES)
                     .caseDocumentUploadDateTime(legacyConfidentialDocument.getConfidentialDocumentUploadDateTime())
                     .build())
             .build();

@@ -47,23 +47,23 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void migrateLegacyConfidentialCaseDocumentFormat(FinremCaseData caseData) {
-        if (caseData.getConfidentialDocumentsUploaded() != null) {
-            caseData.getManageCaseDocumentCollection()
-                .addAll(getConfidentialCaseDocumentCollectionFromLegacyConfidentialDocs(caseData));
-            caseData.getConfidentialDocumentsUploaded().clear();
+    private void migrateLegacyConfidentialCaseDocumentFormat(FinremCaseData data) {
+        if (data.getConfidentialDocumentsUploaded() != null) {
+            data.getManageCaseDocumentCollection()
+                .addAll(getConfidentialCaseDocumentCollectionFromLegacyConfidentialDocs(data));
+            data.getConfidentialDocumentsUploaded().clear();
         }
     }
 
     private void populateMissingConfidentialFlag(FinremCaseData caseData) {
         caseData.getManageCaseDocumentCollection().stream()
             .filter(this::isConfidentialFlagMissing).forEach(documentCollection ->
-                documentCollection.getUploadCaseDocument().setCaseDocumentConfidential(YesOrNo.NO));
+                documentCollection.getUploadCaseDocument().setCaseDocumentConfidentiality(YesOrNo.NO));
     }
 
     private boolean isConfidentialFlagMissing(UploadCaseDocumentCollection documentCollection) {
         return documentCollection.getUploadCaseDocument() != null
-            && documentCollection.getUploadCaseDocument().getCaseDocumentConfidential() == null;
+            && documentCollection.getUploadCaseDocument().getCaseDocumentConfidentiality() == null;
     }
 
     private List<UploadCaseDocumentCollection> getConfidentialCaseDocumentCollectionFromLegacyConfidentialDocs(

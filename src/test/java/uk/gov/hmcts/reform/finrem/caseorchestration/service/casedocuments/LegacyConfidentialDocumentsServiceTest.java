@@ -46,7 +46,7 @@ public class LegacyConfidentialDocumentsServiceTest {
         assertThat(uploadCaseDocumentCollections.get(0).getId(), equalTo(LEGACY_CONFIDENTIAL_ID));
         assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getHearingDetails(),
             equalTo(LEGACY_CONFIDENTIAL_COMMENT));
-        assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocumentConfidential(),
+        assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocumentConfidentiality(),
             is(YesOrNo.YES));
         assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocumentType(),
             is(CaseDocumentType.CARE_PLAN));
