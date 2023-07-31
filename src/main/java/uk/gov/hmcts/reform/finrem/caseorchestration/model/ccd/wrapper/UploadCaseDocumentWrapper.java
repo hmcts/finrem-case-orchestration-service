@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UploadCaseDocumentWrapper {
     private List<UploadCaseDocumentCollection> uploadCaseDocument;
     private List<UploadCaseDocumentCollection> fdrCaseDocumentCollection;
