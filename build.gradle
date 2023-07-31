@@ -35,7 +35,7 @@ def versions = [
         jjwt                 : '0.9.1',
         skyscreamer          : '1.5.1',
         jaxbOsgi             : '2.3.8',
-        springHateoas        : '1.5.1',
+        springHateoas        : '1.5.5',
         tika                 : '2.4.1',
         amClient             : '1.7.3',
         sendLetterClient     : '3.0.23',
