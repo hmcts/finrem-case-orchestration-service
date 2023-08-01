@@ -14,10 +14,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -27,7 +29,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -46,6 +47,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -60,8 +62,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
@@ -76,10 +76,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentHelperTest {
@@ -88,7 +88,6 @@ public class DocumentHelperTest {
     private static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
     private static final String BINARY_URL = DOC_URL + "/binary";
     private static final String FILE_NAME = "app_docs.docx";
-    private static final String TEST_CASE_ID = "123123";
     private ObjectMapper objectMapper;
     private DocumentHelper documentHelper;
     @Mock
@@ -166,59 +165,75 @@ public class DocumentHelperTest {
 
     @Test
     public void hasAnotherHearing_shouldReturnTrue() {
-        Map<String, Object> caseData = new HashMap<>();
-        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(YES_VALUE).build();
-        DirectionDetailsCollectionData directionDetailsCollectionData
-            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        DirectionDetailCollection directionDetailsCollection = DirectionDetailCollection.builder()
+            .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build();
 
+        caseData.setDirectionDetailsCollection(singletonList(directionDetailsCollection));
         assertTrue(documentHelper.hasAnotherHearing(caseData));
+
+        directionDetailsCollection = DirectionDetailCollection.builder()
+            .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.NO).build()).build();
+
+        caseData.setDirectionDetailsCollection(singletonList(directionDetailsCollection));
+        assertFalse(documentHelper.hasAnotherHearing(caseData));
     }
 
     @Test
     public void hasAnotherHearing_noDirectionDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, emptyList());
-
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        caseData.setDirectionDetailsCollection(emptyList());
         assertFalse(documentHelper.hasAnotherHearing(caseData));
     }
 
     @Test
-    public void hasAnotherHearing_missingDirectionDetails() {
-        Map<String, Object> caseData = new HashMap<>();
+    public void getLatestAdditionalHearingDocument() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
-        assertFalse(documentHelper.hasAnotherHearing(caseData));
-    }
+        Optional<CaseDocument> latestDocumentNotAvailable = documentHelper.getLatestAdditionalHearingDocument(caseData);
+        assertFalse(latestDocumentNotAvailable.isPresent());
 
-    @Test
-    public void hasAnotherHearing_noNextHearing() {
-        Map<String, Object> caseData = new HashMap<>();
-        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(NO_VALUE).build();
-        DirectionDetailsCollectionData directionDetailsCollectionData
-            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = new ArrayList<>();
+        AdditionalHearingDocumentCollection doc1
+            = AdditionalHearingDocumentCollection.builder().value(AdditionalHearingDocument
+            .builder().document(caseDocument()).build()).build();
+        AdditionalHearingDocumentCollection doc2
+            = AdditionalHearingDocumentCollection.builder().value(AdditionalHearingDocument
+            .builder().document(caseDocument("url","abc.pdf","binaryURL")).build()).build();
 
-        assertFalse(documentHelper.hasAnotherHearing(caseData));
+        additionalHearingDocuments.add(doc1);
+        additionalHearingDocuments.add(doc2);
+
+        caseData.setAdditionalHearingDocuments(additionalHearingDocuments);
+
+        Optional<CaseDocument> latestDocumentAvailable = documentHelper.getLatestAdditionalHearingDocument(caseData);
+
+        assertTrue(latestDocumentAvailable.isPresent());
+        assertEquals("abc.pdf", latestDocumentAvailable.get().getDocumentFilename());
     }
 
     @Test
     public void getHearingDocumentsAsBulkPrintDocuments() {
-        Map<String, Object> caseData = new HashMap<>();
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+
         DocumentCollection dc = DocumentCollection
             .builder()
             .value(caseDocument(DOCUMENT_URL, FILE_NAME, BINARY_URL))
             .build();
         List<DocumentCollection> documentCollections = new ArrayList<>();
         documentCollections.add(dc);
-        caseData.put(HEARING_ORDER_OTHER_COLLECTION, documentCollections);
+        caseData.setHearingOrderOtherDocuments(documentCollections);
 
         when(service.convertDocumentIfNotPdfAlready(any(), any(), anyString())).thenReturn(caseDocument());
-        List<BulkPrintDocument> hearingDocuments =
-            documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER, TEST_CASE_ID);
-        assertEquals("app_docs.pdf", hearingDocuments.get(0).getFileName());
-        assertEquals(BINARY_URL, hearingDocuments.get(0).getBinaryFileUrl());
+
+        List<CaseDocument> hearingDocuments2 = documentHelper.getHearingDocumentsAsPdfDocuments(caseDetails, AUTHORIZATION_HEADER);
+        assertEquals("app_docs.pdf", hearingDocuments2.get(0).getDocumentFilename());
+        assertEquals(BINARY_URL, hearingDocuments2.get(0).getDocumentBinaryUrl());
 
         verify(service).convertDocumentIfNotPdfAlready(any(), any(), anyString());
     }
@@ -296,12 +311,13 @@ public class DocumentHelperTest {
 
         String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
 
-        String expectedAddress = "50 Applicant Street" + "\n"
-            + "Second Address Line" + "\n"
-            + "Third Address Line" + "\n"
-            + "Greater London" + "\n"
-            + "London" + "\n"
-            + "SW1";
+        String expectedAddress = """
+            50 Applicant Street
+            Second Address Line
+            Third Address Line
+            Greater London
+            London
+            SW1""";
 
         assertThat(formattedAddress, is(expectedAddress));
     }
@@ -336,12 +352,13 @@ public class DocumentHelperTest {
         testAddressMap.put("PostCode", "SW1");
 
         String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
-        String expectedAddress = "50 Applicant Street" + "\n"
-            + "Second Address Line" + "\n"
-            + "Third Address Line" + "\n"
-            + "Greater London" + "\n"
-            + "London" + "\n"
-            + "SW1";
+        String expectedAddress = """
+            50 Applicant Street
+            Second Address Line
+            Third Address Line
+            Greater London
+            London
+            SW1""";
 
         assertThat(formattedAddress, is(expectedAddress));
     }
@@ -676,5 +693,45 @@ public class DocumentHelperTest {
                 .caseDetails(finremCaseDetails)
                 .build();
         }
+    }
+
+    @Test
+    public void convertToCaseDocumentIfObjNotNull() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(CONSENT_ORDER));
+
+        assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
+        assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
+        assertThat(caseDocument.getDocumentFilename(), is("file1"));
+    }
+
+    @Test
+    public void convertToCaseDocumentIfObjNotNullIfNullReturnNull() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(GENERAL_ORDER_PREVIEW_DOCUMENT));
+        assertNull(caseDocument);
+    }
+
+    @Test
+    public void convertToCaseDocument() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+        CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER), CaseDocument.class);
+
+        assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
+        assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
+        assertThat(caseDocument.getDocumentFilename(), is("file1"));
+    }
+
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest.builder()
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())
+            .build();
     }
 }

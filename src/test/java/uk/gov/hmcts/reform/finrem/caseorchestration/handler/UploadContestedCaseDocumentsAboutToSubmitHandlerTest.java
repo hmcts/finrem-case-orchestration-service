@@ -117,7 +117,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             new UploadContestedCaseDocumentsAboutToSubmitHandler(finremCaseDetailsMapper,
                 documentHandlers, uploadedDocumentHelper, caseAssignedRoleService, featureToggleService);
 
-        when(featureToggleService.isIntervenerEnabled()).thenReturn(true);
     }
 
     @Test

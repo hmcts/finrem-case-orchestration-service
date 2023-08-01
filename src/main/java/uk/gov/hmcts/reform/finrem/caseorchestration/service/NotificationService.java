@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -1612,52 +1611,7 @@ public class NotificationService {
             intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode());
     }
 
-    private SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerOneSolicitor() {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey("intervener1SolEmail")
-            .solicitorNameKey("intervener1SolName")
-            .solicitorReferenceKey("intervener1SolicitorReference")
-            .build();
-    }
-
-    private SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerTwoSolicitor() {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey("intervener2SolEmail")
-            .solicitorNameKey("intervener2SolName")
-            .solicitorReferenceKey("intervener2SolicitorReference")
-            .build();
-    }
-
-    private SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerThreeSolicitor() {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey("intervener3SolEmail")
-            .solicitorNameKey("intervener3SolName")
-            .solicitorReferenceKey("intervener3SolicitorReference")
-            .build();
-    }
-
-    private SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerFourSolicitor() {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey("intervener4SolEmail")
-            .solicitorNameKey("intervener4SolName")
-            .solicitorReferenceKey("intervener4SolicitorReference")
-            .build();
-    }
-
     public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerSolicitor(IntervenerWrapper intervenerWrapper) {
-        if (IntervenerType.INTERVENER_ONE.equals(intervenerWrapper.getIntervenerType())) {
-            return getCaseDataKeysForIntervenerOneSolicitor();
-        } else if (IntervenerType.INTERVENER_TWO.equals(intervenerWrapper.getIntervenerType())) {
-            return getCaseDataKeysForIntervenerTwoSolicitor();
-        } else if (IntervenerType.INTERVENER_THREE.equals(intervenerWrapper.getIntervenerType())) {
-            return getCaseDataKeysForIntervenerThreeSolicitor();
-        } else if (IntervenerType.INTERVENER_FOUR.equals(intervenerWrapper.getIntervenerType())) {
-            return getCaseDataKeysForIntervenerFourSolicitor();
-        }
-        return SolicitorCaseDataKeysWrapper.builder().build();
-    }
-
-    public SolicitorCaseDataKeysWrapper getFinremCaseDataKeysForIntervenerSolicitor(IntervenerWrapper intervenerWrapper) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(intervenerWrapper.getIntervenerSolEmail())
             .solicitorNameKey(intervenerWrapper.getIntervenerSolName())

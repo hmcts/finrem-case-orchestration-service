@@ -14,12 +14,14 @@ import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -222,13 +224,24 @@ public class DocumentHelper {
             nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()));
     }
 
+    public boolean hasAnotherHearing(FinremCaseData caseData) {
+        List<DirectionDetailCollection> directionDetailsCollection
+            = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
+        Optional<DirectionDetailCollection> detailCollection
+            = directionDetailsCollection.stream().filter(e -> e.getValue().getIsAnotherHearingYN().isYes()).findAny();
+        return detailCollection.isPresent();
+    }
+
     public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
         if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             log.warn("Latest general order not found for printing for case");
             return null;
         }
-
         return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
+    }
+
+    public CaseDocument convertToCaseDocumentIfObjNotNull(Object object) {
+        return object != null ? objectMapper.convertValue(object, CaseDocument.class) : null;
     }
 
     public CaseDocument convertToCaseDocument(Object object) {
@@ -333,6 +346,20 @@ public class DocumentHelper {
         if (additionalHearingDocumentData.isPresent()) {
             return additionalHearingDocumentData
                 .map(additionalHearingDocumentDataCopy -> additionalHearingDocumentData.get().getAdditionalHearingDocument().getDocument());
+        }
+        return Optional.empty();
+    }
+
+    public Optional<CaseDocument> getLatestAdditionalHearingDocument(FinremCaseData caseData) {
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments  =  caseData.getAdditionalHearingDocuments();
+        Optional<AdditionalHearingDocumentCollection> documentCollection
+            = ofNullable(additionalHearingDocuments)
+            .orElse(emptyList())
+            .stream()
+            .reduce((first, second) -> second);
+        if (documentCollection.isPresent()) {
+            return documentCollection
+                .map(documentCollectionCopy -> documentCollectionCopy.getValue().getDocument());
         }
         return Optional.empty();
     }
@@ -616,6 +643,26 @@ public class DocumentHelper {
         return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
         });
     }
+
+    public List<CaseDocument> getHearingDocumentsAsPdfDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
+        FinremCaseData data = caseDetails.getData();
+        List<CaseDocument> documents = new ArrayList<>();
+        List<DocumentCollection> pdfDocuments = new ArrayList<>();
+        List<DocumentCollection> documentCollections
+            = Optional.ofNullable(data.getHearingOrderOtherDocuments()).orElse(new ArrayList<>());
+        if (!documentCollections.isEmpty()) {
+            documentCollections.forEach(doc -> {
+                CaseDocument caseDocument = doc.getValue();
+                CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken,
+                    String.valueOf(caseDetails.getId()));
+                pdfDocuments.add(DocumentCollection.builder().value(pdfDocument).build());
+                documents.add(pdfDocument);
+            });
+            data.setHearingOrderOtherDocuments(pdfDocuments);
+        }
+        return documents;
+    }
+
 
     public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
                                                                                   String documentName) {
