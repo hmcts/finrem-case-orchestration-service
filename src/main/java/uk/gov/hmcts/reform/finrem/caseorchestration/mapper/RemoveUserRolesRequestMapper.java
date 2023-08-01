@@ -19,9 +19,9 @@ public class RemoveUserRolesRequestMapper {
             .builder()
             .case_users(
                 Arrays.asList(CaseUsers.builder()
-                    .case_id(caseDetails.getId().toString())
-                    .user_id(userId)
-                    .case_role(caseRole)
+                    .caseId(caseDetails.getId().toString())
+                    .userId(userId)
+                    .caseRole(caseRole)
                     .build()))
             .build();
     }
@@ -31,9 +31,9 @@ public class RemoveUserRolesRequestMapper {
             .builder()
             .case_users(
                 Arrays.asList(CaseUsers.builder()
-                    .case_id(caseDetails.getId().toString())
-                    .user_id(userId)
-                    .case_role(caseRole)
+                    .caseId(caseDetails.getId().toString())
+                    .userId(userId)
+                    .caseRole(caseRole)
                     .build()))
             .build();
     }

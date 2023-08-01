@@ -91,6 +91,7 @@ public class ApprovedOrderNoticeOfHearingService {
             documentConfiguration.getAdditionalHearingFileName(), caseDetails.getId().toString());
     }
 
+    @SuppressWarnings("java:S3740")
     private Map<String, Object> getCourtDetails(AdditionalHearingDirectionsCollection latestAdditionalHearingDirection) {
 
         try {
@@ -114,6 +115,7 @@ public class ApprovedOrderNoticeOfHearingService {
             : Optional.empty();
     }
 
+    @SuppressWarnings("java:S3740")
     private Map getNoticeOfHearingLetterDetails(CaseDetails caseDetails,
                                                 AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection) {
         FrcCourtDetails selectedFRCDetails = getFrcCourtDetails(additionalHearingDirectionsCollection);

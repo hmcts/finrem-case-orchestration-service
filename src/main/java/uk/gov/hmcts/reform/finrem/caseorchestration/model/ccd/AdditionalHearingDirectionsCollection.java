@@ -16,6 +16,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@SuppressWarnings("java:S3740")
 public class AdditionalHearingDirectionsCollection {
 
     @JsonProperty("localCourt")

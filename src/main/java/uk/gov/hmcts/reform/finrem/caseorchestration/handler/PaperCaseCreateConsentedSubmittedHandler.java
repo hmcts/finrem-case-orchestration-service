@@ -15,6 +15,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("java:S3740")
 public class PaperCaseCreateConsentedSubmittedHandler implements CallbackHandler {
 
 

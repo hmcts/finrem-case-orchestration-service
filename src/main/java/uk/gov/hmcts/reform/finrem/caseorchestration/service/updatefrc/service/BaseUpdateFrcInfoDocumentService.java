@@ -30,7 +30,7 @@ public abstract class BaseUpdateFrcInfoDocumentService {
     private final UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator;
 
     @Autowired
-    public BaseUpdateFrcInfoDocumentService(GenericDocumentService genericDocumentService,
+    protected BaseUpdateFrcInfoDocumentService(GenericDocumentService genericDocumentService,
                                             DocumentConfiguration documentConfiguration,
                                             CaseDataService caseDataService,
                                             UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator) {
@@ -61,6 +61,7 @@ public abstract class BaseUpdateFrcInfoDocumentService {
         return generateUpdateFrcInfoLetter(caseDetails, authToken, recipient, template, filename);
     }
 
+    @SuppressWarnings("java:S3740")
     private CaseDocument generateUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken,
                                                      DocumentHelper.PaperNotificationRecipient recipient,
                                                      String template, String filename) {
@@ -70,6 +71,7 @@ public abstract class BaseUpdateFrcInfoDocumentService {
             letterDetailsMap, template, filename, caseDetails.getId().toString());
     }
 
+    @SuppressWarnings("java:S3740")
     private Map convertUpdateFrcInfoLetterDetailsToMap(UpdateFrcInfoLetterDetails letterDetails) {
         ObjectMapper objectMapper = new ObjectMapper();
         HashMap caseDetailsMap = new HashMap<String, Object>();

@@ -11,22 +11,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class LegacyConfidentialDocumentsService {
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public List<UploadCaseDocumentCollection> getConfidentialCaseDocumentCollection(
         List<ConfidentialUploadedDocumentData> legacyConfidentialDocumentsUploaded) {
 
         return legacyConfidentialDocumentsUploaded != null
             ? legacyConfidentialDocumentsUploaded.stream().map(this::getUploadCaseDocumentCollection)
-            .collect(Collectors.toList())
+            .toList()
             : new ArrayList<>();
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private UploadCaseDocumentCollection getUploadCaseDocumentCollection(
         ConfidentialUploadedDocumentData legacyConfidentialDocumentsCollection) {
 

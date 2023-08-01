@@ -28,8 +28,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 @RunWith(MockitoJUnitRunner.class)
 public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTest {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
 
     @Mock
     private GenericDocumentService genericDocumentService;
@@ -38,10 +38,10 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
 
     @Before
     public void setUp() throws Exception {
-        caseDetails = caseDetails(NO_VALUE);
+        caseDetails = caseDetails();
         applicantAndRespondentMultiLetterCorresponder =
             new FinremFormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService(objectMapper), genericDocumentService, finremCaseDetailsMapper), objectMapper);
+                new DocumentHelper(objectMapper, new CaseDataService(objectMapper), genericDocumentService, finremCaseDetailsMapper));
     }
 
     @Test
@@ -50,10 +50,10 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
         assertEquals(5, documentsToPrint.size());
     }
 
-    private FinremCaseDetails caseDetails(String isFastTrackDecision) {
+    private FinremCaseDetails caseDetails() {
         FinremCaseData caseData = FinremCaseData.builder()
             .hearingDate(LocalDate.parse(DATE_OF_HEARING))
-            .fastTrackDecision(YesOrNo.forValue(isFastTrackDecision))
+            .fastTrackDecision(YesOrNo.forValue(NO_VALUE))
             .formC(caseDocument())
             .formG(caseDocument())
             .copyOfPaperFormA(List.of(

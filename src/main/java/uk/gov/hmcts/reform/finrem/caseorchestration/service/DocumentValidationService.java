@@ -131,6 +131,7 @@ public class DocumentValidationService {
         return documentGeneratorValidationService.validateFileType(caseDocument.getDocumentBinaryUrl(), authToken);
     }
 
+    @SuppressWarnings("java:S6204")
     private DocumentValidationResponse validateDocuments(String authToken, List<CaseDocument> caseDocuments) {
         DocumentValidationResponseBuilder builder = DocumentValidationResponse.builder();
 

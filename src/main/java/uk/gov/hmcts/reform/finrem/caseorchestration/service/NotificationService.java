@@ -95,6 +95,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("java:S1133")
 public class NotificationService {
 
     private final EmailService emailService;

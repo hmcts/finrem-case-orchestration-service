@@ -113,6 +113,8 @@ public class InterimHearingService {
         caseDetails.setData(caseData);
     }
 
+
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void sendToBulkPrint(CaseDetails caseDetails, Map<String, Object> caseData, String authorisationToken,
                                  List<BulkPrintDocument> documents) {
         if (isPaperApplication(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
@@ -125,6 +127,7 @@ public class InterimHearingService {
         }
     }
 
+    @SuppressWarnings("java:S6204")
     private List<BulkPrintDocument> prepareDocumentsForPrint(CaseDetails caseDetails,
                                                              List<InterimHearingData> interimHearingList,
                                                              String authorisationToken) {
@@ -189,15 +192,16 @@ public class InterimHearingService {
 
         return interimCaseData.stream()
             .map(interimHearingCaseData -> generateCaseDocument(interimHearingCaseData, caseDetails, authorisationToken))
-            .collect(Collectors.toList());
+            .toList();
     }
 
+    @SuppressWarnings("java:S6204")
     public List<Map<String, Object>> convertInterimHearingCollectionDataToMap(List<InterimHearingData> interimHearingList) {
         List<InterimHearingItem> interimHearingItems
             = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
         return interimHearingItems.stream()
             .map(obj -> objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).collect(Collectors.toList());
+            })).toList();
     }
 
     private CaseDocument generateCaseDocument(Map<String, Object> interimHearingCaseData,
@@ -279,7 +283,7 @@ public class InterimHearingService {
 
         return sortedInterimHearingList.stream()
             .filter(collectionId -> !alreadyProcessedIds.contains(collectionId.getId()))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<String> compareCaseData(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
@@ -326,7 +330,7 @@ public class InterimHearingService {
         List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
         return interimHearingList.stream()
             .sorted(Comparator.nullsLast(Comparator.comparing(e -> e.getValue().getInterimHearingDate())))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private void removeNonCollectionInterimData(Map<String, Object> caseData) {

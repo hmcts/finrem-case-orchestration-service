@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan;
 
 public class OcrFieldName {
+    private OcrFieldName() {
+
+    }
+
     public static final String DIVORCE_CASE_NUMBER = "divorceCaseNumber";
     public static final String HWF_NUMBER = "HWFNumber";
     public static final String APPLICANT_FULL_NAME = "ApplicantFullName";

@@ -22,7 +22,7 @@ public class AssignCaseAccessRequestMapperTest extends BaseServiceTest {
 
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, TEST_USER_ID);
 
-        Assert.assertEquals(assignCaseAccessRequest.getAssignee_id(), TEST_USER_ID);
+        Assert.assertEquals(TEST_USER_ID, assignCaseAccessRequest.getAssignee_id());
         Assert.assertEquals(assignCaseAccessRequest.getCase_id(), caseDetails.getId().toString());
         Assert.assertEquals(assignCaseAccessRequest.getCase_type_id(), caseDetails.getCaseTypeId());
     }
@@ -37,7 +37,7 @@ public class AssignCaseAccessRequestMapperTest extends BaseServiceTest {
 
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(finremCaseDetails, TEST_USER_ID);
 
-        Assert.assertEquals(assignCaseAccessRequest.getAssignee_id(), TEST_USER_ID);
+        Assert.assertEquals(TEST_USER_ID, assignCaseAccessRequest.getAssignee_id());
         Assert.assertEquals(assignCaseAccessRequest.getCase_id(), finremCaseDetails.getId().toString());
         Assert.assertEquals(assignCaseAccessRequest.getCase_type_id(), finremCaseDetails.getCaseType().toString());
     }

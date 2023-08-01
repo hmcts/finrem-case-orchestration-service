@@ -37,6 +37,7 @@ public class BarristerLetterService {
     private final GenericDocumentService genericDocumentService;
     private final ObjectMapper objectMapper;
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void sendBarristerLetter(CaseDetails caseDetails,
                                     Barrister barrister,
                                     BarristerLetterTuple barristerLetterTuple,
