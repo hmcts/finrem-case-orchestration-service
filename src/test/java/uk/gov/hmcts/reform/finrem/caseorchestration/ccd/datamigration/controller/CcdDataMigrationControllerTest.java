@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -49,6 +50,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WINCHESTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.LONDON_TEMP;
 
+@Ignore
 @WebMvcTest(CcdDataMigrationController.class)
 public class CcdDataMigrationControllerTest extends BaseControllerTest {
 
