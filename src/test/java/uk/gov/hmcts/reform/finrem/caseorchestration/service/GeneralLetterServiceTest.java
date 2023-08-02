@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -24,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -445,9 +443,13 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void givenAddressIsPresent_whenCaseDataErrorsFetched_ThereIsNoError() {
+        Address address = Address.builder().addressLine1("50 Other Street").addressLine2("Second Address Line")
+            .addressLine3("Third Address Line").county("Greater London")
+            .postTown("London").postCode("SE12 9SE").build();
         FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
         DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(OTHER).label(OTHER).build();
         DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterRecipientAddress(address);
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
         assertThat(errors, is(empty()));
@@ -461,12 +463,6 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
         verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), any());
-    }
-
-    private FinremCaseDetails caseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-letter.json")) {
-            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-        }
     }
 
     private List<DynamicRadioListElement> getDynamicRadioListItems(boolean addIntervenerListElements) {
