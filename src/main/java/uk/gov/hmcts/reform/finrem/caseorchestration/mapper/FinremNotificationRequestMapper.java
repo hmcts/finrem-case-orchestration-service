@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+import static com.google.common.base.Strings.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 
 @Service
@@ -55,16 +56,17 @@ public class FinremNotificationRequestMapper {
     private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getAppSolicitorEmail())
-            .solicitorNameKey(caseData.getAppSolicitorName())
-            .solicitorReferenceKey(caseData.getContactDetailsWrapper().getSolicitorReference())
+            .solicitorNameKey(Objects.toString(caseData.getAppSolicitorName(), caseData.getAppSolicitorFirm()))
+            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
             .build();
     }
 
     private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
-            .solicitorNameKey(caseData.getRespondentSolicitorName())
-            .solicitorReferenceKey(caseData.getContactDetailsWrapper().getRespondentSolicitorReference())
+            .solicitorNameKey(Objects.toString(caseData.getRespondentSolicitorName(),
+                caseData.getContactDetailsWrapper().getRespondentSolicitorFirm()))
+            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
             .build();
     }
 
@@ -125,12 +127,13 @@ public class FinremNotificationRequestMapper {
 
     public NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
                                                         String recipientName, String recipientEmail, String referenceNumber) {
+        String organisationName = intervenerDetails.getIntervenerOrganisation().getOrganisation().getOrganisationName();
         return NotificationRequest.builder()
             .caseReferenceNumber(caseDetails.getId().toString())
             .intervenerFullName(intervenerDetails.getIntervenerName())
-            .intervenerSolicitorFirm(intervenerDetails.getIntervenerOrganisation().getOrganisation().getOrganisationName())
-            .intervenerSolicitorReferenceNumber(referenceNumber)
-            .name(recipientName)
+            .intervenerSolicitorFirm(organisationName)
+            .intervenerSolicitorReferenceNumber(nullToEmpty(referenceNumber))
+            .name(Objects.toString(recipientName, organisationName))
             .notificationEmail(recipientEmail)
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
