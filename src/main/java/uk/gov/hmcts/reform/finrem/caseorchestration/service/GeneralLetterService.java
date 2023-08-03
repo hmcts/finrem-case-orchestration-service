@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -14,9 +15,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.time.LocalDate;
@@ -25,32 +31,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_ADDRESS_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_RECIPIENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_RECIPIENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER_RECIPIENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
 
 @Service
 @RequiredArgsConstructor
@@ -61,8 +65,8 @@ public class GeneralLetterService {
     private final BulkPrintService bulkPrintService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
-    private final CaseDataService caseDataService;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final CaseDataService caseDataService;
 
     public void previewGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
@@ -103,44 +107,10 @@ public class GeneralLetterService {
         populateNameAddressAndReference(caseDetails);
     }
 
-    private void populateNameAddressAndReference(CaseDetails caseDetails) {
-        Map<String, Object> data = caseDetails.getData();
-        String generalLetterAddressTo = (String) data.get(GENERAL_LETTER_ADDRESS_TO);
-        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
-
-        Addressee.AddresseeBuilder addresseeBuilder = Addressee.builder();
-        if ("applicantSolicitor".equalsIgnoreCase(generalLetterAddressTo)) {
-            data.put("reference", data.get(SOLICITOR_REFERENCE));
-            String solicitorNameCcdField = isConsentedApplication ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME;
-            String solicitorAddressCcdField = isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
-            addresseeBuilder
-                .name((String) data.get(solicitorNameCcdField))
-                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(solicitorAddressCcdField)));
-        } else if ("respondentSolicitor".equalsIgnoreCase(generalLetterAddressTo)) {
-            data.put("reference", data.get("rSolicitorReference"));
-            addresseeBuilder
-                .name((String) data.get(RESP_SOLICITOR_NAME))
-                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESP_SOLICITOR_ADDRESS)));
-        } else if ("respondent".equalsIgnoreCase(generalLetterAddressTo)) {
-            String respondentFmNameCcdField =
-                isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
-            String respondentLastNameCcdField = isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME;
-            addresseeBuilder
-                .name(StringUtils.joinWith(" ", data.get(respondentFmNameCcdField), data.get(respondentLastNameCcdField)))
-                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESPONDENT_ADDRESS)));
-        } else if ("applicant".equalsIgnoreCase(generalLetterAddressTo)) {
-            String applicantFmNameCcdField = APPLICANT_FIRST_MIDDLE_NAME;
-            String applicantLastNameCcdField = APPLICANT_LAST_NAME;
-            addresseeBuilder
-                .name(StringUtils.joinWith(" ", data.get(applicantFmNameCcdField), data.get(applicantLastNameCcdField)))
-                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(APPLICANT_ADDRESS)));
-        } else if ("other".equalsIgnoreCase(generalLetterAddressTo)) {
-            addresseeBuilder
-                .name((String) data.get(GENERAL_LETTER_RECIPIENT))
-                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(GENERAL_LETTER_RECIPIENT_ADDRESS)));
-        }
-        data.put("recipient", generalLetterAddressTo);
-        data.put(ADDRESSEE, addresseeBuilder.build());
+    private String getIntervenerAddressee(IntervenerWrapper wrapper, String generalLetterAddressee) {
+        return generalLetterAddressee.equals(INTERVENER1) || generalLetterAddressee.equals(INTERVENER2)
+               || generalLetterAddressee.equals(INTERVENER3) || generalLetterAddressee.equals(INTERVENER4)
+               ? wrapper.getIntervenerName() : wrapper.getIntervenerSolName();
     }
 
     private void addGeneralLetterToCaseData(FinremCaseDetails caseDetails, CaseDocument document,
@@ -158,43 +128,80 @@ public class GeneralLetterService {
 
     public List<String> getCaseDataErrorsForCreatingPreviewOrFinalLetter(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
-        GeneralLetterAddressToType letterAddressToType = data.getGeneralLetterWrapper().getGeneralLetterAddressTo();
+        String letterAddressToType = data.getGeneralLetterWrapper().getGeneralLetterAddressee().getValue().getCode();
         Address recipientAddress = getRecipientAddress(caseDetails);
 
         if (recipientAddress == null || StringUtils.isEmpty(recipientAddress.getPostCode())) {
-            return Collections.singletonList(String.format("Address is missing for recipient type %s", letterAddressToType.getValue()));
+            return Collections.singletonList(String.format("Address is missing for recipient type %s", letterAddressToType));
         } else {
             return emptyList();
         }
     }
 
-    private Address getRecipientAddress(FinremCaseDetails caseDetails) {
-        Address recipientAddress;
-        FinremCaseData data = caseDetails.getData();
-        GeneralLetterAddressToType letterAddressToType = data.getGeneralLetterWrapper().getGeneralLetterAddressTo();
+    private void populateNameAddressAndReference(CaseDetails caseDetails) {
+        Map<String, Object> data = caseDetails.getData();
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        Addressee generalLetterAddressee = Addressee.builder().name(getRecipientName(finremCaseDetails))
+                .formattedAddress(formatAddressForLetterPrinting(getRecipientAddress(finremCaseDetails))).build();
+        String reference = getRecipientSolicitorReference(finremCaseDetails);
+        data.put(ADDRESSEE, generalLetterAddressee);
+        data.put("reference", reference);
+    }
 
-        switch (letterAddressToType) {
-            case APPLICANT_SOLICITOR:
-                recipientAddress = caseDetails.isConsentedApplication()
-                    ? data.getContactDetailsWrapper().getSolicitorAddress()
-                    : data.getContactDetailsWrapper().getApplicantSolicitorAddress();
-                break;
-            case RESPONDENT_SOLICITOR:
-                recipientAddress = data.getContactDetailsWrapper().getRespondentSolicitorAddress();
-                break;
-            case RESPONDENT:
-                recipientAddress = data.getContactDetailsWrapper().getRespondentAddress();
-                break;
-            case APPLICANT:
-                recipientAddress = data.getContactDetailsWrapper().getApplicantAddress();
-                break;
-            case OTHER:
-                recipientAddress = data.getGeneralLetterWrapper().getGeneralLetterRecipientAddress();
-                break;
-            default:
-                recipientAddress = null;
-        }
-        return recipientAddress;
+    private String getRecipientSolicitorReference(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        ContactDetailsWrapper wrapper = data.getContactDetailsWrapper();
+        IntervenerOneWrapper intervenerOneWrapper = data.getIntervenerOneWrapper();
+        IntervenerTwoWrapper intervenerTwoWrapper = data.getIntervenerTwoWrapper();
+        IntervenerThreeWrapper intervenerThreeWrapper = data.getIntervenerThreeWrapper();
+        IntervenerFourWrapper intervenerFourWrapper = data.getIntervenerFourWrapper();
+        String letterAddresseeType = data.getGeneralLetterWrapper().getGeneralLetterAddressee().getValue().getCode();
+        return switch (letterAddresseeType) {
+            case APPLICANT_SOLICITOR -> wrapper.getSolicitorReference();
+            case RESPONDENT_SOLICITOR -> wrapper.getRespondentSolicitorReference();
+            case INTERVENER1_SOLICITOR -> intervenerOneWrapper.getIntervenerSolicitorReference();
+            case INTERVENER2_SOLICITOR -> intervenerTwoWrapper.getIntervenerSolicitorReference();
+            case INTERVENER3_SOLICITOR -> intervenerThreeWrapper.getIntervenerSolicitorReference();
+            case INTERVENER4_SOLICITOR -> intervenerFourWrapper.getIntervenerSolicitorReference();
+            default -> null;
+        };
+    }
+
+    private String getRecipientName(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        String generalLetterAddressee = data.getGeneralLetterWrapper().getGeneralLetterAddressee().getValue().getCode();
+        ContactDetailsWrapper wrapper = data.getContactDetailsWrapper();
+
+        return switch (generalLetterAddressee) {
+            case APPLICANT_SOLICITOR -> data.getAppSolicitorName();
+            case RESPONDENT_SOLICITOR -> data.getRespondentSolicitorName();
+            case RESPONDENT -> StringUtils.joinWith(" ", wrapper.getRespondentFmName(), wrapper.getRespondentLname());
+            case APPLICANT -> StringUtils.joinWith(" ", wrapper.getApplicantFmName(), wrapper.getApplicantLname());
+            case OTHER_RECIPIENT -> data.getGeneralLetterWrapper().getGeneralLetterRecipient();
+            case INTERVENER1, INTERVENER1_SOLICITOR -> getIntervenerAddressee(data.getIntervenerOneWrapper(), generalLetterAddressee);
+            case INTERVENER2, INTERVENER2_SOLICITOR -> getIntervenerAddressee(data.getIntervenerTwoWrapper(), generalLetterAddressee);
+            case INTERVENER3, INTERVENER3_SOLICITOR -> getIntervenerAddressee(data.getIntervenerThreeWrapper(), generalLetterAddressee);
+            case INTERVENER4, INTERVENER4_SOLICITOR -> getIntervenerAddressee(data.getIntervenerFourWrapper(), generalLetterAddressee);
+            default -> null;
+        };
+    }
+
+    private Address getRecipientAddress(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        String letterAddresseeType = data.getGeneralLetterWrapper().getGeneralLetterAddressee().getValue().getCode();
+
+        return switch (letterAddresseeType) {
+            case APPLICANT_SOLICITOR -> data.getAppSolicitorAddress();
+            case RESPONDENT_SOLICITOR -> data.getContactDetailsWrapper().getRespondentSolicitorAddress();
+            case RESPONDENT -> data.getContactDetailsWrapper().getRespondentAddress();
+            case APPLICANT -> data.getContactDetailsWrapper().getApplicantAddress();
+            case OTHER_RECIPIENT -> data.getGeneralLetterWrapper().getGeneralLetterRecipientAddress();
+            case INTERVENER1, INTERVENER1_SOLICITOR -> data.getIntervenerOneWrapper().getIntervenerAddress();
+            case INTERVENER2, INTERVENER2_SOLICITOR -> data.getIntervenerTwoWrapper().getIntervenerAddress();
+            case INTERVENER3, INTERVENER3_SOLICITOR -> data.getIntervenerThreeWrapper().getIntervenerAddress();
+            case INTERVENER4, INTERVENER4_SOLICITOR -> data.getIntervenerFourWrapper().getIntervenerAddress();
+            default -> null;
+        };
     }
 
     private UUID printLatestGeneralLetter(FinremCaseDetails caseDetails, String authorisationToken) {
@@ -210,5 +217,22 @@ public class GeneralLetterService {
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(),
             generalLetterWrapper.getGeneralLetterRecipient(),
             bulkPrintDocuments, authorisationToken);
+    }
+
+    public static String formatAddressForLetterPrinting(Address address) {
+        return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class));
+    }
+
+    private static String formatAddressForLetterPrinting(Map<String, Object> address) {
+        if (address != null) {
+            return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")
+                    .map(address::get)
+                    .filter(Objects::nonNull)
+                    .map(Object::toString)
+                    .filter(StringUtils::isNotEmpty)
+                    .filter(s -> !s.equals("null"))
+                    .collect(Collectors.joining("\n"));
+        }
+        return "";
     }
 }
