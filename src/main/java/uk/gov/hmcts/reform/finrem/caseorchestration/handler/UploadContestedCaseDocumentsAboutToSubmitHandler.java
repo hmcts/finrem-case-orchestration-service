@@ -71,11 +71,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = getValidatedResponse(caseData);
         if (response.hasErrors()) {
             return response;
         }
+
 
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
 
