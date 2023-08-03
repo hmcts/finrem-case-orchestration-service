@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -48,6 +49,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, managedCollections));
         uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
+
+        Optional.ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
