@@ -31,7 +31,7 @@ public class UploadCaseDocumentCollection implements CaseDocumentTabData {
     @Override
     @JsonIgnore
     public void setUploadDateTime(LocalDateTime date) {
-        if (uploadCaseDocument != null) {
+        if (uploadCaseDocument != null && uploadCaseDocument.getCaseDocumentUploadDateTime() == null) {
             uploadCaseDocument.setCaseDocumentUploadDateTime(date);
         }
     }
