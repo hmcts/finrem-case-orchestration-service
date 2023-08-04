@@ -18,7 +18,7 @@ import java.util.List;
 public class LegacyConfidentialDocumentsService {
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
-    public List<UploadCaseDocumentCollection> getConfidentialCaseDocumentCollection(
+    public List<UploadCaseDocumentCollection> mapLegacyConfidentialDocumentToConfidentialDocumentCollection(
         List<ConfidentialUploadedDocumentData> legacyConfidentialDocumentsUploaded) {
 
         return legacyConfidentialDocumentsUploaded != null
@@ -38,8 +38,8 @@ public class LegacyConfidentialDocumentsService {
                 UploadCaseDocument.builder()
                     .caseDocuments(legacyConfidentialDocument.getDocumentLink())
                     .caseDocumentType(legacyConfidentialDocument.getDocumentType())
-                    .caseDocumentOther(legacyConfidentialDocument.getDocumentComment())
-                    .caseDocumentConfidential(YesOrNo.YES)
+                    .hearingDetails(legacyConfidentialDocument.getDocumentComment())
+                    .caseDocumentConfidentiality(YesOrNo.YES)
                     .caseDocumentUploadDateTime(legacyConfidentialDocument.getConfidentialDocumentUploadDateTime())
                     .build())
             .build();

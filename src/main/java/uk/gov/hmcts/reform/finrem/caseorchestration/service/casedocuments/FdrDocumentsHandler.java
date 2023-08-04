@@ -26,7 +26,7 @@ public class FdrDocumentsHandler extends DocumentHandler {
     private boolean isFdr(UploadCaseDocumentCollection managedDocumentCollection) {
         UploadCaseDocument uploadedCaseDocument = managedDocumentCollection.getUploadCaseDocument();
         return !isIntervener(uploadedCaseDocument.getCaseDocumentParty())
-            && YesOrNo.isNoOrNull(uploadedCaseDocument.getCaseDocumentConfidential())
+            && YesOrNo.isNoOrNull(uploadedCaseDocument.getCaseDocumentConfidentiality())
             && YesOrNo.isYes(uploadedCaseDocument.getCaseDocumentFdr());
     }
 

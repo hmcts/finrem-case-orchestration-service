@@ -19,7 +19,7 @@ public class ConfidentialDocumentsHandler extends DocumentHandler {
 
         return allManagedDocumentCollections.stream()
             .filter(managedDocumentCollection ->
-                YesOrNo.isYes(managedDocumentCollection.getUploadCaseDocument().getCaseDocumentConfidential()))
+                YesOrNo.isYes(managedDocumentCollection.getUploadCaseDocument().getCaseDocumentConfidentiality()))
             .toList();
     }
 }
