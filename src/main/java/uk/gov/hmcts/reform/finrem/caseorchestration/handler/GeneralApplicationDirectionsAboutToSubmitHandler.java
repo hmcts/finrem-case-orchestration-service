@@ -93,7 +93,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
             String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
                 status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
-            setStatusForNonCollAndBulkPrintDouments(caseDetails,
+            setStatusForNonCollAndBulkPrintDocuments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
             caseData.put(GENERAL_APPLICATION_COLLECTION, existingGeneralApplication);
@@ -128,16 +128,16 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
                                                                            List<BulkPrintDocument> bulkPrintDocuments,
                                                                            String userAuthorisation) {
         if (code.equals(data.getId())) {
-            return setStatusForNonCollAndBulkPrintDouments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
+            return setStatusForNonCollAndBulkPrintDocuments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
         }
         return data;
     }
 
-    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDouments(CaseDetails caseDetails,
-                                                                                     GeneralApplicationCollectionData data,
-                                                                                     List<BulkPrintDocument> bulkPrintDocuments,
-                                                                                     String status,
-                                                                                     String userAuthorisation) {
+    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDocuments(CaseDetails caseDetails,
+                                                                                      GeneralApplicationCollectionData data,
+                                                                                      List<BulkPrintDocument> bulkPrintDocuments,
+                                                                                      String status,
+                                                                                      String userAuthorisation) {
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
