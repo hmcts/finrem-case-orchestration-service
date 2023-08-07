@@ -14,7 +14,7 @@ plugins {
 }
 
 def versions = [
-        guava                : '32.0.1-jre',
+        guava                : '32.1.2-jre',
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.9.2',
         commonsIo            : '2.7',
@@ -29,7 +29,7 @@ def versions = [
         serenity             : '3.2.5',
         serviceTokenGenerator: '4.1.2',
         springDoc            : '1.6.9',
-        wiremock             : '2.27.2',
+        wiremock             : '2.33.2',
         apacheLogging        : '2.17.2',
         idamClient           : '2.1.1',
         jjwt                 : '0.9.1',
