@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applic
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantOtherDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentQuestionnairesAnswersHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,6 +47,10 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     public static final String AUTH_TOKEN = "AuthTokien";
     @Mock
     private UploadedDocumentService uploadedDocumentHelper;
+
+    @Mock
+    private EvidenceManagementDeleteService evidenceManagementDeleteService;
+
     private RespondentChronologiesStatementHandler respondentChronologiesStatementCollectionService;
 
     private ApplicantChronologiesStatementHandler applicantChronologiesStatementCollectionService;
@@ -86,7 +91,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         manageCaseDocumentsAboutToSubmitCaseHandler =
             new ManageCaseDocumentsContestedAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentHandlers, uploadedDocumentHelper);
+                documentHandlers, uploadedDocumentHelper, evidenceManagementDeleteService);
     }
 
     @Test
@@ -161,10 +166,10 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     }
 
     private UploadCaseDocumentCollection createContestedUploadDocumentItem(CaseDocumentType type,
-                                                                             CaseDocumentParty party,
-                                                                             YesOrNo isConfidential,
-                                                                             YesOrNo isFdr,
-                                                                             String other) {
+                                                                           CaseDocumentParty party,
+                                                                           YesOrNo isConfidential,
+                                                                           YesOrNo isFdr,
+                                                                           String other) {
         UUID uuid = UUID.randomUUID();
 
         return UploadCaseDocumentCollection.builder()
