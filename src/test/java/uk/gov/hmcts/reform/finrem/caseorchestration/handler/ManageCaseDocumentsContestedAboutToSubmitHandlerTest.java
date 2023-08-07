@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
@@ -50,6 +51,9 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
     @Mock
     private EvidenceManagementDeleteService evidenceManagementDeleteService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     private RespondentChronologiesStatementHandler respondentChronologiesStatementCollectionService;
 
@@ -91,7 +95,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         manageCaseDocumentsAboutToSubmitCaseHandler =
             new ManageCaseDocumentsContestedAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentHandlers, uploadedDocumentHelper, evidenceManagementDeleteService);
+                documentHandlers, uploadedDocumentHelper, evidenceManagementDeleteService, featureToggleService);
     }
 
     @Test
