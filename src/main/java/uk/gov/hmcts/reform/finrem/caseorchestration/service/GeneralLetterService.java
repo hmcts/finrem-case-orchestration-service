@@ -215,7 +215,7 @@ public class GeneralLetterService {
             bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalLetterUploadedDocument));
         }
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(),
-            generalLetterWrapper.getGeneralLetterRecipient(),
+            generalLetterWrapper.getGeneralLetterAddressee().getValue().getCode(),
             bulkPrintDocuments, authorisationToken);
     }
 
