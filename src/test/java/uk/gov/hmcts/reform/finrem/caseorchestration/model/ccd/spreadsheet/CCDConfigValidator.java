@@ -44,8 +44,10 @@ public class CCDConfigValidator {
 
     protected static final String INTERVENER_CT = "FR_intervener";
     protected static final int ROW_HEADERS = 2;
-    private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer",
-        "CasePaymentHistoryViewer", "FlagLauncher", "caseDocumentConfidential");
+    private List<String> ccdFieldsTypeToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer",
+        "CasePaymentHistoryViewer", "FlagLauncher");
+
+    private List<String> ccdFieldsToIgnore = Arrays.asList("caseDocumentConfidential");
     protected static final String STATE_SHEET = "State";
     protected static final String DYNAMIC_LIST = "DynamicList";
     protected static final String DYNAMIC_RADIO_LIST = "DynamicRadioList";
@@ -448,7 +450,8 @@ public class CCDConfigValidator {
                 fieldAttributes.setFieldId(row.getCell(3).getStringCellValue());
                 fieldAttributes.setFieldType(row.getCell(6).getStringCellValue());
                 fieldAttributes.setFieldTypeParameter(row.getCell(8).getStringCellValue());
-                if (!ccdFieldsToIgnore.contains(fieldAttributes.getFieldType())) {
+                if (!ccdFieldsTypeToIgnore.contains(fieldAttributes.getFieldType()) &&
+                    !ccdFieldsToIgnore.contains(fieldAttributes.getListElementCode())) {
                     caseFields.add(fieldAttributes);
                 }
             }
@@ -499,7 +502,8 @@ public class CCDConfigValidator {
                         fieldAttributes.setListElementCode(row.getCell(3).getStringCellValue());
                         fieldAttributes.setFieldType(row.getCell(4).getStringCellValue());
                         fieldAttributes.setFieldTypeParameter(row.getCell(5).getStringCellValue());
-                        if (!ccdFieldsToIgnore.contains(fieldAttributes.getFieldType())) {
+                        if (!ccdFieldsTypeToIgnore.contains(fieldAttributes.getFieldType()) &&
+                            !ccdFieldsToIgnore.contains(fieldAttributes.getListElementCode())) {
                             caseFields.add(fieldAttributes);
                         }
                     }
