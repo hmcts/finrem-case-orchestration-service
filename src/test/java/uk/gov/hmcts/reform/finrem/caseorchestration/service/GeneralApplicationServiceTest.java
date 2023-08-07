@@ -21,8 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
@@ -434,33 +432,46 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenGeneralApplicationAndNoExistingIntervenerDirectionsDocument_ShouldUpdateIntervenerDirectionsDocuments() {
+    public void givenGeneralApplicationAndNoExistingIntervenerDirectionsOrder_ShouldUpdateIntervenerDirectionsOrder() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         caseDocument.setDocumentUrl(DOC_IN_EXISTING_COLLECTION_URL);
-        generalApplicationService.updateIntervenerDirectionsDocumentCollection(wrapper, caseDocument);
-        assertEquals(caseDocument, wrapper.getGeneralApplicationIntvrDocuments().get(0).getValue().getDocument());
+        GeneralApplicationItems generalApplicationItems =
+            GeneralApplicationItems.builder().generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours").generalApplicationDirectionsDocument(caseDocument)
+                .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(LocalDate.now()).build();
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        generalApplicationService.updateIntervenerDirectionsOrders(generalApplicationItems, callbackRequest.getCaseDetails());
+        assertEquals(caseDocument, wrapper.getGeneralApplicationIntvrOrders().get(0).getValue().getGeneralApplicationDirectionsDocument());
+        assertEquals("No", wrapper.getGeneralApplicationIntvrOrders().get(0).getValue().getGeneralApplicationHearingRequired());
+        assertEquals("48 hours", wrapper.getGeneralApplicationIntvrOrders().get(0).getValue().getGeneralApplicationTimeEstimate());
+        assertEquals(1, wrapper.getGeneralApplicationIntvrOrders().size());
     }
 
     @Test
     public void givenGeneralApplicationAndExistingIntervenerDirectionsDocument_ShouldUpdateIntervenerDirectionsDocuments() {
-        IntervenerCaseDocumentCollection gaCaseDocumentCollection = IntervenerCaseDocumentCollection.builder().build();
-        CaseDocument existingCaseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        existingCaseDocument.setDocumentUrl(DOC_IN_NEW_COLLECTION_URL);
-        IntervenerCaseDocument gaCaseDocument = IntervenerCaseDocument.builder().build();
-        gaCaseDocument.setDocument(existingCaseDocument);
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        gaCaseDocumentCollection.setValue(gaCaseDocument);
-        List<IntervenerCaseDocumentCollection> gaDocumentCollectionList = new ArrayList<>();
-        gaDocumentCollectionList.add(gaCaseDocumentCollection);
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
-        wrapper.setGeneralApplicationIntvrDocuments(gaDocumentCollectionList);
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         caseDocument.setDocumentUrl(DOC_IN_EXISTING_COLLECTION_URL);
-        generalApplicationService.updateIntervenerDirectionsDocumentCollection(wrapper, caseDocument);
-        assertEquals(caseDocument, wrapper.getGeneralApplicationIntvrDocuments().get(1).getValue().getDocument());
-        assertEquals(existingCaseDocument, wrapper.getGeneralApplicationIntvrDocuments().get(0).getValue().getDocument());
+        GeneralApplicationItems generalApplicationItems1 =
+            GeneralApplicationItems.builder().generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours").generalApplicationDirectionsDocument(caseDocument)
+                .generalApplicationSpecialMeasures("Special measure").build();
+        GeneralApplicationItems generalApplicationItems2 =
+            GeneralApplicationItems.builder().generalApplicationCreatedBy("Claire Papadale")
+                .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("72 hours").generalApplicationDirectionsDocument(caseDocument)
+                .generalApplicationSpecialMeasures("There will be special measures").build();
+        wrapper.setGeneralApplicationIntvrOrders(List.of(
+            GeneralApplicationsCollection.builder().id(UUID.randomUUID()).value(generalApplicationItems1).build()));
+        generalApplicationService.updateIntervenerDirectionsOrders(generalApplicationItems2, callbackRequest.getCaseDetails());
+        assertEquals(caseDocument, wrapper.getGeneralApplicationIntvrOrders().get(0).getValue().getGeneralApplicationDirectionsDocument());
+        assertEquals(caseDocument, wrapper.getGeneralApplicationIntvrOrders().get(1).getValue().getGeneralApplicationDirectionsDocument());
+        assertEquals("Claire Mumford", wrapper.getGeneralApplicationIntvrOrders().get(0).getValue().getGeneralApplicationCreatedBy());
+        assertEquals("Claire Papadale", wrapper.getGeneralApplicationIntvrOrders().get(1).getValue().getGeneralApplicationCreatedBy());
+        assertEquals("48 hours", wrapper.getGeneralApplicationIntvrOrders().get(0).getValue().getGeneralApplicationTimeEstimate());
+        assertEquals("72 hours", wrapper.getGeneralApplicationIntvrOrders().get(1).getValue().getGeneralApplicationTimeEstimate());
+        assertEquals(2, wrapper.getGeneralApplicationIntvrOrders().size());
     }
 
     public DynamicRadioList buildDynamicList(String role) {
