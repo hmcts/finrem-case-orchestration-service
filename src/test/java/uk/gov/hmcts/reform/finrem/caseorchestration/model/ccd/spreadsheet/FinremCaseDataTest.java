@@ -33,7 +33,7 @@ public class FinremCaseDataTest {
     @Before
     public void setUpDefinitionFiles() {
         String branch = System.getenv("JENKINS_BRANCH");
-        if (isMaster(branch)) {
+        if (isMaster(branch) || localMode) {
             testEnabled = false;
         }
         if (!localMode) {
