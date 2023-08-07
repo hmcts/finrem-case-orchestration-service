@@ -14,7 +14,7 @@ plugins {
 }
 
 def versions = [
-        guava                : '32.0.1-jre',
+        guava                : '32.1.2-jre',
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.9.2',
         commonsIo            : '2.7',
