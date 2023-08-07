@@ -27,4 +27,6 @@ public class UploadCaseDocument {
     private YesOrNo caseDocumentFdr;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime caseDocumentUploadDateTime;
+    @Deprecated
+    private YesOrNo caseDocumentConfidential;
 }
