@@ -450,8 +450,8 @@ public class CCDConfigValidator {
                 fieldAttributes.setFieldId(row.getCell(3).getStringCellValue());
                 fieldAttributes.setFieldType(row.getCell(6).getStringCellValue());
                 fieldAttributes.setFieldTypeParameter(row.getCell(8).getStringCellValue());
-                if (!ccdFieldsTypeToIgnore.contains(fieldAttributes.getFieldType()) &&
-                    !ccdFieldsToIgnore.contains(fieldAttributes.getListElementCode())) {
+                if (!ccdFieldsTypeToIgnore.contains(fieldAttributes.getFieldType())
+                    && !ccdFieldsToIgnore.contains(fieldAttributes.getListElementCode())) {
                     caseFields.add(fieldAttributes);
                 }
             }
@@ -502,8 +502,8 @@ public class CCDConfigValidator {
                         fieldAttributes.setListElementCode(row.getCell(3).getStringCellValue());
                         fieldAttributes.setFieldType(row.getCell(4).getStringCellValue());
                         fieldAttributes.setFieldTypeParameter(row.getCell(5).getStringCellValue());
-                        if (!ccdFieldsTypeToIgnore.contains(fieldAttributes.getFieldType()) &&
-                            !ccdFieldsToIgnore.contains(fieldAttributes.getListElementCode())) {
+                        if (!ccdFieldsTypeToIgnore.contains(fieldAttributes.getFieldType())
+                            && !ccdFieldsToIgnore.contains(fieldAttributes.getListElementCode())) {
                             caseFields.add(fieldAttributes);
                         }
                     }
