@@ -44,9 +44,10 @@ public class CCDConfigValidator {
 
     protected static final String INTERVENER_CT = "FR_intervener";
     protected static final int ROW_HEADERS = 2;
-    private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer", "FlagLauncher");
+    private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer",
+        "CasePaymentHistoryViewer", "FlagLauncher", "caseDocumentConfidential");
     protected static final String STATE_SHEET = "State";
-    protected static final String DYNAMIC_LIST = "DynamicList";      
+    protected static final String DYNAMIC_LIST = "DynamicList";
     protected static final String DYNAMIC_RADIO_LIST = "DynamicRadioList";
     private List<String> finremCaseDataFieldsToIgnore = Arrays.asList("ccdCaseId");
     private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST, INTERVENER_CT);
