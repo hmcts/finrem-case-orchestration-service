@@ -1,14 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Maps;
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.Features;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -91,4 +95,20 @@ public class FeatureToggleService {
         return isFeatureEnabled(INTERVENER_ENABLED);
     }
 
+    /**
+     * Given runtime feature toggle status, returns fields that should be ignored during serialisation (i.e. not
+     * serialised to JSON).
+     *
+     * @return a map with Class of ignored fields as key and field names as value
+     */
+    @SuppressWarnings("java:S3740")
+    public Map<Class, List<String>> getFieldsIgnoredDuringSerialisation() {
+        Map<Class, List<String>> ignoredFields = Maps.newHashMap();
+
+
+        ignoredFields.put(UploadCaseDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
+
+
+        return ignoredFields;
+    }
 }
