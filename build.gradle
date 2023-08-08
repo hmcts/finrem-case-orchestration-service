@@ -444,7 +444,7 @@ dependencies {
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: versions.jjwt
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
-    functionalImplementation("net.serenity-bdd:serenity-core:3.2.5") {
+    functionalImplementation("net.serenity-bdd:serenity-core:3.9.8") {
         exclude group: "commons-net", module: "commons-net"
         exclude group: "org.apache.commons", module: "commons-compress"
     }
