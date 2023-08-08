@@ -37,7 +37,7 @@ def versions = [
         jaxbOsgi             : '2.3.8',
         springHateoas        : '1.5.5',
         tika                 : '2.8.0',
-        amClient             : '1.7.3',
+        amClient             : '1.59',
         sendLetterClient     : '3.0.23',
         elasticSearch        : '7.17.12',
         jacksonDatabind      : '2.13.2',
