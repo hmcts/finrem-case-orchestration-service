@@ -41,11 +41,15 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
+    public static final String DOCUMENT_URL_TEST = "document/url/test";
     @Mock
     private UploadedDocumentService uploadedDocumentHelper;
 
@@ -136,6 +140,21 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             hasSize(0));
     }
 
+    @Test
+    public void givenAManagedCaseWithCasesAddedAndRemovedDeleteFlagOn_WhenHandle_thenDeleteServiceCalled() {
+        setUpRemovedDocuments();
+        setUpAddedDocuments();
+
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
+        manageCaseDocumentsAboutToSubmitCaseHandler.handle(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            AUTH_TOKEN);
+
+        verify(evidenceManagementDeleteService, times(1)).delete(DOCUMENT_URL_TEST, AUTH_TOKEN);
+    }
+
     private void setUpAddedDocuments() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_OF_ISSUES,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
@@ -165,6 +184,9 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION)
             .addAll(beforeEventDocList);
+        caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION)
+            .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
     }
@@ -180,7 +202,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             .id(uuid.toString())
             .uploadCaseDocument(UploadCaseDocument
                 .builder()
-                .caseDocuments(new CaseDocument())
+                .caseDocuments(CaseDocument.builder().documentUrl(DOCUMENT_URL_TEST).build())
                 .caseDocumentType(type)
                 .caseDocumentParty(party)
                 .caseDocumentConfidentiality(isConfidential)
