@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
 
 public abstract class DocumentDateService<T extends CaseDocumentTabData> {
 
@@ -23,13 +22,14 @@ public abstract class DocumentDateService<T extends CaseDocumentTabData> {
     private final BiPredicate<String, List<T>> isNewDocument = (id, oldDocuments) ->
         oldDocuments.stream().map(T::getElementId).noneMatch(oldId -> oldId.equals(id));
 
-    public DocumentDateService(ObjectMapper objectMapper, Class<T> documentType) {
+    protected DocumentDateService(ObjectMapper objectMapper, Class<T> documentType) {
         objectMapper.registerModule(new JavaTimeModule());
         this.mapper = objectMapper;
         this.documentType = documentType;
     }
 
     @Deprecated
+    @SuppressWarnings({"java:S3864", "java:S1133", "java:S1123", "java:S6355"})
     public Map<String, Object> addUploadDateToNewDocuments(Map<String, Object> caseData,
                                                            Map<String, Object> caseDataBefore,
                                                            String documentCollection) {
@@ -38,7 +38,7 @@ public abstract class DocumentDateService<T extends CaseDocumentTabData> {
 
         List<T> modifiedDocuments = allDocuments.stream()
             .peek(document -> addDateToNewDocuments(documentsBeforeEvent, document))
-            .collect(Collectors.toList());
+            .toList();
 
         caseData.put(documentCollection, modifiedDocuments);
         return caseData;

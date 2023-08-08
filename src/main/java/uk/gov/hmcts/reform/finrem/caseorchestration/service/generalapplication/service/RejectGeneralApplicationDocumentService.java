@@ -30,6 +30,7 @@ public class RejectGeneralApplicationDocumentService  {
 
     private final DocumentConfiguration documentConfiguration;
 
+    @SuppressWarnings("java:S3740")
     public CaseDocument generateGeneralApplicationRejectionLetter(CaseDetails caseDetails, String authToken,
                                                      DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating General Application Rejection Letter for {} for caseId {}", recipient, caseDetails.getId());
@@ -41,6 +42,7 @@ public class RejectGeneralApplicationDocumentService  {
             documentConfiguration.getGeneralApplicationRejectionFileName(), caseDetails.getId().toString());
     }
 
+    @SuppressWarnings("java:S3740")
     private Map convertGeneralApplicationRejectionLetterDetailsToMap(GeneralApplicationRejectionLetterDetails letterDetails) {
         ObjectMapper objectMapper = new ObjectMapper();
         HashMap caseDetailsMap = new HashMap<String, Object>();

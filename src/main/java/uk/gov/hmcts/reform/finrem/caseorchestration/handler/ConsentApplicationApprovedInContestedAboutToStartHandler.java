@@ -18,6 +18,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("java:S3740")
 public class ConsentApplicationApprovedInContestedAboutToStartHandler implements CallbackHandler {
 
     private final IdamService service;

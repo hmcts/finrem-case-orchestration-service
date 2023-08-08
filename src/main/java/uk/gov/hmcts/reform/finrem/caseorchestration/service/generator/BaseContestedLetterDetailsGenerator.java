@@ -30,7 +30,7 @@ public abstract class BaseContestedLetterDetailsGenerator<T> {
     protected CaseDataService caseDataService;
     protected DocumentHelper documentHelper;
 
-    public BaseContestedLetterDetailsGenerator(CaseDataService caseDataService, DocumentHelper documentHelper) {
+    protected BaseContestedLetterDetailsGenerator(CaseDataService caseDataService, DocumentHelper documentHelper) {
         this.caseDataService = caseDataService;
         this.documentHelper = documentHelper;
     }

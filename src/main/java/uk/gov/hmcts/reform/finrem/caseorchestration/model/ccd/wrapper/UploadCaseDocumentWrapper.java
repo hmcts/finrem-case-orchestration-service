@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UploadCaseDocumentWrapper {
     private List<UploadCaseDocumentCollection> uploadCaseDocument;
     private List<UploadCaseDocumentCollection> fdrCaseDocumentCollection;
@@ -190,6 +190,7 @@ public class UploadCaseDocumentWrapper {
 
 
     @JsonIgnore
+    @SuppressWarnings({"java:S6204", "java:S1121"})
     public List<UploadCaseDocumentCollection> getAllManageableCollections() {
         return Stream.of(uploadCaseDocument, fdrCaseDocumentCollection, appCorrespondenceCollection,
                 appFrFormsCollection, appEvidenceCollection, appTrialBundleCollection, appConfidentialDocsCollection,
@@ -220,6 +221,7 @@ public class UploadCaseDocumentWrapper {
     }
 
     @JsonIgnore
+    @SuppressWarnings("java:S1121")
     public List<UploadCaseDocumentCollection> getDocumentCollectionPerType(
         CaseDocumentCollectionType collectionType) {
 

@@ -49,9 +49,9 @@ public class CcdDataStoreServiceTest extends BaseServiceTest {
                 Arrays.asList(
                     CaseUsers
                         .builder()
-                        .case_id(TEST_CASE_ID)
-                        .user_id(TEST_USER_ID)
-                        .case_role(CREATOR_USER_ROLE)
+                        .caseId(TEST_CASE_ID)
+                        .userId(TEST_USER_ID)
+                        .caseRole(CREATOR_USER_ROLE)
                         .build()))
             .build();
 

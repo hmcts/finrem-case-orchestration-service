@@ -12,11 +12,11 @@ import javax.annotation.PostConstruct;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -58,8 +58,8 @@ public class OptionIdToValueTranslator {
     private void handleTranslation(Map<String, Object> data, String optionKey) {
         Object option = data.get(optionKey);
 
-        if (option instanceof String) {
-            String optionValue = optionsMap(optionKey).getOrDefault(option, (String) option);
+        if (option instanceof String opt) {
+            String optionValue = optionsMap(optionKey).getOrDefault(option, opt);
             data.put(optionKey, optionValue);
         }
 
@@ -67,9 +67,8 @@ public class OptionIdToValueTranslator {
             List<String> originalOptionsList = (List<String>) option;
             Map<String, String> optionMap = optionsMap(optionKey);
 
-            List<String> collect = originalOptionsList.stream()
-                .map(key -> optionMap.getOrDefault(key, key))
-                .collect(Collectors.toList());
+            List<String> collect = new ArrayList<>();
+            originalOptionsList.forEach(key -> collect.add(optionMap.getOrDefault(key, key)));
 
             data.put(optionKey, collect);
         }

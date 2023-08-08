@@ -349,7 +349,7 @@ public class ManageBarristersITest implements IntegrationTest {
 
 
         NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
-        assertEquals(notificationRequest.getBarristerReferenceNumber(), APP_BARR_ORG_ID);
+        assertEquals(APP_BARR_ORG_ID, notificationRequest.getBarristerReferenceNumber());
     }
 
     @Test
@@ -374,7 +374,7 @@ public class ManageBarristersITest implements IntegrationTest {
         verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED));
 
         NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
-        assertEquals(notificationRequest.getBarristerReferenceNumber(), APP_BARR_ORG_ID);
+        assertEquals(APP_BARR_ORG_ID, notificationRequest.getBarristerReferenceNumber());
     }
 
     @Test
@@ -397,7 +397,7 @@ public class ManageBarristersITest implements IntegrationTest {
 
 
         NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
-        assertEquals(notificationRequest.getBarristerReferenceNumber(), APP_BARR_ORG_ID);
+        assertEquals(APP_BARR_ORG_ID, notificationRequest.getBarristerReferenceNumber());
     }
 
     private CallbackRequest buildCallbackRequest() {

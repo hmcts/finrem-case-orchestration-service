@@ -12,14 +12,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -75,8 +74,8 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(prdOrganisationService.retrieveOrganisationsData(eq(AUTH_TOKEN))).thenReturn(OrganisationsResponse.builder()
-            .contactInformation(Arrays.asList(organisationContactInformation))
+        when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
+            .contactInformation(Collections.singletonList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
             .organisationIdentifier(TEST_SOLICITOR_REFERENCE)
             .build());
@@ -97,8 +96,8 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         Assert.assertEquals(addressMap.get("Country"), organisationContactInformation.getCountry());
         Assert.assertEquals(addressMap.get("PostTown"), organisationContactInformation.getTownCity());
         Assert.assertEquals(addressMap.get("PostCode"), organisationContactInformation.getPostcode());
-        Assert.assertEquals(caseDetails.getData().get(CONTESTED_SOLICITOR_FIRM), TEST_SOLICITOR_NAME);
-        Assert.assertEquals(caseDetails.getData().get(SOLICITOR_REFERENCE), TEST_SOLICITOR_REFERENCE);
+        Assert.assertEquals(TEST_SOLICITOR_NAME, caseDetails.getData().get(CONTESTED_SOLICITOR_FIRM));
+        Assert.assertEquals(TEST_SOLICITOR_REFERENCE, caseDetails.getData().get(SOLICITOR_REFERENCE));
     }
 
 
@@ -106,7 +105,7 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     public void shouldSuccessfullyConvertOrganisationAddress() {
 
         when(prdOrganisationService.findOrganisationByOrgId("organisationId")).thenReturn(OrganisationsResponse.builder()
-            .contactInformation(Arrays.asList(organisationContactInformation))
+            .contactInformation(Collections.singletonList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
             .organisationIdentifier(TEST_SOLICITOR_REFERENCE)
             .build());
@@ -141,13 +140,13 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         Assert.assertEquals(addressMap.get("Country"), organisationContactInformation.getCountry());
         Assert.assertEquals(addressMap.get("PostTown"), organisationContactInformation.getTownCity());
         Assert.assertEquals(addressMap.get("PostCode"), organisationContactInformation.getPostcode());
-        Assert.assertEquals(caseDetails.getData().get(CONSENTED_SOLICITOR_FIRM), TEST_SOLICITOR_NAME);
-        Assert.assertEquals(caseDetails.getData().get(SOLICITOR_REFERENCE), TEST_SOLICITOR_REFERENCE);
+        Assert.assertEquals(TEST_SOLICITOR_NAME, caseDetails.getData().get(CONSENTED_SOLICITOR_FIRM));
+        Assert.assertEquals(TEST_SOLICITOR_REFERENCE, caseDetails.getData().get(SOLICITOR_REFERENCE));
     }
 
     @Test
     public void shouldNotSetApplicantSolicitorOrganisationDetails_orgRespNull() {
-        when(prdOrganisationService.retrieveOrganisationsData(eq(AUTH_TOKEN))).thenReturn(null);
+        when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(null);
 
         CaseDetails caseDetails = buildCaseDetails();
 
@@ -180,8 +179,8 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
             isConsented,
             isApplicant);
 
-        assertEquals(caseData.get(CONTESTED_SOLICITOR_NAME), "Sir Solicitor");
-        assertEquals(caseData.get(CONTESTED_SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
+        assertEquals("Sir Solicitor", caseData.get(CONTESTED_SOLICITOR_NAME));
+        assertEquals("sirsolicitor1@gmail.com", caseData.get(CONTESTED_SOLICITOR_EMAIL));
     }
 
     @Test
@@ -206,8 +205,8 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
             isConsented,
             isApplicant);
 
-        assertEquals(caseData.get(CONSENTED_SOLICITOR_NAME), "Sir Solicitor");
-        assertEquals(caseData.get(SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
+        assertEquals("Sir Solicitor", caseData.get(CONSENTED_SOLICITOR_NAME));
+        assertEquals("sirsolicitor1@gmail.com", caseData.get(SOLICITOR_EMAIL));
     }
 
     @Test
@@ -232,8 +231,8 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
             isConsented,
             isApplicant);
 
-        assertEquals(caseData.get(RESP_SOLICITOR_NAME), "Sir Solicitor");
-        assertEquals(caseData.get(RESP_SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
+        assertEquals("Sir Solicitor", caseData.get(RESP_SOLICITOR_NAME));
+        assertEquals("sirsolicitor1@gmail.com", caseData.get(RESP_SOLICITOR_EMAIL));
 
     }
 
