@@ -25,7 +25,7 @@ def versions = [
         mockito              : '3.12.4',
         pact                 : '4.4.0-beta.2',
         pdfbox               : '2.0.29',
-        reformLogging        : '5.1.9',
+        reformLogging        : '6.0.1',
         serenity             : '3.2.5',
         serviceTokenGenerator: '4.1.2',
         springDoc            : '1.6.9',
