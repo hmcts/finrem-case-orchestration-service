@@ -25,58 +25,47 @@ public class EventTypeTest {
         GeneralApplicationHandler.class, CallbackHandler.class, IntervenerHandler.class, AssignApplicantSolicitorHandler.class);
 
     @Test
-    public void shouldOnlyBeOneEventHandlerPerEventType() throws ClassNotFoundException {
+    public void givenEventHandler_whenMoreThanOneEventMatches_thenThrowError() throws ClassNotFoundException {
+        List<String> errors = new ArrayList<>();
         var handlerClasses = getHandlerClasses();
-        List<EventType> eventTypeList = new ArrayList<>(Arrays.stream(EventType.values()).toList());
-        List<CaseType> caseTypeList = new ArrayList<>(Arrays.stream(CaseType.values()).toList());
-        List<CallbackType> callbackTypeList = new ArrayList<>(Arrays.stream(CallbackType.values()).toList());
-        for (EventType event : eventTypeList) {
-            for (CaseType caseType : caseTypeList) {
-                for (CallbackType callbackType : callbackTypeList) {
+        for (EventType event : EventType.values()) {
+            for (CaseType caseType : CaseType.values()) {
+                for (CallbackType callbackType : CallbackType.values()) {
                     List<Class> matchingClasses = new ArrayList<>();
-                    handlerClasses.forEach(clazz -> {
-                        try {
-                            if (!handlerClassesToIgnore.contains(clazz)) {
-                                if (invokeCanHandleMethod(clazz, callbackType, caseType, event)) {
-                                    matchingClasses.add(clazz);
-                                }
-                            }
-                        } catch (InvocationTargetException | InstantiationException | IllegalAccessException
-                                 | NoSuchMethodException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    });
+                    findMatchingClasses(event, caseType, callbackType, handlerClasses, matchingClasses);
                     if (matchingClasses.size() > 1) {
-                        throw new RuntimeException("The combination of event type " + event + ", case type " + caseType
+                        errors.add("The combination of event type " + event + ", case type " + caseType
                             + " and callback type " + callbackType + " has been found in more than one class " + matchingClasses);
                     }
                 }
             }
         }
+        errors.forEach(log::error);
+        assert errors.isEmpty();
     }
 
     @Test
-    public void checkEachEventTypeIsUnique() {
+    public void givenEventType_whenEventTypeNotUnique_ThenThrowError() {
+        List<String> errors = new ArrayList<>();
         List<EventType> eventTypeList = new ArrayList<>(Arrays.stream(EventType.values()).toList());
         eventTypeList.forEach(x -> {
             try {
-                validateEventTypes(x, eventTypeList);
+                validateEventTypes(x, eventTypeList, errors);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
+        errors.forEach(log::error);
+        assert errors.isEmpty();
     }
 
-    private void validateEventTypes(EventType event, List<EventType> allEvents) {
-        List<String> errors = new ArrayList<>();
+    private void validateEventTypes(EventType event, List<EventType> allEvents, List<String> errors) {
         if (isEnumTypeMatching(event.toString(), allEvents)) {
             errors.add("The event type " + event + " is duplicated in the EventType enum.");
         }
         if (isEnumCcdTypeMatching(event.getCcdType(), allEvents)) {
             errors.add("The event ccd type " + event.getCcdType() + " is duplicated in the EventType enum.");
         }
-        errors.forEach(log::error);
-        assert errors.isEmpty();
     }
 
     private boolean isEnumTypeMatching(String enumType, List<EventType> allEvents) {
@@ -85,6 +74,20 @@ public class EventTypeTest {
 
     private boolean isEnumCcdTypeMatching(String enumCcdType, List<EventType> allEvents) {
         return allEvents.stream().filter(x -> x.getCcdType().equalsIgnoreCase(enumCcdType)).count() > 1;
+    }
+
+    private void findMatchingClasses(EventType event, CaseType caseType, CallbackType callbackType,
+                                     List<Class> handlerClasses, List<Class> matchingClasses) {
+        handlerClasses.forEach(clazz -> {
+            try {
+                if (!handlerClassesToIgnore.contains(clazz) && invokeCanHandleMethod(clazz, callbackType, caseType, event)) {
+                    matchingClasses.add(clazz);
+                }
+            } catch (InvocationTargetException | InstantiationException | IllegalAccessException
+                     | NoSuchMethodException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
     public List<Class> getHandlerClasses() throws ClassNotFoundException {
