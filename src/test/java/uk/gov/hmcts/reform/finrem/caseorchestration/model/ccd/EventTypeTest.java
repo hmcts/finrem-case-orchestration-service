@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
+
 @Slf4j
 public class EventTypeTest {
 
@@ -41,7 +43,7 @@ public class EventTypeTest {
             }
         }
         errors.forEach(log::error);
-        assert errors.isEmpty();
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -56,7 +58,7 @@ public class EventTypeTest {
             }
         });
         errors.forEach(log::error);
-        assert errors.isEmpty();
+        assertTrue(errors.isEmpty());
     }
 
     private void validateEventTypes(EventType event, List<EventType> allEvents, List<String> errors) {
