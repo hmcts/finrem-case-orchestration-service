@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
@@ -96,7 +97,7 @@ public class PdfStampingService {
         return outputBytes.toByteArray();
     }
 
-    public byte[] imageAsBytes(String fileName) throws Exception {
+    public byte[] imageAsBytes(String fileName) throws IOException {
         try (InputStream inputStream = getClass().getResourceAsStream(fileName)) {
             return IOUtils.toByteArray(inputStream);
         }

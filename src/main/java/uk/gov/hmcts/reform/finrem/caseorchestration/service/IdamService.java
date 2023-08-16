@@ -23,10 +23,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"java:S3740", "java:S1905", "java:S4276"})
 public class IdamService {
 
     private static final Function<IdamServiceConfiguration, URI> uriSupplier =
-        serviceConfig -> fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi()).build().toUri();
+        serviceConf -> fromHttpUrl(serviceConf.getUrl() + serviceConf.getApi()).build().toUri();
     private static final Function<String, HttpEntity> buildAuthRequest = authToken -> {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, authToken);

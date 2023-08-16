@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
@@ -27,6 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
+@SuppressWarnings({"java:S110"})
 public class FormCandGCorresponder extends HearingCorresponder {
 
     private final DocumentHelper documentHelper;
@@ -48,6 +48,7 @@ public class FormCandGCorresponder extends HearingCorresponder {
         return getHearingCaseDocuments(caseDetails.getData(), caseId);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private List<BulkPrintDocument> getHearingCaseDocuments(Map<String, Object> caseData, String caseId) {
         List<BulkPrintDocument> caseDocuments = new ArrayList<>();
         try {
@@ -65,7 +66,7 @@ public class FormCandGCorresponder extends HearingCorresponder {
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, HEARING_ADDITIONAL_DOC).ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
-        caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));
+        caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).toList());
 
         return caseDocuments;
     }

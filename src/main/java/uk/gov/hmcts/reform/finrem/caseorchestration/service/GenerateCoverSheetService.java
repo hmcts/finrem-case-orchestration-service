@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("java:S1133")
 public class GenerateCoverSheetService {
 
     private final GenericDocumentService genericDocumentService;
@@ -52,7 +53,15 @@ public class GenerateCoverSheetService {
 
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    @Deprecated
+    /**
+     * No Return.
+     * <p>Please use @{@link #generateApplicantCoverSheet(FinremCaseDetails, String)}</p>
+     *
+     * @param caseDetails instance of CaseDetails
+     * @param authorisationToken instance of String
+     * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken}
+     */
+    @Deprecated(since = "15-june-2023")
     public CaseDocument generateApplicantCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
@@ -71,7 +80,15 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT);
     }
 
-    @Deprecated
+    /**
+     * No Return.
+     * <p>Please use @{@link #generateRespondentCoverSheet(FinremCaseDetails, String)}</p>
+     *
+     * @param caseDetails instance of CaseDetails
+     * @param authorisationToken instance of String
+     * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken}
+     */
+    @Deprecated(since = "15-june-2023")
     public CaseDocument generateRespondentCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
@@ -91,7 +108,16 @@ public class GenerateCoverSheetService {
     }
 
 
-    @Deprecated
+    /**
+     * No Return.
+     * <p>Please use @{@link #generateIntervenerCoverSheet(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}</p>
+     *
+     * @param caseDetails instance of CaseDetails
+     * @deprecated Use {@link final CaseDetails caseDetails,
+     *                                                      final String authorisationToken,
+     *                                                      DocumentHelper.PaperNotificationRecipient recipient}
+     */
+    @Deprecated(since = "15-june-2023")
     public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails,
                                                      final String authorisationToken,
                                                      DocumentHelper.PaperNotificationRecipient recipient) {
@@ -111,7 +137,17 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, recipient);
     }
 
-    @Deprecated
+    /**
+     * Return CaseDocument.
+     *
+     * @param caseDetails instance of CaseDetails
+     * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken, String partyAddressCcdFieldName,
+     *                                             String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
+     *                                             String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
+     *                                             boolean isRepresentedByASolicitor}
+     */
+    @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S107")
     private CaseDocument generateCoverSheet(CaseDetails caseDetails, String authorisationToken, String partyAddressCcdFieldName,
                                             String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
                                             String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
@@ -137,7 +173,16 @@ public class GenerateCoverSheetService {
             caseDetails.getId().toString());
     }
 
-    @Deprecated
+    /**
+     * No Return.
+     *
+     * @param caseDetails instance of CaseDetails
+     * @deprecated Use {@link CaseDetails caseDetails, String partyAddressCcdFieldName,
+     *                                    String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
+     *                                    String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
+     *                                    boolean isRepresentedByASolicitor}
+     */
+    @Deprecated(since = "15-june-2023")
     private void prepareCoverSheet(CaseDetails caseDetails, String partyAddressCcdFieldName,
                                    String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
                                    String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
@@ -183,6 +228,7 @@ public class GenerateCoverSheetService {
             coversheetCtscContactDetails.getPostcode());
     }
 
+    @SuppressWarnings("java:S3358")
     private AddressFoundInCaseData checkAddress(Map<String, Object> caseData, String partyAddressCcdFieldName,
                                                 String solicitorAddressCcdFieldName, boolean isRepresentedByASolicitor) {
         return isRepresentedByASolicitor && caseDataService.addressLineOneNotEmpty((Map) caseData.get(solicitorAddressCcdFieldName))

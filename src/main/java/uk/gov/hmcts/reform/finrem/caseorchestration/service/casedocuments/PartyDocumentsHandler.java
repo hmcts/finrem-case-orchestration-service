@@ -8,13 +8,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class PartyDocumentsHandler extends DocumentHandler {
     private final CaseDocumentParty party;
 
-    public PartyDocumentsHandler(CaseDocumentCollectionType caseDocumentCollectionType,
+    protected PartyDocumentsHandler(CaseDocumentCollectionType caseDocumentCollectionType,
                                  CaseDocumentParty party) {
         super(caseDocumentCollectionType);
         this.party = party;
@@ -28,12 +27,12 @@ public abstract class PartyDocumentsHandler extends DocumentHandler {
         return allManagedDocumentCollections.stream()
             .filter(this::isNonConfidentialDocWithParty)
             .filter(d -> canHandleDocument(d.getUploadCaseDocument()))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private boolean isNonConfidentialDocWithParty(UploadCaseDocumentCollection d) {
         UploadCaseDocument uploadedCaseDocument = d.getUploadCaseDocument();
         return party.equals(uploadedCaseDocument.getCaseDocumentParty())
-            && YesOrNo.isNoOrNull(uploadedCaseDocument.getCaseDocumentConfidential());
+            && YesOrNo.isNoOrNull(uploadedCaseDocument.getCaseDocumentConfidentiality());
     }
 }

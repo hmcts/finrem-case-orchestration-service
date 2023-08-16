@@ -21,8 +21,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.fo
 @Service
 public class CallbackDispatchService {
 
+    @SuppressWarnings("java:S3740")
     private final List<CallbackHandler> callbackHandlers;
 
+    @SuppressWarnings("java:S3740")
     public GenericAboutToStartOrSubmitCallbackResponse dispatchToHandlers(CallbackType callbackType,
                                                                           CallbackRequest callbackRequest,
                                                                           String userAuthorisation) {

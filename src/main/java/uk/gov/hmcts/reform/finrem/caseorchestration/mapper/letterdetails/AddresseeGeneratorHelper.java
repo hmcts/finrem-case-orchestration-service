@@ -116,6 +116,7 @@ public class AddresseeGeneratorHelper {
         return "";
     }
 
+    @SuppressWarnings("java:S1452")
     public static Map<String, Map<GeneralLetterAddressToType, ?>> getAddressToCaseDataMapping(FinremCaseData data) {
         Map<GeneralLetterAddressToType, Address> generalLetterAddressToValueToAddress = Map.of(
             GeneralLetterAddressToType.APPLICANT_SOLICITOR, getAddressOrNew(data.getAppSolicitorAddress()),

@@ -15,8 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfig
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationUser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -71,10 +71,10 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
         contactInfoMap.put("townCity", townCity);
 
         Map<String, Object> restApiGetResponseBody = new HashMap<>();
-        restApiGetResponseBody.put("contactInformation", Arrays.asList(contactInfoMap));
+        restApiGetResponseBody.put("contactInformation", List.of(contactInfoMap));
 
         when(prdOrganisationConfiguration.getOrganisationsUrl()).thenReturn(TEST_URL);
-        when(restService.restApiGetCall(eq(AUTH_TOKEN), eq(TEST_URL))).thenReturn(restApiGetResponseBody);
+        when(restService.restApiGetCall(AUTH_TOKEN, TEST_URL)).thenReturn(restApiGetResponseBody);
 
         OrganisationsResponse organisationsResponse = prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN);
 
@@ -86,7 +86,7 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
         assertThat(organisationsResponse.getContactInformation().get(0).getPostcode(), is(postCode));
         assertThat(organisationsResponse.getContactInformation().get(0).getTownCity(), is(townCity));
 
-        verify(restService, times(1)).restApiGetCall(eq(AUTH_TOKEN), eq(TEST_URL));
+        verify(restService, times(1)).restApiGetCall(AUTH_TOKEN, TEST_URL);
         verify(prdOrganisationConfiguration, times(1)).getOrganisationsUrl();
     }
 

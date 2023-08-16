@@ -17,7 +17,7 @@ public abstract class NocDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final ObjectMapper objectMapper;
 
-    public NocDocumentService(GenericDocumentService genericDocumentService,
+    protected NocDocumentService(GenericDocumentService genericDocumentService,
                               ObjectMapper objectMapper) {
         this.genericDocumentService = genericDocumentService;
         this.objectMapper = objectMapper;
@@ -35,9 +35,9 @@ public abstract class NocDocumentService {
             getNocDocumentTemplate().getDocumentFileName(), caseId);
     }
 
-    private Map convertNoticeOfChangeLetterDetailsToMap(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
-        HashMap caseDetailsMap = new HashMap<String, Object>();
-        HashMap caseDataMap = new HashMap<String, Object>();
+    private Map<String, Object> convertNoticeOfChangeLetterDetailsToMap(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
+        HashMap<String, Object> caseDetailsMap = new HashMap<>();
+        HashMap<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(CASE_DATA, objectMapper.convertValue(noticeOfChangeLetterDetails, Map.class));
         caseDetailsMap.put(CASE_DETAILS, caseDataMap);
         return caseDetailsMap;

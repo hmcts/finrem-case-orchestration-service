@@ -21,6 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.MaskHelper.mas
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("java:S112")
 public class PrdOrganisationService {
 
     private final PrdOrganisationConfiguration prdOrganisationConfiguration;

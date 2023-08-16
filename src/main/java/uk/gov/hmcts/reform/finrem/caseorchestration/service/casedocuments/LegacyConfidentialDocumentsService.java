@@ -11,22 +11,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class LegacyConfidentialDocumentsService {
 
-    public List<UploadCaseDocumentCollection> getConfidentialCaseDocumentCollection(
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
+    public List<UploadCaseDocumentCollection> mapLegacyConfidentialDocumentToConfidentialDocumentCollection(
         List<ConfidentialUploadedDocumentData> legacyConfidentialDocumentsUploaded) {
 
         return legacyConfidentialDocumentsUploaded != null
             ? legacyConfidentialDocumentsUploaded.stream().map(this::getUploadCaseDocumentCollection)
-            .collect(Collectors.toList())
+            .toList()
             : new ArrayList<>();
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private UploadCaseDocumentCollection getUploadCaseDocumentCollection(
         ConfidentialUploadedDocumentData legacyConfidentialDocumentsCollection) {
 
@@ -37,8 +38,8 @@ public class LegacyConfidentialDocumentsService {
                 UploadCaseDocument.builder()
                     .caseDocuments(legacyConfidentialDocument.getDocumentLink())
                     .caseDocumentType(legacyConfidentialDocument.getDocumentType())
-                    .caseDocumentOther(legacyConfidentialDocument.getDocumentComment())
-                    .caseDocumentConfidential(YesOrNo.YES)
+                    .hearingDetails(legacyConfidentialDocument.getDocumentComment())
+                    .caseDocumentConfidentiality(YesOrNo.YES)
                     .caseDocumentUploadDateTime(legacyConfidentialDocument.getConfidentialDocumentUploadDateTime())
                     .build())
             .build();

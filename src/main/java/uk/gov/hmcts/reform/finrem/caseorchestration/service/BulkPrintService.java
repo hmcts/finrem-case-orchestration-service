@@ -41,12 +41,12 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-     * <p>Use @link sendDocumentForPrint(final CaseDocument document, FinremCaseDetails caseDetails, final String recipient, String auth) instead </p>
-     *
+
      * @return letterId to be return
      * @deprecated deprecated since 15-Feb-2023
      */
     @Deprecated(since = "15-Feb-2023")
+    @SuppressWarnings("java:S1133")
     public UUID sendDocumentForPrint(final CaseDocument document, CaseDetails caseDetails, final String recipient, String auth) {
         List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl())
@@ -72,11 +72,12 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-     *
+
      * @return letterId to be return
      * @deprecated deprecated since 15-Feb-2023
      */
     @Deprecated(since = "15-Feb-2023")
+    @SuppressWarnings("java:S1133")
     public UUID printApplicantDocuments(CaseDetails caseDetails, String authorisationToken,
                                         List<BulkPrintDocument> caseDocuments) {
         return printDocumentsWithCoversheet(caseDetails,
@@ -93,11 +94,12 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-     *
+
      * @return letterId to be return
      * @deprecated deprecated since 15-Feb-2023
      */
     @Deprecated(since = "15-Feb-2023")
+    @SuppressWarnings("java:S1133")
     public UUID printRespondentDocuments(CaseDetails caseDetails, String authorisationToken,
                                          List<BulkPrintDocument> caseDocuments) {
         return printDocumentsWithCoversheet(caseDetails,
@@ -130,10 +132,12 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
+
      * @return sendLetterResponse response to be return
      * @deprecated deprecated since 15-Feb-2023
      */
     @Deprecated(since = "15-Feb-2023")
+    @SuppressWarnings("java:S1133")
     private UUID printDocumentsWithCoversheet(CaseDetails caseDetails,
                                               BulkPrintDocument coverSheet,
                                               List<BulkPrintDocument> caseDocuments,
@@ -175,12 +179,12 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-     * <p>Use @link generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) instead </p>
-     *
+
      * @return BulkPrintDocument to be return
      * @deprecated deprecated since 15-Feb-2023
      */
     @Deprecated(since = "15-Feb-2023")
+    @SuppressWarnings("java:S1133")
     private BulkPrintDocument generateApplicantCoverSheet(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
         log.info("Applicant coversheet generated {} for case Id {}", applicantCoverSheet, caseDetails.getId());
@@ -198,11 +202,12 @@ public class BulkPrintService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
-     * <p>Use @link generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) instead </p>
+
      * @return BulkPrintDocument to be return
      * @deprecated deprecated since 15-Feb-2023
      */
     @Deprecated(since = "15-Feb-2023")
+    @SuppressWarnings("java:S1133")
     private BulkPrintDocument generateRespondentCoverSheet(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
         log.info("Respondent coversheet generated {} for case Id {}", respondentCoverSheet, caseDetails.getId());
@@ -248,6 +253,8 @@ public class BulkPrintService {
      *                                          String authorisationToken,
      *                                          List caseDocuments}
      */
+    @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails,
                                          String authorisationToken,
                                          List<BulkPrintDocument> caseDocuments) {
@@ -278,6 +285,7 @@ public class BulkPrintService {
      *                                                            DocumentHelper.PaperNotificationRecipient recipient}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken,
                                                            DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);

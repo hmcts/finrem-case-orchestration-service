@@ -101,6 +101,7 @@ public class FeatureToggleService {
      *
      * @return a map with Class of ignored fields as key and field names as value
      */
+    @SuppressWarnings("java:S3740")
     public Map<Class, List<String>> getFieldsIgnoredDuringSerialisation() {
         Map<Class, List<String>> ignoredFields = Maps.newHashMap();
 

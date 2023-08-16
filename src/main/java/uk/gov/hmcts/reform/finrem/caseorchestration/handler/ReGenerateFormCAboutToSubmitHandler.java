@@ -23,6 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("java:S3740")
 public class ReGenerateFormCAboutToSubmitHandler implements CallbackHandler {
 
     public static final String THERE_IS_NO_HEARING_ON_THE_CASE_ERROR_MESSAGE = "There is no hearing on the case.";

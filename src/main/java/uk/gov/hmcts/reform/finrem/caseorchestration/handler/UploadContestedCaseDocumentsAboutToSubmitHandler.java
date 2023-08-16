@@ -12,18 +12,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -89,7 +86,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
             managedCollections.forEach(doc -> doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole));
         }
 
-        saveLegacyConfidentialDocumentsUploaded(managedCollections, caseData);
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.addUploadedDocumentToDocumentCollectionType(callbackRequest, managedCollections));
 
@@ -102,41 +98,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
 
         return response;
-    }
-
-    private void saveLegacyConfidentialDocumentsUploaded(List<UploadCaseDocumentCollection> managedCollections,
-                                                         FinremCaseData caseData) {
-
-        List<UploadCaseDocumentCollection> confidentialDocsUploaded =
-            managedCollections.stream().filter(documentCollection ->
-                    documentCollection.getUploadCaseDocument().getCaseDocumentConfidential().isYes())
-                .toList();
-
-        List<ConfidentialUploadedDocumentData> legacyConfidentialDocsUploaded =
-            confidentialDocsUploaded.stream().map(this::mapToLegacyConfidentialDocs).toList();
-
-        if (caseData.getConfidentialDocumentsUploaded() != null) {
-            caseData.getConfidentialDocumentsUploaded().addAll(legacyConfidentialDocsUploaded);
-        } else {
-            caseData.setConfidentialDocumentsUploaded(legacyConfidentialDocsUploaded);
-        }
-
-        managedCollections.removeAll(confidentialDocsUploaded);
-    }
-
-    private ConfidentialUploadedDocumentData mapToLegacyConfidentialDocs(
-        UploadCaseDocumentCollection documentCollection) {
-
-        UploadCaseDocument documentUploaded = documentCollection.getUploadCaseDocument();
-        return ConfidentialUploadedDocumentData.builder()
-            .value(UploadConfidentialDocument.builder()
-                .documentType(documentUploaded.getCaseDocumentType())
-                .documentComment(documentUploaded.getHearingDetails())
-                .documentFileName(documentUploaded.getCaseDocuments().getDocumentFilename())
-                .confidentialDocumentUploadDateTime(LocalDateTime.now())
-                .documentLink(documentUploaded.getCaseDocuments())
-                .build())
-            .build();
     }
 
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> getValidatedResponse(FinremCaseData caseData) {
@@ -160,7 +121,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
                 uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType())
             .anyMatch(caseDocumentType -> caseDocumentType.equals(TRIAL_BUNDLE));
     }
-
 
     private CaseDocumentParty getActiveUserCaseDocumentParty(String caseId, String userAuthorisation) {
         String logMessage = "Logged in user role {} caseId {}";

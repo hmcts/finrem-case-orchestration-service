@@ -1,20 +1,7 @@
 {
-  "enabledManagers": [
-    "helm-requirements",
-    "gradle-wrapper"
-  ],
-  "labels": [
-    "dependencies"
-  ],
-  "helm-requirements": {
-    "fileMatch": [
-      "\\Chart.yaml|requirements.yaml$"
-    ],
-    "aliases": {
-      "hmctspublic": "https://hmctspublic.azurecr.io/helm/v1/repo/"
-    }
-  },
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>hmcts/.github:renovate-config"
+    "local>hmcts/.github:renovate-config",
+    "local>hmcts/.github//renovate/automerge-minor"
   ]
 }

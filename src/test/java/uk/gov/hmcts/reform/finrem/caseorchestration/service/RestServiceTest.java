@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpEntity;
@@ -21,8 +20,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import java.net.URI;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
@@ -70,7 +72,7 @@ public class RestServiceTest extends BaseServiceTest {
 
         assertRestApiCall(HttpMethod.POST);
 
-        Assert.assertEquals(authRequestCaptor.getValue().getBody(), body);
+        assertEquals(authRequestCaptor.getValue().getBody(), body);
     }
 
     @Test(expected = NullPointerException.class)
@@ -88,7 +90,7 @@ public class RestServiceTest extends BaseServiceTest {
 
         assertRestApiCall(HttpMethod.DELETE);
 
-        Assert.assertEquals(authRequestCaptor.getValue().getBody(), body);
+        assertEquals(authRequestCaptor.getValue().getBody(), body);
     }
 
     @Test(expected = NullPointerException.class)
@@ -104,7 +106,7 @@ public class RestServiceTest extends BaseServiceTest {
 
         Map response = restService.restApiGetCall(AUTH_TOKEN, TEST_URL);
 
-        Assert.assertEquals(response, mockResponse.getBody());
+        assertEquals(response, mockResponse.getBody());
 
         assertRestApiCall(HttpMethod.GET);
 
@@ -119,14 +121,15 @@ public class RestServiceTest extends BaseServiceTest {
     }
 
     private void assertRestApiCall(HttpMethod httpMethod) {
-        Mockito.verify(restTemplate, Mockito.times(1)).exchange(uriCaptor.capture(), eq(httpMethod), authRequestCaptor.capture(), eq(Map.class));
-        Mockito.verify(authTokenGenerator, Mockito.times(1)).generate();
+        verify(restTemplate, times(1)).exchange(uriCaptor.capture(),
+            eq(httpMethod), authRequestCaptor.capture(), eq(Map.class));
+        verify(authTokenGenerator, times(1)).generate();
 
         HttpHeaders headers = authRequestCaptor.getValue().getHeaders();
 
-        Assert.assertEquals(uriCaptor.getValue(), URI.create(TEST_URL));
-        Assert.assertEquals(headers.get(AUTHORIZATION_HEADER).get(0), AUTH_TOKEN);
-        Assert.assertEquals(headers.get(SERVICE_AUTHORISATION_HEADER).get(0), TEST_SERVICE_TOKEN);
-        Assert.assertEquals(headers.get("Content-Type").get(0), MediaType.APPLICATION_JSON_VALUE);
+        assertEquals(uriCaptor.getValue(), URI.create(TEST_URL));
+        assertEquals(AUTH_TOKEN, headers.get(AUTHORIZATION_HEADER).get(0));
+        assertEquals(TEST_SERVICE_TOKEN, headers.get(SERVICE_AUTHORISATION_HEADER).get(0));
+        assertEquals(MediaType.APPLICATION_JSON_VALUE, headers.get("Content-Type").get(0));
     }
 }

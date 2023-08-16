@@ -19,6 +19,7 @@ public abstract class CaseDetailsSingleLetterOrEmailApplicantCorresponder extend
     protected final NotificationService notificationService;
 
     @Override
+    @SuppressWarnings("java:S1874")
     public void sendCorrespondence(CaseDetails caseDetails, String authToken) {
 
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
