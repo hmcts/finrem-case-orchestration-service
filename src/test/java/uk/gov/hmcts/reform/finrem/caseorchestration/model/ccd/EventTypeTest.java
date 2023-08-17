@@ -92,7 +92,7 @@ public class EventTypeTest {
         });
     }
 
-    public List<Class> getHandlerClasses() throws ClassNotFoundException {
+    private List<Class> getHandlerClasses() throws ClassNotFoundException {
         File directoryPath = Paths.get("./src/main/java/uk/gov/hmcts/reform/finrem/caseorchestration/handler")
             .toAbsolutePath().toFile();
         String[] directoryContents = directoryPath.list();
