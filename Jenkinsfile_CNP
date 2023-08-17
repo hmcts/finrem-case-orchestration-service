@@ -33,7 +33,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 def getProjectName() {
-    String projectPrefix = "finrem-ccd-definitions"
+    String projectPrefix = "finrem-ccd-definitions/"
     def githubApi = new GithubAPI(this)
     for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "use-defs-pr-") ) {
         String prNumber = label.substring(12, label.length())
