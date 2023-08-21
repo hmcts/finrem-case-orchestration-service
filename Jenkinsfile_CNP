@@ -48,12 +48,12 @@ env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 withPipeline(type, product, component) {
     loadVaultSecrets(secrets)
     afterSuccess('checkout') {
-        steps {
-            script {
-                copyArtifacts projectName: getProjectName(), selector: lastCompleted(), optional: true, target: "./definition_files"
-            }
-        }
-
+        step ([
+                $class: 'CopyArtifact',
+                selector: lastCompleted(),
+                projectName: getProjectName(),
+                target: "./definition_files"
+        ]);
     }
 
     afterSuccess('functionalTest:aat') {
