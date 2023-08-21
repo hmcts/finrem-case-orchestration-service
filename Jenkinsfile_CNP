@@ -49,7 +49,7 @@ withPipeline(type, product, component) {
     loadVaultSecrets(secrets)
     afterSuccess('checkout') {
         step ([
-                $class: 'CopyArtifact',
+                $class: 'copyArtifacts',
                 selector: lastSuccessful(),
                 projectName: getProjectName(),
                 target: "./definition_files"
