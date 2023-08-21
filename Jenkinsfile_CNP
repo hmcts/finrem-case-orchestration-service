@@ -47,12 +47,11 @@ env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 withPipeline(type, product, component) {
     loadVaultSecrets(secrets)
-
+    options {
+        copyArtifactPermission('Copy artifacts project,...');
+    }
     afterSuccess('checkout') {
         echo "$JOB_NAME"
-        options {
-            copyArtifactPermission('Copy artifacts project,...');
-        }
         step ([
                 $class: 'CopyArtifact',
                 selector: lastCompleted(),
