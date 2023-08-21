@@ -50,7 +50,7 @@ withPipeline(type, product, component) {
     afterSuccess('checkout') {
         step ([
                 $class: 'CopyArtifact',
-                selector: lastCompleted(),
+                selector: lastSuccessful(),
                 projectName: getProjectName(),
                 target: "./definition_files"
         ]);
