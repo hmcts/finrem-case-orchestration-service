@@ -1,13 +1,11 @@
 #!groovy
 import uk.gov.hmcts.contino.AppPipelineDsl
-import uk.gov.hmcts.contino.GithubAPI
 
 @Library("Infrastructure")
 
 def type = "java"
 def product = "finrem"
 def component = "cos"
-def githubApi = new GithubAPI(this)
 
 def secrets = [
         'finrem-${env}': [
