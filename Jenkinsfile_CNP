@@ -7,6 +7,7 @@ import uk.gov.hmcts.contino.GithubAPI
 def type = "java"
 def product = "finrem"
 def component = "cos"
+def githubApi = new GithubAPI(this)
 
 def secrets = [
         'finrem-${env}': [
@@ -34,7 +35,6 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 def getProjectName() {
     String projectPrefix = "HMCTS_d_to_i/finrem-ccd-definitions/"
-    def githubApi = new GithubAPI(this)
     for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "use-defs-pr-") ) {
         String prNumber = label.substring(12, label.length())
         return projectPrefix + "PR-" + prNumber
@@ -47,14 +47,14 @@ env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 withPipeline(type, product, component) {
     loadVaultSecrets(secrets)
-    afterSuccess('checkout') {
+    /*afterSuccess('checkout') {
         step ([
                 $class: 'CopyArtifact',
                 selector: lastCompleted(),
                 projectName: getProjectName(),
                 target: "./definition_files"
         ]);
-    }
+    }*/
 
     afterSuccess('functionalTest:aat') {
         steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
