@@ -33,14 +33,14 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
     ]
 }
 
-def getProjectName() {
+/*def getProjectName() {
     String projectPrefix = "HMCTS_d_to_i/finrem-ccd-definitions/"
     for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "use-defs-pr-") ) {
         String prNumber = label.substring(12, label.length())
         return projectPrefix + "PR-" + prNumber
     }
     return projectPrefix + "master"
-}
+}*/
 
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
