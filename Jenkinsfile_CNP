@@ -45,6 +45,10 @@ def getProjectName() {
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
+properties([
+    copyArtifactPermission('HMCTS_d_to_i/finrem-ccd-definitions/*'),
+]);
+
 withPipeline(type, product, component) {
     loadVaultSecrets(secrets)
     afterSuccess('checkout') {
