@@ -51,14 +51,14 @@ properties([
 
 withPipeline(type, product, component) {
     loadVaultSecrets(secrets)
-    afterSuccess('checkout') {
+    /*afterSuccess('checkout') {
         step ([
                 $class: 'CopyArtifact',
                 selector: lastSuccessful(),
                 projectName: getProjectName(),
                 target: "./definition_files"
         ]);
-    }
+    }*/
 
     afterSuccess('functionalTest:aat') {
         steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
