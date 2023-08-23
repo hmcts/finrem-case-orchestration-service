@@ -22,7 +22,7 @@ public class UploadCaseDocument {
     private CaseDocumentType caseDocumentType;
     private CaseDocumentParty caseDocumentParty;
     private String caseDocumentOther;
-    private YesOrNo caseDocumentConfidential;
+    private YesOrNo caseDocumentConfidentiality;
     private String hearingDetails;
     private YesOrNo caseDocumentFdr;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
