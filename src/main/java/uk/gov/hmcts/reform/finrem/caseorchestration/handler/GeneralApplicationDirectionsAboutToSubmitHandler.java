@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
@@ -115,7 +114,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
             = existingList.stream().map(ga -> setStatusAndBulkPrintDouments(caseDetails,
                 ga, valueCode, status, bulkPrintDocuments, userAuthorisation))
-            .sorted(helper::getCompareTo).collect(Collectors.toList());
+            .sorted(helper::getCompareTo).toList();
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);

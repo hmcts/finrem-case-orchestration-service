@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.File;
+import java.util.Objects;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
@@ -50,8 +51,8 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
             inputFile = isHwf ? "/fixtures/contested/hwf.json" : "/fixtures/contested/pba-validate.json";
         }
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(inputFile).toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource(inputFile)).toURI()));
 
         if (isConsented) {
             if (isHwf) {

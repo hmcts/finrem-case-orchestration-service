@@ -65,7 +65,7 @@ public class IdamServiceTest extends BaseServiceTest {
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("{\"id\": \"1234\"}", MediaType.APPLICATION_JSON));
 
-        Assert.assertEquals(idamService.getIdamUserId(AUTH_TOKEN), "1234");
+        Assert.assertEquals("1234", idamService.getIdamUserId(AUTH_TOKEN));
     }
 
     @Test

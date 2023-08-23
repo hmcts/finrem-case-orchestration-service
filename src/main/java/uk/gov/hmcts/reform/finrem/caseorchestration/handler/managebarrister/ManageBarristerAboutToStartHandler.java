@@ -41,7 +41,8 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler<Map<S
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        CaseAssignedUserRolesResource userCaseRole = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, userAuthorisation);
+        CaseAssignedUserRolesResource userCaseRole =
+            caseAssignedRoleService.getCaseAssignedUserRole(caseDetails.getId().toString(), userAuthorisation);
         if (userCaseRole.getCaseAssignedUserRoles() == null || userCaseRole.getCaseAssignedUserRoles().isEmpty()) {
             caseData.put(CASE_ROLE, CASEWORKER_ROLE);
             caseData.put(CASE_ROLE_FOR_FIELD_SHOW, CASEWORKER_ROLE_FIELD_SHOW_LABEL);

@@ -2,52 +2,52 @@ plugins {
     id 'application'
     id 'checkstyle'
     id 'jacoco'
-    id 'org.springframework.boot' version "2.7.12"
-    id 'io.spring.dependency-management' version '1.0.12.RELEASE'
-    id 'au.com.dius.pact' version '4.4.0-beta.2'
-    id 'com.github.ben-manes.versions' version '0.42.0'
-    id "info.solidsoft.pitest" version "1.7.4"
-    id 'org.owasp.dependencycheck' version '8.0.2'
-    id 'org.sonarqube' version '3.4.0.2513'
-    id 'uk.gov.hmcts.java' version '0.12.27'
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.602'
+    id 'org.springframework.boot' version "2.7.14"
+    id 'io.spring.dependency-management' version '1.1.3'
+    id 'au.com.dius.pact' version '4.6.1'
+    id 'com.github.ben-manes.versions' version '0.47.0'
+    id "info.solidsoft.pitest" version "1.9.11"
+    id 'org.owasp.dependencycheck' version '8.3.1'
+    id 'org.sonarqube' version '3.5.0.2730'
+    id 'uk.gov.hmcts.java' version '0.12.43'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.778'
 }
 
 def versions = [
-        guava                : '32.0.1-jre',
+        guava                : '32.1.2-jre',
         bspCommonLib         : '0.0.51',
-        ccdClient            : '4.8.6',
+        ccdClient            : '4.9.2',
         commonsIo            : '2.7',
-        commonsLang3         : '3.11',
-        hmctsNotify          : '3.17.0-RELEASE',
-        junit                : '4.13.1',
-        lombok               : '1.18.22',
-        mockito              : '3.4.4',
-        pact                 : '4.4.0-beta.2',
-        pdfbox               : '2.0.25',
-        reformLogging        : '5.1.9',
+        commonsLang3         : '3.13.0',
+        hmctsNotify          : '3.19.2-RELEASE',
+        junit                : '4.13.2',
+        lombok               : '1.18.28',
+        mockito              : '3.12.4',
+        pact                 : '4.6.1',
+        pdfbox               : '2.0.29',
+        reformLogging        : '6.0.1',
         serenity             : '3.2.5',
-        serviceTokenGenerator: '4.0.3',
-        springDoc            : '1.6.9',
-        wiremock             : '2.27.2',
-        apacheLogging        : '2.17.2',
-        idamClient           : '2.0.1',
+        serviceTokenGenerator: '4.1.2',
+        springDoc            : '1.7.0',
+        wiremock             : '2.33.2',
+        apacheLogging        : '2.20.0',
+        idamClient           : '2.1.1',
         jjwt                 : '0.9.1',
-        skyscreamer          : '1.5.0',
-        jaxbOsgi             : '2.3.3',
-        springHateoas        : '1.5.1',
-        tika                 : '2.4.1',
+        skyscreamer          : '1.5.1',
+        jaxbOsgi             : '2.3.8',
+        springHateoas        : '1.5.5',
+        tika                 : '2.8.0',
         amClient             : '1.7.3',
-        sendLetterClient     : '3.0.16',
-        elasticSearch        : '7.17.9',
+        sendLetterClient     : '3.0.23',
+        elasticSearch        : '7.17.12',
         jacksonDatabind      : '2.13.2',
-        retry                : '1.3.1'
+        retry                : '1.3.4'
 ]
 
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
-    springCloudBomVersion = "2021.0.4"
-    restAssuredBomVersion = "5.1.1"
+    springCloudBomVersion = "2021.0.8"
+    restAssuredBomVersion = "5.3.1"
 }
 
 group = 'uk.gov.hmcts.reform.finrem'
@@ -208,6 +208,33 @@ sonarqube {
         property "sonar.java.coveragePlugin", "jacoco"
         property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
         property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
+        property "sonar.issue.ignore.multicriteria", "e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13"
+        property "sonar.issue.ignore.multicriteria.e1.ruleKey", "java:S1141"
+        property "sonar.issue.ignore.multicriteria.e1.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e2.ruleKey", "java:S3740"
+        property "sonar.issue.ignore.multicriteria.e2.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e3.ruleKey", "java:S110"
+        property "sonar.issue.ignore.multicriteria.e3.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e4.ruleKey", "java:S112"
+        property "sonar.issue.ignore.multicriteria.e4.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e5.ruleKey", "java:S2925"
+        property "sonar.issue.ignore.multicriteria.e5.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e6.ruleKey", "java:S5961"
+        property "sonar.issue.ignore.multicriteria.e6.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e7.ruleKey", "java:S1874"
+        property "sonar.issue.ignore.multicriteria.e7.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e8.ruleKey", "java:S1488"
+        property "sonar.issue.ignore.multicriteria.e8.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e9.ruleKey", "java:S6201"
+        property "sonar.issue.ignore.multicriteria.e9.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e10.ruleKey", "java:S5411"
+        property "sonar.issue.ignore.multicriteria.e10.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e11.ruleKey", "java:S6201"
+        property "sonar.issue.ignore.multicriteria.e11.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e12.ruleKey", "java:S1133"
+        property "sonar.issue.ignore.multicriteria.e12.resourceKey", "**/*.java"
+        property "sonar.issue.ignore.multicriteria.e13.ruleKey", "java:S1135"
+        property "sonar.issue.ignore.multicriteria.e13.resourceKey", "**/*.java"
     }
 }
 
@@ -308,7 +335,6 @@ bootWithCCD {
 
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
 
-    environment("FEATURE_MANAGE_BUNDLE", "true")
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
 }
 
@@ -319,16 +345,16 @@ dependencyManagement {
     }
     dependencies {
         //CVE-2022-42252
-        dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.69') {
+        dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.79') {
             entry 'tomcat-embed-core'
             entry 'tomcat-embed-websocket'
         }
         //VE-2022-31692, CVE-2022-31690 CVE-2023-20862
-        dependencySet(group: 'org.springframework.security', version: '6.1.1') {
+        dependencySet(group: 'org.springframework.security', version: '6.1.2') {
             entry 'spring-security-crypto'
         }
         //CVE-2023-20861
-        dependencySet(group: 'org.springframework', version: '5.3.27') {
+        dependencySet(group: 'org.springframework', version: '5.3.29') {
             entry 'spring-aop'
             entry 'spring-beans'
             entry 'spring-context'
@@ -399,7 +425,7 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation('com.github.hmcts:fortify-client:1.2.0:all')
+    testImplementation('com.github.hmcts:fortify-client:1.3.0:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }

@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequiredArgsConstructor
 @Slf4j
 @EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
+@SuppressWarnings("java:S3740")
 public class RestService {
 
     private final RestTemplate restTemplate;

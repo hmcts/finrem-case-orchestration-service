@@ -44,10 +44,7 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
 
         List<IntervenerWrapper> interveners = caseData.getInterveners();
-        interveners.forEach(intervenerWrapper -> {
-
-            buildDynamicIntervenerList(dynamicListElements, intervenerWrapper);
-        });
+        interveners.forEach(intervenerWrapper -> buildDynamicIntervenerList(dynamicListElements, intervenerWrapper));
 
         DynamicRadioList dynamicList = getDynamicRadioList(dynamicListElements);
         caseData.setIntervenersList(dynamicList);

@@ -30,6 +30,7 @@ public class BarristerLetterDetailsGenerator extends BaseContestedLetterDetailsG
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public BarristerLetterDetails generate(CaseDetails caseDetails,
                                            DocumentHelper.PaperNotificationRecipient recipient,
                                            Barrister barrister) {

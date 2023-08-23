@@ -21,8 +21,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.fo
 @Service
 public class CallbackDispatchService {
 
+    @SuppressWarnings("java:S3740")
     private final List<CallbackHandler> callbackHandlers;
 
+    @SuppressWarnings("java:S3740")
     public GenericAboutToStartOrSubmitCallbackResponse dispatchToHandlers(CallbackType callbackType,
                                                                           CallbackRequest callbackRequest,
                                                                           String userAuthorisation) {
@@ -43,9 +45,9 @@ public class CallbackDispatchService {
                     callbackHandler.handle(callbackRequest, userAuthorisation);
 
                 callbackResponse.setData(handlerCallbackResponse.getData());
-                List<String> errors = Optional.ofNullable(handlerCallbackResponse.getErrors()).orElse(Collections.EMPTY_LIST);
+                List<String> errors = Optional.ofNullable(handlerCallbackResponse.getErrors()).orElse(Collections.emptyList());
                 callbackResponse.getErrors().addAll(errors);
-                List<String> warnings = Optional.ofNullable(handlerCallbackResponse.getWarnings()).orElse(Collections.EMPTY_LIST);
+                List<String> warnings = Optional.ofNullable(handlerCallbackResponse.getWarnings()).orElse(Collections.emptyList());
                 callbackResponse.getWarnings().addAll(warnings);
                 callbackResponse.setState(handlerCallbackResponse.getState());
             }

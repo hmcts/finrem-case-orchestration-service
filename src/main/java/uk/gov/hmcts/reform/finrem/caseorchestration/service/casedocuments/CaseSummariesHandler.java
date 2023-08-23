@@ -1,17 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
-public class CaseSummariesHandler extends PartyDocumentHandler {
+public class CaseSummariesHandler extends PartyDocumentsHandler {
 
-    public CaseSummariesHandler(String collectionName, String party, ObjectMapper mapper) {
-        super(collectionName, party, mapper);
+    public CaseSummariesHandler(CaseDocumentCollectionType caseDocumentCollectionType,
+                                CaseDocumentParty party) {
+        super(caseDocumentCollectionType, party);
     }
 
     @Override
-    protected boolean isDocumentTypeValid(String caseDocumentType) {
-        return caseDocumentType.equals("Position Statement")
-            || caseDocumentType.equals("Skeleton Argument")
-            || caseDocumentType.equals("Case Summary");
+    protected boolean canHandleDocument(UploadCaseDocument uploadCaseDocument) {
+
+        CaseDocumentType caseDocumentType = uploadCaseDocument.getCaseDocumentType();
+        return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.NO)
+            && (caseDocumentType.equals(CaseDocumentType.POSITION_STATEMENT)
+            || caseDocumentType.equals(CaseDocumentType.SKELETON_ARGUMENT)
+            || caseDocumentType.equals(CaseDocumentType.CASE_SUMMARY));
     }
 }

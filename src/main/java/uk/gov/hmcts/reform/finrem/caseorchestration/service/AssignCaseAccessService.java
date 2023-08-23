@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.USER_ROLES_CACHE;
@@ -117,7 +116,7 @@ public class AssignCaseAccessService {
     private CaseAssignmentUserRolesRequest getCaseAssignmentUserRolesRequest(Long caseId, Set<String> users, String caseRole, String orgId) {
         final List<CaseAssignmentUserRoleWithOrganisation> caseAssignedRoles = users.stream()
             .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
-            .collect(Collectors.toList());
+            .toList();
 
         return CaseAssignmentUserRolesRequest.builder()
             .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
@@ -226,7 +225,7 @@ public class AssignCaseAccessService {
     private List<CaseAssignmentUserRole> getCreatorRoles(List<CaseAssignmentUserRole> allRoles) {
         return allRoles.stream()
             .filter(role -> role.getCaseRole().equalsIgnoreCase(CREATOR_ROLE))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private Optional<CaseAssignmentUserRole> getUserToRemove(List<CaseAssignmentUserRole> creatorRoles,
@@ -263,27 +262,7 @@ public class AssignCaseAccessService {
             .build());
     }
 
-    public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
-        log.info("retrieve active user case role for caseId {}", caseId);
-        String idamUserId = idamService.getIdamUserId(userAuthorisation);
-        CaseAssignmentUserRolesResource rolesResource1 = getUserRoles(caseId);
-        log.info("idamUserId {} case roles {} for caseId {}",
-            idamUserId, rolesResource1 != null ? rolesResource1 : "empty", caseId);
 
-        CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
-        if (rolesResource != null) {
-            List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
-            log.info("All roles {} for caseId {}", allRoles, caseId);
-            List<CaseAssignmentUserRole> activeRole = allRoles.stream().filter(role -> role.getUserId().equals(idamUserId)).toList();
-            if (!activeRole.isEmpty()) {
-                log.info("Active Role {} for caseId {}", activeRole, caseId);
-                String caseRole = activeRole.get(0).getCaseRole();
-                log.info("case role found {} for caseId {}", caseRole, caseId);
-                return caseRole;
-            }
-        }
-        return "case";
-    }
 
     public List<CaseAssignmentUserRole> getAllCaseRole(final String caseId) {
         log.info("retrieve all case role for caseId {}", caseId);

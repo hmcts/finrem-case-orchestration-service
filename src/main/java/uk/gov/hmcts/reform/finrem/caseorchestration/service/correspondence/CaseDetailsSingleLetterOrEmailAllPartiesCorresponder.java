@@ -30,10 +30,11 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
         if (notificationService.isContestedApplication(caseDetails)) {
-            sendIntervenerCorrespondence(caseDetails, authToken);
+            sendIntervenerCorrespondence(caseDetails);
         }
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void sendApplicantCorrespondence(CaseDetails caseDetails, String authorisationToken) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
@@ -47,6 +48,7 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
         }
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void sendRespondentCorrespondence(CaseDetails caseDetails, String authorisationToken) {
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
@@ -61,7 +63,7 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
         }
     }
 
-    protected void sendIntervenerCorrespondence(CaseDetails caseDetails, String authorisationToken) {
+    protected void sendIntervenerCorrespondence(CaseDetails caseDetails) {
         final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         final List<IntervenerWrapper> interveners =  finremCaseDetails.getData().getInterveners();
         interveners.forEach(intervenerWrapper -> {

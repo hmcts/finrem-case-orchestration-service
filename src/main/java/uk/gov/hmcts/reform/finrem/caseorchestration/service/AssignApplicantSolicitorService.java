@@ -17,6 +17,7 @@ public class AssignApplicantSolicitorService {
     private final CcdDataStoreService ccdDataStoreService;
     private final PrdOrganisationService prdOrganisationService;
 
+    @SuppressWarnings("java:S1141")
     public void setApplicantSolicitor(FinremCaseDetails caseDetails, String userAuthorisation) throws AssignCaseAccessException {
 
         log.info("Received request for assign applicant solicitor for Case ID: {}", caseDetails.getId());

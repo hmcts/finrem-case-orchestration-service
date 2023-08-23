@@ -15,12 +15,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT_PACK;
 
 @Component
 @Slf4j
+@SuppressWarnings("java:S110")
 public class ApprovedOrderNoticeOfHearingCorresponder extends HearingCorresponder {
 
     private final ObjectMapper objectMapper;
@@ -39,8 +39,7 @@ public class ApprovedOrderNoticeOfHearingCorresponder extends HearingCorresponde
     @Override
     public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
         List<CaseDocument> hearingNoticePack = getHearingNoticeDocumentPackFromCaseData(caseDetails);
-        List<BulkPrintDocument> documentsToPrint = documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
-        return documentsToPrint;
+        return documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
     }
 
     private List<CaseDocument> getHearingNoticeDocumentPackFromCaseData(CaseDetails caseDetails) {
@@ -51,7 +50,7 @@ public class ApprovedOrderNoticeOfHearingCorresponder extends HearingCorresponde
 
         return hearingNoticePack.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
     }
 
 

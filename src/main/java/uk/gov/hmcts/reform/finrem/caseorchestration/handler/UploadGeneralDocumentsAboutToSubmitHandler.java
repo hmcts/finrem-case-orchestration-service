@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocument;
@@ -32,7 +32,7 @@ public class UploadGeneralDocumentsAboutToSubmitHandler
     implements CallbackHandler<Map<String, Object>> {
 
     private final ObjectMapper objectMapper;
-    private final UploadedGeneralDocumentHelper uploadedGeneralDocumentHelper;
+    private final UploadedGeneralDocumentService uploadedGeneralDocumentHelper;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -41,6 +41,7 @@ public class UploadGeneralDocumentsAboutToSubmitHandler
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
 
