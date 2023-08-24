@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
@@ -41,19 +42,35 @@ public class UpdateRepresentationWorkflowService {
                                                                              String authorisationToken,
                                                                              CaseDetails originalCaseDetails) {
         log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
+
+        log.info("DEBUGGING NOC - handleNoticeOfChangeWorkflow entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+
         assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
+
+        log.info("DEBUGGING NOC - findAndRevokeCreatorRole entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+        log.info("findAndRevokeCreatorRole executed", caseDetails.getId());
         Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken,
             originalCaseDetails);
+        log.info("DEBUGGING NOC - noticeOfChangeService.updateRepresentation entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
 
         if (isNoOrganisationsToAddOrRemove(caseDetails)) {
             persistDefaultOrganisationPolicy(caseDetails);
+            log.info("DEBUGGING NOC - persistDefaultOrganisationPolicy entered and applicant name is still present",
+                caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
             setDefaultChangeOrganisationRequest(caseDetails);
+            log.info("DEBUGGING NOC - setDefaultChangeOrganisationRequest entered and applicant name is still present",
+                caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
         }
 
         caseDetails.getData().putAll(caseData);
         caseDetails = noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails,
             originalCaseDetails);
+        log.info("DEBUGGING NOC - noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
 
         return assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), caseDetails);
     }
