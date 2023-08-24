@@ -50,8 +50,8 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
             final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
             final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
             interveners.forEach(intervenerWrapper -> {
-                if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
-                    && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
+                if (intervenerWrapper.getIntervenerCorrespondenceEnabled() == null
+                    || Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
                     if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, finremCaseDetails)) {
                         log.info("Sending email correspondence to {} for case: {}",
                             intervenerWrapper.getIntervenerType().getTypeValue(),
