@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
@@ -17,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
@@ -319,7 +319,7 @@ public class ConsentOrderApprovedDocumentService {
 
     @SuppressWarnings("java:S112")
     public void addGeneratedApprovedConsentOrderDocumentsToCase(String userAuthorisation,
-                                                                FinremCaseDetails finremCaseDetails) {
+                                                                FinremCaseDetails<FinremCaseDataConsented> finremCaseDetails) {
 
         String caseId = finremCaseDetails.getId().toString();
         log.info("Generating and preparing documents for latest consent order, case {}", caseId);
@@ -329,35 +329,23 @@ public class ConsentOrderApprovedDocumentService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        StampType stampType = documentHelper.getStampType(finremCaseDetails.getData());
+        FinremCaseDataConsented data = finremCaseDetails.getData();
+        StampType stampType = documentHelper.getStampType(data);
         CaseDocument approvedConsentOrderLetter =
             generateApprovedConsentOrderLetter(generateDocumentPayload, userAuthorisation);
         CaseDocument consentOrderAnnexStamped =
-            genericDocumentService.annexStampDocument(finremCaseDetails.getData().getLatestConsentOrder(),
+            genericDocumentService.annexStampDocument(data.getLatestConsentOrder(),
                 userAuthorisation, stampType, caseId);
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
             .consentOrder(consentOrderAnnexStamped).build();
 
-        List<PensionTypeCollection> consentPensionCollection =
-            finremCaseDetails.getData().getConsentPensionCollection();
-
-        if (!CollectionUtils.isEmpty(consentPensionCollection)) {
-            log.info("Pension Documents not empty for case - "
-                    + "stamping Pension Documents and adding to approvedOrder for case {}",
-                caseId);
-            List<PensionTypeCollection> stampedPensionDocs = stampPensionDocuments(consentPensionCollection,
-                userAuthorisation, stampType, caseId);
-            log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseId);
-            approvedOrder.setPensionDocuments(stampedPensionDocs);
-        }
-
         List<ConsentOrderCollection> approvedOrders = singletonList(ConsentOrderCollection.<ApprovedOrder>builder()
             .approvedOrder(approvedOrder).build());
         log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseId);
 
-        finremCaseDetails.getData().setApprovedOrderCollection(approvedOrders);
+        data.setApprovedOrderCollection(approvedOrders);
 
         log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseId);
     }

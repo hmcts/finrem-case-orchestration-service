@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -61,7 +62,7 @@ public class NotificationRequestMapper {
      * Return NotificationRequest .
      * <p>Please use @{@link #getNotificationRequestForRespondentSolicitor(FinremCaseDetails, Map)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails        instance of CaseDetails
      * @param interimHearingData instance of Map
      * @deprecated Use {@link CaseDetails caseDetails, Map interimHearingData}
      */
@@ -102,7 +103,7 @@ public class NotificationRequestMapper {
      */
     @Deprecated(since = "15-june-2023")
     public NotificationRequest getNotificationRequestForConsentApplicantSolicitor(CaseDetails caseDetails,
-                                                                           Map<String, Object> hearingData) {
+                                                                                  Map<String, Object> hearingData) {
         return buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(), hearingData);
     }
 
@@ -194,9 +195,9 @@ public class NotificationRequestMapper {
      * Return NotificationRequest .
      * <p>Please use @{@link #buildInterimHearingNotificationRequest(FinremCaseDetails, SolicitorCaseDataKeysWrapper, Map)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @param interimHearingData instance of Map
+     * @param interimHearingData  instance of Map
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper, Map interimHearingData}
      */
     @Deprecated(since = "15-june-2023")
@@ -221,11 +222,11 @@ public class NotificationRequestMapper {
                                                                        Map<String, Object> interimHearingData) {
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
 
-        if (caseDetails.isConsentedApplication()) {
+        if (caseDetails.getData().isConsentedApplication()) {
             notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedHearingFrc(interimHearingData));
         }
 
-        if (caseDetails.isContestedApplication()) {
+        if (caseDetails.getData().isContestedApplication()) {
             notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData));
         }
 
@@ -250,7 +251,7 @@ public class NotificationRequestMapper {
      * No Return.
      * <p>Please use @{@link #getNotificationCoreData(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
      */
@@ -306,7 +307,7 @@ public class NotificationRequestMapper {
         notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
         notificationRequest.setSolicitorReferenceNumber(
             Objects.toString(notificationRequestPayload.get(caseDataKeysWrapper.getSolicitorReferenceKey()),
-            EMPTY_STRING));
+                EMPTY_STRING));
         notificationRequest.setDivorceCaseNumber(
             Objects.toString(notificationRequestPayload.get(DIVORCE_CASE_NUMBER)));
         notificationRequest.setName(
@@ -317,12 +318,11 @@ public class NotificationRequestMapper {
             Objects.toString(notificationRequestPayload.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(caseDetails.getCaseType().toString().toLowerCase());
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
-        notificationRequest.setGeneralApplicationRejectionReason(
-            Objects.toString(data.getGeneralApplicationWrapper().getGeneralApplicationRejectReason(),
-                ""));
+
         notificationRequest.setApplicantName(data.getFullApplicantName());
-        if (caseDetails.isConsentedApplication()) {
-            notificationRequest.setRespondentName(data.getFullRespondentNameConsented());
+        if (caseDetails.getData().isConsentedApplication()) {
+            notificationRequest.setGeneralApplicationRejectionReason("");
+            notificationRequest.setRespondentName(data.getRespondentFullName());
             if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(notificationRequestPayload))) {
                 notificationRequest.setCaseOrderType("variation");
                 notificationRequest.setCamelCaseOrderType("Variation");
@@ -332,10 +332,12 @@ public class NotificationRequestMapper {
             }
             log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
                 notificationRequest.getCaseReferenceNumber());
-        }
-
-        if (caseDetails.isContestedApplication()) {
-            notificationRequest.setRespondentName(data.getFullRespondentNameContested());
+        } else if (caseDetails.getData().isContestedApplication()) {
+            notificationRequest.setGeneralApplicationRejectionReason(
+                Objects.toString(((FinremCaseDataContested) data)
+                        .getGeneralApplicationWrapper().getGeneralApplicationRejectReason(),
+                    ""));
+            notificationRequest.setRespondentName(data.getRespondentFullName());
         }
         notificationRequest.setHearingType(Objects.toString(notificationRequestPayload.get(HEARING_TYPE), ""));
         return notificationRequest;

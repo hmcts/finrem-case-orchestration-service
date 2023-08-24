@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -17,14 +18,16 @@ import java.util.Optional;
 
 
 @Component
-public class ContestOrderApprovedLetterDetailsMapper extends AbstractLetterDetailsMapper {
+public class ContestOrderApprovedLetterDetailsMapperContested extends ContestedAbstractLetterDetailsMapper {
 
-    public ContestOrderApprovedLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+    public ContestOrderApprovedLetterDetailsMapperContested(CourtDetailsMapper courtDetailsMapper,
+                                                            ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 
     @Override
-    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                                                CourtListWrapper courtList) {
         return ContestOrderApprovedLetterDetails.builder()
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
@@ -37,13 +40,13 @@ public class ContestOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
             .build();
     }
 
-    private String getJudgeDetails(FinremCaseDetails caseDetails) {
+    private String getJudgeDetails(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
         return StringUtils.joinWith(" ",
             getOrderApprovedJudgeType(caseDetails),
             caseDetails.getData().getOrderApprovedJudgeName());
     }
 
-    private String getOrderApprovedJudgeType(FinremCaseDetails caseDetails) {
+    private String getOrderApprovedJudgeType(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
         return Optional.ofNullable(caseDetails.getData().getOrderApprovedJudgeType()).map(JudgeType::getValue)
             .orElse("");
     }

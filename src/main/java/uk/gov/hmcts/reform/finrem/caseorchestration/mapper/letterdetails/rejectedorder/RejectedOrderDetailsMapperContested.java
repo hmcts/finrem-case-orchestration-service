@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
@@ -26,7 +26,7 @@ import java.util.Optional;
 import static java.util.stream.Collectors.toList;
 
 @Component
-public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
+public class RejectedOrderDetailsMapperContested extends ContestedAbstractLetterDetailsMapper {
 
     public static final String REFUSAL_ORDER_HEADER = "Sitting in the Family Court";
     public static final String CONTESTED_COURT_NAME = "SITTING AT the Family Court at the ";
@@ -34,9 +34,9 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
 
     private final ConsentedApplicationHelper consentedApplicationHelper;
 
-    public RejectedOrderDetailsMapper(CourtDetailsMapper courtDetailsMapper,
-                                      ObjectMapper objectMapper,
-                                      ConsentedApplicationHelper consentedApplicationHelper) {
+    public RejectedOrderDetailsMapperContested(CourtDetailsMapper courtDetailsMapper,
+                                               ObjectMapper objectMapper,
+                                               ConsentedApplicationHelper consentedApplicationHelper) {
         super(courtDetailsMapper, objectMapper);
         this.consentedApplicationHelper = consentedApplicationHelper;
     }

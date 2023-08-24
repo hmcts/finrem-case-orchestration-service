@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
@@ -69,14 +69,14 @@ public class IntervenerThreeWrapper extends IntervenerWrapper {
 
     @Override
     @JsonIgnore
-    public IntervenerWrapper getIntervenerWrapperFromCaseData(FinremCaseData caseData) {
+    public IntervenerWrapper getIntervenerWrapperFromCaseData(FinremCaseDataContested caseData) {
         return caseData.getIntervenerThreeWrapper();
     }
 
 
     @Override
     @JsonIgnore
-    public void removeIntervenerWrapperFromCaseData(FinremCaseData caseData) {
+    public void removeIntervenerWrapperFromCaseData(FinremCaseDataContested caseData) {
         caseData.setIntervenerThreeWrapper(null);
     }
 }

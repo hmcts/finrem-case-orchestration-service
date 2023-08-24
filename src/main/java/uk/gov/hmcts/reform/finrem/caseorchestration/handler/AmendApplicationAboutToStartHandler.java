@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Intention;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
@@ -19,7 +19,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
+public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler<FinremCaseDataConsented> {
 
     public AmendApplicationAboutToStartHandler(FinremCaseDetailsMapper mapper) {
         super(mapper);
@@ -33,12 +33,12 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> handle(FinremCallbackRequest<FinremCaseDataConsented> callbackRequest,
+                                                                                       String userAuthorisation) {
         log.info("Handling amend application about to start callback for case id: {}", callbackRequest.getCaseDetails().getId());
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails<FinremCaseDataConsented> caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to set nature of application for consented case with Case ID: {}", caseDetails.getId());
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataConsented caseData = caseDetails.getData();
         final Intention intention = caseData.getApplicantIntendsTo();
         log.info("Applicant intends to {} for case id: {}", intention, caseDetails.getId());
 
@@ -55,7 +55,7 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
             caseData.setCivilPartnership(YesOrNo.NO);
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataConsented>builder().data(caseData).build();
     }
 
 

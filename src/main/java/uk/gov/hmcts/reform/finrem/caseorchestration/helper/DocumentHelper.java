@@ -23,6 +23,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
@@ -34,7 +36,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContestedContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -149,7 +151,7 @@ public class DocumentHelper {
             .orElseGet(() -> convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
     }
 
-    public CaseDocument getLatestAmendedConsentOrder(FinremCaseData caseData) {
+    public CaseDocument getLatestAmendedConsentOrder(FinremCaseDataConsented caseData) {
         Optional<AmendedConsentOrderCollection> reduce = ofNullable(caseData.getAmendedConsentOrderCollection())
             .orElse(emptyList())
             .stream()
@@ -174,6 +176,7 @@ public class DocumentHelper {
     /**
      * Return List Object for given Case with the given indentation used.
      * <p>Please use @{@link #getFormADocumentsData(FinremCaseData)}</p>
+     *
      * @param caseData instance of Map
      * @return List Object
      * @deprecated Use {@link Map caseData}
@@ -310,7 +313,7 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-    public Optional<CaseDocument> getLatestRespondToOrderDocuments(FinremCaseData caseData) {
+    public Optional<CaseDocument> getLatestRespondToOrderDocuments(FinremCaseDataConsented caseData) {
         Optional<RespondToOrderDocumentCollection> respondToOrderDocumentCollection = ofNullable(caseData.getRespondToOrderDocuments())
             .orElse(emptyList())
             .stream()
@@ -338,7 +341,6 @@ public class DocumentHelper {
     }
 
 
-
     private String getAddresee(PaperNotificationRecipient recipient) {
         return recipient == APPLICANT ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS;
     }
@@ -354,8 +356,9 @@ public class DocumentHelper {
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
      * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, PaperNotificationRecipient)}</p>
+     *
      * @param caseDetails the casedetails
-     * @param recipient instance of PaperNotificationRecipient
+     * @param recipient   instance of PaperNotificationRecipient
      * @return CaseDetails Object
      * @deprecated Use {@link FinremCaseDetails caseDetails, PaperNotificationRecipient recipient}
      */
@@ -427,14 +430,14 @@ public class DocumentHelper {
      * Return CaseDetails Object for given Case with the given indentation used.
      * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, String, String, Address)}</p>
      *
-     * @param caseDetailsCopy the casedetails
-     * @param reference String
-     * @param addresseeName String
-     * @param addressToSendTo map
+     * @param caseDetailsCopy        the casedetails
+     * @param reference              String
+     * @param addresseeName          String
+     * @param addressToSendTo        map
      * @param isConsentedApplication boolean
      * @return CaseDetails Object
      * @deprecated Use {@link CaseDetails caseDetails, String reference, String addresseeName,
-     *                                                   Address addressToSendTo}
+     * Address addressToSendTo}
      */
     @Deprecated(since = "15-june-2023")
     private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName,
@@ -501,8 +504,9 @@ public class DocumentHelper {
         return caseDetails;
     }
 
-    public CaseDetails prepareIntervenerLetterTemplateData(FinremCaseDetails caseDetails, PaperNotificationRecipient recipient) {
-        FinremCaseData caseData = caseDetails.getData();
+    public CaseDetails prepareIntervenerLetterTemplateData(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                                           PaperNotificationRecipient recipient) {
+        FinremCaseDataContested caseData = caseDetails.getData();
         long caseId = caseDetails.getId();
 
         String reference = "";
@@ -517,7 +521,7 @@ public class DocumentHelper {
             addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
         } else {
             log.info("{} is not represented by a digital solicitor on case {}", recipient, caseId);
-            ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+            ContestedContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
             addresseeName = recipient == APPLICANT
                 ? caseDetails.getData().getFullApplicantName()
                 : caseDetails.getData().getRespondentFullName();
@@ -663,11 +667,11 @@ public class DocumentHelper {
         return caseDataService.buildFullName(caseDetails.getData(), CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, CONTESTED_RESPONDENT_LAST_NAME);
     }
 
-    private static Address getRespondentCorrespondenceAddress(ContactDetailsWrapper wrapper) {
+    private static Address getRespondentCorrespondenceAddress(ContestedContactDetailsWrapper wrapper) {
         return wrapper.getContestedRespondentRepresented().isYes() ? wrapper.getRespondentSolicitorAddress() : wrapper.getRespondentAddress();
     }
 
-    private static Address getApplicantCorrespondenceAddress(ContactDetailsWrapper wrapper) {
+    private static Address getApplicantCorrespondenceAddress(ContestedContactDetailsWrapper wrapper) {
         return wrapper.getApplicantRepresented().isYes() ? wrapper.getApplicantSolicitorAddress() : wrapper.getApplicantAddress();
     }
 

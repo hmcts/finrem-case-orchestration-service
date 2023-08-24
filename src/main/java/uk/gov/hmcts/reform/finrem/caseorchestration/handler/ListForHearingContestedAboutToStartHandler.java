@@ -7,13 +7,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 
 @Slf4j
 @Service
-public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHandler {
+public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     public ListForHearingContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
@@ -28,14 +28,14 @@ public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHa
 
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+                                                                                       String userAuthorisation) {
         log.info("Handling contested event {} about to start callback for case id: {}",
             EventType.LIST_FOR_HEARING, callbackRequest.getCaseDetails().getId());
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
         if (caseData.getAdditionalHearingDocumentsOption() == null) {
             caseData.setAdditionalHearingDocumentsOption(YesOrNo.NO);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
     }
 }

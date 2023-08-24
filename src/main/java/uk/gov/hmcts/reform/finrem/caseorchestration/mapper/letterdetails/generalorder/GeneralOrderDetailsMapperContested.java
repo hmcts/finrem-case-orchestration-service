@@ -4,14 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralOrderDetails;
 
 @Component
-public class GeneralOrderDetailsMapper extends AbstractLetterDetailsMapper {
+public class GeneralOrderDetailsMapperContested extends ContestedAbstractLetterDetailsMapper {
 
     private static final String GENERAL_ORDER_COURT_CONSENTED = "SITTING in private";
     private static final String GENERAL_ORDER_COURT_SITTING = "SITTING AT the Family Court at the ";
@@ -19,7 +19,7 @@ public class GeneralOrderDetailsMapper extends AbstractLetterDetailsMapper {
     private static final String GENERAL_ORDER_HEADER_ONE_CONSENTED = "Sitting in the Family Court";
     private static final String GENERAL_ORDER_HEADER_TWO = "sitting in the";
 
-    public GeneralOrderDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+    public GeneralOrderDetailsMapperContested(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 

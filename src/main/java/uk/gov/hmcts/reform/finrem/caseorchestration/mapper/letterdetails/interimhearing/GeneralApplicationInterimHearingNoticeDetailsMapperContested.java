@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.interi
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -19,14 +19,15 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Component
-public class GeneralApplicationInterimHearingNoticeDetailsMapper extends AbstractLetterDetailsMapper {
-    public GeneralApplicationInterimHearingNoticeDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+public class GeneralApplicationInterimHearingNoticeDetailsMapperContested extends ContestedAbstractLetterDetailsMapper {
+    public GeneralApplicationInterimHearingNoticeDetailsMapperContested(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 
     @Override
-    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
-        FinremCaseData caseData = caseDetails.getData();
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                                                CourtListWrapper courtList) {
+        FinremCaseDataContested caseData = caseDetails.getData();
 
         final FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
         final InterimWrapper interimWrapper = caseData.getInterimWrapper();

@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationReq
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -172,7 +174,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails     instance of CaseDetails
      * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
      */
@@ -233,7 +235,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails     instance of CaseDetails
      * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
      */
@@ -336,7 +338,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendConsentOrderAvailableEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails     instance of CaseDetails
      * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
      */
@@ -466,7 +468,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendContestOrderApprovedEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
      */
@@ -527,7 +529,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendPrepareForHearingEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails     instance of CaseDetails
      * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
      */
@@ -625,7 +627,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendSolicitorToDraftOrderEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails     instance of CaseDetails
      * @param dataKeysWrapper of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
      */
@@ -755,7 +757,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendContestOrderNotApprovedEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
      */
@@ -814,7 +816,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendContestedConsentOrderApprovedEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
      */
@@ -873,9 +875,8 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     *
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
      */
     @Deprecated(since = "15-june-2023")
@@ -933,7 +934,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendContestedConsentGeneralOrderEmailIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
      */
@@ -1030,7 +1031,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendContestedGeneralOrderEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
      */
@@ -1056,7 +1057,6 @@ public class NotificationService {
     /**
      * No Return.
      * <p>Please use @{@link #sendContestedGeneralApplicationReferToJudgeEmail(FinremCaseDetails)}</p>
-
      *
      * @param caseDetails instance of CaseDetails
      * @deprecated Use {@link CaseDetails caseDetails}
@@ -1073,7 +1073,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE);
     }
 
-    public void sendContestedGeneralApplicationReferToJudgeEmail(FinremCaseDetails caseDetails) {
+    public void sendContestedGeneralApplicationReferToJudgeEmail(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
         NotificationRequest judgeNotificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         judgeNotificationRequest.setNotificationEmail(caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferToJudgeEmail());
         if (caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail() != null) {
@@ -1162,7 +1162,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
      */
@@ -1188,7 +1188,6 @@ public class NotificationService {
     /**
      * No Return.
      * <p>Please use @{@link #sendConsentHearingNotificationEmailToApplicantSolicitor(FinremCaseDetails, Map)}</p>
-
      *
      * @param caseDetails instance of CaseDetails
      * @param hearingData instance of Map
@@ -1240,7 +1239,6 @@ public class NotificationService {
      * <p>Please use @{@link #sendInterimNotificationEmailToApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
-     *
      * @deprecated Use {@link CaseDetails caseDetails}
      */
     @Deprecated(since = "15-june-2023")
@@ -1286,7 +1284,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendInterimNotificationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails     instance of CaseDetails
      * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails}
      */
@@ -1333,7 +1331,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_TRANSFER_TO_LOCAL_COURT);
     }
 
-    public void sendTransferToLocalCourtEmail(FinremCaseDetails caseDetails) {
+    public void sendTransferToLocalCourtEmail(FinremCaseDetails<FinremCaseDataConsented> caseDetails) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         //Overwrite the email, set to the court provided, and use general body to include the Events "Free Text" field
         notificationRequest.setNotificationEmail(caseDetails.getData().getTransferLocalCourtEmail());
@@ -1349,7 +1347,6 @@ public class NotificationService {
      * <p>Please use @{@link #sendUpdateFrcInformationEmailToAppSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
-     *
      * @deprecated Use {@link CaseDetails caseDetails}
      */
     @Deprecated(since = "15-june-2023")
@@ -1364,7 +1361,6 @@ public class NotificationService {
     /**
      * No Return.
      * <p>Please use @{@link #sendUpdateFrcInformationEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-
      *
      * @param caseDetails instance of CaseDetails
      * @deprecated Use {@link CaseDetails caseDetails}
@@ -1382,7 +1378,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendUpdateFrcInformationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails     instance of CaseDetails
      * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails}
      */
@@ -1469,8 +1465,9 @@ public class NotificationService {
     /**
      * No Return.
      * <p>Please use @{@link #sendBarristerRemovedEmail(FinremCaseDetails, Barrister)}</p>
+     *
      * @param caseDetails instance of CaseDetails
-     * @param barrister instance of Barrister
+     * @param barrister   instance of Barrister
      * @deprecated Use {@link CaseDetails caseDetails, Barrister barrister}
      */
     @Deprecated(since = "15-june-2023")
@@ -1489,8 +1486,9 @@ public class NotificationService {
     /**
      * No Return.
      * <p>Please use @{@link #sendBarristerRemovedEmail(FinremCaseDetails, Barrister)}</p>
+     *
      * @param caseDetails instance of CaseDetails
-     * @param barrister instance of Barrister
+     * @param barrister   instance of Barrister
      * @deprecated Use {@link CaseDetails caseDetails, Barrister barrister}
      */
     @Deprecated(since = "15-june-2023")
@@ -1516,7 +1514,7 @@ public class NotificationService {
     }
 
     public void sendIntervenerSolicitorAddedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
-                                        String recipientName, String recipientEmail, String referenceNumber) {
+                                                  String recipientName, String recipientEmail, String referenceNumber) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(
             caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
         log.info("Received request for notification email for Intervener Solicitor Added event. Case ID : {}",
@@ -1689,6 +1687,7 @@ public class NotificationService {
     /**
      * Do not expect any return.
      * <p>Please use @{@link #sendNoticeOfChangeEmail(FinremCaseDetails)}</p>
+     *
      * @param caseDetails instance of CaseDetails
      * @deprecated Use {@link CaseDetails caseDetails}
      */
@@ -1738,9 +1737,10 @@ public class NotificationService {
     /**
      * Return String Object for given Case with the given indentation used.
      * <p>Please use @{@link #sendEmailIfSolicitorIsDigital(FinremCaseDetails, NotificationRequest, EmailTemplateNames)}</p>
-     * @param caseDetails instance of CaseDetails
+     *
+     * @param caseDetails         instance of CaseDetails
      * @param notificationRequest instance of NotificationRequest
-     * @param template instance of EmailTemplateNames
+     * @param template            instance of EmailTemplateNames
      * @deprecated Use {@link CaseDetails caseDetails, NotificationRequest notificationRequest, EmailTemplateNames template}
      */
     @Deprecated(since = "15-june-2023")
@@ -1781,6 +1781,7 @@ public class NotificationService {
     /**
      * Return EmailTemplateNames Object for given Case with the given indentation used.
      * <p>Please use @{@link #getNoticeOfChangeTemplate(FinremCaseDetails)}</p>
+     *
      * @param caseDetails instance of CaseDetails
      * @return EmailTemplateNames Object
      * @deprecated Use {@link CaseDetails caseDetails}
@@ -1838,8 +1839,10 @@ public class NotificationService {
     private boolean isApplicantNoticeOfChangeRequest(NotificationRequest notificationRequest,
                                                      FinremCaseDetails caseDetails) {
         return notificationRequest.getName().equalsIgnoreCase(
-            nullToEmpty(caseDetails.getData().isConsentedApplication() ? caseDetails.getData().getContactDetailsWrapper().getSolicitorName()
-                : caseDetails.getData().getContactDetailsWrapper().getApplicantSolicitorName()));
+            nullToEmpty(caseDetails.getData().isConsentedApplication()
+                ? ((FinremCaseDataConsented) caseDetails.getData()).getContactDetailsWrapper().getSolicitorName()
+                : ((FinremCaseDataContested) caseDetails.getData())
+                .getContactDetailsWrapper().getApplicantSolicitorName()));
     }
 
     private String getSolicitorNameKey(CaseDetails caseDetails) {
@@ -1851,6 +1854,7 @@ public class NotificationService {
     /**
      * Return Recipient Email for given Case .
      * <p>Please use @{@link #getRecipientEmail(FinremCaseDetails)}</p>
+     *
      * @param caseDetails instance of CaseDetails
      * @return List Object
      * @deprecated Use {@link CaseDetails caseDetails}

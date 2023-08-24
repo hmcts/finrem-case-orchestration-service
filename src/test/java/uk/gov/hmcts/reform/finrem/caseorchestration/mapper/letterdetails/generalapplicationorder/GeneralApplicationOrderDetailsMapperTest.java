@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
@@ -19,12 +19,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GeneralApplicationOrderDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class GeneralApplicationOrderDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON = "/fixtures/general-application-directions.json";
 
     @Autowired
-    private GeneralApplicationOrderDetailsMapper generalApplicationOrderDetailsMapper;
+    private GeneralApplicationOrderDetailsMapperContested generalApplicationOrderDetailsMapper;
 
     @Before
     public void setUp() throws Exception {

@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final List<DocumentHandler> documentHandlers;
     private final UploadedDocumentService uploadedDocumentHelper;
@@ -40,11 +40,11 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+                                                                                       String userAuthorisation) {
 
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, managedCollections));
@@ -52,6 +52,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
         Optional.ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
     }
 }

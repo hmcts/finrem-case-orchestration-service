@@ -11,14 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 
 import java.util.List;
 
 @Slf4j
 @Service
-public class ReadyForHearingConsentedAboutToStartHandler extends FinremCallbackHandler {
+public class ReadyForHearingConsentedAboutToStartHandler extends FinremCallbackHandler<FinremCaseDataConsented> {
 
 
     @Autowired
@@ -34,20 +33,20 @@ public class ReadyForHearingConsentedAboutToStartHandler extends FinremCallbackH
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
-        log.info("Received request to invoke event {} for Case ID: {}", EventType.READY_FOR_HEARING, caseDetails.getId());
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> handle(FinremCallbackRequest<FinremCaseDataConsented> callbackRequest,
+                                                                                       String userAuthorisation) {
+        FinremCaseDataConsented caseData = callbackRequest.getCaseDetails().getData();
+        log.info("Received request to invoke event {} for Case ID: {}",
+            EventType.READY_FOR_HEARING, caseData.getCcdCaseId());
 
         if (!isHearingDatePresent(caseData)) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataConsented>builder().data(caseData)
                 .errors(List.of("There is no hearing on the case.")).build();
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataConsented>builder().data(caseData).build();
     }
 
-    private static boolean isHearingDatePresent(FinremCaseData caseData) {
+    private static boolean isHearingDatePresent(FinremCaseDataConsented caseData) {
 
         ConsentedHearingHelper helper = new ConsentedHearingHelper(new ObjectMapper());
         ConsentedHearingDataWrapper listForHearings = helper.getHearings(caseData).stream()

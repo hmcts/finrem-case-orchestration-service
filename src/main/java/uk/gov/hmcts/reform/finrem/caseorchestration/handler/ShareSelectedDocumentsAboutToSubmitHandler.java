@@ -7,13 +7,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService;
 
 @Slf4j
 @Service
-public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHandler {
+public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
     private final IntervenerShareDocumentsService intervenerShareDocumentsService;
 
     public ShareSelectedDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -30,17 +29,16 @@ public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHa
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Long caseId = caseDetails.getId();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+                                                                                       String userAuthorisation) {
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
+        String caseId = caseData.getCcdCaseId();
         log.info("Invoking contested {} about to submit callback for case id: {}",
             callbackRequest.getEventType(), caseId);
 
-        FinremCaseData caseData = caseDetails.getData();
         intervenerShareDocumentsService.shareSelectedDocumentWithOtherSelectedSolicitors(caseData);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(caseData).build();
     }
 

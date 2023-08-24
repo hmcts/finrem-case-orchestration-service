@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
@@ -254,7 +256,7 @@ public class TestSetUpUtils {
     }
 
     public static FinremCaseDetails defaultConsentedFinremCaseDetails() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDataConsented caseData = FinremCaseDataConsented.builder().build();
         List<NatureApplication> natureOfApplications = List.of(NatureApplication.LUMP_SUM_ORDER,
             NatureApplication.PERIODICAL_PAYMENT_ORDER,
             NatureApplication.PENSION_SHARING_ORDER,
@@ -320,7 +322,7 @@ public class TestSetUpUtils {
     }
 
     public static FinremCaseDetails defaultContestedFinremCaseDetails() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().build();
         List<NatureApplication> natureOfApplications = List.of(NatureApplication.LUMP_SUM_ORDER,
             NatureApplication.PERIODICAL_PAYMENT_ORDER,
             NatureApplication.PENSION_SHARING_ORDER,
@@ -329,7 +331,7 @@ public class TestSetUpUtils {
             NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER,
             NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY,
             NatureApplication.PROPERTY_ADJUSTMENT_ORDER);
-        caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureOfApplications);
+        caseData.setNatureOfApplicationChecklist(natureOfApplications);
         populateApplicantNameAndAddress(caseData);
         populateRespondentNameAndAddressContested(caseData);
         populateCourtDetails(caseData);
@@ -436,7 +438,7 @@ public class TestSetUpUtils {
         caseData.put(CONSENTED_RESPONDENT_REPRESENTED, null);
     }
 
-    private static void populateRespondentNameAndAddressConsented(FinremCaseData caseData) {
+    private static void populateRespondentNameAndAddressConsented(FinremCaseDataConsented caseData) {
         Address respondentAddress = Address.builder().build();
         respondentAddress.setAddressLine1("50 Respondent Street");
         respondentAddress.setAddressLine2("Consented");
@@ -446,10 +448,9 @@ public class TestSetUpUtils {
         respondentAddress.setPostTown("London");
         respondentAddress.setPostCode("SW1");
 
-        caseData.getContactDetailsWrapper().setRespondentFmName("Jane");
-        caseData.getContactDetailsWrapper().setRespondentLname("Doe");
+        caseData.getContactDetailsWrapper().setAppRespondentFmName("Jane");
+        caseData.getContactDetailsWrapper().setAppRespondentLName("Doe");
         caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
-        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(null);
     }
 
     private static void populateRespondentNameAndAddressContested(Map<String, Object> caseData) {
@@ -468,7 +469,7 @@ public class TestSetUpUtils {
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, null);
     }
 
-    private static void populateRespondentNameAndAddressContested(FinremCaseData caseData) {
+    private static void populateRespondentNameAndAddressContested(FinremCaseDataContested caseData) {
 
         Address respondentAddress = Address.builder().build();
         respondentAddress.setAddressLine1("50 Respondent Street");

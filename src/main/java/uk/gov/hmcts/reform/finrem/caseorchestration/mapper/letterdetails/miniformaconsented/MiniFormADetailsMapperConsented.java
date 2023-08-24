@@ -3,12 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifo
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ConsentedAbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentedContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
@@ -19,14 +21,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
-    public MiniFormADetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+public class MiniFormADetailsMapperConsented extends ConsentedAbstractLetterDetailsMapper {
+    public MiniFormADetailsMapperConsented(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 
     @Override
-    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
-        FinremCaseData caseData = caseDetails.getData();
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails<FinremCaseDataConsented> caseDetails, CourtListWrapper courtList) {
+        FinremCaseDataConsented caseData = caseDetails.getData();
         MiniFormADetails.MiniFormADetailsBuilder builder = setApplicantFields(MiniFormADetails.builder(), caseDetails);
         builder = setRespondentFields(builder, caseDetails);
         builder = setNatureApplicationFields(builder, caseData);
@@ -35,7 +37,7 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
     }
 
     private MiniFormADetails.MiniFormADetailsBuilder setApplicantFields(MiniFormADetails.MiniFormADetailsBuilder builder,
-                                                                        FinremCaseDetails caseDetails) {
+                                                                        FinremCaseDetails<FinremCaseDataConsented> caseDetails) {
         ContactDetailsWrapper contactDetails = caseDetails.getData().getContactDetailsWrapper();
         FinremCaseData caseData = caseDetails.getData();
         return builder
@@ -48,9 +50,9 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
     }
 
     private MiniFormADetails.MiniFormADetailsBuilder setRespondentFields(MiniFormADetails.MiniFormADetailsBuilder builder,
-                                                                         FinremCaseDetails caseDetails) {
-        ContactDetailsWrapper contactDetails = caseDetails.getData().getContactDetailsWrapper();
-        FinremCaseData caseData = caseDetails.getData();
+                                                                         FinremCaseDetails<FinremCaseDataConsented> caseDetails) {
+        ConsentedContactDetailsWrapper contactDetails = caseDetails.getData().getContactDetailsWrapper();
+        FinremCaseDataConsented caseData = caseDetails.getData();
         return builder
             .appRespondentFmName(contactDetails.getAppRespondentFmName())
             .appRespondentLName(contactDetails.getAppRespondentLName())
@@ -68,7 +70,7 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
     }
 
     private MiniFormADetails.MiniFormADetailsBuilder setNatureApplicationFields(MiniFormADetails.MiniFormADetailsBuilder builder,
-                                                                                FinremCaseData caseData) {
+                                                                                FinremCaseDataConsented caseData) {
 
         return builder
             .natureOfApplication2(getNatureOfApplication2ListAsString(caseData))
@@ -80,7 +82,7 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
     }
 
     private MiniFormADetails.MiniFormADetailsBuilder setOtherData(MiniFormADetails.MiniFormADetailsBuilder builder,
-                                                                  FinremCaseData caseData) {
+                                                                  FinremCaseDataConsented caseData) {
         return builder
             .authorisation2b(caseData.getAuthorisation2b())
             .authorisation3(String.valueOf(caseData.getAuthorisation3()))
@@ -91,7 +93,7 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
             .orderForChildrenQuestion1(YesOrNo.getYesOrNo(caseData.getNatureApplicationWrapper().getOrderForChildrenQuestion1()));
     }
 
-    private List<String> getNatureOfApplication2ListAsString(FinremCaseData caseData) {
+    private List<String> getNatureOfApplication2ListAsString(FinremCaseDataConsented caseData) {
         List<NatureApplication> natureOfApplication2List = caseData.getNatureApplicationWrapper().getNatureOfApplication2();
         return Optional.ofNullable(natureOfApplication2List)
             .orElse(new ArrayList<>())
@@ -100,7 +102,7 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
             .toList();
     }
 
-    private List<String> getNatureOfApplication6ListAsString(FinremCaseData caseData) {
+    private List<String> getNatureOfApplication6ListAsString(FinremCaseDataConsented caseData) {
         List<ChildrenOrder> childrenOrders = caseData.getNatureApplicationWrapper().getNatureOfApplication6();
         return Optional.ofNullable(childrenOrders)
             .orElse(new ArrayList<>())

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -25,7 +25,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
-        if (caseDetails.isContestedApplication()) {
+        if (caseDetails.getData().isContestedApplication()) {
             sendIntervenerCorrespondence(caseDetails);
         }
     }
@@ -58,8 +58,8 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         }
     }
 
-    protected void sendIntervenerCorrespondence(FinremCaseDetails caseDetails) {
-        FinremCaseData caseData = caseDetails.getData();
+    protected void sendIntervenerCorrespondence(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<IntervenerWrapper> interveners = caseData.getInterveners();
         interveners.forEach(intervenerWrapper -> {
             if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {

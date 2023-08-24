@@ -20,7 +20,6 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NatureApplicationWrapper {
-    private List<NatureApplication> natureOfApplicationChecklist;
     private List<NatureApplication> natureOfApplication2;
     private String natureOfApplication3a;
     private String natureOfApplication3b;

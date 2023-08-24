@@ -9,15 +9,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.time.LocalDate;
 
 @Slf4j
 @Service
-public class UploadApprovedOrderConsentedAboutToStartHandler extends FinremCallbackHandler {
+public class UploadApprovedOrderConsentedAboutToStartHandler extends FinremCallbackHandler<FinremCaseDataConsented> {
 
     private final IdamService idamService;
 
@@ -35,16 +34,15 @@ public class UploadApprovedOrderConsentedAboutToStartHandler extends FinremCallb
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> handle(FinremCallbackRequest<FinremCaseDataConsented> callbackRequest,
+                                                                                       String userAuthorisation) {
         log.info("Handling Upload Approved Order Consented application about to start callback for case id: {}",
             callbackRequest.getCaseDetails().getId());
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataConsented caseData = callbackRequest.getCaseDetails().getData();
 
         caseData.setOrderDirectionJudgeName(idamService.getIdamSurname(userAuthorisation));
         caseData.setOrderDirectionDate(LocalDate.now());
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataConsented>builder().data(caseData).build();
     }
 }

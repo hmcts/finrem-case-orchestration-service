@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -34,22 +34,24 @@ public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
     @Override
     public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
         String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
-        return getHearingCaseDocuments(caseDetails.getData(), caseId);
+        return caseDetails.getData().isContestedApplication()
+            ? getHearingCaseDocuments((FinremCaseDataContested) caseDetails.getData(), caseId)
+            : new ArrayList<>();
     }
 
-    private List<BulkPrintDocument> getHearingCaseDocuments(FinremCaseData caseData, String caseId) {
+    private List<BulkPrintDocument> getHearingCaseDocuments(FinremCaseDataContested caseData, String caseId) {
         List<BulkPrintDocument> caseDocuments = new ArrayList<>();
 
         log.info("Fetching Contested Paper Case bulk print document for caseId {}", caseId);
         Optional.ofNullable(caseData.getFormC()).ifPresent(formC -> caseDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(formC)));
         Optional.ofNullable(caseData.getFormG()).ifPresent(formG -> caseDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(formG)));
-        Optional.ofNullable(caseData.getMiniFormA())
-            .ifPresent(miniFormA -> caseDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(miniFormA)));
         Optional.ofNullable(caseData.getOutOfFamilyCourtResolution()).ifPresent(
             outOfFamilyCourtResolution -> caseDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(outOfFamilyCourtResolution)));
         Optional.ofNullable(caseData.getAdditionalListOfHearingDocuments())
             .ifPresent(hearingAdditionalDoc -> caseDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(hearingAdditionalDoc)));
 
+        Optional.ofNullable(caseData.getMiniFormA())
+            .ifPresent(miniFormA -> caseDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(miniFormA)));
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
         caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));

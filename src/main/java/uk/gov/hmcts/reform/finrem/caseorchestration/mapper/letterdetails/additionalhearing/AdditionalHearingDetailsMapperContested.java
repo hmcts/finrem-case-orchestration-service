@@ -3,7 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.additi
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
@@ -13,14 +14,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 import java.util.Date;
 
 @Component
-public class AdditionalHearingDetailsMapper extends AbstractLetterDetailsMapper {
+public class AdditionalHearingDetailsMapperContested extends ContestedAbstractLetterDetailsMapper {
 
-    public AdditionalHearingDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+    public AdditionalHearingDetailsMapperContested(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 
     @Override
-    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails<FinremCaseDataContested> caseDetails, CourtListWrapper courtList) {
         FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
 
         return AdditionalHearingDetails.builder()

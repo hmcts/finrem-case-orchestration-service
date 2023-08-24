@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hear
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -27,22 +28,24 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
     public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
         List<BulkPrintDocument> documents = new ArrayList<>();
 
-        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = caseDetails.getData().getAdditionalHearingDocuments();
+        if (caseDetails.getData().isContestedApplication()) {
+            FinremCaseDataContested data = (FinremCaseDataContested) caseDetails.getData();
+            List<AdditionalHearingDocumentCollection> additionalHearingDocuments = data.getAdditionalHearingDocuments();
 
-        if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
-            AdditionalHearingDocumentCollection additionalHearingDocumentCollection =
-                additionalHearingDocuments.get(additionalHearingDocuments.size() - 1);
-            BulkPrintDocument additionalDoc
-                = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocumentCollection.getValue().getDocument());
-            documents.add(additionalDoc);
+            if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
+                AdditionalHearingDocumentCollection additionalHearingDocumentCollection =
+                    additionalHearingDocuments.get(additionalHearingDocuments.size() - 1);
+                BulkPrintDocument additionalDoc
+                    = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocumentCollection.getValue().getDocument());
+                documents.add(additionalDoc);
+            }
+
+            if (data.getAdditionalListOfHearingDocuments() != null) {
+                BulkPrintDocument additionalUploadedDoc
+                    = documentHelper.getBulkPrintDocumentFromCaseDocument(data.getAdditionalListOfHearingDocuments());
+                documents.add(additionalUploadedDoc);
+            }
         }
-
-        if (caseDetails.getData().getAdditionalListOfHearingDocuments() != null) {
-            BulkPrintDocument additionalUploadedDoc
-                = documentHelper.getBulkPrintDocumentFromCaseDocument(caseDetails.getData().getAdditionalListOfHearingDocuments());
-            documents.add(additionalUploadedDoc);
-        }
-
         return documents;
     }
 }

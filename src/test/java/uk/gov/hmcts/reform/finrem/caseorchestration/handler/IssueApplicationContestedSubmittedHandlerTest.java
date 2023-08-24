@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.issueapplication.IssueApplicationContestedEmailCorresponder;
 
@@ -57,9 +57,12 @@ class IssueApplicationContestedSubmittedHandlerTest {
 
     @Test
     void givenCase_whenIssueApplication_thenSendAppropriateCorrespondenceToApplicationSolicitor() {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
-        FinremCallbackRequest callbackRequest
-            = FinremCallbackRequest.builder().eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails =
+            FinremCaseDetails.<FinremCaseDataContested>builder().id(123L)
+                .data(FinremCaseDataContested.builder().build()).build();
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest
+            = FinremCallbackRequest.<FinremCaseDataContested>builder()
+            .eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 

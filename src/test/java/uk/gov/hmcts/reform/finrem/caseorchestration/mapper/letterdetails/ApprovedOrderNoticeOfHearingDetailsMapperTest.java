@@ -3,18 +3,18 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.approvedorderhearing.ApprovedOrderNoticeOfHearingDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.approvedorderhearing.ApprovedOrderNoticeOfHearingDetailsMapperContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ApprovedOrderNoticeOfHearingDetails;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ApprovedOrderNoticeOfHearingDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class ApprovedOrderNoticeOfHearingDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
     public static final String TEST_RESOURCE = "/fixtures/general-application-directions.json";
 
     @Autowired
-    private ApprovedOrderNoticeOfHearingDetailsMapper approvedOrderNoticeOfHearingDetailsMapper;
+    private ApprovedOrderNoticeOfHearingDetailsMapperContested approvedOrderNoticeOfHearingDetailsMapper;
 
     @Before
     public void setUp() {

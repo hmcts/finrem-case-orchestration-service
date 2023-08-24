@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -40,17 +41,19 @@ public class AddresseeGeneratorHelper {
             return getApplicantAddressee(caseData);
         } else if (recipient == DocumentHelper.PaperNotificationRecipient.RESPONDENT) {
             return getRespondentAddressee(caseData);
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE) {
-            return getIntervenerAddressee(caseData.getIntervenerOneWrapper());
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO) {
-            return getIntervenerAddressee(caseData.getIntervenerTwoWrapper());
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE) {
-            return getIntervenerAddressee(caseData.getIntervenerThreeWrapper());
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR) {
-            return getIntervenerAddressee(caseData.getIntervenerFourWrapper());
-        } else {
-            return null;
+        } else if (caseData.isContestedApplication()) {
+            if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE) {
+                return getIntervenerAddressee(((FinremCaseDataContested) caseData).getIntervenerOneWrapper());
+            } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO) {
+                return getIntervenerAddressee(((FinremCaseDataContested) caseData).getIntervenerTwoWrapper());
+            } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE) {
+                return getIntervenerAddressee(((FinremCaseDataContested) caseData).getIntervenerThreeWrapper());
+            } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR) {
+                return getIntervenerAddressee(((FinremCaseDataContested) caseData).getIntervenerFourWrapper());
+            }
         }
+
+        return null;
     }
 
     private static Addressee getApplicantAddressee(FinremCaseData caseData) {

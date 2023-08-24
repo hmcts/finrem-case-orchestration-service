@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 
@@ -72,13 +72,13 @@ public class IntervenerShareDocumentsService implements SharedService {
     public static final String QUESTIONNAIRES_ANSWERS = "QUESTIONNAIRES_ANSWERS";
     public static final String STATEMENTS_EXHIBITS = "STATEMENTS_EXHIBITS";
 
-    public DynamicMultiSelectList intervenerSourceDocumentList(FinremCaseDetails caseDetails, String role) {
+    public DynamicMultiSelectList intervenerSourceDocumentList(FinremCaseDetails<FinremCaseDataContested> caseDetails, String role) {
 
         log.info("Setting intervener {}, source document list for case {}", role, caseDetails.getId());
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
-        List<String>  collectionType =  List.of(OTHER, CHRONOLOGIES, STATEMENTS_EXHIBITS, HEARING_BUNDLES, FORM_E_EXHIBITS,
+        List<String> collectionType = List.of(OTHER, CHRONOLOGIES, STATEMENTS_EXHIBITS, HEARING_BUNDLES, FORM_E_EXHIBITS,
             QUESTIONNAIRES_ANSWERS, SUMMARIES, FORM_H, EXPERT_EVIDENCE, CORRESPONDENCE);
 
         collectionType.forEach(obj -> {
@@ -105,7 +105,7 @@ public class IntervenerShareDocumentsService implements SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getIntervenerCollection(FinremCaseData caseData, String role, String collectionType) {
+    private List<UploadCaseDocumentCollection> getIntervenerCollection(FinremCaseDataContested caseData, String role, String collectionType) {
         log.info("role {}, collectionType {} INTVR_SOLICITOR_2 {}", role, collectionType, CaseRole.INTVR_SOLICITOR_2.getCcdCode());
         if (role.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
             return getIntervenerOneList(caseData, role, collectionType);
@@ -119,7 +119,7 @@ public class IntervenerShareDocumentsService implements SharedService {
         return Collections.emptyList();
     }
 
-    private List<UploadCaseDocumentCollection> getIntervenerOneList(FinremCaseData caseData, String role, String collectionType) {
+    private List<UploadCaseDocumentCollection> getIntervenerOneList(FinremCaseDataContested caseData, String role, String collectionType) {
         if (role.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
@@ -138,7 +138,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv1FormEsExhibits();
                 }
                 case QUESTIONNAIRES_ANSWERS -> {
-                    return  caseData.getUploadCaseDocumentWrapper().getIntv1Qa();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1Qa();
                 }
                 case SUMMARIES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv1Summaries();
@@ -159,7 +159,7 @@ public class IntervenerShareDocumentsService implements SharedService {
         return Collections.emptyList();
     }
 
-    private List<UploadCaseDocumentCollection> getIntervenerTwoList(FinremCaseData caseData, String role, String collectionType) {
+    private List<UploadCaseDocumentCollection> getIntervenerTwoList(FinremCaseDataContested caseData, String role, String collectionType) {
         log.info("getIntervenerTwoList role {}, collectionType {}", role, collectionType);
         if (role.equals(CaseRole.INTVR_SOLICITOR_2.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_2.getCcdCode())) {
             switch (collectionType) {
@@ -185,7 +185,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv2FormEsExhibits();
                 }
                 case QUESTIONNAIRES_ANSWERS -> {
-                    return  caseData.getUploadCaseDocumentWrapper().getIntv2Qa();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2Qa();
                 }
                 case SUMMARIES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv2Summaries();
@@ -206,7 +206,7 @@ public class IntervenerShareDocumentsService implements SharedService {
         return Collections.emptyList();
     }
 
-    private List<UploadCaseDocumentCollection> getIntervenerThreeList(FinremCaseData caseData, String role, String collectionType) {
+    private List<UploadCaseDocumentCollection> getIntervenerThreeList(FinremCaseDataContested caseData, String role, String collectionType) {
         if (role.equals(CaseRole.INTVR_SOLICITOR_3.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_3.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
@@ -225,7 +225,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv3FormEsExhibits();
                 }
                 case QUESTIONNAIRES_ANSWERS -> {
-                    return  caseData.getUploadCaseDocumentWrapper().getIntv3Qa();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3Qa();
                 }
                 case SUMMARIES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv3Summaries();
@@ -246,7 +246,7 @@ public class IntervenerShareDocumentsService implements SharedService {
         return Collections.emptyList();
     }
 
-    private List<UploadCaseDocumentCollection> getIntervenerFourList(FinremCaseData caseData, String role, String collectionType) {
+    private List<UploadCaseDocumentCollection> getIntervenerFourList(FinremCaseDataContested caseData, String role, String collectionType) {
         if (role.equals(CaseRole.INTVR_SOLICITOR_4.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_4.getCcdCode())) {
             switch (collectionType) {
                 case OTHER -> {
@@ -265,7 +265,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv4FormEsExhibits();
                 }
                 case QUESTIONNAIRES_ANSWERS -> {
-                    return  caseData.getUploadCaseDocumentWrapper().getIntv4Qa();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4Qa();
                 }
                 case SUMMARIES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv4Summaries();
@@ -289,7 +289,7 @@ public class IntervenerShareDocumentsService implements SharedService {
     private String getIntervenerOtherCollection(String role, String collectionType) {
         String result = null;
         if (role.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
-            result =  getIntervenerOneCollectionType(collectionType, role);
+            result = getIntervenerOneCollectionType(collectionType, role);
         } else if (role.equals(CaseRole.INTVR_SOLICITOR_2.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_2.getCcdCode())) {
             result = getIntervenerTwoCollectionType(collectionType, role);
         } else if (role.equals(CaseRole.INTVR_SOLICITOR_3.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_3.getCcdCode())) {
@@ -460,7 +460,7 @@ public class IntervenerShareDocumentsService implements SharedService {
     }
 
 
-    public void shareSelectedDocumentWithOtherSelectedSolicitors(FinremCaseData caseData) {
+    public void shareSelectedDocumentWithOtherSelectedSolicitors(FinremCaseDataContested caseData) {
         DynamicMultiSelectList sourceDocumentList = caseData.getSourceDocumentList();
         DynamicMultiSelectList solicitorRoleList = caseData.getSolicitorRoleList();
 

@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentedContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContestedContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -146,7 +148,7 @@ public class GeneralLetterService {
     private void addGeneralLetterToCaseData(FinremCaseDetails caseDetails, CaseDocument document,
                                             CaseDocument generalLetterUploadedDocument) {
         List<GeneralLetterCollection> generalLetterCollection = Optional.ofNullable(caseDetails.getData()
-            .getGeneralLetterWrapper().getGeneralLetterCollection())
+                .getGeneralLetterWrapper().getGeneralLetterCollection())
             .orElse(new ArrayList<>(1));
         generalLetterCollection.add(GeneralLetterCollection.builder().value(GeneralLetter.builder()
                 .generatedLetter(document)
@@ -175,9 +177,9 @@ public class GeneralLetterService {
 
         switch (letterAddressToType) {
             case APPLICANT_SOLICITOR:
-                recipientAddress = caseDetails.isConsentedApplication()
-                    ? data.getContactDetailsWrapper().getSolicitorAddress()
-                    : data.getContactDetailsWrapper().getApplicantSolicitorAddress();
+                recipientAddress = caseDetails.getData().isConsentedApplication()
+                    ? ((ConsentedContactDetailsWrapper) data.getContactDetailsWrapper()).getSolicitorAddress()
+                    : ((ContestedContactDetailsWrapper) data.getContactDetailsWrapper()).getApplicantSolicitorAddress();
                 break;
             case RESPONDENT_SOLICITOR:
                 recipientAddress = data.getContactDetailsWrapper().getRespondentSolicitorAddress();

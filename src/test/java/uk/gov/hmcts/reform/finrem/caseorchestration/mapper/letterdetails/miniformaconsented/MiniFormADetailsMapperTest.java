@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifo
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -16,11 +16,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class MiniFormADetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class MiniFormADetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
     public static final String TEST_JSON = "/fixtures/mini-form-a-details.json";
 
     @Autowired
-    private MiniFormADetailsMapper miniFormADetailsMapper;
+    private MiniFormADetailsMapperConsented miniFormADetailsMapper;
 
     @Before
     public void setUp() throws Exception {

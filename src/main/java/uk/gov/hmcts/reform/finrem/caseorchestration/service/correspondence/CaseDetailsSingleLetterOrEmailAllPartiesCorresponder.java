@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -64,8 +65,8 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
     }
 
     protected void sendIntervenerCorrespondence(CaseDetails caseDetails) {
-        final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        final List<IntervenerWrapper> interveners =  finremCaseDetails.getData().getInterveners();
+        final FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
         interveners.forEach(intervenerWrapper -> {
             if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
                 log.info("Sending email correspondence to {} for case: {}",

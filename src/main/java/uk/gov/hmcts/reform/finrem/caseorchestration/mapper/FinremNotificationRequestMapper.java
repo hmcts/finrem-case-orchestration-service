@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
@@ -90,23 +92,27 @@ public class FinremNotificationRequestMapper {
         notificationRequest.setNotificationEmail(caseDataKeysWrapper.getSolicitorEmailKey());
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
-        notificationRequest.setGeneralApplicationRejectionReason(
-            Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason(), EMPTY_STRING));
+
         notificationRequest.setGeneralEmailBody(Objects.toString(caseData.getGeneralEmailWrapper().getGeneralEmailBody(), EMPTY_STRING));
         notificationRequest.setApplicantName(Objects.toString(caseData.getFullApplicantName()));
         if (caseData.isConsentedApplication()) {
-            notificationRequest.setRespondentName(Objects.toString(caseData.getFullRespondentNameConsented()));
-            setCaseOrderType(notificationRequest, caseData);
+            notificationRequest.setGeneralApplicationRejectionReason(EMPTY_STRING);
+            notificationRequest.setRespondentName(Objects.toString(caseData.getRespondentFullName()));
+            setCaseOrderType(notificationRequest, (FinremCaseDataConsented) caseData);
+            notificationRequest.setHearingType(EMPTY_STRING);
             log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
                 notificationRequest.getCaseReferenceNumber());
-        }
-        if (caseData.isContestedApplication()) {
-            notificationRequest.setRespondentName(Objects.toString(caseData.getFullRespondentNameContested()));
+        } else if (caseData.isContestedApplication()) {
+            notificationRequest.setGeneralApplicationRejectionReason(
+                Objects.toString(((FinremCaseDataContested) caseData).getGeneralApplicationWrapper().getGeneralApplicationRejectReason(), EMPTY_STRING));
+            notificationRequest.setRespondentName(Objects.toString(caseData.getRespondentFullName()));
             notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedFrc(caseDetails));
+            notificationRequest.setHearingType(((FinremCaseDataContested) caseData).getHearingType() != null
+                ? ((FinremCaseDataContested) caseData).getHearingType().getId()
+                : EMPTY_STRING);
             log.info("selectedCourt is {} for case ID: {}", notificationRequest.getSelectedCourt(),
                 notificationRequest.getCaseReferenceNumber());
         }
-        notificationRequest.setHearingType(caseData.getHearingType() != null ? caseData.getHearingType().getId() : "");
 
         return notificationRequest;
     }
@@ -138,7 +144,7 @@ public class FinremNotificationRequestMapper {
             .build();
     }
 
-    private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseData caseData) {
+    private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseDataConsented caseData) {
         if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
             notificationRequest.setCaseOrderType("variation");
             notificationRequest.setCamelCaseOrderType("Variation");

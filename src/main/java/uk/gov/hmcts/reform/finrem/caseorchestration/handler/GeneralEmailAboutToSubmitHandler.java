@@ -55,7 +55,7 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
                 userAuthorisation, caseDetails.getId().toString());
             caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
         }
-        if (caseDetails.isConsentedApplication()) {
+        if (caseDetails.getData().isConsentedApplication()) {
             notificationService.sendConsentGeneralEmail(caseDetails, userAuthorisation);
         } else {
             notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);

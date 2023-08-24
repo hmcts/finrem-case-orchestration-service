@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
@@ -38,7 +39,7 @@ public class CreateGeneralLetterAboutToStartHandlerTest {
 
     @Before
     public void setup() {
-        handler =  new CreateGeneralLetterAboutToStartHandler(finremCaseDetailsMapper, idamService);
+        handler = new CreateGeneralLetterAboutToStartHandler(finremCaseDetailsMapper, idamService);
         when(idamService.getIdamFullName(anyString())).thenReturn("UserName");
     }
 
@@ -77,7 +78,7 @@ public class CreateGeneralLetterAboutToStartHandlerTest {
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
-        FinremCaseData caseData = FinremCaseData.builder()
+        FinremCaseData caseData = FinremCaseDataConsented.builder()
             .generalLetterWrapper(GeneralLetterWrapper.builder()
                 .generalLetterAddressTo(GeneralLetterAddressToType.APPLICANT_SOLICITOR)
                 .generalLetterRecipient("Test")

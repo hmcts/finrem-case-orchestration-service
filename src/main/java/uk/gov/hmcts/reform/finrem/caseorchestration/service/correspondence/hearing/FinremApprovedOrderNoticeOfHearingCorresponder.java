@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -29,9 +30,13 @@ public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearin
 
     @Override
     public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
-        List<CaseDocument> hearingNoticePack = caseDetails.getData().getHearingNoticeDocumentPack().stream()
-            .map(DocumentCollection::getValue)
-            .toList();
+        List<CaseDocument> hearingNoticePack = null;
+        if (caseDetails.getData().isContestedApplication()) {
+            hearingNoticePack = ((FinremCaseDataContested) caseDetails.getData())
+                .getHearingNoticeDocumentPack().stream()
+                .map(DocumentCollection::getValue)
+                .toList();
+        }
         return documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
     }
 }

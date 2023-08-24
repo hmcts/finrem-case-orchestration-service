@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -47,7 +48,8 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
     @SuppressWarnings("java:S1874")
     public void sendIntervenerCorrespondence(String authorisationToken, CaseDetails caseDetails) {
         if (notificationService.isContestedApplication(caseDetails)) {
-            final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+            final FinremCaseDetails<FinremCaseDataContested> finremCaseDetails =
+                finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
             final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
             interveners.forEach(intervenerWrapper -> {
                 if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, finremCaseDetails)) {

@@ -12,13 +12,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RequiredArgsConstructor
-public abstract class FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
+public abstract class FinremCallbackHandler<D extends FinremCaseData> implements CallbackHandler<D> {
 
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<D> handle(CallbackRequest callbackRequest,
+                                                                 String userAuthorisation) {
 
         FinremCallbackRequest callbackRequestWithFinremCaseDetails =
             mapToFinremCallbackRequest(callbackRequest);
@@ -26,8 +26,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return handle(callbackRequestWithFinremCaseDetails, userAuthorisation);
     }
 
-    public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
-                                                                                       String userAuthorisation);
+    public abstract GenericAboutToStartOrSubmitCallbackResponse<D> handle(FinremCallbackRequest<D> callbackRequestWithFinremCaseDetails,
+                                                                          String userAuthorisation);
 
     private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());

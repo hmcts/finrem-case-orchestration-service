@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.formatAddressForLetterPrinting;
 
-public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class GeneralLetterDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
 
     private static final String TEST_JSON = "/fixtures/general-letter.json";
 
@@ -30,7 +30,7 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
     public static final String GENERAL_LETTER_CREATED_DATE = "generalLetterCreatedDate";
 
     @Autowired
-    private GeneralLetterDetailsMapper generalLetterDetailsMapper;
+    private GeneralLetterDetailsMapperContested generalLetterDetailsMapper;
 
     @Before
     public void setUp() throws Exception {

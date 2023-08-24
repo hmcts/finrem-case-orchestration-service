@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class IntervenersAboutToStartHandler extends FinremCallbackHandler implements IntervenerHandler {
+public class IntervenersAboutToStartHandler extends FinremCallbackHandler<FinremCaseDataContested> implements IntervenerHandler {
     private static final String DEFAULT = "not added to case yet.";
 
     public IntervenersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
@@ -35,12 +35,12 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
 
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+                                                                                       String userAuthorisation) {
         log.info("Invoking contested {} about to start callback for case id: {}",
             callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
 
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
 
         List<IntervenerWrapper> interveners = caseData.getInterveners();
@@ -49,7 +49,7 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
         DynamicRadioList dynamicList = getDynamicRadioList(dynamicListElements);
         caseData.setIntervenersList(dynamicList);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(caseData).build();
     }
 

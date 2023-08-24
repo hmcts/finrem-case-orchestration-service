@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.consentorderapproved.ConsentOrderApprovedLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.consentorderapproved.ConsentOrderApprovedLetterDetailsMapperContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ConsentOrderApprovedLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
@@ -13,12 +13,12 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ConsentOrderApprovedLetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class ConsentOrderApprovedLetterDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON = "/fixtures/consent-order-approved-mapping.json";
 
     @Autowired
-    private ConsentOrderApprovedLetterDetailsMapper consentOrderApprovedLetterDetailsMapper;
+    private ConsentOrderApprovedLetterDetailsMapperContested consentOrderApprovedLetterDetailsMapper;
 
     @Before
     public void setUp() {

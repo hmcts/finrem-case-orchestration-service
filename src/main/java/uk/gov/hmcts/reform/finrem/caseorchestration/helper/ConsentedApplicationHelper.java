@@ -8,8 +8,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,15 +36,15 @@ public class ConsentedApplicationHelper {
 
     private final DocumentConfiguration documentConfiguration;
 
-    public void setConsentVariationOrderLabelField(FinremCaseData caseData) {
+    public void setConsentVariationOrderLabelField(FinremCaseDataConsented caseData) {
         if (Boolean.TRUE.equals(isVariationOrder(caseData))) {
-            caseData.getConsentOrderWrapper().setConsentVariationOrderLabelC(VARIATION_ORDER_CAMELCASE_LABEL_VALUE);
-            caseData.getConsentOrderWrapper().setConsentVariationOrderLabelL(VARIATION_ORDER_LOWERCASE_LABEL_VALUE);
-            caseData.getConsentOrderWrapper().setOtherDocLabel(CV_OTHER_DOC_LABEL_VALUE);
+            caseData.setConsentVariationOrderLabelC(VARIATION_ORDER_CAMELCASE_LABEL_VALUE);
+            caseData.setConsentVariationOrderLabelL(VARIATION_ORDER_LOWERCASE_LABEL_VALUE);
+            caseData.setOtherDocLabel(CV_OTHER_DOC_LABEL_VALUE);
         } else {
-            caseData.getConsentOrderWrapper().setConsentVariationOrderLabelC(CONSENT_ORDER_CAMELCASE_LABEL_VALUE);
-            caseData.getConsentOrderWrapper().setConsentVariationOrderLabelL(CONSENT_ORDER_LOWERCASE_LABEL_VALUE);
-            caseData.getConsentOrderWrapper().setOtherDocLabel(CONSENT_OTHER_DOC_LABEL_VALUE);
+            caseData.setConsentVariationOrderLabelC(CONSENT_ORDER_CAMELCASE_LABEL_VALUE);
+            caseData.setConsentVariationOrderLabelL(CONSENT_ORDER_LOWERCASE_LABEL_VALUE);
+            caseData.setOtherDocLabel(CONSENT_OTHER_DOC_LABEL_VALUE);
         }
     }
 
@@ -60,8 +60,9 @@ public class ConsentedApplicationHelper {
         }
     }
 
-    public Boolean isVariationOrder(final FinremCaseData caseData) {
-        List<NatureApplication> natureOfApplicationList = caseData.getNatureApplicationWrapper().getNatureOfApplication2();
+    public Boolean isVariationOrder(final FinremCaseDataConsented caseData) {
+        List<NatureApplication> natureOfApplicationList =
+            caseData.getNatureApplicationWrapper().getNatureOfApplication2();
         log.info("Nature list {}", natureOfApplicationList);
         return (!CollectionUtils.isEmpty(natureOfApplicationList)
             && natureOfApplicationList.contains(NatureApplication.VARIATION_ORDER));
@@ -83,7 +84,7 @@ public class ConsentedApplicationHelper {
         });
     }
 
-    public String getNotApprovedOrderNotificationFileName(FinremCaseData caseData) {
+    public String getNotApprovedOrderNotificationFileName(FinremCaseDataConsented caseData) {
         return Boolean.TRUE.equals(isVariationOrder(caseData))
             ? documentConfiguration.getVariationOrderNotApprovedCoverLetterFileName()
             : documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
@@ -92,10 +93,10 @@ public class ConsentedApplicationHelper {
     public String getOrderType(FinremCaseData caseData) {
         if (caseData.isContestedApplication()) {
             return CONSENT;
+        } else {
+            return Boolean.TRUE.equals(isVariationOrder((FinremCaseDataConsented) caseData))
+                ? VARIATION
+                : CONSENT;
         }
-
-        return Boolean.TRUE.equals(isVariationOrder(caseData))
-            ? VARIATION
-            : CONSENT;
     }
 }

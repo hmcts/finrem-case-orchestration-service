@@ -17,9 +17,9 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GenericAboutToStartOrSubmitCallbackResponse<D> {
+public class GenericAboutToStartOrSubmitCallbackResponse<T> {
 
-    private D data;
+    private T data;
 
     @JsonProperty("data_classification")
     private Map<String, Object> dataClassification;

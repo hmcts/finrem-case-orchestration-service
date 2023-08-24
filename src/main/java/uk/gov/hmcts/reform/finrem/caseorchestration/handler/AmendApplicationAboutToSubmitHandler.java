@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler {
+public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataConsented> {
 
     private final ConsentOrderService consentOrderService;
 
@@ -41,12 +41,11 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> handle(FinremCallbackRequest<FinremCaseDataConsented> callbackRequest,
+                                                                                       String userAuthorisation) {
 
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataConsented caseData = callbackRequest.getCaseDetails().getData();
+        log.info("Received request to update consented case with Case ID: {}", caseData.getCcdCaseId());
 
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
@@ -56,11 +55,11 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(callbackRequest);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataConsented>builder().data(caseData).build();
     }
 
-    private void updateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+    private void updateLatestConsentOrder(FinremCallbackRequest<FinremCaseDataConsented> callbackRequest) {
+        FinremCaseDataConsented caseData = callbackRequest.getCaseDetails().getData();
         caseData.setLatestConsentOrder(consentOrderService.getLatestConsentOrderData(callbackRequest));
     }
 
@@ -74,7 +73,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         }
     }
 
-    private void updatePeriodicPaymentData(FinremCaseData caseData) {
+    private void updatePeriodicPaymentData(FinremCaseDataConsented caseData) {
         List<NatureApplication> natureOfApplication2 =
             Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
 
@@ -89,7 +88,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         }
     }
 
-    private void updatePropertyDetails(FinremCaseData caseData) {
+    private void updatePropertyDetails(FinremCaseDataConsented caseData) {
         List<NatureApplication> natureOfApplication2 =
             Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
 
@@ -98,7 +97,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         }
     }
 
-    private void updateD81Details(FinremCaseData caseData) {
+    private void updateD81Details(FinremCaseDataConsented caseData) {
         if (YesOrNo.YES.equals(caseData.getD81Question())) {
             caseData.setD81Applicant(null);
             caseData.setD81Respondent(null);
@@ -107,7 +106,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         }
     }
 
-    private void updateRespondentSolicitorAddress(FinremCaseData caseData) {
+    private void updateRespondentSolicitorAddress(FinremCaseDataConsented caseData) {
         if (YesOrNo.NO.equals(caseData.getContactDetailsWrapper().getConsentedRespondentRepresented())) {
             removeRespondentSolicitorAddress(caseData);
         } else {
@@ -115,20 +114,20 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         }
     }
 
-    private void removePeriodicPaymentData(FinremCaseData caseData) {
+    private void removePeriodicPaymentData(FinremCaseDataConsented caseData) {
         caseData.getNatureApplicationWrapper().setNatureOfApplication5(null);
         caseData.getNatureApplicationWrapper().setNatureOfApplication6(null);
         caseData.getNatureApplicationWrapper().setNatureOfApplication7(null);
         caseData.getNatureApplicationWrapper().setOrderForChildrenQuestion1(null);
     }
 
-    private void removePropertyAdjustmentDetails(FinremCaseData caseData) {
+    private void removePropertyAdjustmentDetails(FinremCaseDataConsented caseData) {
         caseData.getNatureApplicationWrapper().setNatureOfApplication3a(null);
         caseData.getNatureApplicationWrapper().setNatureOfApplication3b(null);
     }
 
 
-    private void updateApplicantOrSolicitorContactDetails(FinremCaseData caseData) {
+    private void updateApplicantOrSolicitorContactDetails(FinremCaseDataConsented caseData) {
         if (YesOrNo.NO.equals(caseData.getContactDetailsWrapper().getApplicantRepresented())) {
             removeApplicantSolicitorAddress(caseData);
         } else {
@@ -137,20 +136,20 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
     }
 
 
-    private void removeApplicantAddress(FinremCaseData caseData) {
+    private void removeApplicantAddress(FinremCaseDataConsented caseData) {
         caseData.getContactDetailsWrapper().setApplicantAddress(null);
         caseData.getContactDetailsWrapper().setApplicantPhone(null);
         caseData.getContactDetailsWrapper().setApplicantEmail(null);
     }
 
-    private void removeRespondentAddress(FinremCaseData caseData) {
+    private void removeRespondentAddress(FinremCaseDataConsented caseData) {
         caseData.getContactDetailsWrapper().setRespondentAddress(null);
         caseData.getContactDetailsWrapper().setRespondentPhone(null);
         caseData.getContactDetailsWrapper().setRespondentEmail(null);
     }
 
 
-    private void removeApplicantSolicitorAddress(FinremCaseData caseData) {
+    private void removeApplicantSolicitorAddress(FinremCaseDataConsented caseData) {
         caseData.getContactDetailsWrapper().setSolicitorReference(null);
         caseData.getContactDetailsWrapper().setSolicitorName(null);
         caseData.getContactDetailsWrapper().setSolicitorFirm(null);
@@ -162,7 +161,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
 
     }
 
-    private void removeRespondentSolicitorAddress(FinremCaseData caseData) {
+    private void removeRespondentSolicitorAddress(FinremCaseDataConsented caseData) {
         caseData.getContactDetailsWrapper().setRespondentSolicitorName(null);
         caseData.getContactDetailsWrapper().setRespondentSolicitorFirm(null);
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(null);

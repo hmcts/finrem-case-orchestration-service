@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_FOUR_CODE;
@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 
 @Slf4j
 @Service
-public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
+public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
     private final IntervenerService service;
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -40,29 +40,37 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+                                                                                       String userAuthorisation) {
         Long caseId = callbackRequest.getCaseDetails().getId();
         log.info("Invoking contested event {}, callback {} callback for case id: {}",
             callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
 
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
         log.info("selected operation choice {} for intervener {} for case id: {}",
             selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
         switch (selectedOperationCode) {
-            case ADD_INTERVENER_ONE_CODE -> service.updateIntervenerDetails(caseData.getIntervenerOneWrapper(), callbackRequest);
-            case ADD_INTERVENER_TWO_CODE -> service.updateIntervenerDetails(caseData.getIntervenerTwoWrapper(), callbackRequest);
-            case ADD_INTERVENER_THREE_CODE -> service.updateIntervenerDetails(caseData.getIntervenerThreeWrapper(), callbackRequest);
-            case ADD_INTERVENER_FOUR_CODE -> service.updateIntervenerDetails(caseData.getIntervenerFourWrapper(), callbackRequest);
-            case DEL_INTERVENER_ONE_CODE -> service.removeIntervenerDetails(caseData.getIntervenerOneWrapper(), caseData, caseId);
-            case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerDetails(caseData.getIntervenerTwoWrapper(), caseData, caseId);
-            case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerDetails(caseData.getIntervenerThreeWrapper(), caseData, caseId);
-            case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerDetails(caseData.getIntervenerFourWrapper(), caseData, caseId);
+            case ADD_INTERVENER_ONE_CODE ->
+                service.updateIntervenerDetails(caseData.getIntervenerOneWrapper(), callbackRequest);
+            case ADD_INTERVENER_TWO_CODE ->
+                service.updateIntervenerDetails(caseData.getIntervenerTwoWrapper(), callbackRequest);
+            case ADD_INTERVENER_THREE_CODE ->
+                service.updateIntervenerDetails(caseData.getIntervenerThreeWrapper(), callbackRequest);
+            case ADD_INTERVENER_FOUR_CODE ->
+                service.updateIntervenerDetails(caseData.getIntervenerFourWrapper(), callbackRequest);
+            case DEL_INTERVENER_ONE_CODE ->
+                service.removeIntervenerDetails(caseData.getIntervenerOneWrapper(), caseData, caseId);
+            case DEL_INTERVENER_TWO_CODE ->
+                service.removeIntervenerDetails(caseData.getIntervenerTwoWrapper(), caseData, caseId);
+            case DEL_INTERVENER_THREE_CODE ->
+                service.removeIntervenerDetails(caseData.getIntervenerThreeWrapper(), caseData, caseId);
+            case DEL_INTERVENER_FOUR_CODE ->
+                service.removeIntervenerDetails(caseData.getIntervenerFourWrapper(), caseData, caseId);
             default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(caseData).build();
     }
 

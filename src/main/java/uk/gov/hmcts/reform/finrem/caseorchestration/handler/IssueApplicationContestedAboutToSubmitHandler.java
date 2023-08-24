@@ -9,14 +9,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 @Slf4j
 @Service
-public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final OnlineFormDocumentService service;
 
@@ -35,15 +35,15 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
 
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+                                                                                       String userAuthorisation) {
 
         Long caseId = callbackRequest.getCaseDetails().getId();
         log.info("Invoking contested {} about to submit callback for case id: {}",
             callbackRequest.getEventType(), caseId);
 
 
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
 
         CaseDocument document = service.generateContestedMiniForm(userAuthorisation, callbackRequest.getCaseDetails());
         log.info("Issue application generated document {} for caseId {}", document, caseId);
@@ -57,7 +57,7 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
                 .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
     }
 }

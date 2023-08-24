@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContestedContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAddedLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAddedSolicitorLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerRemovedLetterDetails;
@@ -153,9 +154,9 @@ public class IntervenerDocumentService {
     }
 
     private CaseDocument generateDocument(String authToken,
-                                                    IntervenerAddedLetterDetails intervenerAddedLetterDetails,
-                                                    String template,
-                                                    String filename) {
+                                          IntervenerAddedLetterDetails intervenerAddedLetterDetails,
+                                          String template,
+                                          String filename) {
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
             authToken,
             convertLetterDetailsToMap(intervenerAddedLetterDetails),
@@ -209,7 +210,7 @@ public class IntervenerDocumentService {
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
-            .respondentName(caseDetails.getRespondentFullName())
+            .respondentName(caseDetails.getData().getRespondentFullName())
             .reference(getSolicitorReference(caseDetails, recipient))
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
             .caseNumber(caseDetails.getId().toString())
@@ -226,7 +227,7 @@ public class IntervenerDocumentService {
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
-            .respondentName(caseDetails.getRespondentFullName())
+            .respondentName(caseDetails.getData().getRespondentFullName())
             .reference(getSolicitorReference(caseDetails, recipient))
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
             .caseNumber(caseDetails.getId().toString())
@@ -243,7 +244,7 @@ public class IntervenerDocumentService {
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
-            .respondentName(caseDetails.getRespondentFullName())
+            .respondentName(caseDetails.getData().getRespondentFullName())
             .reference(getSolicitorReference(caseDetails, recipient))
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
             .caseNumber(caseDetails.getId().toString())
@@ -262,7 +263,7 @@ public class IntervenerDocumentService {
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
-            .respondentName(caseDetails.getRespondentFullName())
+            .respondentName(caseDetails.getData().getRespondentFullName())
             .reference(getSolicitorReference(caseDetails, recipient))
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
             .caseNumber(caseDetails.getId().toString())
@@ -275,9 +276,13 @@ public class IntervenerDocumentService {
     private String getSolicitorReference(FinremCaseDetails caseDetails,
                                          DocumentHelper.PaperNotificationRecipient recipient) {
         ContactDetailsWrapper contactDetailsWrapper = caseDetails.getData().getContactDetailsWrapper();
-        if (recipient == APPLICANT && YesOrNo.YES.equals(contactDetailsWrapper.getApplicantRepresented())) {
+        if (recipient == APPLICANT
+            && YesOrNo.YES.equals(contactDetailsWrapper.getApplicantRepresented())) {
             return contactDetailsWrapper.getSolicitorReference();
-        } else if (recipient == RESPONDENT && YesOrNo.YES.equals(contactDetailsWrapper.getContestedRespondentRepresented())) {
+        } else if (caseDetails.getData().isContestedApplication()
+            && recipient == RESPONDENT
+            && YesOrNo.YES.equals(((ContestedContactDetailsWrapper) contactDetailsWrapper)
+            .getContestedRespondentRepresented())) {
             return contactDetailsWrapper.getRespondentSolicitorReference();
         }
         return null;

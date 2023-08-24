@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
@@ -73,9 +73,9 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     public abstract DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient();
 
-    public abstract IntervenerWrapper getIntervenerWrapperFromCaseData(FinremCaseData caseData);
+    public abstract IntervenerWrapper getIntervenerWrapperFromCaseData(FinremCaseDataContested caseData);
 
-    public abstract void removeIntervenerWrapperFromCaseData(FinremCaseData caseData);
+    public abstract void removeIntervenerWrapperFromCaseData(FinremCaseDataContested caseData);
 
     @JsonIgnore
     public boolean isIntervenerSolicitorPopulated() {

@@ -4,7 +4,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contes
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ContestedDraftOrderNotApprovedDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
@@ -14,12 +14,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ContestedDraftOrderNotApprovedDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class ContestedDraftOrderNotApprovedDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON = "/fixtures/refusal-order-contested.json";
 
     @Autowired
-    private ContestedDraftOrderNotApprovedDetailsMapper contestedDraftOrderNotApprovedDetailsMapper;
+    private ContestedDraftOrderNotApprovedDetailsMapperContested contestedDraftOrderNotApprovedDetailsMapper;
 
     @Before
     public void setUp() {

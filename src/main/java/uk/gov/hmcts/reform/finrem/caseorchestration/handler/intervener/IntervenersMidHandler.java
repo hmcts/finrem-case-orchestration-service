@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 
 @Slf4j
 @Service
-public class IntervenersMidHandler extends FinremCallbackHandler implements IntervenerHandler {
+public class IntervenersMidHandler extends FinremCallbackHandler<FinremCaseDataContested> implements IntervenerHandler {
     public IntervenersMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
     }
@@ -36,27 +36,29 @@ public class IntervenersMidHandler extends FinremCallbackHandler implements Inte
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+                                                                                       String userAuthorisation) {
 
         Long caseId = callbackRequest.getCaseDetails().getId();
         log.info("Invoking contested {} about to mid callback for case id: {}",
             callbackRequest.getEventType(), caseId);
 
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         String valueCode = caseData.getIntervenersList().getValueCode();
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         switch (valueCode) {
             case INTERVENER_ONE -> showIntervenerOption(caseDataBefore.getIntervenerOneWrapper(), dynamicListElements);
             case INTERVENER_TWO -> showIntervenerOption(caseDataBefore.getIntervenerTwoWrapper(), dynamicListElements);
-            case INTERVENER_THREE -> showIntervenerOption(caseDataBefore.getIntervenerThreeWrapper(), dynamicListElements);
-            case INTERVENER_FOUR -> showIntervenerOption(caseDataBefore.getIntervenerFourWrapper(), dynamicListElements);
+            case INTERVENER_THREE ->
+                showIntervenerOption(caseDataBefore.getIntervenerThreeWrapper(), dynamicListElements);
+            case INTERVENER_FOUR ->
+                showIntervenerOption(caseDataBefore.getIntervenerFourWrapper(), dynamicListElements);
             default -> throw new IllegalArgumentException("Invalid intervener selected for caseId " + caseId);
         }
 
         caseData.setIntervenerOptionList(getDynamicRadioList(dynamicListElements));
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(caseData).build();
     }
 

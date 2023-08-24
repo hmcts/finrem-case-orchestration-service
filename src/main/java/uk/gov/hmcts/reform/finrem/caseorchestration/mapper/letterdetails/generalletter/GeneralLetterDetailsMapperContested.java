@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -24,9 +24,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.getAddressToCaseDataMapping;
 
 @Component
-public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
+public class GeneralLetterDetailsMapperContested extends ContestedAbstractLetterDetailsMapper {
 
-    public GeneralLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+    public GeneralLetterDetailsMapperContested(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 
@@ -50,9 +50,9 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
         FinremCaseData caseData = caseDetails.getData();
         GeneralLetterAddressToType recipient = caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo();
         return Addressee.builder()
-                .name((String) getAddressToCaseDataMapping(caseData).get(NAME_MAP).get(recipient))
-                .formattedAddress(getFormattedAddress(caseData, recipient))
-                .build();
+            .name((String) getAddressToCaseDataMapping(caseData).get(NAME_MAP).get(recipient))
+            .formattedAddress(getFormattedAddress(caseData, recipient))
+            .build();
     }
 
     private String getFormattedAddress(FinremCaseData caseData, GeneralLetterAddressToType recipient) {

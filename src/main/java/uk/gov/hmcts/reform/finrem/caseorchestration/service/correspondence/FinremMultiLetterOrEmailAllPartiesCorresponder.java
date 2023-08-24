@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -39,22 +39,25 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         }
     }
 
-    public void sendIntervenerCorrespondence(String authorisationToken, FinremCaseDetails caseDetails) {
-        FinremCaseData caseData = caseDetails.getData();
-        List<IntervenerWrapper> interveners = caseData.getInterveners();
-        interveners.forEach(intervenerWrapper -> {
-            if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
-                log.info("Sending email correspondence to {} for case: {}",
-                    intervenerWrapper.getIntervenerType().getTypeValue(),
-                    caseDetails.getId());
-                this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
-            } else if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
-                log.info("Sending letter correspondence to {} for case: {}",
-                    intervenerWrapper.getIntervenerType().getTypeValue(),
-                    caseDetails.getId());
-                bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
-            }
-        });
+    public void sendIntervenerCorrespondence(String authorisationToken,
+                                             FinremCaseDetails caseDetails) {
+        if (caseDetails.getData().isContestedApplication()) {
+            FinremCaseDataContested caseData = (FinremCaseDataContested) caseDetails.getData();
+            List<IntervenerWrapper> interveners = caseData.getInterveners();
+            interveners.forEach(intervenerWrapper -> {
+                if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
+                    log.info("Sending email correspondence to {} for case: {}",
+                        intervenerWrapper.getIntervenerType().getTypeValue(),
+                        caseDetails.getId());
+                    this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
+                } else if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
+                    log.info("Sending letter correspondence to {} for case: {}",
+                        intervenerWrapper.getIntervenerType().getTypeValue(),
+                        caseDetails.getId());
+                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+                }
+            });
+        }
     }
 
     protected boolean shouldSendApplicantSolicitorEmail(FinremCaseDetails caseDetails) {

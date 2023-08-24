@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.Map;
 
-public abstract class AbstractLetterDetailsMapperTest extends BaseServiceTest {
+public abstract class ContestedContestedAbstractLetterDetailsMapperTest extends BaseServiceTest {
 
     protected FinremCaseDetails caseDetails;
 

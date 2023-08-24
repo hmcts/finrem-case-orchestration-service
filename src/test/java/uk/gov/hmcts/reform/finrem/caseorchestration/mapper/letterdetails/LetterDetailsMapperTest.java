@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.formatAddressForLetterPrinting;
 
-public class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class LetterDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON_CONTESTED = "/fixtures/basic-letter-details.json";
 

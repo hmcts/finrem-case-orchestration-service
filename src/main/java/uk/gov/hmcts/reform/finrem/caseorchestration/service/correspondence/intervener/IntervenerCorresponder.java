@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
@@ -28,18 +29,19 @@ public class IntervenerCorresponder extends FinremSingleLetterOrEmailAllPartiesC
 
     @Override
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
-        IntervenerChangeDetails intervenerChangeDetails = caseDetails.getData().getCurrentIntervenerChangeDetails();
+        FinremCaseDataContested data = (FinremCaseDataContested) caseDetails.getData();
+        IntervenerChangeDetails intervenerChangeDetails = data.getCurrentIntervenerChangeDetails();
         log.info("intervener type: {}", intervenerChangeDetails.getIntervenerType());
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
         if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_ONE) {
-            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerOneWrapper(), caseDetails, authToken);
+            sendIntervenerCorrespondence(data.getIntervenerOneWrapper(), caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_TWO) {
-            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerTwoWrapper(), caseDetails, authToken);
+            sendIntervenerCorrespondence(data.getIntervenerTwoWrapper(), caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_THREE) {
-            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerThreeWrapper(), caseDetails, authToken);
+            sendIntervenerCorrespondence(data.getIntervenerThreeWrapper(), caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_FOUR) {
-            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerFourWrapper(), caseDetails, authToken);
+            sendIntervenerCorrespondence(data.getIntervenerFourWrapper(), caseDetails, authToken);
         }
     }
 

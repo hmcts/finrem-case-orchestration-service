@@ -12,8 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
@@ -35,7 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 
 @Slf4j
 @Service
-public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCallbackHandler {
+public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     public static final String TRIAL_BUNDLE_SELECTED_ERROR =
         "To upload a hearing bundle please use the Manage hearing "
@@ -67,12 +66,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+                                                                                       String userAuthorisation) {
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = getValidatedResponse(caseData);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> response = getValidatedResponse(caseData);
         if (response.hasErrors()) {
             return response;
         }
@@ -81,7 +79,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
 
         if (featureToggleService.isIntervenerEnabled()) {
             CaseDocumentParty loggedInUserRole =
-                getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
+                getActiveUserCaseDocumentParty(caseData.getCcdCaseId(), userAuthorisation);
 
             managedCollections.forEach(doc -> doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole));
         }
@@ -94,15 +92,15 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
                 UploadCaseDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
                     Comparator.reverseOrder()))));
 
-        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseDataContested caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
 
         return response;
     }
 
-    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> getValidatedResponse(FinremCaseData caseData) {
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> getValidatedResponse(FinremCaseDataContested caseData) {
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> response =
+            GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
         if (!isAnyDocumentPresent(caseData)) {
             response.getErrors().add(NO_DOCUMENT_ERROR);
         } else if (isAnyTrialBundleDocumentPresent(caseData)) {
@@ -111,11 +109,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         return response;
     }
 
-    private boolean isAnyDocumentPresent(FinremCaseData caseData) {
+    private boolean isAnyDocumentPresent(FinremCaseDataContested caseData) {
         return CollectionUtils.isNotEmpty(caseData.getManageCaseDocumentCollection());
     }
 
-    private boolean isAnyTrialBundleDocumentPresent(FinremCaseData caseData) {
+    private boolean isAnyTrialBundleDocumentPresent(FinremCaseDataContested caseData) {
         return caseData.getManageCaseDocumentCollection().stream()
             .map(uploadCaseDocumentCollection ->
                 uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType())

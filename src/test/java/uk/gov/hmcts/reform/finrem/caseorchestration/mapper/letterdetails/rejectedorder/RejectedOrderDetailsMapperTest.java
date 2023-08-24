@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -26,18 +26,18 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapper.CONSENTED_COURT_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapper.CONTESTED_COURT_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapper.REFUSAL_ORDER_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapperContested.CONSENTED_COURT_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapperContested.CONTESTED_COURT_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapperContested.REFUSAL_ORDER_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetailsObject;
 
-public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class RejectedOrderDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON_CONTESTED = "/fixtures/refusal-order-contested.json";
     public static final String TEST_JSON_CONSENTED = "/fixtures/refusal-order-consented.json";
 
     @Autowired
-    private RejectedOrderDetailsMapper rejectedOrderDetailsMapper;
+    private RejectedOrderDetailsMapperContested rejectedOrderDetailsMapper;
 
     @Before
     public void setUp() throws Exception {
@@ -150,7 +150,7 @@ public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperT
                             .build())
                         .orderRefusalJudgeName("Contested")
                         .orderRefusalJudge(JudgeType.HIS_HONOUR_JUDGE.getValue())
-                        .orderRefusalDate(LocalDate.of(2022,1, 1))
+                        .orderRefusalDate(LocalDate.of(2022, 1, 1))
                         .orderRefusalAddComments("testComment")
                         .build())
                 .build());

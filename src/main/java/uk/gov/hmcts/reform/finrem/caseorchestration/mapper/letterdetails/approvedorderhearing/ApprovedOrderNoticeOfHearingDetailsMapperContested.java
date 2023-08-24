@@ -5,8 +5,9 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
@@ -23,8 +24,8 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Component
-public class ApprovedOrderNoticeOfHearingDetailsMapper extends AbstractLetterDetailsMapper {
-    public ApprovedOrderNoticeOfHearingDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+public class ApprovedOrderNoticeOfHearingDetailsMapperContested extends ContestedAbstractLetterDetailsMapper {
+    public ApprovedOrderNoticeOfHearingDetailsMapperContested(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 
@@ -57,7 +58,7 @@ public class ApprovedOrderNoticeOfHearingDetailsMapper extends AbstractLetterDet
         return Optional.ofNullable(hearingDirectionDetail.getTypeOfHearing()).map(HearingTypeDirection::getId).orElse(null);
     }
 
-    private Optional<HearingDirectionDetail> getLatestAdditionalHearingDirections(FinremCaseDetails caseDetails) {
+    private Optional<HearingDirectionDetail> getLatestAdditionalHearingDirections(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
         List<HearingDirectionDetailsCollection> additionalHearingDetailsCollection =
             caseDetails.getData().getHearingDirectionDetailsCollection();
 

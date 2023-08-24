@@ -6,7 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 
@@ -29,10 +29,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @RequiredArgsConstructor
 public class RespondentShareDocumentsService implements SharedService {
 
-    public DynamicMultiSelectList respondentSourceDocumentList(FinremCaseDetails caseDetails) {
+    public DynamicMultiSelectList respondentSourceDocumentList(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
         String caseId = String.valueOf(caseDetails.getId());
         log.info("setting respondent source document list for case {}", caseId);
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
         List<UploadCaseDocumentCollection> otherCollection

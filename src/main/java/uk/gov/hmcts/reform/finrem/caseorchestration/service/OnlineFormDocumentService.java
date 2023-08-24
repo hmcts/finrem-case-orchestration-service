@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformacontested.ContestedMiniFormADetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformacontested.ContestedMiniFormADetailsMapperContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.Map;
@@ -64,12 +64,12 @@ public class OnlineFormDocumentService {
     private final OptionIdToValueTranslator optionIdToValueTranslator;
     private final DocumentHelper documentHelper;
     private final ConsentedApplicationHelper consentedApplicationHelper;
-    private final ContestedMiniFormADetailsMapper contestedMiniFormADetailsMapper;
+    private final ContestedMiniFormADetailsMapperContested contestedMiniFormADetailsMapper;
 
     public CaseDocument generateMiniFormA(String authorisationToken, CaseDetails caseDetails) {
 
         log.info("Generating Consented Mini Form A for Case ID : {}", caseDetails.getId());
-        CaseDetails  caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getMiniFormTemplate(caseDetails),
             documentConfiguration.getMiniFormFileName());
@@ -83,10 +83,11 @@ public class OnlineFormDocumentService {
             documentConfiguration.getContestedMiniFormFileName());
     }
 
-    public CaseDocument generateContestedMiniForm(String authorisationToken, FinremCaseDetails caseDetails) {
+    public CaseDocument generateContestedMiniForm(String authorisationToken,
+                                                  FinremCaseDetails<FinremCaseDataContested> caseDetails) {
 
         log.info("Generating Contested Mini Form A for Case ID : {}", caseDetails.getId());
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         String contestedMiniFormTemplate;
         String typeOfApplication;
         if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {

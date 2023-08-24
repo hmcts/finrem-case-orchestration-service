@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contes
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -19,10 +19,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ContestOrderApprovedLetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class ContestOrderApprovedLetterDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
 
     @Autowired
-    private ContestOrderApprovedLetterDetailsMapper contestOrderApprovedLetterDetailsMapper;
+    private ContestOrderApprovedLetterDetailsMapperContested contestOrderApprovedLetterDetailsMapper;
 
     @Test
     public void givenValidCaseDataContested_whenBuildDocumentTemplateDetails_thenReturnExpectedDetails() {

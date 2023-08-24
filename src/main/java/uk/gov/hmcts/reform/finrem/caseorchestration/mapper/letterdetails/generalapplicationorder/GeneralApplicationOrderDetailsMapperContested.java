@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.genera
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -18,15 +18,16 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Component
-public class GeneralApplicationOrderDetailsMapper extends AbstractLetterDetailsMapper {
+public class GeneralApplicationOrderDetailsMapperContested extends ContestedAbstractLetterDetailsMapper {
 
-    public GeneralApplicationOrderDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+    public GeneralApplicationOrderDetailsMapperContested(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 
     @Override
-    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
-        FinremCaseData caseData = caseDetails.getData();
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                                                CourtListWrapper courtList) {
+        FinremCaseDataContested caseData = caseDetails.getData();
         final GeneralApplicationWrapper generalApplication = caseData.getGeneralApplicationWrapper();
         final FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseDocumentTabData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public abstract class DocumentDateService<T extends CaseDocumentTabData> {
         return caseData;
     }
 
-    public void addUploadDateToNewDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    public void addUploadDateToNewDocuments(FinremCaseDataContested caseData, FinremCaseDataContested caseDataBefore) {
         List<T> allDocuments = (List<T>) caseData.getUploadCaseDocumentWrapper().getAllManageableCollections();
         List<T> documentsBeforeEvent = (List<T>) caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
 

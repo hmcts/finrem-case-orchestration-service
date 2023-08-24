@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
@@ -20,9 +20,9 @@ public abstract class DocumentHandler {
     protected abstract List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections);
 
-    public void replaceManagedDocumentsInCollectionType(FinremCallbackRequest callbackRequest,
+    public void replaceManagedDocumentsInCollectionType(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
                                                         List<UploadCaseDocumentCollection> screenCollection) {
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
 
         List<UploadCaseDocumentCollection> originalCollectionForType =
             caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
@@ -41,9 +41,9 @@ public abstract class DocumentHandler {
         screenCollection.removeAll(alteredCollectionForType);
     }
 
-    public void addUploadedDocumentToDocumentCollectionType(FinremCallbackRequest callbackRequest,
+    public void addUploadedDocumentToDocumentCollectionType(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
                                                             List<UploadCaseDocumentCollection> screenCollection) {
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
 
         List<UploadCaseDocumentCollection> originalCollectionForType =
             caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);

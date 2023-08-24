@@ -6,7 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -25,7 +25,9 @@ public class IntervenerService {
     private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
 
-    public IntervenerChangeDetails removeIntervenerDetails(IntervenerWrapper intervenerWrapper, FinremCaseData caseData, Long caseId) {
+    public IntervenerChangeDetails removeIntervenerDetails(IntervenerWrapper intervenerWrapper,
+                                                           FinremCaseDataContested caseData,
+                                                           Long caseId) {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         intervenerChangeDetails.setIntervenerType(intervenerWrapper.getIntervenerType());
@@ -42,8 +44,9 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    public IntervenerChangeDetails updateIntervenerDetails(IntervenerWrapper intervenerWrapper, FinremCallbackRequest callbackRequest) {
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+    public IntervenerChangeDetails updateIntervenerDetails(IntervenerWrapper intervenerWrapper,
+                                                           FinremCallbackRequest<FinremCaseDataContested> callbackRequest) {
+        FinremCaseDetails<FinremCaseDataContested> caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         Long caseId = callbackRequest.getCaseDetails().getId();
 
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
@@ -64,7 +67,7 @@ public class IntervenerService {
                 checkIfIntervenerSolicitorDetailsChanged(intervenerWrapper, caseDetailsBefore, orgId, email);
                 addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
-                FinremCaseData beforeData = caseDetailsBefore.getData();
+                FinremCaseDataContested beforeData = caseDetailsBefore.getData();
                 IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
                 if (ObjectUtils.isNotEmpty(beforeIntv)
                     && beforeIntv.getIntervenerRepresented() != null
@@ -88,9 +91,11 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore, String orgId,
+    private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper,
+                                                          FinremCaseDetails<FinremCaseDataContested> caseDetailsBefore,
+                                                          String orgId,
                                                           String email) {
-        FinremCaseData beforeData = caseDetailsBefore.getData();
+        FinremCaseDataContested beforeData = caseDetailsBefore.getData();
         IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
 
         if (ObjectUtils.isNotEmpty(beforeIntv)
@@ -105,33 +110,40 @@ public class IntervenerService {
         }
     }
 
-    private boolean checkIfIntervenerOneSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    private boolean checkIfIntervenerOneSolicitorRemoved(FinremCaseDataContested caseData,
+                                                         FinremCaseDataContested caseDataBefore) {
         return YesOrNo.YES.equals(caseDataBefore.getIntervenerOneWrapper().getIntervenerRepresented())
             && (caseData.getIntervenerOneWrapper().getIntervenerRepresented() == null
             || YesOrNo.NO.equals(caseData.getIntervenerOneWrapper().getIntervenerRepresented()));
     }
 
-    private boolean checkIfIntervenerTwoSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    private boolean checkIfIntervenerTwoSolicitorRemoved(FinremCaseDataContested caseData,
+                                                         FinremCaseDataContested caseDataBefore) {
         return YesOrNo.YES.equals(caseDataBefore.getIntervenerTwoWrapper().getIntervenerRepresented())
             && (caseData.getIntervenerTwoWrapper().getIntervenerRepresented() == null
             || YesOrNo.NO.equals(caseData.getIntervenerTwoWrapper().getIntervenerRepresented()));
     }
 
-    private boolean checkIfIntervenerThreeSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    private boolean checkIfIntervenerThreeSolicitorRemoved(FinremCaseDataContested caseData,
+                                                           FinremCaseDataContested caseDataBefore) {
         return YesOrNo.YES.equals(caseDataBefore.getIntervenerThreeWrapper().getIntervenerRepresented())
             && (caseData.getIntervenerThreeWrapper().getIntervenerRepresented() == null
             || YesOrNo.NO.equals(caseData.getIntervenerThreeWrapper().getIntervenerRepresented()));
     }
 
-    private boolean checkIfIntervenerFourSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    private boolean checkIfIntervenerFourSolicitorRemoved(FinremCaseDataContested caseData,
+                                                          FinremCaseDataContested caseDataBefore) {
         return YesOrNo.YES.equals(caseDataBefore.getIntervenerFourWrapper().getIntervenerRepresented())
             && (caseData.getIntervenerFourWrapper().getIntervenerRepresented() == null
             || YesOrNo.NO.equals(caseData.getIntervenerFourWrapper().getIntervenerRepresented()));
     }
 
-    public boolean checkIfAnyIntervenerSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        return checkIfIntervenerOneSolicitorRemoved(caseData, caseDataBefore) || checkIfIntervenerTwoSolicitorRemoved(caseData, caseDataBefore)
-            || checkIfIntervenerThreeSolicitorRemoved(caseData, caseDataBefore) || checkIfIntervenerFourSolicitorRemoved(caseData, caseDataBefore);
+    public boolean checkIfAnyIntervenerSolicitorRemoved(FinremCaseDataContested caseData,
+                                                        FinremCaseDataContested caseDataBefore) {
+        return checkIfIntervenerOneSolicitorRemoved(caseData, caseDataBefore)
+            || checkIfIntervenerTwoSolicitorRemoved(caseData, caseDataBefore)
+            || checkIfIntervenerThreeSolicitorRemoved(caseData, caseDataBefore)
+            || checkIfIntervenerFourSolicitorRemoved(caseData, caseDataBefore);
     }
 
     private void setDefaultOrgForintervener(IntervenerWrapper intervenerWrapper) {

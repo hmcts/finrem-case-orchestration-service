@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BristolCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -23,12 +23,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class FormCLetterDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2022, 1, 1);
 
     @Autowired
-    private FormCLetterDetailsMapper formCLetterDetailsMapper;
+    private FormCLetterDetailsMapperContested formCLetterDetailsMapper;
 
     @Before
     public void setUp() {

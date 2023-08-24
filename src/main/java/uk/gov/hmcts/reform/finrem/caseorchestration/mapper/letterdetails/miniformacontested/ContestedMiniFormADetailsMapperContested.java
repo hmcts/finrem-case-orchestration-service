@@ -4,20 +4,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamDomesticViolence;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamExemption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamUrgencyReason;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureOfApplicationSchedule;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContestedContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ContestedMiniFormADetails;
@@ -32,17 +32,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.getYesOrNo;
 
 @Component
-public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper {
+public class ContestedMiniFormADetailsMapperContested extends ContestedAbstractLetterDetailsMapper {
 
-    public ContestedMiniFormADetailsMapper(CourtDetailsMapper courtDetailsMapper,
-                                           ObjectMapper objectMapper) {
+    public ContestedMiniFormADetailsMapperContested(CourtDetailsMapper courtDetailsMapper,
+                                                    ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
-        ContactDetailsWrapper contactDetails = caseDetails.getData().getContactDetailsWrapper();
-        FinremCaseData caseData = caseDetails.getData();
+        ContestedContactDetailsWrapper contactDetails =
+            (ContestedContactDetailsWrapper) caseDetails.getData().getContactDetailsWrapper();
+        FinremCaseDataContested caseData = (FinremCaseDataContested) caseDetails.getData();
 
         ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder =
             setApplicantDetails(ContestedMiniFormADetails.builder(), contactDetails, caseData);
@@ -56,7 +57,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             builder = setNatureApplicationDetailsSchedule(builder, caseData);
         }
         builder = setCoreCaseData(builder, caseData, contactDetails);
-        builder = setMiamDetails(builder, caseData, caseDetails.getData().getMiamWrapper());
+        builder = setMiamDetails(builder, caseData, caseData.getMiamWrapper());
         builder = builder.caseNumber(caseDetails.getId().toString());
 
         return builder.build();
@@ -64,8 +65,8 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
     private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setApplicantDetails(
         ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
-        ContactDetailsWrapper contactDetails,
-        FinremCaseData caseData) {
+        ContestedContactDetailsWrapper contactDetails,
+        FinremCaseDataContested caseData) {
 
         return builder
             .applicantFmName(contactDetails.getApplicantFmName())
@@ -83,8 +84,8 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
     private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setRespondentDetails(
         ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
-        ContactDetailsWrapper contactDetails,
-        FinremCaseData caseData) {
+        ContestedContactDetailsWrapper contactDetails,
+        FinremCaseDataContested caseData) {
 
         return builder
             .respondentFmName(contactDetails.getRespondentFmName())
@@ -104,10 +105,8 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
     private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setNatureApplicationDetails(
         ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
-        FinremCaseData caseData) {
+        FinremCaseDataContested caseData) {
         return builder
-            .natureOfApplicationChecklist(getNatureOfApplicationChecklist(caseData))
-            .natureOfApplication7(caseData.getNatureApplicationWrapper().getNatureOfApplication7())
             .mortgageDetail(caseData.getMortgageDetail())
             .propertyAddress(caseData.getPropertyAddress())
             .propertyAdjustmentOrderDetail(getPropertyAdjustmentOrderDetailCollection(caseData))
@@ -118,10 +117,9 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
     private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setNatureApplicationDetailsSchedule(
         ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
-        FinremCaseData caseData) {
+        FinremCaseDataContested caseData) {
         return builder
             .natureOfApplicationChecklistSchedule(getNatureOfApplicationChecklistSchedule(caseData))
-            .natureOfApplication7(caseData.getNatureApplicationWrapper().getNatureOfApplication7())
             .mortgageDetail(caseData.getMortgageDetail())
             .propertyAddress(caseData.getPropertyAddress())
             .propertyAdjustmentOrderDetail(getPropertyAdjustmentOrderDetailCollection(caseData))
@@ -132,7 +130,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
     private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setCoreCaseData(
         ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
-        FinremCaseData caseData,
+        FinremCaseDataContested caseData,
         ContactDetailsWrapper contactDetails) {
         return builder
             .fastTrackDecision(getYesOrNo(caseData.getFastTrackDecision()))
@@ -145,7 +143,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .authorisation3(String.valueOf(caseData.getAuthorisation3()));
     }
 
-    private String getDefaultTypeOfApplicationIfNotPresent(FinremCaseData caseData) {
+    private String getDefaultTypeOfApplicationIfNotPresent(FinremCaseDataContested caseData) {
         if (ObjectUtils.isNotEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {
             return caseData.getScheduleOneWrapper().getTypeOfApplication().getValue();
         }
@@ -154,7 +152,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
     private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setMiamDetails(
         ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
-        FinremCaseData caseData,
+        FinremCaseDataContested caseData,
         MiamWrapper miamDetails) {
         return builder
             .claimingExemptionMiam(getYesOrNo(miamDetails.getClaimingExemptionMiam()))
@@ -182,17 +180,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .orElse(null);
     }
 
-
-    private List<String> getNatureOfApplicationChecklist(FinremCaseData caseData) {
-        List<NatureApplication> natureApplicationList = caseData.getNatureApplicationWrapper()
-            .getNatureOfApplicationChecklist();
-
-        return Optional.ofNullable(natureApplicationList).orElse(Collections.emptyList()).stream()
-            .map(NatureApplication::getText)
-            .toList();
-    }
-
-    private List<String> getNatureOfApplicationChecklistSchedule(FinremCaseData caseData) {
+    private List<String> getNatureOfApplicationChecklistSchedule(FinremCaseDataContested caseData) {
         List<NatureOfApplicationSchedule> natureOfApplicationChecklistSchedule = caseData.getScheduleOneWrapper()
             .getNatureOfApplicationChecklistSchedule();
 
@@ -201,7 +189,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .toList();
     }
 
-    private List<String> getBenefitPaymentChecklistSchedule(FinremCaseData caseData) {
+    private List<String> getBenefitPaymentChecklistSchedule(FinremCaseDataContested caseData) {
         List<BenefitPaymentChecklist> benefitPaymentChecklistSchedule = caseData.getBenefitPaymentChecklistSchedule();
 
         return Optional.ofNullable(benefitPaymentChecklistSchedule).orElse(Collections.emptyList()).stream()
@@ -209,7 +197,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .toList();
     }
 
-    private List<String> getBenefitPaymentChecklist(FinremCaseData caseData) {
+    private List<String> getBenefitPaymentChecklist(FinremCaseDataContested caseData) {
         List<BenefitPayment> benefitPaymentChecklist = caseData.getBenefitPaymentChecklist();
 
         return Optional.ofNullable(benefitPaymentChecklist).orElse(Collections.emptyList()).stream()
@@ -217,7 +205,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .toList();
     }
 
-    private List<String> getMiamExemptionsChecklist(FinremCaseData caseData) {
+    private List<String> getMiamExemptionsChecklist(FinremCaseDataContested caseData) {
         List<MiamExemption> miamExemptions = caseData.getMiamWrapper().getMiamExemptionsChecklist();
 
         return Optional.ofNullable(miamExemptions).orElse(Collections.emptyList()).stream()
@@ -225,7 +213,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .toList();
     }
 
-    private List<String> getMiamDomesticViolenceChecklist(FinremCaseData caseData) {
+    private List<String> getMiamDomesticViolenceChecklist(FinremCaseDataContested caseData) {
         List<MiamDomesticViolence> domesticViolenceCheklist = caseData.getMiamWrapper().getMiamDomesticViolenceChecklist();
 
         return Optional.ofNullable(domesticViolenceCheklist).orElse(Collections.emptyList()).stream()
@@ -233,7 +221,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .toList();
     }
 
-    private List<String> getMiamUrgencyReasonsChecklist(FinremCaseData caseData) {
+    private List<String> getMiamUrgencyReasonsChecklist(FinremCaseDataContested caseData) {
         List<MiamUrgencyReason> miamUrgencyReasons = caseData.getMiamWrapper().getMiamUrgencyReasonChecklist();
 
         return Optional.ofNullable(miamUrgencyReasons).orElse(Collections.emptyList()).stream()
@@ -241,7 +229,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .toList();
     }
 
-    private List<PropertyAdjustmentOrderCollection> getPropertyAdjustmentOrderDetailCollection(FinremCaseData caseData) {
+    private List<PropertyAdjustmentOrderCollection> getPropertyAdjustmentOrderDetailCollection(FinremCaseDataContested caseData) {
         return Optional.ofNullable(caseData.getPropertyAdjustmentOrderDetail()).orElse(Collections.emptyList());
     }
 }

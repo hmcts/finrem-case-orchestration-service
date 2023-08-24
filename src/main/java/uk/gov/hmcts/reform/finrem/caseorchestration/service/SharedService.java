@@ -4,7 +4,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
@@ -109,10 +109,10 @@ public interface SharedService {
         }
     }
 
-    default DynamicMultiSelectList getOtherSolicitorRoleList(FinremCaseDetails caseDetails,
+    default DynamicMultiSelectList getOtherSolicitorRoleList(FinremCaseDetails<FinremCaseDataContested> caseDetails,
                                                              List<CaseAssignmentUserRole> caseAssignedUserRoleList,
                                                              String loggedInUserCaseRole) {
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
         if (!caseAssignedUserRoleList.isEmpty()) {
@@ -146,7 +146,7 @@ public interface SharedService {
             .uploadCaseDocument(sd.getUploadCaseDocument()).build();
     }
 
-    default void copySharedDocumentsInSharedCollection(FinremCaseData caseData,
+    default void copySharedDocumentsInSharedCollection(FinremCaseDataContested caseData,
                                                        String role,
                                                        List<DynamicMultiSelectListElement> documentList) {
         documentList.forEach(doc -> {
@@ -167,7 +167,7 @@ public interface SharedService {
         });
     }
 
-    private void copySelectedOtherFiles(FinremCaseData caseData,
+    private void copySelectedOtherFiles(FinremCaseDataContested caseData,
                                         String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> docs = new ArrayList<>();
         docs = getUploadCaseOtherDocumentCollections(caseData, collName, docs);
@@ -187,9 +187,9 @@ public interface SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getUploadCaseOtherDocumentCollections(FinremCaseData caseData,
-                                                                                            String collName,
-                                                                                            List<UploadCaseDocumentCollection> docs) {
+    private List<UploadCaseDocumentCollection> getUploadCaseOtherDocumentCollections(FinremCaseDataContested caseData,
+                                                                                     String collName,
+                                                                                     List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
         if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getAppOtherCollection();
@@ -207,7 +207,7 @@ public interface SharedService {
         return docs;
     }
 
-    private void copySelectedFormEFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+    private void copySelectedFormEFiles(FinremCaseDataContested caseData, String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> docs = new ArrayList<>();
         docs = getUploadCaseFormEsExDocumentCollections(caseData, collName, docs);
 
@@ -226,7 +226,7 @@ public interface SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getUploadCaseFormEsExDocumentCollections(FinremCaseData caseData,
+    private List<UploadCaseDocumentCollection> getUploadCaseFormEsExDocumentCollections(FinremCaseDataContested caseData,
                                                                                         String collName,
                                                                                         List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
@@ -247,7 +247,7 @@ public interface SharedService {
     }
 
 
-    private void copySelectedCorresFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+    private void copySelectedCorresFiles(FinremCaseDataContested caseData, String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> docs = new ArrayList<>();
         docs = getUploadCaseCorresDocumentCollections(caseData, collName, docs);
 
@@ -266,9 +266,9 @@ public interface SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getUploadCaseCorresDocumentCollections(FinremCaseData caseData,
-                                                                                             String collName,
-                                                                                             List<UploadCaseDocumentCollection> docs) {
+    private List<UploadCaseDocumentCollection> getUploadCaseCorresDocumentCollections(FinremCaseDataContested caseData,
+                                                                                      String collName,
+                                                                                      List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
         if (collName.equalsIgnoreCase(APPLICANT_CORRESPONDENCE_DOC_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getAppCorrespondenceDocsCollection();
@@ -286,7 +286,7 @@ public interface SharedService {
         return docs;
     }
 
-    private void copySelectedExpertFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+    private void copySelectedExpertFiles(FinremCaseDataContested caseData, String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> docs = new ArrayList<>();
         docs = getUploadCaseExpertDocumentCollections(caseData, collName, docs);
 
@@ -305,7 +305,7 @@ public interface SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getUploadCaseExpertDocumentCollections(FinremCaseData caseData,
+    private List<UploadCaseDocumentCollection> getUploadCaseExpertDocumentCollections(FinremCaseDataContested caseData,
                                                                                       String collName,
                                                                                       List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
@@ -325,7 +325,7 @@ public interface SharedService {
         return docs;
     }
 
-    private void copySelectedFormHFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+    private void copySelectedFormHFiles(FinremCaseDataContested caseData, String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> docs = new ArrayList<>();
         docs = getUploadCaseFormHsDocumentCollections(caseData, collName, docs);
 
@@ -344,7 +344,7 @@ public interface SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getUploadCaseFormHsDocumentCollections(FinremCaseData caseData,
+    private List<UploadCaseDocumentCollection> getUploadCaseFormHsDocumentCollections(FinremCaseDataContested caseData,
                                                                                       String collName,
                                                                                       List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
@@ -364,7 +364,7 @@ public interface SharedService {
         return docs;
     }
 
-    private void copySelectedHearingFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+    private void copySelectedHearingFiles(FinremCaseDataContested caseData, String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> docs = new ArrayList<>();
         docs = getUploadCaseHearingDocumentCollections(caseData, collName, docs);
 
@@ -384,9 +384,9 @@ public interface SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getUploadCaseHearingDocumentCollections(FinremCaseData caseData,
-                                                                                              String collName,
-                                                                                              List<UploadCaseDocumentCollection> docs) {
+    private List<UploadCaseDocumentCollection> getUploadCaseHearingDocumentCollections(FinremCaseDataContested caseData,
+                                                                                       String collName,
+                                                                                       List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
         if (collName.equalsIgnoreCase(APP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getAppHearingBundlesCollection();
@@ -404,7 +404,7 @@ public interface SharedService {
         return docs;
     }
 
-    private void copySelectedSummariesFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+    private void copySelectedSummariesFiles(FinremCaseDataContested caseData, String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> docs = new ArrayList<>();
         docs = getUploadCaseSummeriesDocumentCollections(caseData, collName, docs);
 
@@ -424,7 +424,7 @@ public interface SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getUploadCaseSummeriesDocumentCollections(FinremCaseData caseData,
+    private List<UploadCaseDocumentCollection> getUploadCaseSummeriesDocumentCollections(FinremCaseDataContested caseData,
                                                                                          String collName,
                                                                                          List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
@@ -444,7 +444,7 @@ public interface SharedService {
         return docs;
     }
 
-    private void copySelectedStmtExhibitsFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+    private void copySelectedStmtExhibitsFiles(FinremCaseDataContested caseData, String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> docs = new ArrayList<>();
         docs = getUploadCaseStmtDocumentCollections(caseData, collName, docs);
 
@@ -464,9 +464,9 @@ public interface SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getUploadCaseStmtDocumentCollections(FinremCaseData caseData,
-                                                                                           String collName,
-                                                                                           List<UploadCaseDocumentCollection> docs) {
+    private List<UploadCaseDocumentCollection> getUploadCaseStmtDocumentCollections(FinremCaseDataContested caseData,
+                                                                                    String collName,
+                                                                                    List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
         if (collName.equalsIgnoreCase(APP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
             docs = documentWrapper.getAppStatementsExhibitsCollection();
@@ -484,7 +484,7 @@ public interface SharedService {
         return docs;
     }
 
-    private void copySelectedQaFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+    private void copySelectedQaFiles(FinremCaseDataContested caseData, String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> docs = new ArrayList<>();
         docs = getUploadCaseQaDocumentCollections(caseData, collName, docs);
 
@@ -504,7 +504,7 @@ public interface SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getUploadCaseQaDocumentCollections(FinremCaseData caseData,
+    private List<UploadCaseDocumentCollection> getUploadCaseQaDocumentCollections(FinremCaseDataContested caseData,
                                                                                   String collName,
                                                                                   List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
@@ -524,7 +524,7 @@ public interface SharedService {
         return docs;
     }
 
-    private void copySelectedChronologiesFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+    private void copySelectedChronologiesFiles(FinremCaseDataContested caseData, String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> docs = new ArrayList<>();
         docs = getUploadCaseChronoDocumentCollections(caseData, collName, docs);
 
@@ -544,7 +544,7 @@ public interface SharedService {
         }
     }
 
-    private List<UploadCaseDocumentCollection> getUploadCaseChronoDocumentCollections(FinremCaseData caseData,
+    private List<UploadCaseDocumentCollection> getUploadCaseChronoDocumentCollections(FinremCaseDataContested caseData,
                                                                                       String collName,
                                                                                       List<UploadCaseDocumentCollection> docs) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
@@ -564,7 +564,7 @@ public interface SharedService {
         return docs;
     }
 
-    default void setIntv1CorrespDocsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv1CorrespDocsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -577,7 +577,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1ExpertEvidenceShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv1ExpertEvidenceShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> intv1Collection =
@@ -590,7 +590,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1FormHsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv1FormHsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> intv1Collection =
@@ -603,7 +603,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1HearingBundlesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv1HearingBundlesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -617,7 +617,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1SummariesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv1SummariesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> intv1Collection =
@@ -630,7 +630,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1StmtsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv1StmtsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -644,7 +644,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1QaShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
+    default void setIntv1QaShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
         appQaCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -657,7 +657,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1ChronologiesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
+    default void setIntv1ChronologiesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
         appChronologiesCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -671,7 +671,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1FormEsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
+    default void setIntv1FormEsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
         appFormEExhibitsCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> intv1Collection =
@@ -685,7 +685,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1OtherShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv1OtherShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -698,7 +698,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2CorrespDocsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv2CorrespDocsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -711,7 +711,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2ExpertEvidenceShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv2ExpertEvidenceShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -724,7 +724,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2FormHsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv2FormHsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -737,7 +737,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2HearingBundlesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv2HearingBundlesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -750,7 +750,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2SummariesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv2SummariesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -763,7 +763,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2StmtsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv2StmtsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -775,7 +775,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2QaShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
+    default void setIntv2QaShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
         appQaCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -788,7 +788,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2ChronologiesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
+    default void setIntv2ChronologiesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
         appChronologiesCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -801,7 +801,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2FormEsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
+    default void setIntv2FormEsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
         appFormEExhibitsCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -814,7 +814,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2OtherShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv2OtherShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(d -> {
             if (String.valueOf(d.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -827,7 +827,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3CorrespDocsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv3CorrespDocsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -840,7 +840,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3ExpertEvidenceShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv3ExpertEvidenceShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -854,7 +854,7 @@ public interface SharedService {
     }
 
 
-    default void setIntv3FormHsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv3FormHsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -867,7 +867,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3HearingBundlesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv3HearingBundlesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -880,7 +880,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3SummariesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv3SummariesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -893,7 +893,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3StmtsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv3StmtsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -906,7 +906,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3QaShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
+    default void setIntv3QaShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
         appQaCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -919,7 +919,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3ChronologiesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
+    default void setIntv3ChronologiesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
         appChronologiesCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -932,7 +932,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3FormEsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
+    default void setIntv3FormEsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
         appFormEExhibitsCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -944,7 +944,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3OtherShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appOtherCollection) {
+    default void setIntv3OtherShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appOtherCollection) {
         appOtherCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -958,7 +958,7 @@ public interface SharedService {
     }
 
 
-    default void setIntv4CorrespDocsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv4CorrespDocsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -970,7 +970,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4ExpertEvidenceShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv4ExpertEvidenceShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -983,7 +983,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4FormHsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv4FormHsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -997,7 +997,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4HearingBundlesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv4HearingBundlesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1010,7 +1010,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4SummariesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv4SummariesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1024,7 +1024,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4StmtsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv4StmtsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1037,7 +1037,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4QaShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
+    default void setIntv4QaShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
         appQaCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1051,7 +1051,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4ChronologiesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
+    default void setIntv4ChronologiesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
         appChronologiesCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1064,7 +1064,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4FormEsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
+    default void setIntv4FormEsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
         appFormEExhibitsCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1078,7 +1078,7 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4OtherShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> appOtherCollection) {
+    default void setIntv4OtherShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appOtherCollection) {
         appOtherCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1091,7 +1091,7 @@ public interface SharedService {
         });
     }
 
-    default void setAppOtherShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setAppOtherShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1103,7 +1103,7 @@ public interface SharedService {
         });
     }
 
-    default void setAppFormEsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setAppFormEsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1115,7 +1115,7 @@ public interface SharedService {
         });
     }
 
-    default void setAppCorrespDocsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setAppCorrespDocsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1127,7 +1127,7 @@ public interface SharedService {
         });
     }
 
-    default void setAppExpertEvidenceShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setAppExpertEvidenceShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1139,7 +1139,7 @@ public interface SharedService {
         });
     }
 
-    default void setAppHearingBundlesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setAppHearingBundlesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1151,7 +1151,7 @@ public interface SharedService {
         });
     }
 
-    default void setAppSummariesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setAppSummariesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1163,7 +1163,7 @@ public interface SharedService {
         });
     }
 
-    default void setAppStmtsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setAppStmtsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1175,7 +1175,7 @@ public interface SharedService {
         });
     }
 
-    default void setAppQaShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setAppQaShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1187,7 +1187,7 @@ public interface SharedService {
         });
     }
 
-    default void setAppChronologiesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setAppChronologiesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1199,7 +1199,7 @@ public interface SharedService {
         });
     }
 
-    default void setAppFormHsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setAppFormHsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1212,8 +1212,7 @@ public interface SharedService {
     }
 
 
-
-    default void setRespOtherShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setRespOtherShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1225,7 +1224,7 @@ public interface SharedService {
         });
     }
 
-    default void setRespFormEsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setRespFormEsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1237,7 +1236,7 @@ public interface SharedService {
         });
     }
 
-    default void setRespCorrespDocsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setRespCorrespDocsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1249,7 +1248,7 @@ public interface SharedService {
         });
     }
 
-    default void setRespExpertEvidenceShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setRespExpertEvidenceShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1261,7 +1260,7 @@ public interface SharedService {
         });
     }
 
-    default void setRespHearingBundlesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setRespHearingBundlesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1273,7 +1272,7 @@ public interface SharedService {
         });
     }
 
-    default void setRespSummariesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setRespSummariesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1285,7 +1284,7 @@ public interface SharedService {
         });
     }
 
-    default void setRespStmtsExhibitsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setRespStmtsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1297,7 +1296,7 @@ public interface SharedService {
         });
     }
 
-    default void setRespQaShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setRespQaShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1309,7 +1308,7 @@ public interface SharedService {
         });
     }
 
-    default void setRespChronologiesShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setRespChronologiesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1321,7 +1320,7 @@ public interface SharedService {
         });
     }
 
-    default void setRespFormHsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setRespFormHsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =

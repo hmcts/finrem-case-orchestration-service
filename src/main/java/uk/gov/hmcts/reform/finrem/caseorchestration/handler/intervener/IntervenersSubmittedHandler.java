@@ -9,11 +9,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerAddedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerRemovedCorresponder;
+
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_FOUR_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_ONE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_THREE_CODE;
@@ -29,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 
 @Slf4j
 @Service
-public class IntervenersSubmittedHandler extends FinremCallbackHandler {
+public class IntervenersSubmittedHandler extends FinremCallbackHandler<FinremCaseDataContested> {
     private final IntervenerService service;
     private final IntervenerAddedCorresponder intervenerAddedCorresponder;
     private final IntervenerRemovedCorresponder intervenerRemovedCorresponder;
@@ -51,13 +52,13 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+                                                                                       String userAuthorisation) {
         Long caseId = callbackRequest.getCaseDetails().getId();
         log.info("Invoking contested event {}, callback {} callback for case id: {}",
             callbackRequest.getEventType(), CallbackType.SUBMITTED, caseId);
-        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
         String intervenerType = caseData.getIntervenersList().getValueCode();
         String selectedOperationCode;
         boolean wasIntervenerSolicitorRemoved = service.checkIfAnyIntervenerSolicitorRemoved(caseData, caseDataBefore);
@@ -106,7 +107,7 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
             log.info("sending Removed Intervener Correspondence for case id: {}", caseId);
             intervenerRemovedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails(), userAuthorisation);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(caseData).build();
 
     }

@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifo
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
@@ -29,13 +29,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class ContestedMiniFormADetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
 
     private static final String TEST_JSON = "/fixtures/contested/contested-mini-form-a-details.json";
     private static final String SCHEDULE_1_TEST_JSON = "/fixtures/contested/contested-mini-form-a-details-schedule-1.json";
 
     @Autowired
-    private ContestedMiniFormADetailsMapper contestedMiniFormADetailsMapper;
+    private ContestedMiniFormADetailsMapperContested contestedMiniFormADetailsMapper;
 
     @Before
     public void setUp() throws Exception {
@@ -67,7 +67,7 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
     public void givenEmptyOrNullFields_whenBuildDocumentTemplateDetails_thenDoNotThrowException() {
         FinremCaseDetails emptyDetails = FinremCaseDetails.builder().id(1596638099618923L)
             .data(FinremCaseData.builder().scheduleOneWrapper(ScheduleOneWrapper.builder()
-                .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build())
+                    .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build())
                 .build()).build();
 
         DocumentTemplateDetails actual = contestedMiniFormADetailsMapper.buildDocumentTemplateDetails(emptyDetails,

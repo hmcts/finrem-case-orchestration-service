@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -53,9 +53,9 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     private FdrDocumentsHandler fdrDocumentsCollectionService;
     private RespondentQuestionnairesAnswersHandler respondentQuestionnairesAnswersCollectionService;
     private ManageCaseDocumentsContestedAboutToSubmitHandler manageCaseDocumentsAboutToSubmitCaseHandler;
-    private FinremCaseDetails caseDetails;
-    private FinremCaseDetails caseDetailsBefore;
-    private FinremCaseData caseData;
+    private FinremCaseDetails<FinremCaseDataContested> caseDetails;
+    private FinremCaseDetails<FinremCaseDataContested> caseDetailsBefore;
+    private FinremCaseDataContested caseData;
     private List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
 
 
@@ -111,7 +111,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         manageCaseDocumentsAboutToSubmitCaseHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -161,10 +162,10 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     }
 
     private UploadCaseDocumentCollection createContestedUploadDocumentItem(CaseDocumentType type,
-                                                                             CaseDocumentParty party,
-                                                                             YesOrNo isConfidential,
-                                                                             YesOrNo isFdr,
-                                                                             String other) {
+                                                                           CaseDocumentParty party,
+                                                                           YesOrNo isConfidential,
+                                                                           YesOrNo isFdr,
+                                                                           String other) {
         UUID uuid = UUID.randomUUID();
 
         return UploadCaseDocumentCollection.builder()
@@ -183,11 +184,11 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             .build();
     }
 
-    protected FinremCaseDetails buildCaseDetails() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
+    protected FinremCaseDetails<FinremCaseDataContested> buildCaseDetails() {
+        FinremCaseDataContested finremCaseData = FinremCaseDataContested.builder()
             .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder().build())
             .build();
-        return FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED)
+        return FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CaseType.CONTESTED)
             .data(finremCaseData).build();
     }
 }

@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.additionalhearing.AdditionalHearingDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.additionalhearing.AdditionalHearingDetailsMapperContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AdditionalHearingDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
@@ -15,12 +15,12 @@ import java.util.Map;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AdditionalHearingDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class AdditionalHearingDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
 
     public static final String BULK_PRINT_ADDITIONAL_HEARING_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
 
     @Autowired
-    AdditionalHearingDetailsMapper additionalHearingDetailsMapper;
+    AdditionalHearingDetailsMapperContested additionalHearingDetailsMapper;
 
     @Before
     public void setUp() {

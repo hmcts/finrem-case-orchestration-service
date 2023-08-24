@@ -6,19 +6,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 @Data
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Jacksonized
-public class FinremCallbackRequest {
+public class FinremCallbackRequest<T extends FinremCaseData> {
 
     @JsonProperty("case_details")
-    private FinremCaseDetails caseDetails;
+    private FinremCaseDetails<T> caseDetails;
 
     @JsonProperty("case_details_before")
-    private FinremCaseDetails caseDetailsBefore;
+    private FinremCaseDetails<T> caseDetailsBefore;
 
     @JsonProperty("event_id")
     private EventType eventType;
