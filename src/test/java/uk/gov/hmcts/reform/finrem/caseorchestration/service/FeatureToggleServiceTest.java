@@ -31,11 +31,6 @@ public class FeatureToggleServiceTest {
         private FeatureToggleService featureToggleService;
 
         @Test
-        public void isSendToFRCEnabledReturnsTrue() {
-            assertThat(featureToggleService.isSendToFRCEnabled(), is(true));
-        }
-
-        @Test
         public void isAssignCaseAccessEnabledReturnsTrue() {
             assertThat(featureToggleService.isAssignCaseAccessEnabled(), is(true));
         }
@@ -63,11 +58,6 @@ public class FeatureToggleServiceTest {
             Map<Class, List<String>> ignoredFields = Maps.newHashMap();
             ignoredFields.put(UploadCaseDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
             assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(ignoredFields));
-        }
-
-        @Test
-        public void isSendToFRCEnabledReturnsFalse() {
-            assertThat(featureToggleService.isSendToFRCEnabled(), is(false));
         }
 
         @Test
