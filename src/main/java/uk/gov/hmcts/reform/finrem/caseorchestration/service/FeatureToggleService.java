@@ -22,7 +22,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.INTERV
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SOLICITOR_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.USE_USER_TOKEN;
 
@@ -75,10 +74,6 @@ public class FeatureToggleService {
      * Removing will result in test account being emailed, rather than actual FRCs
      * Court Emails are defined in court-details.json
      */
-    public boolean isSendToFRCEnabled() {
-        return isFeatureEnabled(SEND_TO_FRC);
-    }
-
     public boolean isCaseworkerNoCEnabled() {
         return isFeatureEnabled(CASEWORKER_NOTICE_OF_CHANGE);
     }
