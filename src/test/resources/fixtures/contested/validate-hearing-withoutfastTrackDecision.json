@@ -35,7 +35,6 @@
       "authorisation2b": "test",
       "otherCollection": [
         {
-          "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
           "value": {
             "typeOfDocument": "ScheduleOfAssets",
             "uploadedDocument": {
@@ -46,7 +45,6 @@
           }
         }
       ],
-      "respondentEmail": null,
       "respondentPhone": "9963472494",
       "appRespondentRep": "No",
       "consentOrderText": {
@@ -103,7 +101,6 @@
         "AddressLine2": "AddressGlobalUK",
         "AddressLine3": "London"
       },
-      "solicitorDXnumber": null,
       "appRespondentLName": "Korivi",
       "solicitorReference": "LL01",
       "appRespondentFMName": "test",
@@ -136,7 +133,15 @@
         "document_binary_url": "http://dm-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
       },
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "No"
+      "solicitorAgreeToReceiveEmails": "No",
+      "intervener1": {
+      },
+      "intervener2": {
+      },
+      "intervener3": {
+      },
+      "intervener4": {
+      }
     }
   }
 }
