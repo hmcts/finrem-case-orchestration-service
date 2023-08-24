@@ -1092,13 +1092,12 @@ public class NotificationService {
     @Deprecated(since = "15-june-2023")
     public void sendContestedGeneralApplicationOutcomeEmail(CaseDetails caseDetails) throws IOException {
         String recipientEmail = DEFAULT_EMAIL;
-        if (featureToggleService.isSendToFRCEnabled()) {
+
             Map<String, Object> data = caseDetails.getData();
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
 
             recipientEmail = (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
-        }
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(recipientEmail);
@@ -1110,11 +1109,10 @@ public class NotificationService {
 
     public void sendContestedGeneralApplicationOutcomeEmail(FinremCaseDetails caseDetails) throws IOException {
         String recipientEmail = DEFAULT_EMAIL;
-        if (featureToggleService.isSendToFRCEnabled()) {
+
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseDetails.getData().getSelectedAllocatedCourt());
             recipientEmail = (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
-        }
 
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(recipientEmail);
@@ -1816,24 +1814,24 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     private String getRecipientEmail(CaseDetails caseDetails) throws JsonProcessingException {
-        if (featureToggleService.isSendToFRCEnabled()) {
+
             Map<String, Object> data = caseDetails.getData();
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
 
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
-        }
+
         return DEFAULT_EMAIL;
     }
 
 
     private String getRecipientEmail(FinremCaseDetails caseDetails) throws JsonProcessingException {
-        if (featureToggleService.isSendToFRCEnabled()) {
+
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseDetails.getData().getSelectedAllocatedCourt());
 
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
-        }
+
         return DEFAULT_EMAIL;
     }
 }
