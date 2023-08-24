@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -96,9 +95,12 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     private static final String HANDLER_URL = "/case-orchestration/ccdSubmittedEvent";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
-    @Autowired protected ObjectMapper objectMapper;
-    @Autowired protected MockMvc webClient;
-    @Autowired protected DocumentConfiguration config;
+    @Autowired
+    protected ObjectMapper objectMapper;
+    @Autowired
+    protected MockMvc webClient;
+    @Autowired
+    protected DocumentConfiguration config;
 
     @ClassRule
     public static WireMockClassRule documentGeneratorServiceClass = new WireMockClassRule(4001);
@@ -163,7 +165,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         data.put(FORM_G, caseDocument());
         data.put(MINI_FORM_A, caseDocument());
         data.put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
-        data.put(HEARING_ADDITIONAL_DOC,caseDocument());
+        data.put(HEARING_ADDITIONAL_DOC, caseDocument());
 
         MvcResult mvcResult;
         int requestsMade = 0;
@@ -173,10 +175,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             }
 
             mvcResult = webClient.perform(MockMvcRequestBuilders.post(HANDLER_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE)
-                .accept(APPLICATION_JSON_VALUE))
+                    .content(objectMapper.writeValueAsString(request))
+                    .header(AUTHORIZATION, AUTH_TOKEN)
+                    .contentType(APPLICATION_JSON_VALUE)
+                    .accept(APPLICATION_JSON_VALUE))
                 .andReturn();
         } while (++requestsMade < 5 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
 
@@ -202,10 +204,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         generateDocumentServiceErrorStub(pdfGenerationRequest(config.getFormGTemplate(request.getCaseDetails())));
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE)
-            .accept(APPLICATION_JSON_VALUE))
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -214,10 +216,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         caseDetails.getData().put(missingFieldKey, null);
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE)
-            .accept(APPLICATION_JSON_VALUE))
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().json(expectedErrorData(), true));
     }
@@ -258,7 +260,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     private void generateDocumentServiceSuccessStub(PdfDocumentRequest documentRequest) throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-//            .withRequestBody(equalToJson(objectMapper.writeValueAsString(pdfGenerationRequest(config.getBulkPrintTemplate())), true, true))
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
