@@ -63,7 +63,6 @@ class PartyServiceTest {
 
 
         Assertions.assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
-        Assertions.assertEquals(2, partiesOnCase.getValue().size(), "pre-selected parties");
     }
 
     @Test
@@ -103,7 +102,6 @@ class PartyServiceTest {
         DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyList(caseDetails);
 
         Assertions.assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
-        Assertions.assertEquals(2, partiesOnCase.getValue().size(), "selected parties");
     }
 
     private DynamicMultiSelectListElement getDynamicElementList(String role) {

@@ -59,7 +59,6 @@ public class PartyService {
                                                List<DynamicMultiSelectListElement> defaultDynamicListElements) {
 
         return DynamicMultiSelectList.builder()
-                .value(defaultDynamicListElements)
                 .listItems(dynamicMultiSelectListElement)
                 .build();
 
