@@ -57,7 +57,7 @@ public class PartyService {
     private DynamicMultiSelectList getRoleList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
                                                DynamicMultiSelectList selectedRoles,
                                                List<DynamicMultiSelectListElement> defaultDynamicListElements) {
-        if (selectedRoles != null) {
+        if (selectedRoles != null && selectedRoles.getValue() != null && selectedRoles.getValue().size() == 1) {
             return DynamicMultiSelectList.builder()
                     .value(selectedRoles.getValue())
                     .listItems(dynamicMultiSelectListElement)
