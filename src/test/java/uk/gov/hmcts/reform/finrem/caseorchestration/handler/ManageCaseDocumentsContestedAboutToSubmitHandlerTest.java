@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -44,6 +45,11 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.ManageCaseDocumentsContestedAboutToSubmitHandler.CHOOSE_A_DIFFERENT_PARTY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.ManageCaseDocumentsContestedAboutToSubmitHandler.INTERVENER_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.ManageCaseDocumentsContestedAboutToSubmitHandler.INTERVENER_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.ManageCaseDocumentsContestedAboutToSubmitHandler.INTERVENER_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.ManageCaseDocumentsContestedAboutToSubmitHandler.INTERVENER_4;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
@@ -153,6 +159,70 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         verify(evidenceManagementDeleteService, times(1)).delete(DOCUMENT_URL_TEST, AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenACaseWithoutIntervenersAndManagedDocIntoIntv1_WhenHandle_thenThrowValidationError() {
+        setUpRemovedDocuments();
+        setUpAddedDocuments();
+
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentCollection().get(0).getUploadCaseDocument()
+            .setCaseDocumentParty(CaseDocumentParty.INTERVENER_ONE);
+
+        GenericAboutToStartOrSubmitCallbackResponse response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            AUTH_TOKEN);
+
+        assertThat(response.getErrors().get(0), is(INTERVENER_1 + CHOOSE_A_DIFFERENT_PARTY));
+    }
+
+    @Test
+    public void givenACaseWithoutIntervenersAndManagedDocIntoIntv2_WhenHandle_thenThrowValidationError() {
+        setUpRemovedDocuments();
+        setUpAddedDocuments();
+
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentCollection().get(0).getUploadCaseDocument()
+            .setCaseDocumentParty(CaseDocumentParty.INTERVENER_TWO);
+
+        GenericAboutToStartOrSubmitCallbackResponse response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            AUTH_TOKEN);
+
+        assertThat(response.getErrors().get(0), is(INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY));
+    }
+
+    @Test
+    public void givenACaseWithoutIntervenersAndManagedDocIntoIntv3_WhenHandle_thenThrowValidationError() {
+        setUpRemovedDocuments();
+        setUpAddedDocuments();
+
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentCollection().get(0).getUploadCaseDocument()
+            .setCaseDocumentParty(CaseDocumentParty.INTERVENER_THREE);
+
+        GenericAboutToStartOrSubmitCallbackResponse response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            AUTH_TOKEN);
+
+        assertThat(response.getErrors().get(0), is(INTERVENER_3 + CHOOSE_A_DIFFERENT_PARTY));
+    }
+
+    @Test
+    public void givenACaseWithoutIntervenersAndManagedDocIntoIntv4_WhenHandle_thenThrowValidationError() {
+        setUpRemovedDocuments();
+        setUpAddedDocuments();
+
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentCollection().get(0).getUploadCaseDocument()
+            .setCaseDocumentParty(CaseDocumentParty.INTERVENER_FOUR);
+
+        GenericAboutToStartOrSubmitCallbackResponse response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            AUTH_TOKEN);
+
+        assertThat(response.getErrors().get(0), is(INTERVENER_4 + CHOOSE_A_DIFFERENT_PARTY));
     }
 
     private void setUpAddedDocuments() {
