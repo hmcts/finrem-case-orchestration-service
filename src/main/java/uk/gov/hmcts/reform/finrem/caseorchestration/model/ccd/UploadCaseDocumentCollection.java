@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseDocumentTabData;
 
@@ -16,9 +17,12 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class UploadCaseDocumentCollection implements CaseDocumentTabData {
+
     private String id;
 
+    @EqualsAndHashCode.Exclude
     @JsonProperty("value")
     private UploadCaseDocument uploadCaseDocument;
 
