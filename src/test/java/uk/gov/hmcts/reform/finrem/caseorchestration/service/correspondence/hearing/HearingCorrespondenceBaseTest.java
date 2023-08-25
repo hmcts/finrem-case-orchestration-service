@@ -97,6 +97,7 @@ public abstract class HearingCorrespondenceBaseTest {
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
+            .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .build();
         caseDetails.getData().put("intervener1", mapper.convertValue(intervenerOneWrapper, Map.class));
         caseDetails.setCaseTypeId(CaseType.CONTESTED.getCcdType());
@@ -130,6 +131,7 @@ public abstract class HearingCorrespondenceBaseTest {
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
+            .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .build();
         caseDetails.getData().put("intervener1", mapper.convertValue(intervenerOneWrapper, Map.class));
         caseDetails.setCaseTypeId(CaseType.CONTESTED.getCcdType());

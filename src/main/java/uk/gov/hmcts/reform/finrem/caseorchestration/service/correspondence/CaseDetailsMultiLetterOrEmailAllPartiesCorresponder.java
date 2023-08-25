@@ -50,16 +50,20 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
             final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
             final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
             interveners.forEach(intervenerWrapper -> {
-                if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, finremCaseDetails)) {
-                    log.info("Sending email correspondence to {} for case: {}",
-                        intervenerWrapper.getIntervenerType().getTypeValue(),
-                        caseDetails.getId());
-                    this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
-                } else if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
-                    log.info("Sending letter correspondence to {} for case: {}",
-                        intervenerWrapper.getIntervenerType().getTypeValue(),
-                        caseDetails.getId());
-                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+                if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
+                    && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
+                    if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, finremCaseDetails)) {
+                        log.info("Sending email correspondence to {} for case: {}",
+                            intervenerWrapper.getIntervenerType().getTypeValue(),
+                            caseDetails.getId());
+                        this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
+                    } else if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
+                        log.info("Sending letter correspondence to {} for case: {}",
+                            intervenerWrapper.getIntervenerType().getTypeValue(),
+                            caseDetails.getId());
+                        bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
+                            getDocumentsToPrint(caseDetails));
+                    }
                 }
             });
         }
