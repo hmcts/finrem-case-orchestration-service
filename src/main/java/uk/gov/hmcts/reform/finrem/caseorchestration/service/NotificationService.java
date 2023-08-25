@@ -1861,7 +1861,7 @@ public class NotificationService {
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
         Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
 
-            return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+        return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
 
     }
 
@@ -1871,7 +1871,7 @@ public class NotificationService {
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
         Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseDetails.getData().getSelectedCourt());
 
-            return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+        return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
 
     }
 }

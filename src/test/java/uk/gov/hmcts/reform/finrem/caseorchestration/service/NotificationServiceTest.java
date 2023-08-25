@@ -576,6 +576,16 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void sendContestedGeneralApplicationOutcomeNotificationEmail() throws IOException {
+
+        callbackRequest = getContestedCallbackRequest();
+        notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_APPLICATION_OUTCOME);
+    }
+
+    @Test
     public void sendContestedConsentGeneralOrderNotificationEmailApplicantSolicitor() {
         notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(callbackRequest.getCaseDetails());
 
@@ -992,6 +1002,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendUpdateFrcInformationEmailToCourt() throws JsonProcessingException {
+
         callbackRequest = getContestedCallbackRequest();
 
         notificationService.sendUpdateFrcInformationEmailToCourt(callbackRequest.getCaseDetails());
