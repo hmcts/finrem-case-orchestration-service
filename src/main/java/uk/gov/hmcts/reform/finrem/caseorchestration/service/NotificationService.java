@@ -1862,7 +1862,6 @@ public class NotificationService {
 
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
 
-        return DEFAULT_EMAIL;
     }
 
 
@@ -1873,6 +1872,5 @@ public class NotificationService {
 
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
 
-        return DEFAULT_EMAIL;
     }
 }
