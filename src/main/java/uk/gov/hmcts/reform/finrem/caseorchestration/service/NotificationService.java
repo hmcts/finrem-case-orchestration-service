@@ -1095,11 +1095,11 @@ public class NotificationService {
     @Deprecated(since = "15-june-2023")
     public void sendContestedGeneralApplicationOutcomeEmail(CaseDetails caseDetails) throws IOException {
         String recipientEmail = DEFAULT_EMAIL;
-            Map<String, Object> data = caseDetails.getData();
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
+        Map<String, Object> data = caseDetails.getData();
+        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
 
-            recipientEmail = (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+        recipientEmail = (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(recipientEmail);
