@@ -53,8 +53,7 @@ public class EvidenceManagementDeleteService {
             getDocumentIdFromFileUrl(fileUrl), Boolean.TRUE);
     }
 
-    private void deleteOnDmStore(String fileUrl,
-                                             String authorizationToken) {
+    private void deleteOnDmStore(String fileUrl, String authorizationToken) {
 
         UserDetails userDetails;
         try {

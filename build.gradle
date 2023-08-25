@@ -257,7 +257,7 @@ bootJar {
     archiveFileName = 'finrem-case-orchestration.jar'
     manifest {
         attributes 'Implementation-Title': project.name,
-                'Implementation-Version': project.version
+            'Implementation-Version': project.version
     }
 }
 
