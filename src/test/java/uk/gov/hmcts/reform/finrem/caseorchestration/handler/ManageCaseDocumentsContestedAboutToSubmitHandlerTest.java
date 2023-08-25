@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
@@ -29,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applic
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantOtherDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentQuestionnairesAnswersHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,6 +42,9 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.ManageCaseDocumentsContestedAboutToSubmitHandler.CHOOSE_A_DIFFERENT_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.ManageCaseDocumentsContestedAboutToSubmitHandler.INTERVENER_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.ManageCaseDocumentsContestedAboutToSubmitHandler.INTERVENER_2;
@@ -50,8 +55,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.ManageCaseDoc
 public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
+    public static final String DOCUMENT_URL_TEST = "document/url/test";
     @Mock
     private UploadedDocumentService uploadedDocumentHelper;
+
+    @Mock
+    private EvidenceManagementDeleteService evidenceManagementDeleteService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
+
     private RespondentChronologiesStatementHandler respondentChronologiesStatementCollectionService;
 
     private ApplicantChronologiesStatementHandler applicantChronologiesStatementCollectionService;
@@ -92,7 +105,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         manageCaseDocumentsAboutToSubmitCaseHandler =
             new ManageCaseDocumentsContestedAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentHandlers, uploadedDocumentHelper);
+                documentHandlers, uploadedDocumentHelper, evidenceManagementDeleteService, featureToggleService);
     }
 
     @Test
@@ -131,6 +144,21 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
+    }
+
+    @Test
+    public void givenAManagedCaseWithCasesAddedAndRemovedDeleteFlagOn_WhenHandle_thenDeleteServiceCalled() {
+        setUpRemovedDocuments();
+        setUpAddedDocuments();
+
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
+        manageCaseDocumentsAboutToSubmitCaseHandler.handle(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            AUTH_TOKEN);
+
+        verify(evidenceManagementDeleteService, times(1)).delete(DOCUMENT_URL_TEST, AUTH_TOKEN);
     }
 
     @Test
@@ -226,6 +254,9 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION)
             .addAll(beforeEventDocList);
+        caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION)
+            .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
     }
@@ -241,7 +272,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             .id(uuid.toString())
             .uploadCaseDocument(UploadCaseDocument
                 .builder()
-                .caseDocuments(new CaseDocument())
+                .caseDocuments(CaseDocument.builder().documentUrl(DOCUMENT_URL_TEST).build())
                 .caseDocumentType(type)
                 .caseDocumentParty(party)
                 .caseDocumentConfidentiality(isConfidential)

@@ -12,8 +12,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,13 +32,21 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     private final List<DocumentHandler> documentHandlers;
     private final UploadedDocumentService uploadedDocumentHelper;
 
+    private final EvidenceManagementDeleteService evidenceManagementDeleteService;
+    private final FeatureToggleService featureToggleService;
+
+
     @Autowired
     public ManageCaseDocumentsContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                             List<DocumentHandler> documentHandlers,
-                                                            UploadedDocumentService uploadedDocumentHelper) {
+                                                            UploadedDocumentService uploadedDocumentHelper,
+                                                            EvidenceManagementDeleteService evidenceManagementDeleteService,
+                                                            FeatureToggleService featureToggleService) {
         super(mapper);
         this.documentHandlers = documentHandlers;
         this.uploadedDocumentHelper = uploadedDocumentHelper;
+        this.evidenceManagementDeleteService = evidenceManagementDeleteService;
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -63,6 +73,10 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
         uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
 
         Optional.ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);
+
+        if (featureToggleService.isSecureDocEnabled()) {
+            deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
@@ -92,5 +106,20 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
                                                List<UploadCaseDocumentCollection> manageCaseDocumentCollection) {
         return manageCaseDocumentCollection.stream().anyMatch(documentCollection ->
             documentCollection.getUploadCaseDocument().getCaseDocumentParty().equals(caseDocumentParty));
+    }
+
+    private void deleteRemovedDocuments(FinremCaseData caseData,
+                                        FinremCaseData caseDataBefore,
+                                        String userAuthorisation) {
+        List<UploadCaseDocumentCollection> allCollectionsBefore =
+            caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
+        allCollectionsBefore.removeAll(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
+
+        allCollectionsBefore.stream().map(this::getDocumentUrl)
+            .forEach(docUrl -> evidenceManagementDeleteService.delete(docUrl, userAuthorisation));
+    }
+
+    private String getDocumentUrl(UploadCaseDocumentCollection documentCollection) {
+        return documentCollection.getUploadCaseDocument().getCaseDocuments().getDocumentUrl();
     }
 }
