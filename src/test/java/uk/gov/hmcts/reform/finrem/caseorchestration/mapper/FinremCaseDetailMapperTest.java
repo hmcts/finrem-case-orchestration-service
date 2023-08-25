@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAsset;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Gender;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
@@ -139,7 +140,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrd
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -196,7 +196,7 @@ class FinremCaseDetailMapperTest {
         assertNotNull(finremCaseDetails);
         assertEquals("Test", finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName());
     }
-    
+
     @Test
     void givenValidCallbackRequest_thenSuccessfullyMapped() {
         caseDetails = buildCaseDetailsFromJson(REFUSAL_ORDER_CALLBACK_REQUEST);
@@ -232,10 +232,11 @@ class FinremCaseDetailMapperTest {
     }
 
     @Test
-    void givenCcdRequestAppIssued_whenDeserializeFromString_thenSuccessfullyDeserialize() throws IOException {
+    void givenCcdRequestAppIssued_whenDeserializeFromString_thenSuccessfullyDeserialize() {
         caseDetails = buildCaseDetailsFromJson(SOL_CONTEST_CALLBACK_REQUEST);
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        FinremCaseData caseData = finremCaseDetails.getData();
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails =
+            finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDataContested caseData = finremCaseDetails.getData();
 
         assertBatchOne(caseData);
         assertBatchTwo(caseData);
@@ -243,7 +244,8 @@ class FinremCaseDetailMapperTest {
 
         assertNotNull(caseData.getContactDetailsWrapper().getRespondentAddress());
         assertNotNull(caseData.getContactDetailsWrapper().getApplicantSolicitorAddress());
-        assertEquals("Line1", caseData.getContactDetailsWrapper().getApplicantSolicitorAddress().getAddressLine1());
+        assertEquals("Line1",
+            caseData.getContactDetailsWrapper().getApplicantSolicitorAddress().getAddressLine1());
     }
 
     private void assertBatchThree(FinremCaseData caseData) {
@@ -280,7 +282,7 @@ class FinremCaseDetailMapperTest {
         assertOrderRefusalCollection(caseData);
     }
 
-    private void assertBatchOne(FinremCaseData caseData) {
+    private void assertBatchOne(FinremCaseDataContested caseData) {
         assertMiam(caseData);
         assertAmendedConsentOrderCollection(caseData);
         assertCaseNotesCollection(caseData);
@@ -292,7 +294,7 @@ class FinremCaseDetailMapperTest {
     }
 
 
-    private void assertAmendedConsentOrderCollection(FinremCaseData caseData) {
+    private void assertAmendedConsentOrderCollection(FinremCaseDataContested caseData) {
         List<AmendedConsentOrderCollection> expected = List.of(
             AmendedConsentOrderCollection.builder()
                 .value(AmendedConsentOrder.builder()
