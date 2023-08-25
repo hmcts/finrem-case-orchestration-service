@@ -1095,6 +1095,7 @@ public class NotificationService {
     @Deprecated(since = "15-june-2023")
     public void sendContestedGeneralApplicationOutcomeEmail(CaseDetails caseDetails) throws IOException {
         String recipientEmail = DEFAULT_EMAIL;
+
         Map<String, Object> data = caseDetails.getData();
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
         Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
@@ -1111,9 +1112,11 @@ public class NotificationService {
 
     public void sendContestedGeneralApplicationOutcomeEmail(FinremCaseDetails caseDetails) throws IOException {
         String recipientEmail = DEFAULT_EMAIL;
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseDetails.getData().getSelectedCourt());
-            recipientEmail = (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+
+        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseDetails.getData().getSelectedCourt());
+
+        recipientEmail = (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
 
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(recipientEmail);
@@ -1853,9 +1856,10 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     private String getRecipientEmail(CaseDetails caseDetails) throws JsonProcessingException {
-            Map<String, Object> data = caseDetails.getData();
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
+
+        Map<String, Object> data = caseDetails.getData();
+        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
 
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
 
@@ -1863,8 +1867,9 @@ public class NotificationService {
 
 
     private String getRecipientEmail(FinremCaseDetails caseDetails) throws JsonProcessingException {
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseDetails.getData().getSelectedCourt());
+
+        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseDetails.getData().getSelectedCourt());
 
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
 
