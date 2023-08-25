@@ -13,15 +13,8 @@
         "document_filename": "fileupload.txt",
         "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/33482ce7-639b-48dd-bee4-61a849da50cc/binary"
       },
-      "generalApplicationSpecialMeasures": null,
       "divorceUploadEvidence2": null,
-      "generalApplicationLatestDocument": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
-        "document_filename": "InterimHearingNotice.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
-      },
       "divorceStageReached": "Decree Nisi",
-      "generalApplicationTimeEstimate": null,
       "otherReasonForComplexity": null,
       "applicantFMName": "Tik",
       "fastTrackDecision": "No",
@@ -48,23 +41,7 @@
       "netValueOfHome": null,
       "promptForAnyDocument": "No",
       "claimingExemptionMIAM": null,
-      "generalApplicationCreatedBy": "Claire Mumford",
       "solicitorFirm": "Abc Org",
-      "generalApplicationDocument": {
-        "document_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
-        "document_filename": "InterimHearingNotice.pdf",
-        "document_binary_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
-      },
-      "generalApplicationDraftOrder": {
-        "document_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
-        "document_filename": "InterimHearingNotice.pdf",
-        "document_binary_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
-      },
-      "generalApplicationDirectionsDocument": {
-        "document_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
-        "document_filename": "InterimHearingNotice.pdf",
-        "document_binary_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
-      },
       "propertyAddress": "26 Riverside gardens, SW10XE",
       "applicantSolicitorConsentForEmails": "Yes",
       "isAdmin": "No",
@@ -98,7 +75,6 @@
       "applicantRepresented": "Yes",
       "applicantAttendedMIAM": "Yes",
       "specialAssistanceRequired": "Not required",
-      "generalApplicationHearingRequired": "No",
       "respondentPhone": null,
       "isApplicantsHomeCourt": "No",
       "fastTrackDecisionReason": null,
@@ -107,7 +83,6 @@
       "additionalPropertyOrderDecision": "No",
       "estimatedAssetsChecklist": null,
       "londonFRCList": "cfc",
-      "generalApplicationPreState": "applicationIssued",
       "MIAMDomesticViolenceChecklist": null,
       "amountToPay": "27500",
       "rSolicitorAddress": {
@@ -126,7 +101,6 @@
       "otherReasonForComplexityText": null,
       "uploadAdditionalDocument": [],
       "applicantSolicitorFirm": "MSN Firm",
-      "generalApplicationReceivedFrom": "applicant",
       "applicantLName": "Tok",
       "rSolicitorEmail": "vivcontestedupdatesol@mailinator.com",
       "respondentAddress": {},
@@ -170,18 +144,6 @@
       "detailPotentialAllegation": null,
       "benefitForChildrenDecision": null,
       "regionList": "london",
-      "generalApplicationCollection": [
-        {
-          "id": "93524393-ff92-408d-af68-1705721be12a",
-          "value": {
-            "generalApplicationDocument": {
-              "document_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
-              "document_filename": "InterimHearingNotice.pdf",
-              "document_binary_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
-            }
-          }
-        }
-      ],
       "divorceDecreeAbsoluteDate": null,
       "MIAMPreviousAttendanceChecklist": null,
       "MIAMUrgencyReasonChecklist": null,

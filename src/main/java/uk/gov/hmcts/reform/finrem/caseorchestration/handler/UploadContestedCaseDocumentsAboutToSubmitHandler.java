@@ -79,12 +79,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
 
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
 
-        if (featureToggleService.isIntervenerEnabled()) {
-            CaseDocumentParty loggedInUserRole =
-                getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
+        CaseDocumentParty loggedInUserRole =
+            getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
 
-            managedCollections.forEach(doc -> doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole));
-        }
+        managedCollections.forEach(doc -> doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole));
+
 
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.addUploadedDocumentToDocumentCollectionType(callbackRequest, managedCollections));

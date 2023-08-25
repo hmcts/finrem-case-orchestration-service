@@ -378,6 +378,11 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_LIST = "generalApplicationList";
     public static final String GENERAL_APPLICATION_TRACKING = "generalApplicationTracking";
     public static final String GENERAL_APPLICATION_COLLECTION = "generalApplications";
+    public static final String APP_RESP_GENERAL_APPLICATION_COLLECTION = "appRespGeneralApplications";
+    public static final String INTERVENER1_GENERAL_APPLICATION_COLLECTION = "intervener1GeneralApplications";
+    public static final String INTERVENER2_GENERAL_APPLICATION_COLLECTION = "intervener2GeneralApplications";
+    public static final String INTERVENER3_GENERAL_APPLICATION_COLLECTION = "intervener3GeneralApplications";
+    public static final String INTERVENER4_GENERAL_APPLICATION_COLLECTION = "intervener4GeneralApplications";
     public static final String GENERAL_APPLICATION_DOCUMENT_LATEST = "generalApplicationLatestDocument";
     public static final String GENERAL_APPLICATION_DOCUMENT = "generalApplicationDocument";
     public static final String GENERAL_APPLICATION_RECEIVED_FROM = "generalApplicationReceivedFrom";
@@ -457,6 +462,10 @@ public class CCDConfigConstant {
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
     public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER1 = "bulkPrintCoverSheetIntervener1";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER2 = "bulkPrintCoverSheetIntervener2";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER3 = "bulkPrintCoverSheetIntervener3";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER4 = "bulkPrintCoverSheetIntervener4";
     public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL = "bulkPrintCoverSheetAppConfidential";

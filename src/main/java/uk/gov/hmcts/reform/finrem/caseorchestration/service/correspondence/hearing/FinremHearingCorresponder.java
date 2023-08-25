@@ -32,7 +32,7 @@ public abstract class FinremHearingCorresponder extends FinremMultiLetterOrEmail
     @Override
     public void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
         notificationService.sendPrepareForHearingEmailIntervener(caseDetails,
-            notificationService.getFinremCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
+            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
 
 }
