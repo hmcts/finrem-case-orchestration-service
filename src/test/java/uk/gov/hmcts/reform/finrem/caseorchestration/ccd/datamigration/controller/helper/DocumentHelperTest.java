@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -92,6 +94,9 @@ public class DocumentHelperTest {
     private DocumentHelper documentHelper;
     @Mock
     private GenericDocumentService service;
+
+    @Mock
+    private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Before
@@ -100,7 +105,7 @@ public class DocumentHelperTest {
         objectMapper.registerModule(new JavaTimeModule());
         CaseDataService caseDataService = new CaseDataService(objectMapper);
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-        documentHelper = new DocumentHelper(objectMapper, caseDataService, service, finremCaseDetailsMapper);
+        documentHelper = new DocumentHelper(objectMapper, caseDataService, service, finremCaseDetailsMapper, letterAddresseeGenerator);
     }
 
     @Test
@@ -395,7 +400,14 @@ public class DocumentHelperTest {
 
     @Test
     public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated() {
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), APPLICANT);
+        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
+
+        when(letterAddresseeGenerator.generate(preparedCaseDetails, APPLICANT)).thenReturn(
+            AddresseeDetails.builder()
+                .addresseeName("addresseeName")
+                .reference("reference")
+                .addressToSendTo(buildAddress("Address line 1")).build());
+        preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), APPLICANT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -413,7 +425,21 @@ public class DocumentHelperTest {
 
     @Test
     public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated_finrem() {
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedFinremCaseDetails(), APPLICANT);
+        FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
+
+        when(letterAddresseeGenerator.generate(finremCaseDetails, APPLICANT)).thenReturn(
+            AddresseeDetails.builder()
+                .addresseeName("addresseeName")
+                .reference("reference")
+                .finremAddressToSendTo(buildFinremAddress("Address line 1")).build());
+
+        when(letterAddresseeGenerator.generate(finremCaseDetails, APPLICANT)).thenReturn(
+            AddresseeDetails.builder()
+                .addresseeName("addresseeName")
+                .reference("reference")
+                .finremAddressToSendTo(buildFinremAddress("Address line 1")).build());
+
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(finremCaseDetails, APPLICANT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -431,7 +457,16 @@ public class DocumentHelperTest {
 
     @Test
     public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated() {
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), RESPONDENT);
+
+        CaseDetails caseDetails = defaultConsentedCaseDetails();
+
+        when(letterAddresseeGenerator.generate(caseDetails, RESPONDENT)).thenReturn(
+            AddresseeDetails.builder()
+                .addresseeName("addresseeName")
+                .reference("reference")
+                .addressToSendTo(buildAddress("Address line 1")).build());
+
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(caseDetails, RESPONDENT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -450,7 +485,16 @@ public class DocumentHelperTest {
 
     @Test
     public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated_finrem() {
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedFinremCaseDetails(), RESPONDENT);
+
+        CaseDetails caseDetails = defaultConsentedCaseDetails();
+
+        when(letterAddresseeGenerator.generate(caseDetails, RESPONDENT)).thenReturn(
+            AddresseeDetails.builder()
+                .addresseeName("addresseeName")
+                .reference("reference")
+                .addressToSendTo(buildAddress("Address line 1")).build());
+
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(caseDetails, RESPONDENT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -693,6 +737,29 @@ public class DocumentHelperTest {
                 .caseDetails(finremCaseDetails)
                 .build();
         }
+    }
+
+    private static Map<String, Object> buildAddress(String addressLine1) {
+        Map<String, Object> solicitorAddress = new HashMap<>();
+        solicitorAddress.put("AddressLine1", addressLine1);
+        solicitorAddress.put("AddressLine2", "Second Address Line");
+        solicitorAddress.put("AddressLine3", "Third Address Line");
+        solicitorAddress.put("County", "London");
+        solicitorAddress.put("Country", "England");
+        solicitorAddress.put("PostTown", "London");
+        solicitorAddress.put("PostCode", "SE1");
+        return solicitorAddress;
+    }
+
+    private static Address buildFinremAddress(String addressLine1) {
+        return Address.builder()
+            .addressLine1(addressLine1).addressLine2("Second Address Line")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SE1")
+            .build();
     }
 
     @Test
