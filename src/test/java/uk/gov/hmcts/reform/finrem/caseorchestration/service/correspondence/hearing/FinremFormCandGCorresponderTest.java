@@ -37,6 +37,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
     @Mock
     private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
 
+
     private static final String DATE_OF_HEARING = "2019-01-01";
 
     @Before
@@ -45,7 +46,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
         applicantAndRespondentMultiLetterCorresponder =
             new FinremFormCandGCorresponder(bulkPrintService, notificationService,
                 new DocumentHelper(objectMapper, new CaseDataService(objectMapper), genericDocumentService, finremCaseDetailsMapper,
-                    letterAddresseeGenerator), objectMapper);
+                    letterAddresseeGenerator));
     }
 
     @Test
