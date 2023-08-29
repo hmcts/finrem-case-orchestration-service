@@ -1453,6 +1453,11 @@ public class NotificationService {
         sendGeneralApplicationRejectionEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
+    public void sendGeneralApplicationRejectionEmailToIntervenerSolicitor(FinremCaseDetails caseDetails, IntervenerWrapper intervenerWrapper) {
+        sendGeneralApplicationRejectionEmail(finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
+            getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)));
+    }
+
     public void sendGeneralApplicationRejectionEmail(NotificationRequest notificationRequest) {
         log.info("Received request for notification email for General Application Rejected event. Case ID : {}",
             notificationRequest.getCaseReferenceNumber());

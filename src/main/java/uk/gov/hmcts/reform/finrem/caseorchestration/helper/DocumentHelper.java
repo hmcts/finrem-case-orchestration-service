@@ -37,8 +37,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -753,6 +755,19 @@ public class DocumentHelper {
     public enum PaperNotificationRecipient {
         APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR,
         INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR
+    }
+
+    public static PaperNotificationRecipient getIntervenerPaperNotificationRecipient(IntervenerWrapper intervenerWrapper) {
+        if (IntervenerType.INTERVENER_ONE.equals(intervenerWrapper.getIntervenerType())) {
+            return INTERVENER_ONE;
+        } else if (IntervenerType.INTERVENER_TWO.equals(intervenerWrapper.getIntervenerType())) {
+            return INTERVENER_TWO;
+        } else if (IntervenerType.INTERVENER_THREE.equals(intervenerWrapper.getIntervenerType())) {
+            return INTERVENER_THREE;
+        } else if (IntervenerType.INTERVENER_FOUR.equals(intervenerWrapper.getIntervenerType())) {
+            return INTERVENER_FOUR;
+        }
+        return null;
     }
 
     public CaseDocument nullCheckAndConvertToCaseDocument(Object object) {
