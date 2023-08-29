@@ -57,17 +57,11 @@ public class PartyService {
     private DynamicMultiSelectList getRoleList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
                                                DynamicMultiSelectList selectedRoles,
                                                List<DynamicMultiSelectListElement> defaultDynamicListElements) {
-        if (selectedRoles != null) {
-            return DynamicMultiSelectList.builder()
-                    .value(selectedRoles.getValue())
-                    .listItems(dynamicMultiSelectListElement)
-                    .build();
-        } else {
-            return DynamicMultiSelectList.builder()
-                    .value(defaultDynamicListElements)
-                    .listItems(dynamicMultiSelectListElement)
-                    .build();
-        }
+        return DynamicMultiSelectList.builder()
+                .value(defaultDynamicListElements)
+                .listItems(dynamicMultiSelectListElement)
+                .build();
+
     }
 
     private List<DynamicMultiSelectListElement> intervenerCaseRoleList(FinremCaseData caseData,
