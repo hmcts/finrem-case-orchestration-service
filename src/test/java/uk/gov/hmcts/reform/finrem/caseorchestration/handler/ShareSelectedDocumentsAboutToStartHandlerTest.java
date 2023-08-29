@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -116,15 +117,16 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
     @Test
     void givenContestedCase_whenInvokedSharedServiceAsApplicantSolicitor_thenHandlerCanHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseDataContested data = caseDetails.getData();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()),
             AUTH_TOKEN)).thenReturn(getCaseAssignedUserRolesResource("[APPSOLICITOR]"));
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
         when(applicantDocumentsService.applicantSourceDocumentList(caseDetails)).thenReturn(getDynamicList(data));
         when(applicantDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(getCaseRoles(data));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertEquals(3, handle.getData().getSolicitorRoleList().getListItems().size());
 
@@ -136,15 +138,16 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
     @Test
     void givenContestedCase_whenInvokedSharedServiceAsRespondentSolicitor_thenHandlerCanHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseDataContested data = caseDetails.getData();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()),
             AUTH_TOKEN)).thenReturn(getCaseAssignedUserRolesResource("[RESPSOLICITOR]"));
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
         when(respondentShareDocumentsService.respondentSourceDocumentList(caseDetails)).thenReturn(getDynamicList(data));
         when(respondentShareDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(getCaseRoles(data));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertEquals(3, handle.getData().getSolicitorRoleList().getListItems().size());
 
@@ -155,8 +158,8 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
     @Test
     void givenContestedCase_whenInvokedSharedServiceAsIntervenerSolicitor_thenHandlerCanHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseDataContested data = caseDetails.getData();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource("[INTVRSOLICITOR1]"));
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
@@ -164,7 +167,8 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         when(intervenerShareDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(getCaseRoles(data));
         when(applicantDocumentsService.getIntervenerRoles(any())).thenReturn(true);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertEquals(3, handle.getData().getSolicitorRoleList().getListItems().size());
@@ -175,9 +179,9 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
     @Test
     void givenContestedCase_whenInvokedSharedServiceAsIntervenerSolicitorNoOtherPartiesDigital__thenHandlerWillShowMessage() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseDataContested data = caseDetails.getData();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource("[INTVRSOLICITOR1]"));
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
@@ -186,7 +190,8 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         when(intervenerShareDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(new DynamicMultiSelectList());
         when(applicantDocumentsService.getIntervenerRoles(any())).thenReturn(true);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertNull(handle.getData().getSolicitorRoleList());
@@ -198,8 +203,8 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
     @Test
     void givenContestedCase_whenInvokedSharedServiceAsIntervenerSolicitorNoDocumentAvailableToShare_thenHandlerWillShowMessage() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = finremCallbackRequest.getCaseDetails();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource("[INTVRSOLICITOR1]"));
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
@@ -207,7 +212,8 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
             "[INTVRSOLICITOR1]")).thenReturn(new DynamicMultiSelectList());
         when(applicantDocumentsService.getIntervenerRoles(any())).thenReturn(true);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertNull(handle.getData().getSourceDocumentList());
         assertNull(handle.getData().getSolicitorRoleList());
@@ -220,14 +226,15 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
     @Test
     void givenContestedCase_whenInvokedSharedServicAppSolicitorNoDocumentAvailableToShare_thenHandlerWillShowMessage() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = finremCallbackRequest.getCaseDetails();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource("[APPSOLICITOR]"));
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
         when(applicantDocumentsService.applicantSourceDocumentList(caseDetails)).thenReturn(new DynamicMultiSelectList());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertNull(handle.getData().getSourceDocumentList());
         assertNull(handle.getData().getSolicitorRoleList());
@@ -240,16 +247,17 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
     @Test
     void givenContestedCase_whenInvokedSharedServiceAsAppSolicitorNoOtherPartiesDigital__thenHandlerWillShowMessage() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseDataContested data = caseDetails.getData();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource("[APPSOLICITOR]"));
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
         when(applicantDocumentsService.applicantSourceDocumentList(caseDetails)).thenReturn(getDynamicList(data));
         when(applicantDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(new DynamicMultiSelectList());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertNull(handle.getData().getSolicitorRoleList());
@@ -261,14 +269,15 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
     @Test
     void givenContestedCase_whenInvokedSharedServiceAsRespondentSolicitorNoDocumentsAvailable_thenHandlerWillShowMessage() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = finremCallbackRequest.getCaseDetails();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource("[RESPSOLICITOR]"));
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
         when(respondentShareDocumentsService.respondentSourceDocumentList(caseDetails)).thenReturn(new DynamicMultiSelectList());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertNull(handle.getData().getSourceDocumentList());
         assertNull(handle.getData().getSolicitorRoleList());
@@ -281,16 +290,17 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
     @Test
     void givenContestedCase_whenInvokedSharedServiceAsRespSolicitorNoOtherPartiesDigital__thenHandlerWillShowMessage() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseDataContested data = caseDetails.getData();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource("[RESPSOLICITOR]"));
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
         when(respondentShareDocumentsService.respondentSourceDocumentList(caseDetails)).thenReturn(getDynamicList(data));
         when(respondentShareDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(new DynamicMultiSelectList());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertNull(handle.getData().getSolicitorRoleList());
@@ -300,12 +310,12 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         verify(respondentShareDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
     }
 
-    private FinremCallbackRequest buildCallbackRequest() {
+    private FinremCallbackRequest<FinremCaseDataContested> buildCallbackRequest() {
         return FinremCallbackRequest
-            .builder()
+            .<FinremCaseDataContested>builder()
             .eventType(EventType.SHARE_SELECTED_DOCUMENTS)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseDataContested()).build())
             .build();
     }
 
@@ -356,7 +366,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         return List.of(UploadCaseDocumentCollection.builder().id(String.valueOf(uuid.get())).uploadCaseDocument(document).build());
     }
 
-    private DynamicMultiSelectList getDynamicList(FinremCaseData data) {
+    private DynamicMultiSelectList getDynamicList(FinremCaseDataContested data) {
         data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setAppChronologiesCollection(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setAppStatementsExhibitsCollection(getTestDocument(STATEMENT_AFFIDAVIT));
@@ -386,7 +396,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         return sourceDocumentList;
     }
 
-    private DynamicMultiSelectList getCaseRoles(FinremCaseData data) {
+    private DynamicMultiSelectList getCaseRoles(FinremCaseDataContested data) {
 
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(getDynamicMultiSelectListElement("[INTVRSOLICITOR1]", "[INTVRSOLICITOR1]"));

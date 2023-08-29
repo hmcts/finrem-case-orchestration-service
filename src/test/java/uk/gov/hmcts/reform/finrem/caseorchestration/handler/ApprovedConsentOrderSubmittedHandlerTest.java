@@ -8,11 +8,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentedContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderAvailableCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderMadeCorresponder;
@@ -42,7 +42,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     private FinremConsentOrderMadeCorresponder consentOrderMadeCorresponder;
     @Mock
     private FinremConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
-    private FinremCaseDetails caseDetails;
+    private FinremCaseDetails<FinremCaseDataConsented> caseDetails;
 
 
     @Test
@@ -84,15 +84,15 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
 
     }
 
-    protected FinremCallbackRequest getConsentedCallbackRequestForConsentOrder() {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+    protected FinremCallbackRequest<FinremCaseDataConsented> getConsentedCallbackRequestForConsentOrder() {
+        FinremCaseDataConsented caseData = FinremCaseDataConsented.builder()
+            .contactDetailsWrapper(ConsentedContactDetailsWrapper.builder()
                 .solicitorEmail(TEST_SOLICITOR_EMAIL)
                 .solicitorName(TEST_SOLICITOR_NAME)
                 .solicitorReference(TEST_SOLICITOR_REFERENCE)
                 .respondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL)
                 .respondentSolicitorName(TEST_RESP_SOLICITOR_NAME)
-                .applicantSolicitorConsentForEmails(YesOrNo.YES)
+                .solicitorAgreeToReceiveEmails(YesOrNo.YES)
                 .respondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE)
                 .consentedRespondentRepresented(YesOrNo.YES)
                 .build())
@@ -109,12 +109,12 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
                     NatureApplication.PROPERTY_ADJUSTMENT_ORDER))
                 .build()).build();
 
-        caseDetails = FinremCaseDetails.builder()
+        caseDetails = FinremCaseDetails.<FinremCaseDataConsented>builder()
             .caseType(CaseType.CONSENTED)
             .id(12345L)
             .data(caseData)
             .build();
-        return FinremCallbackRequest.builder()
+        return FinremCallbackRequest.<FinremCaseDataConsented>builder()
             .caseDetails(caseDetails)
             .build();
     }

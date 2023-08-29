@@ -3,13 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.genera
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralOrderDetails;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GeneralOrderDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class GeneralOrderDetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
 
     public static final String CONTESTED_GENERAL_ORDER = "/fixtures/general-order-contested.json";
     public static final String CONSENTED_GENERAL_ORDER = "/fixtures/general-order-consented.json";

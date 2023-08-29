@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
@@ -82,7 +83,7 @@ public class ManualPaymentAboutToSubmitHandlerTest {
             .builder()
             .eventType(EventType.ISSUE_APPLICATION)
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().copyOfPaperFormA(paymentList).build()).build())
+                .data(FinremCaseDataContested.builder().copyOfPaperFormA(paymentList).build()).build())
             .build();
     }
 }

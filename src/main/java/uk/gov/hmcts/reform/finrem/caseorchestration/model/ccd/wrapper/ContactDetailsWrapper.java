@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class ContactDetailsWrapper {
     private YesOrNo updateIncludesRepresentativeChange;

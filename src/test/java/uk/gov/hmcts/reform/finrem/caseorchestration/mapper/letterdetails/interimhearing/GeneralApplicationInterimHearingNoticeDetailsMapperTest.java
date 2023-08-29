@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
@@ -15,7 +15,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
 
     private static final String INTERIM_JSON = "/fixtures/contested-interim-hearing.json";
     private static final String ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON =

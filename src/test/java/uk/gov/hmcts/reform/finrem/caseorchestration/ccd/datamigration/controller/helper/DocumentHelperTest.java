@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -115,7 +117,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetLatestFinremAmendedConsentOrder() throws Exception {
-        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
         CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl(),
@@ -235,7 +237,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetFinremRespondToOrderDocuments() throws Exception {
-        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(true));
@@ -252,7 +254,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldNotGetFinremRespondToOrderDocuments() throws Exception {
-        FinremCallbackRequest callbackRequest =
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest =
             prepareFinremCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
             callbackRequest.getCaseDetails().getData());
@@ -451,7 +453,7 @@ public class DocumentHelperTest {
 
     @Test
     public void whenRecipientIsNondigitallyRepresentedApplicant_AndIntervenerRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = defaultContestedFinremCaseDetails();
         caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
 
         Address address = Address.builder().addressLine1("Applicant Sol Address").postCode("SW11 6HL").build();
@@ -474,7 +476,7 @@ public class DocumentHelperTest {
 
     @Test
     public void whenRecipientIsNondigitallyRepresentedRespondent_AndIntervenerRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = defaultContestedFinremCaseDetails();
 
         Address address = Address.builder().addressLine1("Respondent Sol Address").postCode("SW11 6HL").build();
         caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorAddress(address);
@@ -497,7 +499,7 @@ public class DocumentHelperTest {
 
     @Test
     public void whenRecipientIsUnrepresentedApplicant_AndIntervenerRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = defaultContestedFinremCaseDetails();
         caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
 
         Address address = Address.builder().addressLine1("Applicant Address").postCode("SW11 6HL").build();
@@ -520,7 +522,7 @@ public class DocumentHelperTest {
 
     @Test
     public void whenRecipientIsUnrepresentedRespondent_AndIntervenerRepresented_setAddressee() {
-        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = defaultContestedFinremCaseDetails();
         caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
 
         Address address = Address.builder().addressLine1("Respondent Address").postCode("SW11 6HL").build();

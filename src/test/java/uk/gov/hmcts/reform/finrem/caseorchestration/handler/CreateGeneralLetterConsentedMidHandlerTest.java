@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
@@ -28,9 +28,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CreateGeneralLetterMidHandlerTest {
+public class CreateGeneralLetterConsentedMidHandlerTest {
 
-    private CreateGeneralLetterMidHandler handler;
+    private CreateGeneralLetterConsentedMidHandler handler;
 
     @Mock
     private GeneralLetterService generalLetterService;
@@ -39,7 +39,7 @@ public class CreateGeneralLetterMidHandlerTest {
 
     @Before
     public void setup() {
-        handler =  new CreateGeneralLetterMidHandler(finremCaseDetailsMapper, generalLetterService);
+        handler = new CreateGeneralLetterConsentedMidHandler(finremCaseDetailsMapper, generalLetterService);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class CreateGeneralLetterMidHandlerTest {
 
     @Test
     public void givenACcdCallbackCallbackCreateGeneralLetterAboutToSubmitHandler_WhenHandle_thenCreateError() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = buildFinremCallbackRequest();
         callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setSolicitorAddress(null);
         when(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(callbackRequest.getCaseDetails()))
             .thenReturn(asList("Address is missing for recipient type"));
@@ -82,7 +82,7 @@ public class CreateGeneralLetterMidHandlerTest {
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
-        FinremCaseData caseData = FinremCaseData.builder()
+        FinremCaseDataConsented caseData = FinremCaseDataConsented.builder()
             .generalLetterWrapper(GeneralLetterWrapper.builder()
                 .generalLetterAddressTo(GeneralLetterAddressToType.APPLICANT_SOLICITOR)
                 .generalLetterRecipient("Test")

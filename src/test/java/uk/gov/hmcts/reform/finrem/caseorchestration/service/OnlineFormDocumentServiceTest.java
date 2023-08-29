@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformacontested.ContestedMiniFormADetailsMapperContested;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
@@ -91,7 +91,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     public void generateMiniFormADirectFromMapWhenTypeOfApplicationNotPresentThenUseDefault() {
         Map<String, Object> placeholdersMap = new HashMap<>();
         when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
-        FinremCaseDetails finremCaseDetails = emptyCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = emptyCaseDetails();
         finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder()
             .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN,
@@ -108,7 +108,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     public void generateMiniFormADirectFromMapWhenTypeOfApplicationPresentAndSchedule1ThenUseChooseTemplate() {
         Map<String, Object> placeholdersMap = new HashMap<>();
         when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
-        FinremCaseDetails finremCaseDetails = emptyCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = emptyCaseDetails();
         finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder()
             .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, finremCaseDetails));
@@ -124,7 +124,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     public void generateMiniFormADirectFromMapWhenTypeOfApplicationPresentAndNotSchedule1ThenUseChooseTemplate() {
         Map<String, Object> placeholdersMap = new HashMap<>();
         when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
-        FinremCaseDetails finremCaseDetails = emptyCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = emptyCaseDetails();
         finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder()
             .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, finremCaseDetails));
@@ -249,7 +249,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
 
     private FinremCaseDetails emptyCaseDetails() {
-        return FinremCaseDetails.builder().id(1234L).data(new FinremCaseData()).build();
+        return FinremCaseDetails.builder().id(1234L).data(new FinremCaseDataContested()).build();
     }
 
     protected Map<String, Object> convertToMap(Object object) {

@@ -13,12 +13,12 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ConsentOrderApprovedLetterDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class ConsentOrderApprovedLetterDetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON = "/fixtures/consent-order-approved-mapping.json";
 
     @Autowired
-    private ConsentOrderApprovedLetterDetailsMapperContested consentOrderApprovedLetterDetailsMapper;
+    private ConsentOrderApprovedLetterDetailsMapperContested consentOrderApprovedLetterDetailsMapperContested;
 
     @Before
     public void setUp() {
@@ -27,7 +27,7 @@ public class ConsentOrderApprovedLetterDetailsMapperTest extends ContestedContes
 
     @Test
     public void givenValidCaseData_whenBuildDocumentTemplateDetails_thenReturnExpectedTemplateDetails() {
-        DocumentTemplateDetails actual = consentOrderApprovedLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails,
+        DocumentTemplateDetails actual = consentOrderApprovedLetterDetailsMapperContested.buildDocumentTemplateDetails(caseDetails,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         DocumentTemplateDetails expected = getExpectedConsentOrderApprovedLetterDetails();
@@ -39,7 +39,7 @@ public class ConsentOrderApprovedLetterDetailsMapperTest extends ContestedContes
     public void givenContestedApplication_whenBuildDocumentTemplateDetails_thenReturnExpectedDetails() {
         setContestedFields();
 
-        DocumentTemplateDetails actual = consentOrderApprovedLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails,
+        DocumentTemplateDetails actual = consentOrderApprovedLetterDetailsMapperContested.buildDocumentTemplateDetails(caseDetails,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         DocumentTemplateDetails expected = getExpectedConsentOrderApprovedLetterDetails();
@@ -51,7 +51,7 @@ public class ConsentOrderApprovedLetterDetailsMapperTest extends ContestedContes
     public void givenNullEnums_whenBuildDocumentTemplateDetails_thenReturnDetails() {
         setNullFields();
 
-        DocumentTemplateDetails actual = consentOrderApprovedLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails,
+        DocumentTemplateDetails actual = consentOrderApprovedLetterDetailsMapperContested.buildDocumentTemplateDetails(caseDetails,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         assertNotNull(actual);
@@ -61,7 +61,6 @@ public class ConsentOrderApprovedLetterDetailsMapperTest extends ContestedContes
         caseDetails.getData().setCivilPartnership(null);
         caseDetails.getData().setServePensionProvider(null);
         caseDetails.getData().setServePensionProviderResponsibility(null);
-        caseDetails.getData().setOrderDirectionJudge(null);
     }
 
     private void setContestedFields() {
@@ -71,11 +70,6 @@ public class ConsentOrderApprovedLetterDetailsMapperTest extends ContestedContes
         caseDetails.getData().getConsentOrderWrapper().setConsentDateOfOrder(LocalDate.of(2022, 7, 1));
         caseDetails.getData().getContactDetailsWrapper().setRespondentFmName("test");
         caseDetails.getData().getContactDetailsWrapper().setRespondentLname("Korivi");
-        caseDetails.getData().setOrderDirectionDate(null);
-        caseDetails.getData().setOrderDirectionJudge(null);
-        caseDetails.getData().setOrderDirectionJudgeName(null);
-        caseDetails.getData().getContactDetailsWrapper().setAppRespondentFmName(null);
-        caseDetails.getData().getContactDetailsWrapper().setAppRespondentLName(null);
     }
 
     private ConsentOrderApprovedLetterDetails getExpectedConsentOrderApprovedLetterDetails() {

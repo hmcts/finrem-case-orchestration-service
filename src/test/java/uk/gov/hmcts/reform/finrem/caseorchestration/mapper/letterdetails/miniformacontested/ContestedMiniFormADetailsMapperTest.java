@@ -3,11 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifo
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamDomesticViolence;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamExemption;
@@ -29,13 +29,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ContestedMiniFormADetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class ContestedMiniFormADetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
 
     private static final String TEST_JSON = "/fixtures/contested/contested-mini-form-a-details.json";
     private static final String SCHEDULE_1_TEST_JSON = "/fixtures/contested/contested-mini-form-a-details-schedule-1.json";
 
     @Autowired
-    private ContestedMiniFormADetailsMapperContested contestedMiniFormADetailsMapper;
+    private ContestedMiniFormADetailsMapperContested contestedMiniFormADetailsMapperContested;
 
     @Before
     public void setUp() throws Exception {
@@ -46,7 +46,7 @@ public class ContestedMiniFormADetailsMapperTest extends ContestedContestedAbstr
     public void givenValidCaseData_whenBuildDocumentTemplateDetails_thenReturnExpectedTemplateDetails() {
         DocumentTemplateDetails expected = getExpectedContestedMiniFormADetails();
 
-        DocumentTemplateDetails actual = contestedMiniFormADetailsMapper.buildDocumentTemplateDetails(caseDetails,
+        DocumentTemplateDetails actual = contestedMiniFormADetailsMapperContested.buildDocumentTemplateDetails(caseDetails,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         assertEquals(expected, actual);
@@ -57,7 +57,7 @@ public class ContestedMiniFormADetailsMapperTest extends ContestedContestedAbstr
         setCaseDetails(SCHEDULE_1_TEST_JSON);
         DocumentTemplateDetails expected = getExpectedContestedMiniFormADetailsScheduleOne();
 
-        DocumentTemplateDetails actual = contestedMiniFormADetailsMapper.buildDocumentTemplateDetails(caseDetails,
+        DocumentTemplateDetails actual = contestedMiniFormADetailsMapperContested.buildDocumentTemplateDetails(caseDetails,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         assertEquals(expected.toString().trim(), actual.toString().trim());
@@ -66,11 +66,11 @@ public class ContestedMiniFormADetailsMapperTest extends ContestedContestedAbstr
     @Test
     public void givenEmptyOrNullFields_whenBuildDocumentTemplateDetails_thenDoNotThrowException() {
         FinremCaseDetails emptyDetails = FinremCaseDetails.builder().id(1596638099618923L)
-            .data(FinremCaseData.builder().scheduleOneWrapper(ScheduleOneWrapper.builder()
+            .data(FinremCaseDataContested.builder().scheduleOneWrapper(ScheduleOneWrapper.builder()
                     .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build())
                 .build()).build();
 
-        DocumentTemplateDetails actual = contestedMiniFormADetailsMapper.buildDocumentTemplateDetails(emptyDetails,
+        DocumentTemplateDetails actual = contestedMiniFormADetailsMapperContested.buildDocumentTemplateDetails(emptyDetails,
             emptyDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         assertNotNull(actual);

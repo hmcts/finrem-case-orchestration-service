@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -81,11 +81,10 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     private CaseDocumentsHandler caseDocumentHandler;
     private FdrDocumentsHandler fdrDocumentsHandler;
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
-    private FinremCaseDetails caseDetails;
-    private FinremCaseDetails caseDetailsBefore;
-    private FinremCaseData caseData;
+    private FinremCaseDetails<FinremCaseDataContested> caseDetails;
+    private FinremCaseDetails<FinremCaseDataContested> caseDetailsBefore;
+    private FinremCaseDataContested caseData;
     private final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
-
 
 
     @Before
@@ -147,7 +146,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -170,7 +170,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -193,7 +194,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -216,7 +218,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -241,7 +244,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -264,7 +268,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -287,7 +292,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -310,7 +316,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -333,7 +340,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -360,7 +368,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
@@ -373,8 +382,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     @Test
     public void givenUploadFileTrialBundleSelected_WhenAboutToSubmit_ThenShowTrialBundleErrorMessage() {
 
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest = buildCallbackRequest();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
 
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
             null, YesOrNo.YES, YesOrNo.NO, "Other Example"));
@@ -382,7 +391,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
         caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested>
             response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors().size(), is(1));
@@ -393,8 +402,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     @Test
     public void givenUploadFileWithoutTrialBundle_WhenAboutToSubmit_ThenNoErrors() {
 
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest = buildCallbackRequest();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
 
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
@@ -405,7 +414,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
         caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested>
             response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors().size(), is(0));
@@ -414,14 +423,14 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     @Test
     public void givenUploadFileNoDocSelected_WhenAboutToSubmit_ThenShowNoDocErrorMessage() {
 
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest = buildCallbackRequest();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested>
             response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors().size(), is(1));
@@ -430,7 +439,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
-        FinremCaseData data = FinremCaseData.builder().build();
+        FinremCaseDataContested data = FinremCaseDataContested.builder().build();
         FinremCaseDetails caseDetails =
             FinremCaseDetails.builder().data(data).id(Long.valueOf(CASE_ID)).build();
         FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(data).id(123L).build();
@@ -461,11 +470,12 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             .build();
     }
 
-    protected FinremCaseDetails buildCaseDetails() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
+    protected FinremCaseDetails<FinremCaseDataContested> buildCaseDetails() {
+        FinremCaseDataContested finremCaseData = FinremCaseDataContested.builder()
             .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder().build())
             .build();
-        return FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CaseType.CONTESTED)
+        return FinremCaseDetails.<FinremCaseDataContested>builder()
+            .id(Long.valueOf(CASE_ID)).caseType(CaseType.CONTESTED)
             .data(finremCaseData).build();
     }
 

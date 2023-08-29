@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
@@ -63,9 +64,9 @@ public class IssueApplicationContestedAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenUseIssueApplicationAndIssueDateEnteredManually_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        finremCallbackRequest.getCaseDetails().getData().setIssueDate(LocalDate.of(2000,10,10));
+        finremCallbackRequest.getCaseDetails().getData().setIssueDate(LocalDate.of(2000, 10, 10));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(LocalDate.of(2000,10,10), response.getData().getIssueDate());
+        assertEquals(LocalDate.of(2000, 10, 10), response.getData().getIssueDate());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
@@ -73,7 +74,7 @@ public class IssueApplicationContestedAboutToStartHandlerTest {
             .builder()
             .eventType(EventType.ISSUE_APPLICATION)
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(new FinremCaseDataContested()).build())
             .build();
     }
 }

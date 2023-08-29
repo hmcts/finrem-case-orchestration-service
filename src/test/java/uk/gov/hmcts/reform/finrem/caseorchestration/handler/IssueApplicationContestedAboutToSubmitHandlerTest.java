@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication;
@@ -62,15 +62,17 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenCase_whenIssueApplication_thenGenerateAppropriateCaseDocumentAndSetDefaultIfValueIsMissing() {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(123L).data(FinremCaseData.builder().scheduleOneWrapper(ScheduleOneWrapper.builder().build()).build()).build();
-        FinremCallbackRequest callbackRequest
-            = FinremCallbackRequest.builder().eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = FinremCaseDetails.<FinremCaseDataContested>builder()
+            .id(123L).data(FinremCaseDataContested.builder().scheduleOneWrapper(ScheduleOneWrapper.builder().build()).build()).build();
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest
+            = FinremCallbackRequest.<FinremCaseDataContested>builder()
+            .eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
 
         when(service.generateContestedMiniForm(AUTH_TOKEN, callbackRequest.getCaseDetails())).thenReturn(caseDocument());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        FinremCaseData data = response.getData();
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseDataContested data = response.getData();
 
         assertEquals("123", data.getDivorceCaseNumber());
         assertEquals(TypeOfApplication.MATRIMONIAL_CIVILPARTNERSHIP.getTypeOfApplication(),
@@ -80,17 +82,20 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenCase_whenIssueApplication_thenGenerateAppropriateCaseDocumentDoNotSetIfAlreadySetValue() {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(123L).data(FinremCaseData.builder().divorceCaseNumber("897901").scheduleOneWrapper(ScheduleOneWrapper.builder()
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = FinremCaseDetails.<FinremCaseDataContested>builder()
+            .id(123L).data(FinremCaseDataContested.builder().divorceCaseNumber("897901")
+                .scheduleOneWrapper(ScheduleOneWrapper.builder()
                     .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989)
-                .build()).build()).build();
-        FinremCallbackRequest callbackRequest
-            = FinremCallbackRequest.builder().eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
+                    .build()).build()).build();
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest
+            = FinremCallbackRequest.<FinremCaseDataContested>builder()
+            .eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
 
         when(service.generateContestedMiniForm(AUTH_TOKEN, callbackRequest.getCaseDetails())).thenReturn(caseDocument());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        FinremCaseData data = response.getData();
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseDataContested data = response.getData();
 
         assertEquals("897901", data.getDivorceCaseNumber());
         assertEquals(TypeOfApplication.SCHEDULE_ONE.getTypeOfApplication(),

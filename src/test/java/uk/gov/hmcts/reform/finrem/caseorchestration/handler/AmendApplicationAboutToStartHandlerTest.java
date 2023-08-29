@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Intention;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
@@ -66,17 +66,17 @@ public class AmendApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenIntendsToIsApplyToVary_thenShouldAddToNatureList() {
-        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = callbackRequest();
 
-        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataConsented data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
             NatureApplication.PENSION_SHARING_ORDER,
             NatureApplication.LUMP_SUM_ORDER));
         data.setApplicantIntendsTo(Intention.APPLY_TO_VARY);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
+        final FinremCaseDataConsented responseData = response.getData();
         final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
 
         assertThat(natureOfApplication2, hasItems(NatureApplication.VARIATION_ORDER));
@@ -86,17 +86,17 @@ public class AmendApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenIntendsToIsNotApplyToVary_thenShouldNotDoAnything() {
-        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = callbackRequest();
 
-        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataConsented data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
             NatureApplication.PENSION_SHARING_ORDER,
             NatureApplication.LUMP_SUM_ORDER));
         data.setApplicantIntendsTo(Intention.APPLY_TO_COURT_FOR);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
+        final FinremCaseDataConsented responseData = response.getData();
         final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
 
         assertThat(natureOfApplication2, hasItems(NatureApplication.PENSION_SHARING_ORDER,
@@ -107,26 +107,28 @@ public class AmendApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenNatureListIsEmptyAndIntendsToIsApplyToVary_thenShouldAddToNatureList() {
-        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = callbackRequest();
 
-        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataConsented data = callbackRequest.getCaseDetails().getData();
         data.setApplicantIntendsTo(Intention.APPLY_TO_VARY);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
-        final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
+        final FinremCaseDataConsented responseData = response.getData();
+        final List<NatureApplication> natureOfApplication2 =
+            responseData.getNatureApplicationWrapper().getNatureOfApplication2();
 
         assertThat(natureOfApplication2, hasItems(NatureApplication.VARIATION_ORDER));
         assertThat(natureOfApplication2, hasSize(1));
         assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
     }
 
-    private FinremCallbackRequest callbackRequest() {
+    private FinremCallbackRequest<FinremCaseDataConsented> callbackRequest() {
         return FinremCallbackRequest
-            .<FinremCaseDetails>builder()
-            .caseDetails(FinremCaseDetails.builder().id(123L)
-                .data(new FinremCaseData()).build())
+            .<FinremCaseDataConsented>builder()
+            .caseDetails(FinremCaseDetails.<FinremCaseDataConsented>builder().id(123L)
+                .data(new FinremCaseDataConsented()).build())
             .build();
     }
 }

@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
@@ -90,16 +90,16 @@ public class IntervenersMidHandlerTest {
 
     @Test
     public void givenContestedCase_whenMidEventCalledAndInterv1SelectedToOperate_thenPrepareOptionListForIntvBasedOnIntervenersList() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         handleResp.getData().getIntervenersList().setValue(option1);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
 
 
@@ -112,9 +112,9 @@ public class IntervenersMidHandlerTest {
 
     @Test
     public void givenContestedCase_whenMidEventCalledAndIntervSelectedToOperateNotValid_thenThrowException() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -130,16 +130,16 @@ public class IntervenersMidHandlerTest {
 
     @Test
     public void givenContestedCase_whenMidEventCalledAndInterv2SelectedToOperate_thenPrepareOptionListForIntvBasedOnIntervenersList() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         handleResp.getData().getIntervenersList().setValue(option1);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
 
 
@@ -152,16 +152,16 @@ public class IntervenersMidHandlerTest {
 
     @Test
     public void givenContestedCase_whenMidEventCalledAndInterv3SelectedToOperate_thenPrepareOptionListForIntvBasedOnIntervenersList() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         handleResp.getData().getIntervenersList().setValue(option1);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
 
 
@@ -174,16 +174,16 @@ public class IntervenersMidHandlerTest {
 
     @Test
     public void givenContestedCase_whenMidEventCalledAndInterv4SelectedToOperate_thenPrepareOptionListForIntvBasedOnIntervenersList() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         handleResp.getData().getIntervenersList().setValue(option1);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
 
 
@@ -197,21 +197,21 @@ public class IntervenersMidHandlerTest {
 
     @Test
     public void givenContestedCase_whenMidEventCalled_thenPrepareOptionListForIntvOneBasedOnIntervenersList() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
             .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerOneWrapper(oneWrapper);
         finremCallbackRequest.getCaseDetailsBefore().getData().setIntervenerOneWrapper(oneWrapper);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         handleResp.getData().getIntervenersList().setValue(option1);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
 
 
@@ -226,19 +226,19 @@ public class IntervenersMidHandlerTest {
 
     @Test
     public void givenContestedCase_whenMidEventCalled_thenPrepareOptionListForIntvTwoBasedOnIntervenersList() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
         IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerTwoWrapper(twoWrapper);
         finremCallbackRequest.getCaseDetailsBefore().getData().setIntervenerTwoWrapper(twoWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option2 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         handleResp.getData().getIntervenersList().setValue(option2);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
 
         assertEquals(2, intervenerOptionList.getListItems().size());
@@ -251,19 +251,19 @@ public class IntervenersMidHandlerTest {
 
     @Test
     public void givenContestedCase_whenMidEventCalled_thenPrepareOptionListForIntvThreeBasedOnIntervenersList() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerThreeWrapper(threeWrapper);
         finremCallbackRequest.getCaseDetailsBefore().getData().setIntervenerThreeWrapper(threeWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option3 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         handleResp.getData().getIntervenersList().setValue(option3);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
 
         assertEquals(2, intervenerOptionList.getListItems().size());
@@ -275,19 +275,19 @@ public class IntervenersMidHandlerTest {
 
     @Test
     public void givenContestedCase_whenMidEventCalled_thenPrepareOptionListForIntvFourBasedOnIntervenersList() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerFourWrapper(fourWrapper);
         finremCallbackRequest.getCaseDetailsBefore().getData().setIntervenerFourWrapper(fourWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option4 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         handleResp.getData().getIntervenersList().setValue(option4);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
 
         assertEquals(2, intervenerOptionList.getListItems().size());
@@ -299,12 +299,12 @@ public class IntervenersMidHandlerTest {
 
     @Test
     public void givenContestedCase_whenMidEventCalledWithInvalidOption_thenHandlerThrowError() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
 
         finremCallbackRequest.getCaseDetails().getData().setIntervenerFourWrapper(fourWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -318,14 +318,14 @@ public class IntervenersMidHandlerTest {
     }
 
 
-    private FinremCallbackRequest buildCallbackRequest() {
+    private FinremCallbackRequest<FinremCaseDataContested> buildCallbackRequest() {
         return FinremCallbackRequest
-            .builder()
+            .<FinremCaseDataContested>builder()
             .eventType(EventType.MANAGE_INTERVENERS)
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+            .caseDetailsBefore(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseDataContested()).build())
+            .caseDetails(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseDataContested()).build())
             .build();
     }
 }

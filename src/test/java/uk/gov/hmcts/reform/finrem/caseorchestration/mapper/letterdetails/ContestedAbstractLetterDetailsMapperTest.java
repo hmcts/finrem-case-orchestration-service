@@ -1,13 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.Map;
 
-public abstract class ContestedContestedAbstractLetterDetailsMapperTest extends BaseServiceTest {
+public abstract class ContestedAbstractLetterDetailsMapperTest extends BaseServiceTest {
 
-    protected FinremCaseDetails caseDetails;
+    protected FinremCaseDetails<FinremCaseDataContested> caseDetails;
 
     protected void setCaseDetails(String resource) {
         caseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(buildCaseDetailsFromJson(resource));

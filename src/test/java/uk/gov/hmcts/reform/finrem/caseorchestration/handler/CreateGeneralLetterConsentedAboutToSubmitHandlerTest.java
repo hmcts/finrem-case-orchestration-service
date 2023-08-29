@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
@@ -28,9 +28,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CreateGeneralLetterAboutToSubmitHandlerTest {
+public class CreateGeneralLetterConsentedAboutToSubmitHandlerTest {
 
-    private CreateGeneralLetterAboutToSubmitHandler handler;
+    private CreateGeneralLetterContestedAboutToSubmitHandler handler;
 
     @Mock
     private GeneralLetterService generalLetterService;
@@ -39,13 +39,13 @@ public class CreateGeneralLetterAboutToSubmitHandlerTest {
 
     @Before
     public void setup() {
-        handler =  new CreateGeneralLetterAboutToSubmitHandler(finremCaseDetailsMapper, generalLetterService);
+        handler = new CreateGeneralLetterContestedAboutToSubmitHandler(finremCaseDetailsMapper, generalLetterService);
     }
 
     @Test
     public void givenACcdCallbackCreateGeneralLetterAboutToSubmitHandler_WhenCanHandleCalled_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CREATE_GENERAL_LETTER),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CREATE_GENERAL_LETTER),
             is(true));
     }
 
@@ -73,8 +73,7 @@ public class CreateGeneralLetterAboutToSubmitHandlerTest {
 
     @Test
     public void givenACcdCallbackCallbackCreateGeneralLetterAboutToSubmitHandler_WhenHandle_thenCreateError() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setSolicitorAddress(null);
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = buildFinremCallbackRequest();
         when(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(callbackRequest.getCaseDetails()))
             .thenReturn(asList("Address is missing for recipient type"));
         handler.handle(callbackRequest, AUTH_TOKEN);
@@ -82,7 +81,7 @@ public class CreateGeneralLetterAboutToSubmitHandlerTest {
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
-        FinremCaseData caseData = FinremCaseData.builder()
+        FinremCaseDataConsented caseData = FinremCaseDataConsented.builder()
             .generalLetterWrapper(GeneralLetterWrapper.builder()
                 .generalLetterAddressTo(GeneralLetterAddressToType.APPLICANT_SOLICITOR)
                 .generalLetterRecipient("Test")
@@ -96,8 +95,10 @@ public class CreateGeneralLetterAboutToSubmitHandlerTest {
                 .generalLetterPreview(CaseDocument.builder().build())
                 .build())
             .build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).caseType(CaseType.CONSENTED).data(caseData).build();
-        return FinremCallbackRequest.builder().eventType(EventType.CREATE_GENERAL_LETTER).caseDetails(caseDetails).build();
+        FinremCaseDetails<FinremCaseDataConsented> caseDetails =
+            FinremCaseDetails.<FinremCaseDataConsented>builder().id(123L)
+                .caseType(CaseType.CONSENTED).data(caseData).build();
+        return FinremCallbackRequest.<FinremCaseDataConsented>builder().eventType(EventType.CREATE_GENERAL_LETTER).caseDetails(caseDetails).build();
     }
 
 }

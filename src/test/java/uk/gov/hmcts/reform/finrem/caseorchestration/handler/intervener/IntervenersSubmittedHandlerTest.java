@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
@@ -84,8 +84,8 @@ class IntervenersSubmittedHandlerTest {
 
     @Test
     void givenContestedCase_whenIntervenerOneActionIsAdded_thenSendCorrespondance() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails();
         intervenerOneChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
@@ -112,8 +112,8 @@ class IntervenersSubmittedHandlerTest {
 
     @Test
     void givenContestedCase_whenIntervenerTwoActionIsAdded_thenSendCorrespondance() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails();
         intervenerTwoChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
@@ -141,8 +141,8 @@ class IntervenersSubmittedHandlerTest {
 
     @Test
     void givenContestedCase_whenIntervenerThreeActionIsAdded_thenSendCorrespondance() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails();
         intervenerThreeChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
@@ -171,8 +171,8 @@ class IntervenersSubmittedHandlerTest {
 
     @Test
     void givenContestedCase_whenIntervenerFourActionIsAdded_thenSendCorrespondance() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails();
         intervenerFourChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
@@ -202,8 +202,8 @@ class IntervenersSubmittedHandlerTest {
 
     @Test
     void givenContestedCase_whenIntervenerOneActionIsRemoved_thenSendCorrespondance() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails();
         intervenerOneChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
@@ -220,7 +220,7 @@ class IntervenersSubmittedHandlerTest {
         finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
             .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
         finremCaseDataBefore.setIntervenerOneWrapper(oneWrapper);
@@ -232,8 +232,8 @@ class IntervenersSubmittedHandlerTest {
 
     @Test
     void givenContestedCase_whenIntervenerTwoActionIsRemoved_thenSendCorrespondance() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails();
         intervenerTwoChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
@@ -250,7 +250,7 @@ class IntervenersSubmittedHandlerTest {
         finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
         finremCaseDataBefore.setIntervenerTwoWrapper(twoWrapper);
@@ -262,8 +262,8 @@ class IntervenersSubmittedHandlerTest {
 
     @Test
     void givenContestedCase_whenIntervenerThreeActionIsRemoved_thenSendCorrespondance() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails();
         intervenerThreeChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
@@ -280,7 +280,7 @@ class IntervenersSubmittedHandlerTest {
         finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
         finremCaseDataBefore.setIntervenerThreeWrapper(threeWrapper);
@@ -292,8 +292,8 @@ class IntervenersSubmittedHandlerTest {
 
     @Test
     void givenContestedCase_whenIntervenerFourActionIsRemoved_thenSendCorrespondance() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails();
         intervenerFourChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
@@ -310,7 +310,7 @@ class IntervenersSubmittedHandlerTest {
         finremCaseData.getIntervenersList().setValue(option);
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
         finremCaseDataBefore.setIntervenerFourWrapper(fourWrapper);
@@ -320,14 +320,14 @@ class IntervenersSubmittedHandlerTest {
         verify(intervenerRemovedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
-    private FinremCallbackRequest buildCallbackRequest() {
+    private FinremCallbackRequest<FinremCaseDataContested> buildCallbackRequest() {
         return FinremCallbackRequest
-            .builder()
+            .<FinremCaseDataContested>builder()
             .eventType(EventType.MANAGE_INTERVENERS)
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+            .caseDetailsBefore(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseDataContested()).build())
+            .caseDetails(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseDataContested()).build())
             .build();
     }
 }

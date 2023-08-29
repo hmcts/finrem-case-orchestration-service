@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDa
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -354,8 +356,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForRespSolicitorForContestedJourneyForInterimHearingFinremData() {
-        FinremCallbackRequest callbackRequest = buildHearingFinremCallbackRequest(INTERIM_HEARING_JSON);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest = buildHearingFinremCallbackRequest(INTERIM_HEARING_JSON);
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
 
         List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.getInterimWrapper().getInterimHearings())
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
@@ -386,8 +388,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourneyForHearingFinremCaseData() {
-        FinremCallbackRequest callbackRequest = buildHearingFinremCallbackRequest(CONSENTED_HEARING_JSON);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = buildHearingFinremCallbackRequest(CONSENTED_HEARING_JSON);
+        FinremCaseDataConsented caseData = callbackRequest.getCaseDetails().getData();
 
         List<ConsentedHearingDataWrapper> hearings = caseData.getListForHearings();
         List<ConsentedHearingDataElement> elements = hearings.stream().map(ConsentedHearingDataWrapper::getValue).toList();
@@ -455,9 +457,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourneyForHearingFinremCaseData() {
-        FinremCallbackRequest callbackRequest = buildHearingFinremCallbackRequest(CONSENTED_HEARING_JSON);
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = buildHearingFinremCallbackRequest(CONSENTED_HEARING_JSON);
 
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDataConsented caseData = callbackRequest.getCaseDetails().getData();
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
         caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);

@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -280,7 +281,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
-        FinremCaseDetails finremCaseDetails = finremCaseDetails();
+        FinremCaseDetails<FinremCaseDataConsented> finremCaseDetails = finremCaseDetails();
 
         when(pdfStampingServiceMock.stampDocument(
             any(Document.class), eq(AUTH_TOKEN), eq(false), eq(StampType.FAMILY_COURT_STAMP), eq(caseId)))
@@ -290,7 +291,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             .thenReturn(document());
 
         consentOrderApprovedDocumentService
-           .addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);
+            .addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);
 
         assertThat(finremCaseDetails.getData().getApprovedOrderCollection(), hasSize(1));
     }

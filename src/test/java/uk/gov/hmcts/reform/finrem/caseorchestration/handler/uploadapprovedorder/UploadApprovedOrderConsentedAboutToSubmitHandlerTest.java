@@ -11,9 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -49,17 +48,17 @@ public class UploadApprovedOrderConsentedAboutToSubmitHandlerTest {
     @Test
     public void givenUploadConsentedApproveOrder_whenHandle_thenSetLatestConsentOrderAndCallAddGeneratedDocs() {
         CaseDocument uploadApproveOrder = CaseDocument.builder().documentFilename("testUploadAppOrder").build();
-        FinremCaseData finremCaseData = FinremCaseData.builder().consentOrderWrapper(
-            ConsentOrderWrapper.builder().uploadApprovedConsentOrder(uploadApproveOrder).build())
-            .build();
+        FinremCaseDataConsented finremCaseData =
+            FinremCaseDataConsented.builder().uploadApprovedConsentOrder(uploadApproveOrder).build();
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(1L).data(finremCaseData).build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(finremCaseDetails).build();
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
             uploadApprovedOrderConsentedAboutToSubmitHandler.handle(callbackRequest, "auth");
 
         assertThat(response.getData().getLatestConsentOrder(), is(uploadApproveOrder));
-        verify(consentOrderApprovedDocumentService, times(1)).addGeneratedApprovedConsentOrderDocumentsToCase(any(), any());
+        verify(consentOrderApprovedDocumentService, times(1))
+            .addGeneratedApprovedConsentOrderDocumentsToCase(any(), any());
 
     }
 }

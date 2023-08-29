@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -67,7 +67,7 @@ class ManualPaymentSubmittedHandlerTest {
 
     @Test
     void givenContestedPaperCase_whenManualPaymentEventInvoke_thenSendToBulkPrinte() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
         finremCallbackRequest.getCaseDetails().getData().setPaperApplication(YesOrNo.YES);
         when(service.generateManualPaymentLetter(finremCallbackRequest.getCaseDetails(),
             AUTH_TOKEN, APPLICANT)).thenReturn(caseDocument());
@@ -89,7 +89,7 @@ class ManualPaymentSubmittedHandlerTest {
             .builder()
             .eventType(EventType.ISSUE_APPLICATION)
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
+                .data(FinremCaseDataContested.builder().ccdCaseType(CONTESTED).build()).build())
             .build();
     }
 }

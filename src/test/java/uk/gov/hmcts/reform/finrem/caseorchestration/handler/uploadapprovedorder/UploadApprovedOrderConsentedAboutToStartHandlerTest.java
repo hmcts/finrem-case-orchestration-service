@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -45,12 +45,12 @@ public class UploadApprovedOrderConsentedAboutToStartHandlerTest {
     @Test
     public void givenUploadConsentedApproveOrder_whenHandle_thenAddDefaultJudgeAndCurrentDate() {
 
-        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+        FinremCaseDataConsented finremCaseData = FinremCaseDataConsented.builder().build();
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(1L).data(finremCaseData).build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(finremCaseDetails).build();
         when(idamService.getIdamSurname("auth")).thenReturn("judge");
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
             uploadApprovedOrderConsentedAboutToStartHandler.handle(callbackRequest, "auth");
 
         assertThat(response.getData().getOrderDirectionJudgeName(), is("judge"));

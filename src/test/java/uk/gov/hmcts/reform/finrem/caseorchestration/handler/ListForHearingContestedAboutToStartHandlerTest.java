@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -62,8 +62,8 @@ public class ListForHearingContestedAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenEventStart_thenSetDefaultOptionToNo() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> response
             = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(YesOrNo.NO, response.getData().getAdditionalHearingDocumentsOption());
     }
@@ -71,11 +71,11 @@ public class ListForHearingContestedAboutToStartHandlerTest {
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
-            .<FinremCaseDetails>builder()
+            .<FinremCaseDataContested>builder()
             .eventType(EventType.LIST_FOR_HEARING)
-            .caseDetails(FinremCaseDetails.builder().id(123L)
+            .caseDetails(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L)
                 .caseType(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(new FinremCaseDataContested()).build())
             .build();
     }
 }

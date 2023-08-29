@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
@@ -78,14 +78,15 @@ public class IntervenersAboutToSubmitHandlerTest {
 
     @Test
     public void givenContestedCase_whenSelectionMadeToAddIntervener1_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
             .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
 
         finremCaseData.setIntervenerOneWrapper(oneWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp =
+            startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -103,14 +104,15 @@ public class IntervenersAboutToSubmitHandlerTest {
 
     @Test
     public void givenContestedCase_whenSelectionMadeToRemoveIntervener1_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
             .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
 
         finremCaseData.setIntervenerOneWrapper(oneWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp =
+            startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -128,14 +130,15 @@ public class IntervenersAboutToSubmitHandlerTest {
 
     @Test
     public void givenContestedCase_whenSelectionMadeToAddIntervener2_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
 
         finremCaseData.setIntervenerTwoWrapper(twoWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp =
+            startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -153,14 +156,15 @@ public class IntervenersAboutToSubmitHandlerTest {
 
     @Test
     public void givenContestedCase_whenSelectionMadeToRemoveIntervener2_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
 
         finremCaseData.setIntervenerTwoWrapper(twoWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp =
+            startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -179,13 +183,14 @@ public class IntervenersAboutToSubmitHandlerTest {
 
     @Test
     public void givenContestedCase_whenSelectionMadeToAddIntervener3_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
 
         finremCaseData.setIntervenerThreeWrapper(threeWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp =
+            startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -202,14 +207,14 @@ public class IntervenersAboutToSubmitHandlerTest {
 
     @Test
     public void givenContestedCase_whenSelectionMadeToRemoveIntervener3_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
 
         finremCaseData.setIntervenerThreeWrapper(threeWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -226,13 +231,14 @@ public class IntervenersAboutToSubmitHandlerTest {
 
     @Test
     public void givenContestedCase_whenSelectionMadeToAddIntervener4_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
 
         finremCaseData.setIntervenerFourWrapper(fourWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp =
+            startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -250,15 +256,16 @@ public class IntervenersAboutToSubmitHandlerTest {
 
     @Test
     public void givenContestedCase_whenSelectionMadeToRemoveIntervener4_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
 
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
 
         finremCaseData.setIntervenerFourWrapper(fourWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp =
+            startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -276,13 +283,13 @@ public class IntervenersAboutToSubmitHandlerTest {
 
     @Test
     public void givenContestedCase_whenInvalidOptionReceived_thenHandlerThrowError() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
 
         finremCaseData.setIntervenerFourWrapper(fourWrapper);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
@@ -301,14 +308,14 @@ public class IntervenersAboutToSubmitHandlerTest {
             .hasMessage("Invalid option received for case " + 123L);
     }
 
-    private FinremCallbackRequest buildCallbackRequest() {
+    private FinremCallbackRequest<FinremCaseDataContested> buildCallbackRequest() {
         return FinremCallbackRequest
-            .builder()
+            .<FinremCaseDataContested>builder()
             .eventType(EventType.MANAGE_INTERVENERS)
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+            .caseDetailsBefore(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseDataContested()).build())
+            .caseDetails(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseDataContested()).build())
             .build();
     }
 }

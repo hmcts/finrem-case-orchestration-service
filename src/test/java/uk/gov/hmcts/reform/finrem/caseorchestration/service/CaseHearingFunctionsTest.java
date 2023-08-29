@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DevonCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DorsetCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HighCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LancashireCourt;
@@ -150,7 +151,7 @@ public class CaseHearingFunctionsTest {
 
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Reedley Family Hearing Centre"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), 
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY),
             is("The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("LancashireandCumbriaFRC@justice.gov.uk"));
@@ -165,7 +166,7 @@ public class CaseHearingFunctionsTest {
 
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Reedley Family Hearing Centre"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), 
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY),
             is("The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("LancashireandCumbriaFRC@justice.gov.uk"));
@@ -547,7 +548,7 @@ public class CaseHearingFunctionsTest {
     }
 
     private FinremCaseData getFinremCaseData(DefaultRegionWrapper regionWrapper) {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(TEST_SOLICITOR_EMAIL);
         caseData.getContactDetailsWrapper().setApplicantSolicitorName(TEST_SOLICITOR_NAME);
         caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);

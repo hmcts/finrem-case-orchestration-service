@@ -5,10 +5,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
@@ -31,13 +31,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapperContested.REFUSAL_ORDER_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetailsObject;
 
-public class RejectedOrderDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class RejectedOrderDetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON_CONTESTED = "/fixtures/refusal-order-contested.json";
     public static final String TEST_JSON_CONSENTED = "/fixtures/refusal-order-consented.json";
 
     @Autowired
-    private RejectedOrderDetailsMapperContested rejectedOrderDetailsMapper;
+    private RejectedOrderDetailsMapperContested rejectedOrderDetailsMapperContested;
 
     @Before
     public void setUp() throws Exception {
@@ -48,7 +48,7 @@ public class RejectedOrderDetailsMapperTest extends ContestedContestedAbstractLe
     public void givenValidCaseDataContested_whenBuildDocumentTemplateDetails_thenReturnExpectedDetails() {
         DocumentTemplateDetails expected = getExpectedContestedRejectedOrderDetails();
 
-        DocumentTemplateDetails actual = rejectedOrderDetailsMapper.buildDocumentTemplateDetails(caseDetails,
+        DocumentTemplateDetails actual = rejectedOrderDetailsMapperContested.buildDocumentTemplateDetails(caseDetails,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
 
@@ -60,7 +60,7 @@ public class RejectedOrderDetailsMapperTest extends ContestedContestedAbstractLe
         setCaseDetails(TEST_JSON_CONSENTED);
         DocumentTemplateDetails expected = getExpectedConsentedRejectedOrderDetails();
 
-        DocumentTemplateDetails actual = rejectedOrderDetailsMapper.buildDocumentTemplateDetails(caseDetails,
+        DocumentTemplateDetails actual = rejectedOrderDetailsMapperContested.buildDocumentTemplateDetails(caseDetails,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         assertTemplateFields(actual, expected);
@@ -69,9 +69,10 @@ public class RejectedOrderDetailsMapperTest extends ContestedContestedAbstractLe
     @Test
     public void givenEmptyOrNullFields_whenBuildDocumentTemplateDetails_thenDoNotThrowException() {
         FinremCaseDetails emptyDetails = FinremCaseDetails.builder()
-            .caseType(CaseType.CONSENTED).data(FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).build()).build();
+            .caseType(CaseType.CONSENTED)
+            .data(FinremCaseDataContested.builder().ccdCaseType(CaseType.CONSENTED).build()).build();
 
-        DocumentTemplateDetails actual = rejectedOrderDetailsMapper.buildDocumentTemplateDetails(emptyDetails,
+        DocumentTemplateDetails actual = rejectedOrderDetailsMapperContested.buildDocumentTemplateDetails(emptyDetails,
             emptyDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         assertNotNull(actual);

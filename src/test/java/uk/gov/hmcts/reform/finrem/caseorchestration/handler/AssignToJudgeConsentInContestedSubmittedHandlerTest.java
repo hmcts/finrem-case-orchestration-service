@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudgeconsentincontested.FinremAssignToJudgeConsentInContestedCorresponder;
 
@@ -33,7 +34,7 @@ public class AssignToJudgeConsentInContestedSubmittedHandlerTest {
 
     @Before
     public void setup() {
-        handler =  new AssignToJudgeConsentInContestedSubmittedHandler(finremCaseDetailsMapper, corresponder);
+        handler = new AssignToJudgeConsentInContestedSubmittedHandler(finremCaseDetailsMapper, corresponder);
     }
 
     @Test
@@ -73,7 +74,7 @@ public class AssignToJudgeConsentInContestedSubmittedHandlerTest {
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
         return FinremCallbackRequest.builder().eventType(EventType.ASSIGN_TO_JUDGE_CONSENT).caseDetails(caseDetails).build();
     }

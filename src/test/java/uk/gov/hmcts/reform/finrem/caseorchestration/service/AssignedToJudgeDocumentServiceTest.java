@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
@@ -50,16 +51,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-feign-clients")
 public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    @Autowired
+    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
-    @Autowired private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
+    @Autowired
+    private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
 
-    @Autowired private EvidenceManagementUploadService evidenceManagementUploadService;
+    @Autowired
+    private EvidenceManagementUploadService evidenceManagementUploadService;
 
-    @Autowired private IdamAuthService idamAuthService;
+    @Autowired
+    private IdamAuthService idamAuthService;
 
     private CaseDetails caseDetails;
-    private FinremCaseDetails frCaseDetails;
+    private FinremCaseDetails<FinremCaseDataContested> frCaseDetails;
 
     @Captor
     private ArgumentCaptor<Map> mapArgumentCaptor;
@@ -175,14 +180,14 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
         frCaseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorName(TEST_SOLICITOR_NAME);
         frCaseDetails.getData().getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
         frCaseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorAddress(Address.builder()
-                .addressLine1("123 Applicant Solicitor Street")
-                .addressLine2("Second Address Line")
-                .addressLine3("Third Address Line")
-                .county("London")
-                .country("England")
-                .postTown("London")
-                .postCode("SE1")
-                .build());
+            .addressLine1("123 Applicant Solicitor Street")
+            .addressLine2("Second Address Line")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SE1")
+            .build());
 
         CaseDocument generatedAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(frCaseDetails, AUTH_TOKEN, APPLICANT);

@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
-public class ConsentHearingServiceTest extends BaseServiceTest  {
+public class ConsentHearingServiceTest extends BaseServiceTest {
 
     @Autowired
     private ConsentHearingService service;
@@ -139,7 +140,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
     @Test
     public void givenFinremCaseDetailsConsentedNotPaperCase_WhenPaperCase_ThenItShouldSendNotification() {
-        FinremCaseDetails caseDetails = buildFinremCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
+        FinremCaseDetails<FinremCaseDataConsented> caseDetails = buildFinremCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
         caseDetails.getData().setPaperApplication(YesOrNo.NO);
         caseDetails.getData().getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(YesOrNo.YES);
         caseDetails.getData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
@@ -155,7 +156,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
             .sendConsentHearingNotificationEmailToRespondentSolicitor(any(FinremCaseDetails.class), anyMap());
     }
 
-    private CaseDetails buildCaseDetails(String testPayload)  {
+    private CaseDetails buildCaseDetails(String testPayload) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testPayload)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         } catch (Exception e) {
@@ -163,7 +164,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
         }
     }
 
-    private FinremCaseDetails buildFinremCaseDetails(String testPayload)  {
+    private FinremCaseDetails<FinremCaseDataConsented> buildFinremCaseDetails(String testPayload) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testPayload)) {
             return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         } catch (Exception e) {

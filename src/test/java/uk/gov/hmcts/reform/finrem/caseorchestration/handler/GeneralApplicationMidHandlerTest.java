@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
@@ -98,9 +99,9 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
             .builder()
             .eventType(EventType.GENERAL_APPLICATION)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(new FinremCaseDataContested()).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(new FinremCaseDataContested()).build())
             .build();
     }
 
@@ -117,9 +118,9 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
             .builder()
             .eventType(EventType.GENERAL_APPLICATION)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().generalApplicationWrapper(wrapper1).build()).build())
+                .data(FinremCaseDataContested.builder().generalApplicationWrapper(wrapper1).build()).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().generalApplicationWrapper(wrapper1).build()).build())
+                .data(FinremCaseDataContested.builder().generalApplicationWrapper(wrapper1).build()).build())
             .build();
     }
 }

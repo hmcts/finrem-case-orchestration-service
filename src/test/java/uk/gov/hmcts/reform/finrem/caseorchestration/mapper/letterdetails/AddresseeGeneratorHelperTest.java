@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -24,7 +25,7 @@ class AddresseeGeneratorHelperTest {
 
     @Test
     void givenApplicantRecipient_whenGetAddressee_thenReturnApplicantAddressee() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseData caseData = new FinremCaseDataContested();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.getContactDetailsWrapper().setApplicantFmName("Applicant");
         caseData.getContactDetailsWrapper().setApplicantLname("Name");
@@ -43,7 +44,7 @@ class AddresseeGeneratorHelperTest {
 
     @Test
     void givenApplicantSolicitorRecipient_whenGetAddressee_thenReturnApplicantSolicitorAddressee() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.getContactDetailsWrapper().setApplicantSolicitorName("AppSolName");
         caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
@@ -62,7 +63,7 @@ class AddresseeGeneratorHelperTest {
 
     @Test
     void givenRespondentRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.getContactDetailsWrapper().setRespondentFmName("Respondent");
         caseData.getContactDetailsWrapper().setRespondentLname("Name");
@@ -82,7 +83,7 @@ class AddresseeGeneratorHelperTest {
 
     @Test
     void givenIntervenerOneRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.setIntervenerTwoWrapper(IntervenerTwoWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
             .addressLine1("2 Intervener Street")
@@ -102,7 +103,7 @@ class AddresseeGeneratorHelperTest {
 
     @Test
     void givenIntervenerTwoRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.setIntervenerOneWrapper(IntervenerOneWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
             .addressLine1("1 Intervener Street")
@@ -122,7 +123,7 @@ class AddresseeGeneratorHelperTest {
 
     @Test
     void givenIntervenerThreeRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.setIntervenerThreeWrapper(IntervenerThreeWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
             .addressLine1("3 Intervener Street")
@@ -142,7 +143,7 @@ class AddresseeGeneratorHelperTest {
 
     @Test
     void givenIntervenerFourRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.setIntervenerFourWrapper(IntervenerFourWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
             .addressLine1("4 Intervener Street")
@@ -162,7 +163,7 @@ class AddresseeGeneratorHelperTest {
 
     @Test
     void givenRespondentSolicitorRecipient_whenGetAddressee_thenReturnRespondentSolicitorAddressee() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
         caseData.getContactDetailsWrapper().setRespondentSolicitorName("RespSol Name");
@@ -197,7 +198,7 @@ class AddresseeGeneratorHelperTest {
 
     @Test
     void givenValidCaseData_whenGetAddressToCaseDataMapping_thenReturnCorrectMapping() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.getContactDetailsWrapper().setApplicantSolicitorAddress(Address.builder()
             .addressLine1("50 App Sol Street").build());
         caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(Address.builder()

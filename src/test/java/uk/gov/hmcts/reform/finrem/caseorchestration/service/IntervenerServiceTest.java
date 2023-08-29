@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
@@ -77,9 +77,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenCase_whenRemoveOperationChoosenForIntv1NotRepresented_thenRemoveIntervener() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
             .builder().intervenerName("One name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
         finremCaseData.setIntervenerOneWrapper(oneWrapper);
@@ -93,9 +93,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenCase_whenRemoveOperationChoosenForIntv1Represented_thenRemoveIntervener() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -126,9 +126,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenCase_whenRemoveOperationChoosenForIntv2NotRepresented_thenRemoveintervener() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
         finremCaseData.setIntervenerTwoWrapper(twoWrapper);
@@ -144,9 +144,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenCase_whenRemoveOperationChoosenForIntv2Represented_thenRemoveIntervener() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -175,9 +175,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenCase_whenRemoveOperationChoosenForIntv3NotRepesented_thenRemoveintervener() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
         finremCaseData.setIntervenerThreeWrapper(threeWrapper);
@@ -193,9 +193,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenCase_whenRemoveOperationChoosenForIntv3Repesented_thenRemoveIntervener() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -223,9 +223,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenCase_whenRemoveOperationChoosenForIntv4NotRepresented_thenRemoveintervener() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
         finremCaseData.setIntervenerFourWrapper(fourWrapper);
@@ -240,9 +240,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenCase_whenRemoveOperationChoosenForIntv4Represented_thenRemoveIntervener() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
 
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -271,8 +271,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenAddingintervenerAndIntv1Represent_thenSetIntvenerDateAddedAndDefaultOrg() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -304,9 +304,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervener1AndChangedRepresetationYesToNo_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -356,9 +356,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervener1AndChangedRepresetationSolEmailChanged_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -419,9 +419,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervener1AndChangedRepresetationSolOrgChanged_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -484,9 +484,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervener1AndChangedRepresetationNoToYes_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -536,8 +536,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenAddingIntervenerAndIntv1NotRepresent_thenSetIntvenerDateAddedAndDefaultOrg() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(null).organisationName(null).build()
         ).build();
@@ -562,8 +562,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenAddingIntervenerAndIntv2NotRepresent_thenSetIntvenerDateAddedAndDefaultOrg() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(null).organisationName(null).build()
         ).build();
@@ -588,8 +588,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenAddingIntervenerAndIntv2Represent_thenSetIntvenerDateAddedAndDefaultOrg() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -620,9 +620,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervener2AndChangedRepresetationYesToNo_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -670,9 +670,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervener2AndChangedRepresetationSolOrgChanged_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -734,9 +734,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervenerAndChangedRepresetationSolEmailChanged_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -796,9 +796,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervener2AndChangedRepresetationNoToYes_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -846,8 +846,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenAddingIntervenerAndIntv3NotRepresent_thenSetIntvenerDateAddedAndDefaultOrg() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(null).organisationName(null).build()
         ).build();
@@ -872,8 +872,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenAddingIntervenerAndIntv3Represent_thenSetIntvenerDateAddedAndDefaultOrg() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -905,9 +905,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervener3AndChangedRepresetationYesToNo_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -957,9 +957,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervener3AndChangedRepresetationSolEmailChanges_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -1019,9 +1019,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervenerAndChangedRepresetationSolOrgChanges_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -1082,9 +1082,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervener3AndChangedRepresetationNoToYes_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -1132,8 +1132,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenAddingIntervenerAndIntv4NotRepresent_thenSetIntvenerDateAddedAndDefaultOrg() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(null).organisationName(null).build()
         ).build();
@@ -1158,8 +1158,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenAddingIntervenerAndIntv4Represent_thenSetIntvenerDateAddedAndDefaultOrg() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -1191,9 +1191,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervenerAndChangedRepresetationYesToNo_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -1243,9 +1243,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervenerAndChangedRepresetationNoToYes_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -1293,9 +1293,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervenerAndChangedRepresetationSolEmailChanges_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -1355,9 +1355,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenUpdatingIntervenerAndChangedRepresetationSolOrgChanged_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -1419,8 +1419,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenAddingIntervenerWithNonRegisterEmail_thenHandlerThrowException() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDataContested finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
@@ -1506,10 +1506,10 @@ public class IntervenerServiceTest extends BaseServiceTest {
         intervenerOneWrapperBefore.setIntervenerRepresented(YesOrNo.YES);
         IntervenerOneWrapper intervenerOneWrapper = new IntervenerOneWrapper();
         intervenerOneWrapper.setIntervenerRepresented(YesOrNo.NO);
-        FinremCaseData finremCaseData = FinremCaseData.builder()
+        FinremCaseDataContested finremCaseData = FinremCaseDataContested.builder()
             .intervenerOneWrapper(intervenerOneWrapper)
             .build();
-        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+        FinremCaseDataContested finremCaseDataBefore = FinremCaseDataContested.builder()
             .intervenerOneWrapper(intervenerOneWrapperBefore)
             .build();
         Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
@@ -1521,10 +1521,10 @@ public class IntervenerServiceTest extends BaseServiceTest {
         intervenerTwoWrapperBefore.setIntervenerRepresented(YesOrNo.YES);
         IntervenerTwoWrapper intervenerTwoWrapper = new IntervenerTwoWrapper();
         intervenerTwoWrapper.setIntervenerRepresented(YesOrNo.NO);
-        FinremCaseData finremCaseData = FinremCaseData.builder()
+        FinremCaseDataContested finremCaseData = FinremCaseDataContested.builder()
             .intervenerTwoWrapper(intervenerTwoWrapper)
             .build();
-        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+        FinremCaseDataContested finremCaseDataBefore = FinremCaseDataContested.builder()
             .intervenerTwoWrapper(intervenerTwoWrapperBefore)
             .build();
         Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
@@ -1536,10 +1536,10 @@ public class IntervenerServiceTest extends BaseServiceTest {
         intervenerThreeWrapperBefore.setIntervenerRepresented(YesOrNo.YES);
         IntervenerThreeWrapper intervenerThreeWrapper = new IntervenerThreeWrapper();
         intervenerThreeWrapper.setIntervenerRepresented(YesOrNo.NO);
-        FinremCaseData finremCaseData = FinremCaseData.builder()
+        FinremCaseDataContested finremCaseData = FinremCaseDataContested.builder()
             .intervenerThreeWrapper(intervenerThreeWrapper)
             .build();
-        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+        FinremCaseDataContested finremCaseDataBefore = FinremCaseDataContested.builder()
             .intervenerThreeWrapper(intervenerThreeWrapperBefore)
             .build();
         Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
@@ -1551,10 +1551,10 @@ public class IntervenerServiceTest extends BaseServiceTest {
         intervenerFourWrapperBefore.setIntervenerRepresented(YesOrNo.YES);
         IntervenerFourWrapper intervenerFourWrapper = new IntervenerFourWrapper();
         intervenerFourWrapper.setIntervenerRepresented(YesOrNo.NO);
-        FinremCaseData finremCaseData = FinremCaseData.builder()
+        FinremCaseDataContested finremCaseData = FinremCaseDataContested.builder()
             .intervenerFourWrapper(intervenerFourWrapper)
             .build();
-        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+        FinremCaseDataContested finremCaseDataBefore = FinremCaseDataContested.builder()
             .intervenerFourWrapper(intervenerFourWrapperBefore)
             .build();
         Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
@@ -1562,8 +1562,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void whenNoIntervenerSolicitorRemoved_ShouldReturnFalse() {
-        FinremCaseData finremCaseData = FinremCaseData.builder().build();
-        FinremCaseData finremCaseDataBefore = FinremCaseData.builder().build();
+        FinremCaseDataContested finremCaseData = FinremCaseDataContested.builder().build();
+        FinremCaseDataContested finremCaseDataBefore = FinremCaseDataContested.builder().build();
         Assert.assertFalse(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }
 
@@ -1572,9 +1572,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .builder()
             .eventType(EventType.MANAGE_INTERVENERS)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(new FinremCaseDataContested()).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(new FinremCaseDataContested()).build())
             .build();
     }
 }

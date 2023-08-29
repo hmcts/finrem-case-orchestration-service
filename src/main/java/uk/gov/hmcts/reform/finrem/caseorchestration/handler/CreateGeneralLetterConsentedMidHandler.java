@@ -14,13 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService
 
 @Slf4j
 @Service
-public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
+public class CreateGeneralLetterConsentedMidHandler extends FinremCallbackHandler {
 
     private final GeneralLetterService generalLetterService;
 
     @Autowired
-    public CreateGeneralLetterMidHandler(FinremCaseDetailsMapper mapper,
-                                         GeneralLetterService generalLetterService) {
+    public CreateGeneralLetterConsentedMidHandler(FinremCaseDetailsMapper mapper,
+                                                  GeneralLetterService generalLetterService) {
         super(mapper);
         this.generalLetterService = generalLetterService;
     }
@@ -28,6 +28,7 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
+            && CaseType.CONSENTED.equals(caseType)
             && (EventType.CREATE_GENERAL_LETTER.equals(eventType)
             || EventType.CREATE_GENERAL_LETTER_JUDGE.equals(eventType));
     }

@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.time.LocalDate;
@@ -80,24 +81,26 @@ public class ReadyForHearingConsentedAboutToStartHandlerTest extends BaseHandler
     @Test
     public void givenConsentedCase_WhenHearingListingSchedulesOnly_ThenShouldBeReadyForHearing() {
 
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataConsented> finremCallbackRequest = buildCallbackRequest();
         ConsentedHearingDataElement consentedHearingDataElement = new ConsentedHearingDataElement();
         consentedHearingDataElement.setHearingDate(LocalDate.now().plusMonths(1).toString());
         List<ConsentedHearingDataWrapper> listForHearings = new ArrayList<>();
-        listForHearings.add(new ConsentedHearingDataWrapper(LIST_FOR_HEARING_COLLECTION_CONSENTED, consentedHearingDataElement));
+        listForHearings.add(new ConsentedHearingDataWrapper(LIST_FOR_HEARING_COLLECTION_CONSENTED,
+            consentedHearingDataElement));
         finremCallbackRequest.getCaseDetails().getData().setListForHearings(listForHearings);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors(), is(empty()));
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
-            .<FinremCaseDetails>builder()
+            .<FinremCaseDataConsented>builder()
             .eventType(EventType.READY_FOR_HEARING)
-            .caseDetails(FinremCaseDetails.builder().id(123L)
+            .caseDetails(FinremCaseDetails.<FinremCaseDataConsented>builder().id(123L)
                 .caseType(CaseType.CONSENTED)
-                .data(new FinremCaseData()).build())
+                .data(new FinremCaseDataConsented()).build())
             .build();
     }
 }

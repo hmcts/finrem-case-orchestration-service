@@ -22,12 +22,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContestedContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
@@ -169,7 +169,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     private CaseDataService caseDataService;
 
     private CallbackRequest callbackRequest;
-    private FinremCallbackRequest finremCallbackRequest;
+    private FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest;
     private NotificationRequest notificationRequest;
     private SolicitorCaseDataKeysWrapper dataKeysWrapper;
 
@@ -189,7 +189,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
             .thenReturn(notificationRequest);
         when(finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(FinremCaseDetails.class),
-                any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
+            any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
         when(evidenceManagementDownloadService.downloadInResponseEntity(anyString(), anyString()))
             .thenReturn(ResponseEntity.status(HttpStatus.OK).body(new ByteArrayResource(new byte[2048])));
     }
@@ -1061,8 +1061,8 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldEmailApplicantSolicitorWhenApplicantSolicitorIsDigitalAndEmailIsPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder().applicantSolicitorEmail(APPLICANT_EMAIL).build()).build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().contactDetailsWrapper(
+            ContestedContactDetailsWrapper.builder().applicantSolicitorEmail(APPLICANT_EMAIL).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(true);
@@ -1072,8 +1072,8 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailApplicantSolicitorWhenApplicantSolicitorIsNotDigitalAndEmailIsPopulatedFinrem() {
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder().respondentSolicitorEmail(APPLICANT_EMAIL).build()).build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().contactDetailsWrapper(
+            ContestedContactDetailsWrapper.builder().respondentSolicitorEmail(APPLICANT_EMAIL).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
@@ -1083,8 +1083,8 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailApplicantSolicitorWhenApplicantSolicitorIsDigitalAndEmailIsNotPopulatedFinrem() {
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder().applicantSolicitorEmail(null).build()).build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().contactDetailsWrapper(
+            ContestedContactDetailsWrapper.builder().applicantSolicitorEmail(null).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
@@ -1130,8 +1130,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldEmailRespondentSolicitorWhenRespondentSolicitorIsDigitalAndEmailPopulated() {
 
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder().respondentSolicitorEmail(RESP_SOLICITOR_EMAIL).build()).build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().contactDetailsWrapper(
+            ContestedContactDetailsWrapper.builder().respondentSolicitorEmail(RESP_SOLICITOR_EMAIL).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())).thenReturn(true);
@@ -1180,8 +1180,8 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailRespondentSolicitorWhenRespondentSolicitorIsNotDigitalAndEmailIsPopulatedFinrem() {
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder().respondentSolicitorEmail(RESP_SOLICITOR_EMAIL).build()).build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().contactDetailsWrapper(
+            ContestedContactDetailsWrapper.builder().respondentSolicitorEmail(RESP_SOLICITOR_EMAIL).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
@@ -1191,7 +1191,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldEmailIfIntervenerOneSolicitorIsPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerOneWrapper(
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().intervenerOneWrapper(
             IntervenerOneWrapper.builder().intervenerRepresented(YesOrNo.YES)
                 .intervenerSolEmail(INTERVENER_SOL_EMAIL)
                 .intervenerSolName("name").build()).build();
@@ -1204,7 +1204,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailIfIntervenerOneSolicitorIsNotPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerOneWrapper(
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().intervenerOneWrapper(
             IntervenerOneWrapper.builder().intervenerRepresented(YesOrNo.NO).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
@@ -1215,7 +1215,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldEmailIfIntervenerTwoSolicitorIsPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerTwoWrapper(
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().intervenerTwoWrapper(
             IntervenerTwoWrapper.builder().intervenerRepresented(YesOrNo.YES)
                 .intervenerSolEmail(INTERVENER_SOL_EMAIL)
                 .intervenerSolName("name").build()).build();
@@ -1228,7 +1228,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailIfIntervenerTwoSolicitorIsNotPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerTwoWrapper(
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().intervenerTwoWrapper(
             IntervenerTwoWrapper.builder().intervenerRepresented(YesOrNo.NO).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
@@ -1239,7 +1239,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldEmailIfIntervenerThreeSolicitorIsPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerThreeWrapper(
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().intervenerThreeWrapper(
             IntervenerThreeWrapper.builder().intervenerRepresented(YesOrNo.YES)
                 .intervenerSolEmail(INTERVENER_SOL_EMAIL)
                 .intervenerSolName("name").build()).build();
@@ -1252,7 +1252,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailIfIntervenerThreeSolicitorIsNotPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerThreeWrapper(
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().intervenerThreeWrapper(
             IntervenerThreeWrapper.builder().intervenerRepresented(YesOrNo.NO).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
@@ -1263,7 +1263,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldEmailIfIntervenerFourSolicitorIsPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerFourWrapper(
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().intervenerFourWrapper(
             IntervenerFourWrapper.builder().intervenerRepresented(YesOrNo.YES)
                 .intervenerSolEmail(INTERVENER_SOL_EMAIL)
                 .intervenerSolName("name").build()).build();
@@ -1277,7 +1277,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldEmailIntervenerSolicitorIfIntervenerSolicitorWasPopulated() {
         IntervenerWrapper wrapper = new IntervenerOneWrapper();
-        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().build();
         IntervenerChangeDetails changeDetails = new IntervenerChangeDetails();
         wrapper.setIntervenerSolEmail("intvrsol@email.com");
         changeDetails.setIntervenerDetails(wrapper);
@@ -1288,7 +1288,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldNotEmailIntervenerSolicitorIfIntervenerSolicitorWasNotPopulated() {
         IntervenerWrapper wrapper = new IntervenerOneWrapper();
-        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().build();
         IntervenerChangeDetails changeDetails = new IntervenerChangeDetails();
         changeDetails.setIntervenerDetails(wrapper);
         caseData.setCurrentIntervenerChangeDetails(changeDetails);
@@ -1297,8 +1297,8 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailRespondentSolicitorWhenRespondentSolicitorIsDigitalAndEmailIsNotPopulatedFinrem() {
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder().respondentSolicitorEmail(null).build()).build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().contactDetailsWrapper(
+            ContestedContactDetailsWrapper.builder().respondentSolicitorEmail(null).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
@@ -1502,7 +1502,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void checkFinremIsIntervenerSolicitorDigitalAndEmailPopulated() {
-        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseDataContested caseData = finremCallbackRequest.getCaseDetails().getData();
         caseData.getIntervenerOneWrapper().setIntervenerSolEmail(TEST_SOLICITOR_EMAIL);
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), anyString())).thenReturn(true);
 
@@ -1546,7 +1546,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldReturnFinremCaseDataKeysForIntervenersSolicitor() {
-        FinremCaseData caseData = FinremCaseData.builder()
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder()
             .intervenerOneWrapper(IntervenerOneWrapper.builder()
                 .intervenerSolName("1Name")
                 .intervenerSolEmail("1Email")
@@ -1596,7 +1596,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     private static FinremCaseDetails getFinremCaseDetails(CaseType caseType) {
         return FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .data(FinremCaseDataContested.builder()
                 .ccdCaseType(caseType)
                 .generalEmailWrapper(GeneralEmailWrapper.builder()
                     .generalEmailRecipient(APPLICANT_EMAIL)

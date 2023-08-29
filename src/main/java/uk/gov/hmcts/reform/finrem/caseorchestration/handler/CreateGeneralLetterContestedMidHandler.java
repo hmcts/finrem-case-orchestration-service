@@ -14,19 +14,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService
 
 @Slf4j
 @Service
-public class CreateGeneralLetterAboutToSubmitHandler extends FinremCallbackHandler {
+public class CreateGeneralLetterContestedMidHandler extends FinremCallbackHandler {
+
     private final GeneralLetterService generalLetterService;
 
     @Autowired
-    public CreateGeneralLetterAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                   GeneralLetterService generalLetterService) {
+    public CreateGeneralLetterContestedMidHandler(FinremCaseDetailsMapper mapper,
+                                                  GeneralLetterService generalLetterService) {
         super(mapper);
         this.generalLetterService = generalLetterService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+        return CallbackType.MID_EVENT.equals(callbackType)
+            && CaseType.CONTESTED.equals(caseType)
             && (EventType.CREATE_GENERAL_LETTER.equals(eventType)
             || EventType.CREATE_GENERAL_LETTER_JUDGE.equals(eventType));
     }
@@ -34,12 +36,13 @@ public class CreateGeneralLetterAboutToSubmitHandler extends FinremCallbackHandl
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request for generating general letter with Case ID: {}", caseDetails.getId());
+        log.info("Received request to preview general letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
-            generalLetterService.createGeneralLetter(userAuthorisation, caseDetails);
+            generalLetterService.previewGeneralLetter(userAuthorisation, caseDetails);
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
         } else {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

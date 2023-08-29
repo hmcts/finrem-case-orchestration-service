@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ApprovedOrderNoticeOfHearingDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class ApprovedOrderNoticeOfHearingDetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
     public static final String TEST_RESOURCE = "/fixtures/general-application-directions.json";
 
     @Autowired

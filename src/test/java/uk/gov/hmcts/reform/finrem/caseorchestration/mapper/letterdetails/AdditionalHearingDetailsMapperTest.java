@@ -15,7 +15,7 @@ import java.util.Map;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AdditionalHearingDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class AdditionalHearingDetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
 
     public static final String BULK_PRINT_ADDITIONAL_HEARING_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
 

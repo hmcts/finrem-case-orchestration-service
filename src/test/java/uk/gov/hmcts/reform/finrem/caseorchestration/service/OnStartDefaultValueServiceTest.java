@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
+public class OnStartDefaultValueServiceTest extends BaseServiceTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
 
@@ -55,7 +55,7 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
     public void defaultCivilPartnershipField() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         service.defaultCivilPartnershipField(callbackRequest);
-        assertEquals(NO_VALUE,callbackRequest.getCaseDetails().getData().get(CIVIL_PARTNERSHIP));
+        assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().get(CIVIL_PARTNERSHIP));
     }
 
 
@@ -63,7 +63,7 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
     public void defaultTypeOfApplication_defaultValue() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         service.defaultTypeOfApplication(callbackRequest);
-        assertEquals(TYPE_OF_APPLICATION_DEFAULT_TO,callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
+        assertEquals(TYPE_OF_APPLICATION_DEFAULT_TO, callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -72,7 +72,7 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(TYPE_OF_APPLICATION, schedule1);
         service.defaultTypeOfApplication(callbackRequest);
-        assertEquals(schedule1,callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
+        assertEquals(schedule1, callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
             .builder()
             .eventType(EventType.ISSUE_APPLICATION)
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(new FinremCaseDataContested()).build())
             .build();
     }
 }

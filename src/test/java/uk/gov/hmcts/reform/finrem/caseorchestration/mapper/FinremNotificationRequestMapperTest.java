@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
@@ -79,7 +79,7 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldReturnHearingTypeForPrepareForHearingContestedEventInvoke() {
-        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = getContestedNewCallbackRequest().getCaseDetails();
         caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             caseDetails);
@@ -97,7 +97,7 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldReturnHearingTypeForPrepareForHearingContestedEventInvokeIntervener() {
-        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = getContestedNewCallbackRequest().getCaseDetails();
         caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(TEST_SOLICITOR_EMAIL)
@@ -198,8 +198,8 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForRespSolicitorForContestedJourneyForInterimHearing() {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(TEST_JSON, mapper);
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = finremCaseDetailsFromResource(TEST_JSON, mapper);
+        FinremCaseDataContested caseData = caseDetails.getData();
 
         List<InterimHearingCollection> interimHearingList = Optional.ofNullable(
             caseData.getInterimWrapper().getInterimHearings()).orElse(Collections.emptyList());

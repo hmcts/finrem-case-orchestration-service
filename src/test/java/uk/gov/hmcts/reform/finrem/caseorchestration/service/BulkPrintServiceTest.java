@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
@@ -306,7 +307,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
             .thenReturn(caseDocument);
         when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN))).thenReturn(letterId);
 
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         IntervenerOneWrapper intervenerOneWrapper = finremCaseDetails.getData().getIntervenerOneWrapper();
 
         UUID uuid = bulkPrintService.printIntervenerDocuments(intervenerOneWrapper, caseDetails, AUTH_TOKEN, bulkPrintDocuments);
@@ -326,7 +327,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldPrintIntervenerDocumentsFinrem() {
         final String contestedBulkPrintConsentIntervener1Json
             = "/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json";
-        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource(contestedBulkPrintConsentIntervener1Json, mapper);
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = TestSetUpUtils.finremCaseDetailsFromResource(contestedBulkPrintConsentIntervener1Json, mapper);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE))

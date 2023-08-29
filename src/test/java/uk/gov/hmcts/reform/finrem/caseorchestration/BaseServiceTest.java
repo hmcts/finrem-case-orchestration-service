@@ -18,12 +18,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentedContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -149,7 +152,7 @@ public abstract class BaseServiceTest extends BaseTest {
             .build();
     }
 
-    protected FinremCallbackRequest getConsentedFinremCallbackRequestForVariationOrder() {
+    protected FinremCallbackRequest<FinremCaseDataConsented> getConsentedFinremCallbackRequestForVariationOrder() {
         List<String> natureOfApplication = List.of("Lump Sum Order",
             "Periodical Payment Order",
             "Pension Sharing Order",
@@ -159,7 +162,7 @@ public abstract class BaseServiceTest extends BaseTest {
             "A settlement or a transfer of property",
             "Variation Order",
             "Property Adjustment Order");
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+        ConsentedContactDetailsWrapper contactDetailsWrapper = ConsentedContactDetailsWrapper.builder()
             .appRespondentFmName("David")
             .appRespondentLName("Goodman")
             .applicantFmName("Victoria")
@@ -171,14 +174,14 @@ public abstract class BaseServiceTest extends BaseTest {
             .respondentSolicitorName(TEST_RESP_SOLICITOR_NAME)
             .respondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE)
             .build();
-        FinremCaseData caseData = FinremCaseData.builder()
+        FinremCaseDataConsented caseData = FinremCaseDataConsented.builder()
             .contactDetailsWrapper(contactDetailsWrapper)
             .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
             .natureApplicationWrapper(NatureApplicationWrapper.builder()
                 .natureOfApplication2(Arrays.stream(NatureApplication.values()).toList()).build()).build();
 
-        return FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
+        return FinremCallbackRequest.<FinremCaseDataConsented>builder()
+            .caseDetails(FinremCaseDetails.<FinremCaseDataConsented>builder()
                 .caseType(CaseType.CONSENTED)
                 .id(12345L)
                 .data(caseData)
@@ -251,8 +254,8 @@ public abstract class BaseServiceTest extends BaseTest {
             .build();
     }
 
-    protected FinremCallbackRequest getConsentedNewCallbackRequest() {
-        FinremCaseData caseData = new FinremCaseData();
+    protected FinremCallbackRequest<FinremCaseDataConsented> getConsentedNewCallbackRequest() {
+        FinremCaseDataConsented caseData = new FinremCaseDataConsented();
         caseData.getContactDetailsWrapper().setAppRespondentFmName("David");
         caseData.getContactDetailsWrapper().setAppRespondentLName("Goodman");
         caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
@@ -265,14 +268,13 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
         caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.setCcdCaseType(CaseType.CONSENTED);
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
         caseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
         caseData.getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
         caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
         caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
-        return FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
+        return FinremCallbackRequest.<FinremCaseDataConsented>builder()
+            .caseDetails(FinremCaseDetails.<FinremCaseDataConsented>builder()
                 .caseType(CaseType.CONSENTED)
                 .id(12345L)
                 .data(caseData)
@@ -308,13 +310,13 @@ public abstract class BaseServiceTest extends BaseTest {
             .build();
     }
 
-    protected FinremCallbackRequest getContestedNewCallbackRequest() {
-        FinremCaseData caseData = getFinremCaseData();
+    protected FinremCallbackRequest<FinremCaseDataContested> getContestedNewCallbackRequest() {
+        FinremCaseDataContested caseData = getFinremCaseDataContested();
         caseData.getContactDetailsWrapper().setRespondentFmName("David");
         caseData.getContactDetailsWrapper().setRespondentLname("Goodman");
         caseData.setCcdCaseType(CaseType.CONTESTED);
-        return FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
+        return FinremCallbackRequest.<FinremCaseDataContested>builder()
+            .caseDetails(FinremCaseDetails.<FinremCaseDataContested>builder()
                 .caseType(CaseType.CONTESTED)
                 .id(12345L)
                 .data(caseData)
@@ -341,8 +343,8 @@ public abstract class BaseServiceTest extends BaseTest {
         return caseData;
     }
 
-    private FinremCaseData getFinremCaseData() {
-        FinremCaseData caseData = new FinremCaseData();
+    private FinremCaseDataContested getFinremCaseDataContested() {
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
         caseData.getContactDetailsWrapper().setApplicantLname("Goodman");
         caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(TEST_SOLICITOR_EMAIL);

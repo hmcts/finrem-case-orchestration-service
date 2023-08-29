@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.AssignCaseAccessException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
@@ -23,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AssignApplicantSolicitorServiceTest  {
+public class AssignApplicantSolicitorServiceTest {
 
     private static final long CASE_ID = 1583841721773828L;
     private static final String USER_AUTH = "123456789";
@@ -47,7 +48,7 @@ public class AssignApplicantSolicitorServiceTest  {
 
     @Before
     public void setUp() throws Exception {
-        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseData caseData = FinremCaseDataContested.builder().build();
         caseDetails = FinremCaseDetails.builder().id(CASE_ID).data(caseData).build();
 
         applicantOrgPolicy = OrganisationPolicy.builder()

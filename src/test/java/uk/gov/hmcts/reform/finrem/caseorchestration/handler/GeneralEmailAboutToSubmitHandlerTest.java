@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
@@ -42,7 +43,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
 
     @Before
     public void setup() {
-        handler =  new GeneralEmailAboutToSubmitHandler(finremCaseDetailsMapper,
+        handler = new GeneralEmailAboutToSubmitHandler(finremCaseDetailsMapper,
             notificationService,
             generalEmailService,
             genericDocumentService);
@@ -71,7 +72,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
-        FinremCaseData caseData = FinremCaseData.builder()
+        FinremCaseData caseData = FinremCaseDataContested.builder()
             .generalEmailWrapper(GeneralEmailWrapper.builder()
                 .generalEmailRecipient("Test")
                 .generalEmailCreatedBy("Test")

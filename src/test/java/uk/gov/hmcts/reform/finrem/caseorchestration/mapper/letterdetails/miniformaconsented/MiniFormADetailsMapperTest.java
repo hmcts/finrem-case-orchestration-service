@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifo
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ConsentedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
@@ -16,11 +16,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class MiniFormADetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class MiniFormADetailsMapperTest extends ConsentedAbstractLetterDetailsMapperTest {
     public static final String TEST_JSON = "/fixtures/mini-form-a-details.json";
 
     @Autowired
-    private MiniFormADetailsMapperConsented miniFormADetailsMapper;
+    private MiniFormADetailsMapperConsented miniFormADetailsMapperConsented;
 
     @Before
     public void setUp() throws Exception {
@@ -31,7 +31,7 @@ public class MiniFormADetailsMapperTest extends ContestedContestedAbstractLetter
     public void givenValidCaseData_whenBuildDocumentTemplateDetails_thenReturnExpectedTemplateDetails() {
         DocumentTemplateDetails expected = getExpectedMiniFormADetails();
 
-        DocumentTemplateDetails actual = miniFormADetailsMapper.buildDocumentTemplateDetails(caseDetails,
+        DocumentTemplateDetails actual = miniFormADetailsMapperConsented.buildDocumentTemplateDetails(caseDetails,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         assertEquals(expected, actual);
@@ -39,9 +39,9 @@ public class MiniFormADetailsMapperTest extends ContestedContestedAbstractLetter
 
     @Test
     public void givenEmptyOrNullFields_whenBuildDocumentTemplateDetails_thenDoNotThrowException() {
-        FinremCaseDetails emptyDetails = FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
+        FinremCaseDetails emptyDetails = FinremCaseDetails.builder().data(FinremCaseDataConsented.builder().build()).build();
 
-        DocumentTemplateDetails actual = miniFormADetailsMapper.buildDocumentTemplateDetails(emptyDetails,
+        DocumentTemplateDetails actual = miniFormADetailsMapperConsented.buildDocumentTemplateDetails(emptyDetails,
             emptyDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         assertNotNull(actual);

@@ -6,10 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BristolCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
@@ -23,7 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class FormCLetterDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class FormCLetterDetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2022, 1, 1);
 
@@ -88,7 +88,7 @@ public class FormCLetterDetailsMapperTest extends ContestedContestedAbstractLett
     }
 
     private void setCaseDetails() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.getContactDetailsWrapper().setApplicantFmName("Test");
         caseData.getContactDetailsWrapper().setApplicantLname("Applicant");
@@ -103,7 +103,8 @@ public class FormCLetterDetailsMapperTest extends ContestedContestedAbstractLett
         caseData.setHearingTime("1pm");
         caseData.setTimeEstimate("1 hour");
 
-        caseDetails = FinremCaseDetails.builder().id(12345L).caseType(CaseType.CONTESTED).data(caseData).build();
+        caseDetails = FinremCaseDetails.<FinremCaseDataContested>builder()
+            .id(12345L).caseType(CaseType.CONTESTED).data(caseData).build();
     }
 
 }

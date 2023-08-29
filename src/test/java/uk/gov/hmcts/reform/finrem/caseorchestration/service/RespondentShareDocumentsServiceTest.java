@@ -7,17 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
@@ -30,33 +20,10 @@ import static java.util.Collections.singletonList;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.APPLICANT_FORM_E;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CARE_PLAN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CASE_SUMMARY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CHRONOLOGY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.EXPERT_EVIDENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.FORM_H;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.OTHER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.QUESTIONNAIRE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.STATEMENT_AFFIDAVIT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.TRIAL_BUNDLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.*;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_CASE_SUMMARIES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_CORRESPONDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_EXPERT_EVIDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_FORM_E_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_FORM_H_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_HEARING_BUNDLES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_OTHER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.*;
 
 @ExtendWith(MockitoExtension.class)
 class RespondentShareDocumentsServiceTest {
@@ -88,8 +55,8 @@ class RespondentShareDocumentsServiceTest {
     void respondentSourceDocumentListWhenDocPresent() {
 
         FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails details = request.getCaseDetails();
-        FinremCaseData data = details.getData();
+        FinremCaseDetails<FinremCaseDataContested> details = request.getCaseDetails();
+        FinremCaseDataContested data = details.getData();
 
         data.getUploadCaseDocumentWrapper().setRespOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setRespChronologiesCollection(getTestDocument(CHRONOLOGY));
@@ -116,8 +83,8 @@ class RespondentShareDocumentsServiceTest {
     @Test
     void getRespondentToOtherSolicitorRoleList() {
 
-        FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseData caseData = request.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> request = buildCallbackRequest();
+        FinremCaseDataContested caseData = request.getCaseDetails().getData();
 
         DynamicMultiSelectList roleList = new DynamicMultiSelectList();
         roleList.setValue(singletonList(getSelectedParty(RESP_SOLICITOR)));
@@ -140,8 +107,8 @@ class RespondentShareDocumentsServiceTest {
     @Test
     void shareOneDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
         FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails details = request.getCaseDetails();
-        FinremCaseData data = details.getData();
+        FinremCaseDetails<FinremCaseDataContested> details = request.getCaseDetails();
+        FinremCaseDataContested data = details.getData();
 
 
         data.getUploadCaseDocumentWrapper().setRespOtherCollection(getTestDocument(OTHER));
@@ -166,8 +133,8 @@ class RespondentShareDocumentsServiceTest {
     void shareDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
 
         FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails details = request.getCaseDetails();
-        FinremCaseData data = details.getData();
+        FinremCaseDetails<FinremCaseDataContested> details = request.getCaseDetails();
+        FinremCaseDataContested data = details.getData();
 
 
         data.getUploadCaseDocumentWrapper().setRespOtherCollection(getTestDocument(OTHER));
@@ -270,19 +237,19 @@ class RespondentShareDocumentsServiceTest {
         return List.of(UploadCaseDocumentCollection.builder().id(uuid.get().toString()).uploadCaseDocument(document).build());
     }
 
-    private FinremCallbackRequest buildCallbackRequest() {
-        FinremCaseData caseData = new FinremCaseData();
+    private FinremCallbackRequest<FinremCaseDataContested> buildCallbackRequest() {
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         return FinremCallbackRequest
-            .builder()
+            .<FinremCaseDataContested>builder()
             .eventType(EventType.SHARE_SELECTED_DOCUMENTS)
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .caseDetailsBefore(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CONTESTED)
                 .data(caseData).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .caseDetails(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CONTESTED)
                 .data(caseData).build())
             .build();
     }
 
-    private List<CaseAssignmentUserRole>  getCaseRoleList() {
+    private List<CaseAssignmentUserRole> getCaseRoleList() {
 
         List<String> roleList = List.of("[APPSOLICITOR]", "[APPBARRISTER]", "[RESPSOLICITOR]",
             "[RESPBARRISTER]", "[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]",

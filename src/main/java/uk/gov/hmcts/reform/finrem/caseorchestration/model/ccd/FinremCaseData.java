@@ -137,7 +137,7 @@ public abstract class FinremCaseData {
     private RegionWrapper regionWrapper;
 
 
-    //TODO: Remove these 2 attributes from here: currentIntervenerChangeDetails and currentAddressee
+    //TODO: Remove these 2 attributes from this class: currentIntervenerChangeDetails and currentAddressee
     @JsonIgnore
     private IntervenerChangeDetails currentIntervenerChangeDetails;
     @JsonIgnore

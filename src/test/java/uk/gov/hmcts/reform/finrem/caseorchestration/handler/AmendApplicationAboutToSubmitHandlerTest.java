@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -92,7 +93,8 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     public void givenCase_whenSolicitorChooseToDecreeAbsolute_thenShouldDeleteDecreeNisi() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(DECREE_NISI_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getDivorceUploadEvidence2());
@@ -103,7 +105,8 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     public void givenCase_whenSolicitorChooseToDecreeNisi_thenShouldDeleteDecreeAbsolute() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(DECREE_ABS_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getDivorceUploadEvidence1());
@@ -114,9 +117,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     public void givenCase_whenCaseUpdated_thenShouldDeleteD81IndividualData() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(D81_JOINT_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
+        final FinremCaseDataConsented responseData = response.getData();
         assertNull(responseData.getD81Applicant());
         assertNull(responseData.getD81Respondent());
         assertNotNull(responseData.getD81Joint());
@@ -126,9 +130,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     public void givenCase_whenCaseUpdated_thenShouldDeleteD81JointData() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(D81_INDIVIUAL_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
+        final FinremCaseDataConsented responseData = response.getData();
         assertNull(responseData.getD81Joint());
         assertNotNull(responseData.getD81Applicant());
         assertNotNull(responseData.getD81Respondent());
@@ -138,9 +143,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     public void givenCase_whenCaseUpdated_thenShouldDeletePropertyDetails() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(PROPERTY_DETAILS_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
+        final FinremCaseDataConsented responseData = response.getData();
         assertNull(responseData.getNatureApplicationWrapper().getNatureOfApplication3a());
         assertNull(responseData.getNatureApplicationWrapper().getNatureOfApplication3b());
     }
@@ -149,9 +155,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     public void givenCase_whenCaseUpdated_thenShouldNotRemovePropertyDetails() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(PROPERTY_ADJ_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
+        final FinremCaseDataConsented responseData = response.getData();
         assertNotNull(responseData.getNatureApplicationWrapper().getNatureOfApplication3a());
         assertNotNull(responseData.getNatureApplicationWrapper().getNatureOfApplication3b());
     }
@@ -161,9 +168,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         CallbackRequest callbackRequest =
             doValidCaseDataSetUp(PERIODIC_PAYMENT_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
+        final FinremCaseDataConsented responseData = response.getData();
         assertNotNull(responseData.getNatureApplicationWrapper().getNatureOfApplication6());
         assertNotNull(responseData.getNatureApplicationWrapper().getNatureOfApplication7());
     }
@@ -172,9 +180,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     public void givenCase_whenCaseUpdated_thenShouldDeletePeriodicPaymentDetailsWithWrittenAgreementForChildren() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(PERIODIC_PAYMENT_CHILD_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
+        final FinremCaseDataConsented responseData = response.getData();
         assertNull(responseData.getNatureApplicationWrapper().getNatureOfApplication6());
         assertNull(responseData.getNatureApplicationWrapper().getNatureOfApplication7());
     }
@@ -183,9 +192,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     public void givenCase_whenCaseUpdated_thenShouldDeletePeriodicPaymentDetailsIfUnchecked() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(PAYMENT_UNCHECKED_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
+        final FinremCaseDataConsented responseData = response.getData();
         assertNull(responseData.getNatureApplicationWrapper().getNatureOfApplication5());
         assertNull(responseData.getNatureApplicationWrapper().getNatureOfApplication6());
         assertNull(responseData.getNatureApplicationWrapper().getNatureOfApplication7());
@@ -196,7 +206,8 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     public void givenCase_whenIfRespondentNotRepresentedBySolicitor_thenShouldDeleteRespondentSolicitorDetails() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(RES_SOL_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorFirm());
@@ -213,9 +224,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     public void givenCase_whenApplicantNotRepresentedBySolicitor_thenShouldDeleteApplicantSolicitorDetails() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(APP_SOL_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
+        final FinremCaseDataConsented responseData = response.getData();
         assertNull(responseData.getContactDetailsWrapper().getSolicitorFirm());
         assertNull(responseData.getContactDetailsWrapper().getSolicitorName());
         assertNull(responseData.getContactDetailsWrapper().getSolicitorReference());

@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifo
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
@@ -16,7 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ConsentInContestMiniFormADetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class ConsentInContestMiniFormADetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON = "/fixtures/contested/consent-in-contest-mini-form-a-details.json";
 
@@ -40,7 +40,7 @@ public class ConsentInContestMiniFormADetailsMapperTest extends ContestedContest
 
     @Test
     public void givenEmptyOrNullFields_whenBuildDocumentTemplateDetails_thenDoNotThrowException() {
-        FinremCaseDetails emptyDetails = FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
+        FinremCaseDetails emptyDetails = FinremCaseDetails.builder().data(FinremCaseDataContested.builder().build()).build();
 
         DocumentTemplateDetails actual = consentInContestMiniFormADetailsMapper.buildDocumentTemplateDetails(emptyDetails,
             emptyDetails.getData().getRegionWrapper().getDefaultCourtList());

@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contes
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedContestedAbstractLetterDetailsMapperTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -19,7 +19,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ContestOrderApprovedLetterDetailsMapperTest extends ContestedContestedAbstractLetterDetailsMapperTest {
+public class ContestOrderApprovedLetterDetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
 
     @Autowired
     private ContestOrderApprovedLetterDetailsMapperContested contestOrderApprovedLetterDetailsMapper;
@@ -65,7 +65,7 @@ public class ContestOrderApprovedLetterDetailsMapperTest extends ContestedContes
     }
 
     private FinremCaseDetails contestedCaseDetails() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDataContested caseData = FinremCaseDataContested.builder().build();
         caseData.getContactDetailsWrapper().setApplicantFmName("Poor");
         caseData.getContactDetailsWrapper().setApplicantLname("Guy");
         caseData.getContactDetailsWrapper().setRespondentFmName("Test");

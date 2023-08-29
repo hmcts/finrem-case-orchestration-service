@@ -321,7 +321,7 @@ public class TestSetUpUtils {
             .build();
     }
 
-    public static FinremCaseDetails defaultContestedFinremCaseDetails() {
+    public static FinremCaseDetails<FinremCaseDataContested> defaultContestedFinremCaseDetails() {
         FinremCaseDataContested caseData = FinremCaseDataContested.builder().build();
         List<NatureApplication> natureOfApplications = List.of(NatureApplication.LUMP_SUM_ORDER,
             NatureApplication.PERIODICAL_PAYMENT_ORDER,
@@ -337,7 +337,7 @@ public class TestSetUpUtils {
         populateCourtDetails(caseData);
         caseData.setCcdCaseType(CaseType.CONTESTED);
 
-        return FinremCaseDetails.builder()
+        return FinremCaseDetails.<FinremCaseDataContested>builder()
             .caseType(CaseType.CONTESTED)
             .id(987654321L)
             .state(State.APPLICATION_SUBMITTED)

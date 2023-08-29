@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -88,8 +88,8 @@ class ApplicantShareDocumentsServiceTest {
     void applicantSourceDocumentListWhenDocPresent() {
 
         FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails details = request.getCaseDetails();
-        FinremCaseData data = details.getData();
+        FinremCaseDetails<FinremCaseDataContested> details = request.getCaseDetails();
+        FinremCaseDataContested data = details.getData();
 
         data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setAppChronologiesCollection(getTestDocument(CHRONOLOGY));
@@ -132,8 +132,8 @@ class ApplicantShareDocumentsServiceTest {
     @Test
     void shareOneDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
         FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails details = request.getCaseDetails();
-        FinremCaseData data = details.getData();
+        FinremCaseDetails<FinremCaseDataContested> details = request.getCaseDetails();
+        FinremCaseDataContested data = details.getData();
 
 
         data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
@@ -158,8 +158,8 @@ class ApplicantShareDocumentsServiceTest {
     void shareDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
 
         FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails details = request.getCaseDetails();
-        FinremCaseData data = details.getData();
+        FinremCaseDetails<FinremCaseDataContested> details = request.getCaseDetails();
+        FinremCaseDataContested data = details.getData();
 
 
         data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
@@ -264,7 +264,7 @@ class ApplicantShareDocumentsServiceTest {
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
-        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDataContested caseData = new FinremCaseDataContested();
         return FinremCallbackRequest
             .builder()
             .eventType(EventType.SHARE_SELECTED_DOCUMENTS)
@@ -275,7 +275,7 @@ class ApplicantShareDocumentsServiceTest {
             .build();
     }
 
-    private List<CaseAssignmentUserRole>  getCaseRoleList() {
+    private List<CaseAssignmentUserRole> getCaseRoleList() {
 
         List<String> roleList = List.of("[APPSOLICITOR]", "[APPBARRISTER]", "[RESPSOLICITOR]",
             "[RESPBARRISTER]", "[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]",

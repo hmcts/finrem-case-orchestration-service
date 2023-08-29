@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
@@ -65,14 +65,15 @@ public class IntervenersAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenUseManageInterveners_thenPrepareIntervenersList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handle.getData().getIntervenersList().getListItems().size());
     }
 
     @Test
     public void givenContestedCase_whenUseManageIntervenersAndThereIsOneIntervnerAlready_thenPrepareIntervenersList() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest<FinremCaseDataContested> finremCallbackRequest = buildCallbackRequest();
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
             .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
         IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
@@ -87,7 +88,8 @@ public class IntervenersAboutToStartHandlerTest {
         finremCallbackRequest.getCaseDetails().getData().setIntervenerThreeWrapper(threeWrapper);
         finremCallbackRequest.getCaseDetails().getData().setIntervenerFourWrapper(fourWrapper);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(4, handle.getData().getIntervenersList().getListItems().size());
         assertEquals(INTERVENER_ONE, handle.getData().getIntervenersList().getValueCode());
@@ -101,12 +103,12 @@ public class IntervenersAboutToStartHandlerTest {
             handle.getData().getIntervenersList().getListItems().get(3).getLabel());
     }
 
-    private FinremCallbackRequest buildCallbackRequest() {
+    private FinremCallbackRequest<FinremCaseDataContested> buildCallbackRequest() {
         return FinremCallbackRequest
-            .builder()
+            .<FinremCaseDataContested>builder()
             .eventType(EventType.MANAGE_INTERVENERS)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseDataContested()).build())
             .build();
     }
 }
