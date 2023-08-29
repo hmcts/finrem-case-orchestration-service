@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
+@SuppressWarnings("java:S116")
 public class AssignCaseAccessRequest {
     private String case_id;
     private String assignee_id;

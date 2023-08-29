@@ -27,6 +27,7 @@ public class PaperNotificationService {
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
 
+    @SuppressWarnings("java:S1874")
     public void printAssignToJudgeNotification(CaseDetails caseDetails, String authToken) {
         log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}", caseDetails.getId());
 
@@ -66,12 +67,14 @@ public class PaperNotificationService {
             && !YES_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
+    @SuppressWarnings("java:S1874")
     public void printApplicantRejectionGeneralApplication(CaseDetails caseDetails, String authToken) {
         CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
             caseDetails, authToken, APPLICANT);
         bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, CCDConfigConstant.APPLICANT, authToken);
     }
 
+    @SuppressWarnings("java:S1874")
     public void printRespondentRejectionGeneralApplication(CaseDetails caseDetails, String authToken) {
         CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
             caseDetails, authToken, RESPONDENT);

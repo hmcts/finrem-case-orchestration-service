@@ -84,6 +84,8 @@ public class ContestedDraftOrderNotApprovedService {
         return caseDetails;
     }
 
+
+    @SuppressWarnings("java:S3740")
     private String formatRefusalReasons(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         List<Object> refusalReasons = (List<Object>) caseData.get(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL);

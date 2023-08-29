@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @JsonPropertyOrder(value = {"caseReference"})
 @AllArgsConstructor
 @NoArgsConstructor
+@SuppressWarnings("java:S1700")
 public class CaseReference {
 
     @JsonProperty

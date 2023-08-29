@@ -3,9 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalDocumentType;
@@ -31,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfoCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Complexity;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentNatureOfApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderType;
@@ -123,7 +123,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
@@ -149,42 +148,41 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FinremCaseDetailMapperTest {
 
+class FinremCaseDetailMapperTest {
 
     FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private static final String REFUSAL_ORDER_CALLBACK_REQUEST = "/fixtures/refusal-order-contested.json";
     private static final String CONTESTED_INTERIM_CALLBACK_REQUEST = "/fixtures/contested-interim-hearing.json";
-    public static final String BULK_PRINT_ADDITIONAL_HEARING_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
+    static final String BULK_PRINT_ADDITIONAL_HEARING_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
     private static final String SOL_CONTEST_CALLBACK_REQUEST = "/fixtures/deserialisation/ccd-request-with-solicitor-contestApplicationIssued.json";
     private static final String BASIC_REQUEST = "/fixtures/deserialisation/basic-request.json";
 
     private static final String GA_REQUEST = "/fixtures/deserialisation/ccd-request-with-general-application.json";
-    private static final String CASE_FLAGS_REQUEST = "/fixtures/case-flags.json";
 
     private CaseDetails caseDetails;
     private ObjectMapper objectMapper;
 
-    @Before
-    public void testSetUp() {
+    @BeforeEach
+    void testSetUp() {
         objectMapper = new ObjectMapper();
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
     }
 
     @Test
-    public void mapBasicCaseDetails() {
+    void mapBasicCaseDetails() {
         caseDetails = buildCaseDetailsFromJson(BASIC_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
     }
 
     @Test
-    public void mapFinremCaseDetailsToCaseDetails() {
+    void mapFinremCaseDetailsToCaseDetails() {
         caseDetails = buildCaseDetailsFromJson(BASIC_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         CaseDetails caseDetailsFromPojo = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
@@ -192,49 +190,34 @@ public class FinremCaseDetailMapperTest {
     }
 
     @Test
-    public void mapBulkPrintDetails() throws JsonProcessingException {
+    void mapBulkPrintDetails() throws JsonProcessingException {
         caseDetails = buildCaseDetailsFromJson(BULK_PRINT_ADDITIONAL_HEARING_JSON);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
-        assertEquals(finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName(), "Test");
+        assertEquals("Test", finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName());
     }
-
-
+    
     @Test
-    @Ignore
-    public void mapBulkPrintDetails_PojoCheck() throws JsonProcessingException {
-        caseDetails = buildCaseDetailsFromJson(BULK_PRINT_ADDITIONAL_HEARING_JSON);
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        assertNotNull(finremCaseDetails);
-        assertEquals(finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName(), "Test");
-        CaseDetails caseDetailsFromPojo = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-        String caseDetailsString = objectMapper.writeValueAsString(caseDetails);
-        String caseDetailsPojoString = objectMapper.writeValueAsString(caseDetailsFromPojo);
-        assertEquals(objectMapper.readTree(caseDetailsString), objectMapper.readTree(caseDetailsPojoString));
-    }
-
-
-    @Test
-    public void givenValidCallbackRequest_thenSuccessfullyMapped() {
+    void givenValidCallbackRequest_thenSuccessfullyMapped() {
         caseDetails = buildCaseDetailsFromJson(REFUSAL_ORDER_CALLBACK_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
         assertNotNull(caseDetails);
         FinremCaseData caseData = finremCaseDetails.getData();
-        assertEquals(caseData.getContactDetailsWrapper().getApplicantRepresented(), YesOrNo.YES);
-        assertEquals(caseData.getContactDetailsWrapper().getApplicantFmName(), "Contested Applicant");
-        assertEquals(caseData.getRegionWrapper().getDefaultCourtList().getNottinghamCourtList().getId(), "FR_s_NottinghamList_1");
+        assertEquals(YesOrNo.YES, caseData.getContactDetailsWrapper().getApplicantRepresented());
+        assertEquals("Contested Applicant", caseData.getContactDetailsWrapper().getApplicantFmName());
+        assertEquals("FR_s_NottinghamList_1", caseData.getRegionWrapper().getDefaultCourtList().getNottinghamCourtList().getId());
     }
 
     @Test
-    public void givenGeneralOrderFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
+    void givenGeneralOrderFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
         caseDetails = buildCaseDetailsFromJson(CONTESTED_INTERIM_CALLBACK_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
     }
 
     @Test
-    public void givenGeneralApplicationFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
+    void givenGeneralApplicationFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
         caseDetails = buildCaseDetailsFromJson(GA_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
@@ -242,25 +225,43 @@ public class FinremCaseDetailMapperTest {
 
 
     @Test
-    public void givenCaseFlagsFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
-        caseDetails = buildCaseDetailsOnlyFromJson(CASE_FLAGS_REQUEST);
+    void givenCaseFlagsFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
+        caseDetails = buildCaseDetailsOnlyFromJson();
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
     }
 
     @Test
-    public void givenCcdRequestAppIssued_whenDeserializeFromString_thenSuccessfullyDeserialize() throws IOException {
+    void givenCcdRequestAppIssued_whenDeserializeFromString_thenSuccessfullyDeserialize() throws IOException {
         caseDetails = buildCaseDetailsFromJson(SOL_CONTEST_CALLBACK_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         FinremCaseData caseData = finremCaseDetails.getData();
-        assertMiam(caseData);
-        assertAmendedConsentOrderCollection(caseData);
-        assertCaseNotesCollection(caseData);
-        assertScannedDocuments(caseData);
-        assertCoverSheets(caseData);
-        assertApprovedOrderCollection(caseData);
-        assertEnums(caseData);
-        assertMiam(caseData);
+
+        assertBatchOne(caseData);
+        assertBatchTwo(caseData);
+        assertBatchThree(caseData);
+
+        assertNotNull(caseData.getContactDetailsWrapper().getRespondentAddress());
+        assertNotNull(caseData.getContactDetailsWrapper().getApplicantSolicitorAddress());
+        assertEquals("Line1", caseData.getContactDetailsWrapper().getApplicantSolicitorAddress().getAddressLine1());
+    }
+
+    private void assertBatchThree(FinremCaseData caseData) {
+        assertOtherCollection(caseData);
+        assertCopyOfPaperFormA(caseData);
+        assertPensionCollection(caseData);
+        assertDraftDirectionOrders(caseData);
+        assertGeneralApplicationsCollection(caseData);
+        assertGeneralLetterCollection(caseData);
+        assertRespondToOrderDocuments(caseData);
+        assertDirectionDetailsInterim(caseData);
+        assertSolUploadDocuments(caseData);
+        assertUploadOrder(caseData);
+        assertUploadDocuments(caseData);
+        assertConsentOrderWrapper(caseData);
+    }
+
+    private void assertBatchTwo(FinremCaseData caseData) {
         assertChildrenInfo(caseData);
         assertGeneralEmail(caseData);
         assertRepresentationUpdateHistory(caseData);
@@ -277,22 +278,17 @@ public class FinremCaseDetailMapperTest {
         assertDirectionDetailsCollection(caseData);
         assertIndividualDocuments(caseData);
         assertOrderRefusalCollection(caseData);
-        assertOtherCollection(caseData);
-        assertCopyOfPaperFormA(caseData);
-        assertPensionCollection(caseData);
-        assertDraftDirectionOrders(caseData);
-        assertGeneralApplicationsCollection(caseData);
-        assertGeneralLetterCollection(caseData);
-        assertRespondToOrderDocuments(caseData);
-        assertDirectionDetailsInterim(caseData);
-        assertSolUploadDocuments(caseData);
-        assertUploadOrder(caseData);
-        assertUploadDocuments(caseData);
-        assertConsentOrderWrapper(caseData);
+    }
 
-        assertNotNull(caseData.getContactDetailsWrapper().getRespondentAddress());
-        assertNotNull(caseData.getContactDetailsWrapper().getApplicantSolicitorAddress());
-        assertEquals(caseData.getContactDetailsWrapper().getApplicantSolicitorAddress().getAddressLine1(), "Line1");
+    private void assertBatchOne(FinremCaseData caseData) {
+        assertMiam(caseData);
+        assertAmendedConsentOrderCollection(caseData);
+        assertCaseNotesCollection(caseData);
+        assertScannedDocuments(caseData);
+        assertCoverSheets(caseData);
+        assertApprovedOrderCollection(caseData);
+        assertEnums(caseData);
+        assertMiam(caseData);
     }
 
 
@@ -371,28 +367,28 @@ public class FinremCaseDetailMapperTest {
     }
 
     private void assertEnums(FinremCaseData caseData) {
-        assertEquals(caseData.getDivRoleOfFrApplicant(), ApplicantRole.FR_ApplicantsRoleInDivorce_1);
-        assertEquals(caseData.getApplicantRepresentedPaper(), ApplicantRepresentedPaper.FR_applicant_represented_1);
-        assertEquals(caseData.getAuthorisationSignedBy(), AuthorisationSignedBy.LITIGATION_FRIEND);
-        assertEquals(caseData.getHearingType(), HearingTypeDirection.DIR);
+        assertEquals(ApplicantRole.FR_ApplicantsRoleInDivorce_1, caseData.getDivRoleOfFrApplicant());
+        assertEquals(ApplicantRepresentedPaper.FR_applicant_represented_1, caseData.getApplicantRepresentedPaper());
+        assertEquals(AuthorisationSignedBy.LITIGATION_FRIEND, caseData.getAuthorisationSignedBy());
+        assertEquals(HearingTypeDirection.DIR, caseData.getHearingType());
         assertTrue(caseData.getJudgeAllocated().containsAll(List.of(
             JudgeAllocated.FR_JUDGE_ALLOCATED_LIST_1,
             JudgeAllocated.FR_JUDGE_ALLOCATED_LIST_3)));
-        assertEquals(caseData.getAssignedToJudgeReason(), AssignToJudgeReason.DRAFT_CONSENT_ORDER);
-        assertEquals(caseData.getSolicitorResponsibleForDraftingOrder(), SolicitorToDraftOrder.APPLICANT_SOLICITOR);
-        assertEquals(caseData.getRefusalOrderJudgeType(), JudgeType.HER_HONOUR_JUDGE);
-        assertEquals(caseData.getSendOrderPostStateOption(), SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
-        assertEquals(caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList(), Region.SOUTHEAST);
-        assertEquals(caseData.getRegionWrapper().getDefaultRegionWrapper().getSouthEastFrcList(), RegionSouthEastFrc.KENT);
-        assertEquals(caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper().getKentSurreyCourtList(),
-            KentSurreyCourt.FR_kent_surreyList_1);
-        assertEquals(caseData.getOrderDirection(), OrderDirection.ORDER_ACCEPTED_AS_DRAFTED);
-        assertEquals(caseData.getOrderDirectionJudge(), JudgeType.DISTRICT_JUDGE);
-        assertEquals(caseData.getRegionWrapper().getInterimRegionWrapper().getInterimRegionList(), Region.SOUTHWEST);
-        assertEquals(caseData.getRegionWrapper().getInterimRegionWrapper().getInterimSouthWestFrcList(), RegionSouthWestFrc.BRISTOL);
-        assertEquals(caseData.getRegionWrapper().getInterimRegionWrapper().getCourtListWrapper().getInterimBristolCourtList(),
-            BristolCourt.SALISBURY_LAW_COURTS);
-        assertEquals(caseData.getAddToComplexityListOfCourts(), Complexity.TRUE_YES);
+        assertEquals(AssignToJudgeReason.DRAFT_CONSENT_ORDER, caseData.getAssignedToJudgeReason());
+        assertEquals(SolicitorToDraftOrder.APPLICANT_SOLICITOR, caseData.getSolicitorResponsibleForDraftingOrder());
+        assertEquals(JudgeType.HER_HONOUR_JUDGE, caseData.getRefusalOrderJudgeType());
+        assertEquals(SendOrderEventPostStateOption.PREPARE_FOR_HEARING, caseData.getSendOrderPostStateOption());
+        assertEquals(Region.SOUTHEAST, caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList());
+        assertEquals(RegionSouthEastFrc.KENT, caseData.getRegionWrapper().getDefaultRegionWrapper().getSouthEastFrcList());
+        assertEquals(KentSurreyCourt.FR_kent_surreyList_1,
+            caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper().getKentSurreyCourtList());
+        assertEquals(OrderDirection.ORDER_ACCEPTED_AS_DRAFTED, caseData.getOrderDirection());
+        assertEquals(JudgeType.DISTRICT_JUDGE, caseData.getOrderDirectionJudge());
+        assertEquals(Region.SOUTHWEST, caseData.getRegionWrapper().getInterimRegionWrapper().getInterimRegionList());
+        assertEquals(RegionSouthWestFrc.BRISTOL, caseData.getRegionWrapper().getInterimRegionWrapper().getInterimSouthWestFrcList());
+        assertEquals(BristolCourt.SALISBURY_LAW_COURTS,
+            caseData.getRegionWrapper().getInterimRegionWrapper().getCourtListWrapper().getInterimBristolCourtList());
+        assertEquals(Complexity.TRUE_YES, caseData.getAddToComplexityListOfCourts());
         assertTrue(caseData.getEstimatedAssetsChecklist().containsAll(List.of(
             EstimatedAsset.UNABLE_TO_QUANTIFY,
             EstimatedAsset.ONE_TO_FIVE_MILLION
@@ -402,21 +398,21 @@ public class FinremCaseDetailMapperTest {
             PotentialAllegation.POTENTIAL_ALLEGATION_CHECKLIST_13,
             PotentialAllegation.NOT_APPLICABLE
         )));
-        assertEquals(caseData.getJudgeTimeEstimate(), JudgeTimeEstimate.ADDITIONAL_TIME);
-        assertEquals(caseData.getSolicitorResponsibleForDraftingOrder(), SolicitorToDraftOrder.APPLICANT_SOLICITOR);
-        assertEquals(caseData.getProvisionMadeFor(), Provision.CHILDREN_ACT_1989);
-        assertEquals(caseData.getApplicantIntendsTo(), Intention.PROCEED_WITH_APPLICATION);
+        assertEquals(JudgeTimeEstimate.ADDITIONAL_TIME, caseData.getJudgeTimeEstimate());
+        assertEquals(SolicitorToDraftOrder.APPLICANT_SOLICITOR, caseData.getSolicitorResponsibleForDraftingOrder());
+        assertEquals(Provision.CHILDREN_ACT_1989, caseData.getProvisionMadeFor());
+        assertEquals(Intention.PROCEED_WITH_APPLICATION, caseData.getApplicantIntendsTo());
         assertTrue(caseData.getDischargePeriodicalPaymentSubstituteFor().containsAll(List.of(
             PeriodicalPaymentSubstitute.LUMP_SUM_ORDER,
             PeriodicalPaymentSubstitute.PENSION_SHARING_ORDER
         )));
-        assertEquals(caseData.getServePensionProviderResponsibility(), PensionProvider.THE_COURT);
-        assertEquals(caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom(), EvidenceParty.CASE);
-        assertEquals(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsJudgeType(),
-            JudgeType.DEPUTY_DISTRICT_JUDGE);
-        assertEquals(caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo(), GeneralLetterAddressToType.APPLICANT_SOLICITOR);
-        assertEquals(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome(), GeneralApplicationOutcome.NOT_APPROVED);
-        assertEquals(caseData.getDivorceStageReached(), StageReached.DECREE_NISI);
+        assertEquals(PensionProvider.THE_COURT, caseData.getServePensionProviderResponsibility());
+        assertEquals(EvidenceParty.CASE, caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom());
+        assertEquals(JudgeType.DEPUTY_DISTRICT_JUDGE,
+            caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsJudgeType());
+        assertEquals(GeneralLetterAddressToType.APPLICANT_SOLICITOR, caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo());
+        assertEquals(GeneralApplicationOutcome.NOT_APPROVED, caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome());
+        assertEquals(StageReached.DECREE_NISI, caseData.getDivorceStageReached());
         assertEquals(YesOrNo.YES, caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange());
         assertEquals(YesOrNo.YES, caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent());
         assertEquals(YesOrNo.YES, caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant());
@@ -451,10 +447,10 @@ public class FinremCaseDetailMapperTest {
             )
         ));
 
-        assertEquals(miamValues.getMiamPreviousAttendanceChecklist(),
-            MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_2);
+        assertEquals(MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_2,
+            miamValues.getMiamPreviousAttendanceChecklist());
 
-        assertEquals(miamValues.getMiamOtherGroundsChecklist(), MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1);
+        assertEquals(MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1, miamValues.getMiamOtherGroundsChecklist());
 
 
     }
@@ -476,8 +472,8 @@ public class FinremCaseDetailMapperTest {
     }
 
     private void assertGeneralEmail(FinremCaseData caseData) {
-        assertEquals(caseData.getGeneralEmailWrapper().getGeneralEmailRecipient(), "recipient");
-        assertEquals(caseData.getGeneralEmailWrapper().getGeneralEmailCreatedBy(), "sender");
+        assertEquals("recipient", caseData.getGeneralEmailWrapper().getGeneralEmailRecipient());
+        assertEquals("sender", caseData.getGeneralEmailWrapper().getGeneralEmailCreatedBy());
         List<GeneralEmailCollection> expected = List.of(
             GeneralEmailCollection.builder()
                 .value(GeneralEmailHolder.builder()
@@ -538,7 +534,7 @@ public class FinremCaseDetailMapperTest {
                 .build()
         );
 
-        assertTrue(caseData.getAdditionalHearingDocuments().size() == 1);
+        assertEquals(1, caseData.getAdditionalHearingDocuments().size());
     }
 
     private void assertUploadGeneralDocuments(FinremCaseData caseData) {
@@ -655,8 +651,8 @@ public class FinremCaseDetailMapperTest {
     }
 
     private void assertConfidentialDocumentsUploaded(FinremCaseData caseData) {
-        List<UploadConfidentialDocumentCollection> expected = List.of(
-            UploadConfidentialDocumentCollection.builder()
+        List<ConfidentialUploadedDocumentData> expected = List.of(
+            ConfidentialUploadedDocumentData.builder()
                 .value(UploadConfidentialDocument.builder()
                     .documentLink(getTestDocument())
                     .documentComment("comment")
@@ -819,7 +815,7 @@ public class FinremCaseDetailMapperTest {
                 .build()
         );
 
-        assertTrue(caseData.getGeneralApplicationWrapper().getGeneralApplicationDocumentCollection().size() == 1);
+        assertEquals(1, caseData.getGeneralApplicationWrapper().getGeneralApplicationDocumentCollection().size());
     }
 
     private void assertGeneralLetterCollection(FinremCaseData caseData) {
@@ -831,7 +827,7 @@ public class FinremCaseDetailMapperTest {
                 .build()
         );
 
-        assertTrue(caseData.getGeneralLetterWrapper().getGeneralLetterCollection().size() == 1);
+        assertEquals(1, caseData.getGeneralLetterWrapper().getGeneralLetterCollection().size());
     }
 
     private void assertRespondToOrderDocuments(FinremCaseData caseData) {
@@ -926,27 +922,27 @@ public class FinremCaseDetailMapperTest {
         ConsentOrderWrapper consentOrderWrapper = caseData.getConsentOrderWrapper();
         assertTrue(consentOrderWrapper.getConsentNatureOfApplicationChecklist()
             .contains(NatureApplication.PENSION_COMPENSATION_SHARING_ORDER));
-        assertEquals(consentOrderWrapper.getConsentNatureOfApplicationAddress(), "Address");
-        assertEquals(consentOrderWrapper.getConsentNatureOfApplicationMortgage(), "Mortgage");
-        assertEquals(consentOrderWrapper.getConsentNatureOfApplication5(), YesOrNo.YES);
-        assertEquals(consentOrderWrapper.getConsentOrderForChildrenQuestion1(), YesOrNo.YES);
+        assertEquals("Address", consentOrderWrapper.getConsentNatureOfApplicationAddress());
+        assertEquals("Mortgage", consentOrderWrapper.getConsentNatureOfApplicationMortgage());
+        assertEquals(YesOrNo.YES, consentOrderWrapper.getConsentNatureOfApplication5());
+        assertEquals(YesOrNo.YES, consentOrderWrapper.getConsentOrderForChildrenQuestion1());
         assertTrue(consentOrderWrapper.getConsentNatureOfApplication6().containsAll(List.of(
             ConsentNatureOfApplication.DISABILITY_EXPENSES,
             ConsentNatureOfApplication.TRAINING
         )));
-        assertEquals(consentOrderWrapper.getConsentNatureOfApplication7(), "String");
-        assertEquals(consentOrderWrapper.getConsentOrderFrcName(), "Bromley");
-        assertEquals(consentOrderWrapper.getConsentOrderFrcAddress(), "The Law Courts, North Parade Road, Bath, BA1 5AF");
-        assertEquals(consentOrderWrapper.getConsentOrderFrcEmail(), "email");
-        assertEquals(consentOrderWrapper.getConsentOrderFrcPhone(), "123456789");
-        assertEquals(consentOrderWrapper.getConsentSubjectToDecreeAbsoluteValue(), YesOrNo.YES);
-        assertEquals(consentOrderWrapper.getConsentServePensionProvider(), YesOrNo.YES);
-        assertEquals(consentOrderWrapper.getConsentServePensionProviderResponsibility(), PensionProvider.APPLICANT_SOLICITOR);
-        assertEquals(consentOrderWrapper.getConsentServePensionProviderOther(), "Other");
-        assertEquals(consentOrderWrapper.getConsentSelectJudge(), "Judge");
-        assertEquals(consentOrderWrapper.getConsentJudgeName(), "Name");
+        assertEquals("String", consentOrderWrapper.getConsentNatureOfApplication7());
+        assertEquals("Bromley", consentOrderWrapper.getConsentOrderFrcName());
+        assertEquals("The Law Courts, North Parade Road, Bath, BA1 5AF", consentOrderWrapper.getConsentOrderFrcAddress());
+        assertEquals("email", consentOrderWrapper.getConsentOrderFrcEmail());
+        assertEquals("123456789", consentOrderWrapper.getConsentOrderFrcPhone());
+        assertEquals(YesOrNo.YES, consentOrderWrapper.getConsentSubjectToDecreeAbsoluteValue());
+        assertEquals(YesOrNo.YES, consentOrderWrapper.getConsentServePensionProvider());
+        assertEquals(PensionProvider.APPLICANT_SOLICITOR, consentOrderWrapper.getConsentServePensionProviderResponsibility());
+        assertEquals("Other", consentOrderWrapper.getConsentServePensionProviderOther());
+        assertEquals("Judge", consentOrderWrapper.getConsentSelectJudge());
+        assertEquals("Name", consentOrderWrapper.getConsentJudgeName());
         assertEquals(consentOrderWrapper.getConsentDateOfOrder(), LocalDate.of(2022, 2, 2));
-        assertEquals(consentOrderWrapper.getConsentAdditionalComments(), "additional");
+        assertEquals("additional", consentOrderWrapper.getConsentAdditionalComments());
         assertEquals(consentOrderWrapper.getConsentMiniFormA(), getTestDocument());
         assertConsentedNotApprovedOrders(caseData);
         assertConsentedNotApprovedOrders(caseData);
@@ -1016,19 +1012,15 @@ public class FinremCaseDetailMapperTest {
 
     private CaseDetails buildCaseDetailsFromJson(String testJson) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
-            CaseDetails caseDetails =
-                objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return caseDetails;
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private CaseDetails buildCaseDetailsOnlyFromJson(String testJson) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
-            CaseDetails caseDetails =
-                objectMapper.readValue(resourceAsStream, CaseDetails.class);
-            return caseDetails;
+    private CaseDetails buildCaseDetailsOnlyFromJson() {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/case-flags.json")) {
+            return objectMapper.readValue(resourceAsStream, CaseDetails.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

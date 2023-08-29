@@ -39,6 +39,8 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
         }
     }
 
+
+    @Override
     public CaseDocument getAppRepDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                                  DocumentHelper.PaperNotificationRecipient recipient) {
         if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {

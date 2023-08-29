@@ -15,7 +15,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumentServiceTest {
+public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumentServiceSetup {
 
     private static final String APP_LITIGANT_URL = "appLitigantUrl";
     private static final String APP_SOLICITOR_URL = "appSolicitorUrl";
@@ -32,8 +32,8 @@ public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfo
         assertTrue(applicantLetter.isPresent());
         assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue());
         assertAndVerifyDocumentIsGenerated(applicantLetter.get());
-        assertEquals(applicantLetter.get().getDocumentFilename(), LIT_DOC_FILENAME);
-        assertEquals(applicantLetter.get().getDocumentUrl(), APP_LITIGANT_URL);
+        assertEquals(LIT_DOC_FILENAME, applicantLetter.get().getDocumentFilename());
+        assertEquals(APP_LITIGANT_URL, applicantLetter.get().getDocumentUrl());
     }
 
     @Test
@@ -45,8 +45,8 @@ public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfo
         assertTrue(appSolLetter.isPresent());
         assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue());
         assertAndVerifyDocumentIsGenerated(appSolLetter.get());
-        assertEquals(appSolLetter.get().getDocumentFilename(), SOL_DOC_FILENAME);
-        assertEquals(appSolLetter.get().getDocumentUrl(), APP_SOLICITOR_URL);
+        assertEquals(SOL_DOC_FILENAME, appSolLetter.get().getDocumentFilename());
+        assertEquals(APP_SOLICITOR_URL, appSolLetter.get().getDocumentUrl());
     }
 
     @Test

@@ -63,11 +63,12 @@ public class ConsentOrderNotApprovedDocumentService {
 
         if (useNotApprovedOrder) {
             existingList.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(notApprovedOrderDocuments));
-        } else if (generalOrder.isPresent()) {
-            existingList.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder.get()));
+        } else {
+            generalOrder.ifPresent(caseDocument -> existingList.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
         }
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private BulkPrintDocument coverLetter(CaseDetails caseDetails, String authorisationToken) {
         CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterTemplateData(caseDetails, APPLICANT);
         String notApprovedOrderNotificationFileName;
@@ -86,6 +87,7 @@ public class ConsentOrderNotApprovedDocumentService {
         return documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter);
     }
 
+    @SuppressWarnings("java:S3740")
     public List<CaseDocument> notApprovedConsentOrder(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 

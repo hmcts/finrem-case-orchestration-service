@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -22,7 +21,7 @@ public class BulkPrintDocumentService {
 
         List<byte[]> documents = bulkPrintRequest.getBulkPrintDocuments().stream()
             .map(bulkPrintDocument -> service.download(bulkPrintDocument.getBinaryFileUrl(), auth))
-            .collect(Collectors.toList());
+            .toList();
         log.info("Download document count for bulk print {} for case id {} ", documents.size(),
             caseId);
         return documents;

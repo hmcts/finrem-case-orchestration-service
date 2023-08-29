@@ -51,7 +51,7 @@ import java.util.Optional;
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
 @Builder
 @AllArgsConstructor
@@ -279,7 +279,7 @@ public class FinremCaseData {
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
-    private List<UploadConfidentialDocumentCollection> confidentialDocumentsUploaded;
+    private List<ConfidentialUploadedDocumentData> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")
     private OrganisationPolicy applicantOrganisationPolicy;
@@ -289,6 +289,8 @@ public class FinremCaseData {
     private String currentUserCaseRoleLabel;
     private CaseDocument outOfFamilyCourtResolution;
 
+    private DynamicMultiSelectList sourceDocumentList;
+    private DynamicMultiSelectList solicitorRoleList;
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
 
@@ -303,6 +305,8 @@ public class FinremCaseData {
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener3")
     private IntervenerThreeWrapper intervenerThreeWrapper;
+
+    private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener4")

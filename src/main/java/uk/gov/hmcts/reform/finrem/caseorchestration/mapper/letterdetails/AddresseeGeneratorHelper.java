@@ -25,6 +25,9 @@ public class AddresseeGeneratorHelper {
     public static final String ADDRESS_MAP = "addressMap";
     public static final String NAME_MAP = "nameMap";
 
+    private AddresseeGeneratorHelper() {
+    }
+
     public static Addressee generateAddressee(FinremCaseDetails caseDetails,
                                               DocumentHelper.PaperNotificationRecipient recipient) {
 
@@ -96,16 +99,6 @@ public class AddresseeGeneratorHelper {
             .build();
     }
 
-    private static String getIntvrName(IntervenerWrapper wrapper) {
-        return wrapper.isIntervenerSolicitorPopulated()
-            ? wrapper.getIntervenerSolName()
-            : wrapper.getIntervenerName();
-    }
-
-    private static Address getIntvrAddress(IntervenerWrapper wrapper) {
-        return wrapper.getIntervenerAddress();
-    }
-
     public static String formatAddressForLetterPrinting(Address address) {
         return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class));
     }
@@ -123,6 +116,7 @@ public class AddresseeGeneratorHelper {
         return "";
     }
 
+    @SuppressWarnings("java:S1452")
     public static Map<String, Map<GeneralLetterAddressToType, ?>> getAddressToCaseDataMapping(FinremCaseData data) {
         Map<GeneralLetterAddressToType, Address> generalLetterAddressToValueToAddress = Map.of(
             GeneralLetterAddressToType.APPLICANT_SOLICITOR, getAddressOrNew(data.getAppSolicitorAddress()),

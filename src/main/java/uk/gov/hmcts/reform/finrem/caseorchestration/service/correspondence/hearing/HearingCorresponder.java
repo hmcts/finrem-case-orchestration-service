@@ -15,23 +15,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseD
 public abstract class HearingCorresponder extends CaseDetailsMultiLetterOrEmailAllPartiesCorresponder {
 
     @Autowired
-    public HearingCorresponder(BulkPrintService bulkPrintService,
+    protected HearingCorresponder(BulkPrintService bulkPrintService,
                                NotificationService notificationService,
                                FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(bulkPrintService, notificationService, finremCaseDetailsMapper);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void emailApplicantSolicitor(CaseDetails caseDetails) {
         notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void emailRespondentSolicitor(CaseDetails caseDetails) {
         notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
     }
 
     @Override
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         notificationService.sendPrepareForHearingEmailIntervener(caseDetails,
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));

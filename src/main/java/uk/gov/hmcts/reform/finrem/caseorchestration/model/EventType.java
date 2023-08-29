@@ -61,6 +61,7 @@ public enum EventType {
     CREATE_GENERAL_LETTER("FR_generalLetter"),
     CREATE_GENERAL_LETTER_JUDGE("FR_generalLetter_judge"),
     CREATE_GENERAL_EMAIL("FR_generalEmail"),
+    SHARE_SELECTED_DOCUMENTS("shareSelectedDocuments"),
 
     @JsonEnumDefaultValue
     NONE("");
@@ -73,7 +74,6 @@ public enum EventType {
     }
 
     public static EventType getEventType(String ccdType) {
-        log.info("Event type to process {}", ccdType);
         return Arrays.stream(EventType.values())
             .filter(eventTypeValue -> eventTypeValue.ccdType.equals(ccdType))
             .findFirst().orElseThrow(IllegalArgumentException::new);

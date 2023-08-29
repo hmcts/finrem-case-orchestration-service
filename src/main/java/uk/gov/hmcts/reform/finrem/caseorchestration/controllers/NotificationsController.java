@@ -44,6 +44,7 @@ import java.util.Optional;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
@@ -215,6 +216,7 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "204",
             description = "'Prepare for Hearing' e-mail sent successfully",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public ResponseEntity<SubmittedCallbackResponse> sendPrepareForHearingEmail(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody CallbackRequest callbackRequest) {
@@ -262,6 +264,7 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "General application refer to judge email sent successfully",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationReferToJudgeEmail(
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -279,6 +282,7 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "General Application Outcome email sent successfully",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationOutcomeEmail(
         @RequestBody CallbackRequest callbackRequest) throws IOException {
         log.info("Received request to send General Application Outcome email for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -312,6 +316,7 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "Transfer to Local Courts e-mail sent successfully",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendTransferCourtsEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -330,32 +335,13 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
-    @PostMapping(value = "/prepare-for-interim-hearing", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send general application refer to judge email")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "General application refer to judge email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendInterimHearingNotification(
-        @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-        if (!caseDataService.isPaperApplication(caseData)) {
-            contestedIntermHearingCorresponder.sendCorrespondence(caseDetails);
-        }
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
-    }
-
-
     @PostMapping(value = "/notice-of-change", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "Send a notice of change to the Solicitor email and a letter to the organization.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Notice of change e-mail and letter sent successfully",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody CallbackRequest callbackRequest) {
@@ -392,8 +378,12 @@ public class NotificationsController extends BaseController {
         }
         log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
+        log.info("DEBUGGING NOC - sendNoticeOfChangeEmailCaseworker executed and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
+        log.info("DEBUGGING NOC - sendNoticeOfChangeLetters executed and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         caseDetails.getData().put(INCLUDES_REPRESENTATIVE_UPDATE, null);
         caseDetails.getData().put(NOC_PARTY, null);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());

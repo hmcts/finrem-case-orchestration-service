@@ -190,39 +190,20 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void addressToFormattedCorrectlyForApplicant() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "applicant");
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
-    }
-
-    @Test
-    public void addressToFormattedCorrectlyForApplicantSolicitor() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "applicantSolicitor");
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant Solicitor"));
-    }
-
-    @Test
-    public void addressToFormattedCorrectlyForRespondentSolicitor() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "respondentSolicitor");
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Respondent Solicitor"));
-    }
-
-    @Test
-    public void addressToFormattedCorrectlyReturnsEmptyStringForInvalid() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "invalid");
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is(""));
+    public void addressToFormattedCorrectly() {
+        Map<String, String> parties = Map.of("applicant", "Applicant", "applicantSolicitor",
+            "Applicant Solicitor", "respondentSolicitor", "Respondent Solicitor", "invalid", "");
+        parties.forEach((key, value) -> {
+            try {
+                CaseDetails details = consentedCaseDetails();
+                details.getData().put(GENERAL_ORDER_ADDRESS_TO, key);
+                Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
+                List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+                assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is(value));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Test

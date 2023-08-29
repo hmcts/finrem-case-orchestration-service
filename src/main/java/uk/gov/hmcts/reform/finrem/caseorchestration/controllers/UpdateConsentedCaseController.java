@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDe
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeSolicitorAddress;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -114,22 +115,30 @@ public class UpdateConsentedCaseController extends BaseController {
         validateCaseData(ccdRequest);
         Map<String, Object> caseData = caseDetails.getData();
 
+
         updateRespondentSolicitorAddress(caseData);
+        log.info("DEBUGGING NOC - updateRespondentSolicitorAddress entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         updateApplicantOrSolicitorContactDetails(caseData);
+        log.info("DEBUGGING NOC - updateApplicantOrSolicitorContactDetails entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
 
-        if (featureToggleService.isCaseworkerNoCEnabled()) {
-
-            if (ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
-                && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
-                CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
-                return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
-                    authToken,
-                    originalCaseDetails));
-            }
-
+        if (featureToggleService.isCaseworkerNoCEnabled()
+            && ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+            CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
+            return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
+                authToken,
+                originalCaseDetails));
         }
-
+        log.info("DEBUGGING NOC - after conditional entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null,
+            ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent(),
+            caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE));
         persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
+
+        log.info("DEBUGGING NOC - persistOrgPolicies entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -170,7 +179,7 @@ public class UpdateConsentedCaseController extends BaseController {
     }
 
     private void updatePeriodicPaymentData(Map<String, Object> caseData) {
-        List natureOfApplication2 = (List) caseData.get("natureOfApplication2");
+        List<String> natureOfApplication2 = (List) caseData.get("natureOfApplication2");
 
         if (hasNotSelected(natureOfApplication2, "Periodical Payment Order")) {
             removePeriodicPaymentData(caseData);
@@ -184,7 +193,7 @@ public class UpdateConsentedCaseController extends BaseController {
     }
 
     private void updatePropertyDetails(Map<String, Object> caseData) {
-        List natureOfApplication2 = (List) caseData.get("natureOfApplication2");
+        List<String> natureOfApplication2 = (List) caseData.get("natureOfApplication2");
 
         if (hasNotSelected(natureOfApplication2, "Property Adjustment Order")) {
             removePropertyAdjustmentDetails(caseData);

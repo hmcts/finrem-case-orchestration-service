@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -120,11 +119,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST_CT;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public final class CaseHearingFunctions {
 
-    public static final String COURT_DETAILS_JSON_PATH = "/json/court-details.json";
+    private CaseHearingFunctions() {
+    }
 
     static UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
         Map<String, Object> data = caseDetails.getData();
@@ -147,6 +146,7 @@ public final class CaseHearingFunctions {
         return caseDetails;
     };
 
+    @SuppressWarnings("java:S4276")
     static Function<Map<String, Object>, Boolean> isFastTrackApplication = caseData -> {
         String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION));
         String caseAllocatedTo = (String) caseData.get(CASE_ALLOCATED_TO);
@@ -180,6 +180,7 @@ public final class CaseHearingFunctions {
             NORTHEAST_FRC_LIST, SOUTHWEST_FRC_LIST, SOUTHEAST_FRC_LIST, WALES_FRC_LIST, HIGHCOURT_FRC_LIST);
     }
 
+    @SuppressWarnings("java:S107")
     private static String getSelectedCourt(Map<String, Object> mapOfCaseData, String regionListName, String midlandsListName,
                                            String londonListName, String northwestListName, String northeastListName,
                                            String southwestListName, String southeastListName, String walesListName,
@@ -206,7 +207,7 @@ public final class CaseHearingFunctions {
         }
     }
 
-    private static String getWalesFRC(Map mapOfCaseData, String frcListName) {
+    private static String getWalesFRC(Map<String, Object> mapOfCaseData, String frcListName) {
         String walesList = (String) mapOfCaseData.get(frcListName);
         if (NEWPORT.equalsIgnoreCase(walesList)) {
             return NEWPORT_COURTLIST;
@@ -218,7 +219,7 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    private static String getHighCourtFRC(Map mapOfCaseData, String frcListName) {
+    private static String getHighCourtFRC(Map<String, Object> mapOfCaseData, String frcListName) {
         String highCourtList = (String) mapOfCaseData.get(frcListName);
         if (HIGHCOURT.equalsIgnoreCase(highCourtList)) {
             return HIGHCOURT_COURTLIST;
@@ -226,7 +227,7 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    private static String getSouthEastFRC(Map mapOfCaseData, String frcListName) {
+    private static String getSouthEastFRC(Map<String, Object> mapOfCaseData, String frcListName) {
         String southEastList = (String) mapOfCaseData.get(frcListName);
         if (KENT.equalsIgnoreCase(southEastList) || KENTFRC.equalsIgnoreCase(southEastList)) {
             return KENTFRC_COURTLIST;
@@ -238,7 +239,7 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    private static String getSouthWestFRC(Map mapOfCaseData, String frcListName) {
+    private static String getSouthWestFRC(Map<String, Object> mapOfCaseData, String frcListName) {
         String southWestList = (String) mapOfCaseData.get(frcListName);
         if (DEVON.equalsIgnoreCase(southWestList)) {
             return DEVON_COURTLIST;
@@ -250,7 +251,7 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    private static String getNorthEastFRC(Map mapOfCaseData, String frcListName) {
+    private static String getNorthEastFRC(Map<String, Object> mapOfCaseData, String frcListName) {
         String northEastList = (String) mapOfCaseData.get(frcListName);
         if (CLEAVELAND.equalsIgnoreCase(northEastList) || CLEVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND_COURTLIST;
@@ -262,7 +263,7 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    private static String getNorthWestFRC(Map mapOfCaseData, String frcListName) {
+    private static String getNorthWestFRC(Map<String, Object> mapOfCaseData, String frcListName) {
         String northWestList = (String) mapOfCaseData.get(frcListName);
         if (LIVERPOOL.equalsIgnoreCase(northWestList)) {
             return LIVERPOOL_COURTLIST;
@@ -274,7 +275,7 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    private static String getLondonFRC(Map mapOfCaseData, String frcListName) {
+    private static String getLondonFRC(Map<String, Object> mapOfCaseData, String frcListName) {
         String londonList = (String) mapOfCaseData.get(frcListName);
         if (CFC.equalsIgnoreCase(londonList)) {
             return CFC_COURTLIST;
@@ -282,7 +283,7 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    private static String getMidlandFRC(Map mapOfCaseData, String frcListName) {
+    private static String getMidlandFRC(Map<String, Object> mapOfCaseData, String frcListName) {
         String midlandsList = (String) mapOfCaseData.get(frcListName);
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
             return NOTTINGHAM_COURTLIST;
@@ -292,7 +293,14 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    @Deprecated
+    /**
+     * Return BulkPrintDocument.
+     * <p>Please use @{@link #buildFrcCourtDetails(FinremCaseData)}</p>
+     * @param data instance of Map
+     * @deprecated Use {@link Map data}
+     */
+    @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public static Map<String, Object> buildFrcCourtDetails(Map<String, Object> data) {
         try {
             Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
@@ -305,7 +313,7 @@ public final class CaseHearingFunctions {
                 .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
                 .build(), Map.class);
         } catch (IOException | NullPointerException e) {
-            return null;
+            return Collections.emptyMap();
         }
     }
 
@@ -322,7 +330,7 @@ public final class CaseHearingFunctions {
                 .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
                 .build(), Map.class);
         } catch (IOException | NullPointerException e) {
-            return null;
+            return Collections.emptyMap();
         }
     }
 
@@ -338,7 +346,7 @@ public final class CaseHearingFunctions {
                 .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
                 .build(), Map.class);
         } catch (IOException | NullPointerException e) {
-            return null;
+            return Collections.emptyMap();
         }
     }
 
@@ -361,7 +369,7 @@ public final class CaseHearingFunctions {
     }
 
     public static String getCourtDetailsString() {
-        try (InputStream inputStream = CaseHearingFunctions.class.getResourceAsStream(COURT_DETAILS_JSON_PATH)) {
+        try (InputStream inputStream = CaseHearingFunctions.class.getResourceAsStream("/json/court-details.json")) {
             return IOUtils.toString(inputStream, UTF_8);
         } catch (IOException e) {
             throw new CourtDetailsParseException();

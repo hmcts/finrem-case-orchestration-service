@@ -26,7 +26,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
         if (caseDetails.isContestedApplication()) {
-            sendIntervenerCorrespondence(caseDetails, authToken);
+            sendIntervenerCorrespondence(caseDetails);
         }
     }
 
@@ -58,7 +58,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         }
     }
 
-    protected void sendIntervenerCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendIntervenerCorrespondence(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
         List<IntervenerWrapper> interveners = caseData.getInterveners();
         interveners.forEach(intervenerWrapper -> {

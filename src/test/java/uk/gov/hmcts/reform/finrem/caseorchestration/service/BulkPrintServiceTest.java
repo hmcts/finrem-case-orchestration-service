@@ -102,7 +102,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     @Test
     public void getRecipientInCamelCase() {
         String recipient = bulkPrintService.getRecipient("APPLICANT_CONFIDENTIAL_SOLICITOR");
-        assertEquals(recipient, "ApplicantConfidentialSolicitor");
+        assertEquals("ApplicantConfidentialSolicitor", recipient);
     }
 
     @Test

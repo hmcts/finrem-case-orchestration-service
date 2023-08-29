@@ -13,10 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 
 import java.io.File;
+import java.util.Objects;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -34,7 +33,7 @@ public class OptionIdToValueTranslatorTest extends BaseTest {
         CaseDetails actual = caseDetailsWithOptions();
         translator.translateOptionsValues.accept(actual);
 
-        assertThat(actual, is(equalTo(expectedCaseDetails())));
+        assertEquals(actual, expectedCaseDetails());
     }
 
     @Test
@@ -42,7 +41,7 @@ public class OptionIdToValueTranslatorTest extends BaseTest {
         CaseDetails actual = caseDetailsWithEmptyOptions();
         translator.translateOptionsValues.accept(actual);
 
-        assertThat(actual, is(equalTo(caseDetailsWithEmptyOptions())));
+        assertEquals(actual, caseDetailsWithEmptyOptions());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -55,12 +54,12 @@ public class OptionIdToValueTranslatorTest extends BaseTest {
     }
 
     private CaseDetails expectedCaseDetails() throws Exception {
-        File file = new File(getClass().getResource("/fixtures/contested/expected-contested-case-details.json").toURI());
+        File file = new File(Objects.requireNonNull(getClass().getResource("/fixtures/contested/expected-contested-case-details.json")).toURI());
         return objectMapper.readValue(file, CaseDetails.class);
     }
 
     private CaseDetails caseDetailsWithOptions() throws Exception {
-        File file = new File(getClass().getResource("/fixtures/contested/contested-case-details-options-list.json").toURI());
+        File file = new File(Objects.requireNonNull(getClass().getResource("/fixtures/contested/contested-case-details-options-list.json")).toURI());
         return objectMapper.readValue(file, CaseDetails.class);
     }
 }

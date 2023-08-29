@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,7 +18,6 @@ import java.util.function.UnaryOperator;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_COLLECTION;
 
 @Service
@@ -28,7 +26,7 @@ public final class OrderRefusalTranslatorService {
 
     private static final String ORDER_REFUSAL_COLLECTION_NEW = "orderRefusalCollectionNew";
     private static final Map<String, String> REFUSAL_KEYS =
-        ImmutableMap.of("Transferred to Applicant’s home Court", "Transferred to Applicant home Court - A",
+        Map.of("Transferred to Applicant’s home Court", "Transferred to Applicant home Court - A",
             "Transferred to Applicant's home Court", "Transferred to Applicant home Court - B"
         );
     private static final Function<Pair<CaseDetails, List<OrderRefusalData>>, CaseDetails> translate =
@@ -36,7 +34,7 @@ public final class OrderRefusalTranslatorService {
     private final ObjectMapper objectMapper;
     private final Function<CaseDetails, Pair<CaseDetails, List<OrderRefusalData>>> pickLatestOrderRefusal =
         this::applyPickLatest;
-    public UnaryOperator<Pair<CaseDetails, String>> translateOrderRefusalCollection =
+    public final UnaryOperator<Pair<CaseDetails, String>> translateOrderRefusalCollection =
         this::applyOrderRefusalCollectionTranslation;
     private final Function<CaseDetails, Pair<CaseDetails, List<OrderRefusalData>>> pickOrderRefusalCollection =
         this::applyPickOrderRefusalCollection;
@@ -52,7 +50,7 @@ public final class OrderRefusalTranslatorService {
             orderRefusalData.getOrderRefusal().setOrderRefusal(
                 orderRefusal.stream()
                     .map(s -> REFUSAL_KEYS.getOrDefault(s, s))
-                    .collect(toList()));
+                    .toList());
         });
 
         return caseDetails;
@@ -70,7 +68,7 @@ public final class OrderRefusalTranslatorService {
     }
 
     private Pair<CaseDetails, String> applyOrderRefusalCollectionTranslation(Pair<CaseDetails, String> pair) {
-        return ImmutablePair.of(translateOrderRefusalCollection(pair.getLeft()), pair.getRight());
+        return ImmutablePair.of(translateOrderRefusals(pair.getLeft()), pair.getRight());
     }
 
     private Pair<CaseDetails, List<OrderRefusalData>> applyPickLatest(CaseDetails caseDetails) {
@@ -98,7 +96,7 @@ public final class OrderRefusalTranslatorService {
         });
     }
 
-    public CaseDetails translateOrderRefusalCollection(CaseDetails caseDetails) {
+    public CaseDetails translateOrderRefusals(CaseDetails caseDetails) {
         return pickLatestOrderRefusal.andThen(translate).apply(caseDetails);
     }
 

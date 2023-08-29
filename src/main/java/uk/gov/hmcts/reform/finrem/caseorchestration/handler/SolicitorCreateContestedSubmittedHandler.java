@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignApplicantSolicitorService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
 
 @Slf4j
@@ -19,15 +18,11 @@ public class SolicitorCreateContestedSubmittedHandler extends AssignApplicantSol
 
     private final CreateCaseService createCaseService;
 
-    private final CaseDataService caseDataService;
-
     public SolicitorCreateContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     AssignApplicantSolicitorService assignApplicantSolicitorService,
-                                                    CreateCaseService createCaseService,
-                                                    CaseDataService caseDataService) {
+                                                    CreateCaseService createCaseService) {
         super(finremCaseDetailsMapper, assignApplicantSolicitorService);
         this.createCaseService = createCaseService;
-        this.caseDataService = caseDataService;
     }
 
     @Override
