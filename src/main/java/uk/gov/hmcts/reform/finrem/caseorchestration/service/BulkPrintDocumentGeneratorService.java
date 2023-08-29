@@ -68,9 +68,9 @@ public class BulkPrintDocumentGeneratorService {
         additionalData.put(FILE_NAMES, getFileNames(bulkPrintRequest));
 
         log.info("isSendLetterDuplicateCheckEnabled {} for caseId {}", featureToggleService.isSendLetterDuplicateCheckEnabled(), caseId);
-        additionalData.put(RECIPIENTS, featureToggleService.isSendLetterDuplicateCheckEnabled() ? recipient
-            : "%s:%d".formatted(recipient, System.nanoTime()));
-
+        additionalData.put(RECIPIENTS, featureToggleService.isSendLetterDuplicateCheckEnabled() ? new String[] {recipient}
+            : new String[] {"%s:%d".formatted(recipient, System.nanoTime())});
+        log.info("additional data {}", additionalData);
         return additionalData;
     }
 
