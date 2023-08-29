@@ -7,10 +7,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContestedContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
@@ -41,7 +41,7 @@ public class IntervenerAddedCorresponderTest {
 
     private static final String AUTHORISATION_TOKEN = "authToken";
     private FinremCaseDetails finremCaseDetails;
-    private FinremCaseData finremCaseData;
+    private FinremCaseDataContested finremCaseData;
     private CaseDocument caseDocument;
 
     @Before
@@ -52,7 +52,7 @@ public class IntervenerAddedCorresponderTest {
         IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder().build();
         IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder().build();
         IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder().build();
-        finremCaseData = FinremCaseData.builder()
+        finremCaseData = FinremCaseDataContested.builder()
             .intervenerOneWrapper(intervenerOneWrapper)
             .intervenerTwoWrapper(intervenerTwoWrapper)
             .intervenerThreeWrapper(intervenerThreeWrapper)
@@ -293,7 +293,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setIntervenerOneWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
 
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+        ContestedContactDetailsWrapper contactDetailsWrapper = ContestedContactDetailsWrapper.builder()
             .solicitorReference("123456789").applicantSolicitorEmail("test@test.com").applicantSolicitorName("test name").build();
         finremCaseData.setContactDetailsWrapper(contactDetailsWrapper);
         finremCaseDetails = FinremCaseDetails.builder()
@@ -321,7 +321,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setIntervenerOneWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
 
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+        ContestedContactDetailsWrapper contactDetailsWrapper = ContestedContactDetailsWrapper.builder()
             .solicitorReference("123456789").applicantSolicitorEmail("test@test.com").applicantSolicitorName("test name").build();
         finremCaseData.setContactDetailsWrapper(contactDetailsWrapper);
         finremCaseDetails = FinremCaseDetails.builder()
@@ -347,7 +347,7 @@ public class IntervenerAddedCorresponderTest {
         finremCaseData.setIntervenerOneWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
 
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+        ContestedContactDetailsWrapper contactDetailsWrapper = ContestedContactDetailsWrapper.builder()
             .respondentSolicitorReference("123456789").respondentSolicitorEmail("test@test.com").respondentSolicitorName("test name").build();
         finremCaseData.setContactDetailsWrapper(contactDetailsWrapper);
         finremCaseDetails = FinremCaseDetails.builder()
@@ -375,7 +375,7 @@ public class IntervenerAddedCorresponderTest {
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
 
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+        ContestedContactDetailsWrapper contactDetailsWrapper = ContestedContactDetailsWrapper.builder()
             .respondentSolicitorReference("123456789").respondentSolicitorEmail("test@test.com").respondentSolicitorName("test name").build();
         finremCaseData.setContactDetailsWrapper(contactDetailsWrapper);
         finremCaseDetails = FinremCaseDetails.builder()

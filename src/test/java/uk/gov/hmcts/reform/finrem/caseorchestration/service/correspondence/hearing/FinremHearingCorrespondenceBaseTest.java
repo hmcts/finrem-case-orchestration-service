@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hear
 import org.junit.Test;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -27,7 +27,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
 
     @Mock
     DocumentHelper documentHelper;
-    FinremCaseDetails caseDetails;
+    FinremCaseDetails<FinremCaseDataContested> caseDetails;
     FinremMultiLetterOrEmailAllPartiesCorresponder applicantAndRespondentMultiLetterCorresponder;
 
 
@@ -115,8 +115,9 @@ public abstract class FinremHearingCorrespondenceBaseTest {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        FinremCaseDetails finremCaseDetails =
-            FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails =
+            FinremCaseDetails.<FinremCaseDataContested>builder()
+                .data(FinremCaseDataContested.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
             any(FinremCaseDetails.class))).thenReturn(false);
 
@@ -124,7 +125,8 @@ public abstract class FinremHearingCorrespondenceBaseTest {
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
-        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOneWrapper.class), any(FinremCaseDetails.class), anyString(), anyList());
+        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOneWrapper.class),
+            any(FinremCaseDetails.class), anyString(), anyList());
     }
 
 

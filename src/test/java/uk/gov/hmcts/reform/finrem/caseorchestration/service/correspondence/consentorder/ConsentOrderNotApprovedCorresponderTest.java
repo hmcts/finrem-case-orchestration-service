@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -84,7 +84,7 @@ public class ConsentOrderNotApprovedCorresponderTest {
         when(caseDataService.isContestedApplication(caseDetails)).thenReturn(true);
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .data(FinremCaseDataContested.builder()
                 .intervenerOneWrapper(IntervenerOneWrapper.builder()
                     .intervenerSolEmail(TEST_SOLICITOR_EMAIL)
                     .build())

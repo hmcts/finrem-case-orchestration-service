@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
@@ -64,7 +64,7 @@ public class ConsentOrderAvailableCorresponderTest {
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .data(FinremCaseDataContested.builder()
                 .intervenerOneWrapper(IntervenerOneWrapper.builder()
                     .intervenerSolEmail(TEST_SOLICITOR_EMAIL)
                     .build())
@@ -72,7 +72,7 @@ public class ConsentOrderAvailableCorresponderTest {
             .build());
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerOneWrapper.builder()
-                .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build(), caseDetails)).thenReturn(true);
+            .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build(), caseDetails)).thenReturn(true);
         consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendConsentOrderAvailableEmailToIntervenerSolicitor(caseDetails,
             dataKeysWrapper);
@@ -85,7 +85,7 @@ public class ConsentOrderAvailableCorresponderTest {
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .data(FinremCaseDataContested.builder()
                 .intervenerTwoWrapper(IntervenerTwoWrapper.builder()
                     .intervenerSolEmail(TEST_SOLICITOR_EMAIL)
                     .build())
@@ -93,7 +93,7 @@ public class ConsentOrderAvailableCorresponderTest {
             .build());
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerTwoWrapper.builder()
-                .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build(),caseDetails)).thenReturn(true);
+            .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build(), caseDetails)).thenReturn(true);
         consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendConsentOrderAvailableEmailToIntervenerSolicitor(caseDetails,
             dataKeysWrapper);
@@ -106,7 +106,7 @@ public class ConsentOrderAvailableCorresponderTest {
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .data(FinremCaseDataContested.builder()
                 .intervenerThreeWrapper(IntervenerThreeWrapper.builder()
                     .intervenerSolEmail(TEST_SOLICITOR_EMAIL)
                     .build())
@@ -114,7 +114,7 @@ public class ConsentOrderAvailableCorresponderTest {
             .build());
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerThreeWrapper.builder()
-                .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build(),caseDetails)).thenReturn(true);
+            .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build(), caseDetails)).thenReturn(true);
         consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendConsentOrderAvailableEmailToIntervenerSolicitor(caseDetails,
             dataKeysWrapper);
@@ -127,7 +127,7 @@ public class ConsentOrderAvailableCorresponderTest {
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .data(FinremCaseDataContested.builder()
                 .intervenerFourWrapper(IntervenerFourWrapper.builder()
                     .intervenerSolEmail(TEST_SOLICITOR_EMAIL)
                     .build())
@@ -135,7 +135,7 @@ public class ConsentOrderAvailableCorresponderTest {
             .build());
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerFourWrapper.builder()
-                .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build(),caseDetails)).thenReturn(true);
+            .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build(), caseDetails)).thenReturn(true);
         consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendConsentOrderAvailableEmailToIntervenerSolicitor(caseDetails,
             dataKeysWrapper);

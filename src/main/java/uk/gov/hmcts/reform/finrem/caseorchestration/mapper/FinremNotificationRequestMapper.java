@@ -93,7 +93,8 @@ public class FinremNotificationRequestMapper {
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
 
-        notificationRequest.setGeneralEmailBody(Objects.toString(caseData.getGeneralEmailWrapper().getGeneralEmailBody(), EMPTY_STRING));
+        notificationRequest.setGeneralEmailBody(Objects.toString(
+            caseData.getGeneralEmailWrapper().getGeneralEmailBody(), EMPTY_STRING));
         notificationRequest.setApplicantName(Objects.toString(caseData.getFullApplicantName()));
         if (caseData.isConsentedApplication()) {
             notificationRequest.setGeneralApplicationRejectionReason(EMPTY_STRING);
@@ -104,7 +105,8 @@ public class FinremNotificationRequestMapper {
                 notificationRequest.getCaseReferenceNumber());
         } else if (caseData.isContestedApplication()) {
             notificationRequest.setGeneralApplicationRejectionReason(
-                Objects.toString(((FinremCaseDataContested) caseData).getGeneralApplicationWrapper().getGeneralApplicationRejectReason(), EMPTY_STRING));
+                Objects.toString(((FinremCaseDataContested) caseData).getGeneralApplicationWrapper()
+                    .getGeneralApplicationRejectReason(), EMPTY_STRING));
             notificationRequest.setRespondentName(Objects.toString(caseData.getRespondentFullName()));
             notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedFrc(caseDetails));
             notificationRequest.setHearingType(((FinremCaseDataContested) caseData).getHearingType() != null

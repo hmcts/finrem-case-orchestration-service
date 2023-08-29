@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -106,7 +106,7 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
 
         FinremCaseDetails finremCaseDetails =
-            FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
+            FinremCaseDetails.builder().data(FinremCaseDataContested.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCaseDetails);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
             any(FinremCaseDetails.class))).thenReturn(true);
@@ -139,7 +139,7 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
 
         FinremCaseDetails finremCaseDetails =
-            FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
+            FinremCaseDetails.builder().data(FinremCaseDataContested.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOneWrapper, finremCaseDetails)).thenReturn(false);
 

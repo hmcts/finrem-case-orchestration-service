@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -21,9 +21,9 @@ public abstract class BaseManageDocumentsHandlerTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
     protected final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
-    protected FinremCaseDetails caseDetails;
-    protected FinremCaseDetails caseDetailsBefore;
-    protected FinremCaseData caseData;
+    protected FinremCaseDetails<FinremCaseDataContested> caseDetails;
+    protected FinremCaseDetails<FinremCaseDataContested> caseDetailsBefore;
+    protected FinremCaseDataContested caseData;
 
     @Before
     public void setUp() {
@@ -55,11 +55,11 @@ public abstract class BaseManageDocumentsHandlerTest {
             .build();
     }
 
-    protected FinremCaseDetails buildCaseDetails() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
+    protected FinremCaseDetails<FinremCaseDataContested> buildCaseDetails() {
+        FinremCaseDataContested finremCaseData = FinremCaseDataContested.builder()
             .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder().build())
             .build();
-        return FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED)
+        return FinremCaseDetails.<FinremCaseDataContested>builder().id(123L).caseType(CaseType.CONTESTED)
             .data(finremCaseData).build();
     }
 }

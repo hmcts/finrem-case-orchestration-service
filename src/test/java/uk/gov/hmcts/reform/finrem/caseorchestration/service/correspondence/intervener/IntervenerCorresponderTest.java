@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
@@ -36,8 +36,8 @@ public class IntervenerCorresponderTest {
     @Mock
     private BulkPrintService bulkPrintService;
     private static final String AUTHORISATION_TOKEN = "authToken";
-    private FinremCaseDetails finremCaseDetails;
-    private FinremCaseData finremCaseData;
+    private FinremCaseDetails<FinremCaseDataContested> finremCaseDetails;
+    private FinremCaseDataContested finremCaseData;
 
     @Before
     public void setup() {
@@ -47,7 +47,7 @@ public class IntervenerCorresponderTest {
         IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder().build();
         IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder().build();
         IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder().build();
-        finremCaseData = FinremCaseData.builder()
+        finremCaseData = FinremCaseDataContested.builder()
             .intervenerOneWrapper(intervenerOneWrapper)
             .intervenerTwoWrapper(intervenerTwoWrapper)
             .intervenerThreeWrapper(intervenerThreeWrapper)
@@ -66,7 +66,7 @@ public class IntervenerCorresponderTest {
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setIntervenerOneWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = FinremCaseDetails.<FinremCaseDataContested>builder().data(finremCaseData).build();
         when(intervenerCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(false);
         intervenerCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -86,7 +86,7 @@ public class IntervenerCorresponderTest {
         finremCaseData.setIntervenerTwoWrapper(intervenerDetails);
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = FinremCaseDetails.<FinremCaseDataContested>builder().data(finremCaseData).build();
         when(intervenerCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(false);
         intervenerCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -106,7 +106,7 @@ public class IntervenerCorresponderTest {
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setIntervenerThreeWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = FinremCaseDetails.<FinremCaseDataContested>builder().data(finremCaseData).build();
         when(intervenerCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(false);
         intervenerCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -126,7 +126,7 @@ public class IntervenerCorresponderTest {
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setIntervenerFourWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = FinremCaseDetails.<FinremCaseDataContested>builder().data(finremCaseData).build();
         when(intervenerCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(false);
         intervenerCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -149,7 +149,7 @@ public class IntervenerCorresponderTest {
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setIntervenerOneWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCaseDetails = FinremCaseDetails.<FinremCaseDataContested>builder().data(finremCaseData).build();
         when(intervenerCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(true);
         intervenerCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
 
@@ -173,7 +173,7 @@ public class IntervenerCorresponderTest {
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setIntervenerTwoWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder()
+        finremCaseDetails = FinremCaseDetails.<FinremCaseDataContested>builder()
             .data(finremCaseData).build();
         when(intervenerCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(true);
         intervenerCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
@@ -196,7 +196,7 @@ public class IntervenerCorresponderTest {
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setIntervenerThreeWrapper(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder()
+        finremCaseDetails = FinremCaseDetails.<FinremCaseDataContested>builder()
             .data(finremCaseData).build();
         when(intervenerCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(true);
         intervenerCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
@@ -219,7 +219,7 @@ public class IntervenerCorresponderTest {
         finremCaseData.setIntervenerFourWrapper(intervenerDetails);
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
-        finremCaseDetails = FinremCaseDetails.builder()
+        finremCaseDetails = FinremCaseDetails.<FinremCaseDataContested>builder()
             .data(finremCaseData).build();
         when(intervenerCorresponder.shouldSendIntervenerSolicitorEmail(intervenerDetails)).thenReturn(true);
         intervenerCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);

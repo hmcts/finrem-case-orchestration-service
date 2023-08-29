@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
@@ -606,6 +606,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     private FinremCaseDetails getFinremCaseDetailsFromCaseDetails() {
-        return FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
+        return FinremCaseDetails.builder().data(FinremCaseDataContested.builder().build()).build();
     }
 }

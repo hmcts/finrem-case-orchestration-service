@@ -5,7 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 
@@ -28,7 +28,7 @@ public class FinremConsentedApplicationHelperTest {
 
     @Test
     public void isVariationOrder() {
-        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = callbackRequest();
         callbackRequest.getCaseDetails().getData().getNatureApplicationWrapper().setNatureOfApplication2(
             List.of(NatureApplication.VARIATION_ORDER, NatureApplication.PENSION_SHARING_ORDER, NatureApplication.LUMP_SUM_ORDER));
         ConsentedApplicationHelper helper = new ConsentedApplicationHelper(documentConfigurationMock);
@@ -37,37 +37,37 @@ public class FinremConsentedApplicationHelperTest {
 
     @Test
     public void setConsentVariationOrderLabelField() {
-        FinremCallbackRequest callbackRequest = callbackRequest();
-        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = callbackRequest();
+        FinremCaseDataConsented data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(
             List.of(NatureApplication.VARIATION_ORDER, NatureApplication.PENSION_SHARING_ORDER, NatureApplication.LUMP_SUM_ORDER));
 
         ConsentedApplicationHelper helper = new ConsentedApplicationHelper(documentConfigurationMock);
         helper.setConsentVariationOrderLabelField(data);
 
-        assertEquals(VARIATION_ORDER_CAMELCASE_LABEL_VALUE, data.getConsentOrderWrapper().getConsentVariationOrderLabelC());
-        assertEquals(VARIATION_ORDER_LOWERCASE_LABEL_VALUE, data.getConsentOrderWrapper().getConsentVariationOrderLabelL());
-        assertEquals(CV_OTHER_DOC_LABEL_VALUE, data.getConsentOrderWrapper().getOtherDocLabel());
+        assertEquals(VARIATION_ORDER_CAMELCASE_LABEL_VALUE, data.getConsentVariationOrderLabelC());
+        assertEquals(VARIATION_ORDER_LOWERCASE_LABEL_VALUE, data.getConsentVariationOrderLabelL());
+        assertEquals(CV_OTHER_DOC_LABEL_VALUE, data.getOtherDocLabel());
     }
 
     @Test
     public void givenCase_whenEmptyNatureOfApplicationIsEmpty_thenReturnEmptyList() {
-        FinremCallbackRequest callbackRequest = callbackRequest();
-        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = callbackRequest();
+        FinremCaseDataConsented data = callbackRequest.getCaseDetails().getData();
 
         ConsentedApplicationHelper helper = new ConsentedApplicationHelper(documentConfigurationMock);
         helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
 
-        assertEquals(CONSENT_ORDER_CAMELCASE_LABEL_VALUE, data.getConsentOrderWrapper().getConsentVariationOrderLabelC());
-        assertEquals(CONSENT_ORDER_LOWERCASE_LABEL_VALUE, data.getConsentOrderWrapper().getConsentVariationOrderLabelL());
-        assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, data.getConsentOrderWrapper().getOtherDocLabel());
+        assertEquals(CONSENT_ORDER_CAMELCASE_LABEL_VALUE, data.getConsentVariationOrderLabelC());
+        assertEquals(CONSENT_ORDER_LOWERCASE_LABEL_VALUE, data.getConsentVariationOrderLabelL());
+        assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, data.getOtherDocLabel());
     }
 
-    private FinremCallbackRequest callbackRequest() {
+    private FinremCallbackRequest<FinremCaseDataConsented> callbackRequest() {
         return FinremCallbackRequest
-            .builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .data(FinremCaseData.builder().build()).build())
+            .<FinremCaseDataConsented>builder()
+            .caseDetails(FinremCaseDetails.<FinremCaseDataConsented>builder()
+                .data(FinremCaseDataConsented.builder().build()).build())
             .build();
     }
 }

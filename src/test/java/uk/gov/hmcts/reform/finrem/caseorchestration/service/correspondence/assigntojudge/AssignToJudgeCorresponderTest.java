@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
@@ -59,7 +59,7 @@ public class AssignToJudgeCorresponderTest {
             DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(
             caseDocument);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder().build()).build());
+            .data(FinremCaseDataContested.builder().build()).build());
     }
 
     @Test
@@ -103,19 +103,19 @@ public class AssignToJudgeCorresponderTest {
             .builder().build();
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .data(FinremCaseDataContested.builder()
                 .intervenerOneWrapper(IntervenerOneWrapper.builder()
                     .intervenerSolEmail(intervenerEmail)
                     .build())
                 .build())
             .build());
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerOneWrapper.builder()
-                .intervenerSolEmail(intervenerEmail).build(), caseDetails)).thenReturn(true);
+            .intervenerSolEmail(intervenerEmail).build(), caseDetails)).thenReturn(true);
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerOneWrapper.builder()
-                .intervenerSolEmail(intervenerEmail).build(),caseDetails);
+            .intervenerSolEmail(intervenerEmail).build(), caseDetails);
     }
 
     @Test
@@ -125,19 +125,19 @@ public class AssignToJudgeCorresponderTest {
             .builder().build();
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .data(FinremCaseDataContested.builder()
                 .intervenerTwoWrapper(IntervenerTwoWrapper.builder()
                     .intervenerSolEmail(intervenerEmail)
                     .build())
                 .build())
             .build());
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerTwoWrapper.builder()
-                .intervenerSolEmail(intervenerEmail).build(), caseDetails)).thenReturn(true);
+            .intervenerSolEmail(intervenerEmail).build(), caseDetails)).thenReturn(true);
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerTwoWrapper.builder()
-                .intervenerSolEmail(intervenerEmail).build(),caseDetails);
+            .intervenerSolEmail(intervenerEmail).build(), caseDetails);
     }
 
     @Test
@@ -147,19 +147,19 @@ public class AssignToJudgeCorresponderTest {
             .builder().build();
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .data(FinremCaseDataContested.builder()
                 .intervenerThreeWrapper(IntervenerThreeWrapper.builder()
                     .intervenerSolEmail(intervenerEmail)
                     .build())
                 .build())
             .build());
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerThreeWrapper.builder()
-                .intervenerSolEmail(intervenerEmail).build(), caseDetails)).thenReturn(true);
+            .intervenerSolEmail(intervenerEmail).build(), caseDetails)).thenReturn(true);
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerThreeWrapper.builder()
-                .intervenerSolEmail(intervenerEmail).build(), caseDetails);
+            .intervenerSolEmail(intervenerEmail).build(), caseDetails);
     }
 
     @Test
@@ -169,19 +169,19 @@ public class AssignToJudgeCorresponderTest {
             .builder().build();
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .data(FinremCaseDataContested.builder()
                 .intervenerFourWrapper(IntervenerFourWrapper.builder()
                     .intervenerSolEmail(intervenerEmail)
                     .build())
                 .build())
             .build());
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerFourWrapper.builder()
-                .intervenerSolEmail(intervenerEmail).build(), caseDetails)).thenReturn(true);
+            .intervenerSolEmail(intervenerEmail).build(), caseDetails)).thenReturn(true);
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(IntervenerFourWrapper.builder()
-                .intervenerSolEmail(intervenerEmail).build(), caseDetails);
+            .intervenerSolEmail(intervenerEmail).build(), caseDetails);
     }
 
     @Test

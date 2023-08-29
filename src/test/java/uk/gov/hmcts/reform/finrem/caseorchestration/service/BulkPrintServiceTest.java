@@ -327,7 +327,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldPrintIntervenerDocumentsFinrem() {
         final String contestedBulkPrintConsentIntervener1Json
             = "/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json";
-        FinremCaseDetails<FinremCaseDataContested> caseDetails = TestSetUpUtils.finremCaseDetailsFromResource(contestedBulkPrintConsentIntervener1Json, mapper);
+        FinremCaseDetails<FinremCaseDataContested> caseDetails =
+            TestSetUpUtils.finremCaseDetailsFromResource(contestedBulkPrintConsentIntervener1Json, mapper);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE))

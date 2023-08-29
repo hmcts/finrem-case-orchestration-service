@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
@@ -40,7 +39,7 @@ public class CreateGeneralLetterContestedAboutToSubmitHandlerTest {
 
     @Before
     public void setup() {
-        handler =  new CreateGeneralLetterContestedAboutToSubmitHandler(finremCaseDetailsMapper, generalLetterService);
+        handler = new CreateGeneralLetterContestedAboutToSubmitHandler(finremCaseDetailsMapper, generalLetterService);
     }
 
     @Test

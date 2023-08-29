@@ -644,7 +644,8 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1QaShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
+    default void setIntv1QaShared(FinremCaseDataContested caseData,
+                                  String collId, List<UploadCaseDocumentCollection> appQaCollection) {
         appQaCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -657,7 +658,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1ChronologiesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
+    default void setIntv1ChronologiesShared(FinremCaseDataContested caseData,
+                                            String collId,
+                                            List<UploadCaseDocumentCollection> appChronologiesCollection) {
         appChronologiesCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -671,7 +674,8 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1FormEsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
+    default void setIntv1FormEsExhibitsShared(FinremCaseDataContested caseData, String collId,
+                                              List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
         appFormEExhibitsCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> intv1Collection =
@@ -685,7 +689,8 @@ public interface SharedService {
         });
     }
 
-    default void setIntv1OtherShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv1OtherShared(FinremCaseDataContested caseData,
+                                     String collId, List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -775,7 +780,8 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2QaShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
+    default void setIntv2QaShared(FinremCaseDataContested caseData,
+                                  String collId, List<UploadCaseDocumentCollection> appQaCollection) {
         appQaCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -788,7 +794,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2ChronologiesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
+    default void setIntv2ChronologiesShared(FinremCaseDataContested caseData,
+                                            String collId,
+                                            List<UploadCaseDocumentCollection> appChronologiesCollection) {
         appChronologiesCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -801,7 +809,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2FormEsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
+    default void setIntv2FormEsExhibitsShared(FinremCaseDataContested caseData,
+                                              String collId,
+                                              List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
         appFormEExhibitsCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -814,7 +824,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv2OtherShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv2OtherShared(FinremCaseDataContested caseData,
+                                     String collId,
+                                     List<UploadCaseDocumentCollection> coll) {
         coll.forEach(d -> {
             if (String.valueOf(d.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -906,7 +918,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3QaShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
+    default void setIntv3QaShared(FinremCaseDataContested caseData,
+                                  String collId,
+                                  List<UploadCaseDocumentCollection> appQaCollection) {
         appQaCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -919,7 +933,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3ChronologiesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
+    default void setIntv3ChronologiesShared(FinremCaseDataContested caseData,
+                                            String collId,
+                                            List<UploadCaseDocumentCollection> appChronologiesCollection) {
         appChronologiesCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -932,7 +948,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv3FormEsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
+    default void setIntv3FormEsExhibitsShared(FinremCaseDataContested caseData,
+                                              String collId,
+                                              List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
         appFormEExhibitsCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1024,7 +1042,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4StmtsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> coll) {
+    default void setIntv4StmtsExhibitsShared(FinremCaseDataContested caseData,
+                                             String collId,
+                                             List<UploadCaseDocumentCollection> coll) {
         coll.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1037,7 +1057,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4QaShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appQaCollection) {
+    default void setIntv4QaShared(FinremCaseDataContested caseData,
+                                  String collId,
+                                  List<UploadCaseDocumentCollection> appQaCollection) {
         appQaCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1051,7 +1073,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4ChronologiesShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appChronologiesCollection) {
+    default void setIntv4ChronologiesShared(FinremCaseDataContested caseData,
+                                            String collId,
+                                            List<UploadCaseDocumentCollection> appChronologiesCollection) {
         appChronologiesCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
@@ -1064,7 +1088,9 @@ public interface SharedService {
         });
     }
 
-    default void setIntv4FormEsExhibitsShared(FinremCaseDataContested caseData, String collId, List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
+    default void setIntv4FormEsExhibitsShared(FinremCaseDataContested caseData,
+                                              String collId,
+                                              List<UploadCaseDocumentCollection> appFormEExhibitsCollection) {
         appFormEExhibitsCollection.forEach(sd -> {
             if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                 List<UploadCaseDocumentCollection> list =
