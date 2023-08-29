@@ -157,7 +157,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         return data;
     }
 
-    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDouments(
+    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDocuments(
         FinremCaseDetails finremCaseDetails, GeneralApplicationCollectionData data,
         List<BulkPrintDocument> bulkPrintDocuments, String status, String userAuthorisation) {
 
