@@ -638,4 +638,5 @@ public class CCDConfigConstant {
     public static final String CASE_LEVEL_ROLE = "Case";
     
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
+
 }
