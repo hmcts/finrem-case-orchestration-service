@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.generalapplication.GeneralApplicationRejectionLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions;
@@ -33,8 +34,9 @@ public class GeneralApplicationRejectionLetterGenerator extends BaseContestedLet
 
     public GeneralApplicationRejectionLetterGenerator(ObjectMapper objectMapper,
                                                       CaseDataService caseDataService,
-                                                      DocumentHelper documentHelper) {
-        super(caseDataService, documentHelper);
+                                                      DocumentHelper documentHelper,
+                                                      LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper) {
+        super(caseDataService, documentHelper, letterAddresseeGeneratorMapper);
         this.objectMapper = objectMapper;
     }
 

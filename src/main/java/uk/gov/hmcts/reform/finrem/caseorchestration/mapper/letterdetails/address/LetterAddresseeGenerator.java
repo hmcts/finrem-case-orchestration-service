@@ -8,4 +8,5 @@ public interface LetterAddresseeGenerator {
     AddresseeDetails generate(CaseDetails caseDetails);
 
     AddresseeDetails generate(FinremCaseDetails caseDetails);
+
 }

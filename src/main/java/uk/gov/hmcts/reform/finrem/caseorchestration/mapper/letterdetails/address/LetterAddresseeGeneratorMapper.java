@@ -30,6 +30,7 @@ public class LetterAddresseeGeneratorMapper {
         return addresseeGeneratorMap().get(recipient).generate(caseDetails);
     }
 
+
     private Map<DocumentHelper.PaperNotificationRecipient, LetterAddresseeGenerator> addresseeGeneratorMap() {
         ImmutableMap<DocumentHelper.PaperNotificationRecipient, LetterAddresseeGenerator>
             map =

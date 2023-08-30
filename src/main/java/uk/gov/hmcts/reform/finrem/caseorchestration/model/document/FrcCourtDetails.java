@@ -29,6 +29,9 @@ public class FrcCourtDetails {
     @JsonProperty("email")
     private String email;
 
+    @JsonProperty("openingHours")
+    private String openingHours;
+
     @JsonIgnore
     public String getCourtContactDetailsAsOneLineAddressString() {
         return StringUtils.joinWith(", ", courtName, courtAddress);
