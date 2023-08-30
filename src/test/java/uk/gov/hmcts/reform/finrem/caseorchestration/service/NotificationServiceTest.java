@@ -1030,6 +1030,17 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void sendGeneralApplicationRejectionEmailIntervenerSolicitor() {
+        finremCallbackRequest = getContestedNewCallbackRequest();
+        IntervenerWrapper intervenerOneWrapper = IntervenerOneWrapper.builder().build();
+        notificationService.sendGeneralApplicationRejectionEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            intervenerOneWrapper);
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            SolicitorCaseDataKeysWrapper.builder().build());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_REJECT_GENERAL_APPLICATION);
+    }
+
+    @Test
     public void shouldEmailApplicantSolicitorWhenApplicantSolicitorIsRegisteredAndAcceptingEmails() {
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorEmailPopulated(any())).thenReturn(true);
