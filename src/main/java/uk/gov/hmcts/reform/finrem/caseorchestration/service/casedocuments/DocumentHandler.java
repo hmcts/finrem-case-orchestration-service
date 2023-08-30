@@ -26,19 +26,10 @@ public abstract class DocumentHandler {
 
         List<UploadCaseDocumentCollection> originalCollectionForType =
             caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
-        List<UploadCaseDocumentCollection> alteredCollectionForType =
-            getAlteredCollectionForType(screenCollection);
 
         originalCollectionForType.clear();
-        originalCollectionForType.addAll(alteredCollectionForType);
 
-        originalCollectionForType.sort(Comparator.comparing(
-            UploadCaseDocumentCollection::getUploadCaseDocument, Comparator.comparing(
-                UploadCaseDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
-                    Comparator.reverseOrder()))));
-        log.info("Adding items: {}, to {} Collection", alteredCollectionForType,
-            collectionType);
-        screenCollection.removeAll(alteredCollectionForType);
+        addUploadedDocumentToDocumentCollectionType(callbackRequest, screenCollection);
     }
 
     public void addUploadedDocumentToDocumentCollectionType(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,

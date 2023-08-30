@@ -1,17 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,16 +24,29 @@ import java.util.Optional;
 @Service
 public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
+    public static final String CHOOSE_A_DIFFERENT_PARTY = " not present on the case, please choose a different party";
+    public static final String INTERVENER_1 = "Intervener 1 ";
+    public static final String INTERVENER_2 = "Intervener 2 ";
+    public static final String INTERVENER_3 = "Intervener 3 ";
+    public static final String INTERVENER_4 = "Intervener 4 ";
     private final List<DocumentHandler> documentHandlers;
     private final UploadedDocumentService uploadedDocumentHelper;
+
+    private final EvidenceManagementDeleteService evidenceManagementDeleteService;
+    private final FeatureToggleService featureToggleService;
+
 
     @Autowired
     public ManageCaseDocumentsContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                             List<DocumentHandler> documentHandlers,
-                                                            UploadedDocumentService uploadedDocumentHelper) {
+                                                            UploadedDocumentService uploadedDocumentHelper,
+                                                            EvidenceManagementDeleteService evidenceManagementDeleteService,
+                                                            FeatureToggleService featureToggleService) {
         super(mapper);
         this.documentHandlers = documentHandlers;
         this.uploadedDocumentHelper = uploadedDocumentHelper;
+        this.evidenceManagementDeleteService = evidenceManagementDeleteService;
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -41,9 +58,15 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
-                                                                                       String userAuthorisation) {
-
+                                                                              String userAuthorisation) {
         FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> response =
+            getValidatedResponse(caseData);
+        if (response.hasErrors()) {
+            return response;
+        }
+
+
         FinremCaseDataContested caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
         documentHandlers.forEach(documentCollectionService ->
@@ -52,6 +75,52 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
         Optional.ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);
 
+        if (featureToggleService.isSecureDocEnabled()) {
+            deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
+        }
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
+    }
+
+    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> getValidatedResponse(FinremCaseDataContested caseData) {
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> response =
+            GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
+        List<UploadCaseDocumentCollection> manageCaseDocumentCollection = caseData.getManageCaseDocumentCollection();
+
+        if (StringUtils.isBlank(caseData.getIntervenerOneWrapper().getIntervenerName())
+            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageCaseDocumentCollection)) {
+            response.getErrors().add(INTERVENER_1 + CHOOSE_A_DIFFERENT_PARTY);
+        } else if (StringUtils.isBlank(caseData.getIntervenerTwoWrapper().getIntervenerName())
+            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_TWO, manageCaseDocumentCollection)) {
+            response.getErrors().add(INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY);
+        } else if (StringUtils.isBlank(caseData.getIntervenerThreeWrapper().getIntervenerName())
+            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_THREE, manageCaseDocumentCollection)) {
+            response.getErrors().add(INTERVENER_3 + CHOOSE_A_DIFFERENT_PARTY);
+        } else if (StringUtils.isBlank(caseData.getIntervenerFourWrapper().getIntervenerName())
+            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_FOUR, manageCaseDocumentCollection)) {
+            response.getErrors().add(INTERVENER_4 + CHOOSE_A_DIFFERENT_PARTY);
+        }
+        return response;
+    }
+
+    private boolean isIntervernerPartySelected(CaseDocumentParty caseDocumentParty,
+                                               List<UploadCaseDocumentCollection> manageCaseDocumentCollection) {
+        return manageCaseDocumentCollection.stream().anyMatch(documentCollection ->
+            documentCollection.getUploadCaseDocument().getCaseDocumentParty().equals(caseDocumentParty));
+    }
+
+    private void deleteRemovedDocuments(FinremCaseDataContested caseData,
+                                        FinremCaseDataContested caseDataBefore,
+                                        String userAuthorisation) {
+        List<UploadCaseDocumentCollection> allCollectionsBefore =
+            caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
+        allCollectionsBefore.removeAll(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
+
+        allCollectionsBefore.stream().map(this::getDocumentUrl)
+            .forEach(docUrl -> evidenceManagementDeleteService.delete(docUrl, userAuthorisation));
+    }
+
+    private String getDocumentUrl(UploadCaseDocumentCollection documentCollection) {
+        return documentCollection.getUploadCaseDocument().getCaseDocuments().getDocumentUrl();
     }
 }
