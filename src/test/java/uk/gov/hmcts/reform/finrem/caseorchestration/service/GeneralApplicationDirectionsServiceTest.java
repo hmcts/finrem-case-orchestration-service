@@ -259,6 +259,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
                 "courtName", "Kingston-Upon-Thames County Court And Family Court",
                 "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
                 "phoneNumber", "0208 972 8700",
+                "openingHours", "from 8am to 6pm, Monday to Friday",
                 "email", "enquiries.kingston.countycourt@justice.gov.uk")),
             Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
             Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
@@ -361,7 +362,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private void assertDocumentPrintRequestContainsExpectedDocuments() {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
+                GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).fileName("app_docs.pdf").build())
             .toArray()));
     }
