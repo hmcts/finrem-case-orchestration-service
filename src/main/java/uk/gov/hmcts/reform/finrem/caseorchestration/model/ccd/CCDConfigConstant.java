@@ -29,6 +29,7 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_PHONE = "respondentPhone";
     public static final String RESPONDENT_EMAIL = "respondentEmail";
     public static final String RESPONDENT = "Respondent";
+    public static final String OTHER_RECIPIENT = "Other";
 
     // Intervener related
     public static final String INTERVENER1_FIRST_MIDDLE_NAME = "intervener1FMName";
@@ -41,9 +42,13 @@ public class CCDConfigConstant {
     public static final String INTERVENER4_LAST_NAME = "intervener4LName";
     public static final String INTERVENER = "Intervener";
     public static final String INTERVENER1 = "Intervener1";
+    public static final String INTERVENER1_SOLICITOR = "Intervener1Solicitor";
     public static final String INTERVENER2 = "Intervener2";
+    public static final String INTERVENER2_SOLICITOR = "Intervener2Solicitor";
     public static final String INTERVENER3 = "Intervener3";
+    public static final String INTERVENER3_SOLICITOR = "Intervener3Solicitor";
     public static final String INTERVENER4 = "Intervener4";
+    public static final String INTERVENER4_SOLICITOR = "Intervener4Solicitor";
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
@@ -342,6 +347,7 @@ public class CCDConfigConstant {
     public static final String ORDER_REFUSAL_COLLECTION = "orderRefusalCollection";
     public static final String ORDER_REFUSAL_PREVIEW_COLLECTION = "orderRefusalPreviewDocument";
     public static final String GENERAL_LETTER_ADDRESS_TO = "generalLetterAddressTo";
+    public static final String GENERAL_LETTER_ADDRESSEE = "generalLetterAddressee";
     public static final String GENERAL_LETTER_RECIPIENT = "generalLetterRecipient";
     public static final String GENERAL_LETTER_RECIPIENT_ADDRESS = "generalLetterRecipientAddress";
     public static final String CONTESTED_CONSENT_ORDER_COLLECTION = "Contested_ConsentedApprovedOrders";
@@ -636,7 +642,6 @@ public class CCDConfigConstant {
     public static final String CASE_APPLICANT_FLAGS = "applicantFlags";
     public static final String CASE_RESPONDENT_FLAGS = "respondentFlags";
     public static final String CASE_LEVEL_ROLE = "Case";
-    
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 
 }
