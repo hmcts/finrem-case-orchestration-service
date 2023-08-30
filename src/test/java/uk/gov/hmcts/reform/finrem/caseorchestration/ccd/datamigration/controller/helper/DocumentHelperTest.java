@@ -795,6 +795,34 @@ public class DocumentHelperTest {
         assertThat(caseDocument.getDocumentFilename(), is("file1"));
     }
 
+    @Test
+    public void getIntervenerOnePaperNotificationRecipient() {
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder().build();
+        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerOneWrapper);
+        assertThat(recipient, is(INTERVENER_ONE));
+    }
+
+    @Test
+    public void getIntervenerTwoPaperNotificationRecipient() {
+        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder().build();
+        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerTwoWrapper);
+        assertThat(recipient, is(INTERVENER_TWO));
+    }
+
+    @Test
+    public void getIntervenerThreePaperNotificationRecipient() {
+        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder().build();
+        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerThreeWrapper);
+        assertThat(recipient, is(INTERVENER_THREE));
+    }
+
+    @Test
+    public void getIntervenerFourPaperNotificationRecipient() {
+        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder().build();
+        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerFourWrapper);
+        assertThat(recipient, is(INTERVENER_FOUR));
+    }
+
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest.builder()
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())

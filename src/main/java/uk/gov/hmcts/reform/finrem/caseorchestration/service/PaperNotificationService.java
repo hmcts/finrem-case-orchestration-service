@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
 import java.util.Map;
@@ -79,5 +81,12 @@ public class PaperNotificationService {
         CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
             caseDetails, authToken, RESPONDENT);
         bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, CCDConfigConstant.RESPONDENT, authToken);
+    }
+
+    public void printIntervenerRejectionGeneralApplication(CaseDetails caseDetails, IntervenerWrapper intervenerWrapper, String authToken) {
+        CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
+            caseDetails, authToken, DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerWrapper));
+        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails,
+            intervenerWrapper.getIntervenerType().getTypeValue(), authToken);
     }
 }
