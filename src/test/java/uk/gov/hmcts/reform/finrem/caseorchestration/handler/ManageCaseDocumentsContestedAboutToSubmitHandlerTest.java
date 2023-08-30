@@ -156,7 +156,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
         when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
         manageCaseDocumentsAboutToSubmitCaseHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         verify(evidenceManagementDeleteService, times(1)).delete(DOCUMENT_URL_TEST, AUTH_TOKEN);
@@ -172,7 +173,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             .setCaseDocumentParty(CaseDocumentParty.INTERVENER_ONE);
 
         GenericAboutToStartOrSubmitCallbackResponse response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(response.getErrors().get(0), is(INTERVENER_1 + CHOOSE_A_DIFFERENT_PARTY));
@@ -188,7 +190,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             .setCaseDocumentParty(CaseDocumentParty.INTERVENER_TWO);
 
         GenericAboutToStartOrSubmitCallbackResponse response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(response.getErrors().get(0), is(INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY));
@@ -204,7 +207,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             .setCaseDocumentParty(CaseDocumentParty.INTERVENER_THREE);
 
         GenericAboutToStartOrSubmitCallbackResponse response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(response.getErrors().get(0), is(INTERVENER_3 + CHOOSE_A_DIFFERENT_PARTY));
@@ -220,7 +224,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             .setCaseDocumentParty(CaseDocumentParty.INTERVENER_FOUR);
 
         GenericAboutToStartOrSubmitCallbackResponse response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            FinremCallbackRequest.<FinremCaseDataContested>builder()
+                .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
         assertThat(response.getErrors().get(0), is(INTERVENER_4 + CHOOSE_A_DIFFERENT_PARTY));
