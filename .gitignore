@@ -41,3 +41,5 @@ pacts/
 
 lib/applicationinsights-agent-*.jar
 lib/applicationinsights.log
+
+main/resources/ccd-config*.*
