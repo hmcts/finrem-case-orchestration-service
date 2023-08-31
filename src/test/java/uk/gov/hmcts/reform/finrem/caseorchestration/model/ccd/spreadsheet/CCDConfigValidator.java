@@ -51,7 +51,7 @@ public class CCDConfigValidator {
     protected static final String STATE_SHEET = "State";
     protected static final String DYNAMIC_LIST = "DynamicList";
     protected static final String DYNAMIC_RADIO_LIST = "DynamicRadioList";
-    private List<String> finremCaseDataFieldsToIgnore = Arrays.asList("ccdCaseId");
+    private List<String> finremCaseDataFieldsToIgnore = Arrays.asList("ccdCaseId, ccdCaseType");
     private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST, INTERVENER_CT);
     private List<String> alreadyProcessedCcdFields = new ArrayList<>();
 
