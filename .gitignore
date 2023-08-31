@@ -35,6 +35,7 @@ pacts/
 ### Local test files (properties or yaml) ###
 /src/functionalTests/resources/application-local.*
 /src/main/resources/application-*.*
+/src/main/resources/ccd-config-*.*
 
 # Log file
 *.log
@@ -42,4 +43,3 @@ pacts/
 lib/applicationinsights-agent-*.jar
 lib/applicationinsights.log
 
-main/resources/ccd-config*.*
