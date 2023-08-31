@@ -59,7 +59,7 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     private OrganisationPolicy intervenerOrganisation;
 
     protected IntervenerWrapper() {
-        intervenerCorrespondenceEnabled =  Boolean.TRUE;
+        intervenerCorrespondenceEnabled =  Boolean.FALSE;
     }
 
     public abstract String getIntervenerLabel();
