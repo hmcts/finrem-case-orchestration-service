@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -20,10 +21,12 @@ public class FinremCaseDetailsMapper {
     private final ObjectMapper objectMapper;
 
     public FinremCaseDetails mapToFinremCaseDetails(CaseDetails caseDetails) {
-        FinremCaseData data = objectMapper.convertValue(caseDetails.getData(), FinremCaseData.class);
-        data.setCcdCaseType(CaseType.forValue(caseDetails.getCaseTypeId()));
+        String caseTypeId = caseDetails.getCaseTypeId();
+        Map<String, Object> caseDataCopy = new HashMap<>(caseDetails.getData());
+        caseDataCopy.put("ccdCaseType", caseTypeId);
+        FinremCaseData data = objectMapper.convertValue(caseDataCopy, FinremCaseData.class);
         return FinremCaseDetails.builder()
-            .caseType(CaseType.forValue(caseDetails.getCaseTypeId()))
+            .caseType(CaseType.forValue(caseTypeId))
             .id(caseDetails.getId())
             .jurisdiction(caseDetails.getJurisdiction())
             .state(caseDetails.getState() != null ? State.forValue(caseDetails.getState()) : null)

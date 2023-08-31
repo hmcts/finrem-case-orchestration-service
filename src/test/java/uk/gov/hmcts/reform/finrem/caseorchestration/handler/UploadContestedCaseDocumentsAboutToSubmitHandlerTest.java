@@ -472,6 +472,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
     protected FinremCaseDetails<FinremCaseDataContested> buildCaseDetails() {
         FinremCaseDataContested finremCaseData = FinremCaseDataContested.builder()
+            .ccdCaseType(CaseType.CONTESTED)
             .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder().build())
             .build();
         return FinremCaseDetails.<FinremCaseDataContested>builder()

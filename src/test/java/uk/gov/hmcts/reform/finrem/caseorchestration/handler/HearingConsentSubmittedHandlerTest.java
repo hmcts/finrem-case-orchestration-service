@@ -14,11 +14,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentHearingService;
 
@@ -38,6 +41,7 @@ public class HearingConsentSubmittedHandlerTest {
     @Mock
     private ConsentHearingService service;
 
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
     private ObjectMapper objectMapper;
     private static final String AUTH_TOKEN = "tokien:)";
     private static final String TEST_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
@@ -51,6 +55,7 @@ public class HearingConsentSubmittedHandlerTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .build();
+        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
     }
 
     @Test
@@ -91,9 +96,14 @@ public class HearingConsentSubmittedHandlerTest {
         verify(service).sendNotification(any(FinremCaseDetails.class), any());
     }
 
-    private FinremCallbackRequest buildCallbackRequest() {
+    private FinremCallbackRequest<FinremCaseDataConsented> buildCallbackRequest() {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(TEST_JSON)) {
-            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class);
+            CallbackRequest callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            FinremCaseDetails<FinremCaseDataConsented> finremCaseDetails =
+                finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
+            return FinremCallbackRequest.<FinremCaseDataConsented>builder()
+                .caseDetails(finremCaseDetails)
+                .build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

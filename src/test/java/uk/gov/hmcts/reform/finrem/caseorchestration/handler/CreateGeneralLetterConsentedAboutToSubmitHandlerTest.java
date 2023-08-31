@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @RunWith(MockitoJUnitRunner.class)
 public class CreateGeneralLetterConsentedAboutToSubmitHandlerTest {
 
-    private CreateGeneralLetterContestedAboutToSubmitHandler handler;
+    private CreateGeneralLetterConsentedAboutToSubmitHandler handler;
 
     @Mock
     private GeneralLetterService generalLetterService;
@@ -39,7 +39,7 @@ public class CreateGeneralLetterConsentedAboutToSubmitHandlerTest {
 
     @Before
     public void setup() {
-        handler = new CreateGeneralLetterContestedAboutToSubmitHandler(finremCaseDetailsMapper, generalLetterService);
+        handler = new CreateGeneralLetterConsentedAboutToSubmitHandler(finremCaseDetailsMapper, generalLetterService);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class CreateGeneralLetterConsentedAboutToSubmitHandlerTest {
     @Test
     public void givenACcdCallbackCreateGeneralLetterAboutToSubmitHandlerJudge_WhenCanHandleCalled_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CREATE_GENERAL_LETTER_JUDGE),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CREATE_GENERAL_LETTER_JUDGE),
             is(true));
     }
 

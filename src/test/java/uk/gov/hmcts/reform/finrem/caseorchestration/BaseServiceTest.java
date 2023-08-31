@@ -419,14 +419,6 @@ public abstract class BaseServiceTest extends BaseTest {
         }
     }
 
-    protected FinremCallbackRequest buildHearingFinremCallbackRequest(String payloadJson) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
-            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     protected List<InterimHearingData> convertToInterimHearingDataList(Object object) {
         return mapper.convertValue(object, new TypeReference<>() {
         });

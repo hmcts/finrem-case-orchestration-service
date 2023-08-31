@@ -354,8 +354,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldCreateNotificationRequestForRespSolicitorForContestedJourneyForInterimHearingFinremData() {
-        FinremCallbackRequest<FinremCaseDataContested> callbackRequest = buildHearingFinremCallbackRequest(INTERIM_HEARING_JSON);
+    public void shouldCreateNotificationRequestForRespSolicitorForContestedJourneyForInterimHearingFinremData() throws Exception {
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest = buildFinremCallbackRequest(INTERIM_HEARING_JSON);
         FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
 
         List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.getInterimWrapper().getInterimHearings())
@@ -386,8 +386,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourneyForHearingFinremCaseData() {
-        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = buildHearingFinremCallbackRequest(CONSENTED_HEARING_JSON);
+    public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourneyForHearingFinremCaseData() throws Exception {
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = buildFinremCallbackRequest(CONSENTED_HEARING_JSON);
         FinremCaseDataConsented caseData = callbackRequest.getCaseDetails().getData();
 
         List<ConsentedHearingDataWrapper> hearings = caseData.getListForHearings();
@@ -455,8 +455,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourneyForHearingFinremCaseData() {
-        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = buildHearingFinremCallbackRequest(CONSENTED_HEARING_JSON);
+    public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourneyForHearingFinremCaseData() throws Exception {
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = buildFinremCallbackRequest(CONSENTED_HEARING_JSON);
 
         FinremCaseDataConsented caseData = callbackRequest.getCaseDetails().getData();
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);

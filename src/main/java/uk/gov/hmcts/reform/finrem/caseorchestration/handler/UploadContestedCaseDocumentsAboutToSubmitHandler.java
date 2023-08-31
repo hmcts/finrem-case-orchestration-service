@@ -67,7 +67,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
-                                                                              String userAuthorisation) {
+                                                                                       String userAuthorisation) {
         FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> response = getValidatedResponse(caseData);
         if (response.hasErrors()) {
@@ -79,7 +79,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
 
         if (featureToggleService.isIntervenerEnabled()) {
             CaseDocumentParty loggedInUserRole =
-                getActiveUserCaseDocumentParty(caseData.getCcdCaseId(), userAuthorisation);
+                getActiveUserCaseDocumentParty(String.valueOf(callbackRequest.getCaseDetails().getId()), userAuthorisation);
 
             managedCollections.forEach(doc -> doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole));
         }
