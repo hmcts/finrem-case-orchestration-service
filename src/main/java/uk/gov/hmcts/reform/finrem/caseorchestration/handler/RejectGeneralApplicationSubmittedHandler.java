@@ -80,6 +80,7 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
         final List<IntervenerWrapper> interveners = caseDetails.getData().getInterveners();
         interveners.forEach(intervenerWrapper -> {
             if (intervenerWrapper.getIntervenerType().getTypeValue().equalsIgnoreCase(receivedFrom)) {
+                log.info("Reject general application receivedFrom matched");
                 sendIntervenerNotifications(userAuthorisation, caseDetails, intervenerWrapper);
             }
         });
@@ -112,6 +113,7 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void sendIntervenerNotifications(String userAuthorisation, FinremCaseDetails caseDetails,
                                              IntervenerWrapper intervenerWrapper) {
+        log.info("Is intervenerCorrespondenceEnabled {}", intervenerWrapper.getIntervenerCorrespondenceEnabled());
         if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
             && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
             if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)) {
