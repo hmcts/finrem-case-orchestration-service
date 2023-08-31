@@ -91,13 +91,11 @@ public class RemoveApplicantDetailsController extends BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        log.info("DEBUGGING NOC - updateRespondentSolicitorAddress entered and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         removeApplicantDetails(caseData);
-        log.info("DEBUGGING NOC - updateRespondentSolicitorAddress entered and applicant name is still present",
+        log.info("DEBUGGING NOC - removeApplicantDetails entered and applicant name is still present",
             caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
-        log.info("DEBUGGING NOC - updateRespondentSolicitorAddress entered and applicant name is still present",
+        log.info("DEBUGGING NOC - removeRespondentDetails entered and applicant name is still present",
             caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
 
         String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);
@@ -106,7 +104,7 @@ public class RemoveApplicantDetailsController extends BaseController {
             || respondentConfidentialAddress != null && respondentConfidentialAddress.equalsIgnoreCase(YES_VALUE)) {
             CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
             caseData.put(MINI_FORM_A, document);
-            log.info("DEBUGGING NOC - updateRespondentSolicitorAddress entered and applicant name is still present",
+            log.info("DEBUGGING NOC - generateContestedMiniFormA entered and applicant name is still present",
                 caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         }
 
@@ -118,10 +116,8 @@ public class RemoveApplicantDetailsController extends BaseController {
                 authorisationToken,
                 originalCaseDetails));
         }
-        log.info("DEBUGGING NOC - updateRespondentSolicitorAddress entered and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
-        log.info("DEBUGGING NOC - updateRespondentSolicitorAddress entered and applicant name is still present",
+        log.info("DEBUGGING NOC - persistOrgPolicies entered and applicant name is still present",
             caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
