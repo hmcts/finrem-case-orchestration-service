@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
@@ -91,7 +92,11 @@ public class RemoveApplicantDetailsController extends BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         removeApplicantDetails(caseData);
+        log.info("DEBUGGING NOC - removeApplicantDetails entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
+        log.info("DEBUGGING NOC - removeRespondentDetails entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
 
         String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);
         String respondentConfidentialAddress = Objects.toString(caseData.get(RESPONDENT_CONFIDENTIAL_ADDRESS), null);
@@ -99,6 +104,8 @@ public class RemoveApplicantDetailsController extends BaseController {
             || respondentConfidentialAddress != null && respondentConfidentialAddress.equalsIgnoreCase(YES_VALUE)) {
             CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
             caseData.put(MINI_FORM_A, document);
+            log.info("DEBUGGING NOC - generateContestedMiniFormA entered and applicant name is still present",
+                caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         }
 
         if (featureToggleService.isCaseworkerNoCEnabled()
@@ -109,8 +116,9 @@ public class RemoveApplicantDetailsController extends BaseController {
                 authorisationToken,
                 originalCaseDetails));
         }
-
         persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
+        log.info("DEBUGGING NOC - persistOrgPolicies entered and applicant name is still present",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
