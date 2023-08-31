@@ -3,12 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder;
 
-import java.io.InputStream;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,7 +20,8 @@ public class GeneralEmailServiceTest extends BaseServiceTest {
 
     @Test
     public void generateGeneralEmailConsented() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsConsented();
+        FinremCaseDetails caseDetails =
+            buildFinremCallbackRequest("/fixtures/general-email-consented.json").getCaseDetails();
         generalEmailService.storeGeneralEmail(caseDetails);
         List<GeneralEmailCollection> generalEmailCollections = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailCollection();
         assertThat(generalEmailCollections, hasSize(2));
@@ -32,7 +31,8 @@ public class GeneralEmailServiceTest extends BaseServiceTest {
         assertThat(originalEmail.getGeneralEmailCreatedBy(), is("first user"));
         assertThat(originalEmail.getGeneralEmailBody(), is("original email body"));
 
-        GeneralEmailHolder addedEmail = generalEmailCollections.get(1).getValue();;
+        GeneralEmailHolder addedEmail = generalEmailCollections.get(1).getValue();
+        ;
         assertThat(addedEmail.getGeneralEmailRecipient(), is("b1@b.com"));
         assertThat(addedEmail.getGeneralEmailCreatedBy(), is("Test user"));
         assertThat(addedEmail.getGeneralEmailBody(), is("Test email body"));
@@ -40,7 +40,8 @@ public class GeneralEmailServiceTest extends BaseServiceTest {
 
     @Test
     public void generateGeneralEmailContested() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsContested();
+        FinremCaseDetails caseDetails =
+            buildFinremCallbackRequest("/fixtures/contested/general-email-contested.json").getCaseDetails();
         generalEmailService.storeGeneralEmail(caseDetails);
         List<GeneralEmailCollection> generalEmailCollections = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailCollection();
         assertThat(generalEmailCollections, hasSize(2));
@@ -54,21 +55,5 @@ public class GeneralEmailServiceTest extends BaseServiceTest {
         assertThat(addedEmail.getGeneralEmailRecipient(), is("b1@b.com"));
         assertThat(addedEmail.getGeneralEmailCreatedBy(), is("Test user"));
         assertThat(addedEmail.getGeneralEmailBody(), is("Test email body"));
-    }
-
-    private FinremCaseDetails caseDetailsConsented() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-email-consented.json")) {
-            FinremCallbackRequest finremCallbackRequest = mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
-            finremCallbackRequest.getCaseDetails().getData().setCcdCaseType(finremCallbackRequest.getCaseDetails().getCaseType());
-            return finremCallbackRequest.getCaseDetails();
-        }
-    }
-
-    private FinremCaseDetails caseDetailsContested() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/general-email-contested.json")) {
-            FinremCallbackRequest finremCallbackRequest = mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
-            finremCallbackRequest.getCaseDetails().getData().setCcdCaseType(finremCallbackRequest.getCaseDetails().getCaseType());
-            return finremCallbackRequest.getCaseDetails();
-        }
     }
 }

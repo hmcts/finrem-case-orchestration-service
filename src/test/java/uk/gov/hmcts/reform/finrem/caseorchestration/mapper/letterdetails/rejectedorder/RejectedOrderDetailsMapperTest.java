@@ -7,9 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
@@ -25,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapperContested.CONSENTED_COURT_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapperContested.CONTESTED_COURT_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapperContested.REFUSAL_ORDER_HEADER;
@@ -34,7 +30,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 public class RejectedOrderDetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON_CONTESTED = "/fixtures/refusal-order-contested.json";
-    public static final String TEST_JSON_CONSENTED = "/fixtures/refusal-order-consented.json";
 
     @Autowired
     private RejectedOrderDetailsMapperContested rejectedOrderDetailsMapperContested;
@@ -53,29 +48,6 @@ public class RejectedOrderDetailsMapperTest extends ContestedAbstractLetterDetai
 
 
         assertTemplateFields(actual, expected);
-    }
-
-    @Test
-    public void givenValidCaseDataConsented_whenBuildDocumentTemplateDetails_thenReturnExpectedDetails() {
-        setCaseDetails(TEST_JSON_CONSENTED);
-        DocumentTemplateDetails expected = getExpectedConsentedRejectedOrderDetails();
-
-        DocumentTemplateDetails actual = rejectedOrderDetailsMapperContested.buildDocumentTemplateDetails(caseDetails,
-            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
-
-        assertTemplateFields(actual, expected);
-    }
-
-    @Test
-    public void givenEmptyOrNullFields_whenBuildDocumentTemplateDetails_thenDoNotThrowException() {
-        FinremCaseDetails emptyDetails = FinremCaseDetails.builder()
-            .caseType(CaseType.CONSENTED)
-            .data(FinremCaseDataContested.builder().ccdCaseType(CaseType.CONSENTED).build()).build();
-
-        DocumentTemplateDetails actual = rejectedOrderDetailsMapperContested.buildDocumentTemplateDetails(emptyDetails,
-            emptyDetails.getData().getRegionWrapper().getDefaultCourtList());
-
-        assertNotNull(actual);
     }
 
     private void assertTemplateFields(DocumentTemplateDetails actual, DocumentTemplateDetails expected) {

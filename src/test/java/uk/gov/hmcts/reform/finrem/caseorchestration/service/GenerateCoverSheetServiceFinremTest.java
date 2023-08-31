@@ -12,12 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.hasKey;
@@ -60,7 +57,8 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApplicantCoverSheet() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateApplicantCoverSheet(caseDetailsConsented(), AUTH_TOKEN);
+        CaseDocument caseDocument = generateCoverSheetService.generateApplicantCoverSheet(
+            buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print.json").getCaseDetails(), AUTH_TOKEN);
 
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
@@ -72,7 +70,8 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateRespondentCoverSheet() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateRespondentCoverSheet(caseDetailsConsented(), AUTH_TOKEN);
+        CaseDocument caseDocument = generateCoverSheetService.generateRespondentCoverSheet(
+            buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print.json").getCaseDetails(), AUTH_TOKEN);
 
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
@@ -83,7 +82,9 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantAddressWhenApplicantSolicitorAddressIsEmpty() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithEmptySolAddress();
+        FinremCaseDetails caseDetails =
+            buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print-empty-solicitor-address.json")
+                .getCaseDetails();
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         assertCoversheetAddress("50 Applicant Street\nLondon\nSE1");
@@ -91,7 +92,9 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantAddressWhenApplicantSolicitorAddressIsEmptyFinrem() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithEmptySolAddress();
+        FinremCaseDetails caseDetails =
+            buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print-empty-solicitor-address.json")
+                .getCaseDetails();
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         assertCoversheetAddress("50 Applicant Street\nLondon\nSE1");
@@ -99,7 +102,9 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateRespondentCoverSheetUsingRespondentAddressWhenRespondentSolicitorAddressIsEmpty() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithEmptySolAddress();
+        FinremCaseDetails caseDetails =
+            buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print-empty-solicitor-address.json")
+                .getCaseDetails();
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
         assertCoversheetAddress("51 Respondent Street\nLondon\nSE1");
@@ -107,7 +112,9 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateRespCoverSheetWithRespAddressWhenRespPostcodeIsEmptyAndRespSolAddressIsEmpty() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithEmptySolAddressAndEmptyPostcode();
+        FinremCaseDetails caseDetails =
+            buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print-empty-solicitor-address-and-empty-postcode.json")
+                .getCaseDetails();
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
         assertCoversheetAddress("51 Respondent Street\nLondon");
@@ -115,7 +122,8 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantSolicitorAddress() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithSolicitors();
+        FinremCaseDetails caseDetails =
+            buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print-with-solicitors.json").getCaseDetails();
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         assertCoversheetAddress("123 Applicant Solicitor Street\nSecond Address Line\nGreater London\nLondon\nSE1");
@@ -123,7 +131,8 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateRespondentCoverSheetUsingRespondentSolicitorAddress() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithSolicitors();
+        FinremCaseDetails caseDetails =
+            buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print-with-solicitors.json").getCaseDetails();
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
         assertCoversheetAddress("321 Respondent Solicitor Street\nLondon\nSE1");
@@ -131,7 +140,8 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Test
     public void whenPartyIsRepresented_thenSolicitorNameIsUsedOnCoverSheet() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithSolicitors();
+        FinremCaseDetails caseDetails =
+            buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print-with-solicitors.json").getCaseDetails();
 
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
         assertAddresseeName(1, "Mr J Solicitor");
@@ -142,47 +152,15 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
     @Test
     public void whenPartyIsNotRepresented_thenPartyNameIsUsedOnCoverSheet() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsWithEmptySolAddress();
+        FinremCaseDetails caseDetails =
+            buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print-empty-solicitor-address.json")
+                .getCaseDetails();
 
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
         assertAddresseeName(1, "John Doe");
 
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         assertAddresseeName(2, "Jane Doe");
-    }
-
-    private FinremCaseDetails caseDetailsConsented() throws Exception {
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
-            return getFinremCaseDetails(resourceAsStream);
-        }
-    }
-
-    private FinremCaseDetails caseDetailsWithEmptySolAddress() throws Exception {
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-empty-solicitor-address.json")) {
-            return getFinremCaseDetails(resourceAsStream);
-        }
-    }
-
-    private FinremCaseDetails caseDetailsWithEmptySolAddressAndEmptyPostcode() throws Exception {
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-empty-solicitor-address-and-empty-postcode.json")) {
-            return getFinremCaseDetails(resourceAsStream);
-        }
-    }
-
-    private FinremCaseDetails caseDetailsWithSolicitors() throws Exception {
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-with-solicitors.json")) {
-            return getFinremCaseDetails(resourceAsStream);
-        }
-    }
-
-    private FinremCaseDetails getFinremCaseDetails(InputStream resourceAsStream) throws IOException {
-        FinremCallbackRequest finremCallbackRequest = mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
-        finremCallbackRequest.getCaseDetails().getData().setCcdCaseType(finremCallbackRequest.getCaseDetails().getCaseType());
-        return finremCallbackRequest.getCaseDetails();
     }
 
     private void assertCoversheetAddress(String formattedAddress) {

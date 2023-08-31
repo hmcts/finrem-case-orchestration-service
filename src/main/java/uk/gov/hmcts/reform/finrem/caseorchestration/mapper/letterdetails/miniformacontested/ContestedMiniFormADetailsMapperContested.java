@@ -107,6 +107,7 @@ public class ContestedMiniFormADetailsMapperContested extends ContestedAbstractL
         ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
         FinremCaseDataContested caseData) {
         return builder
+            .natureOfApplicationChecklistSchedule(getNatureOfApplicationChecklistSchedule(caseData))
             .mortgageDetail(caseData.getMortgageDetail())
             .propertyAddress(caseData.getPropertyAddress())
             .propertyAdjustmentOrderDetail(getPropertyAdjustmentOrderDetailCollection(caseData))

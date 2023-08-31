@@ -9,10 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralO
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GeneralOrderDetailsMapperTest extends ContestedAbstractLetterDetailsMapperTest {
+public class GeneralOrderDetailsMapperContestedTest extends ContestedAbstractLetterDetailsMapperTest {
 
     public static final String CONTESTED_GENERAL_ORDER = "/fixtures/general-order-contested.json";
-    public static final String CONSENTED_GENERAL_ORDER = "/fixtures/general-order-consented.json";
 
     private static final String GENERAL_ORDER_COURT_CONSENTED = "SITTING in private";
     private static final String GENERAL_ORDER_COURT_SITTING = "SITTING AT the Family Court at the ";
@@ -30,18 +29,6 @@ public class GeneralOrderDetailsMapperTest extends ContestedAbstractLetterDetail
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         DocumentTemplateDetails expected = getExpectedContestedGeneralOrderDetails();
-
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void givenValidCaseDataConsented_whenBuildDocumentTemplateDetails_thenReturnExpectedTemplateDetails() {
-        setCaseDetails(CONSENTED_GENERAL_ORDER);
-        DocumentTemplateDetails actual = generalOrderDetailsMapper.buildDocumentTemplateDetails(caseDetails,
-            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
-
-        DocumentTemplateDetails expected = getExpectedConsentedGeneralOrderDetails();
 
 
         assertEquals(expected, actual);

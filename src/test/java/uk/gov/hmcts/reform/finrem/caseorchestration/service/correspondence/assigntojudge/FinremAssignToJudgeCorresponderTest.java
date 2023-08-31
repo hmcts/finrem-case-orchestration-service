@@ -42,7 +42,7 @@ public class FinremAssignToJudgeCorresponderTest {
     public void setUp() throws Exception {
         assignToJudgeCorresponder = new FinremAssignToJudgeCorresponder(notificationService, bulkPrintService, assignedToJudgeDocumentService);
         caseDetails = FinremCaseDetails.<FinremCaseDataContested>builder()
-            .data(FinremCaseDataContested.builder().build())
+            .data(FinremCaseDataContested.builder().ccdCaseType(CaseType.CONTESTED).build())
             .caseType(CaseType.CONTESTED)
             .build();
         caseDocument = CaseDocument.builder().build();

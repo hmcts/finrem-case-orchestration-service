@@ -45,6 +45,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.EXISTING_PROPERTY,
+    visible = true,
     property = "ccdCaseType")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = FinremCaseDataConsented.class, name = "FinancialRemedyMVP2"),
@@ -54,7 +55,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 public abstract class FinremCaseData {
 
     @JsonProperty(access = WRITE_ONLY)
-    private CaseType ccdCaseType;
+    protected CaseType ccdCaseType;
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;
     private String assignedToJudge;

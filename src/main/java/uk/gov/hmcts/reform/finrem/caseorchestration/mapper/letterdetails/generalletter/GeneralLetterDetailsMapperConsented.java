@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ConsentedAbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -24,9 +24,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.getAddressToCaseDataMapping;
 
 @Component
-public class GeneralLetterDetailsMapperContested extends ContestedAbstractLetterDetailsMapper {
+public class GeneralLetterDetailsMapperConsented extends ConsentedAbstractLetterDetailsMapper {
 
-    public GeneralLetterDetailsMapperContested(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+    public GeneralLetterDetailsMapperConsented(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 

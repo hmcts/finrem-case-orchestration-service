@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOn
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ContestedMiniFormADetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -94,6 +95,7 @@ public class ContestedMiniFormADetailsMapperTest extends ContestedAbstractLetter
             .respondentLName("Name")
             .respondentPhone("12345")
             .respondentEmail("respondent@gmail.com")
+            .natureOfApplicationChecklistSchedule(Collections.emptyList())
             .respondentRepresented("Yes")
             .respondentAddressConfidential("No")
             .respondentAddress(getAddress("50 Respondent Street"))
@@ -111,8 +113,6 @@ public class ContestedMiniFormADetailsMapperTest extends ContestedAbstractLetter
             .authorisation2b("testAuth2b")
             .authorisation3("2022-05-05")
             .fastTrackDecision("Yes")
-            .natureOfApplicationChecklist(getNatureApplicationChecklist())
-            .natureOfApplication7("testNature7")
             .mortgageDetail("test3b")
             .propertyAddress("test3a")
             .paymentForChildrenDecision("Yes")

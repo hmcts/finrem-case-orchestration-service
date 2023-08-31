@@ -283,7 +283,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             Matchers.<String, Object>hasEntry("interim_cfcCourtList", "FR_s_CFCList_4"),
             Matchers.<String, Object>hasEntry("interimHearingDate", "2020-06-01"),
             Matchers.<String, Object>hasEntry("interimHearingTime", "2:00 pm"),
-            Matchers.<String, Object>hasEntry("interimHearingTimeEstimate", "30 minutes"),
+            Matchers.<String, Object>hasEntry("interimTimeEstimate", "30 minutes"),
             Matchers.<String, Object>hasEntry("interimAdditionalInformationAboutHearing", "refreshments will be provided"),
             hasKey("letterDate")));
 
@@ -346,7 +346,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private void assertDocumentPrintRequestContainsExpectedDocuments() {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
+                GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).fileName("app_docs.pdf").build())
             .toArray()));
     }

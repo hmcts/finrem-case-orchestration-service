@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -53,6 +54,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
 
     private FinremCaseDetails caseDetails() {
         FinremCaseData caseData = FinremCaseDataContested.builder()
+            .ccdCaseType(CaseType.CONTESTED)
             .hearingDate(LocalDate.parse(DATE_OF_HEARING))
             .fastTrackDecision(YesOrNo.forValue(NO_VALUE))
             .formC(caseDocument())

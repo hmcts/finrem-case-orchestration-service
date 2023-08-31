@@ -12,13 +12,11 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -185,7 +183,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, GeneralLetterAddressToType generalLetterAddressTo, String expectedName) {
         FinremCaseDetails caseDetails;
         try {
-            caseDetails = caseDetails();
+            caseDetails = buildFinremCallbackRequest("/fixtures/general-letter.json").getCaseDetails();
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e.getCause());
         }
@@ -196,12 +194,6 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
         Addressee addressee = (Addressee) documentGenerationRequestCaseDetailsCaptor.getValue().getData().get(ADDRESSEE);
         assertThat(addressee.getName(), is(expectedName));
-    }
-
-    private FinremCaseDetails caseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-letter.json")) {
-            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-        }
     }
 
     private static void doCaseDocumentAssert(CaseDocument result) {

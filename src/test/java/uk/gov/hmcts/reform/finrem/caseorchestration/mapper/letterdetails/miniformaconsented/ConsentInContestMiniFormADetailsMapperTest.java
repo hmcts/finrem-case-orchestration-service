@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
@@ -40,7 +41,8 @@ public class ConsentInContestMiniFormADetailsMapperTest extends ContestedAbstrac
 
     @Test
     public void givenEmptyOrNullFields_whenBuildDocumentTemplateDetails_thenDoNotThrowException() {
-        FinremCaseDetails emptyDetails = FinremCaseDetails.builder().data(FinremCaseDataContested.builder().build()).build();
+        FinremCaseDetails emptyDetails = FinremCaseDetails.builder().data(FinremCaseDataContested.builder()
+            .ccdCaseType(CaseType.CONTESTED).build()).build();
 
         DocumentTemplateDetails actual = consentInContestMiniFormADetailsMapper.buildDocumentTemplateDetails(emptyDetails,
             emptyDetails.getData().getRegionWrapper().getDefaultCourtList());
@@ -78,7 +80,6 @@ public class ConsentInContestMiniFormADetailsMapperTest extends ContestedAbstrac
             .natureOfApplication5("Yes")
             .natureOfApplication6(getNatureApplication6())
             .natureOfApplication7("testNature7")
-            .authorisationFirm("testAuthFirm")
             .authorisationName("testAuthName")
             .authorisation2b("testAuth2b")
             .authorisation3("2022-05-05")

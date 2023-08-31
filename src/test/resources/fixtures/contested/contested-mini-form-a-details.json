@@ -1,80 +1,80 @@
 {
-  "token": "test_token",
-  "event_id": "FR_consentOrderApproved",
-  "case_details": {
-    "id": 1596638099618923,
-    "jurisdiction": "DIVORCE",
-    "state": "consentedOrderApproved",
-    "version": 1,
-    "case_type_id": "FinancialRemedyContested",
-    "created_date": "2020-08-05T14:34:59.683",
-    "last_modified": "2020-08-05T14:37:15.69",
-    "last_state_modified_date": "2020-08-05T14:37:15.69",
-    "security_classification": "PUBLIC",
-    "case_data": {
-      "caseNumber": "1596638099618923",
-      "applicantFMName": "Applicant",
-      "applicantLName": "Name",
-      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
-      "applicantAddress": {
-        "County": "Greater London",
-        "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
-        "PostTown": "London",
-        "AddressLine1": "50 Applicant Street",
-        "AddressLine2": "Line2",
-        "AddressLine3": "Line3"
+  "token" : "test_token",
+  "event_id" : "FR_consentOrderApproved",
+  "case_details" : {
+    "id" : 1596638099618923,
+    "jurisdiction" : "DIVORCE",
+    "state" : "consentedOrderApproved",
+    "version" : 1,
+    "case_type_id" : "FinancialRemedyContested",
+    "created_date" : "2020-08-05T14:34:59.683",
+    "last_modified" : "2020-08-05T14:37:15.69",
+    "last_state_modified_date" : "2020-08-05T14:37:15.69",
+    "security_classification" : "PUBLIC",
+    "case_data" : {
+      "caseNumber" : "1596638099618923",
+      "applicantFMName" : "Applicant",
+      "applicantLName" : "Name",
+      "typeOfApplication" : "In connection to matrimonial and civil partnership proceedings",
+      "applicantAddress" : {
+        "County" : "Greater London",
+        "Country" : "United Kingdom",
+        "PostCode" : "SE12 9SE",
+        "PostTown" : "London",
+        "AddressLine1" : "50 Applicant Street",
+        "AddressLine2" : "Line2",
+        "AddressLine3" : "Line3"
       },
-      "applicantPhone": "12345",
-      "applicantEmail": "applicant@gmail.com",
-      "applicantAddressConfidential": "No",
-      "applicantRepresented": "Yes",
-      "respondentFMName": "Respondent",
-      "respondentLName": "Name",
-      "issueDate": "2022-01-01",
-      "divorceCaseNumber": "DD12D12345",
-      "applicantSolicitorName": "SolicitorName",
-      "applicantSolicitorEmail": "jocureca@mailinator.com",
-      "applicantSolicitorPhone": "+1 (454) 664-3749",
-      "applicantSolicitorFirm": "SolicitorFirm",
-      "solicitorReference": "SolicitorReference",
-      "applicantSolicitorAddress": {
-        "County": "Greater London",
-        "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
-        "PostTown": "London",
-        "AddressLine1": "50 ApplicantSolicitor Street",
-        "AddressLine2": "Line2",
-        "AddressLine3": "Line3"
+      "applicantPhone" : "12345",
+      "applicantEmail" : "applicant@gmail.com",
+      "applicantAddressConfidential" : "No",
+      "applicantRepresented" : "Yes",
+      "respondentFMName" : "Respondent",
+      "respondentLName" : "Name",
+      "issueDate" : "2022-01-01",
+      "divorceCaseNumber" : "DD12D12345",
+      "applicantSolicitorName" : "SolicitorName",
+      "applicantSolicitorEmail" : "jocureca@mailinator.com",
+      "applicantSolicitorPhone" : "+1 (454) 664-3749",
+      "applicantSolicitorFirm" : "SolicitorFirm",
+      "solicitorReference" : "SolicitorReference",
+      "applicantSolicitorAddress" : {
+        "County" : "Greater London",
+        "Country" : "United Kingdom",
+        "PostCode" : "SE12 9SE",
+        "PostTown" : "London",
+        "AddressLine1" : "50 ApplicantSolicitor Street",
+        "AddressLine2" : "Line2",
+        "AddressLine3" : "Line3"
       },
-      "respondentRepresented": "Yes",
-      "respondentAddressConfidential": "No",
-      "respondentAddress": {
-        "County": "Greater London",
-        "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
-        "PostTown": "London",
-        "AddressLine1": "50 Respondent Street",
-        "AddressLine2": "Line2",
-        "AddressLine3": "Line3"
+      "respondentRepresented" : "Yes",
+      "respondentAddressConfidential" : "No",
+      "respondentAddress" : {
+        "County" : "Greater London",
+        "Country" : "United Kingdom",
+        "PostCode" : "SE12 9SE",
+        "PostTown" : "London",
+        "AddressLine1" : "50 Respondent Street",
+        "AddressLine2" : "Line2",
+        "AddressLine3" : "Line3"
       },
-      "respondentPhone": "12345",
-      "respondentEmail": "respondent@gmail.com",
-      "rSolicitorName": "RespSolicitorName",
-      "rSolicitorFirm": "RespSolicitorFirm",
-      "rSolicitorReference": "RespSolicitorReference",
-      "rSolicitorAddress": {
-        "County": "Greater London",
-        "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
-        "PostTown": "London",
-        "AddressLine1": "50 RespondentSolicitor Street",
-        "AddressLine2": "Line2",
-        "AddressLine3": "Line3"
+      "respondentPhone" : "12345",
+      "respondentEmail" : "respondent@gmail.com",
+      "rSolicitorName" : "RespSolicitorName",
+      "rSolicitorFirm" : "RespSolicitorFirm",
+      "rSolicitorReference" : "RespSolicitorReference",
+      "rSolicitorAddress" : {
+        "County" : "Greater London",
+        "Country" : "United Kingdom",
+        "PostCode" : "SE12 9SE",
+        "PostTown" : "London",
+        "AddressLine1" : "50 RespondentSolicitor Street",
+        "AddressLine2" : "Line2",
+        "AddressLine3" : "Line3"
       },
-      "rSolicitorPhone": "12345",
-      "rSolicitorEmail": "respsolicitor@gmail.com",
-      "natureOfApplicationChecklist": [
+      "rSolicitorPhone" : "12345",
+      "rSolicitorEmail" : "respsolicitor@gmail.com",
+      "natureOfApplicationChecklist" : [
         "Lump Sum Order",
         "periodicalPaymentOrder",
         "Pension Sharing Order",
@@ -84,67 +84,67 @@
         "A settlement or a transfer of property",
         "propertyAdjustmentOrder"
       ],
-      "propertyAddress": "test3a",
-      "mortgageDetail": "test3b",
-      "consentOrderForChildrenQuestion1": "Yes",
-      "consentNatureOfApplication5": "Yes",
-      "consentNatureOfApplication6": [
+      "propertyAddress" : "test3a",
+      "mortgageDetail" : "test3b",
+      "consentOrderForChildrenQuestion1" : "Yes",
+      "consentNatureOfApplication5" : "Yes",
+      "consentNatureOfApplication6" : [
         "Step Child or Step Children",
         "disability expenses",
         "In addition to child support",
         "training",
         "When not habitually resident"
       ],
-      "natureOfApplication7": "testNature7",
-      "paymentForChildrenDecision": "Yes",
-      "benefitForChildrenDecision": "No",
-      "benefitPaymentChecklist": [
+      "consentNatureOfApplication7" : "testNature7",
+      "paymentForChildrenDecision" : "Yes",
+      "benefitForChildrenDecision" : "No",
+      "benefitPaymentChecklist" : [
         "Step child or step children",
         "In addition to child support maintenance already paid under a Child Support Agency assessment",
         "To meet expenses arising from a child’s disability"
       ],
-      "fastTrackDecision": "Yes",
-      "mediatorRegistrationNumber": "MRX-01901",
-      "familyMediatorServiceName": "MRX Limited",
-      "soleTraderName": "Tikka MRX",
-      "claimingExemptionMIAM": "No",
-      "familyMediatorMIAM": "No",
-      "applicantAttendedMIAM": "Yes",
-      "MIAMExemptionsChecklist": [
+      "fastTrackDecision" : "Yes",
+      "mediatorRegistrationNumber" : "MRX-01901",
+      "familyMediatorServiceName" : "MRX Limited",
+      "soleTraderName" : "Tikka MRX",
+      "claimingExemptionMIAM" : "No",
+      "familyMediatorMIAM" : "No",
+      "applicantAttendedMIAM" : "Yes",
+      "MIAMExemptionsChecklist" : [
         "domesticViolence",
         "urgency",
         "previousMIAMattendance",
         "other"
       ],
-      "MIAMDomesticViolenceChecklist": [
+      "MIAMDomesticViolenceChecklist" : [
         "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_4",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_3",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_2"
       ],
-      "MIAMUrgencyReasonChecklist": [
+      "MIAMUrgencyReasonChecklist" : [
         "FR_ms_MIAMUrgencyReasonChecklist_Value_1",
         "FR_ms_MIAMUrgencyReasonChecklist_Value_3",
         "FR_ms_MIAMUrgencyReasonChecklist_Value_5"
       ],
-      "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_1",
-      "MIAMOtherGroundsChecklist": "FR_ms_MIAMOtherGroundsChecklist_Value_1",
-      "authorisationName": "testAuthName",
-      "authorisationFirm": "testAuthFirm",
-      "authorisation2b": "testAuth2b",
-      "authorisation3": "2022-05-05",
-      "solicitorFirm": "testAuthFirm",
-      "propertyAdjutmentOrderDetail": [
+      "MIAMPreviousAttendanceChecklist" : "FR_ms_MIAMPreviousAttendanceChecklist_Value_1",
+      "MIAMOtherGroundsChecklist" : "FR_ms_MIAMOtherGroundsChecklist_Value_1",
+      "authorisationName" : "testAuthName",
+      "authorisationFirm" : "testAuthFirm",
+      "authorisation2b" : "testAuth2b",
+      "authorisation3" : "2022-05-05",
+      "solicitorFirm" : "testAuthFirm",
+      "propertyAdjutmentOrderDetail" : [
         {
-          "value": {
-            "propertAddress": "FirstAddress",
-            "nameForProperty": "FirstPropertyName"
+          "value" : {
+            "propertAddress" : "FirstAddress",
+            "nameForProperty" : "FirstPropertyName"
           }
         },
         {
-          "value": {
-            "propertAddress": "SecondAddress",
-            "nameForProperty": "SecondPropertyName"
+          "value" : {
+            "propertAddress" : "SecondAddress",
+            "nameForProperty" : "SecondPropertyName"
           }
         }
       ]

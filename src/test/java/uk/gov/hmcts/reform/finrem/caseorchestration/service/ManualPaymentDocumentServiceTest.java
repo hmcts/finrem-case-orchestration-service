@@ -12,12 +12,10 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
-import java.io.InputStream;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -55,7 +53,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateManualPaymentLetterForApplicantSolicitor() throws Exception {
-        finremCaseDetails = contestedPaperFinremCaseDetails();
+        finremCaseDetails = buildFinremCallbackRequest("/fixtures/contested/paper-case.json").getCaseDetails();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         CaseDocument generatedManualPaymentLetter
@@ -82,7 +80,8 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateManualPaymentLetterForApplicant() throws Exception {
-        finremCaseDetails = contestedPaperCaseDetailsWithoutSolicitors();
+        finremCaseDetails = buildFinremCallbackRequest("/fixtures/contested/paper-case-no-solicitors.json")
+            .getCaseDetails();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         CaseDocument generatedManualPaymentLetter
@@ -104,19 +103,6 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         assertThat(frcCourtDetails.getCourtAddress(), is("The Law Courts, Hurst Road, Horsham, RH12 2ET"));
         assertThat(frcCourtDetails.getPhoneNumber(), is("0300 1235577"));
         assertThat(frcCourtDetails.getEmail(), is("sussexfamily@Justice.gov.uk"));
-    }
-
-    private FinremCaseDetails contestedPaperFinremCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/paper-case.json")) {
-            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-        }
-    }
-
-    private FinremCaseDetails contestedPaperCaseDetailsWithoutSolicitors() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(
-            "/fixtures/contested/paper-case-no-solicitors.json")) {
-            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-        }
     }
 
     private FrcCourtDetails convertToCourtDetails(Object object) {

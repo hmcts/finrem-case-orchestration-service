@@ -14,7 +14,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
@@ -145,6 +144,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest {
         caseDetails.getData().getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(YesOrNo.YES);
         caseDetails.getData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
         caseDetails.getData().getContactDetailsWrapper().setSolicitorEmail("some@som.com");
+        caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorEmail("ressome@som.com");
         caseDetails.getData().setRespSolNotificationsEmailConsent(YesOrNo.YES);
         FinremCaseDetails caseDetailsBefore = buildFinremCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
 
@@ -165,10 +165,6 @@ public class ConsentHearingServiceTest extends BaseServiceTest {
     }
 
     private FinremCaseDetails<FinremCaseDataConsented> buildFinremCaseDetails(String testPayload) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(testPayload)) {
-            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return finremCaseDetailsMapper.mapToFinremCaseDetails(buildCaseDetails(testPayload));
     }
 }

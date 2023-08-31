@@ -173,6 +173,7 @@ public abstract class BaseServiceTest extends BaseTest {
             .respondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE)
             .build();
         FinremCaseDataConsented caseData = FinremCaseDataConsented.builder()
+            .ccdCaseType(CaseType.CONSENTED)
             .contactDetailsWrapper(contactDetailsWrapper)
             .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
             .natureApplicationWrapper(NatureApplicationWrapper.builder()
