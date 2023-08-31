@@ -29,7 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
@@ -145,6 +145,8 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper().setIntervenerCorrespondenceEnabled(true);
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
+            any(FinremCaseDetails.class))).thenReturn(true);
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
         wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
@@ -193,18 +195,22 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     @Test
     public void givenIntervenerSolicitorNotDigital_whenHandle_thenSendLetterToIntervenerSolicitor() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        DynamicRadioList dynamicRadioList = buildDynamicListForIntervener(INTERVENER1);
+        callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper().setIntervenerCorrespondenceEnabled(true);
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
-            caseDetailsBefore(buildDynamicIntervenerListForRespondent()));
+            caseDetailsBefore(dynamicRadioList));
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
+            any(FinremCaseDetails.class))).thenReturn(false);
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
         wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
-            buildDynamicListForIntervener(INTERVENER1)));
+            dynamicRadioList));
         wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
-            buildDynamicListForIntervener(INTERVENER1)));
+            dynamicRadioList));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(paperNotificationService).printIntervenerRejectionGeneralApplication(
-            caseDetailsBefore(buildDynamicListForIntervener(INTERVENER1)), IntervenerOneWrapper.builder().build(), AUTH_TOKEN);
+            caseDetailsBefore(dynamicRadioList), callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper(), AUTH_TOKEN);
     }
 
     @Test

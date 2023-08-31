@@ -68,6 +68,7 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
             ? null : getApplicationReceivedFrom(
                 caseDetails, callbackRequest.getCaseDetailsBefore()).getValue().getCode();
 
+        log.info("General application receivedFrom: {}", receivedFrom);
         if (APPLICANT.equals(receivedFrom)) {
             sendApplicantNotifications(userAuthorisation, caseDetails);
         }
@@ -113,11 +114,15 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
                                              IntervenerWrapper intervenerWrapper) {
         if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
             && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
-            notificationService.sendGeneralApplicationRejectionEmailToIntervenerSolicitor(caseDetails, intervenerWrapper);
-        } else {
-            CaseDetails caseDetailsForNotification = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
-            paperNotificationService.printIntervenerRejectionGeneralApplication(
-                caseDetailsForNotification, intervenerWrapper, userAuthorisation);
+            if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)) {
+                log.info("Send general application rejection email for case ID: {}", caseDetails.getId());
+                notificationService.sendGeneralApplicationRejectionEmailToIntervenerSolicitor(caseDetails, intervenerWrapper);
+            } else {
+                log.info("Send general application rejection letter for case ID: {}", caseDetails.getId());
+                CaseDetails caseDetailsForNotification = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
+                paperNotificationService.printIntervenerRejectionGeneralApplication(
+                    caseDetailsForNotification, intervenerWrapper, userAuthorisation);
+            }
         }
     }
 
