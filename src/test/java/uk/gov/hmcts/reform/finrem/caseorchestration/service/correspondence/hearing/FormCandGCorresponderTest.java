@@ -37,7 +37,7 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
     private ObjectMapper objectMapper = new ObjectMapper();
     @Mock
     private GenericDocumentService service;
-    private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
+
     @Mock
     private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
 
