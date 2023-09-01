@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
@@ -67,6 +68,7 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
             ? null : getApplicationReceivedFrom(
                 caseDetails, callbackRequest.getCaseDetailsBefore()).getValue().getCode();
 
+        log.info("General application receivedFrom: {}", receivedFrom);
         if (APPLICANT.equals(receivedFrom)) {
             sendApplicantNotifications(userAuthorisation, caseDetails);
         }
@@ -74,6 +76,14 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
         if (RESPONDENT.equals(receivedFrom)) {
             sendRespondentNotifications(userAuthorisation, caseDetails);
         }
+
+        final List<IntervenerWrapper> interveners = caseDetails.getData().getInterveners();
+        interveners.forEach(intervenerWrapper -> {
+            if (intervenerWrapper.getIntervenerType().getTypeValue().equalsIgnoreCase(receivedFrom)) {
+                log.info("Reject general application receivedFrom matched");
+                sendIntervenerNotifications(userAuthorisation, caseDetails, intervenerWrapper);
+            }
+        });
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
@@ -97,6 +107,20 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
             CaseDetails caseDetailsForNotification = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
             paperNotificationService.printRespondentRejectionGeneralApplication(
                 caseDetailsForNotification, userAuthorisation);
+        }
+    }
+
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
+    private void sendIntervenerNotifications(String userAuthorisation, FinremCaseDetails caseDetails,
+                                             IntervenerWrapper intervenerWrapper) {
+        if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)) {
+            log.info("Send general application rejection email for case ID: {}", caseDetails.getId());
+            notificationService.sendGeneralApplicationRejectionEmailToIntervenerSolicitor(caseDetails, intervenerWrapper);
+        } else {
+            log.info("Send general application rejection letter for case ID: {}", caseDetails.getId());
+            CaseDetails caseDetailsForNotification = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
+            paperNotificationService.printIntervenerRejectionGeneralApplication(
+                caseDetailsForNotification, intervenerWrapper, userAuthorisation);
         }
     }
 

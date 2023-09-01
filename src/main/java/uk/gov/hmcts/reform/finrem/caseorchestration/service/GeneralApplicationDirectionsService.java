@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -115,9 +116,9 @@ public class GeneralApplicationDirectionsService {
     public String getEventPostState(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         List<String> eventDetailsOnCase = ccdService.getCcdEventDetailsOnCase(
-            userAuthorisation,
-            caseDetails,
-            EventType.GENERAL_APPLICATION_DIRECTIONS.getCcdType())
+                userAuthorisation,
+                caseDetails,
+                EventType.GENERAL_APPLICATION_DIRECTIONS.getCcdType())
             .stream()
             .map(CaseEventDetail::getEventName).toList();
 
@@ -278,7 +279,7 @@ public class GeneralApplicationDirectionsService {
 
     @SuppressWarnings("java:S1874")
     private void printDocumentPackAndSendToRelevantParties(CaseDetails caseDetails, String authorisationToken,
-                                                                  List<BulkPrintDocument> documents) {
+                                                           List<BulkPrintDocument> documents) {
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
         log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}", documents.size(), caseDetails.getId(),
             documents);
@@ -286,7 +287,7 @@ public class GeneralApplicationDirectionsService {
     }
 
     private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
-                                                                  List<BulkPrintDocument> documents) {
+                                                           List<BulkPrintDocument> documents) {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
         if (referDetail.contains(APPLICANT) || referDetail.contains(APPLICANT.toLowerCase())
             || referDetail.contains(RESPONDENT.toLowerCase()) || referDetail.contains(RESPONDENT)) {
@@ -299,33 +300,33 @@ public class GeneralApplicationDirectionsService {
                 documents.size(), caseDetails.getId(),
                 documents);
         } else if (referDetail.contains(INTERVENER1.toLowerCase()) || referDetail.contains(INTERVENER1)) {
-            IntervenerWrapper intervenerOneWrapper = caseDetails.getData().getIntervenerOneWrapper();
-            bulkPrintService.printIntervenerDocuments(intervenerOneWrapper, caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to intervener1 via bulk print for Case {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
+            IntervenerOneWrapper intervenerWrapper = caseDetails.getData().getIntervenerOneWrapper();
+            sendToBulkprintIfIntervenerCorrespondenceEnabled(caseDetails, authorisationToken, documents, intervenerWrapper);
         } else if (referDetail.contains(INTERVENER2.toLowerCase()) || referDetail.contains(INTERVENER2)) {
-            IntervenerWrapper intervenerTwoWrapper = caseDetails.getData().getIntervenerTwoWrapper();
-            bulkPrintService.printIntervenerDocuments(intervenerTwoWrapper, caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to intervener2 via bulk print for Case {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
+            IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerTwoWrapper();
+            sendToBulkprintIfIntervenerCorrespondenceEnabled(caseDetails, authorisationToken, documents, intervenerWrapper);
         } else if (referDetail.contains(INTERVENER3.toLowerCase()) || referDetail.contains(INTERVENER3)) {
-            IntervenerWrapper intervenerThreeWrapper = caseDetails.getData().getIntervenerThreeWrapper();
-            bulkPrintService.printIntervenerDocuments(intervenerThreeWrapper, caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to intervener3 via bulk print for Case {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
+            IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerThreeWrapper();
+            sendToBulkprintIfIntervenerCorrespondenceEnabled(caseDetails, authorisationToken, documents, intervenerWrapper);
         } else if (referDetail.contains(INTERVENER4.toLowerCase()) || referDetail.contains(INTERVENER4)) {
-            IntervenerWrapper intervenerFourWrapper = caseDetails.getData().getIntervenerFourWrapper();
-            bulkPrintService.printIntervenerDocuments(intervenerFourWrapper, caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to intervener4 via bulk print for Case {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
+            IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerFourWrapper();
+            sendToBulkprintIfIntervenerCorrespondenceEnabled(caseDetails, authorisationToken, documents, intervenerWrapper);
         } else {
             throw new NoSuchUserException(
                 "The relevant party to print the general application document pack for could not be found on case "
-                + caseDetails.getId());
+                    + caseDetails.getId());
+        }
+    }
+
+    private void sendToBulkprintIfIntervenerCorrespondenceEnabled(FinremCaseDetails caseDetails, String authorisationToken,
+                                                                  List<BulkPrintDocument> documents,
+                                                                  IntervenerWrapper intervenerWrapper) {
+        if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
+            && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
+            bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, documents);
+            log.info("Sending {} document(s) to {} via bulk print for Case {}, document(s) are {}",
+                intervenerWrapper.getIntervenerType(), documents.size(), caseDetails.getId(),
+                documents);
         }
     }
 

@@ -112,7 +112,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
                 .getGeneralApplicationOutcome(), null);
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
                 status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
-            setStatusForNonCollAndBulkPrintDouments(caseDetails,
+            setStatusForNonCollAndBulkPrintDocuments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
             gaService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
@@ -152,12 +152,12 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
                                                                            List<BulkPrintDocument> bulkPrintDocuments,
                                                                            String userAuthorisation) {
         if (code.equals(data.getId())) {
-            return setStatusForNonCollAndBulkPrintDouments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
+            return setStatusForNonCollAndBulkPrintDocuments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
         }
         return data;
     }
 
-    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDouments(
+    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDocuments(
         FinremCaseDetails finremCaseDetails, GeneralApplicationCollectionData data,
         List<BulkPrintDocument> bulkPrintDocuments, String status, String userAuthorisation) {
 

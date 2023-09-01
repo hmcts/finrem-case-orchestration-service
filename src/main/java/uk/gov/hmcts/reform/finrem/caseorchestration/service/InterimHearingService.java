@@ -395,7 +395,9 @@ public class InterimHearingService {
             final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
             final List<IntervenerWrapper> interveners =  finremCaseDetails.getData().getInterveners();
             interveners.forEach(intervenerWrapper -> {
-                if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)) {
+                if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)
+                    && (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
+                    && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled()))) {
                     log.info("Sending email notification to {} Solicitor about interim hearing for case id {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
                         caseDetails.getId());

@@ -119,7 +119,7 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = caseDetailsWithSolicitors();
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
-        assertCoversheetAddress("123 Applicant Solicitor Street\nSecond Address Line\nGreater London\nLondon\nSE1");
+        assertCoversheetAddress("123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nGreater London\nLondon\nSE1");
     }
 
     @Test
@@ -166,7 +166,7 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
 
         assertCoversheetAddressFromMap("Intervener 1 Address Line 1\nIntervener 1 Address Line 2"
-            + "\nIntervener 1 County\nIntervener 1 Post Town\nIntervener 1 Post Code");
+            + "\nIntervener 1 Address Line 3\nIntervener 1 County\nIntervener 1 Post Town\nIntervener 1 Post Code");
     }
 
     private FinremCaseDetails caseDetailsConsented() throws Exception {
