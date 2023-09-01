@@ -14,5 +14,6 @@
   "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/sitemap.xml_GET": "ignore",
   "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore",
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore",
-  "10049_Storable and Cacheable Content_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore"
+  "10049_Storable and Cacheable Content_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore",
+  "10112_Session Management Response Identified_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore"
 }
