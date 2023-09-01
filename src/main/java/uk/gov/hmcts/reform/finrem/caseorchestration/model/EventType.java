@@ -62,6 +62,7 @@ public enum EventType {
     CREATE_GENERAL_LETTER_JUDGE("FR_generalLetter_judge"),
     CREATE_GENERAL_EMAIL("FR_generalEmail"),
     SHARE_SELECTED_DOCUMENTS("shareSelectedDocuments"),
+    SOLICITOR_CW_DRAFT_ORDER("FR_solicitorDraftDirectionOrder"),
 
     @JsonEnumDefaultValue
     NONE("");
