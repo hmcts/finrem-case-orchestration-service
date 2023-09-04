@@ -24,6 +24,11 @@ public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAl
     }
 
     @Override
+    protected boolean shouldSendIntervenerLetter(IntervenerWrapper intervenerWrapper) {
+        return intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty();
+    }
+
+    @Override
     public CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                            DocumentHelper.PaperNotificationRecipient recipient) {
         return assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(

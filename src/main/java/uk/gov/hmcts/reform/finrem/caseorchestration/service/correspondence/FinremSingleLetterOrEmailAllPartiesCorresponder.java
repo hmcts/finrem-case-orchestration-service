@@ -67,7 +67,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
                 this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
-            } else if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
+            } else if (shouldSendIntervenerLetter(intervenerWrapper)) {
                 log.info("Sending letter correspondence to {} for case: {}",
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
@@ -93,6 +93,8 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
 
+    protected abstract boolean shouldSendIntervenerLetter(IntervenerWrapper intervenerWrapper);
+
     public abstract CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                                     DocumentHelper.PaperNotificationRecipient recipient);
 
@@ -101,4 +103,5 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
     protected abstract void emailRespondentSolicitor(FinremCaseDetails caseDetails);
 
     protected abstract void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails);
+
 }
