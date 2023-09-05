@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
@@ -29,7 +28,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitorAndCaseWorkerDraftOrderMidHandlerTest extends BaseHandlerTestSetup {
@@ -80,7 +78,7 @@ class SolicitorAndCaseWorkerDraftOrderMidHandlerTest extends BaseHandlerTestSetu
 
     @Test
     void givenContestedCase_whenDraftOrderUploadedButNonEncryptedFileShouldNotGetError() throws Exception {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.SOLICITOR_CW_DRAFT_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
 
@@ -104,17 +102,4 @@ class SolicitorAndCaseWorkerDraftOrderMidHandlerTest extends BaseHandlerTestSetu
         assertTrue(response.getErrors().isEmpty());
         verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
-
-
-    private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(EventType.SOLICITOR_CW_DRAFT_ORDER)
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
-            .build();
-    }
-
 }

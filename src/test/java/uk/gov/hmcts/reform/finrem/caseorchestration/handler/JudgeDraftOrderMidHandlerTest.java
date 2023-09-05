@@ -14,9 +14,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -25,9 +30,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ContestedListForHearingMidHandlerTest extends BaseHandlerTestSetup {
+class JudgeDraftOrderMidHandlerTest extends BaseHandlerTestSetup {
 
-    private ContestedListForHearingMidHandler handler;
+    private JudgeDraftOrderMidHandler handler;
     @Mock
     private BulkPrintDocumentService service;
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
@@ -39,20 +44,20 @@ class ContestedListForHearingMidHandlerTest extends BaseHandlerTestSetup {
     @BeforeEach
     void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler = new ContestedListForHearingMidHandler(finremCaseDetailsMapper, service);
+        handler = new JudgeDraftOrderMidHandler(finremCaseDetailsMapper, service);
     }
 
     @Test
     void canHandle() {
         assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.JUDGE_DRAFT_ORDER),
             is(true));
     }
 
     @Test
     void canNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.JUDGE_DRAFT_ORDER),
             is(false));
     }
 
@@ -66,19 +71,31 @@ class ContestedListForHearingMidHandlerTest extends BaseHandlerTestSetup {
     @Test
     void canNotHandleWrongCallbackType() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.JUDGE_DRAFT_ORDER),
             is(false));
     }
 
 
     @Test
-    void givenContestedCase_whenListForHearingAdditionalUploadedButNonEncryptedFileShouldNotGetError() throws Exception {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING);
+    void givenContestedCase_whenDraftOrderUploadedButNonEncryptedFileShouldNotGetError() throws Exception {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.JUDGE_DRAFT_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
+
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
-        caseData.setAdditionalHearingDocumentsOption(YesOrNo.YES);
-        caseData.setAdditionalListOfHearingDocuments(caseDocument);
+        DraftDirectionOrder directionOrder =
+            DraftDirectionOrder
+                .builder()
+                .purposeOfDocument("test")
+                .uploadDraftDocument(caseDocument)
+                .build();
+        DraftDirectionOrderCollection directionOrderCollection = DraftDirectionOrderCollection.builder().value(directionOrder).build();
+
+        List<DraftDirectionOrderCollection> draftDirectionOrderCollection = new ArrayList<>();
+        draftDirectionOrderCollection.add(directionOrderCollection);
+
+        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
+        draftDirectionWrapper.setDraftDirectionOrderCollection(draftDirectionOrderCollection);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
