@@ -10,9 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
@@ -60,8 +58,7 @@ public class ConsentOrderNotApprovedDocumentService {
 
     private void addEitherNotApprovedOrderOrGeneralOrderIfApplicable(FinremCaseDetails finremCaseDetails, List<BulkPrintDocument> existingList,
                                                                      String authorisationToken) {
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-        List<CaseDocument> notApprovedOrderDocuments = notApprovedConsentOrder(caseDetails);
+        List<CaseDocument> notApprovedOrderDocuments = notApprovedConsentOrder(finremCaseDetails);
         Optional<CaseDocument> generalOrder = Optional.ofNullable(documentHelper.getLatestGeneralOrder(finremCaseDetails.getData()));
 
         boolean useNotApprovedOrder = !notApprovedOrderDocuments.isEmpty() && (generalOrder.isEmpty()
@@ -69,8 +66,8 @@ public class ConsentOrderNotApprovedDocumentService {
 
         if (useNotApprovedOrder) {
             existingList.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(notApprovedOrderDocuments));
-        } else if (generalOrder.isPresent()) {
-            existingList.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder.get()));
+        } else {
+            generalOrder.ifPresent(caseDocument -> existingList.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
         }
     }
 
@@ -93,8 +90,8 @@ public class ConsentOrderNotApprovedDocumentService {
     }
 
     @SuppressWarnings("java:S3740")
-    public List<CaseDocument> notApprovedConsentOrder(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+    public List<CaseDocument> notApprovedConsentOrder(FinremCaseDetails caseDetails) {
+        Map<String, Object> caseData = finremCaseDetailsMapper.mapToCaseDetails(caseDetails).getData();
 
         if (caseDataService.isContestedApplication(caseDetails)) {
             List<ContestedConsentOrderData> consentOrders = consentOrderInContestedNotApprovedList(caseData);
@@ -125,5 +122,33 @@ public class ConsentOrderNotApprovedDocumentService {
         return Optional.ofNullable(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION))
             .map(documentHelper::convertToContestedConsentOrderData)
             .orElse(new ArrayList<>(1));
+    }
+
+    public CaseDocument getLatestOrderDocument(CaseDocument refusedConsentOrder,
+                                                CaseDocument latestGeneralOrder,
+                                                String userAuthorisation) {
+        if (refusedConsentOrder != null && latestGeneralOrder != null) {
+            return documentOrderingService.isDocumentModifiedLater(latestGeneralOrder, refusedConsentOrder, userAuthorisation)
+                ? latestGeneralOrder : refusedConsentOrder;
+        } else if (refusedConsentOrder != null) {
+            return refusedConsentOrder;
+        }
+        return latestGeneralOrder;
+    }
+
+    public void addNotApprovedConsentCoverLetter(FinremCaseDetails caseDetails,
+                                                 List<CaseDocument> consentOrderDocumentPack,
+                                                 String authToken,
+                                                 DocumentHelper.PaperNotificationRecipient recipient) {
+        final Long caseId = caseDetails.getId();
+        CaseDetails bulkPrintCaseDetails = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
+        String generalOrderNotificationFileName = documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
+        CaseDocument approvedCoverLetter = genericDocumentService
+            .generateDocument(authToken, bulkPrintCaseDetails,
+                documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(),
+                generalOrderNotificationFileName);
+        log.info("Generating approved consent order cover letter {} from {} for role {} on case {}", generalOrderNotificationFileName,
+            documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(), recipient, caseId);
+        consentOrderDocumentPack.add(approvedCoverLetter);
     }
 }

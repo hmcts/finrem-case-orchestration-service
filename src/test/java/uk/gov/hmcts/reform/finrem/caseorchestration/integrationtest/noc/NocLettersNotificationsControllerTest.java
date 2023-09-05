@@ -23,6 +23,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderNotApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentOrderingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
@@ -60,6 +64,14 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     private AssignCaseAccessService assignCaseAccessService;
     @MockBean
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    @MockBean
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @MockBean
+    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @MockBean
+    private ConsentOrderPrintService consentOrderPrintService;
+    @MockBean
+    private DocumentOrderingService documentOrderingService;
     @Autowired
     private DocumentConfiguration documentConfiguration;
     @MockBean

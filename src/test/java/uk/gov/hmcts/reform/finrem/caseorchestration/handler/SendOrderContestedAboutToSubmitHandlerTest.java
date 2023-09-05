@@ -18,8 +18,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerFourDocumentHandler;
@@ -61,17 +64,23 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private DocumentHelper documentHelper;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @Mock
+    private NotificationService notificationService;
+    @Mock
+    private CaseDataService caseDataService;
 
     @BeforeEach
     public void setUpTest() {
         sendOrderContestedAboutToSubmitHandler = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper, generalOrderService,
             genericDocumentService, documentHelper, List.of(
-                new SendOrderApplicantDocumentHandler(),
-                new SendOrderRespondentDocumentHandler(),
-                new SendOrderIntervenerOneDocumentHandler(),
-                new SendOrderIntervenerTwoDocumentHandler(),
-                new SendOrderIntervenerThreeDocumentHandler(),
-                new SendOrderIntervenerFourDocumentHandler())
+                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
+                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
+                new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService),
+                new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService),
+                new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService),
+                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService))
         );
     }
 

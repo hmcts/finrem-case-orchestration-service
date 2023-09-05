@@ -10,20 +10,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
+
+import java.util.List;
 
 @Slf4j
 @Service
 public class SendConsentOrderInContestedAboutToStartHandler extends FinremCallbackHandler {
 
-    private final GeneralOrderService generalOrderService;
     private final PartyService partyService;
 
     public SendConsentOrderInContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                          GeneralOrderService generalOrderService, PartyService partyService) {
+                                                          PartyService partyService) {
         super(finremCaseDetailsMapper);
-        this.generalOrderService = generalOrderService;
         this.partyService = partyService;
     }
 
@@ -41,12 +40,12 @@ public class SendConsentOrderInContestedAboutToStartHandler extends FinremCallba
         log.info("Invoking contested {} about to start callback for case id: {}",
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
-        generalOrderService.setConsentInContestedOrderList(caseDetails);
 
         DynamicMultiSelectList roleList = partyService.getAllActivePartyList(caseDetails);
+        roleList.setValue(List.of(roleList.getListItems().get(0), roleList.getListItems().get(1)));
         finremCaseData.setPartiesOnCase(roleList);
 
-        finremCaseData.setAdditionalConsentInContestedDocument(null);
+        finremCaseData.setAdditionalCicDocuments(null);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
     }

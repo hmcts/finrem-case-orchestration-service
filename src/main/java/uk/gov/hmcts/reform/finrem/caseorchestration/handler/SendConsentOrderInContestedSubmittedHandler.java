@@ -6,33 +6,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentInContestedSendOrderCorresponder;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
 public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackHandler {
-    private final NotificationService notificationService;
     private final GeneralOrderService generalOrderService;
-    private final CcdService ccdService;
+    private final FinremConsentInContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
     public SendConsentOrderInContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                       NotificationService notificationService,
                                                        GeneralOrderService generalOrderService,
-                                                       CcdService ccdService) {
+                                                       FinremConsentInContestedSendOrderCorresponder contestedSendOrderCorresponder) {
         super(finremCaseDetailsMapper);
-        this.notificationService = notificationService;
         this.generalOrderService = generalOrderService;
-        this.ccdService = ccdService;
+        this.contestedSendOrderCorresponder = contestedSendOrderCorresponder;
     }
 
 
@@ -53,31 +46,17 @@ public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackH
         List<String> parties = generalOrderService.getParties(caseDetails);
         log.info("Selected parties {} on case {}", parties, caseDetails.getId());
 
-        sendNotifications(callbackRequest, parties);
+        sendNotifications(callbackRequest, parties, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData()).build();
     }
 
-    private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties) {
+    private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
-        String caseId = String.valueOf(caseDetails.getId());
-
-        if (Objects.nonNull(caseData.getFinalOrderCollection())) {
-            log.info("Received request to send email for 'Order Approved' for Case ID: {}", caseId);
-            if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
-                && parties.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
-                log.info("Sending 'Order Approved' email notification to Applicant Solicitor for Case ID: {}", caseId);
-                notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
-            }
-
-            if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
-                && parties.contains(CaseRole.RESP_SOLICITOR.getCcdCode())) {
-                log.info("Sending 'Order Approved' email notification to Respondent Solicitor for Case ID: {}", caseId);
-                notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
-            }
-            // TODO: Check applicant and respondent sending correct notifications, add notifications for interveners
-        }
+        generalOrderService.setPartiesToReceiveCommunication(caseDetails, parties);
+        log.info("About to start send order correspondence for case {}", caseDetails.getId());
+        contestedSendOrderCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
+        log.info("Finish sending order correspondence for case {}", caseDetails.getId());
     }
 }

@@ -750,7 +750,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_USER_EMAIL);
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
 
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isPaperApplication(anyMap())).thenReturn(false);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
 
@@ -759,7 +759,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailRespondentSolicitor() {
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(anyMap())).thenReturn(true);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
 
         assertFalse(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any()));
@@ -767,7 +767,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldEmailRespondentSolicitorWhenNullEmailConsent() {
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isPaperApplication(anyMap())).thenReturn(false);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
         when(caseDataService.isNotEmpty(any(), any())).thenReturn(true);
 
@@ -785,7 +785,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_USER_EMAIL);
         caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
 
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isPaperApplication(anyMap())).thenReturn(false);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseData)).thenReturn(true);
 
@@ -794,7 +794,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailContestedAppSolicitor() {
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(anyMap())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
 
         assertFalse(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any()));
@@ -869,7 +869,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         notificationService.sendNoticeOfChangeEmail(getConsentedCallbackRequest().getCaseDetails());
 
@@ -912,7 +912,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         notificationService.sendNoticeOfChangeEmailCaseworker(getConsentedCallbackRequestUpdateDetails()
             .getCaseDetails());
@@ -1317,7 +1317,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenAppIsNotContestedAndApplicantSolicitorIsRegisteredAndAcceptingEmails_shouldNotSendLetters() {
-        when(caseDataService.isContestedApplication(any())).thenReturn(false);
+        when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
 
@@ -1326,7 +1326,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(true);
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(false);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
 
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();

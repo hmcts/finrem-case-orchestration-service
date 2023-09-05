@@ -115,7 +115,7 @@ public class FinremCaseData {
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
     private CaseDocument additionalDocument;
-    private CaseDocument additionalConsentInContestedDocument;
+    private List<DocumentCollection> additionalCicDocuments;
     private String orderDirectionOpt2;
     private YesOrNo orderDirectionAbsolute;
     private YesOrNo servePensionProvider;
@@ -151,10 +151,10 @@ public class FinremCaseData {
     private CaseDocument approvedConsentOrderLetter;
     private CaseDocument bulkPrintCoverSheetApp;
     private CaseDocument bulkPrintCoverSheetRes;
-    private CaseDocument bulkPrintCoverSheetIntervener1;
-    private CaseDocument bulkPrintCoverSheetIntervener2;
-    private CaseDocument bulkPrintCoverSheetIntervener3;
-    private CaseDocument bulkPrintCoverSheetIntervener4;
+    private CaseDocument bulkPrintCoverSheetIntv1;
+    private CaseDocument bulkPrintCoverSheetIntv2;
+    private CaseDocument bulkPrintCoverSheetIntv3;
+    private CaseDocument bulkPrintCoverSheetIntv4;
     private String bulkPrintLetterIdRes;
     private String bulkPrintLetterIdApp;
     private List<ConsentOrderCollection> approvedOrderCollection;
@@ -295,7 +295,6 @@ public class FinremCaseData {
     private SendOrderEventPostStateOption sendOrderPostStateOption;
     private DynamicMultiSelectList ordersToShare;
     private DynamicMultiSelectList partiesOnCase;
-    private DynamicMultiSelectList consentInContestedOrdersToShare;
     private List<ConfidentialUploadedDocumentData> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")

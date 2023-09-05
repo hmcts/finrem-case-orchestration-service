@@ -619,7 +619,6 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
-
     public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data,
                                                                            String authorisationToken,
                                                                            String caseId) {
@@ -667,7 +666,6 @@ public class DocumentHelper {
         }
         return documents;
     }
-
 
     public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
                                                                                   String documentName) {

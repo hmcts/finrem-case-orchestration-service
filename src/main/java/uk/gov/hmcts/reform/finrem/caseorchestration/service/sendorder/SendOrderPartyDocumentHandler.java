@@ -6,6 +6,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderColle
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,9 +36,44 @@ public abstract class SendOrderPartyDocumentHandler {
         }
     }
 
+    public void setUpConsentOrderApprovedDocumentsOnCase(FinremCaseDetails caseDetails, List<String> partyList,
+                                                         List<CaseDocument> approvedOrderDocumentPack) {
+        if (partyList.contains(caseRoleCode)) {
+            FinremCaseData caseData = caseDetails.getData();
+            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData))
+                    .orElse(new ArrayList<>());
+            approvedOrderDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
+            addOrdersToPartyCollection(caseData, orderColl);
+        }
+    }
+
+    public void setUpConsentOrderUnapprovedDocumentsOnCase(FinremCaseDetails caseDetails, List<String> partyList,
+                                                           List<CaseDocument> approvedOrderDocumentPack) {
+        if (partyList.contains(caseRoleCode)) {
+            FinremCaseData caseData = caseDetails.getData();
+            List<UnapprovedOrderCollection> orderColl = Optional.ofNullable(getUnapprovedOrderCollectionForParty(caseData))
+                .orElse(new ArrayList<>());
+            approvedOrderDocumentPack.forEach(document -> orderColl.add(getUnapprovedOrderCollection(document)));
+            addUnapprovedOrdersToPartyCollection(caseData, orderColl);
+        }
+    }
+
+    public void setUpCoverSheetOnCase(FinremCaseDetails caseDetails, List<String> partyList, String authToken) {
+        if (partyList.contains(caseRoleCode)) {
+            CaseDocument coverSheet = getPartyCoverSheet(caseDetails, authToken);
+            addCoverSheetToPartyField(caseDetails, coverSheet);
+        }
+    }
+
     private ApprovedOrderCollection getApprovedOrderCollection(CaseDocument generalOrder) {
         return ApprovedOrderCollection.builder()
             .value(ApproveOrder.builder().caseDocument(generalOrder)
+                .orderReceivedAt(LocalDateTime.now()).build()).build();
+    }
+
+    private UnapprovedOrderCollection getUnapprovedOrderCollection(CaseDocument consentOrder) {
+        return UnapprovedOrderCollection.builder()
+            .value(UnapproveOrder.builder().caseDocument(consentOrder)
                 .orderReceivedAt(LocalDateTime.now()).build()).build();
     }
 
@@ -49,7 +86,14 @@ public abstract class SendOrderPartyDocumentHandler {
 
     protected abstract List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData);
 
+    protected abstract List<UnapprovedOrderCollection> getUnapprovedOrderCollectionForParty(FinremCaseData caseData);
+
     protected abstract void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
 
+    protected abstract void addUnapprovedOrdersToPartyCollection(FinremCaseData caseData, List<UnapprovedOrderCollection> orderColl);
+
+    protected abstract void addCoverSheetToPartyField(FinremCaseDetails caseDetails, CaseDocument coverSheet);
+
+    protected abstract CaseDocument getPartyCoverSheet(FinremCaseDetails caseDetails, String authToken);
 
 }

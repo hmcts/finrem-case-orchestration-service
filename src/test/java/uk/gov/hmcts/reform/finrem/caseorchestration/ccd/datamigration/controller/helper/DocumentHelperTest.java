@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -47,7 +48,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -76,10 +76,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentHelperTest {
@@ -165,7 +163,7 @@ public class DocumentHelperTest {
 
     @Test
     public void hasAnotherHearing_shouldReturnTrue() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         DirectionDetailCollection directionDetailsCollection = DirectionDetailCollection.builder()
             .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build();
@@ -182,7 +180,7 @@ public class DocumentHelperTest {
 
     @Test
     public void hasAnotherHearing_noDirectionDetails() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         caseData.setDirectionDetailsCollection(emptyList());
         assertFalse(documentHelper.hasAnotherHearing(caseData));
@@ -190,7 +188,7 @@ public class DocumentHelperTest {
 
     @Test
     public void getLatestAdditionalHearingDocument() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
         Optional<CaseDocument> latestDocumentNotAvailable = documentHelper.getLatestAdditionalHearingDocument(caseData);
@@ -202,7 +200,7 @@ public class DocumentHelperTest {
             .builder().document(caseDocument()).build()).build();
         AdditionalHearingDocumentCollection doc2
             = AdditionalHearingDocumentCollection.builder().value(AdditionalHearingDocument
-            .builder().document(caseDocument("url","abc.pdf","binaryURL")).build()).build();
+            .builder().document(caseDocument("url", "abc.pdf", "binaryURL")).build()).build();
 
         additionalHearingDocuments.add(doc1);
         additionalHearingDocuments.add(doc2);
@@ -217,7 +215,7 @@ public class DocumentHelperTest {
 
     @Test
     public void getHearingDocumentsAsBulkPrintDocuments() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
@@ -695,43 +693,9 @@ public class DocumentHelperTest {
         }
     }
 
-    @Test
-    public void convertToCaseDocumentIfObjNotNull() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> data = caseDetails.getData();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(CONSENT_ORDER));
-
-        assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
-        assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
-        assertThat(caseDocument.getDocumentFilename(), is("file1"));
-    }
-
-    @Test
-    public void convertToCaseDocumentIfObjNotNullIfNullReturnNull() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> data = caseDetails.getData();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(GENERAL_ORDER_PREVIEW_DOCUMENT));
-        assertNull(caseDocument);
-    }
-
-    @Test
-    public void convertToCaseDocument() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> data = caseDetails.getData();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER), CaseDocument.class);
-
-        assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
-        assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
-        assertThat(caseDocument.getDocumentFilename(), is("file1"));
-    }
-
-    private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequest.builder()
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())
-            .build();
+    private FinremCallbackRequest buildFinremCallbackRequest() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
+        return FinremCallbackRequest.builder().eventType(EventType.SOLICITOR_CREATE).caseDetails(caseDetails).build();
     }
 }

@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
@@ -43,8 +42,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_PHONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
@@ -251,7 +248,7 @@ public class CaseDataService {
     }
 
     public boolean isContestedApplication(FinremCaseDetails caseDetails) {
-        return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType()));
+        return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType().getCcdType()));
     }
 
     public boolean isContestedPaperApplication(CaseDetails caseDetails) {
@@ -272,13 +269,22 @@ public class CaseDataService {
             && !caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders().isEmpty();
     }
 
+    @Deprecated(since = "05-september-2023")
     public boolean isApplicantAddressConfidential(Map<String, Object> caseData) {
         return isAddressConfidential(caseData, APPLICANT_CONFIDENTIAL_ADDRESS);
     }
 
+    public boolean isApplicantAddressConfidential(FinremCaseData caseData) {
+        return caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent().isYes();
+    }
 
+    @Deprecated(since = "05-september-2023")
     public boolean isRespondentAddressConfidential(Map<String, Object> caseData) {
         return isAddressConfidential(caseData, RESPONDENT_CONFIDENTIAL_ADDRESS);
+    }
+
+    public boolean isRespondentAddressConfidential(FinremCaseData caseData) {
+        return caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant().isYes();
     }
 
     private boolean isAddressConfidential(Map<String, Object> caseData, String address) {
