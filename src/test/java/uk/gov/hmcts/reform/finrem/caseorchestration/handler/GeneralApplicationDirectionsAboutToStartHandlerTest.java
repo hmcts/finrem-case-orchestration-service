@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -57,6 +58,8 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     private GenericDocumentService documentService;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
+    private PartyService partyService;
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -68,7 +71,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
         handler = new GeneralApplicationDirectionsAboutToStartHandler(assignCaseAccessService,
-            finremCaseDetailsMapper, helper, service);
+            finremCaseDetailsMapper, helper, service, partyService);
     }
 
     @Test
