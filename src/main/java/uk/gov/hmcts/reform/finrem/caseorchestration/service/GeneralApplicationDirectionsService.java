@@ -291,14 +291,18 @@ public class GeneralApplicationDirectionsService {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
         if (referDetail.contains(APPLICANT) || referDetail.contains(APPLICANT.toLowerCase())
             || referDetail.contains(RESPONDENT.toLowerCase()) || referDetail.contains(RESPONDENT)) {
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to respondent via bulk print for Case {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
+            if (caseDetails.getData().isApplicantCorrespondenceEnabled()) {
+                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
+                log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}",
+                    documents.size(), caseDetails.getId(),
+                    documents);
+            }
+            if (caseDetails.getData().isRespondentCorrespondenceEnabled()) {
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
+                log.info("Sending {} document(s) to respondent via bulk print for Case {}, document(s) are {}",
+                    documents.size(), caseDetails.getId(),
+                    documents);
+            }
         } else if (referDetail.contains(INTERVENER1.toLowerCase()) || referDetail.contains(INTERVENER1)) {
             IntervenerOneWrapper intervenerWrapper = caseDetails.getData().getIntervenerOneWrapper();
             sendToBulkprintIfIntervenerCorrespondenceEnabled(caseDetails, authorisationToken, documents, intervenerWrapper);
