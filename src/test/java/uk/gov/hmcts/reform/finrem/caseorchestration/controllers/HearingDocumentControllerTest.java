@@ -112,7 +112,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
-        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(), any());
+        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(CaseDetails.class), any());
     }
 
     @Test
@@ -192,7 +192,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.bulkPrintCoverSheetAppConfidential.document_url", is(DOC_URL)))
             .andExpect(jsonPath("$.data.bulkPrintCoverSheetResConfidential.document_url", is(DOC_URL)));
-
 
 
         verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());

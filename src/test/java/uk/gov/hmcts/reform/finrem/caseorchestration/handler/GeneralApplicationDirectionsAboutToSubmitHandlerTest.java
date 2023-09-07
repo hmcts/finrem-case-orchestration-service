@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -69,6 +70,9 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     private GeneralApplicationService gaService;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Mock
+    private PartyService partyService;
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -78,7 +82,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     public void setup() {
         objectMapper = new ObjectMapper();
         startHandler = new GeneralApplicationDirectionsAboutToStartHandler(
-            assignCaseAccessService, finremCaseDetailsMapper, helper, service);
+            assignCaseAccessService, finremCaseDetailsMapper, helper, service, partyService);
         submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
             finremCaseDetailsMapper, helper, service, gaService);
     }
