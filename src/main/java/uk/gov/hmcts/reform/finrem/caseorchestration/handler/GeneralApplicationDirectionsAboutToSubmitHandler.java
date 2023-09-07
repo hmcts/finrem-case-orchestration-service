@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,16 +41,19 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     private final GeneralApplicationDirectionsService service;
     private final GeneralApplicationService gaService;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     public GeneralApplicationDirectionsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                             GeneralApplicationHelper helper,
                                                             GeneralApplicationDirectionsService service,
-                                                            GeneralApplicationService gaService) {
+                                                            GeneralApplicationService gaService,
+                                                            SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
         this.gaService = gaService;
         this.finremCaseDetailsMapper = finremCaseDetailsMapper;
+        this.selectablePartiesCorrespondenceService = selectablePartiesCorrespondenceService;
     }
 
     @Override
@@ -82,6 +86,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         List<String> errors = new ArrayList<>();
 
         try {
+            selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails.getData());
             service.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
         } catch (InvalidCaseDataException invalidCaseDataException) {
             errors.add(invalidCaseDataException.getMessage());

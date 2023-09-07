@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -72,6 +73,9 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Mock
+    SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+
+    @Mock
     private PartyService partyService;
     private ObjectMapper objectMapper;
 
@@ -84,7 +88,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         startHandler = new GeneralApplicationDirectionsAboutToStartHandler(
             assignCaseAccessService, finremCaseDetailsMapper, helper, service, partyService);
         submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
-            finremCaseDetailsMapper, helper, service, gaService);
+            finremCaseDetailsMapper, helper, service, gaService, selectablePartiesCorrespondenceService);
     }
 
     @Test
