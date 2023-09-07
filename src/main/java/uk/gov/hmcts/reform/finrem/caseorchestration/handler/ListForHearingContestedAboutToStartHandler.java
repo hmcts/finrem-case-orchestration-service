@@ -23,7 +23,7 @@ public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHa
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.LIST_FOR_HEARING.equals(eventType);
+            && (EventType.LIST_FOR_HEARING.equals(eventType) || EventType.UPLOAD_ORDER.equals(eventType));
     }
 
 
@@ -31,7 +31,7 @@ public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHa
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info("Handling contested event {} about to start callback for case id: {}",
-            EventType.LIST_FOR_HEARING, callbackRequest.getCaseDetails().getId());
+            callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         if (caseData.getAdditionalHearingDocumentsOption() == null) {
             caseData.setAdditionalHearingDocumentsOption(YesOrNo.NO);

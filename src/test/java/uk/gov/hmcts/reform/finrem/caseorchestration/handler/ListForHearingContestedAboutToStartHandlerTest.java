@@ -39,6 +39,14 @@ public class ListForHearingContestedAboutToStartHandlerTest {
     }
 
     @Test
+    public void givenContestedCase_whenEventIsUploadOrder_thenHandlerCanHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.UPLOAD_ORDER),
+            is(true));
+    }
+
+
+    @Test
     public void givenContestedCase_whenEventIsNotListForHearing_thenHandlerCanNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CLOSE),

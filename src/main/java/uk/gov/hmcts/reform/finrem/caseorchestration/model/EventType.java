@@ -63,6 +63,8 @@ public enum EventType {
     CREATE_GENERAL_EMAIL("FR_generalEmail"),
     SHARE_SELECTED_DOCUMENTS("shareSelectedDocuments"),
 
+    UPLOAD_ORDER("FR_uploadOrder"),
+
     @JsonEnumDefaultValue
     NONE("");
 

@@ -36,9 +36,16 @@ class ListForHearingContestedSubmittedHandlerTest {
     private ListForHearingContestedSubmittedHandler handler;
 
     @Test
-    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
+    void givenACcdCallbackContestedCase_WhenASubmitEventListForHearing_thenHandlerCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+            is(true));
+    }
+
+    @Test
+    void givenACcdCallbackContestedCase_WhenASubmitEventUploadOrder_thenHandlerCanHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.UPLOAD_ORDER),
             is(true));
     }
 
@@ -50,7 +57,7 @@ class ListForHearingContestedSubmittedHandlerTest {
     }
 
     @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
+    void givenACcdCallbackConsentedCase_WhenASubmitEventListForHearing_thenHandlerCanNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
             is(false));
