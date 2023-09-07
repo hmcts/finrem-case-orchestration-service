@@ -35,7 +35,7 @@ public class ListForHearingContestedSubmittedHandler implements CallbackHandler<
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Handling contested event {} submit callback for case id: {}",
-            EventType.valueOf(callbackRequest.getEventId()), caseDetails.getId());
+            EventType.getEventType(callbackRequest.getEventId()), caseDetails.getId());
 
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
