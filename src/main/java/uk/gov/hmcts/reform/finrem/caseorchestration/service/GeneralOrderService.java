@@ -25,6 +25,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContes
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +89,16 @@ public class GeneralOrderService {
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {
         return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
             documentConfiguration.getGeneralOrderTemplate(caseDetails),
-            documentConfiguration.getGeneralOrderFileName());
+            getGeneralOrderFileNameWithDateTimeStamp());
+    }
+
+
+    private String getGeneralOrderFileNameWithDateTimeStamp() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        LocalDateTime now = LocalDateTime.now();
+        String dateTimeString = now.format(formatter);
+        String str = documentConfiguration.getGeneralOrderFileName();
+        return new StringBuilder(str).insert(str.length() - 4, "-" + dateTimeString).toString();
     }
 
     private GeneralOrderPreviewDocument applyGeneralOrderData(CaseDocument caseDocument) {
@@ -230,15 +241,13 @@ public class GeneralOrderService {
                 "Orders tab [Lastest general order]" + " - " + orderLatestDocumentFilename));
         }
 
-        DynamicMultiSelectList selectedOrders = data.getOrdersToShare();
-
-        DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, selectedOrders);
+        DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
         data.setOrdersToShare(dynamicOrderList);
     }
 
     private DynamicMultiSelectList getDynamicOrderList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
                                                            DynamicMultiSelectList selectedOrders) {
-        if (selectedOrders != null) {
+        if (selectedOrders != null && selectedOrders.getValue() != null) {
             return DynamicMultiSelectList.builder()
                 .value(selectedOrders.getValue())
                 .listItems(dynamicMultiSelectListElement)
