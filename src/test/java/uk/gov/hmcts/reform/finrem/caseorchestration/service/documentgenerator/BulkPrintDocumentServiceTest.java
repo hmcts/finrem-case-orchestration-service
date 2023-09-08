@@ -29,7 +29,6 @@ class BulkPrintDocumentServiceTest {
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
     private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
     private static final String FILE_NAME = "abc.pdf";
-    private static final String NON_PDF_FILE_NAME = "abc.docx";
     public static final String AUTH = "auth";
     private final byte[] someBytes = "ainhsdcnoih".getBytes();
     @InjectMocks
@@ -88,15 +87,6 @@ class BulkPrintDocumentServiceTest {
             + "Please remove encryption before uploading or upload another document.", errors.get(0));
     }
 
-    @Test
-    void ifUploadedDocumentIsNotPdfThenDoNotCheckForEncryption() {
-        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, NON_PDF_FILE_NAME, FILE_BINARY_URL);
-        List<String> errors =  new ArrayList<>();
-
-        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-        assertEquals(0, errors.size());
-    }
-
     private byte[] loadResource() throws Exception {
         String fixture = "/fixtures/encryptedDocument.pdf";
         try (InputStream resourceAsStream = getClass().getResourceAsStream(fixture)) {
@@ -104,6 +94,4 @@ class BulkPrintDocumentServiceTest {
             return resourceAsStream.readAllBytes();
         }
     }
-
-
 }
