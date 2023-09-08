@@ -64,6 +64,7 @@ public enum EventType {
     SHARE_SELECTED_DOCUMENTS("shareSelectedDocuments"),
     SOLICITOR_CW_DRAFT_ORDER("FR_solicitorDraftDirectionOrder"),
     JUDGE_DRAFT_ORDER("FR_judgeDraftDirectionOrder"),
+    DIRECTION_UPLOAD_ORDER("FR_directionOrder"),
 
     @JsonEnumDefaultValue
     NONE("");
