@@ -73,7 +73,10 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
             List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
 
             List<CaseDocument> documents = new ArrayList<>();
-            caseData.getAdditionalCicDocuments().forEach(doc -> documents.add(doc.getValue()));
+            if (caseData.getAdditionalCicDocuments() != null) {
+                caseData.getAdditionalCicDocuments().forEach(doc -> documents.add(doc.getValue()));
+            }
+
             if (!documents.isEmpty()) {
                 log.info("Additional uploaded documents {} to be sent with consent or general order for case id {}", documents, caseId);
                 List<CaseDocument> pdfDocuments = documents.stream().map(doc ->
@@ -116,15 +119,18 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
         log.info("Setting up order documents for case {}:", caseId);
         List<CaseDocument> consentOrderDocumentPack;
         ConsentOrderWrapper wrapper = caseData.getConsentOrderWrapper();
-        CaseDocument latestRefusedConsentOrder = wrapper.getConsentedNotApprovedOrders().get(0).getApprovedOrder().getConsentOrder();
-        List<ConsentOrderCollection> approvedConsentOrders = caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
 
         if (consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, userAuthorisation)) {
+            List<ConsentOrderCollection> approvedConsentOrders = caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
             consentOrderDocumentPack = createApprovedOrderDocumentPack(approvedConsentOrders);
             sendOrderPartyDocumentList.forEach(
                 handler -> handler.setUpConsentOrderApprovedDocumentsOnCase(caseDetails, parties, consentOrderDocumentPack));
         } else {
             CaseDocument latestGeneralOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+            CaseDocument latestRefusedConsentOrder = null;
+            if (wrapper.getConsentedNotApprovedOrders() != null && !wrapper.getConsentedNotApprovedOrders().isEmpty()) {
+                latestRefusedConsentOrder = wrapper.getConsentedNotApprovedOrders().get(0).getApprovedOrder().getConsentOrder();
+            }
             consentOrderDocumentPack = List.of(
                 consentOrderNotApprovedDocumentService.getLatestOrderDocument(latestRefusedConsentOrder, latestGeneralOrder, userAuthorisation));
             sendOrderPartyDocumentList.forEach(
@@ -150,7 +156,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
             if (orderLetter != null) {
                 approvedConsentOrderDocumentPack.add(orderLetter);
             }
-            if (!pensionDocuments.isEmpty()) {
+            if (pensionDocuments != null && !pensionDocuments.isEmpty()) {
                 pensionDocuments.forEach(doc -> pensionCaseDocuments.add(doc.getTypedCaseDocument().getPensionDocument()));
                 approvedConsentOrderDocumentPack.addAll(pensionCaseDocuments);
             }

@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -65,8 +63,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     private NotificationService notificationService;
     @MockBean
     private GenericDocumentService genericDocumentService;
-    @Mock
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @MockBean
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
@@ -99,71 +95,23 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(2)).bulkPrint(any(), any(), any());
     }
 
-    //    @Test PROBLEMATIC TEST
-    //    public void shouldSendForBulkPrintPackWithRespondentAndApplicantAddressAsSolicitorEmailIsNo() {
-    //        final String consentedBulkPrintSimpleJson = "/fixtures/contested/bulk_print_simple.json";
-    //        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintSimpleJson, mapper);
-    //        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
-    //        when(coverSheetService.generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
-    //        when(coverSheetService.generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
-    //
-    //        FinremCaseDetails resultingCaseDetails = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
-    //
-    //        FinremCaseData caseData = resultingCaseDetails.getData();
-    //        assertNotNull(caseData.getBulkPrintCoverSheetRes());
-    //        assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
-    //        assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
-    //
-    //        verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
-    //    }
+    @Test
+    public void shouldSendForBulkPrintPackWithRespondentAndApplicantAddressAsSolicitorEmailIsNo() {
+        final String consentedBulkPrintSimpleJson = "/fixtures/contested/bulk_print_simple.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintSimpleJson, mapper);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
+        when(coverSheetService.generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
+        when(coverSheetService.generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
 
-    //    @Test PROBLEMATIC TEST ATTEMPT AT WORKAROUND SOLUTION
-    //    public void shouldSendForBulkPrintPackWithRespondentAndApplicantAddressAsSolicitorEmailIsNo() {
-    //        final String consentedBulkPrintSimpleJson = "/fixtures/contested/bulk_print_simple.json";
-    //        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintSimpleJson, mapper);
-    //        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-    //        CaseDocument orderLetter = CaseDocument.builder().documentUrl("http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8")
-    //            .documentBinaryUrl("http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8/binary")
-    //            .documentFilename("ApprovedConsentOrderLetter.pdf").build();
-    //        CaseDocument consentOrder = CaseDocument.builder().documentUrl("http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1")
-    //            .documentBinaryUrl("http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1/binary")
-    //            .documentFilename("011.pdf").build();
-    //        CaseDocument pensionDocs1 = CaseDocument.builder().documentUrl("http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952").
-    //            documentFilename("006.pdf").
-    //            documentBinaryUrl("http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952/binary").build();
-    //        CaseDocument pensionDocs2 = CaseDocument.builder().documentUrl("http://localhost:4506/documents/ba37e288-cf8d-426b-a368-7f237be756b7").
-    //            documentFilename("014.pdf").
-    //            documentBinaryUrl("http://localhost:4506/documents/ba37e288-cf8d-426b-a368-7f237be756b7/binary").build();
-    //
-    //        PensionType pensionType1 = PensionType.builder()
-    //        .typeOfDocument(PensionDocumentType.FORM_PPF1).pensionDocument(pensionDocs1).build();
-    //        PensionType pensionType2 = PensionType.builder()
-    //        .typeOfDocument(PensionDocumentType.FORM_PPF2).pensionDocument(pensionDocs2).build();
-    //        PensionTypeCollection pensionTypeCollection2 =
-    //        PensionTypeCollection.builder().typedCaseDocument(pensionType1).id("3bc538b9-8a6e-4fd1-84de-eeb01460f900").build();
-    //        PensionTypeCollection pensionTypeCollection1 =
-    //        PensionTypeCollection.builder().typedCaseDocument(pensionType2).id("5b9be58f-c368-411a-bd3a-ff1c104ba87f").build();
-    //
-    //        ApprovedOrder orderLetterApprovedOrder = ApprovedOrder.builder().orderLetter(orderLetter).consentOrder(consentOrder)
-    //            .pensionDocuments(List.of(pensionTypeCollection1, pensionTypeCollection2)).build();
-    //        CollectionElement<ApprovedOrder> orderLetterApprovedOrderCollection = CollectionElement.<ApprovedOrder>builder()
-    //            .id("00ffa155-e60f-499a-9295-77b598bf16d1")
-    //            .value(orderLetterApprovedOrder).build();
-    //        caseDetails.getData().put(APPROVED_ORDER_COLLECTION, orderLetterApprovedOrderCollection);
-    //        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
-    //        when(coverSheetService.generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
-    //        when(coverSheetService.generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
-    //        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCaseDetails);
-    //
-    //        FinremCaseDetails resultingCaseDetails = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
-    //
-    //        FinremCaseData caseData = resultingCaseDetails.getData();
-    //        assertNotNull(caseData.getBulkPrintCoverSheetRes());
-    //        assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
-    //        assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
-    //
-    //        verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), AUTH_TOKEN);
-    //    }
+        FinremCaseDetails resultingCaseDetails = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
+
+        FinremCaseData caseData = resultingCaseDetails.getData();
+        assertNotNull(caseData.getBulkPrintCoverSheetRes());
+        assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
+        assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
+
+        verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
+    }
 
     @Test
     public void shouldSendForBulkPrintPackWithOnlyRespondentAddress() {
@@ -177,7 +125,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(consentOrderApprovedDocumentService.prepareApplicantLetterPack(any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
             .thenReturn(bulkPrintDocuments);
 
-        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
         FinremCaseDetails finremCaseDetails = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
         FinremCaseData caseData = finremCaseDetails.getData();
 
