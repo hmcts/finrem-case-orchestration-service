@@ -280,9 +280,6 @@ public class CCDConfigConstant {
     public static final String CONTESTED_ORDER_APPROVED_JUDGE_NAME = "orderApprovedJudgeName";
     public static final String CONTESTED_ORDER_APPROVED_DATE = "orderApprovedDate";
     public static final String CONTESTED_ORDER_APPROVED_COVER_LETTER = "orderApprovedCoverLetter";
-    public static final String ORDER_LIST = "ordersToShare";
-    public static final String PARIY_LIST = "partiesOnCase";
-    public static final String ADDITIONAL_ORDER_DOC = "additionalDocument";
 
     //Application Type related
     public static final String CONSENT_D81_QUESTION = "consentD81Question";
@@ -643,5 +640,7 @@ public class CCDConfigConstant {
     public static final String CASE_RESPONDENT_FLAGS = "respondentFlags";
     public static final String CASE_LEVEL_ROLE = "Case";
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
+
+    public static final String PARTIES_ON_CASE = "partiesOnCase";
 
 }

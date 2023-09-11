@@ -1,15 +1,23 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.List;
 
+
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class SelectablePartiesCorrespondenceService {
+
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public void setPartiesToReceiveCorrespondence(FinremCaseData data) {
         List<String> selectedParties = data.getSelectedParties();
@@ -40,6 +48,42 @@ public class SelectablePartiesCorrespondenceService {
         }
     }
 
+    public boolean shouldSendApplicantCorrespondence(CaseDetails caseDetails) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+        return finremCaseDetails.getData().isApplicantCorrespondenceEnabled();
+    }
+
+    public boolean shouldSendRespondentCorrespondence(CaseDetails caseDetails) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+        return finremCaseDetails.getData().isRespondentCorrespondenceEnabled();
+    }
+
+    public boolean shouldSendIntervenerOneCorrespondence(CaseDetails caseDetails) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+        return finremCaseDetails.getData().getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled();
+    }
+
+    public boolean shouldSendIntervenerTwoCorrespondence(CaseDetails caseDetails) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+        return finremCaseDetails.getData().getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled();
+    }
+
+    public boolean shouldSendIntervenerThreeCorrespondence(CaseDetails caseDetails) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+        return finremCaseDetails.getData().getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled();
+    }
+
+    public boolean shouldSendIntervenerFourCorrespondence(CaseDetails caseDetails) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+        return finremCaseDetails.getData().getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled();
+    }
+
     public boolean isCorrespondenceShareableWithParties(List<String> selectedParties, List<String> partyRoles) {
         for (String party : partyRoles) {
             if (selectedParties.contains(party)) {
@@ -48,4 +92,5 @@ public class SelectablePartiesCorrespondenceService {
         }
         return false;
     }
+
 }

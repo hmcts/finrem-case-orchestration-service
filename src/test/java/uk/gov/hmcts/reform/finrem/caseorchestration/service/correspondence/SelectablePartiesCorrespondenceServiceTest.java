@@ -1,12 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +24,17 @@ import static org.junit.Assert.assertTrue;
 @RunWith(MockitoJUnitRunner.class)
 public class SelectablePartiesCorrespondenceServiceTest {
 
-    SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService = new SelectablePartiesCorrespondenceService();
-
-
+    SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
     FinremCaseData finremCaseData;
+
+    @Mock
+    FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Before
+    public void setUpTest() {
+        selectablePartiesCorrespondenceService = new SelectablePartiesCorrespondenceService(
+            finremCaseDetailsMapper);
+    }
 
     @Test
     public void shouldSetAllPartiesToReceiveCorrespondence() {
@@ -131,6 +144,80 @@ public class SelectablePartiesCorrespondenceServiceTest {
         assertFalse(finremCaseData.getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled());
         assertFalse(finremCaseData.getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled());
         assertTrue(finremCaseData.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled());
+    }
+
+
+    @Test
+    public void shouldDetermineIfApplicantCorrespondenceShouldBeSent() {
+
+        finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.APP_SOLICITOR.getCcdCode()))).build();
+
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        Mockito.when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))
+            .thenReturn(FinremCaseDetails.builder().data(finremCaseData).build());
+
+        assertTrue(selectablePartiesCorrespondenceService.shouldSendApplicantCorrespondence(caseDetails));
+    }
+
+
+    @Test
+    public void shouldDetermineIfRespondentCorrespondenceShouldBeSent() {
+
+        finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.RESP_SOLICITOR.getCcdCode()))).build();
+
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        Mockito.when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))
+            .thenReturn(FinremCaseDetails.builder().data(finremCaseData).build());
+
+        assertTrue(selectablePartiesCorrespondenceService.shouldSendRespondentCorrespondence(caseDetails));
+    }
+
+    @Test
+    public void shouldDetermineIfIntervenerOneCorrespondenceShouldBeSent() {
+
+        finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.INTVR_BARRISTER_1.getCcdCode()))).build();
+
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        Mockito.when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))
+            .thenReturn(FinremCaseDetails.builder().data(finremCaseData).build());
+
+        assertTrue(selectablePartiesCorrespondenceService.shouldSendIntervenerOneCorrespondence(caseDetails));
+    }
+
+    @Test
+    public void shouldDetermineIfIntervenerTwoCorrespondenceShouldBeSent() {
+
+        finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.INTVR_BARRISTER_2.getCcdCode()))).build();
+
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        Mockito.when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))
+            .thenReturn(FinremCaseDetails.builder().data(finremCaseData).build());
+
+        assertTrue(selectablePartiesCorrespondenceService.shouldSendIntervenerTwoCorrespondence(caseDetails));
+    }
+
+    @Test
+    public void shouldDetermineIfIntervenerThreeCorrespondenceShouldBeSent() {
+
+        finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.INTVR_BARRISTER_3.getCcdCode()))).build();
+
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        Mockito.when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))
+            .thenReturn(FinremCaseDetails.builder().data(finremCaseData).build());
+
+        assertTrue(selectablePartiesCorrespondenceService.shouldSendIntervenerThreeCorrespondence(caseDetails));
+    }
+
+    @Test
+    public void shouldDetermineIfIntervenerFourCorrespondenceShouldBeSent() {
+
+        finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.INTVR_BARRISTER_4.getCcdCode()))).build();
+
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        Mockito.when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))
+            .thenReturn(FinremCaseDetails.builder().data(finremCaseData).build());
+
+        assertTrue(selectablePartiesCorrespondenceService.shouldSendIntervenerFourCorrespondence(caseDetails));
     }
 
     private DynamicMultiSelectList buildDynamicSelectableParties(List<String> parties) {
