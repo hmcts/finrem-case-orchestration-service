@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -18,7 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +25,9 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -33,7 +35,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationMidHandler handler;
     @Mock
-    private GenericDocumentService service;
+    private BulkPrintDocumentService bulkPrintDocumentService;
 
     public static final String AUTH_TOKEN = "tokien:)";
 
@@ -41,9 +43,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
     @Before
     public void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        ObjectMapper objectMapper = new ObjectMapper();
-        GeneralApplicationHelper helper = new GeneralApplicationHelper(objectMapper, service);
-        handler = new GeneralApplicationMidHandler(finremCaseDetailsMapper, helper);
+        handler = new GeneralApplicationMidHandler(finremCaseDetailsMapper, bulkPrintDocumentService);
     }
 
     @Test
@@ -90,6 +90,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
         assertTrue(response.getErrors().get(0)
             .contains("Any changes to an existing General Applications will not be saved."
                 + " Please add a new General Application in order to progress."));
+        verify(bulkPrintDocumentService, times(4)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
 
