@@ -105,7 +105,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     private boolean isIntervernerPartySelected(CaseDocumentParty caseDocumentParty,
                                                List<UploadCaseDocumentCollection> manageCaseDocumentCollection) {
         return manageCaseDocumentCollection.stream().anyMatch(documentCollection ->
-            documentCollection.getUploadCaseDocument().getCaseDocumentParty().equals(caseDocumentParty));
+            caseDocumentParty.equals(documentCollection.getUploadCaseDocument().getCaseDocumentParty()));
     }
 
     private void deleteRemovedDocuments(FinremCaseData caseData,
