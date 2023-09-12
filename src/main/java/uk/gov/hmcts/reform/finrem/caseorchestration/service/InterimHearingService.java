@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
@@ -82,7 +83,6 @@ public class InterimHearingService {
     private final BulkPrintService bulkPrintService;
     private final DocumentConfiguration documentConfiguration;
     private final GenericDocumentService genericDocumentService;
-    private final CaseDataService caseDataService;
     private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
@@ -98,8 +98,8 @@ public class InterimHearingService {
         List<InterimHearingData> interimHearingList = filterInterimHearingToProcess(caseData, caseDataBefore);
 
         if (!interimHearingList.isEmpty()) {
-            List<BulkPrintDocument> documents = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
-            sendToBulkPrint(caseDetails, caseData, authorisationToken, documents);
+            CaseDocumentsHolder caseDocumentsHolder = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
+            sendToBulkPrint(caseDetails, authorisationToken, caseDocumentsHolder);
         }
 
         //Need only for existing Interim Hearing
@@ -111,71 +111,90 @@ public class InterimHearingService {
 
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
-    private void sendToBulkPrint(CaseDetails caseDetails, Map<String, Object> caseData, String authorisationToken,
-                                 List<BulkPrintDocument> documents) {
+    private void sendToBulkPrint(CaseDetails caseDetails, String authorisationToken,
+                                 CaseDocumentsHolder caseDocumentsHolder) {
         if ((!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails))
             && selectablePartiesCorrespondenceService.shouldSendApplicantCorrespondence(caseDetails)) {
             log.info("Sending interim hearing documents to applicant - bulk print for caseid {}", caseDetails.getId());
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
         }
         if ((!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails))
             && selectablePartiesCorrespondenceService.shouldSendRespondentCorrespondence(caseDetails)) {
             log.info("Sending interim hearing documents to respondent - bulk print for caseid {}", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
         }
-        sendToBulkPrintForInterveners(authorisationToken, caseDetails, documents);
+        sendToBulkPrintForInterveners(authorisationToken, caseDetails, caseDocumentsHolder);
     }
 
-    private void sendToBulkPrintForInterveners(String authorisationToken, CaseDetails caseDetails, List<BulkPrintDocument> bulkPrintDocuments) {
+    private void sendToBulkPrintForInterveners(String authorisationToken, CaseDetails caseDetails, CaseDocumentsHolder caseDocumentsHolder) {
         final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
         interveners.forEach(intervenerWrapper -> {
             if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
-                && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())
-                && !notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)) {
-                log.info("Sending letter correspondence to {} for case: {}",
-                    intervenerWrapper.getIntervenerType().getTypeValue(),
-                    caseDetails.getId());
-                bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
-                    bulkPrintDocuments);
+                && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
+                addCaseDocumentsToIntervenerHearingNotices(intervenerWrapper, caseDocumentsHolder);
+                if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)) {
+                    log.info("Sending letter correspondence to {} for case: {}",
+                        intervenerWrapper.getIntervenerType().getTypeValue(),
+                        caseDetails.getId());
+                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
+                        caseDocumentsHolder.getBulkPrintDocuments());
+                }
             }
         });
     }
 
+    private void addCaseDocumentsToIntervenerHearingNotices(IntervenerWrapper intervenerWrapper, CaseDocumentsHolder caseDocumentsHolder) {
+        if (intervenerWrapper.getHearingNoticesDocumentCollection() == null) {
+            intervenerWrapper.setHearingNoticesDocumentCollection(new ArrayList<>());
+        }
+        caseDocumentsHolder.getCaseDocuments().forEach(cd -> {
+            intervenerWrapper.getHearingNoticesDocumentCollection().add(DocumentCollection.builder().value(cd).build());
+        });
+    }
+
     @SuppressWarnings("java:S6204")
-    private List<BulkPrintDocument> prepareDocumentsForPrint(CaseDetails caseDetails,
+    private CaseDocumentsHolder prepareDocumentsForPrint(CaseDetails caseDetails,
                                                              List<InterimHearingData> interimHearingList,
                                                              String authorisationToken) {
+        CaseDocumentsHolder caseDocumentsHolder = CaseDocumentsHolder.builder()
+            .caseDocuments(new ArrayList<>())
+            .bulkPrintDocuments(new ArrayList<>())
+            .build();
+
         String caseId = caseDetails.getId().toString();
         log.info("preparing for bulk print document for case id {}", caseId);
         Map<String, Object> caseData = caseDetails.getData();
         List<CaseDocument> interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails,
             interimHearingList, authorisationToken);
+        caseDocumentsHolder.getCaseDocuments().addAll(interimDocument);
 
         List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
             interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseData);
 
         interimDocument.forEach(doc -> bulkPrintDocumentsList.add(loadBulkPrintDocument(doc)));
+
+
         caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
 
         List<BulkPrintDocument> documents = interimDocument.stream()
             .map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList());
 
-        addUploadedDocumentsToBulkPrintList(caseId, interimHearingList, documents, authorisationToken);
+        addUploadedDocumentsToBulkPrintList(caseId, interimHearingList, caseDocumentsHolder, authorisationToken);
 
-        return documents;
+        return caseDocumentsHolder;
     }
 
     private void addUploadedDocumentsToBulkPrintList(String caseId,
                                                      List<InterimHearingData> interimHearingList,
-                                                     List<BulkPrintDocument> documents,
+                                                     CaseDocumentsHolder caseDocumentsHolder,
                                                      String authorisationToken) {
         List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
-        interimCaseData.forEach(interimData -> addToBulkPrintList(caseId, interimData, documents, authorisationToken));
+        interimCaseData.forEach(interimData -> addToBulkPrintList(caseId, interimData, caseDocumentsHolder, authorisationToken));
     }
 
     private void addToBulkPrintList(String caseId, Map<String, Object> interimData,
-                                    List<BulkPrintDocument> documents, String authorisationToken) {
+                                    CaseDocumentsHolder caseDocumentsHolder, String authorisationToken) {
         String isDocUploaded = nullToEmpty(interimData.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
         if ("Yes".equalsIgnoreCase(isDocUploaded)) {
             log.warn("Additional uploaded interim document found for printing for case id {}", caseId);
@@ -183,7 +202,8 @@ public class InterimHearingService {
                 documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments =
                 genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
-            documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
+            caseDocumentsHolder.getBulkPrintDocuments().add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
+            caseDocumentsHolder.getCaseDocuments().add(additionalUploadedDocuments);
         }
     }
 
@@ -401,4 +421,6 @@ public class InterimHearingService {
             });
         }
     }
+
+
 }

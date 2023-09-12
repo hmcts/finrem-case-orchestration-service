@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -17,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
@@ -37,20 +37,20 @@ public class FormCandGCorresponder extends HearingCorresponder {
                                  NotificationService notificationService,
                                  FinremCaseDetailsMapper finremCaseDetailsMapper,
                                  DocumentHelper documentHelper, ObjectMapper objectMapper) {
-        super(bulkPrintService, notificationService, finremCaseDetailsMapper);
+        super(bulkPrintService, notificationService, finremCaseDetailsMapper, documentHelper);
         this.documentHelper = documentHelper;
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
+    public List<CaseDocument> getCaseDocuments(CaseDetails caseDetails) {
         String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
         return getHearingCaseDocuments(caseDetails.getData(), caseId);
     }
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
-    private List<BulkPrintDocument> getHearingCaseDocuments(Map<String, Object> caseData, String caseId) {
-        List<BulkPrintDocument> caseDocuments = new ArrayList<>();
+    private List<CaseDocument> getHearingCaseDocuments(Map<String, Object> caseData, String caseId) {
+        List<CaseDocument> caseDocuments = new ArrayList<>();
         try {
             caseData = objectMapper.readValue(objectMapper.writeValueAsString(caseData), HashMap.class);
         } catch (JsonProcessingException e) {
@@ -59,14 +59,13 @@ public class FormCandGCorresponder extends HearingCorresponder {
 
         log.info("Fetching Contested Paper Case bulk print document for caseId {}", caseId);
 
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, FORM_C).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, FORM_G).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, MINI_FORM_A).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, OUT_OF_FAMILY_COURT_RESOLUTION).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, HEARING_ADDITIONAL_DOC).ifPresent(caseDocuments::add);
-
-        List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
-        caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).toList());
+        Optional.ofNullable(documentHelper.nullCheckAndConvertToCaseDocument(caseData.get(FORM_C))).ifPresent(caseDocuments::add);
+        Optional.ofNullable(documentHelper.nullCheckAndConvertToCaseDocument(caseData.get(FORM_G))).ifPresent(caseDocuments::add);
+        Optional.ofNullable(documentHelper.nullCheckAndConvertToCaseDocument(caseData.get(MINI_FORM_A))).ifPresent(caseDocuments::add);
+        Optional.ofNullable(documentHelper.nullCheckAndConvertToCaseDocument(caseData.get(OUT_OF_FAMILY_COURT_RESOLUTION)))
+            .ifPresent(caseDocuments::add);
+        Optional.ofNullable(documentHelper.nullCheckAndConvertToCaseDocument(caseData.get(HEARING_ADDITIONAL_DOC))).ifPresent(caseDocuments::add);
+        caseDocuments.addAll(documentHelper.getFormADocumentsData(caseData));
 
         return caseDocuments;
     }

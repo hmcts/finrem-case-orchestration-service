@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -23,15 +22,16 @@ public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearin
     public FinremApprovedOrderNoticeOfHearingCorresponder(BulkPrintService bulkPrintService,
                                                           NotificationService notificationService,
                                                           DocumentHelper documentHelper) {
-        super(bulkPrintService, notificationService);
+        super(bulkPrintService, notificationService, documentHelper);
         this.documentHelper = documentHelper;
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
+    public List<CaseDocument> getCaseDocuments(FinremCaseDetails caseDetails) {
         List<CaseDocument> hearingNoticePack = caseDetails.getData().getHearingNoticeDocumentPack().stream()
             .map(DocumentCollection::getValue)
             .toList();
-        return documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
+
+        return hearingNoticePack;
     }
 }

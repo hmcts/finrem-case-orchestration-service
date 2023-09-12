@@ -13,12 +13,14 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
@@ -37,6 +39,8 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     private String intervenerPhone;
     private YesOrNo intervenerRepresented;
+
+    private List<DocumentCollection> hearingNoticesDocumentCollection;
 
     @JsonIgnore
     private Boolean intervenerCorrespondenceEnabled;
@@ -59,7 +63,7 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     private OrganisationPolicy intervenerOrganisation;
 
     protected IntervenerWrapper() {
-        intervenerCorrespondenceEnabled =  Boolean.FALSE;
+        intervenerCorrespondenceEnabled = Boolean.FALSE;
     }
 
     public abstract String getIntervenerLabel();
@@ -81,6 +85,7 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     public abstract DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient();
 
     public abstract IntervenerWrapper getIntervenerWrapperFromCaseData(FinremCaseData caseData);
+
 
     public abstract void removeIntervenerWrapperFromCaseData(FinremCaseData caseData);
 
