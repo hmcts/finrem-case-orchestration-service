@@ -51,7 +51,7 @@ import java.util.Optional;
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
 @Builder
 @AllArgsConstructor
@@ -222,6 +222,7 @@ public class FinremCaseData {
     private List<AdditionalHearingDocumentCollection> additionalHearingDocuments;
     private List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollection;
     private List<DocumentCollection> hearingNoticeDocumentPack;
+    private List<DocumentCollection> hearingNoticesDocumentCollection;
 
     private HearingTypeDirection hearingType;
     private String timeEstimate;
