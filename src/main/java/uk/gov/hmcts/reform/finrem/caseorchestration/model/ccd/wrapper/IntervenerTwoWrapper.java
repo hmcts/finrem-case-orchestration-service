@@ -6,12 +6,8 @@ import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @SuperBuilder
 @NoArgsConstructor
@@ -81,21 +77,5 @@ public class IntervenerTwoWrapper extends IntervenerWrapper {
     @JsonIgnore
     public void removeIntervenerWrapperFromCaseData(FinremCaseData caseData) {
         caseData.setIntervenerTwoWrapper(null);
-    }
-
-
-    @Override
-    @JsonIgnore
-    public String getIntervenerHearingNoticesCollectionName() {
-        return "intv2HearingNoticesCollection";
-    }
-
-    @Override
-    @JsonIgnore
-    public List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData) {
-        if (caseData.getIntv2HearingNoticesCollection() == null) {
-            caseData.setIntv2HearingNoticesCollection(new ArrayList<>());
-        }
-        return caseData.getIntv2HearingNoticesCollection();
     }
 }

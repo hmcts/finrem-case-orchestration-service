@@ -13,19 +13,21 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assume.assumeTrue;
+
 @Slf4j
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
 
-    public static final String CCD_CONFIG_PROD_CONTESTED_XLSX = "ccd-config-preview-contested-base.xlsx";
-    public static final String CCD_CONFIG_PROD_CONSENTED_XLSX = "ccd-config-preview-consented-base.xlsx";
+    public static final String CCD_CONFIG_PROD_CONTESTED_XLSX = "ccd-config-prod-contested.xlsx";
+    public static final String CCD_CONFIG_PROD_CONSENTED_XLSX = "ccd-config-prod-consented.xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
 
     private String consentedFileNameWithPath = null;
     private String contestedFileNameWithPath = null;
-    private boolean localMode = true;
+    private boolean localMode = System.getenv("JENKINS_BRANCH") == null;
     private boolean testEnabled = true;
 
     @Before
@@ -64,7 +66,7 @@ public class FinremCaseDataTest {
 
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        //assumeTrue(testEnabled);
+        assumeTrue(testEnabled);
         List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath),
             getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath));
         validateConfig(configFiles);
@@ -72,7 +74,7 @@ public class FinremCaseDataTest {
 
     @Test
     public void testConsentedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        //assumeTrue(testEnabled);
+        assumeTrue(testEnabled);
         List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath),
             getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath));
         validateConfig(configFiles);
@@ -80,14 +82,14 @@ public class FinremCaseDataTest {
 
     @Test
     public void testConsentedStateData() throws IOException, InvalidFormatException {
-        // assumeTrue(testEnabled);
+        assumeTrue(testEnabled);
         File configFile = getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath);
         validateState(configFile);
     }
 
     @Test
     public void testContestedStateData() throws IOException, InvalidFormatException {
-        //assumeTrue(testEnabled);
+        assumeTrue(testEnabled);
         File configFile = getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath);
         validateState(configFile);
     }
