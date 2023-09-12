@@ -5,15 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNotice;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -93,13 +94,19 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
     private List<CaseDocument> returnAndAddCaseDocumentsToIntervenerHearingNotices(FinremCaseDetails caseDetails,
                                                                                    IntervenerWrapper intervenerWrapper) {
         List<CaseDocument> caseDocuments = getCaseDocuments(caseDetails);
-        if (intervenerWrapper.getHearingNoticesDocumentCollection() == null) {
-            intervenerWrapper.setHearingNoticesDocumentCollection(new ArrayList<>());
-        }
+        List<IntervenerHearingNoticeCollection> intervenerHearingNoticesCollection =
+            intervenerWrapper.getIntervenerHearingNoticesCollection(caseDetails.getData());
         caseDocuments.forEach(cd -> {
-            intervenerWrapper.getHearingNoticesDocumentCollection().add(DocumentCollection.builder().value(cd).build());
+            intervenerHearingNoticesCollection.add(getHearingNoticesDocumentCollection(cd));
         });
         return caseDocuments;
+    }
+
+
+    private IntervenerHearingNoticeCollection getHearingNoticesDocumentCollection(CaseDocument hearingNotice) {
+        return IntervenerHearingNoticeCollection.builder()
+            .value(IntervenerHearingNotice.builder().caseDocument(hearingNotice)
+                .noticeReceivedAt(LocalDateTime.now()).build()).build();
     }
 
 }
