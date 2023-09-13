@@ -9,7 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentConversionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 
 import java.io.InputStream;
@@ -29,6 +31,7 @@ class BulkPrintDocumentServiceTest {
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
     private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
     private static final String FILE_NAME = "abc.pdf";
+    private static final String DOC_FILE_NAME = "abc.docx";
     public static final String AUTH = "auth";
     private final byte[] someBytes = "ainhsdcnoih".getBytes();
     @InjectMocks
@@ -36,6 +39,8 @@ class BulkPrintDocumentServiceTest {
 
     @Mock
     private EvidenceManagementDownloadService evidenceManagementService;
+    @Mock
+    private DocumentConversionService documentConversionService;
 
 
 
@@ -54,9 +59,22 @@ class BulkPrintDocumentServiceTest {
         assertThat(result.get(0), is(equalTo(someBytes)));
     }
 
+    @Test
+    void validateWordDocumentOnUploadedDocument()  {
+        Document document = Document.builder().url(FILE_URL)
+            .binaryUrl(FILE_BINARY_URL)
+            .fileName(DOC_FILE_NAME)
+            .build();
+        when(documentConversionService.convertDocumentToPdf(document, AUTH)).thenReturn(someBytes);
+        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, DOC_FILE_NAME, FILE_BINARY_URL);
+
+        List<String> errors =  new ArrayList<>();
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+        assertEquals("Failed to parse the documents for abc.docx", errors.get(0));
+    }
 
     @Test
-    void validateEncryptionOnUploadedDocumentWhenInvalidByteSupplied() throws Exception {
+    void validateEncryptionOnUploadedDocumentWhenInvalidByteSupplied()  {
         when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(someBytes);
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
         BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()

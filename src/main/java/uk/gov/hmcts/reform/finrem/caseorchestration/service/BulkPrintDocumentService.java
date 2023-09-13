@@ -6,6 +6,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.List;
 public class BulkPrintDocumentService {
 
     private final EvidenceManagementDownloadService service;
+    private final DocumentConversionService documentConversionService;
 
     public List<byte[]> downloadDocuments(BulkPrintRequest bulkPrintRequest, String auth) {
         String caseId = bulkPrintRequest.getCaseId();
@@ -36,7 +38,17 @@ public class BulkPrintDocumentService {
                                                      String auth) {
         String documentFilename = caseDocument.getDocumentFilename();
         log.info("checking encryption for file {} for caseId {}", documentFilename, caseId);
-        byte[] pdfBytes = service.download(caseDocument.getDocumentBinaryUrl(), auth);
+        byte[] pdfBytes;
+        if (documentFilename.endsWith(".doc") || documentFilename.endsWith(".docx")) {
+            Document document = Document.builder().url(caseDocument.getDocumentUrl())
+                .binaryUrl(caseDocument.getDocumentBinaryUrl())
+                .fileName(caseDocument.getDocumentFilename())
+                .build();
+
+            pdfBytes = documentConversionService.convertDocumentToPdf(document, auth);
+        } else {
+            pdfBytes = service.download(caseDocument.getDocumentBinaryUrl(), auth);
+        }
 
         try (PDDocument doc = PDDocument.load(pdfBytes)) {
             if (doc.isEncrypted()) {
