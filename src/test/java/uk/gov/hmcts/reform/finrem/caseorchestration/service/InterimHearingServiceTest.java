@@ -275,6 +275,16 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
 
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
+
+        when(selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails)).thenReturn(finremCaseDetails);
+
+
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
+
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
         interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
 

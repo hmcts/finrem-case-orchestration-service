@@ -409,16 +409,21 @@ public class InterimHearingService {
     }
 
     private void notify(CaseDetails caseDetails, Map<String, Object> interimHearingData) {
-        if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
+
+        final FinremCaseDetails finremCaseDetails = selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails);
+
+        if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
+            && finremCaseDetails.getData().isApplicantCorrespondenceEnabled()) {
             log.info("Sending email notification to Applicant Solicitor about interim hearing for case id {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(caseDetails, interimHearingData);
         }
-        if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
+        if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
+            && finremCaseDetails.getData().isRespondentCorrespondenceEnabled()) {
             log.info("Sending email notification to Respondent Solicitor about interim hearing for case id {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(caseDetails, interimHearingData);
         }
         if (notificationService.isContestedApplication(caseDetails)) {
-            final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+
             final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
             interveners.forEach(intervenerWrapper -> {
                 if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)
