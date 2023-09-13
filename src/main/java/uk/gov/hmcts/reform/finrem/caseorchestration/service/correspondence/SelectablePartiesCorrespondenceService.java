@@ -48,6 +48,11 @@ public class SelectablePartiesCorrespondenceService {
         }
     }
 
+    public void setPartiesToReceiveCorrespondence(CaseDetails caseDetails) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+    }
+
     public boolean shouldSendApplicantCorrespondence(CaseDetails caseDetails) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());

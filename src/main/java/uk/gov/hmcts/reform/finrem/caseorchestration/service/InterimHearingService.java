@@ -116,6 +116,7 @@ public class InterimHearingService {
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void sendToBulkPrint(CaseDetails caseDetails, String authorisationToken,
                                  CaseDocumentsHolder caseDocumentsHolder) {
+
         if ((!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails))
             && selectablePartiesCorrespondenceService.shouldSendApplicantCorrespondence(caseDetails)) {
             log.info("Sending interim hearing documents to applicant - bulk print for caseid {}", caseDetails.getId());
@@ -131,11 +132,13 @@ public class InterimHearingService {
 
     private void sendToBulkPrintForInterveners(String authorisationToken, CaseDetails caseDetails, CaseDocumentsHolder caseDocumentsHolder) {
         final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
         interveners.forEach(intervenerWrapper -> {
             if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
                 && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
-                addCaseDocumentsToIntervenerHearingNotices(intervenerWrapper, caseDocumentsHolder, finremCaseDetails.getData());
+                addCaseDocumentsToIntervenerHearingNotices(intervenerWrapper, caseDocumentsHolder, finremCaseDetails.getData(),
+                    caseDetails.getData());
                 if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)) {
                     log.info("Sending letter correspondence to {} for case: {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
@@ -148,10 +151,12 @@ public class InterimHearingService {
     }
 
     private void addCaseDocumentsToIntervenerHearingNotices(IntervenerWrapper intervenerWrapper, CaseDocumentsHolder caseDocumentsHolder,
-                                                            FinremCaseData finremCaseData) {
+                                                            FinremCaseData finremCaseData, Map<String, Object> caseData) {
+        List<IntervenerHearingNoticeCollection> hearingNotices = intervenerWrapper.getIntervenerHearingNoticesCollection(finremCaseData);
         caseDocumentsHolder.getCaseDocuments().forEach(cd -> {
-            intervenerWrapper.getIntervenerHearingNoticesCollection(finremCaseData).add(getHearingNoticesDocumentCollection(cd));
+            hearingNotices.add(getHearingNoticesDocumentCollection(cd));
         });
+        caseData.put(intervenerWrapper.getIntervenerHearingNoticesCollectionName(), hearingNotices);
     }
 
     private IntervenerHearingNoticeCollection getHearingNoticesDocumentCollection(CaseDocument hearingNotice) {
