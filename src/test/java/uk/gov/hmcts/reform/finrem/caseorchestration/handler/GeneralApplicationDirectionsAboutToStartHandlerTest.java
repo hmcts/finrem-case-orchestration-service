@@ -58,8 +58,6 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     private GenericDocumentService documentService;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-    @Mock
-    private PartyService partyService;
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -71,7 +69,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
         handler = new GeneralApplicationDirectionsAboutToStartHandler(assignCaseAccessService,
-            finremCaseDetailsMapper, helper, service, partyService);
+            finremCaseDetailsMapper, helper, service);
     }
 
     @Test

@@ -31,18 +31,16 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-    private final PartyService partyService;
 
     public GeneralApplicationDirectionsAboutToStartHandler(AssignCaseAccessService assignCaseAccessService,
                                                            FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            GeneralApplicationHelper helper,
-                                                           GeneralApplicationDirectionsService service, PartyService partyService) {
+                                                           GeneralApplicationDirectionsService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
         this.assignCaseAccessService = assignCaseAccessService;
         this.finremCaseDetailsMapper = finremCaseDetailsMapper;
-        this.partyService = partyService;
     }
 
     @Override
@@ -61,8 +59,6 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
 
         FinremCaseData caseData = finremCaseDetails.getData();
-
-        caseData.setPartiesOnCase(partyService.getAllActivePartyList(finremCaseDetails));
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
         log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
