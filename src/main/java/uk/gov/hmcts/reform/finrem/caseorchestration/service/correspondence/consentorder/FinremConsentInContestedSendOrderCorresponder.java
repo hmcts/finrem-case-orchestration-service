@@ -48,9 +48,6 @@ public class FinremConsentInContestedSendOrderCorresponder extends FinremMultiLe
         } else {
             consentOrderNotApprovedDocumentService.addNotApprovedConsentCoverLetter(caseDetails, consentOrderDocuments, authToken, recipient);
         }
-        CaseDocument coverSheet = consentOrderApprovedDocumentService.getPopulatedConsentCoverSheet(caseDetails, authToken, recipient);
-        consentOrderDocuments.add(coverSheet);
-        consentOrderDocuments.forEach(doc -> System.out.println("The document url:   " + doc.getDocumentBinaryUrl()));
         List<BulkPrintDocument> bulkPrintDocumentList = new ArrayList<>();
         consentOrderDocuments.forEach(caseDocument -> {
             bulkPrintDocumentList.add(BulkPrintDocument.builder()

@@ -66,7 +66,6 @@ public class FinremCaseData {
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
-    private CaseDocument d11;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate divorceDecreeNisiDate;
@@ -145,7 +144,6 @@ public class FinremCaseData {
     private List<RespondToOrderDocumentCollection> respondToOrderDocuments;
     private List<AmendedConsentOrderCollection> amendedConsentOrderCollection;
     private List<CaseNotesCollection> caseNotesCollection;
-    private String state;
     private List<ScannedDocumentCollection> scannedDocuments;
     private YesOrNo evidenceHandled;
     private CaseDocument approvedConsentOrderLetter;
@@ -204,7 +202,6 @@ public class FinremCaseData {
     private List<FastTrackReason> fastTrackDecisionReason;
     private Complexity addToComplexityListOfCourts;
     private List<EstimatedAsset> estimatedAssetsChecklist;
-    private String netValueOfHome;
     private List<PotentialAllegation> potentialAllegationChecklist;
     private String detailPotentialAllegation;
     private YesOrNo otherReasonForComplexity;
@@ -261,6 +258,12 @@ public class FinremCaseData {
     private List<ApprovedOrderCollection> intv2OrderCollection;
     private List<ApprovedOrderCollection> intv3OrderCollection;
     private List<ApprovedOrderCollection> intv4OrderCollection;
+    private List<RoleConsentOrderCollection> appConsentApprovedOrders;
+    private List<RoleConsentOrderCollection> respConsentApprovedOrders;
+    private List<RoleConsentOrderCollection> intv1ConsentApprovedOrders;
+    private List<RoleConsentOrderCollection> intv2ConsentApprovedOrders;
+    private List<RoleConsentOrderCollection> intv3ConsentApprovedOrders;
+    private List<RoleConsentOrderCollection> intv4ConsentApprovedOrders;
     private List<UnapprovedOrderCollection> appRefusedOrderCollection;
     private List<UnapprovedOrderCollection> respRefusedOrderCollection;
     private List<UnapprovedOrderCollection> intv1RefusedOrderCollection;

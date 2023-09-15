@@ -15,12 +15,17 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class UnapproveOrder {
+@AllArgsConstructor
+public class RoleApprovedOrder {
+    @JsonProperty("orderLetter")
+    private CaseDocument orderLetter;
 
-    @JsonProperty("unapproveOrder")
-    CaseDocument caseDocument;
+    @JsonProperty("consentOrder")
+    private CaseDocument consentOrder;
+
+    @JsonProperty("pensionDocuments")
+    private List<PensionTypeCollection> pensionDocuments;
 
     @JsonProperty("additionalConsentDocuments")
     private List<DocumentCollection> additionalConsentDocuments;

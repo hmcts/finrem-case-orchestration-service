@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RoleConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
@@ -38,6 +39,17 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
     protected List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData) {
         return Optional.ofNullable(caseData.getRespOrderCollection())
             .orElse(new ArrayList<>());
+    }
+
+    @Override
+    protected List<RoleConsentOrderCollection> getConsentOrderCollectionForParty(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getRespConsentApprovedOrders())
+            .orElse(new ArrayList<>());
+    }
+
+    @Override
+    protected void addApprovedConsentOrdersToPartyCollection(FinremCaseData caseData, List<RoleConsentOrderCollection> orderColl) {
+        caseData.setRespConsentApprovedOrders(orderColl);
     }
 
     @Override

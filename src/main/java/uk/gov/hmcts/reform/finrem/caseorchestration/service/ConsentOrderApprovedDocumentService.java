@@ -252,9 +252,9 @@ public class ConsentOrderApprovedDocumentService {
             ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
 
         List<ConsentOrderCollection> convertedData = new ArrayList<>();
-        Object approveOderColl = caseData.get(approvedOrderCollectionFieldName);
+        Object approveOrderColl = caseData.get(approvedOrderCollectionFieldName);
         List<ConsentOrderCollection> approvedOrderList = mapper.registerModule(new JavaTimeModule())
-            .convertValue(approveOderColl != null ? approveOderColl : Collections.emptyList(), new TypeReference<>() {
+            .convertValue(approveOrderColl != null ? approveOrderColl : Collections.emptyList(), new TypeReference<>() {
             });
 
         if (!approvedOrderList.isEmpty()) {
@@ -387,25 +387,35 @@ public class ConsentOrderApprovedDocumentService {
         consentOrderDocumentPack.add(approvedCoverLetter);
     }
 
+    public boolean getApprovedOrderModifiedAfterNotApprovedOrder(ConsentOrderWrapper wrapper, String userAuthorisation) {
+        CaseDocument latestRefusedConsentOrder;
+        CaseDocument latestApprovedConsentOrder;
+        List<ConsentOrderCollection> refusedOrders = wrapper.getConsentedNotApprovedOrders();
+        List<ConsentOrderCollection> approvedOrders = wrapper.getContestedConsentedApprovedOrders();
+        if (refusedOrders != null && !refusedOrders.isEmpty()) {
+            latestRefusedConsentOrder = refusedOrders.get(refusedOrders.size() - 1).getApprovedOrder().getConsentOrder();
+        } else {
+            return true;
+        }
+        if (approvedOrders != null && !approvedOrders.isEmpty()) {
+            latestApprovedConsentOrder = approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder().getConsentOrder();
+        } else {
+            return false;
+        }
+        return documentOrderingService.isDocumentModifiedLater(latestApprovedConsentOrder, latestRefusedConsentOrder, userAuthorisation);
+    }
+
     public CaseDocument getPopulatedConsentCoverSheet(FinremCaseDetails caseDetails,
                                                       String authToken,
                                                       DocumentHelper.PaperNotificationRecipient recipient) {
         final Long caseId = caseDetails.getId();
         Map<String, Object> placeholdersMap = bulkPrintLetterDetailsMapper
-            .getLetterDetailsAsMap(caseDetails, recipient, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+                .getLetterDetailsAsMap(caseDetails, recipient, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
         CaseDocument bulkPrintCoverSheet = genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, placeholdersMap,
-            documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName(),
-            caseDetails.getId().toString());
+                documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName(),
+                caseDetails.getId().toString());
         log.info("Generating consent order cover sheet {} from {} for role {} on case {}", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate(), recipient, caseId);
+                documentConfiguration.getBulkPrintTemplate(), recipient, caseId);
         return bulkPrintCoverSheet;
-    }
-
-    public boolean getApprovedOrderModifiedAfterNotApprovedOrder(ConsentOrderWrapper wrapper, String userAuthorisation) {
-        CaseDocument latestRefusedConsentOrder = wrapper.getConsentedNotApprovedOrders()
-            .get(wrapper.getConsentedNotApprovedOrders().size() - 1).getApprovedOrder().getConsentOrder();
-        CaseDocument latestApprovedConsentOrder = wrapper.getContestedConsentedApprovedOrders()
-            .get(wrapper.getContestedConsentedApprovedOrders().size() - 1).getApprovedOrder().getConsentOrder();
-        return documentOrderingService.isDocumentModifiedLater(latestApprovedConsentOrder, latestRefusedConsentOrder, userAuthorisation);
     }
 }

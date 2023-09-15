@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RoleConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
@@ -33,6 +34,17 @@ public class SendOrderIntervenerOneDocumentHandler extends SendOrderPartyDocumen
     protected List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData) {
         return Optional.ofNullable(caseData.getIntv1OrderCollection())
             .orElse(new ArrayList<>());
+    }
+
+    @Override
+    protected List<RoleConsentOrderCollection> getConsentOrderCollectionForParty(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getIntv1ConsentApprovedOrders())
+            .orElse(new ArrayList<>());
+    }
+
+    @Override
+    protected void addApprovedConsentOrdersToPartyCollection(FinremCaseData caseData, List<RoleConsentOrderCollection> orderColl) {
+        caseData.setIntv1ConsentApprovedOrders(orderColl);
     }
 
     @Override

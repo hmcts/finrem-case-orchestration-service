@@ -125,8 +125,8 @@ public class ConsentOrderNotApprovedDocumentService {
     }
 
     public CaseDocument getLatestOrderDocument(CaseDocument refusedConsentOrder,
-                                                CaseDocument latestGeneralOrder,
-                                                String userAuthorisation) {
+                                               CaseDocument latestGeneralOrder,
+                                               String userAuthorisation) {
         if (refusedConsentOrder != null && latestGeneralOrder != null) {
             return documentOrderingService.isDocumentModifiedLater(latestGeneralOrder, refusedConsentOrder, userAuthorisation)
                 ? latestGeneralOrder : refusedConsentOrder;
