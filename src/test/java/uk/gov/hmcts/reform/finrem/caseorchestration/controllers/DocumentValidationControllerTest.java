@@ -12,7 +12,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
 import java.io.File;
@@ -50,6 +52,10 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
 
     @MockBean
     private ConsentedApplicationHelper helper;
+    @MockBean
+    private BulkPrintDocumentService documentService;
+    @MockBean
+    private DocumentHelper documentHelper;
 
     @Test
     public void whenCaseIsContestedshouldReturnSuccessWhenFileUploadCheckButNotToSetLabelField() throws Exception {
@@ -85,8 +91,11 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors").doesNotExist());
+            .andExpect(jsonPath("$.errors.errors").doesNotExist());
         verify(helper).setConsentVariationOrderLabelField(anyMap());
+        verify(documentHelper).getPensionDocumentsData(anyMap());
+        verify(documentHelper).getVariationOrderDocumentsData(anyMap());
+        verify(documentService, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
     @Test

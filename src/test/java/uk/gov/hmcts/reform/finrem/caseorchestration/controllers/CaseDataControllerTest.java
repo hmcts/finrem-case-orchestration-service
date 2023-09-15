@@ -317,7 +317,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 is(APP_SOLICITOR_POLICY)))
             .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole",
                 is(RESP_SOLICITOR_POLICY)))
-            .andExpect(jsonPath("$.data.changeOrganisationRequestField").exists());
+            .andExpect(jsonPath("$.data.changeOrganisationRequestField").exists())
+            .andExpect(jsonPath("$.errors.errors").doesNotExist());
     }
 
     @Test
