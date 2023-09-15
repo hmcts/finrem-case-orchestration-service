@@ -20,6 +20,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -151,6 +155,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener1-referdetails").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
+        data.setIntervenerOneWrapper(IntervenerOneWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE)
+            .intervenerName("intervener1").build());
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
@@ -169,6 +176,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
             .data(data).build();
+        data.setIntervenerTwoWrapper(IntervenerTwoWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE)
+            .intervenerName("intervener1").build());
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
         verify(bulkPrintService, times(1)).printIntervenerDocuments(
@@ -183,6 +193,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener3-referdetails").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
+        data.setIntervenerThreeWrapper(IntervenerThreeWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE)
+            .intervenerName("intervener1").build());
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
@@ -199,6 +212,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener4-referdetails").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
+        data.setIntervenerFourWrapper(IntervenerFourWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE)
+            .intervenerName("intervener1").build());
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
@@ -259,6 +275,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
                 "courtName", "Kingston-Upon-Thames County Court And Family Court",
                 "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
                 "phoneNumber", "0208 972 8700",
+                "openingHours", "from 8am to 6pm, Monday to Friday",
                 "email", "enquiries.kingston.countycourt@justice.gov.uk")),
             Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
             Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
@@ -361,7 +378,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private void assertDocumentPrintRequestContainsExpectedDocuments() {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
+                GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).fileName("app_docs.pdf").build())
             .toArray()));
     }

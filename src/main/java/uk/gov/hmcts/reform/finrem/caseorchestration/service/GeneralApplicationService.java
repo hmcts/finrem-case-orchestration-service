@@ -22,8 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 
@@ -227,8 +225,8 @@ public class GeneralApplicationService {
     }
 
     private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(FinremCaseDetails caseDetails, String loggedInUserCaseRole,
-         List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
-         FinremCaseData caseData, FinremCaseData caseDataBefore) {
+                                                                                       List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
+                                                                                       FinremCaseData caseData, FinremCaseData caseDataBefore) {
         switch (loggedInUserCaseRole) {
             case INTERVENER1 -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
@@ -420,7 +418,9 @@ public class GeneralApplicationService {
 
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(generalApplications));
+
         GeneralApplicationWrapper generalApplicationWrapper = caseData.getGeneralApplicationWrapper();
+
         convertToGeneralApplicationsCollections(generalApplicationWrapper, appRespGeneralApplications,
             intervener1GeneralApplications, intervener2GeneralApplications,
             intervener3GeneralApplications, intervener4GeneralApplications);
@@ -442,28 +442,16 @@ public class GeneralApplicationService {
         }
     }
 
-    public void updateIntervenerDirectionsDocumentCollection(GeneralApplicationWrapper wrapper,
-                                                             CaseDocument caseDocument) {
-        IntervenerCaseDocument gaCaseDocument = IntervenerCaseDocument.builder().build();
-        IntervenerCaseDocumentCollection gaCaseDocumentCollection = IntervenerCaseDocumentCollection.builder().build();
-        List<IntervenerCaseDocumentCollection> gaDocumentCollectionList = new ArrayList<>();
-        List<IntervenerCaseDocumentCollection> existingGeneralApplicationDocuments =
-            wrapper.getGeneralApplicationIntvrDocuments();
-        if (existingGeneralApplicationDocuments != null && existingGeneralApplicationDocuments.size() > 0) {
-            gaCaseDocument.setDocument(caseDocument);
-            gaCaseDocumentCollection.setValue(gaCaseDocument);
-            if (existingGeneralApplicationDocuments.stream().filter(
-                ga -> ga.getValue().getDocument().getDocumentUrl().equals(
-                    caseDocument.getDocumentUrl())).count() < 1) {
-                existingGeneralApplicationDocuments.add(gaCaseDocumentCollection);
-            }
-            wrapper.setGeneralApplicationIntvrDocuments(existingGeneralApplicationDocuments);
-        } else {
-            gaCaseDocument.setDocument(caseDocument);
-            gaCaseDocumentCollection.setValue(gaCaseDocument);
-            gaDocumentCollectionList.add(gaCaseDocumentCollection);
-            wrapper.setGeneralApplicationIntvrDocuments(gaDocumentCollectionList);
+    public void updateIntervenerDirectionsOrders(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        List<GeneralApplicationsCollection> intvOrders = new ArrayList<>();
+        if (caseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders() != null
+            && !caseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders().isEmpty()) {
+            intvOrders.addAll(helper.convertToGeneralApplicationsCollection(
+                caseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders()));
         }
+        intvOrders.add(GeneralApplicationsCollection.builder().id(UUID.randomUUID()).value(items).build());
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationIntvrOrders(intvOrders);
     }
 
     private void convertToGeneralApplicationsCollections(GeneralApplicationWrapper wrapper,
@@ -496,6 +484,7 @@ public class GeneralApplicationService {
             && !appRespGeneralApplications.isEmpty()) {
             wrapper.setAppRespGeneralApplications(
                 helper.convertToGeneralApplicationsCollection(appRespGeneralApplications));
+            wrapper.getAppRespGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(null));
         }
     }
 

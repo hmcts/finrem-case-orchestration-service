@@ -28,7 +28,7 @@ public class RejectGeneralApplicationAboutToSubmitHandler
     private final GeneralApplicationService generalApplicationService;
 
     public RejectGeneralApplicationAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-                                        GeneralApplicationService service) {
+                                                        GeneralApplicationService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.generalApplicationService = service;

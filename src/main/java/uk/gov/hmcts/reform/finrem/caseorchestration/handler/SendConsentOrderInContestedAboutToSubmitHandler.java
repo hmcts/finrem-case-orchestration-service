@@ -106,7 +106,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
 
         if (consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, userAuthorisation)) {
             List<ConsentOrderCollection> approvedConsentOrders = caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
-            ConsentOrderCollection latestApprovedConsentOrder = approvedConsentOrders.get(approvedConsentOrders.size() -1);
+            ConsentOrderCollection latestApprovedConsentOrder = approvedConsentOrders.get(approvedConsentOrders.size() - 1);
             consentOrderDocumentPack = createApprovedOrderDocumentPack(latestApprovedConsentOrder);
             sendOrderPartyDocumentList.forEach(
                 handler -> handler.setUpConsentOrderApprovedDocumentsOnCase(caseDetails, parties, approvedConsentOrders, additionalDocuments));
@@ -114,7 +114,8 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
             CaseDocument latestGeneralOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
             CaseDocument latestRefusedConsentOrder = null;
             if (wrapper.getConsentedNotApprovedOrders() != null && !wrapper.getConsentedNotApprovedOrders().isEmpty()) {
-                latestRefusedConsentOrder = wrapper.getConsentedNotApprovedOrders().get(wrapper.getConsentedNotApprovedOrders().size() - 1).getApprovedOrder().getConsentOrder();
+                latestRefusedConsentOrder = wrapper.getConsentedNotApprovedOrders()
+                    .get(wrapper.getConsentedNotApprovedOrders().size() - 1).getApprovedOrder().getConsentOrder();
             }
 
             CaseDocument latestOrderDocument = consentOrderNotApprovedDocumentService.getLatestOrderDocument(
@@ -130,27 +131,30 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
         consentOrderDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
     }
 
-    private List<CaseDocument> createApprovedOrderDocumentPack (ConsentOrderCollection latestApprovedConsentOrder) {
+    private List<CaseDocument> createApprovedOrderDocumentPack(ConsentOrderCollection latestApprovedConsentOrder) {
         List<CaseDocument> approvedConsentOrderDocumentPack = new ArrayList<>();
-            CaseDocument consentOrder = latestApprovedConsentOrder.getApprovedOrder().getConsentOrder();
-            CaseDocument orderLetter = latestApprovedConsentOrder.getApprovedOrder().getOrderLetter();
-            List<CaseDocument> pensionCaseDocuments = new ArrayList<>();
-            List<PensionTypeCollection> pensionDocuments = latestApprovedConsentOrder.getApprovedOrder().getPensionDocuments();
-            if (consentOrder != null) {
-                approvedConsentOrderDocumentPack.add(consentOrder);
-            }
-            if (orderLetter != null) {
-                approvedConsentOrderDocumentPack.add(orderLetter);
-            }
-            if (pensionDocuments != null && !pensionDocuments.isEmpty()) {
-                pensionDocuments.forEach(doc -> pensionCaseDocuments.add(doc.getTypedCaseDocument().getPensionDocument()));
-                approvedConsentOrderDocumentPack.addAll(pensionCaseDocuments);
-            }
+        CaseDocument consentOrder = latestApprovedConsentOrder.getApprovedOrder().getConsentOrder();
+        CaseDocument orderLetter = latestApprovedConsentOrder.getApprovedOrder().getOrderLetter();
+        List<CaseDocument> pensionCaseDocuments = new ArrayList<>();
+        List<PensionTypeCollection> pensionDocuments = latestApprovedConsentOrder.getApprovedOrder().getPensionDocuments();
+        if (consentOrder != null) {
+            approvedConsentOrderDocumentPack.add(consentOrder);
+        }
+        if (orderLetter != null) {
+            approvedConsentOrderDocumentPack.add(orderLetter);
+        }
+        if (pensionDocuments != null && !pensionDocuments.isEmpty()) {
+            pensionDocuments.forEach(doc -> pensionCaseDocuments.add(doc.getTypedCaseDocument().getPensionDocument()));
+            approvedConsentOrderDocumentPack.addAll(pensionCaseDocuments);
+        }
 
         return approvedConsentOrderDocumentPack;
     }
 
-    private List<DocumentCollection> getAdditionalDocuments(FinremCaseData caseData, String userAuthorisation, String caseId, List<OrderSentToPartiesCollection> printOrderCollection) {
+    private List<DocumentCollection> getAdditionalDocuments(FinremCaseData caseData,
+                                                            String userAuthorisation,
+                                                            String caseId,
+                                                            List<OrderSentToPartiesCollection> printOrderCollection) {
 
         List<CaseDocument> documents = new ArrayList<>();
         List<DocumentCollection> caseDocuments = new ArrayList<>();

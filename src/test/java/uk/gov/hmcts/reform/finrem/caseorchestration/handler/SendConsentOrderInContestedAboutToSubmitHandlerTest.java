@@ -124,7 +124,6 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-        ConsentOrderWrapper wrapper = data.getConsentOrderWrapper();
         data.setPartiesOnCase(getParties());
 
         CaseDocument additionalDocument = caseDocument("additionalDocumentUrl", "additionalDocumentFileName",
@@ -141,7 +140,7 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
         List<ConsentOrderCollection> approvedOrders = List.of(firstConsentOrderCollection, secondConsentOrderCollection);
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), any(), any())).thenReturn(additionalDocument);
         when(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(any(), any())).thenReturn(true);
-
+        ConsentOrderWrapper wrapper = data.getConsentOrderWrapper();
         wrapper.setContestedConsentedApprovedOrders(approvedOrders);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = sendConsentOrderInContestedAboutToSubmitHandler.handle(
             callbackRequest, AUTH_TOKEN);
@@ -170,7 +169,8 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
         List<ConsentOrderCollection> refusedOrders = List.of(firstConsentOrderCollection, secondConsentOrderCollection);
         wrapper.setConsentedNotApprovedOrders(refusedOrders);
         when(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(any(), any())).thenReturn(false);
-        when(consentOrderNotApprovedDocumentService.getLatestOrderDocument(any(), any(), any())).thenReturn(wrapper.getConsentedNotApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
+        when(consentOrderNotApprovedDocumentService.getLatestOrderDocument(any(), any(), any()))
+            .thenReturn(wrapper.getConsentedNotApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = sendConsentOrderInContestedAboutToSubmitHandler.handle(
             callbackRequest, AUTH_TOKEN);

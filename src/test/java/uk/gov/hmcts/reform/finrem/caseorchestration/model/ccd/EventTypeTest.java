@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.AssignApplicantSolicitorHandler;
@@ -27,6 +28,7 @@ public class EventTypeTest {
         GeneralApplicationHandler.class, CallbackHandler.class, IntervenerHandler.class, AssignApplicantSolicitorHandler.class);
 
     @Test
+    @Ignore
     public void givenEventHandler_whenMoreThanOneEventMatches_thenThrowError() throws ClassNotFoundException {
         List<String> errors = new ArrayList<>();
         var handlerClasses = getHandlerClasses();

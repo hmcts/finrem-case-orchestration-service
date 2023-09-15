@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -158,37 +157,27 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         return data;
     }
 
-    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDocuments(CaseDetails caseDetails,
-                                                                                      GeneralApplicationCollectionData data,
-                                                                                      List<BulkPrintDocument> bulkPrintDocuments,
-                                                                                      String status,
-                                                                                      String userAuthorisation) {
+    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDocuments(
+        FinremCaseDetails finremCaseDetails, GeneralApplicationCollectionData data,
+        List<BulkPrintDocument> bulkPrintDocuments, String status, String userAuthorisation) {
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
-        GeneralApplicationWrapper wrapper = finremCaseDetails.getData().getGeneralApplicationWrapper();
-        if (items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER1)
-            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER2)
-            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER3)
-            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
-            gaService.updateIntervenerDirectionsDocumentCollection(wrapper, caseDocument);
-        }
         items.setGeneralApplicationDirectionsDocument(caseDocument);
         items.setGeneralApplicationOutcomeOther(Objects.toString(
             caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         String caseId = caseDetails.getId().toString();
+        log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
+            EventType.GENERAL_APPLICATION_DIRECTIONS);
 
-        log.info("status {} for general application for Case ID: {} Event type {}",
-            status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
-
-        switch (gaElementStatus) {
-            case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
-            case "Not Approved" ->
+        switch (gaElementStatus.toLowerCase()) {
+            case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
+            case "not approved" ->
                 items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
-            case "Other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
+            case "other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
             default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
         }
 
@@ -221,6 +210,13 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
                 .fileName(items.getGeneralApplicationDraftOrder().getDocumentFilename())
                 .build();
             bulkPrintDocuments.add(draftDoc);
+        }
+
+        if (items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER1)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER2)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER3)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
+            gaService.updateIntervenerDirectionsOrders(items, finremCaseDetails);
         }
         return data;
     }

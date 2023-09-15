@@ -170,7 +170,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
         assertEquals(2, generalApplicationCollectionData.size());
 
         assertEquals(GeneralApplicationStatus.NOT_APPROVED.getId(),
-              generalApplicationCollectionData.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
+            generalApplicationCollectionData.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationOutcomeList());
     }
 

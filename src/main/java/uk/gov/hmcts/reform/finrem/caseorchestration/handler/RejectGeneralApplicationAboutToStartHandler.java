@@ -29,7 +29,7 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
     private final GeneralApplicationService service;
 
     public RejectGeneralApplicationAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-                                        GeneralApplicationService service) {
+                                                       GeneralApplicationService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;

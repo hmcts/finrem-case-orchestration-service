@@ -3,11 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.cons
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremMultiLetterOrEmailAllPartiesCorresponder;
@@ -21,8 +21,8 @@ public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEma
 
     @Autowired
     public FinremContestedSendOrderCorresponder(NotificationService notificationService,
-                                                BulkPrintService bulkPrintService) {
-        super(bulkPrintService, notificationService);
+                                                BulkPrintService bulkPrintService, DocumentHelper documentHelper) {
+        super(bulkPrintService, notificationService, documentHelper);
     }
 
     @Override
@@ -50,14 +50,12 @@ public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEma
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
+    public List<CaseDocument> getCaseDocuments(FinremCaseDetails caseDetails) {
         List<OrderSentToPartiesCollection> sentToPartiesCollection = caseDetails.getData().getOrdersSentToPartiesCollection();
-        List<BulkPrintDocument> bulkPrintDocumentList = new ArrayList<>();
+        List<CaseDocument> caseDocuments = new ArrayList<>();
         sentToPartiesCollection.forEach(sendOrderObj -> {
-            CaseDocument caseDocument = sendOrderObj.getValue().getCaseDocument();
-            bulkPrintDocumentList.add(BulkPrintDocument.builder()
-                .fileName(caseDocument.getDocumentFilename()).binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build());
+            caseDocuments.add(sendOrderObj.getValue().getCaseDocument());
         });
-        return bulkPrintDocumentList;
+        return caseDocuments;
     }
 }

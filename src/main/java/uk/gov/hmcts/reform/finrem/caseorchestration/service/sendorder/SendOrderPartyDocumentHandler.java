@@ -101,11 +101,13 @@ public abstract class SendOrderPartyDocumentHandler {
     }
 
     protected abstract List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData);
+
     protected abstract List<RoleConsentOrderCollection> getConsentOrderCollectionForParty(FinremCaseData caseData);
 
     protected abstract List<UnapprovedOrderCollection> getUnapprovedOrderCollectionForParty(FinremCaseData caseData);
 
     protected abstract void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
+
     protected abstract void addApprovedConsentOrdersToPartyCollection(FinremCaseData caseData, List<RoleConsentOrderCollection> orderColl);
 
     protected abstract void addUnapprovedOrdersToPartyCollection(FinremCaseData caseData, List<UnapprovedOrderCollection> orderColl);

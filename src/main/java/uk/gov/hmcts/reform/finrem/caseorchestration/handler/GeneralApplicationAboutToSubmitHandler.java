@@ -20,7 +20,7 @@ public class GeneralApplicationAboutToSubmitHandler extends FinremCallbackHandle
     private final GeneralApplicationService service;
 
     public GeneralApplicationAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-                                                       GeneralApplicationService service) {
+                                                  GeneralApplicationService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
@@ -29,16 +29,16 @@ public class GeneralApplicationAboutToSubmitHandler extends FinremCallbackHandle
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.GENERAL_APPLICATION.equals(eventType);
+                && CaseType.CONTESTED.equals(caseType)
+                && EventType.GENERAL_APPLICATION.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
+                                                                              String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("About to Submit callback event type {} for case id: {}",
-            EventType.GENERAL_APPLICATION, caseDetails.getId());
+                EventType.GENERAL_APPLICATION, caseDetails.getId());
 
         FinremCaseData caseData = service.updateGeneralApplications(callbackRequest, userAuthorisation);
 

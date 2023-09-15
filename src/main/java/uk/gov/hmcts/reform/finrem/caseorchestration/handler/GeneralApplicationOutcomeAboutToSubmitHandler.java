@@ -29,7 +29,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
     private final GeneralApplicationService service;
 
     public GeneralApplicationOutcomeAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-                                                        GeneralApplicationService service) {
+                                                         GeneralApplicationService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;

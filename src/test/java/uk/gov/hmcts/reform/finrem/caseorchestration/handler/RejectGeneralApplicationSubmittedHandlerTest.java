@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
@@ -88,23 +89,23 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
         submittedHandler = new RejectGeneralApplicationSubmittedHandler(finremCaseDetailsMapper,
-            notificationService,
-            paperNotificationService,
-            objectMapper, generalApplicationHelper);
+                notificationService,
+                paperNotificationService,
+                objectMapper, generalApplicationHelper);
     }
 
     @Test
     public void givenValidCallBack_whenCanHandle_thenReturnTrue() {
         assertTrue(submittedHandler.canHandle(CallbackType.SUBMITTED,
-            CaseType.CONTESTED,
-            EventType.REJECT_GENERAL_APPLICATION));
+                CaseType.CONTESTED,
+                EventType.REJECT_GENERAL_APPLICATION));
     }
 
     @Test
     public void givenInvalidCallBack_whenCanHandle_thenReturnFalse() {
         assertFalse(submittedHandler.canHandle(CallbackType.ABOUT_TO_SUBMIT,
-            CaseType.CONTESTED,
-            EventType.REJECT_GENERAL_APPLICATION));
+                CaseType.CONTESTED,
+                EventType.REJECT_GENERAL_APPLICATION));
     }
 
     @Test
@@ -112,13 +113,13 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(callbackRequest.getCaseDetails()))
-            .thenReturn(true);
+                .thenReturn(true);
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
         wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
-            buildDynamicIntervenerListForApplicant()));
+                buildDynamicIntervenerListForApplicant()));
         wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
-            buildDynamicIntervenerListForApplicant()));
+                buildDynamicIntervenerListForApplicant()));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(notificationService).sendGeneralApplicationRejectionEmailToAppSolicitor(callbackRequest.getCaseDetails());
     }
@@ -128,15 +129,33 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(callbackRequest.getCaseDetails()))
-            .thenReturn(true);
+                .thenReturn(true);
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
         wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
-            buildDynamicIntervenerListForRespondent()));
+                buildDynamicIntervenerListForRespondent()));
         wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
-            buildDynamicIntervenerListForRespondent()));
+                buildDynamicIntervenerListForRespondent()));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(notificationService).sendGeneralApplicationRejectionEmailToResSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void givenIntervenerSolicitorDigital_whenHandle_thenSendEmailToIntervenerSolicitor() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper().setIntervenerCorrespondenceEnabled(true);
+        when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
+                any(FinremCaseDetails.class))).thenReturn(true);
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
+        wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+                buildDynamicListForIntervener(INTERVENER1)));
+        wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+                buildDynamicListForIntervener(INTERVENER1)));
+        submittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        verify(notificationService).sendGeneralApplicationRejectionEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+                callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper());
     }
 
     @Test
@@ -144,16 +163,16 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
-            caseDetailsBefore(buildDynamicIntervenerListForApplicant()));
+                caseDetailsBefore(buildDynamicIntervenerListForApplicant()));
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
         wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
-            buildDynamicIntervenerListForApplicant()));
+                buildDynamicIntervenerListForApplicant()));
         wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
-            buildDynamicIntervenerListForApplicant()));
+                buildDynamicIntervenerListForApplicant()));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(paperNotificationService).printApplicantRejectionGeneralApplication(
-            caseDetailsBefore(buildDynamicIntervenerListForApplicant()), AUTH_TOKEN);
+                caseDetailsBefore(buildDynamicIntervenerListForApplicant()), AUTH_TOKEN);
     }
 
     @Test
@@ -161,16 +180,37 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
-            caseDetailsBefore(buildDynamicIntervenerListForRespondent()));
+                caseDetailsBefore(buildDynamicIntervenerListForRespondent()));
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
         wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
-            buildDynamicIntervenerListForRespondent()));
+                buildDynamicIntervenerListForRespondent()));
         wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
-            buildDynamicIntervenerListForRespondent()));
+                buildDynamicIntervenerListForRespondent()));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(paperNotificationService).printRespondentRejectionGeneralApplication(
-            caseDetailsBefore(buildDynamicIntervenerListForRespondent()), AUTH_TOKEN);
+                caseDetailsBefore(buildDynamicIntervenerListForRespondent()), AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenIntervenerSolicitorNotDigital_whenHandle_thenSendLetterToIntervenerSolicitor() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        DynamicRadioList dynamicRadioList = buildDynamicListForIntervener(INTERVENER1);
+        callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper().setIntervenerCorrespondenceEnabled(true);
+        when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
+        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
+                caseDetailsBefore(dynamicRadioList));
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
+                any(FinremCaseDetails.class))).thenReturn(false);
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
+        wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+                dynamicRadioList));
+        wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+                dynamicRadioList));
+        submittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        verify(paperNotificationService).printIntervenerRejectionGeneralApplication(
+                caseDetailsBefore(dynamicRadioList), callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper(), AUTH_TOKEN);
     }
 
     @Test
@@ -186,141 +226,141 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
 
     private DynamicList generalApplicationDynamicList() {
         return DynamicList.builder()
-            .value(DynamicListElement.builder().code(TEST_ID).build())
-            .build();
+                .value(DynamicListElement.builder().code(TEST_ID).build())
+                .build();
     }
 
     public DynamicRadioListElement getDynamicListElement(String code, String label) {
         return DynamicRadioListElement.builder()
-            .code(code)
-            .label(label)
-            .build();
+                .code(code)
+                .label(label)
+                .build();
     }
 
     public DynamicRadioList buildDynamicIntervenerListForApplicant() {
 
         List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
-            getDynamicListElement(RESPONDENT, RESPONDENT),
-            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+                getDynamicListElement(RESPONDENT, RESPONDENT),
+                getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
-            .value(dynamicListElements.get(0))
-            .listItems(dynamicListElements)
-            .build();
+                .value(dynamicListElements.get(0))
+                .listItems(dynamicListElements)
+                .build();
     }
 
     public DynamicRadioList buildDynamicIntervenerListForRespondent() {
 
         List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(RESPONDENT, RESPONDENT),
-            getDynamicListElement(APPLICANT, APPLICANT),
-            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+                getDynamicListElement(APPLICANT, APPLICANT),
+                getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
-            .value(dynamicListElements.get(0))
-            .listItems(dynamicListElements)
-            .build();
+                .value(dynamicListElements.get(0))
+                .listItems(dynamicListElements)
+                .build();
     }
 
     public DynamicRadioList buildDynamicListForIntervener(String role) {
 
         List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(role, role));
         return DynamicRadioList.builder()
-            .value(dynamicListElements.get(0))
-            .listItems(dynamicListElements)
-            .build();
+                .value(dynamicListElements.get(0))
+                .listItems(dynamicListElements)
+                .build();
     }
 
     private CaseDetails caseDetailsBefore(DynamicRadioList receivedFrom) {
         Map<String, Object> caseData = new HashMap<>();
         List<GeneralApplicationCollectionData> rejectedGeneralApplicationData = List.of(
-            GeneralApplicationCollectionData.builder()
-                .id(TEST_ID)
-                .generalApplicationItems(GeneralApplicationItems.builder()
-                    .generalApplicationSender(receivedFrom)
-                    .build())
-                .build()
+                GeneralApplicationCollectionData.builder()
+                        .id(TEST_ID)
+                        .generalApplicationItems(GeneralApplicationItems.builder()
+                                .generalApplicationSender(receivedFrom)
+                                .build())
+                        .build()
         );
         caseData.put(GENERAL_APPLICATION_COLLECTION, rejectedGeneralApplicationData);
         CaseDetails caseDetails = CaseDetails.builder()
-            .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED.getCcdType())
-            .id(12345L)
-            .build();
+                .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED.getCcdType())
+                .id(12345L)
+                .build();
         return caseDetails;
     }
 
     protected FinremCallbackRequest buildCallbackRequest() {
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationSender(
-                buildDynamicIntervenerListForApplicant()).generalApplicationCreatedBy("Claire Mumford")
-                .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
-                .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
-                    LocalDate.of(2022, 8, 2)).build();
+                GeneralApplicationItems.builder().generalApplicationSender(
+                                buildDynamicIntervenerListForApplicant()).generalApplicationCreatedBy("Claire Mumford")
+                        .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+                        .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
+                                LocalDate.of(2022, 8, 2)).build();
         CaseDocument caseDocument = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
-            .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
-            .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
+                .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
+                .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
         GeneralApplicationsCollection intervener1GeneralApplications = GeneralApplicationsCollection.builder()
-            .id(UUID.randomUUID()).value(generalApplicationItems).build();
+                .id(UUID.randomUUID()).value(generalApplicationItems).build();
         GeneralApplicationsCollection intervener2GeneralApplications = GeneralApplicationsCollection.builder()
-            .id(UUID.randomUUID()).value(generalApplicationItems).build();
+                .id(UUID.randomUUID()).value(generalApplicationItems).build();
         GeneralApplicationsCollection intervener3GeneralApplications = GeneralApplicationsCollection.builder()
-            .id(UUID.randomUUID()).value(generalApplicationItems).build();
+                .id(UUID.randomUUID()).value(generalApplicationItems).build();
         GeneralApplicationsCollection intervener4GeneralApplications = GeneralApplicationsCollection.builder()
-            .id(UUID.randomUUID()).value(generalApplicationItems).build();
+                .id(UUID.randomUUID()).value(generalApplicationItems).build();
         intervener1GeneralApplications.getValue().setGeneralApplicationSender(
-            buildDynamicListForIntervener(INTERVENER1));
+                buildDynamicListForIntervener(INTERVENER1));
         intervener2GeneralApplications.getValue().setGeneralApplicationSender(
-            buildDynamicListForIntervener(INTERVENER2));
+                buildDynamicListForIntervener(INTERVENER2));
         intervener3GeneralApplications.getValue().setGeneralApplicationSender(
-            buildDynamicListForIntervener(INTERVENER3));
+                buildDynamicListForIntervener(INTERVENER3));
         intervener4GeneralApplications.getValue().setGeneralApplicationSender(
-            buildDynamicListForIntervener(INTERVENER4));
+                buildDynamicListForIntervener(INTERVENER4));
         GeneralApplicationsCollection generalApplicationsBefore = GeneralApplicationsCollection.builder()
-            .id(UUID.fromString("1fa411d2-3da3-468d-ad8d-3bfb2514203d")).build();
+                .id(UUID.fromString("1fa411d2-3da3-468d-ad8d-3bfb2514203d")).build();
         GeneralApplicationItems generalApplicationItemsAdded =
-            GeneralApplicationItems.builder().generalApplicationDocument(caseDocument).generalApplicationDraftOrder(caseDocument)
-                .generalApplicationDirectionsDocument(caseDocument).generalApplicationSender(buildDynamicIntervenerListForApplicant())
-                .generalApplicationCreatedBy("Claire Mumford")
-                .generalApplicationStatus(String.valueOf(DIRECTION_APPROVED)).generalApplicationHearingRequired("No")
-                .generalApplicationCreatedDate(LocalDate.now()).build();
+                GeneralApplicationItems.builder().generalApplicationDocument(caseDocument).generalApplicationDraftOrder(caseDocument)
+                        .generalApplicationDirectionsDocument(caseDocument).generalApplicationSender(buildDynamicIntervenerListForApplicant())
+                        .generalApplicationCreatedBy("Claire Mumford")
+                        .generalApplicationStatus(String.valueOf(DIRECTION_APPROVED)).generalApplicationHearingRequired("No")
+                        .generalApplicationCreatedDate(LocalDate.now()).build();
         generalApplicationsBefore.setValue(generalApplicationItemsAdded);
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder().id(
-            UUID.fromString("1fa411d2-3da3-468d-ad8d-3bfb2514203d")).value(generalApplicationItems).build();
+                UUID.fromString("1fa411d2-3da3-468d-ad8d-3bfb2514203d")).value(generalApplicationItems).build();
         FinremCaseData caseData = FinremCaseData.builder()
-            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
-                .generalApplicationDirectionsHearingRequired(YesOrNo.YES)
-                .generalApplicationCreatedBy("Claire Mumford").generalApplicationPreState("applicationIssued")
-                .generalApplications(List.of(generalApplications, generalApplicationsBefore))
-                .intervener1GeneralApplications(List.of(intervener1GeneralApplications))
-                .intervener2GeneralApplications(List.of(intervener2GeneralApplications))
-                .intervener3GeneralApplications(List.of(intervener3GeneralApplications))
-                .intervener4GeneralApplications(List.of(intervener4GeneralApplications))
-                .generalApplicationOutcome(GeneralApplicationOutcome.APPROVED)
-                .build()).build();
+                .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                        .generalApplicationDirectionsHearingRequired(YesOrNo.YES)
+                        .generalApplicationCreatedBy("Claire Mumford").generalApplicationPreState("applicationIssued")
+                        .generalApplications(List.of(generalApplications, generalApplicationsBefore))
+                        .intervener1GeneralApplications(List.of(intervener1GeneralApplications))
+                        .intervener2GeneralApplications(List.of(intervener2GeneralApplications))
+                        .intervener3GeneralApplications(List.of(intervener3GeneralApplications))
+                        .intervener4GeneralApplications(List.of(intervener4GeneralApplications))
+                        .generalApplicationOutcome(GeneralApplicationOutcome.APPROVED)
+                        .build()).build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
-                .generalApplicationCreatedBy("Claire Mumford").generalApplicationOutcome(GeneralApplicationOutcome.APPROVED)
-                .generalApplicationPreState("applicationIssued")
-                .generalApplications(List.of(generalApplications))
-                .intervener1GeneralApplications(List.of(intervener1GeneralApplications))
-                .intervener2GeneralApplications(List.of(intervener2GeneralApplications))
-                .intervener3GeneralApplications(List.of(intervener3GeneralApplications))
-                .intervener4GeneralApplications(List.of(intervener4GeneralApplications))
-                .build()).build();
+                .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                        .generalApplicationCreatedBy("Claire Mumford").generalApplicationOutcome(GeneralApplicationOutcome.APPROVED)
+                        .generalApplicationPreState("applicationIssued")
+                        .generalApplications(List.of(generalApplications))
+                        .intervener1GeneralApplications(List.of(intervener1GeneralApplications))
+                        .intervener2GeneralApplications(List.of(intervener2GeneralApplications))
+                        .intervener3GeneralApplications(List.of(intervener3GeneralApplications))
+                        .intervener4GeneralApplications(List.of(intervener4GeneralApplications))
+                        .build()).build();
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-            .caseType(CaseType.CONTESTED)
-            .id(12345L)
-            .state(State.CASE_ADDED)
-            .data(caseData)
-            .build();
+                .caseType(CaseType.CONTESTED)
+                .id(12345L)
+                .state(State.CASE_ADDED)
+                .data(caseData)
+                .build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder()
-            .caseType(CaseType.CONTESTED)
-            .id(12345L)
-            .state(State.CASE_ADDED)
-            .data(caseDataBefore)
-            .build();
+                .caseType(CaseType.CONTESTED)
+                .id(12345L)
+                .state(State.CASE_ADDED)
+                .data(caseDataBefore)
+                .build();
         return FinremCallbackRequest.builder()
-            .caseDetails(finremCaseDetails)
-            .caseDetailsBefore(finremCaseDetailsBefore)
-            .build();
+                .caseDetails(finremCaseDetails)
+                .caseDetailsBefore(finremCaseDetailsBefore)
+                .build();
     }
 }

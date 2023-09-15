@@ -41,7 +41,7 @@ public class GeneralApplicationWrapper {
     private LocalDate generalApplicationDirectionsCourtOrderDate;
     private String generalApplicationDirectionsTextFromJudge;
     private CaseDocument generalApplicationDirectionsDocument;
-    private List<IntervenerCaseDocumentCollection> generalApplicationIntvrDocuments;
+    private List<GeneralApplicationsCollection> generalApplicationIntvrOrders;
     private String generalApplicationNotApprovedReason;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
