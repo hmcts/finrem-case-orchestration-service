@@ -451,7 +451,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
                 .caseDocuments(new CaseDocument())
                 .caseDocumentType(type)
                 .caseDocumentParty(party)
-                .caseDocumentConfidential(isConfidential)
+                .caseDocumentConfidentiality(isConfidential)
                 .caseDocumentOther(other)
                 .caseDocumentFdr(isFdr)
                 .hearingDetails(null)

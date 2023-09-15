@@ -113,7 +113,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
                 .getGeneralApplicationOutcome(), null);
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
                 status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
-            setStatusForNonCollAndBulkPrintDouments(caseDetails,
+            setStatusForNonCollAndBulkPrintDocuments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
             gaService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
@@ -153,14 +153,16 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
                                                                            List<BulkPrintDocument> bulkPrintDocuments,
                                                                            String userAuthorisation) {
         if (code.equals(data.getId())) {
-            return setStatusForNonCollAndBulkPrintDouments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
+            return setStatusForNonCollAndBulkPrintDocuments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
         }
         return data;
     }
 
-    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDouments(
-        FinremCaseDetails finremCaseDetails, GeneralApplicationCollectionData data,
-        List<BulkPrintDocument> bulkPrintDocuments, String status, String userAuthorisation) {
+    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDocuments(CaseDetails caseDetails,
+                                                                                      GeneralApplicationCollectionData data,
+                                                                                      List<BulkPrintDocument> bulkPrintDocuments,
+                                                                                      String status,
+                                                                                      String userAuthorisation) {
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
@@ -178,14 +180,15 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         String caseId = caseDetails.getId().toString();
-        log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
-            EventType.GENERAL_APPLICATION_DIRECTIONS);
 
-        switch (gaElementStatus.toLowerCase()) {
-            case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
-            case "not approved" ->
+        log.info("status {} for general application for Case ID: {} Event type {}",
+            status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
+
+        switch (gaElementStatus) {
+            case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
+            case "Not Approved" ->
                 items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
-            case "other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
+            case "Other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
             default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
         }
 
