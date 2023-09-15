@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentGeneratorService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -49,9 +50,7 @@ import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -121,71 +120,6 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenConsentInContestedCase_whenNoOrderAvailable_thenHandlerDoNothing() {
-
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-            = sendConsentOrderInContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        FinremCaseData caseData = response.getData();
-
-        verifyNoInteractions(genericDocumentService);
-
-        assertNull(caseData.getAdditionalCicDocuments());
-        assertNull(caseData.getOrdersSentToPartiesCollection());
-        assertNull(caseData.getPartiesOnCase());
-    }
-
-//    @Test
-//    void givenConsentInContestedCase_whenOrderAvailableButNoParty_thenHandlerHandleRequest() {
-//        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-//        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-//        FinremCaseData data = caseDetails.getData();
-//        data.setPartiesOnCase(new DynamicMultiSelectList());
-//
-//        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-//            .value(List.of(DynamicMultiSelectListElement.builder()
-//                .code(uuid)
-//                .label("app_docs.pdf")
-//                .build(), DynamicMultiSelectListElement.builder()
-//                .code("app_docs.pdf")
-//                .label("app_docs.pdf")
-//                .build()))
-//            .listItems(List.of(DynamicMultiSelectListElement.builder()
-//                .code(uuid)
-//                .label("app_docs.pdf")
-//                .build()))
-//            .build();
-//
-////        data.setAdditionalDocument(caseDocument());
-////        data.setOrderApprovedCoverLetter(caseDocument());
-////        List<CaseDocument> caseDocuments = new ArrayList<>();
-////        caseDocuments.add(caseDocument());
-////        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
-//
-//        when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
-//        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(caseDocuments);
-//        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-//        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
-//            .thenReturn(caseDocument());
-//
-//        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-//            = sendConsentOrderInContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-//
-//        FinremCaseData caseData = response.getData();
-//        assertNull(caseData.getPartiesOnCase().getValue());
-//        assertEquals(1, caseData.getFinalOrderCollection().size());
-//        assertNull(caseData.getIntv1OrderCollection());
-//        assertNull(caseData.getAppOrderCollection());
-//        assertNull(caseData.getRespOrderCollection());
-//
-//        verify(genericDocumentService).stampDocument(any(), any(), any(), any());
-//        verify(documentHelper).getStampType(caseData);
-//
-//    }
-
-    @Test
     void givenConsentInContestedCase_whenApprovedOrdersButNoRefusedOrderAvailableToShareWithParties_thenHandleRequest() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -214,10 +148,9 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
         FinremCaseData resultingData = response.getData();
         List<OrderSentToPartiesCollection> partyOrders = resultingData.getOrdersSentToPartiesCollection();
         assertThat(partyOrders.get(0).getValue().getCaseDocument(), equalTo(additionalDocument));
-        assertThat(partyOrders.get(1).getValue().getCaseDocument(), equalTo(firstApprovedOrder.getConsentOrder()));
-        assertThat(partyOrders.get(2).getValue().getCaseDocument(), equalTo(firstApprovedOrder.getOrderLetter()));
-        assertThat(partyOrders.get(3).getValue().getCaseDocument(), equalTo(secondApprovedOrder.getConsentOrder()));
-        assertThat(partyOrders.get(partyOrders.size() - 1).getValue().getCaseDocument(), equalTo(secondApprovedOrder.getOrderLetter()));
+        assertThat(partyOrders.get(1).getValue().getCaseDocument(), equalTo(secondApprovedOrder.getConsentOrder()));
+        assertThat(partyOrders.get(2).getValue().getCaseDocument(), equalTo(secondApprovedOrder.getOrderLetter()));
+        assertThat(partyOrders.size(), equalTo(3));
     }
 
     @Test
@@ -229,11 +162,9 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
         data.setPartiesOnCase(getParties());
 
         ApprovedOrder firstRefusedOrder = ApprovedOrder.builder().consentOrder(caseDocument("consentOrder1Url", "consentOrder1Name",
-            "consentOrder1Binary")).orderLetter(caseDocument("orderLetter1Url", "orderLetter1Name",
-            "OrderLetter1Binary")).build();
+            "consentOrder1Binary")).build();
         ApprovedOrder secondRefusedOrder = ApprovedOrder.builder().consentOrder(caseDocument("consentOrder2Url", "consentOrder2Name",
-            "consentOrder2Binary")).orderLetter(caseDocument("orderLetter2Url", "orderLetter2Name",
-            "OrderLetter2Binary")).build();
+            "consentOrder2Binary")).build();
         ConsentOrderCollection firstConsentOrderCollection = ConsentOrderCollection.builder().approvedOrder(firstRefusedOrder).build();
         ConsentOrderCollection secondConsentOrderCollection = ConsentOrderCollection.builder().approvedOrder(secondRefusedOrder).build();
         List<ConsentOrderCollection> refusedOrders = List.of(firstConsentOrderCollection, secondConsentOrderCollection);
@@ -246,49 +177,30 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
         FinremCaseData resultingData = response.getData();
         List<OrderSentToPartiesCollection> partyOrders = resultingData.getOrdersSentToPartiesCollection();
         assertThat(partyOrders.get(0).getValue().getCaseDocument(), equalTo(firstRefusedOrder.getConsentOrder()));
-        assertThat(partyOrders.get(1).getValue().getCaseDocument(), equalTo(firstRefusedOrder.getOrderLetter()));
-        assertThat(partyOrders.get(2).getValue().getCaseDocument(), equalTo(secondRefusedOrder.getConsentOrder()));
-        assertThat(partyOrders.get(partyOrders.size() - 1).getValue().getCaseDocument(), equalTo(secondRefusedOrder.getOrderLetter()));
     }
 
-//    @Test
-//    void givenConsentInContestedCase_whenOrderAvailableToStampAndNoAdditionalDocumentUploaded_thenHandlerHandleRequest() {
-//        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-//        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-//        FinremCaseData data = caseDetails.getData();
-//        data.setPartiesOnCase(getParties());
-//
-//        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-//            .value(List.of(DynamicMultiSelectListElement.builder()
-//                .code(uuid)
-//                .label("app_docs.pdf")
-//                .build()))
-//            .listItems(List.of(DynamicMultiSelectListElement.builder()
-//                .code(uuid)
-//                .label("app_docs.pdf")
-//                .build()))
-//            .build();
-//
-//        data.setOrdersToShare(selectedDocs);
-//
-//        when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-//        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
-//        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-//        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
-//            .thenReturn(caseDocument());
-//
-//        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-//            = sendConsentOrderInContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-//
-//        FinremCaseData caseData = response.getData();
-//        assertEquals(12, caseData.getPartiesOnCase().getValue().size());
-//        assertEquals(1, caseData.getFinalOrderCollection().size());
-//        assertEquals(2, caseData.getIntv1OrderCollection().size());
-//
-//        verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
-//        verify(documentHelper).getStampType(caseData);
-//
-//    }
+    @Test
+    void givenConsentInContestedCase_whenLatestOrderIsGeneralOrderAvailableToShareWithParties_thenHandleRequest() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        GeneralOrderWrapper wrapper = data.getGeneralOrderWrapper();
+        data.setPartiesOnCase(getParties());
+        CaseDocument latestGeneralOrderDocument = caseDocument("generalOrderUrl", "generalOrderName",
+            "generalOrderBinary");
+
+        wrapper.setGeneralOrderLatestDocument(latestGeneralOrderDocument);
+
+        when(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(any(), any())).thenReturn(false);
+        when(consentOrderNotApprovedDocumentService.getLatestOrderDocument(any(), any(), any())).thenReturn(wrapper.getGeneralOrderLatestDocument());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = sendConsentOrderInContestedAboutToSubmitHandler.handle(
+            callbackRequest, AUTH_TOKEN);
+        FinremCaseData resultingData = response.getData();
+        List<OrderSentToPartiesCollection> partyOrders = resultingData.getOrdersSentToPartiesCollection();
+        assertThat(partyOrders.get(0).getValue().getCaseDocument(), equalTo(wrapper.getGeneralOrderLatestDocument()));
+    }
+
 
     private DynamicMultiSelectList getParties() {
 
