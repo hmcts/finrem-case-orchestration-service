@@ -65,6 +65,7 @@ public enum EventType {
     SOLICITOR_CW_DRAFT_ORDER("FR_solicitorDraftDirectionOrder"),
     JUDGE_DRAFT_ORDER("FR_judgeDraftDirectionOrder"),
     DIRECTION_UPLOAD_ORDER("FR_directionOrder"),
+    CONSENT_ORDER("FR_consentOrder"),
 
     @JsonEnumDefaultValue
     NONE("");
