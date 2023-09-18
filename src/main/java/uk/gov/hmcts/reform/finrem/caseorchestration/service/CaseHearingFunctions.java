@@ -413,4 +413,20 @@ public final class CaseHearingFunctions {
             return Collections.emptyMap();
         }
     }
+
+    public static Map<String, Object> buildHearingCourtDetails(Map<String, Object> data) {
+        try {
+            Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourtHearing(data)));
+
+            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+                .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
+                .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+                .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
+                .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .build(), Map.class);
+        } catch (Exception e) {
+            return Collections.emptyMap();
+        }
+    }
 }
