@@ -10,8 +10,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedCourtWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtWrapper;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCou
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Court implements CourtListWrapper {
+public class Court implements CourtWrapper {
     private Region region;
     private RegionMidlandsFrc midlandsList;
     private RegionLondonFrc londonList;
@@ -32,12 +32,12 @@ public class Court implements CourtListWrapper {
     private RegionHighCourtFrc highCourtList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
-    DefaultCourtListWrapper courtListWrapper;
+    AllocatedCourtWrapper courtListWrapper;
 
     @JsonIgnore
-    public DefaultCourtListWrapper getDefaultCourtListWrapper() {
+    public AllocatedCourtWrapper getDefaultCourtListWrapper() {
         if (courtListWrapper == null) {
-            this.courtListWrapper = new DefaultCourtListWrapper();
+            this.courtListWrapper = new AllocatedCourtWrapper();
         }
         return courtListWrapper;
     }

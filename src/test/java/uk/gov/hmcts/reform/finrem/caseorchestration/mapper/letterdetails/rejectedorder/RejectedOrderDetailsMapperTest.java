@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedCourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.RejectedOrderDetails;
@@ -125,7 +125,7 @@ public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperT
     }
 
     private FrcCourtDetails getCourtDetails() {
-        DefaultCourtListWrapper courtListWrapper = new DefaultCourtListWrapper();
+        AllocatedCourtWrapper courtListWrapper = new AllocatedCourtWrapper();
         courtListWrapper.setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
         return new CourtDetailsMapper(new ObjectMapper()).getCourtDetails(courtListWrapper);
     }
@@ -150,7 +150,7 @@ public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperT
                             .build())
                         .orderRefusalJudgeName("Contested")
                         .orderRefusalJudge(JudgeType.HIS_HONOUR_JUDGE.getValue())
-                        .orderRefusalDate(LocalDate.of(2022,1, 1))
+                        .orderRefusalDate(LocalDate.of(2022, 1, 1))
                         .orderRefusalAddComments("testComment")
                         .build())
                 .build());

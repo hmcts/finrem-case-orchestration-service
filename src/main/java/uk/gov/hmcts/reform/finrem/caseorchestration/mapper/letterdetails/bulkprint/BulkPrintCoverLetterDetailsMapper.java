@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_POSTCODE;
@@ -27,7 +27,7 @@ public class BulkPrintCoverLetterDetailsMapper extends LetterDetailsMapper {
     @Override
     public BasicLetterDetails buildLetterDetails(FinremCaseDetails caseDetails,
                                                  DocumentHelper.PaperNotificationRecipient recipient,
-                                                 CourtListWrapper courtList) {
+                                                 CourtWrapper courtList) {
         BasicLetterDetails letterDetails = super.buildLetterDetails(caseDetails, recipient, courtList);
         letterDetails.setCourtContactDetails(formatCtscContactDetailsForCoversheet());
 

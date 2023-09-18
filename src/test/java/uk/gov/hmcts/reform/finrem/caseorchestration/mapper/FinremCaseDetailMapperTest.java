@@ -135,8 +135,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrderDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedCourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 
 import java.io.IOException;
@@ -196,7 +196,7 @@ class FinremCaseDetailMapperTest {
         assertNotNull(finremCaseDetails);
         assertEquals("Test", finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName());
     }
-    
+
     @Test
     void givenValidCallbackRequest_thenSuccessfullyMapped() {
         caseDetails = buildCaseDetailsFromJson(REFUSAL_ORDER_CALLBACK_REQUEST);
@@ -378,10 +378,10 @@ class FinremCaseDetailMapperTest {
         assertEquals(SolicitorToDraftOrder.APPLICANT_SOLICITOR, caseData.getSolicitorResponsibleForDraftingOrder());
         assertEquals(JudgeType.HER_HONOUR_JUDGE, caseData.getRefusalOrderJudgeType());
         assertEquals(SendOrderEventPostStateOption.PREPARE_FOR_HEARING, caseData.getSendOrderPostStateOption());
-        assertEquals(Region.SOUTHEAST, caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList());
-        assertEquals(RegionSouthEastFrc.KENT, caseData.getRegionWrapper().getDefaultRegionWrapper().getSouthEastFrcList());
+        assertEquals(Region.SOUTHEAST, caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList());
+        assertEquals(RegionSouthEastFrc.KENT, caseData.getRegionWrapper().getAllocatedRegionWrapper().getSouthEastFrcList());
         assertEquals(KentSurreyCourt.FR_kent_surreyList_1,
-            caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper().getKentSurreyCourtList());
+            caseData.getRegionWrapper().getAllocatedRegionWrapper().getAllocatedCourtWrapper().getKentSurreyCourtList());
         assertEquals(OrderDirection.ORDER_ACCEPTED_AS_DRAFTED, caseData.getOrderDirection());
         assertEquals(JudgeType.DISTRICT_JUDGE, caseData.getOrderDirectionJudge());
         assertEquals(Region.SOUTHWEST, caseData.getRegionWrapper().getInterimRegionWrapper().getInterimRegionList());
@@ -597,7 +597,7 @@ class FinremCaseDetailMapperTest {
                     .localCourt(Court.builder()
                         .region(Region.LONDON)
                         .londonList(RegionLondonFrc.LONDON)
-                        .courtListWrapper(DefaultCourtListWrapper.builder()
+                        .courtListWrapper(AllocatedCourtWrapper.builder()
                             .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
                             .build())
                         .build())
@@ -782,7 +782,7 @@ class FinremCaseDetailMapperTest {
                     .localCourt(Court.builder()
                         .region(Region.LONDON)
                         .londonList(RegionLondonFrc.LONDON)
-                        .courtListWrapper(DefaultCourtListWrapper.builder()
+                        .courtListWrapper(AllocatedCourtWrapper.builder()
                             .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
                             .build())
                         .build())
@@ -855,7 +855,7 @@ class FinremCaseDetailMapperTest {
                     .localCourt(Court.builder()
                         .region(Region.LONDON)
                         .londonList(RegionLondonFrc.LONDON)
-                        .courtListWrapper(DefaultCourtListWrapper.builder()
+                        .courtListWrapper(AllocatedCourtWrapper.builder()
                             .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
                             .build())
                         .build())

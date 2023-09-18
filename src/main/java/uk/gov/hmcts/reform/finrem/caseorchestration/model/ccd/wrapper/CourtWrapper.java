@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NwYorkshireCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SwanseaCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
 
-public interface CourtListWrapper {
+public interface CourtWrapper {
     NottinghamCourt getNottinghamCourt();
 
     CfcCourt getCfcCourt();

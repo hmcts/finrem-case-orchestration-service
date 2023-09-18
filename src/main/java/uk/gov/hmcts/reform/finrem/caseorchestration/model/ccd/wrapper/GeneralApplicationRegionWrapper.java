@@ -48,12 +48,12 @@ public class GeneralApplicationRegionWrapper {
     private RegionHighCourtFrc generalApplicationDirectionsHighCourtFrcList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
-    GeneralApplicationCourtListWrapper courtListWrapper;
+    GeneralApplicationCourtWrapper courtListWrapper;
 
     @JsonIgnore
-    public GeneralApplicationCourtListWrapper getCourtListWrapper() {
+    public GeneralApplicationCourtWrapper getCourtListWrapper() {
         if (courtListWrapper == null) {
-            this.courtListWrapper = new GeneralApplicationCourtListWrapper();
+            this.courtListWrapper = new GeneralApplicationCourtWrapper();
         }
         return courtListWrapper;
     }

@@ -34,7 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InterimCourtListWrapper implements CourtListWrapper {
+public class InterimCourtWrapper implements CourtWrapper {
     @JsonProperty("interim_nottinghamCourtList")
     private NottinghamCourt interimNottinghamCourtList;
     @JsonProperty("interim_cfcCourtList")

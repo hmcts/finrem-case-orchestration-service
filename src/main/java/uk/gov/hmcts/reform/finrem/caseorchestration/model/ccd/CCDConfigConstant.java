@@ -518,8 +518,47 @@ public class CCDConfigConstant {
     public static final String CASE_ROLE = "currentUserCaseRole";
     public static final String CASE_ROLE_FOR_FIELD_SHOW = "currentUserCaseRoleLabel";
 
+
+    public static final String HEARING_PREFIX = "hearing_";
+
+    public static final String HEARING_REGION_LIST = "hearing_regionList";
+    public static final String HEARING_LONDON_FRC_LIST = "hearing_londonFRCList";
+    public static final String HEARING_MIDLANDS_FRC_LIST = "hearing_midlandsFRCList";
+    public static final String HEARING_NORTHEAST_FRC_LIST = "hearing_northEastFRCList";
+    public static final String HEARING_NORTHWEST_FRC_LIST = "hearing_northWestFRCList";
+    public static final String HEARING_SOUTHEAST_FRC_LIST = "hearing_southEastFRCList";
+    public static final String HEARING_SOUTHWEST_FRC_LIST = "hearing_southWestFRCList";
+    public static final String HEARING_WALES_FRC_LIST = "hearing_walesFRCList";
+    public static final String HEARING_HIGHCOURT_FRC_LIST = "hearing_highCourtFRCList";
+    public static final String HEARING_CFC_COURT_LIST = "hearing_cfcCourtList";
+    public static final String HEARING_WALES_FRC_COURT_LIST = "hearing_walesFRCList";
+    public static final String HEARING_LONDON_FRC_COURT_LIST = "hearing_londonFRCList";
+    public static final String HEARING_DEVON_COURT_LIST = "hearing_devonCourtList";
+    public static final String HEARING_DORSET_COURT_LIST = "hearing_dorsetCourtList";
+    public static final String HEARING_HUMBER_COURT_LIST = "hearing_humberCourtList";
+    public static final String HEARING_MIDLANDS_FRC_COURT_LIST = "hearing_midlandsFRCList";
+    public static final String HEARING_BRISTOL_COURT_LIST = "hearing_bristolCourtList";
+    public static final String HEARING_NEWPORT_COURT_LIST = "hearing_newportCourtList";
+    public static final String HEARING_NORTHEAST_COURT_LIST = "hearing_northEastFRCList";
+    public static final String HEARING_NORTHWEST_COURT_LIST = "hearing_northWestFRCList";
+    public static final String HEARING_SOUTHEAST_COURT_LIST = "hearing_southEastFRCList";
+    public static final String HEARING_SOUTHWEST_COURT_LIST = "hearing_southWestFRCList";
+    public static final String HEARING_SWANSEA_COURT_LIST = "hearing_swanseaCourtList";
+    public static final String HEARING_LIVERPOOL_COURT_LIST = "hearing_liverpoolCourtList";
+    public static final String HEARING_BIRMINGHAM_COURT_LIST = "hearing_birminghamCourtList";
+    public static final String HEARING_CLEAVELAND_COURT_LIST = "hearing_cleavelandCourtList";
+    public static final String HEARING_KENT_SURREY_COURT_LIST = "hearing_kentSurreyCourtList";
+    public static final String HEARING_LANCASHIRE_COURT_LIST = "hearing_lancashireCourtList";
+    public static final String HEARING_MANCHESTER_COURT_LIST = "hearing_manchesterCourtList";
+    public static final String HEARING_NORTHWALES_COURT_LIST = "hearing_northWalesCourtList";
+    public static final String HEARING_NOTTINGHAM_COURT_LIST = "hearing_nottinghamCourtList";
+    public static final String HEARING_NWYORKSHIRE_COURT_LIST = "hearing_nwyorkshireCourtList";
+    public static final String HEARING_BEDFORDSHIRE_COURT_LIST = "hearing_bedfordshireCourtList";
+    public static final String HEARING_THAMESVALLEY_COURT_LIST = "hearing_thamesvalleyCourtList";
     //Interim FRC List Names
     public static final String INTERIM_HEARING_PREFIX = "interim_";
+
+    public static final String INTERIM_HEARING_REGION_LIST = "interim_regionList";
     public static final String INTERIM_LONDON_FRC_LIST = "interim_londonFRCList";
     public static final String INTERIM_MIDLANDS_FRC_LIST = "interim_midlandsFRCList";
     public static final String INTERIM_NORTHEAST_FRC_LIST = "interim_northEastFRCList";
@@ -528,14 +567,6 @@ public class CCDConfigConstant {
     public static final String INTERIM_SOUTHWEST_FRC_LIST = "interim_southWestFRCList";
     public static final String INTERIM_WALES_FRC_LIST = "interim_walesFRCList";
     public static final String INTERIM_HIGHCOURT_FRC_LIST = "interim_highCourtFRCList";
-
-    //Interim Documents
-    public static final String INTERIM_HEARING_COLLECTION = "interimHearings";
-    public static final String INTERIM_HEARING_TYPE = "interimHearingType";
-    public static final String INTERIM_HEARING_DATE = "interimHearingDate";
-    public static final String INTERIM_HEARING_TIME = "interimHearingTime";
-    public static final String INTERIM_HEARING_TIME_ESTIMATE = "interimTimeEstimate";
-    public static final String INTERIM_HEARING_REGION_LIST = "interim_regionList";
     public static final String INTERIM_HEARING_CFC_COURT_LIST = "interim_cfcCourtList";
     public static final String INTERIM_HEARING_WALES_FRC_COURT_LIST = "interim_walesFRCList";
     public static final String INTERIM_HEARING_LONDON_FRC_COURT_LIST = "interim_londonFRCList";
@@ -561,6 +592,14 @@ public class CCDConfigConstant {
     public static final String INTERIM_HEARING_NWYORKSHIRE_COURT_LIST = "interim_nwyorkshireCourtList";
     public static final String INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST = "interim_bedfordshireCourtList";
     public static final String INTERIM_HEARING_THAMESVALLEY_COURT_LIST = "interim_thamesvalleyCourtList";
+
+    //Interim Documents
+    public static final String INTERIM_HEARING_COLLECTION = "interimHearings";
+    public static final String INTERIM_HEARING_TYPE = "interimHearingType";
+    public static final String INTERIM_HEARING_DATE = "interimHearingDate";
+    public static final String INTERIM_HEARING_TIME = "interimHearingTime";
+    public static final String INTERIM_HEARING_TIME_ESTIMATE = "interimTimeEstimate";
+
     public static final String INTERIM_HEARING_ADDITIONAL_INFO = "interimAdditionalInformationAboutHearing";
     public static final String INTERIM_HEARING_PROMPT_FOR_DOCUMENT = "interimPromptForAnyDocument";
     public static final String INTERIM_HEARING_TRACKING = "iHCollectionItemIds";
@@ -621,6 +660,6 @@ public class CCDConfigConstant {
     public static final String CASE_APPLICANT_FLAGS = "applicantFlags";
     public static final String CASE_RESPONDENT_FLAGS = "respondentFlags";
     public static final String CASE_LEVEL_ROLE = "Case";
-    
+
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 }

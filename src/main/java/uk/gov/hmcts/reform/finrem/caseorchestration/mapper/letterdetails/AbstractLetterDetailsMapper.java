@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
 import java.util.HashMap;
@@ -28,10 +28,10 @@ public abstract class AbstractLetterDetailsMapper {
     }
 
     public abstract DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails,
-                                                                         CourtListWrapper courtList);
+                                                                         CourtWrapper courtList);
 
     public Map<String, Object> getDocumentTemplateDetailsAsMap(FinremCaseDetails caseDetails,
-                                                               CourtListWrapper courtList) {
+                                                               CourtWrapper courtList) {
         Map<String, Object> documentTemplateDetails =
             objectMapper.convertValue(buildDocumentTemplateDetails(caseDetails, courtList),
                 TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));

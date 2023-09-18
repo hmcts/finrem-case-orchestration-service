@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.RejectedOrderDetails;
@@ -42,7 +42,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
     }
 
     @Override
-    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtWrapper courtList) {
         FinremCaseData caseData = caseDetails.getData();
         FrcCourtDetails courtDetails = getFrcCourtDetails(caseData, courtList);
         return RejectedOrderDetails.builder()
@@ -58,7 +58,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
             .build();
     }
 
-    private FrcCourtDetails getFrcCourtDetails(FinremCaseData caseData, CourtListWrapper courtList) {
+    private FrcCourtDetails getFrcCourtDetails(FinremCaseData caseData, CourtWrapper courtList) {
         return caseData.isConsentedApplication()
             ? getConsentedFrcCourtDetails()
             : courtDetailsMapper.getCourtDetails(courtList);

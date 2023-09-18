@@ -27,33 +27,33 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DefaultRegionWrapper {
-    @JsonProperty("regionList")
-    private Region regionList;
-    @JsonProperty("midlandsFRCList")
-    private RegionMidlandsFrc midlandsFrcList;
-    @JsonProperty("londonFRCList")
-    private RegionLondonFrc londonFrcList;
-    @JsonProperty("northWestFRCList")
-    private RegionNorthWestFrc northWestFrcList;
-    @JsonProperty("northEastFRCList")
-    private RegionNorthEastFrc northEastFrcList;
-    @JsonProperty("southEastFRCList")
-    private RegionSouthEastFrc southEastFrcList;
-    @JsonProperty("southWestFRCList")
-    private RegionSouthWestFrc southWestFrcList;
-    @JsonProperty("walesFRCList")
-    private RegionWalesFrc walesFrcList;
-    @JsonProperty("highCourtFRCList")
-    private RegionHighCourtFrc highCourtFrcList;
+public class HearingRegionWrapper {
+    @JsonProperty("hearing_regionList")
+    private Region hearingRegionList;
+    @JsonProperty("hearing_midlandsFRCList")
+    private RegionMidlandsFrc hearingMidlandsFrcList;
+    @JsonProperty("hearing_londonFRCList")
+    private RegionLondonFrc hearingLondonFrcList;
+    @JsonProperty("hearing_northWestFRCList")
+    private RegionNorthWestFrc hearingNorthWestFrcList;
+    @JsonProperty("hearing_northEastFRCList")
+    private RegionNorthEastFrc hearingNorthEastFrcList;
+    @JsonProperty("hearing_southEastFRCList")
+    private RegionSouthEastFrc hearingSouthEastFrcList;
+    @JsonProperty("hearing_southWestFRCList")
+    private RegionSouthWestFrc hearingSouthWestFrcList;
+    @JsonProperty("hearing_walesFRCList")
+    private RegionWalesFrc hearingWalesFrcList;
+    @JsonProperty("hearing_highCourtFRCList")
+    private RegionHighCourtFrc hearingHighCourtFrcList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
-    DefaultCourtListWrapper courtListWrapper;
+    HearingCourtWrapper courtListWrapper;
 
     @JsonIgnore
-    public DefaultCourtListWrapper getDefaultCourtListWrapper() {
+    public HearingCourtWrapper getCourtListWrapper() {
         if (courtListWrapper == null) {
-            this.courtListWrapper = new DefaultCourtListWrapper();
+            this.courtListWrapper = new HearingCourtWrapper();
         }
         return courtListWrapper;
     }

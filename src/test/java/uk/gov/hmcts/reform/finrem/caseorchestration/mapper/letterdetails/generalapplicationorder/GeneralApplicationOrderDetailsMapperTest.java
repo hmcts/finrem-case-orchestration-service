@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedCourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralApplicationOrderDetails;
@@ -74,7 +74,7 @@ public class GeneralApplicationOrderDetailsMapperTest extends AbstractLetterDeta
     }
 
     private FrcCourtDetails getCourtDetails() {
-        DefaultCourtListWrapper courtListWrapper = new DefaultCourtListWrapper();
+        AllocatedCourtWrapper courtListWrapper = new AllocatedCourtWrapper();
         courtListWrapper.setCfcCourtList(CfcCourt.KINGSTON_UPON_THAMES_COUNTY_COURT_AND_FAMILY_COURT);
         return new CourtDetailsMapper(new ObjectMapper()).getCourtDetails(courtListWrapper);
     }

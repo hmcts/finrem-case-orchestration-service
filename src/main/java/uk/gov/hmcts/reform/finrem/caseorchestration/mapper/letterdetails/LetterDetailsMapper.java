@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
 
 import java.time.LocalDate;
@@ -40,7 +40,7 @@ public class LetterDetailsMapper {
 
     public BasicLetterDetails buildLetterDetails(FinremCaseDetails caseDetails,
                                                  DocumentHelper.PaperNotificationRecipient recipient,
-                                                 CourtListWrapper courtList) {
+                                                 CourtWrapper courtList) {
         return BasicLetterDetails.builder()
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
@@ -56,8 +56,8 @@ public class LetterDetailsMapper {
     }
 
     public Map<String, Object> getLetterDetailsAsMap(FinremCaseDetails caseDetails,
-                                     DocumentHelper.PaperNotificationRecipient recipient,
-                                     CourtListWrapper courtList) {
+                                                     DocumentHelper.PaperNotificationRecipient recipient,
+                                                     CourtWrapper courtList) {
         Map<String, Object> documentTemplateDetails =
             objectMapper.convertValue(buildLetterDetails(caseDetails, recipient, courtList),
                 TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));

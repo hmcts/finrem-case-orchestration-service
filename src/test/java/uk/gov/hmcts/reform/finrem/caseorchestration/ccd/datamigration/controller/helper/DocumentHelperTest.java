@@ -624,7 +624,7 @@ public class DocumentHelperTest {
     @Test
     public void shouldReturnTrueWhenCourtIsHighCourtInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
-        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.HIGHCOURT);
+        preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         boolean isHighCourt = documentHelper.isHighCourtSelected(preparedCaseDetails.getData());
         assertTrue(isHighCourt);
     }
@@ -648,7 +648,7 @@ public class DocumentHelperTest {
     @Test
     public void shouldReturnHighCourtStampWhenCourtIsHighCourtInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
-        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.HIGHCOURT);
+        preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
         assertEquals(StampType.HIGH_COURT_STAMP, actualStampType);
     }
@@ -656,7 +656,7 @@ public class DocumentHelperTest {
     @Test
     public void shouldReturnFamilyCourtStampWhenCourtIsLondonInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
-        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.LONDON);
+        preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.LONDON);
         StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
         assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
     }

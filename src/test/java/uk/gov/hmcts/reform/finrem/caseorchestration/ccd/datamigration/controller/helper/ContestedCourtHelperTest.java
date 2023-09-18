@@ -32,6 +32,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_HIGHCOURT_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_REGION_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_SOUTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST;
@@ -73,7 +82,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHWEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHWEST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.THAMESVALLEY;
@@ -527,140 +535,140 @@ public class ContestedCourtHelperTest {
 
     @Test
     public void walesFRCCourts() {
-        verifyCorrectHearingCourtReturned(WALES, WALES_FRC_LIST, NEWPORT);
-        verifyCorrectHearingCourtReturned(WALES, WALES_FRC_LIST, SWANSEA);
-        verifyCorrectHearingCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES);
+        verifyCorrectHearingCourtReturned(WALES, HEARING_WALES_FRC_LIST, NEWPORT);
+        verifyCorrectHearingCourtReturned(WALES, HEARING_WALES_FRC_LIST, SWANSEA);
+        verifyCorrectHearingCourtReturned(WALES, HEARING_WALES_FRC_LIST, NORTHWALES);
     }
 
     @Test
     public void verifyFinremWalesCourtFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.WALES);
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setWalesFrcList(RegionWalesFrc.NORTH_WALES);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.WALES);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setWalesFrcList(RegionWalesFrc.NORTH_WALES);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(NORTHWALES));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setWalesFrcList(RegionWalesFrc.NEWPORT);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setWalesFrcList(RegionWalesFrc.NEWPORT);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(NEWPORT));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setWalesFrcList(RegionWalesFrc.SWANSEA);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setWalesFrcList(RegionWalesFrc.SWANSEA);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(SWANSEA));
     }
 
     @Test
     public void southWestFRCCourts() {
-        verifyCorrectHearingCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON);
-        verifyCorrectHearingCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET);
-        verifyCorrectHearingCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC);
+        verifyCorrectHearingCourtReturned(SOUTHWEST, HEARING_SOUTHWEST_FRC_LIST, DEVON);
+        verifyCorrectHearingCourtReturned(SOUTHWEST, HEARING_SOUTHWEST_FRC_LIST, DORSET);
+        verifyCorrectHearingCourtReturned(SOUTHWEST, HEARING_SOUTHWEST_FRC_LIST, BRISTOLFRC);
     }
 
     @Test
     public void verifyFinremSouthWestFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.SOUTHWEST);
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setSouthWestFrcList(RegionSouthWestFrc.DEVON);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.SOUTHWEST);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthWestFrcList(RegionSouthWestFrc.DEVON);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(DEVON));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setSouthWestFrcList(RegionSouthWestFrc.DORSET);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthWestFrcList(RegionSouthWestFrc.DORSET);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(DORSET));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setSouthWestFrcList(RegionSouthWestFrc.BRISTOL);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthWestFrcList(RegionSouthWestFrc.BRISTOL);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(BRISTOLFRC));
     }
 
     @Test
     public void southEastFRCCourts() {
-        verifyCorrectHearingCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT);
-        verifyCorrectHearingCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
-        verifyCorrectHearingCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, THAMESVALLEY);
+        verifyCorrectHearingCourtReturned(SOUTHEAST, HEARING_SOUTHEAST_FRC_LIST, KENT);
+        verifyCorrectHearingCourtReturned(SOUTHEAST, HEARING_SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+        verifyCorrectHearingCourtReturned(SOUTHEAST, HEARING_SOUTHEAST_FRC_LIST, THAMESVALLEY);
     }
 
     @Test
     public void verifyFinremSouthEastFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.SOUTHEAST);
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.KENT_FRC);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.SOUTHEAST);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.KENT_FRC);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(KENT));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.BEDFORDSHIRE);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.BEDFORDSHIRE);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(BEDFORDSHIRE));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.THAMES_VALLEY);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.THAMES_VALLEY);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(THAMESVALLEY));
     }
 
     @Test
     public void northEastFRCCourts() {
-        verifyCorrectHearingCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND);
-        verifyCorrectHearingCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, NWYORKSHIRE);
-        verifyCorrectHearingCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE);
+        verifyCorrectHearingCourtReturned(NORTHEAST, HEARING_NORTHEAST_FRC_LIST, CLEAVELAND);
+        verifyCorrectHearingCourtReturned(NORTHEAST, HEARING_NORTHEAST_FRC_LIST, NWYORKSHIRE);
+        verifyCorrectHearingCourtReturned(NORTHEAST, HEARING_NORTHEAST_FRC_LIST, HSYORKSHIRE);
     }
 
     @Test
     public void verifyFinremNorthEastFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.NORTHEAST);
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.CLEAVELAND);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.NORTHEAST);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.CLEAVELAND);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(CLEAVELAND));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.NW_YORKSHIRE);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.NW_YORKSHIRE);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(NWYORKSHIRE));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.HS_YORKSHIRE);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.HS_YORKSHIRE);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(HSYORKSHIRE));
     }
 
     @Test
     public void northWestFRCCourts() {
-        verifyCorrectHearingCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LIVERPOOL);
-        verifyCorrectHearingCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER);
-        verifyCorrectHearingCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE);
+        verifyCorrectHearingCourtReturned(NORTHWEST, HEARING_NORTHWEST_FRC_LIST, LIVERPOOL);
+        verifyCorrectHearingCourtReturned(NORTHWEST, HEARING_NORTHWEST_FRC_LIST, MANCHESTER);
+        verifyCorrectHearingCourtReturned(NORTHWEST, HEARING_NORTHWEST_FRC_LIST, LANCASHIRE);
     }
 
     @Test
     public void verifyFinremNorthWestFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.NORTHWEST);
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.LANCASHIRE);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.NORTHWEST);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.LANCASHIRE);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(LANCASHIRE));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.MANCHESTER);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.MANCHESTER);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(MANCHESTER));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.LIVERPOOL);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.LIVERPOOL);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(LIVERPOOL));
     }
 
     @Test
     public void londonFRCCourts() {
-        verifyCorrectHearingCourtReturned(LONDON, LONDON_FRC_LIST, CFC);
+        verifyCorrectHearingCourtReturned(LONDON, HEARING_LONDON_FRC_LIST, CFC);
     }
 
     @Test
     public void verifyFinremLondonFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.LONDON);
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setLondonFrcList(RegionLondonFrc.LONDON);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.LONDON);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setLondonFrcList(RegionLondonFrc.LONDON);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(CFC));
     }
 
     @Test
     public void midlandsFRCCourts() {
-        verifyCorrectHearingCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM);
-        verifyCorrectHearingCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM);
+        verifyCorrectHearingCourtReturned(MIDLANDS, HEARING_MIDLANDS_FRC_LIST, NOTTINGHAM);
+        verifyCorrectHearingCourtReturned(MIDLANDS, HEARING_MIDLANDS_FRC_LIST, BIRMINGHAM);
     }
 
     @Test
     public void verifyMidlandsFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.MIDLANDS);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(NOTTINGHAM));
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.BIRMINGHAM);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.BIRMINGHAM);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(BIRMINGHAM));
     }
 
     @Test
     public void highCourtFRCCourts() {
-        verifyCorrectHearingCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT);
-        verifyCorrectHearingCourtReturned("highCourt", HIGHCOURT_FRC_LIST, HIGHCOURT);
-        verifyCorrectHearingCourtReturned("invalid", HIGHCOURT_FRC_LIST, "");
+        verifyCorrectHearingCourtReturned(HIGHCOURT, HEARING_HIGHCOURT_FRC_LIST, HIGHCOURT);
+        verifyCorrectHearingCourtReturned("highCourt", HEARING_HIGHCOURT_FRC_LIST, HIGHCOURT);
+        verifyCorrectHearingCourtReturned("invalid", HEARING_HIGHCOURT_FRC_LIST, "");
     }
 
     @Test
     public void verifyFinremHighCourtFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.HIGHCOURT);
-        finremCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setHighCourtFrcList(RegionHighCourtFrc.HIGHCOURT);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
+        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setHighCourtFrcList(RegionHighCourtFrc.HIGHCOURT);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(HIGHCOURT));
     }
 
@@ -673,7 +681,7 @@ public class ContestedCourtHelperTest {
 
     private Map<String, Object> getCaseDetailsWithAllocatedValuesForHearing(String region, String subRegionListName, String subRegion) {
         CaseDetails details = defaultConsentedCaseDetails();
-        details.getData().put(REGION, region);
+        details.getData().put(HEARING_REGION_LIST, region);
         details.getData().put(subRegionListName, subRegion);
         return details.getData();
     }

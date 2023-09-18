@@ -11,8 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.ccd.client.model.Classification;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimRegionWrapper;
 
@@ -109,11 +109,11 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
 
     @JsonIgnore
     public String getSelectedCourt() {
-        DefaultRegionWrapper regionWrapper = data.getRegionWrapper().getDefaultRegionWrapper();
-        CourtListWrapper courtList = regionWrapper.getDefaultCourtListWrapper();
+        AllocatedRegionWrapper regionWrapper = data.getRegionWrapper().getAllocatedRegionWrapper();
+        CourtWrapper courtList = regionWrapper.getAllocatedCourtWrapper();
         return Map.of(
             Region.MIDLANDS, getMidlandsCourt(regionWrapper.getMidlandsFrcList(), courtList),
-            Region.LONDON, getCourtListIdOrDefault(regionWrapper.getDefaultCourtListWrapper().getCfcCourtList())
+            Region.LONDON, getCourtListIdOrDefault(regionWrapper.getAllocatedCourtWrapper().getCfcCourtList())
                 .getSelectedCourtId(),
             Region.NORTHEAST, getNorthEastCourt(regionWrapper.getNorthEastFrcList(), courtList),
             Region.NORTHWEST, getNorthWestCourt(regionWrapper.getNorthWestFrcList(), courtList),
@@ -127,7 +127,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     @JsonIgnore
     public String getInterimSelectedCourt() {
         InterimRegionWrapper interimWrapper = data.getRegionWrapper().getInterimRegionWrapper();
-        CourtListWrapper courtList = data.getRegionWrapper().getInterimCourtList();
+        CourtWrapper courtList = data.getRegionWrapper().getInterimCourtList();
         return Map.of(
             Region.MIDLANDS, getMidlandsCourt(interimWrapper.getInterimMidlandsFrcList(), courtList),
             Region.LONDON, getCourtListIdOrDefault(interimWrapper.getCourtListWrapper().getInterimCfcCourtList())
@@ -144,7 +144,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     @JsonIgnore
     public String getGeneralApplicationSelectedCourt() {
         GeneralApplicationRegionWrapper regionWrapper = data.getRegionWrapper().getGeneralApplicationRegionWrapper();
-        CourtListWrapper courtList = regionWrapper.getCourtListWrapper();
+        CourtWrapper courtList = regionWrapper.getCourtListWrapper();
         return Map.of(
             Region.MIDLANDS, getMidlandsCourt(regionWrapper.getGeneralApplicationDirectionsMidlandsFrcList(),
                 courtList),
@@ -164,7 +164,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     }
 
     @JsonIgnore
-    private String getMidlandsCourt(RegionMidlandsFrc frc, CourtListWrapper courtList) {
+    private String getMidlandsCourt(RegionMidlandsFrc frc, CourtWrapper courtList) {
         return Map.of(
                 RegionMidlandsFrc.NOTTINGHAM, getCourtListIdOrDefault(courtList.getNottinghamCourt()),
                 RegionMidlandsFrc.BIRMINGHAM, getCourtListIdOrDefault(courtList.getBirminghamCourt()))
@@ -172,7 +172,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     }
 
     @JsonIgnore
-    private String getNorthEastCourt(RegionNorthEastFrc frc, CourtListWrapper courtList) {
+    private String getNorthEastCourt(RegionNorthEastFrc frc, CourtWrapper courtList) {
         return Map.of(
             RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList
                 .getClevelandCourt(isConsentedApplication())),
@@ -182,7 +182,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     }
 
     @JsonIgnore
-    private String getNorthWestCourt(RegionNorthWestFrc frc, CourtListWrapper courtList) {
+    private String getNorthWestCourt(RegionNorthWestFrc frc, CourtWrapper courtList) {
         return Map.of(
             RegionNorthWestFrc.MANCHESTER, getCourtListIdOrDefault(courtList.getManchesterCourt()),
             RegionNorthWestFrc.LANCASHIRE, getCourtListIdOrDefault(courtList.getLancashireCourt()),
@@ -191,7 +191,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     }
 
     @JsonIgnore
-    private String getSouthWestCourt(RegionSouthWestFrc frc, CourtListWrapper courtList) {
+    private String getSouthWestCourt(RegionSouthWestFrc frc, CourtWrapper courtList) {
         return Map.of(
                 RegionSouthWestFrc.BRISTOL, getCourtListIdOrDefault(courtList.getBristolCourt()),
                 RegionSouthWestFrc.DEVON, getCourtListIdOrDefault(courtList.getDevonCourt()),
@@ -200,7 +200,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     }
 
     @JsonIgnore
-    private String getSouthEastCourt(RegionSouthEastFrc frc, CourtListWrapper courtList) {
+    private String getSouthEastCourt(RegionSouthEastFrc frc, CourtWrapper courtList) {
         return Map.of(
             RegionSouthEastFrc.BEDFORDSHIRE, getCourtListIdOrDefault(courtList.getBedfordshireCourt()),
             RegionSouthEastFrc.KENT, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
@@ -209,7 +209,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     }
 
     @JsonIgnore
-    private String getWalesCourt(RegionWalesFrc frc, CourtListWrapper courtList) {
+    private String getWalesCourt(RegionWalesFrc frc, CourtWrapper courtList) {
         return Map.of(
             RegionWalesFrc.NORTH_WALES, getCourtListIdOrDefault(courtList.getNorthWalesCourt()),
             RegionWalesFrc.NEWPORT, getCourtListIdOrDefault(courtList.getNewportCourt()),
@@ -218,7 +218,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     }
 
     @JsonIgnore
-    private String getHighCourt(RegionHighCourtFrc frc, CourtListWrapper courtList) {
+    private String getHighCourt(RegionHighCourtFrc frc, CourtWrapper courtList) {
         return Map.of(
             RegionHighCourtFrc.HIGHCOURT, getCourtListIdOrDefault(courtList.getHighCourt())
         ).get(frc).getSelectedCourtId();

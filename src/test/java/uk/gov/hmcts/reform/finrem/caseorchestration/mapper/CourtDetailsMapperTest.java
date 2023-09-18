@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedCourtWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationCourtWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimCourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,7 +24,7 @@ public class CourtDetailsMapperTest {
 
     @Test
     public void givenDefaultCourtListAndValidFieldDeclarations_whenGetCourtDetails_thenReturnExpectedCourtDetails() {
-        DefaultCourtListWrapper courtList = new DefaultCourtListWrapper();
+        AllocatedCourtWrapper courtList = new AllocatedCourtWrapper();
         courtList.setCfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT);
 
         FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
@@ -37,7 +37,7 @@ public class CourtDetailsMapperTest {
 
     @Test
     public void givenGeneralApplicationCourtListAndValidFieldDeclarations_whenGetCourtDetails_thenReturnExpectedCourtDetails() {
-        GeneralApplicationCourtListWrapper courtList = new GeneralApplicationCourtListWrapper();
+        GeneralApplicationCourtWrapper courtList = new GeneralApplicationCourtWrapper();
         courtList.setGeneralApplicationDirectionsCfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT);
 
         FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
@@ -50,7 +50,7 @@ public class CourtDetailsMapperTest {
 
     @Test
     public void givenInterimCourtListAndValidFieldDeclarations_whenGetCourtDetails_thenReturnExpectedCourtDetails() {
-        InterimCourtListWrapper courtList = new InterimCourtListWrapper();
+        InterimCourtWrapper courtList = new InterimCourtWrapper();
         courtList.setInterimCfcCourtList(CfcCourt.BARNET_CIVIL_AND_FAMILY_COURTS_CENTRE);
 
         FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
@@ -65,7 +65,7 @@ public class CourtDetailsMapperTest {
     @Test
     public void givenCourtListAndInvalidFieldDeclarations_whenGetCourtDetails_thenThrowIllegalStateException() {
         try {
-            courtDetailsMapper.getCourtDetails(new DefaultCourtListWrapper());
+            courtDetailsMapper.getCourtDetails(new AllocatedCourtWrapper());
         } catch (IllegalStateException ise) {
             String expectedMessage = "There must be exactly one court selected in case data";
             assertTrue(ise.getMessage().contains(expectedMessage));

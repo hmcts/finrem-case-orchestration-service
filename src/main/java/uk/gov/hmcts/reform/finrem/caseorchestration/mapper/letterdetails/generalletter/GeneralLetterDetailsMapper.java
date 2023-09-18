@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralLetterDetails;
 
@@ -31,7 +31,7 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
     }
 
     @Override
-    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtWrapper courtList) {
 
         FinremCaseData caseData = caseDetails.getData();
         return GeneralLetterDetails.builder()
@@ -50,9 +50,9 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
         FinremCaseData caseData = caseDetails.getData();
         GeneralLetterAddressToType recipient = caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo();
         return Addressee.builder()
-                .name((String) getAddressToCaseDataMapping(caseData).get(NAME_MAP).get(recipient))
-                .formattedAddress(getFormattedAddress(caseData, recipient))
-                .build();
+            .name((String) getAddressToCaseDataMapping(caseData).get(NAME_MAP).get(recipient))
+            .formattedAddress(getFormattedAddress(caseData, recipient))
+            .build();
     }
 
     private String getFormattedAddress(FinremCaseData caseData, GeneralLetterAddressToType recipient) {

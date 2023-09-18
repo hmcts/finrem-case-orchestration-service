@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourt;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtHearing;
 
 @Service
 @RequiredArgsConstructor
@@ -57,14 +57,12 @@ public class ConsentHearingService {
             List<ConsentedHearingDataWrapper> listForHearings = data.getListForHearings();
             List<ConsentedHearingDataWrapper> listForHearingsBefore =
                 Optional.ofNullable(caseDetailsBefore.getData().getListForHearings()).orElse(new ArrayList<>());
-            List<ConsentedHearingDataWrapper> hearingList = listForHearings;
-
 
             List<String> hearingIdsToProcess =
                 getNewOrDateTimeModifiedHearingIdsList(listForHearings,
                     listForHearingsBefore);
 
-            hearingList.forEach(hearingCaseData -> notify(caseDetails, hearingCaseData, hearingIdsToProcess));
+            listForHearings.forEach(hearingCaseData -> notify(caseDetails, hearingCaseData, hearingIdsToProcess));
         }
     }
 
@@ -92,7 +90,7 @@ public class ConsentHearingService {
         List<ConsentedHearingDataWrapper> hearingList = helper.getHearings(caseData);
 
         log.info("hearingList ::{} for case id {}", hearingList.size(), caseDetails.getId());
-        List<String> hearingIdsToProcess =  getNewOrDateTimeModifiedHearingIdsList(caseDetails, caseDetailsBefore);
+        List<String> hearingIdsToProcess = getNewOrDateTimeModifiedHearingIdsList(caseDetails, caseDetailsBefore);
         log.info("Hearing to Process ::{} for case id {}", hearingIdsToProcess.size(), caseDetails.getId());
 
         List<BulkPrintDocument> documents = new ArrayList<>();
@@ -137,9 +135,9 @@ public class ConsentHearingService {
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     private ConsentedHearingDataWrapper generateHearingDocument(ConsentedHearingDataWrapper hearingData,
-                                         CaseDetails caseDetails,
-                                         List<BulkPrintDocument> documents,
-                                         String authorisationToken) {
+                                                                CaseDetails caseDetails,
+                                                                List<BulkPrintDocument> documents,
+                                                                String authorisationToken) {
 
         Map<String, Object> hearingCaseData = helper.convertToMap(hearingData.getValue());
 
@@ -149,7 +147,7 @@ public class ConsentHearingService {
         caseData.put("ccdCaseNumber", caseDetailsCopy.getId());
         caseData.put("courtDetails", buildFrcCourtDetails(hearingCaseData));
         caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName",  caseDataService.buildFullRespondentName(caseDetails));
+        caseData.put("respondentName", caseDataService.buildFullRespondentName(caseDetails));
         addHearingVenueDetails(caseDetailsCopy, hearingCaseData);
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
         caseData.put("hearingType", hearingCaseData.get("hearingType"));
@@ -171,7 +169,7 @@ public class ConsentHearingService {
     }
 
     private void addToBulkPrintList(CaseDetails caseDetails, Map<String, Object> hearingData,
-                                    List<BulkPrintDocument> documents,String authorisationToken) {
+                                    List<BulkPrintDocument> documents, String authorisationToken) {
         String isDocUploaded = nullToEmpty(hearingData.get(HEARING_PROMPT_FOR_DOCUMENT));
         String caseId = caseDetails.getId().toString();
         log.warn("Additional uploaded hearing document found for printing for case id {}", caseId);
@@ -188,8 +186,9 @@ public class ConsentHearingService {
         Map<String, Object> caseData = caseDetailsCopy.getData();
         try {
             log.info("Hearing Case Data {} for caseId {}", hearingCaseData, caseDetailsCopy.getId());
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
-            String selectedCourt = getSelectedCourt(hearingCaseData);
+            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {
+            });
+            String selectedCourt = getSelectedCourtHearing(hearingCaseData);
             log.info("SELECTED COURT ---> {} for caseId {}", selectedCourt, caseDetailsCopy.getId());//FR_londonList
             String courtDetailsObj = Objects.toString(hearingCaseData.get(selectedCourt), null);
             log.info("HEARING COURT ---> {} for caseId {}", courtDetailsObj, caseDetailsCopy.getId());
@@ -203,7 +202,8 @@ public class ConsentHearingService {
     /**
      * Do not expect any return.
      * <p>Please use @{@link #getNewOrDateTimeModifiedHearingIdsList(List, List)}</p>
-     * @param caseDetails instance of CaseDetails
+     *
+     * @param caseDetails       instance of CaseDetails
      * @param caseDetailsBefore instance of CaseDetails
      * @deprecated Use {@link Map caseDetails, Map caseDataBefore}
      */
@@ -257,7 +257,8 @@ public class ConsentHearingService {
     /**
      * Do not expect any return.
      * <p>Please use @{@link #getModifiedHearingIds(List, List)}</p>
-     * @param caseData instance of Map
+     *
+     * @param caseData       instance of Map
      * @param caseDataBefore instance of Map
      * @deprecated Use {@link Map caseDetails, Map caseDataBefore}
      */
@@ -308,9 +309,9 @@ public class ConsentHearingService {
         return modifiedCollectionList;
     }
 
-    private  void setList(Map.Entry<String, String> currentDataMap, Map.Entry<String, String> beforeDataMap,
-                          List<String> modifiedCollectionList) {
-        if (currentDataMap.getKey().equals(beforeDataMap.getKey()) && ! currentDataMap.getValue().equals(beforeDataMap.getValue())) {
+    private void setList(Map.Entry<String, String> currentDataMap, Map.Entry<String, String> beforeDataMap,
+                         List<String> modifiedCollectionList) {
+        if (currentDataMap.getKey().equals(beforeDataMap.getKey()) && !currentDataMap.getValue().equals(beforeDataMap.getValue())) {
             modifiedCollectionList.add(currentDataMap.getKey());
         }
     }

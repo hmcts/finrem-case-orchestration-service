@@ -28,6 +28,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_HIGHCOURT_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_REGION_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_SOUTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST;
@@ -348,7 +357,7 @@ public class ContestedCourtHelper {
     }
 
     public static String getSelectedHearingFrc(Map<String, Object> hearingData) {
-        String region = Objects.toString(hearingData.get(REGION), "");
+        String region = Objects.toString(hearingData.get(HEARING_REGION_LIST), "");
 
         if (MIDLANDS.equalsIgnoreCase(region)) {
             return getMidlandHearingFRC(hearingData);
@@ -378,7 +387,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getWalesHearingFRC(Map<String, Object> hearingData) {
-        String walesList = Objects.toString(hearingData.get(WALES_FRC_LIST),"");
+        String walesList = Objects.toString(hearingData.get(HEARING_WALES_FRC_LIST), "");
         if (NEWPORT.equalsIgnoreCase(walesList)) {
             return NEWPORT;
         } else if (SWANSEA.equalsIgnoreCase(walesList)) {
@@ -390,7 +399,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getHighCourtHearingFRC(Map<String, Object> hearingData) {
-        String highCourtList = Objects.toString(hearingData.get(HIGHCOURT_FRC_LIST),"");
+        String highCourtList = Objects.toString(hearingData.get(HEARING_HIGHCOURT_FRC_LIST), "");
         if (HIGHCOURT.equalsIgnoreCase(highCourtList)) {
             return HIGHCOURT;
         }
@@ -398,7 +407,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getSouthWestHearingFRC(Map<String, Object> hearingData) {
-        String southWestList = Objects.toString(hearingData.get(SOUTHWEST_FRC_LIST),"");
+        String southWestList = Objects.toString(hearingData.get(HEARING_SOUTHWEST_FRC_LIST), "");
         if (DEVON.equalsIgnoreCase(southWestList)) {
             return DEVON;
         } else if (DORSET.equalsIgnoreCase(southWestList)) {
@@ -410,7 +419,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getSouthEastHearingFRC(Map<String, Object> hearingData) {
-        String southEastList = Objects.toString(hearingData.get(SOUTHEAST_FRC_LIST),"");
+        String southEastList = Objects.toString(hearingData.get(HEARING_SOUTHEAST_FRC_LIST), "");
         if (KENT.equalsIgnoreCase(southEastList)) {
             return KENT;
         } else if (BEDFORDSHIRE.equalsIgnoreCase(southEastList)) {
@@ -422,7 +431,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getNorthEastHearingFRC(Map<String, Object> hearingData) {
-        String northEastList = Objects.toString(hearingData.get(NORTHEAST_FRC_LIST),"");
+        String northEastList = Objects.toString(hearingData.get(HEARING_NORTHEAST_FRC_LIST), "");
         if (CLEAVELAND.equalsIgnoreCase(northEastList) || CLEVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND;
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
@@ -434,7 +443,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getNorthWestHearingFRC(Map<String, Object> hearingData) {
-        String northWestList = Objects.toString(hearingData.get(NORTHWEST_FRC_LIST),"");
+        String northWestList = Objects.toString(hearingData.get(HEARING_NORTHWEST_FRC_LIST), "");
         if (LIVERPOOL.equalsIgnoreCase(northWestList)) {
             return LIVERPOOL;
         } else if (MANCHESTER.equalsIgnoreCase(northWestList)) {
@@ -446,7 +455,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getLondonHearingFRC(Map<String, Object> hearingData) {
-        String londonList = Objects.toString(hearingData.get(LONDON_FRC_LIST),"");
+        String londonList = Objects.toString(hearingData.get(HEARING_LONDON_FRC_LIST), "");
         if (CFC.equalsIgnoreCase(londonList)) {
             return CFC;
         }
@@ -454,7 +463,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getMidlandHearingFRC(Map<String, Object> hearingData) {
-        String midlandsList = Objects.toString(hearingData.get(MIDLANDS_FRC_LIST),"");
+        String midlandsList = Objects.toString(hearingData.get(HEARING_MIDLANDS_FRC_LIST), "");
         return getMidlandsCourtName(midlandsList);
     }
 
@@ -491,31 +500,31 @@ public class ContestedCourtHelper {
 
     public static String getSelectedFrc(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
-        Region region = caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList();
+        Region region = caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList();
 
         if (MIDLANDS.equalsIgnoreCase(region.getValue())) {
-            return caseData.getRegionWrapper().getDefaultRegionWrapper().getMidlandsFrcList().getValue();
+            return caseData.getRegionWrapper().getAllocatedRegionWrapper().getMidlandsFrcList().getValue();
         }
         if (LONDON.equalsIgnoreCase(region.getValue())) {
-            return caseData.getRegionWrapper().getDefaultRegionWrapper().getLondonFrcList().getValue();
+            return caseData.getRegionWrapper().getAllocatedRegionWrapper().getLondonFrcList().getValue();
         }
         if (NORTHWEST.equalsIgnoreCase(region.getValue())) {
-            return caseData.getRegionWrapper().getDefaultRegionWrapper().getNorthWestFrcList().getValue();
+            return caseData.getRegionWrapper().getAllocatedRegionWrapper().getNorthWestFrcList().getValue();
         }
         if (NORTHEAST.equalsIgnoreCase(region.getValue())) {
-            return caseData.getRegionWrapper().getDefaultRegionWrapper().getNorthEastFrcList().getValue();
+            return caseData.getRegionWrapper().getAllocatedRegionWrapper().getNorthEastFrcList().getValue();
         }
         if (SOUTHEAST.equalsIgnoreCase(region.getValue())) {
-            return caseData.getRegionWrapper().getDefaultRegionWrapper().getSouthEastFrcList().getValue();
+            return caseData.getRegionWrapper().getAllocatedRegionWrapper().getSouthEastFrcList().getValue();
         }
         if (SOUTHWEST.equalsIgnoreCase(region.getValue())) {
-            return caseData.getRegionWrapper().getDefaultRegionWrapper().getSouthWestFrcList().getValue();
+            return caseData.getRegionWrapper().getAllocatedRegionWrapper().getSouthWestFrcList().getValue();
         }
         if (WALES.equalsIgnoreCase(region.getValue())) {
-            return caseData.getRegionWrapper().getDefaultRegionWrapper().getWalesFrcList().getValue();
+            return caseData.getRegionWrapper().getAllocatedRegionWrapper().getWalesFrcList().getValue();
         }
         if (HIGHCOURT.equalsIgnoreCase(region.getValue())) {
-            return caseData.getRegionWrapper().getDefaultRegionWrapper().getHighCourtFrcList().getValue();
+            return caseData.getRegionWrapper().getAllocatedRegionWrapper().getHighCourtFrcList().getValue();
         }
         return EMPTY;
     }
@@ -610,7 +619,6 @@ public class ContestedCourtHelper {
         }
         return EMPTY;
     }
-
 
 
     public static String getNottinghamCourt(Map<String, Object> caseData) {

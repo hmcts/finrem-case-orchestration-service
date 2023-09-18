@@ -22,7 +22,7 @@ public class RegionWrapper {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.PUBLIC)
-    DefaultRegionWrapper defaultRegionWrapper;
+    AllocatedRegionWrapper allocatedRegionWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     InterimRegionWrapper interimRegionWrapper;
@@ -30,12 +30,16 @@ public class RegionWrapper {
     @Getter(AccessLevel.NONE)
     GeneralApplicationRegionWrapper generalApplicationRegionWrapper;
 
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    HearingRegionWrapper hearingRegionWrapper;
+
     @JsonIgnore
-    public DefaultRegionWrapper getDefaultRegionWrapper() {
-        if (defaultRegionWrapper == null) {
-            this.defaultRegionWrapper = new DefaultRegionWrapper();
+    public AllocatedRegionWrapper getAllocatedRegionWrapper() {
+        if (allocatedRegionWrapper == null) {
+            this.allocatedRegionWrapper = new AllocatedRegionWrapper();
         }
-        return defaultRegionWrapper;
+        return allocatedRegionWrapper;
     }
 
     @JsonIgnore
@@ -55,29 +59,29 @@ public class RegionWrapper {
     }
 
     @JsonIgnore
-    public DefaultCourtListWrapper getDefaultCourtList() {
-        if (defaultRegionWrapper == null) {
-            this.defaultRegionWrapper = new DefaultRegionWrapper();
-            this.defaultRegionWrapper.setCourtListWrapper(new DefaultCourtListWrapper());
+    public AllocatedCourtWrapper getDefaultCourtList() {
+        if (allocatedRegionWrapper == null) {
+            this.allocatedRegionWrapper = new AllocatedRegionWrapper();
+            this.allocatedRegionWrapper.setAllocatedCourtWrapper(new AllocatedCourtWrapper());
         }
-        return defaultRegionWrapper.getDefaultCourtListWrapper();
+        return allocatedRegionWrapper.getAllocatedCourtWrapper();
     }
 
     @JsonIgnore
-    public InterimCourtListWrapper getInterimCourtList() {
+    public InterimCourtWrapper getInterimCourtList() {
         if (interimRegionWrapper == null) {
             this.interimRegionWrapper = new InterimRegionWrapper();
-            this.interimRegionWrapper.setCourtListWrapper(new InterimCourtListWrapper());
+            this.interimRegionWrapper.setCourtListWrapper(new InterimCourtWrapper());
         }
 
         return interimRegionWrapper.getCourtListWrapper();
     }
 
     @JsonIgnore
-    public GeneralApplicationCourtListWrapper getGeneralApplicationCourtList() {
+    public GeneralApplicationCourtWrapper getGeneralApplicationCourtList() {
         if (this.generalApplicationRegionWrapper == null) {
             this.generalApplicationRegionWrapper = new GeneralApplicationRegionWrapper();
-            this.generalApplicationRegionWrapper.setCourtListWrapper(new GeneralApplicationCourtListWrapper());
+            this.generalApplicationRegionWrapper.setCourtListWrapper(new GeneralApplicationCourtWrapper());
         }
 
         return generalApplicationRegionWrapper.getCourtListWrapper();

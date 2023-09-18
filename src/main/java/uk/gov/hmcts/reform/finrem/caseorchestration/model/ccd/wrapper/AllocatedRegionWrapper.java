@@ -27,34 +27,34 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InterimRegionWrapper {
-    @JsonProperty("interim_regionList")
-    private Region interimRegionList;
-    @JsonProperty("interim_midlandsFRCList")
-    private RegionMidlandsFrc interimMidlandsFrcList;
-    @JsonProperty("interim_londonFRCList")
-    private RegionLondonFrc interimLondonFrcList;
-    @JsonProperty("interim_northWestFRCList")
-    private RegionNorthWestFrc interimNorthWestFrcList;
-    @JsonProperty("interim_northEastFRCList")
-    private RegionNorthEastFrc interimNorthEastFrcList;
-    @JsonProperty("interim_southEastFRCList")
-    private RegionSouthEastFrc interimSouthEastFrcList;
-    @JsonProperty("interim_southWestFRCList")
-    private RegionSouthWestFrc interimSouthWestFrcList;
-    @JsonProperty("interim_walesFRCList")
-    private RegionWalesFrc interimWalesFrcList;
-    @JsonProperty("interim_highCourtFRCList")
-    private RegionHighCourtFrc interimHighCourtFrcList;
+public class AllocatedRegionWrapper {
+    @JsonProperty("regionList")
+    private Region regionList;
+    @JsonProperty("midlandsFRCList")
+    private RegionMidlandsFrc midlandsFrcList;
+    @JsonProperty("londonFRCList")
+    private RegionLondonFrc londonFrcList;
+    @JsonProperty("northWestFRCList")
+    private RegionNorthWestFrc northWestFrcList;
+    @JsonProperty("northEastFRCList")
+    private RegionNorthEastFrc northEastFrcList;
+    @JsonProperty("southEastFRCList")
+    private RegionSouthEastFrc southEastFrcList;
+    @JsonProperty("southWestFRCList")
+    private RegionSouthWestFrc southWestFrcList;
+    @JsonProperty("walesFRCList")
+    private RegionWalesFrc walesFrcList;
+    @JsonProperty("highCourtFRCList")
+    private RegionHighCourtFrc highCourtFrcList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
-    InterimCourtWrapper courtListWrapper;
+    AllocatedCourtWrapper allocatedCourtWrapper;
 
     @JsonIgnore
-    public InterimCourtWrapper getCourtListWrapper() {
-        if (courtListWrapper == null) {
-            this.courtListWrapper = new InterimCourtWrapper();
+    public AllocatedCourtWrapper getAllocatedCourtWrapper() {
+        if (allocatedCourtWrapper == null) {
+            this.allocatedCourtWrapper = new AllocatedCourtWrapper();
         }
-        return courtListWrapper;
+        return allocatedCourtWrapper;
     }
 }

@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimCourtWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralApplicationInterimHearingNoticeDetails;
@@ -74,7 +74,7 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends Abs
     }
 
     private FrcCourtDetails getCourtDetails(CfcCourt court) {
-        InterimCourtListWrapper courtListWrapper = new InterimCourtListWrapper();
+        InterimCourtWrapper courtListWrapper = new InterimCourtWrapper();
         courtListWrapper.setInterimCfcCourtList(court);
         return new CourtDetailsMapper(new ObjectMapper()).getCourtDetails(courtListWrapper);
     }

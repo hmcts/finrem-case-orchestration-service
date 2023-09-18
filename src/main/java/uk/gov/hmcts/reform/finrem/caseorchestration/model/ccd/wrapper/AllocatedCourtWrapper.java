@@ -36,7 +36,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DefaultCourtListWrapper implements CourtListWrapper {
+public class AllocatedCourtWrapper implements CourtWrapper {
     private NottinghamCourt nottinghamCourtList;
     private CfcCourt cfcCourtList;
     private BirminghamCourt birminghamCourtList;

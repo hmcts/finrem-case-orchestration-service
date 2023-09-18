@@ -174,6 +174,7 @@ public class DocumentHelper {
     /**
      * Return List Object for given Case with the given indentation used.
      * <p>Please use @{@link #getFormADocumentsData(FinremCaseData)}</p>
+     *
      * @param caseData instance of Map
      * @return List Object
      * @deprecated Use {@link Map caseData}
@@ -338,7 +339,6 @@ public class DocumentHelper {
     }
 
 
-
     private String getAddresee(PaperNotificationRecipient recipient) {
         return recipient == APPLICANT ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS;
     }
@@ -354,8 +354,9 @@ public class DocumentHelper {
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
      * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, PaperNotificationRecipient)}</p>
+     *
      * @param caseDetails the casedetails
-     * @param recipient instance of PaperNotificationRecipient
+     * @param recipient   instance of PaperNotificationRecipient
      * @return CaseDetails Object
      * @deprecated Use {@link FinremCaseDetails caseDetails, PaperNotificationRecipient recipient}
      */
@@ -427,14 +428,14 @@ public class DocumentHelper {
      * Return CaseDetails Object for given Case with the given indentation used.
      * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, String, String, Address)}</p>
      *
-     * @param caseDetailsCopy the casedetails
-     * @param reference String
-     * @param addresseeName String
-     * @param addressToSendTo map
+     * @param caseDetailsCopy        the casedetails
+     * @param reference              String
+     * @param addresseeName          String
+     * @param addressToSendTo        map
      * @param isConsentedApplication boolean
      * @return CaseDetails Object
      * @deprecated Use {@link CaseDetails caseDetails, String reference, String addresseeName,
-     *                                                   Address addressToSendTo}
+     * Address addressToSendTo}
      */
     @Deprecated(since = "15-june-2023")
     private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName,
@@ -720,7 +721,7 @@ public class DocumentHelper {
     }
 
     public boolean isHighCourtSelected(FinremCaseData caseData) {
-        Region region = caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList();
+        Region region = caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList();
         return Region.HIGHCOURT.equals(region);
     }
 
