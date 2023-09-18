@@ -349,7 +349,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
             .caseDocumentType(documentType)
             .caseDocumentParty(APPLICANT)
             .caseDocumentOther("No")
-            .caseDocumentConfidential(YesOrNo.NO)
+            .caseDocumentConfidentiality(YesOrNo.NO)
             .hearingDetails("UK 1400 hours")
             .caseDocumentFdr(YesOrNo.NO)
             .caseDocumentUploadDateTime(LocalDateTime.now()).build();

@@ -33,6 +33,6 @@ public abstract class PartyDocumentsHandler extends DocumentHandler {
     private boolean isNonConfidentialDocWithParty(UploadCaseDocumentCollection d) {
         UploadCaseDocument uploadedCaseDocument = d.getUploadCaseDocument();
         return party.equals(uploadedCaseDocument.getCaseDocumentParty())
-            && YesOrNo.isNoOrNull(uploadedCaseDocument.getCaseDocumentConfidential());
+            && YesOrNo.isNoOrNull(uploadedCaseDocument.getCaseDocumentConfidentiality());
     }
 }
