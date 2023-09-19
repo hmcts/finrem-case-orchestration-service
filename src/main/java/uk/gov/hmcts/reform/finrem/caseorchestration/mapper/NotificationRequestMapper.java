@@ -67,6 +67,7 @@ public class NotificationRequestMapper {
      * @deprecated Use {@link CaseDetails caseDetails, Map interimHearingData}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails,
                                                                             Map<String, Object> interimHearingData) {
         return buildInterimHearingNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(caseDetails.getData()), interimHearingData);
@@ -102,6 +103,7 @@ public class NotificationRequestMapper {
      * @deprecated Use {@link CaseDetails caseDetails, Map hearingData}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public NotificationRequest getNotificationRequestForConsentApplicantSolicitor(CaseDetails caseDetails,
                                                                                   Map<String, Object> hearingData) {
         return buildInterimHearingNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(caseDetails.getData()), hearingData);
@@ -131,6 +133,7 @@ public class NotificationRequestMapper {
             : getNotificationRequestForApplicantSolicitor(caseDetails);
     }
 
+    @SuppressWarnings("java:S1144")
     private SolicitorCaseDataKeysWrapper getContestedCaseDataKeysForApplicantSolicitor(FinremCaseData finremCaseData) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(nullToEmpty(finremCaseData.getAppSolicitorEmail()))
@@ -227,6 +230,7 @@ public class NotificationRequestMapper {
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper, Map interimHearingData}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     private NotificationRequest buildInterimHearingNotificationRequest(CaseDetails caseDetails,
                                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
                                                                        Map<String, Object> interimHearingData) {
@@ -282,6 +286,7 @@ public class NotificationRequestMapper {
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> caseData = caseDetails.getData();

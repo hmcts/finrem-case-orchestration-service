@@ -14,6 +14,7 @@ import java.util.List;
 
 @Component
 @Slf4j
+@SuppressWarnings({"java:S110","java:S1068","java:S2387"})
 public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearingCorresponder {
 
     private final DocumentHelper documentHelper;
@@ -28,10 +29,8 @@ public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearin
 
     @Override
     public List<CaseDocument> getCaseDocuments(FinremCaseDetails caseDetails) {
-        List<CaseDocument> hearingNoticePack = caseDetails.getData().getHearingNoticeDocumentPack().stream()
+        return caseDetails.getData().getHearingNoticeDocumentPack().stream()
             .map(DocumentCollection::getValue)
             .toList();
-
-        return hearingNoticePack;
     }
 }

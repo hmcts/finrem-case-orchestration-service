@@ -36,14 +36,14 @@ public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
         List<CaseDocument> caseDocuments = new ArrayList<>();
 
         log.info("Fetching Contested Paper Case bulk print document for caseId {}", caseId);
-        Optional.ofNullable(caseData.getFormC()).ifPresent(formC -> caseDocuments.add(formC));
-        Optional.ofNullable(caseData.getFormG()).ifPresent(formG -> caseDocuments.add(formG));
+        Optional.ofNullable(caseData.getFormC()).ifPresent(caseDocuments::add);
+        Optional.ofNullable(caseData.getFormG()).ifPresent(caseDocuments::add);
         Optional.ofNullable(caseData.getMiniFormA())
-            .ifPresent(miniFormA -> caseDocuments.add(miniFormA));
+            .ifPresent(caseDocuments::add);
         Optional.ofNullable(caseData.getOutOfFamilyCourtResolution()).ifPresent(
-            outOfFamilyCourtResolution -> caseDocuments.add(outOfFamilyCourtResolution));
+            caseDocuments::add);
         Optional.ofNullable(caseData.getAdditionalListOfHearingDocuments())
-            .ifPresent(hearingAdditionalDoc -> caseDocuments.add(hearingAdditionalDoc));
+            .ifPresent(caseDocuments::add);
 
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);

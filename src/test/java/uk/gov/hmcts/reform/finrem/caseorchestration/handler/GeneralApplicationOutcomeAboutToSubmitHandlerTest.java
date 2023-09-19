@@ -221,15 +221,15 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
 
         FinremCaseData data = submitHandle.getData();
 
-        assertEquals(wrapper.getGeneralApplicationOutcomeList(), null);
-        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy(), null);
-        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom(), null);
-        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationHearingRequired(), null);
-        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationTimeEstimate(), null);
-        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationSpecialMeasures(), null);
-        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationDocument(), null);
-        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationDraftOrder(), null);
-        assertEquals(data.getGeneralApplicationWrapper().getGeneralApplicationTracking(), null);
+        assertNull(wrapper.getGeneralApplicationOutcomeList());
+        assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy());
+        assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom());
+        assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationHearingRequired());
+        assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationTimeEstimate());
+        assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationSpecialMeasures());
+        assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDocument());
+        assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDraftOrder());
+        assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationTracking());
     }
 
     public DynamicRadioListElement getDynamicListElement(String code, String label) {

@@ -48,6 +48,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
     }
 
     @Override
+    @SuppressWarnings({"java:S6541","java:S3776"})
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();

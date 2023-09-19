@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNotice;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 import java.io.IOException;
@@ -130,6 +129,7 @@ public class InterimHearingService {
         sendToBulkPrintForInterveners(authorisationToken, caseDetails, caseDocumentsHolder);
     }
 
+    @SuppressWarnings("java:S1874")
     private void sendToBulkPrintForInterveners(String authorisationToken, CaseDetails caseDetails, CaseDocumentsHolder caseDocumentsHolder) {
         final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
@@ -153,9 +153,7 @@ public class InterimHearingService {
     private void addCaseDocumentsToIntervenerHearingNotices(IntervenerWrapper intervenerWrapper, CaseDocumentsHolder caseDocumentsHolder,
                                                             FinremCaseData finremCaseData, Map<String, Object> caseData) {
         List<IntervenerHearingNoticeCollection> hearingNotices = intervenerWrapper.getIntervenerHearingNoticesCollection(finremCaseData);
-        caseDocumentsHolder.getCaseDocuments().forEach(cd -> {
-            hearingNotices.add(getHearingNoticesDocumentCollection(cd));
-        });
+        caseDocumentsHolder.getCaseDocuments().forEach(cd -> hearingNotices.add(getHearingNoticesDocumentCollection(cd)));
         caseData.put(intervenerWrapper.getIntervenerHearingNoticesCollectionName(), hearingNotices);
     }
 
@@ -186,12 +184,7 @@ public class InterimHearingService {
 
         interimDocument.forEach(doc -> bulkPrintDocumentsList.add(loadBulkPrintDocument(doc)));
 
-
         caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
-
-        List<BulkPrintDocument> documents = interimDocument.stream()
-            .map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList());
-
         addUploadedDocumentsToBulkPrintList(caseId, interimHearingList, caseDocumentsHolder, authorisationToken);
 
         return caseDocumentsHolder;

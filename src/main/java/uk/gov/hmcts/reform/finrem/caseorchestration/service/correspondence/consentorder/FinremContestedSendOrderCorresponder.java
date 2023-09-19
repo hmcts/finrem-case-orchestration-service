@@ -53,9 +53,7 @@ public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEma
     public List<CaseDocument> getCaseDocuments(FinremCaseDetails caseDetails) {
         List<OrderSentToPartiesCollection> sentToPartiesCollection = caseDetails.getData().getOrdersSentToPartiesCollection();
         List<CaseDocument> caseDocuments = new ArrayList<>();
-        sentToPartiesCollection.forEach(sendOrderObj -> {
-            caseDocuments.add(sendOrderObj.getValue().getCaseDocument());
-        });
+        sentToPartiesCollection.forEach(sendOrderObj -> caseDocuments.add(sendOrderObj.getValue().getCaseDocument()));
         return caseDocuments;
     }
 }

@@ -59,12 +59,10 @@ public class PartyService {
             dynamicListElements.add(respMultiSelectListElement);
             defaultDynamicListElements.add(respMultiSelectListElement);
         }
-        return getRoleList(intervenerCaseRoleList(caseData, dynamicListElements),
-            caseDetails.getData().getPartiesOnCase(), defaultDynamicListElements);
+        return getRoleList(intervenerCaseRoleList(caseData, dynamicListElements), defaultDynamicListElements);
     }
 
     private DynamicMultiSelectList getRoleList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
-                                               DynamicMultiSelectList selectedRoles,
                                                List<DynamicMultiSelectListElement> defaultDynamicListElements) {
         return DynamicMultiSelectList.builder()
             .value(defaultDynamicListElements)

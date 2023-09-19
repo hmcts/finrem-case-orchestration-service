@@ -69,9 +69,7 @@ public class CreateGeneralLetterAboutToStartHandler extends FinremCallbackHandle
         if (caseDetails.isContestedApplication()) {
             List<IntervenerWrapper> intvrWrappers = caseData.getInterveners();
             if (intvrWrappers != null && !intvrWrappers.isEmpty()) {
-                intvrWrappers.forEach(intvrWrapper -> {
-                    buildDynamicIntervenerList(dynamicListElements, intvrWrapper);
-                });
+                intvrWrappers.forEach(intvrWrapper -> buildDynamicIntervenerList(dynamicListElements, intvrWrapper));
             }
         }
 

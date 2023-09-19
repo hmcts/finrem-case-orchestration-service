@@ -96,9 +96,7 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         List<CaseDocument> caseDocuments = getCaseDocuments(caseDetails);
         List<IntervenerHearingNoticeCollection> intervenerHearingNoticesCollection =
             intervenerWrapper.getIntervenerHearingNoticesCollection(caseDetails.getData());
-        caseDocuments.forEach(cd -> {
-            intervenerHearingNoticesCollection.add(getHearingNoticesDocumentCollection(cd));
-        });
+        caseDocuments.forEach(cd -> intervenerHearingNoticesCollection.add(getHearingNoticesDocumentCollection(cd)));
         return caseDocuments;
     }
 
