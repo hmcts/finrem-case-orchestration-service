@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -90,7 +93,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
         assertTrue(response.getErrors().get(0)
             .contains("Any changes to an existing General Applications will not be saved."
                 + " Please add a new General Application in order to progress."));
-        verify(bulkPrintDocumentService, times(4)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(bulkPrintDocumentService, times(5)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
 
@@ -107,8 +110,11 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
 
 
     private FinremCallbackRequest buildCallbackRequestWithCaseDetailsBefore() {
+        GeneralApplicationSupportingDocumentData supportingDocumentData = GeneralApplicationSupportingDocumentData.builder()
+            .value(GeneralApplicationSuportingDocumentItems.builder().supportDocument(caseDocument()).build()).build();
         GeneralApplicationsCollection record1 = GeneralApplicationsCollection.builder().id(UUID.randomUUID())
-            .value(GeneralApplicationItems.builder().generalApplicationCreatedBy("Test1").build()).build();
+            .value(GeneralApplicationItems.builder().generalApplicationCreatedBy("Test1")
+                .generalApplicationDocument(caseDocument()).gaSupportDocuments(List.of(supportingDocumentData)).build()).build();
         GeneralApplicationsCollection record2 = GeneralApplicationsCollection.builder().id(UUID.randomUUID())
             .value(GeneralApplicationItems.builder().generalApplicationCreatedBy("Test2").build()).build();
 

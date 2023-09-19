@@ -36,31 +36,32 @@ public class BulkPrintDocumentService {
                                                      String caseId,
                                                      List<String> errors,
                                                      String auth) {
-        String documentFilename = caseDocument.getDocumentFilename();
-        log.info("checking encryption for file {} for caseId {}", documentFilename, caseId);
-        byte[] pdfBytes;
-        if (documentFilename.endsWith(".doc") || documentFilename.endsWith(".docx")) {
-            Document document = Document.builder().url(caseDocument.getDocumentUrl())
-                .binaryUrl(caseDocument.getDocumentBinaryUrl())
-                .fileName(caseDocument.getDocumentFilename())
-                .build();
+        if (caseDocument != null) {
+            String documentFilename = caseDocument.getDocumentFilename();
+            log.info("checking encryption for file {} for caseId {}", documentFilename, caseId);
+            byte[] pdfBytes;
+            if (documentFilename.endsWith(".doc") || documentFilename.endsWith(".docx")) {
+                Document document = Document.builder().url(caseDocument.getDocumentUrl())
+                    .binaryUrl(caseDocument.getDocumentBinaryUrl())
+                    .fileName(caseDocument.getDocumentFilename())
+                    .build();
 
-            pdfBytes = documentConversionService.convertDocumentToPdf(document, auth);
-        } else {
-            pdfBytes = service.download(caseDocument.getDocumentBinaryUrl(), auth);
-        }
-
-        try (PDDocument doc = PDDocument.load(pdfBytes)) {
-            if (doc.isEncrypted()) {
-                errors.add("Uploaded document " + documentFilename + " contains encryption. "
-                    + "Please remove encryption before uploading or upload another document.");
+                pdfBytes = documentConversionService.convertDocumentToPdf(document, auth);
+            } else {
+                pdfBytes = service.download(caseDocument.getDocumentBinaryUrl(), auth);
             }
-        } catch (IOException exc) {
-            String errorMessage = "Failed to parse the documents for " + documentFilename;
-            errors.add(errorMessage);
-            log.error(errorMessage);
-            log.error(exc.getMessage());
+
+            try (PDDocument doc = PDDocument.load(pdfBytes)) {
+                if (doc.isEncrypted()) {
+                    errors.add("Uploaded document " + documentFilename + " contains encryption. "
+                        + "Please remove encryption before uploading or upload another document.");
+                }
+            } catch (IOException exc) {
+                String errorMessage = "Failed to parse the documents for " + documentFilename;
+                errors.add(errorMessage);
+                log.error(errorMessage);
+                log.error(exc.getMessage());
+            }
         }
     }
-
 }
