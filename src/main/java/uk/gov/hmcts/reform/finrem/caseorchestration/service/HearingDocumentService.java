@@ -100,13 +100,23 @@ public class HearingDocumentService {
         return isFastTrackApplication.apply(pair.getLeft().getData());
     }
 
+    @SuppressWarnings("java:S1874")
     CaseDetails addCourtFields(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         data.put("courtDetails", buildFrcCourtDetails(data));
         return caseDetails;
     }
 
-    @Deprecated
+    /**
+     * No Return.
+     * <p>Please use @{@link #sendInitialHearingCorrespondence(FinremCaseDetails, String)}</p>
+     *
+     * @param caseDetails instance of CaseDetails
+     * @param authorisationToken instance of String
+     * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken}
+     */
+    @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public void sendInitialHearingCorrespondence(CaseDetails caseDetails, String authorisationToken) {
         formCandGCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
