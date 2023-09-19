@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
@@ -26,4 +27,12 @@ public class SendOrderApplicantDocumentHandler extends SendOrderPartyDocumentHan
         caseData.setAppOrderCollection(orderColl);
     }
 
+
+    protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
+        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getAppOrderCollections())
+            .orElse(new ArrayList<>());
+        orders.add(getConsolidateCollection(orderCollection));
+        caseData.setAppOrderCollections(orders);
+        caseData.setAppOrderCollection(null);
+    }
 }

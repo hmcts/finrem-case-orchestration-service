@@ -256,6 +256,12 @@ public class FinremCaseData {
 
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;
+    private List<ApprovedOrderConsolidateCollection> appOrderCollections;
+    private List<ApprovedOrderConsolidateCollection> respOrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv1OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv2OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv3OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv4OrderCollections;
     private List<ApprovedOrderCollection> appOrderCollection;
     private List<ApprovedOrderCollection> respOrderCollection;
     private List<ApprovedOrderCollection> intv1OrderCollection;
