@@ -69,7 +69,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     private FinremCaseDetails caseDetails;
     private FinremCaseDetails caseDetailsBefore;
     private FinremCaseData caseData;
-    private List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
+    private final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
 
 
     @Before
