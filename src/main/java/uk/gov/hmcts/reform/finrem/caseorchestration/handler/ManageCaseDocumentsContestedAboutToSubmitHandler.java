@@ -24,7 +24,7 @@ import java.util.Optional;
 @Service
 public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
-    public static final String CHOOSE_A_DIFFERENT_PARTY = " not present on the case, please choose a different party";
+    public static final String CHOOSE_A_DIFFERENT_PARTY = " not present on the case, do you want to continue?";
     public static final String INTERVENER_1 = "Intervener 1 ";
     public static final String INTERVENER_2 = "Intervener 2 ";
     public static final String INTERVENER_3 = "Intervener 3 ";
@@ -61,7 +61,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
                                                                               String userAuthorisation) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = getValidatedResponse(caseData);
-        if (response.hasErrors()) {
+        if (response.hasWarnings()) {
             return response;
         }
 
@@ -88,16 +88,16 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
         if (StringUtils.isBlank(caseData.getIntervenerOneWrapper().getIntervenerName())
             && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageCaseDocumentCollection)) {
-            response.getErrors().add(INTERVENER_1 + CHOOSE_A_DIFFERENT_PARTY);
+            response.getWarnings().add(INTERVENER_1 + CHOOSE_A_DIFFERENT_PARTY);
         } else if (StringUtils.isBlank(caseData.getIntervenerTwoWrapper().getIntervenerName())
             && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_TWO, manageCaseDocumentCollection)) {
-            response.getErrors().add(INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY);
+            response.getWarnings().add(INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY);
         } else if (StringUtils.isBlank(caseData.getIntervenerThreeWrapper().getIntervenerName())
             && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_THREE, manageCaseDocumentCollection)) {
-            response.getErrors().add(INTERVENER_3 + CHOOSE_A_DIFFERENT_PARTY);
+            response.getWarnings().add(INTERVENER_3 + CHOOSE_A_DIFFERENT_PARTY);
         } else if (StringUtils.isBlank(caseData.getIntervenerFourWrapper().getIntervenerName())
             && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_FOUR, manageCaseDocumentCollection)) {
-            response.getErrors().add(INTERVENER_4 + CHOOSE_A_DIFFERENT_PARTY);
+            response.getWarnings().add(INTERVENER_4 + CHOOSE_A_DIFFERENT_PARTY);
         }
         return response;
     }
