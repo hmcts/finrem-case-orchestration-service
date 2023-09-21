@@ -433,7 +433,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         List<String> errors = hearingDocumentService.sendListForHearingCorrespondence(caseDetails, caseDetails(NO_VALUE), AUTH_TOKEN);
         assertThat(errors.size(), is(1));
-        assertThat(errors.get(0), is("Respondent correspondence must be enabled for this event"));
+        assertThat(errors.get(0), is("This listing notice must be sent to the applicant and respondent as default."
+            + " If this listing needs to be sent to only one of these parties please use the general order event."));
         verifyNoMoreInteractions(bulkPrintService);
 
     }

@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.List.of;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -218,6 +220,29 @@ public class SelectablePartiesCorrespondenceServiceTest {
             .thenReturn(FinremCaseDetails.builder().data(finremCaseData).build());
 
         assertTrue(selectablePartiesCorrespondenceService.shouldSendIntervenerFourCorrespondence(caseDetails));
+    }
+
+    @Test
+    public void shouldValidateListingNoticeCorrespondence() {
+
+        finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.INTVR_BARRISTER_4.getCcdCode()))).build();
+
+        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseData);
+        List<String> errors = selectablePartiesCorrespondenceService.validateCorrespondenceFieldsForListingNoticeEvent(finremCaseData);
+        assertThat(errors.size(), is(1));
+        assertThat(errors.get(0), is("This listing notice must be sent to the applicant and respondent as default."
+            + " If this listing needs to be sent to only one of these parties please use the general order event."));
+    }
+
+    @Test
+    public void shouldValidateListingNoticeCorrespondenceWithNoErrors() {
+
+        finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.RESP_SOLICITOR.getCcdCode(),
+            CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.INTVR_BARRISTER_1.getCcdCode()))).build();
+
+        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseData);
+        List<String> errors = selectablePartiesCorrespondenceService.validateCorrespondenceFieldsForListingNoticeEvent(finremCaseData);
+        assertThat(errors.size(), is(0));
     }
 
     private DynamicMultiSelectList buildDynamicSelectableParties(List<String> parties) {

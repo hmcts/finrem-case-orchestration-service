@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -99,4 +100,12 @@ public class SelectablePartiesCorrespondenceService {
         return false;
     }
 
+    public List<String> validateCorrespondenceFieldsForListingNoticeEvent(FinremCaseData data) {
+        List<String> errors = new ArrayList<>();
+        if (!data.isApplicantCorrespondenceEnabled() || !data.isRespondentCorrespondenceEnabled()) {
+            errors.add("This listing notice must be sent to the applicant and respondent as default."
+                + " If this listing needs to be sent to only one of these parties please use the general order event.");
+        }
+        return errors;
+    }
 }

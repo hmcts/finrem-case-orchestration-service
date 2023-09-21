@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
@@ -145,7 +144,7 @@ public class HearingDocumentService {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-        errors.addAll(validateCorrespondenceFields(finremCaseDetails.getData()));
+        errors.addAll(selectablePartiesCorrespondenceService.validateCorrespondenceFieldsForListingNoticeEvent(finremCaseDetails.getData()));
         if (!errors.isEmpty()) {
             return errors;
         }
@@ -165,15 +164,5 @@ public class HearingDocumentService {
         return errors;
     }
 
-    private List<String> validateCorrespondenceFields(FinremCaseData data) {
-        List<String> errors = new ArrayList<>();
-        if (!data.isApplicantCorrespondenceEnabled()) {
-            errors.add("Applicant correspondence must be enabled for this event");
-        }
-        if (!data.isRespondentCorrespondenceEnabled()) {
-            errors.add("Respondent correspondence must be enabled for this event");
-        }
-        return errors;
-    }
 
 }

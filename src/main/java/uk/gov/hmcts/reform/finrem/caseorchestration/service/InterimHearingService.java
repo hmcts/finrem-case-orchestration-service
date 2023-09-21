@@ -93,15 +93,22 @@ public class InterimHearingService {
 
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
-    public void submitInterimHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
+    public List<String> submitInterimHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
         log.info("In submitInterimHearing for case id {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
         Map<String, Object> caseDataBefore = caseDetailsBefore.getData();
         List<InterimHearingData> interimHearingList = filterInterimHearingToProcess(caseData, caseDataBefore);
 
+        List<String> errors = new ArrayList<>();
         if (!interimHearingList.isEmpty()) {
+            final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+            selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+            errors = selectablePartiesCorrespondenceService.validateCorrespondenceFieldsForListingNoticeEvent(finremCaseDetails.getData());
+            if (!errors.isEmpty()) {
+                return errors;
+            }
             CaseDocumentsHolder caseDocumentsHolder = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
-            sendToBulkPrint(caseDetails, authorisationToken, caseDocumentsHolder);
+            sendToBulkPrint(caseDetails, finremCaseDetails, authorisationToken, caseDocumentsHolder);
         }
 
         //Need only for existing Interim Hearing
@@ -109,37 +116,36 @@ public class InterimHearingService {
             removeNonCollectionInterimData(caseData);
         }
         caseDetails.setData(caseData);
+        return errors;
     }
 
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
-    private void sendToBulkPrint(CaseDetails caseDetails, String authorisationToken,
+    private void sendToBulkPrint(CaseDetails caseDetails, FinremCaseDetails finremCaseDetails, String authorisationToken,
                                  CaseDocumentsHolder caseDocumentsHolder) {
 
-        if ((!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails))
-            && selectablePartiesCorrespondenceService.shouldSendApplicantCorrespondence(caseDetails)) {
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
             log.info("Sending interim hearing documents to applicant - bulk print for caseid {}", caseDetails.getId());
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
         }
-        if ((!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails))
-            && selectablePartiesCorrespondenceService.shouldSendRespondentCorrespondence(caseDetails)) {
+        if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
             log.info("Sending interim hearing documents to respondent - bulk print for caseid {}", caseDetails.getId());
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
         }
-        sendToBulkPrintForInterveners(authorisationToken, caseDetails, caseDocumentsHolder);
+        sendToBulkPrintForInterveners(authorisationToken, caseDetails, finremCaseDetails, caseDocumentsHolder);
     }
 
     @SuppressWarnings("java:S1874")
-    private void sendToBulkPrintForInterveners(String authorisationToken, CaseDetails caseDetails, CaseDocumentsHolder caseDocumentsHolder) {
-        final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+    private void sendToBulkPrintForInterveners(String authorisationToken, CaseDetails caseDetails, FinremCaseDetails finremCaseDetails,
+                                               CaseDocumentsHolder caseDocumentsHolder) {
+
         final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
         interveners.forEach(intervenerWrapper -> {
             if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
                 && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
                 addCaseDocumentsToIntervenerHearingNotices(intervenerWrapper, caseDocumentsHolder, finremCaseDetails.getData(),
                     caseDetails.getData());
-                if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)) {
+                if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, finremCaseDetails)) {
                     log.info("Sending letter correspondence to {} for case: {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
                         caseDetails.getId());

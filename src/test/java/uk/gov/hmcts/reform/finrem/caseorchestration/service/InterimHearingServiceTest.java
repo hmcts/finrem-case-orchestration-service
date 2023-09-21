@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
@@ -112,9 +113,6 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
-        when(selectablePartiesCorrespondenceService.shouldSendApplicantCorrespondence(any())).thenReturn(true);
-        when(selectablePartiesCorrespondenceService.shouldSendRespondentCorrespondence(any())).thenReturn(true);
-
         CaseDetails caseDetailsBefore = buildCaseDetails(MODIFIED_DURING_MIGRATION_TEST_JSON);
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
@@ -147,8 +145,6 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
 
-        when(selectablePartiesCorrespondenceService.shouldSendApplicantCorrespondence(any())).thenReturn(true);
-        when(selectablePartiesCorrespondenceService.shouldSendRespondentCorrespondence(any())).thenReturn(true);
 
         CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON);
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
@@ -180,8 +176,6 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
 
-        when(selectablePartiesCorrespondenceService.shouldSendApplicantCorrespondence(any())).thenReturn(true);
-        when(selectablePartiesCorrespondenceService.shouldSendRespondentCorrespondence(any())).thenReturn(true);
 
         CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
@@ -208,8 +202,6 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
-        when(selectablePartiesCorrespondenceService.shouldSendApplicantCorrespondence(any())).thenReturn(true);
-        when(selectablePartiesCorrespondenceService.shouldSendRespondentCorrespondence(any())).thenReturn(true);
 
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
@@ -227,6 +219,29 @@ public class InterimHearingServiceTest extends BaseServiceTest {
             interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseDetails.getData());
 
         assertEquals(3, bulkPrintDocumentsList.size());
+
+    }
+
+
+    @Test
+    public void givenCoreLitigantNotSelectedForCorrespondenceShouldReturnWithErrorOnSubmitInterimHearing() {
+        CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
+
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
+
+        when(selectablePartiesCorrespondenceService.validateCorrespondenceFieldsForListingNoticeEvent(any())).thenReturn(List.of("error"));
+
+        CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON);
+        List<String> errors = interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
+
+        verifyNoMoreInteractions(bulkPrintService);
+
+        assertEquals(1, errors.size());
     }
 
     @Test
