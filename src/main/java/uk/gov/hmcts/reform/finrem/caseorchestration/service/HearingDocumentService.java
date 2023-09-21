@@ -9,12 +9,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FormCandGCorresponder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -111,7 +114,7 @@ public class HearingDocumentService {
      * No Return.
      * <p>Please use @{@link #sendInitialHearingCorrespondence(FinremCaseDetails, String)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails        instance of CaseDetails
      * @param authorisationToken instance of String
      * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken}
      */
@@ -136,13 +139,17 @@ public class HearingDocumentService {
         return caseDetails.getData().containsKey(FORM_C);
     }
 
-    public void sendListForHearingCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
+    public List<String> sendListForHearingCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
 
+        List<String> errors = new ArrayList<>();
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        FinremCaseDetails finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore);
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-
+        errors.addAll(validateCorrespondenceFields(finremCaseDetails.getData()));
+        if (!errors.isEmpty()) {
+            return errors;
+        }
+        FinremCaseDetails finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore);
         if (finremCaseDetailsBefore != null && finremCaseDetailsBefore.getData().getFormC() != null) {
             log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
             additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, finremCaseDetails);
@@ -155,6 +162,18 @@ public class HearingDocumentService {
         CaseDetails caseDetailsCopy = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         caseDetails.getData().putAll(caseDetailsCopy.getData());
         log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
+        return errors;
+    }
+
+    private List<String> validateCorrespondenceFields(FinremCaseData data) {
+        List<String> errors = new ArrayList<>();
+        if (!data.isApplicantCorrespondenceEnabled()) {
+            errors.add("Applicant correspondence must be enabled for this event");
+        }
+        if (!data.isRespondentCorrespondenceEnabled()) {
+            errors.add("Respondent correspondence must be enabled for this event");
+        }
+        return errors;
     }
 
 }
