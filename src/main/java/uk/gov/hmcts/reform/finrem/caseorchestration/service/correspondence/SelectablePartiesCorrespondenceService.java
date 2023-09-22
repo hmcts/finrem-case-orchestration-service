@@ -101,10 +101,17 @@ public class SelectablePartiesCorrespondenceService {
     }
 
     public List<String> validateCorrespondenceFieldsForListingNoticeEvent(FinremCaseData data) {
+        return validateApplicantAndRespondentCorrespondenceAreSelected(data,
+            "This listing notice must be sent to the applicant and respondent as default."
+                + " If this listing needs to be sent to only one of these parties please use the general order event.");
+    }
+
+
+
+    public List<String> validateApplicantAndRespondentCorrespondenceAreSelected(FinremCaseData data, String errorMessage) {
         List<String> errors = new ArrayList<>();
         if (!data.isApplicantCorrespondenceEnabled() || !data.isRespondentCorrespondenceEnabled()) {
-            errors.add("This listing notice must be sent to the applicant and respondent as default."
-                + " If this listing needs to be sent to only one of these parties please use the general order event.");
+            errors.add(errorMessage);
         }
         return errors;
     }

@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -234,7 +235,8 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
 
-        when(selectablePartiesCorrespondenceService.validateCorrespondenceFieldsForListingNoticeEvent(any())).thenReturn(List.of("error"));
+        when(selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(any(), anyString())).thenReturn(
+            List.of("error"));
 
         CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON);
         List<String> errors = interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);

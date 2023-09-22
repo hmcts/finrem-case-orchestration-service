@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(MockitoJUnitRunner.class)
 public class SelectablePartiesCorrespondenceServiceTest {
 
+    protected static final String ERROR_MESSAGE = "errorMessage";
     SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
     FinremCaseData finremCaseData;
 
@@ -228,10 +229,10 @@ public class SelectablePartiesCorrespondenceServiceTest {
         finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.INTVR_BARRISTER_4.getCcdCode()))).build();
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseData);
-        List<String> errors = selectablePartiesCorrespondenceService.validateCorrespondenceFieldsForListingNoticeEvent(finremCaseData);
+        List<String> errors = selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseData,
+            ERROR_MESSAGE);
         assertThat(errors.size(), is(1));
-        assertThat(errors.get(0), is("This listing notice must be sent to the applicant and respondent as default."
-            + " If this listing needs to be sent to only one of these parties please use the general order event."));
+        assertThat(errors.get(0), is(ERROR_MESSAGE));
     }
 
     @Test

@@ -76,6 +76,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtIH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -103,7 +104,8 @@ public class InterimHearingService {
         if (!interimHearingList.isEmpty()) {
             final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
             selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-            errors = selectablePartiesCorrespondenceService.validateCorrespondenceFieldsForListingNoticeEvent(finremCaseDetails.getData());
+            errors = selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseDetails.getData(),
+                HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
             if (!errors.isEmpty()) {
                 return errors;
             }

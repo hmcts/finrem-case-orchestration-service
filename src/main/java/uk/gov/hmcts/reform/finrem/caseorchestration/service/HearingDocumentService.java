@@ -34,6 +34,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @RequiredArgsConstructor
 public class HearingDocumentService {
 
+    protected static final String HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE = "This listing notice must be sent to the applicant and respondent"
+        + " as default. If this listing needs to be sent to only one of these parties please use the general order event.";
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
@@ -144,7 +146,8 @@ public class HearingDocumentService {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-        errors.addAll(selectablePartiesCorrespondenceService.validateCorrespondenceFieldsForListingNoticeEvent(finremCaseDetails.getData()));
+        errors.addAll(selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseDetails.getData(),
+            HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
         if (!errors.isEmpty()) {
             return errors;
         }
