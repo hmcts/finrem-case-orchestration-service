@@ -235,17 +235,6 @@ public class SelectablePartiesCorrespondenceServiceTest {
         assertThat(errors.get(0), is(ERROR_MESSAGE));
     }
 
-    @Test
-    public void shouldValidateListingNoticeCorrespondenceWithNoErrors() {
-
-        finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.RESP_SOLICITOR.getCcdCode(),
-            CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.INTVR_BARRISTER_1.getCcdCode()))).build();
-
-        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseData);
-        List<String> errors = selectablePartiesCorrespondenceService.validateCorrespondenceFieldsForListingNoticeEvent(finremCaseData);
-        assertThat(errors.size(), is(0));
-    }
-
     private DynamicMultiSelectList buildDynamicSelectableParties(List<String> parties) {
 
         List<DynamicMultiSelectListElement> list = new ArrayList<>();

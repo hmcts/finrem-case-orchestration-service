@@ -10,24 +10,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
-
-import java.util.List;
 
 @Slf4j
 @Service
 public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHandler {
-    protected static final String DEFAULT_CORRESPONDENCE_ERROR_MESSAGE =
-        "The applicant and respondent must be selected to receive correspondence for this event.";
     private final IntervenerShareDocumentsService intervenerShareDocumentsService;
-    private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     public ShareSelectedDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                      IntervenerShareDocumentsService intervenerShareDocumentsService,
-                                                      SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService) {
+                                                      IntervenerShareDocumentsService intervenerShareDocumentsService) {
         super(finremCaseDetailsMapper);
         this.intervenerShareDocumentsService = intervenerShareDocumentsService;
-        this.selectablePartiesCorrespondenceService = selectablePartiesCorrespondenceService;
     }
 
     @Override
@@ -46,15 +38,6 @@ public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHa
             callbackRequest.getEventType(), caseId);
 
         FinremCaseData caseData = caseDetails.getData();
-
-
-        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseData);
-        List<String> errors = selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(caseData,
-            DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
-        if (!errors.isEmpty()) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(errors).build();
-        }
         intervenerShareDocumentsService.shareSelectedDocumentWithOtherSelectedSolicitors(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
