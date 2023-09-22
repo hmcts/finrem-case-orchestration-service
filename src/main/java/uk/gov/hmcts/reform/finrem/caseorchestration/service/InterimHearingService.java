@@ -176,10 +176,7 @@ public class InterimHearingService {
     private CaseDocumentsHolder prepareDocumentsForPrint(CaseDetails caseDetails,
                                                          List<InterimHearingData> interimHearingList,
                                                          String authorisationToken) {
-        CaseDocumentsHolder caseDocumentsHolder = CaseDocumentsHolder.builder()
-            .caseDocuments(new ArrayList<>())
-            .bulkPrintDocuments(new ArrayList<>())
-            .build();
+
 
         String caseId = caseDetails.getId().toString();
         log.info("preparing for bulk print document for case id {}", caseId);
@@ -192,6 +189,10 @@ public class InterimHearingService {
             interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseData);
         caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
 
+        CaseDocumentsHolder caseDocumentsHolder = CaseDocumentsHolder.builder()
+            .caseDocuments(new ArrayList<>())
+            .bulkPrintDocuments(new ArrayList<>())
+            .build();
         interimDocument.forEach(doc -> bulkPrintDocumentsList.add(loadBulkPrintDocument(doc)));
         caseDocumentsHolder.getCaseDocuments().addAll(interimDocument);
 
