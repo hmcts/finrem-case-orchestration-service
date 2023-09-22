@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNotice;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 import java.io.IOException;
@@ -189,10 +190,14 @@ public class InterimHearingService {
 
         List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
             interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseData);
+        caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
 
         interimDocument.forEach(doc -> bulkPrintDocumentsList.add(loadBulkPrintDocument(doc)));
 
-        caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
+        List<BulkPrintDocument> documents = interimDocument.stream()
+            .map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList());
+        caseDocumentsHolder.getBulkPrintDocuments().addAll(documents);
+
         addUploadedDocumentsToBulkPrintList(caseId, interimHearingList, caseDocumentsHolder, authorisationToken);
 
         return caseDocumentsHolder;
