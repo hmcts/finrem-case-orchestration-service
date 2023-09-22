@@ -186,13 +186,14 @@ public class InterimHearingService {
         Map<String, Object> caseData = caseDetails.getData();
         List<CaseDocument> interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails,
             interimHearingList, authorisationToken);
-        caseDocumentsHolder.getCaseDocuments().addAll(interimDocument);
+
 
         List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
             interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseData);
         caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
 
         interimDocument.forEach(doc -> bulkPrintDocumentsList.add(loadBulkPrintDocument(doc)));
+        caseDocumentsHolder.getCaseDocuments().addAll(interimDocument);
 
         List<BulkPrintDocument> documents = interimDocument.stream()
             .map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList());
