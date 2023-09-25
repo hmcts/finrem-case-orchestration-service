@@ -19,7 +19,6 @@ import static org.junit.Assume.assumeTrue;
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
-
     public static final String CCD_CONFIG_PROD_CONTESTED_XLSX = "ccd-config-prod-contested.xlsx";
     public static final String CCD_CONFIG_PROD_CONSENTED_XLSX = "ccd-config-prod-consented.xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";

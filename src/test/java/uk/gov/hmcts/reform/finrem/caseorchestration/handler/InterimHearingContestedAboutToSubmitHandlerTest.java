@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BIRMINGHAM_COURT_LIST;
@@ -120,6 +121,18 @@ public class InterimHearingContestedAboutToSubmitHandlerTest extends BaseHandler
 
         verify(interimHearingService).submitInterimHearing(any(), any(), any());
         verifyNonCollectionData(caseData);
+    }
+
+    @Test
+    public void shouldHandleErrorsReturnedFromService() {
+        CallbackRequest callbackRequest = buildCallbackRequest(TEST_JSON);
+        when(interimHearingService.submitInterimHearing(any(), any(), any()))
+            .thenReturn(List.of("Error 1", "Error 2"));
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
+            interimHearingContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors().size(), is(2));
+
     }
 
     private void verifyNonCollectionData(Map<String, Object> data) {

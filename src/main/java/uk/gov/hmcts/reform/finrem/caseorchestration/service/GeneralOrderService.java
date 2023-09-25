@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -11,6 +12,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
@@ -18,6 +25,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContes
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +60,7 @@ public class GeneralOrderService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
+    private final PartyService partyService;
     private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
@@ -79,13 +89,23 @@ public class GeneralOrderService {
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {
         return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
             documentConfiguration.getGeneralOrderTemplate(caseDetails),
-            documentConfiguration.getGeneralOrderFileName());
+            getGeneralOrderFileNameWithDateTimeStamp());
+    }
+
+
+    private String getGeneralOrderFileNameWithDateTimeStamp() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        LocalDateTime now = LocalDateTime.now();
+        String dateTimeString = now.format(formatter);
+        String str = documentConfiguration.getGeneralOrderFileName();
+        return new StringBuilder(str).insert(str.length() - 4, "-" + dateTimeString).toString();
     }
 
     private GeneralOrderPreviewDocument applyGeneralOrderData(CaseDocument caseDocument) {
         return new GeneralOrderPreviewDocument(caseDocument);
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -202,5 +222,111 @@ public class GeneralOrderService {
         } else {
             return "";
         }
+    }
+
+    public void setOrderList(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
+        List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
+
+        if (hearingOrderDocuments != null) {
+            hearingOrderDocuments.forEach(obj -> dynamicListElements.add(partyService.getDynamicMultiSelectListElement(obj.getId(),
+                "Case documents tab [Approved Order]" + " - " + obj.getValue().getUploadDraftDocument().getDocumentFilename())));
+        }
+
+        if (ObjectUtils.isNotEmpty(data.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
+            CaseDocument orderLatestDocument = data.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+            String orderLatestDocumentFilename = orderLatestDocument.getDocumentFilename();
+            dynamicListElements.add(partyService.getDynamicMultiSelectListElement(orderLatestDocumentFilename,
+                "Orders tab [Lastest general order]" + " - " + orderLatestDocumentFilename));
+        }
+
+        DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
+        data.setOrdersToShare(dynamicOrderList);
+    }
+
+    private DynamicMultiSelectList getDynamicOrderList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
+                                                           DynamicMultiSelectList selectedOrders) {
+        if (selectedOrders != null && selectedOrders.getValue() != null) {
+            return DynamicMultiSelectList.builder()
+                .value(selectedOrders.getValue())
+                .listItems(dynamicMultiSelectListElement)
+                .build();
+        } else {
+            return DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListElement)
+                .build();
+        }
+    }
+
+    public List<String> getParties(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        DynamicMultiSelectList parties = data.getPartiesOnCase();
+        return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
+    }
+
+    public boolean isOrderSharedWithApplicant(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.APP_SOLICITOR.getCcdCode())
+            || parties.contains(CaseRole.APP_BARRISTER.getCcdCode()));
+    }
+
+    public boolean isOrderSharedWithRespondent(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.RESP_SOLICITOR.getCcdCode())
+            || parties.contains(CaseRole.RESP_BARRISTER.getCcdCode()));
+    }
+
+    public boolean isOrderSharedWithIntervener1(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_1.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
+    }
+
+    public boolean isOrderSharedWithIntervener2(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_2.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
+    }
+
+    public boolean isOrderSharedWithIntervener3(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_3.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
+    }
+
+    public boolean isOrderSharedWithIntervener4(FinremCaseDetails caseDetails) {
+        List<String> parties = getParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_4.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
+    }
+
+    public List<CaseDocument> hearingOrdersToShare(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {
+        FinremCaseData caseData = caseDetails.getData();
+        List<CaseDocument> orders = new ArrayList<>();
+        List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
+        if (selectedDocs != null && hearingOrders != null) {
+            List<DynamicMultiSelectListElement> docs = selectedDocs.getValue();
+            docs.forEach(doc -> hearingOrders.forEach(obj -> addToList(doc, obj, orders, caseDetails.getId())));
+        }
+        return orders;
+    }
+
+    private void addToList(DynamicMultiSelectListElement doc, DirectionOrderCollection obj,
+                           List<CaseDocument> orders, Long caseId) {
+        if (obj.getId().equals(doc.getCode())) {
+            CaseDocument caseDocument = obj.getValue().getUploadDraftDocument();
+            log.info("Adding document to orders {} for caseId {}", caseDocument, caseId);
+            orders.add(caseDocument);
+        }
+    }
+
+    public boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, CaseDocument caseDocument) {
+        if (caseDocument != null) {
+            Optional<DynamicMultiSelectListElement> listElement = selectedDocs.getValue().stream()
+                .filter(e -> e.getCode().equals(caseDocument.getDocumentFilename())).findAny();
+            return listElement.isPresent();
+        }
+        return false;
     }
 }

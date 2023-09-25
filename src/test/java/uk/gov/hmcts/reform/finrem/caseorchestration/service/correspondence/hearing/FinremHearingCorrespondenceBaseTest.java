@@ -85,6 +85,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
+            .intervenerCorrespondenceEnabled(true)
             .build();
 
         caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
@@ -92,7 +93,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
             any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.getFinremCaseDataKeysForIntervenerSolicitor(intervenerOneWrapper))
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerOneWrapper))
             .thenReturn(SolicitorCaseDataKeysWrapper.builder().build());
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
@@ -109,6 +110,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
+            .intervenerCorrespondenceEnabled(true)
             .build();
 
         caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);

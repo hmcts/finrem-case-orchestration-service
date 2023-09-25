@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.frcupateinfo.UpdateFrcInfoLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generator.BaseContestedLetterDetailsGenerator;
@@ -25,8 +26,10 @@ public class UpdateFrcInfoLetterDetailsGenerator extends BaseContestedLetterDeta
 
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 
-    public UpdateFrcInfoLetterDetailsGenerator(CaseDataService caseDataService, DocumentHelper documentHelper) {
-        super(caseDataService, documentHelper);
+
+    public UpdateFrcInfoLetterDetailsGenerator(CaseDataService caseDataService, DocumentHelper documentHelper,
+                                               LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper) {
+        super(caseDataService, documentHelper, letterAddresseeGeneratorMapper);
     }
 
     @Override

@@ -12,14 +12,22 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -28,6 +36,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -76,6 +85,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARTIES_ON_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
@@ -396,6 +406,67 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verifyCourtDetailsFieldsNotSet();
     }
 
+    @Test
+    public void verifySendListForHearingCorrespondence() {
+        CaseDetails caseDetails = caseDetails(NO_VALUE);
+        caseDetails.getData().put(PARTIES_ON_CASE, buildDynamicSelectableParties(fullPartyList()));
+        buildDynamicSelectableParties(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode()));
+
+        hearingDocumentService.sendListForHearingCorrespondence(caseDetails, caseDetails(NO_VALUE), AUTH_TOKEN);
+
+
+        verify(bulkPrintService).printApplicantDocuments(any(FinremCaseDetails.class), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
+        verify(bulkPrintService).printRespondentDocuments(any(FinremCaseDetails.class), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
+
+        assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(1));
+        bulkPrintDocumentsCaptor.getValue().forEach(obj -> assertThat(obj.getBinaryFileUrl(), is(BINARY_URL)));
+
+
+    }
+
+    @Test
+    public void verifySendListForHearingCorrespondenceReturnsErrorsWhenCoreLitigantsNotSelected() {
+        CaseDetails caseDetails = caseDetails(NO_VALUE);
+        caseDetails.getData()
+            .put(PARTIES_ON_CASE, buildDynamicSelectableParties(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode())));
+        buildDynamicSelectableParties(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode()));
+
+        List<String> errors = hearingDocumentService.sendListForHearingCorrespondence(caseDetails, caseDetails(NO_VALUE), AUTH_TOKEN);
+        assertThat(errors.size(), is(1));
+        assertThat(errors.get(0), is("This listing notice must be sent to the applicant and respondent as default."
+            + " If this listing needs to be sent to only one of these parties please use the general order event."));
+        verifyNoMoreInteractions(bulkPrintService);
+
+    }
+
+
+    private List<String> fullPartyList() {
+        return of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode(),
+            CaseRole.RESP_SOLICITOR.getCcdCode(), CaseRole.RESP_BARRISTER.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode(), CaseRole.INTVR_BARRISTER_1.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode(), CaseRole.INTVR_BARRISTER_2.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode(), CaseRole.INTVR_BARRISTER_3.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_4.getCcdCode(), CaseRole.INTVR_BARRISTER_4.getCcdCode());
+    }
+
+    private DynamicMultiSelectList buildDynamicSelectableParties(List<String> parties) {
+
+        List<DynamicMultiSelectListElement> list = new ArrayList<>();
+        parties.forEach(role -> list.add(getElementList(role)));
+
+        return DynamicMultiSelectList.builder()
+            .value(list)
+            .listItems(list)
+            .build();
+    }
+
+    private DynamicMultiSelectListElement getElementList(String role) {
+        return DynamicMultiSelectListElement.builder()
+            .code(role)
+            .label(role)
+            .build();
+    }
+
     private CaseDetails makeItNonFastTrackDecisionCase() {
         return caseDetails(NO_VALUE);
     }
@@ -422,7 +493,10 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseData.put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
         caseData.put(HEARING_ADDITIONAL_DOC, caseDocument());
 
-        return CaseDetails.builder().data(caseData).build();
+        return CaseDetails.builder()
+            .caseTypeId(CaseType.CONTESTED.getCcdType())
+            .state(State.PREPARE_FOR_HEARING.getStateId())
+            .data(caseData).build();
     }
 
     private CaseDetails caseDetailsWithCourtDetails(String region, String frcList, String frc, String courtList, String court) {
