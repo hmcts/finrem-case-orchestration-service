@@ -56,8 +56,8 @@ public class FinremNotificationRequestMapper {
     private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getAppSolicitorEmail())
-            .solicitorNameKey(caseData.getAppSolicitorName())
-            .solicitorReferenceKey(caseData.getContactDetailsWrapper().getSolicitorReference())
+            .solicitorNameKey(nullToEmpty(caseData.getAppSolicitorName()))
+            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
             .build();
     }
 
@@ -130,8 +130,8 @@ public class FinremNotificationRequestMapper {
             .caseReferenceNumber(caseDetails.getId().toString())
             .intervenerFullName(intervenerDetails.getIntervenerName())
             .intervenerSolicitorFirm(intervenerDetails.getIntervenerOrganisation().getOrganisation().getOrganisationName())
-            .intervenerSolicitorReferenceNumber(referenceNumber)
-            .name(recipientName)
+            .intervenerSolicitorReferenceNumber(nullToEmpty(referenceNumber))
+            .name(nullToEmpty(recipientName))
             .notificationEmail(recipientEmail)
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
