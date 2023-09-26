@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
 @Slf4j
@@ -63,8 +64,8 @@ public class FinremNotificationRequestMapper {
     private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
-            .solicitorNameKey(caseData.getRespondentSolicitorName())
-            .solicitorReferenceKey(caseData.getContactDetailsWrapper().getRespondentSolicitorReference())
+            .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
+            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
             .build();
     }
 
