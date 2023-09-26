@@ -73,6 +73,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     private static final String INTV4_SOLICITOR_LABEL = "Intervener 4 Solicitor";
     private static final String RESP_SOLICITOR_LABEL = "Respondent Solicitor";
     private static final String RESP_LABEL = "Respondent";
+    private static final String APP_LABEL = "Applicant";
 
 
     @Autowired
@@ -85,12 +86,52 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     @MockBean
     private BulkPrintService bulkPrintService;
 
+    @MockBean
+    private CaseDataService caseDataService;
+
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
 
     @Before
     public void setup() {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+    }
+
+    @Test
+    public void generateGeneralLetterForApplicantforGivenConsentedCase() {
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        FinremCaseData caseData = caseDetails.getData();
+        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(APPLICANT).label(APP_LABEL).build();
+        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
+        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        when(caseDataService.buildFullApplicantName(any())).thenReturn("Tom Geme");
+        when(caseDataService.buildFullRespondentName(any())).thenReturn("Moj Resp");
+
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+
+        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
+        assertThat(generalLetterData, hasSize(2));
+
+        doCaseDocumentAssert(generalLetterData.get(0).getValue().getGeneratedLetter());
+        doCaseDocumentAssert(generalLetterData.get(1).getValue().getGeneratedLetter());
+
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Applicant Street\n"
+            + "Second Address Line\n"
+            + "Third Address Line\n"
+            + "Greater London\n"
+            + "London\n"
+            + "SE12 9SE"));
+        assertThat(data.get("applicantFullName"), is("Tom Geme"));
+        assertThat(data.get("respondentFullName"), is("Moj Resp"));
+        assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
+        verify(caseDataService).buildFullApplicantName(any());
+        verify(caseDataService).buildFullRespondentName(any());
     }
 
 
@@ -101,7 +142,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(RESPONDENT).label(RESP_LABEL).build();
         DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-
+        when(caseDataService.buildFullApplicantName(any())).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName(any())).thenReturn("Moj Resp");
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
@@ -123,8 +165,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "London\n"
             + "SE12 9SE"));
         assertThat(data.get("applicantFullName"), is("Poor Guy"));
-        assertThat(data.get("respondentFullName"), is("test Korivi"));
+        assertThat(data.get("respondentFullName"), is("Moj Resp"));
         assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
+        verify(caseDataService).buildFullApplicantName(any());
+        verify(caseDataService).buildFullRespondentName(any());
     }
 
     @Test
@@ -134,6 +178,9 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(RESPONDENT_SOLICITOR).label(RESP_SOLICITOR_LABEL).build();
         DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        when(caseDataService.buildFullApplicantName(any())).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName(any())).thenReturn("test Korivi");
+
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
@@ -166,6 +213,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(APPLICANT_SOLICITOR).label(APP_SOLICITOR_LABEL).build();
         DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+
+        when(caseDataService.buildFullApplicantName(any())).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName(any())).thenReturn("Moj Resp");
+
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
@@ -187,7 +238,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "London\n"
             + "SW1V 4FG"));
         assertThat(data.get("applicantFullName"), is("Poor Guy"));
-        assertThat(data.get("respondentFullName"), is("Sarah Beatrice Korivi"));
+        assertThat(data.get("respondentFullName"), is("Moj Resp"));
     }
 
     @Test
