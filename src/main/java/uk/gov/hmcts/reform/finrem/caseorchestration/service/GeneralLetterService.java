@@ -175,7 +175,9 @@ public class GeneralLetterService {
         return switch (generalLetterAddressee) {
             case APPLICANT_SOLICITOR -> data.getAppSolicitorName();
             case RESPONDENT_SOLICITOR -> data.getRespondentSolicitorName();
-            case RESPONDENT -> StringUtils.joinWith(" ", wrapper.getRespondentFmName(), wrapper.getRespondentLname());
+            case RESPONDENT -> StringUtils.joinWith(" ", data.isConsentedApplication()
+                    ? wrapper.getAppRespondentFmName() : wrapper.getRespondentFmName(),
+                data.isConsentedApplication() ? wrapper.getAppRespondentLName() : wrapper.getRespondentLname());
             case APPLICANT -> StringUtils.joinWith(" ", wrapper.getApplicantFmName(), wrapper.getApplicantLname());
             case OTHER_RECIPIENT -> data.getGeneralLetterWrapper().getGeneralLetterRecipient();
             case INTERVENER1, INTERVENER1_SOLICITOR -> getIntervenerAddressee(data.getIntervenerOneWrapper(), generalLetterAddressee);

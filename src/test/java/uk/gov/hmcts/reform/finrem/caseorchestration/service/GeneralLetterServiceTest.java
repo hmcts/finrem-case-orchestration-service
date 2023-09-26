@@ -72,6 +72,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     private static final String INTV3_SOLICITOR_LABEL = "Intervener 3 Solicitor";
     private static final String INTV4_SOLICITOR_LABEL = "Intervener 4 Solicitor";
     private static final String RESP_SOLICITOR_LABEL = "Respondent Solicitor";
+    private static final String RESP_LABEL = "Respondent";
 
 
     @Autowired
@@ -90,6 +91,40 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     @Before
     public void setup() {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+    }
+
+
+    @Test
+    public void generateGeneralLetterForResponsentforGivenConsentedCase() {
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        FinremCaseData caseData = caseDetails.getData();
+        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(RESPONDENT).label(RESP_LABEL).build();
+        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
+        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+
+        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
+        assertThat(generalLetterData, hasSize(2));
+
+        doCaseDocumentAssert(generalLetterData.get(0).getValue().getGeneratedLetter());
+        doCaseDocumentAssert(generalLetterData.get(1).getValue().getGeneratedLetter());
+
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Respondent Street\n"
+            + "Second Address Line\n"
+            + "Third Address Line\n"
+            + "Greater London\n"
+            + "London\n"
+            + "SE12 9SE"));
+        assertThat(data.get("applicantFullName"), is("Poor Guy"));
+        assertThat(data.get("respondentFullName"), is("test Korivi"));
+        assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
     }
 
     @Test
