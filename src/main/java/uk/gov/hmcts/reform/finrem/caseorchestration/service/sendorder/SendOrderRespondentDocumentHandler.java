@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,24 +38,24 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
 
     @Override
     protected List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getRespOrderCollection())
+        return Optional.ofNullable(caseData.getOrderWrapper().getRespOrderCollection())
             .orElse(new ArrayList<>());
     }
 
     @Override
     protected List<RoleConsentOrderCollection> getConsentOrderCollectionForParty(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getRespConsentApprovedOrders())
+        return Optional.ofNullable(caseData.getConsentOrderWrapper().getRespConsentApprovedOrders())
             .orElse(new ArrayList<>());
     }
 
     @Override
     protected void addApprovedConsentOrdersToPartyCollection(FinremCaseData caseData, List<RoleConsentOrderCollection> orderColl) {
-        caseData.setRespConsentApprovedOrders(orderColl);
+        caseData.getConsentOrderWrapper().setRespConsentApprovedOrders(orderColl);
     }
 
     @Override
     protected List<UnapprovedOrderCollection> getUnapprovedOrderCollectionForParty(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getRespRefusedOrderCollection())
+        return Optional.ofNullable(caseData.getConsentOrderWrapper().getRespRefusedOrderCollection())
             .orElse(new ArrayList<>());
     }
 
@@ -79,12 +79,12 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
 
     @Override
     protected void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl) {
-        caseData.setRespOrderCollection(orderColl);
+        caseData.getOrderWrapper().setRespOrderCollection(orderColl);
     }
 
     @Override
     protected void addUnapprovedOrdersToPartyCollection(FinremCaseData caseData, List<UnapprovedOrderCollection> orderColl) {
-        caseData.setRespRefusedOrderCollection(orderColl);
+        caseData.getConsentOrderWrapper().setRespRefusedOrderCollection(orderColl);
     }
 
     private static void setConfidentialBulkPrintFieldForRespondent(FinremCaseDetails finremCaseDetails,
@@ -97,10 +97,10 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
     }
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
-        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getRespOrderCollections())
+        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getOrderWrapper().getRespOrderCollections())
             .orElse(new ArrayList<>());
         orders.add(getConsolidateCollection(orderCollection));
-        caseData.setRespOrderCollections(orders);
-        caseData.setRespOrderCollection(null);
+        caseData.getOrderWrapper().setRespOrderCollections(orders);
+        caseData.getOrderWrapper().setRespOrderCollection(null);
     }
 }

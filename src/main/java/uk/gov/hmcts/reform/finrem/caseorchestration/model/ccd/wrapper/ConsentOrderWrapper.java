@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OtherDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionProvider;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RoleConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationDocumentTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -79,4 +81,16 @@ public class ConsentOrderWrapper {
     private String otherDocLabel;
     private List<VariationDocumentTypeCollection> otherVariationCollection;
     private CaseDocument uploadApprovedConsentOrder;
+    private List<RoleConsentOrderCollection> appConsentApprovedOrders;
+    private List<RoleConsentOrderCollection> respConsentApprovedOrders;
+    private List<RoleConsentOrderCollection> intv1ConsentApprovedOrders;
+    private List<RoleConsentOrderCollection> intv2ConsentApprovedOrders;
+    private List<RoleConsentOrderCollection> intv3ConsentApprovedOrders;
+    private List<RoleConsentOrderCollection> intv4ConsentApprovedOrders;
+    private List<UnapprovedOrderCollection> appRefusedOrderCollection;
+    private List<UnapprovedOrderCollection> respRefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv1RefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv2RefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv3RefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv4RefusedOrderCollection;
 }

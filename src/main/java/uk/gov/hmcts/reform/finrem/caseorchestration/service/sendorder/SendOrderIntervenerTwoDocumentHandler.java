@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -12,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,35 +33,35 @@ public class SendOrderIntervenerTwoDocumentHandler extends SendOrderPartyDocumen
 
     @Override
     protected List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getIntv2OrderCollection())
+        return Optional.ofNullable(caseData.getOrderWrapper().getIntv2OrderCollection())
             .orElse(new ArrayList<>());
     }
 
     @Override
     protected List<RoleConsentOrderCollection> getConsentOrderCollectionForParty(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getIntv2ConsentApprovedOrders())
+        return Optional.ofNullable(caseData.getConsentOrderWrapper().getIntv2ConsentApprovedOrders())
             .orElse(new ArrayList<>());
     }
 
     @Override
     protected void addApprovedConsentOrdersToPartyCollection(FinremCaseData caseData, List<RoleConsentOrderCollection> orderColl) {
-        caseData.setIntv2ConsentApprovedOrders(orderColl);
+        caseData.getConsentOrderWrapper().setIntv2ConsentApprovedOrders(orderColl);
     }
 
     @Override
     protected List<UnapprovedOrderCollection> getUnapprovedOrderCollectionForParty(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getIntv2RefusedOrderCollection())
+        return Optional.ofNullable(caseData.getConsentOrderWrapper().getIntv2RefusedOrderCollection())
             .orElse(new ArrayList<>());
     }
 
     @Override
     protected void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl) {
-        caseData.setIntv2OrderCollection(orderColl);
+        caseData.getOrderWrapper().setIntv2OrderCollection(orderColl);
     }
 
     @Override
     protected void addUnapprovedOrdersToPartyCollection(FinremCaseData caseData, List<UnapprovedOrderCollection> orderColl) {
-        caseData.setIntv2RefusedOrderCollection(orderColl);
+        caseData.getConsentOrderWrapper().setIntv2RefusedOrderCollection(orderColl);
     }
 
     @Override
@@ -80,10 +80,10 @@ public class SendOrderIntervenerTwoDocumentHandler extends SendOrderPartyDocumen
     }
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
-        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getIntv2OrderCollections())
+        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getOrderWrapper().getIntv2OrderCollections())
             .orElse(new ArrayList<>());
         orders.add(getConsolidateCollection(orderCollection));
-        caseData.setIntv2OrderCollections(orders);
-        caseData.setIntv2OrderCollection(null);
+        caseData.getOrderWrapper().setIntv2OrderCollections(orders);
+        caseData.getOrderWrapper().setIntv2OrderCollection(null);
     }
 }

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,35 +39,35 @@ public class SendOrderApplicantDocumentHandler extends SendOrderPartyDocumentHan
 
     @Override
     protected List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getAppOrderCollection())
+        return Optional.ofNullable(caseData.getOrderWrapper().getAppOrderCollection())
             .orElse(new ArrayList<>());
     }
 
     @Override
     protected List<RoleConsentOrderCollection> getConsentOrderCollectionForParty(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getAppConsentApprovedOrders())
+        return Optional.ofNullable(caseData.getConsentOrderWrapper().getAppConsentApprovedOrders())
             .orElse(new ArrayList<>());
     }
 
     @Override
     protected List<UnapprovedOrderCollection> getUnapprovedOrderCollectionForParty(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getAppRefusedOrderCollection())
+        return Optional.ofNullable(caseData.getConsentOrderWrapper().getAppRefusedOrderCollection())
             .orElse(new ArrayList<>());
     }
 
     @Override
     protected void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl) {
-        caseData.setAppOrderCollection(orderColl);
+        caseData.getOrderWrapper().setAppOrderCollection(orderColl);
     }
 
     @Override
     protected void addApprovedConsentOrdersToPartyCollection(FinremCaseData caseData, List<RoleConsentOrderCollection> orderColl) {
-        caseData.setAppConsentApprovedOrders(orderColl);
+        caseData.getConsentOrderWrapper().setAppConsentApprovedOrders(orderColl);
     }
 
     @Override
     protected void addUnapprovedOrdersToPartyCollection(FinremCaseData caseData, List<UnapprovedOrderCollection> orderColl) {
-        caseData.setAppRefusedOrderCollection(orderColl);
+        caseData.getConsentOrderWrapper().setAppRefusedOrderCollection(orderColl);
     }
 
     @Override
@@ -97,10 +97,10 @@ public class SendOrderApplicantDocumentHandler extends SendOrderPartyDocumentHan
     }
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
-        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getAppOrderCollections())
+        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getOrderWrapper().getAppOrderCollections())
             .orElse(new ArrayList<>());
         orders.add(getConsolidateCollection(orderCollection));
-        caseData.setAppOrderCollections(orders);
-        caseData.setAppOrderCollection(null);
+        caseData.getOrderWrapper().setAppOrderCollections(orders);
+        caseData.getOrderWrapper().setAppOrderCollection(null);
     }
 }
