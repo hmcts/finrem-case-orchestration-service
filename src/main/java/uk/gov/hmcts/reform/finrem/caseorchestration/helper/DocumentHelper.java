@@ -42,7 +42,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -79,7 +79,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
@@ -98,7 +97,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
@@ -186,6 +184,7 @@ public class DocumentHelper {
      * @deprecated Use {@link Map caseData}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public List<CaseDocument> getFormADocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(FORM_A_COLLECTION))
             .map(this::convertToPaymentDocumentCollectionList)
@@ -383,13 +382,6 @@ public class DocumentHelper {
         return recipient == APPLICANT ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS;
     }
 
-    private String getRespondentLastNameCcdFieldName(boolean isConsentedApplication) {
-        return isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME;
-    }
-
-    private String getRespondentFirstMiddleNameCcdFieldName(boolean isConsentedApplication) {
-        return isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
-    }
 
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
@@ -400,6 +392,7 @@ public class DocumentHelper {
      * @deprecated Use {@link FinremCaseDetails caseDetails, PaperNotificationRecipient recipient}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public CaseDetails prepareLetterTemplateData(CaseDetails caseDetails, PaperNotificationRecipient recipient) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
         CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
@@ -432,6 +425,7 @@ public class DocumentHelper {
      *                                                   Address addressToSendTo}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName,
                                                   Map<String, Object> addressToSendTo,
                                                   boolean isConsentedApplication) {

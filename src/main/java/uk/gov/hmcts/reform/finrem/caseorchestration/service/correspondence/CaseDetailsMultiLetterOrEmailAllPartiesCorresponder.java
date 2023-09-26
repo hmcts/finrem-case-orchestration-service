@@ -85,9 +85,7 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         List<IntervenerHearingNoticeCollection> intervenerHearingNoticesCollection =
             intervenerWrapper.getIntervenerHearingNoticesCollection(finremCaseDetails.getData());
-        caseDocuments.forEach(cd -> {
-            intervenerHearingNoticesCollection.add(getHearingNoticesDocumentCollection(cd));
-        });
+        caseDocuments.forEach(cd -> intervenerHearingNoticesCollection.add(getHearingNoticesDocumentCollection(cd)));
         caseDetails.getData().put(intervenerWrapper.getIntervenerHearingNoticesCollectionName(), intervenerHearingNoticesCollection);
         return caseDocuments;
     }

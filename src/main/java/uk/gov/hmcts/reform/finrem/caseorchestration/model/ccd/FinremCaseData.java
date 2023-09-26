@@ -225,6 +225,7 @@ public class FinremCaseData {
     private List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollection;
     private List<DocumentCollection> hearingNoticeDocumentPack;
     private List<DocumentCollection> hearingNoticesDocumentCollection;
+
     private HearingTypeDirection hearingType;
     private String timeEstimate;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -254,8 +255,21 @@ public class FinremCaseData {
     private SolicitorToDraftOrder solicitorResponsibleForDraftingOrder;
     private List<DirectionOrderCollection> uploadHearingOrder;
     private List<DocumentCollection> hearingOrderOtherDocuments;
+
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;
+    private List<ApprovedOrderConsolidateCollection> appOrderCollections;
+    private List<ApprovedOrderConsolidateCollection> respOrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv1OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv2OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv3OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv4OrderCollections;
+    private List<ApprovedOrderCollection> appOrderCollection;
+    private List<ApprovedOrderCollection> respOrderCollection;
+    private List<ApprovedOrderCollection> intv1OrderCollection;
+    private List<ApprovedOrderCollection> intv2OrderCollection;
+    private List<ApprovedOrderCollection> intv3OrderCollection;
+    private List<ApprovedOrderCollection> intv4OrderCollection;
     private List<IntervenerHearingNoticeCollection> intv1HearingNoticesCollection;
     private List<IntervenerHearingNoticeCollection> intv2HearingNoticesCollection;
     private List<IntervenerHearingNoticeCollection> intv3HearingNoticesCollection;
