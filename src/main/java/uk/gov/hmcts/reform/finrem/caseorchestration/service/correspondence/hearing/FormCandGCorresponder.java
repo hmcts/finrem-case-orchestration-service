@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
-@SuppressWarnings({"java:S110"})
+@SuppressWarnings({"java:S110", "java:S2387"})
 public class FormCandGCorresponder extends HearingCorresponder {
 
     private final DocumentHelper documentHelper;

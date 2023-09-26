@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Selec
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FormCandGCorresponder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -32,6 +34,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @RequiredArgsConstructor
 public class HearingDocumentService {
 
+    protected static final String HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE = "This listing notice must be sent to the applicant and respondent"
+        + " as default. If this listing needs to be sent to only one of these parties please use the general order event.";
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
@@ -100,13 +104,23 @@ public class HearingDocumentService {
         return isFastTrackApplication.apply(pair.getLeft().getData());
     }
 
+    @SuppressWarnings("java:S1874")
     CaseDetails addCourtFields(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         data.put("courtDetails", buildFrcCourtDetails(data));
         return caseDetails;
     }
 
-    @Deprecated
+    /**
+     * No Return.
+     * <p>Please use @{@link #sendInitialHearingCorrespondence(FinremCaseDetails, String)}</p>
+     *
+     * @param caseDetails        instance of CaseDetails
+     * @param authorisationToken instance of String
+     * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken}
+     */
+    @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public void sendInitialHearingCorrespondence(CaseDetails caseDetails, String authorisationToken) {
         formCandGCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
@@ -126,13 +140,18 @@ public class HearingDocumentService {
         return caseDetails.getData().containsKey(FORM_C);
     }
 
-    public void sendListForHearingCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
+    public List<String> sendListForHearingCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
 
+        List<String> errors = new ArrayList<>();
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        FinremCaseDetails finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore);
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-
+        errors.addAll(selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseDetails.getData(),
+            HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
+        if (!errors.isEmpty()) {
+            return errors;
+        }
+        FinremCaseDetails finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore);
         if (finremCaseDetailsBefore != null && finremCaseDetailsBefore.getData().getFormC() != null) {
             log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
             additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, finremCaseDetails);
@@ -145,6 +164,8 @@ public class HearingDocumentService {
         CaseDetails caseDetailsCopy = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         caseDetails.getData().putAll(caseDetailsCopy.getData());
         log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
+        return errors;
     }
+
 
 }

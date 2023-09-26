@@ -233,12 +233,12 @@ public class GeneralApplicationHelperTest {
     }
 
     private void assertData(List<GeneralApplicationItems> resultingList) {
-        assertEquals(resultingList.get(0).getGeneralApplicationSender().getValue().getCode(), APPLICANT);
-        assertEquals(resultingList.get(0).getGeneralApplicationSender().getValue().getLabel(), APPLICANT);
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedBy(), "Claire Mumford");
-        assertEquals(resultingList.get(0).getGeneralApplicationHearingRequired(), "Yes");
-        assertEquals(resultingList.get(0).getGeneralApplicationTimeEstimate(), "24 hours");
-        assertEquals(resultingList.get(0).getGeneralApplicationSpecialMeasures(), "Special measure");
+        assertEquals(APPLICANT, resultingList.get(0).getGeneralApplicationSender().getValue().getCode());
+        assertEquals(APPLICANT, resultingList.get(0).getGeneralApplicationSender().getValue().getLabel());
+        assertEquals("Claire Mumford", resultingList.get(0).getGeneralApplicationCreatedBy());
+        assertEquals("Yes", resultingList.get(0).getGeneralApplicationHearingRequired());
+        assertEquals("24 hours", resultingList.get(0).getGeneralApplicationTimeEstimate());
+        assertEquals("Special measure", resultingList.get(0).getGeneralApplicationSpecialMeasures());
         assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
             LocalDate.of(2022, 8, 2));
     }

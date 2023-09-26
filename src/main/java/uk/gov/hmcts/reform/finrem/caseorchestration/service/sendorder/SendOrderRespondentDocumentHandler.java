@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,5 +94,13 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
             finremCaseDetails.getId());
         caseData.setBulkPrintCoverSheetRes(null);
         caseData.setBulkPrintCoverSheetResConfidential(bulkPrintSheet);
+    }
+
+    protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
+        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getRespOrderCollections())
+            .orElse(new ArrayList<>());
+        orders.add(getConsolidateCollection(orderCollection));
+        caseData.setRespOrderCollections(orders);
+        caseData.setRespOrderCollection(null);
     }
 }

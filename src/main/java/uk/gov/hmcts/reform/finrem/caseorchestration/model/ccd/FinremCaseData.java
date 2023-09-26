@@ -66,6 +66,7 @@ public class FinremCaseData {
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
+    private CaseDocument d11;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate divorceDecreeNisiDate;
@@ -144,6 +145,7 @@ public class FinremCaseData {
     private List<RespondToOrderDocumentCollection> respondToOrderDocuments;
     private List<AmendedConsentOrderCollection> amendedConsentOrderCollection;
     private List<CaseNotesCollection> caseNotesCollection;
+    private String state;
     private List<ScannedDocumentCollection> scannedDocuments;
     private YesOrNo evidenceHandled;
     private CaseDocument approvedConsentOrderLetter;
@@ -202,6 +204,7 @@ public class FinremCaseData {
     private List<FastTrackReason> fastTrackDecisionReason;
     private Complexity addToComplexityListOfCourts;
     private List<EstimatedAsset> estimatedAssetsChecklist;
+    private String netValueOfHome;
     private List<PotentialAllegation> potentialAllegationChecklist;
     private String detailPotentialAllegation;
     private YesOrNo otherReasonForComplexity;
@@ -252,6 +255,12 @@ public class FinremCaseData {
     private List<DocumentCollection> hearingOrderOtherDocuments;
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;
+    private List<ApprovedOrderConsolidateCollection> appOrderCollections;
+    private List<ApprovedOrderConsolidateCollection> respOrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv1OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv2OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv3OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv4OrderCollections;
     private List<ApprovedOrderCollection> appOrderCollection;
     private List<ApprovedOrderCollection> respOrderCollection;
     private List<ApprovedOrderCollection> intv1OrderCollection;

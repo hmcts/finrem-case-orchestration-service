@@ -86,4 +86,5 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
         contestedSendOrderCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
         log.info("Finish sending order correspondence for case {}", caseDetails.getId());
     }
+
 }

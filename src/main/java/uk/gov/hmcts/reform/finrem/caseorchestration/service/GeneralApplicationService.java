@@ -174,20 +174,20 @@ public class GeneralApplicationService {
             applicationsForRoleType = generalApplicationCollectionDataList.stream()
                 .filter(ga -> ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode()
                     .equalsIgnoreCase(loggedInUserCaseRole))
-                .collect(Collectors.toList());
+                .toList();
         } else {
             applicationsForRoleType = generalApplicationCollectionDataList.stream()
                 .filter(ga -> APPLICANT.equals(
                     ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())
                     || RESPONDENT.equals(
                     ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode()))
-                .collect(Collectors.toList());
+                .toList();
         }
 
         List<GeneralApplicationCollectionData> applicationCollectionDataListForRoleType =
             applicationsForRoleType.stream()
                 .sorted(helper::getCompareTo)
-                .collect(Collectors.toList());
+                .toList();
 
         List<GeneralApplicationsCollection> applicationCollection = helper.convertToGeneralApplicationsCollection(
             applicationCollectionDataListForRoleType);
@@ -225,9 +225,8 @@ public class GeneralApplicationService {
     }
 
     private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(FinremCaseDetails caseDetails, String loggedInUserCaseRole,
-                                                                                       List<GeneralApplicationCollectionData>
-                                                                                       interimGeneralApplicationListForRoleType,
-                                                                                       FinremCaseData caseData, FinremCaseData caseDataBefore) {
+         List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
+         FinremCaseData caseData, FinremCaseData caseDataBefore) {
         switch (loggedInUserCaseRole) {
             case INTERVENER1 -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
@@ -283,7 +282,7 @@ public class GeneralApplicationService {
             helper.getGeneralApplicationList(caseDataBefore, generalApplicationCollection);
         return generalApplicationListForRoleType.stream()
             .filter(f -> generalApplicationListBeforeForRoleType.stream().map(GeneralApplicationCollectionData::getId)
-                .noneMatch(i -> i.equals(f.getId()))).collect(Collectors.toList());
+                .noneMatch(i -> i.equals(f.getId()))).toList();
     }
 
     private GeneralApplicationCollectionData setUserAndDate(FinremCaseDetails caseDetails,

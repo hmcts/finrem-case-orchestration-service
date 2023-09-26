@@ -69,35 +69,35 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTestSe
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
         handler = new GeneralApplicationAboutToStartHandler(finremCaseDetailsMapper, helper,
-                generalApplicationService, assignCaseAccessService);
+            generalApplicationService, assignCaseAccessService);
     }
 
     @Test
     public void canHandle() {
         assertThat(handler
-                        .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
-                is(true));
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
+            is(true));
     }
 
     @Test
     public void canNotHandle() {
         assertThat(handler
-                        .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.GENERAL_APPLICATION),
-                is(false));
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.GENERAL_APPLICATION),
+            is(false));
     }
 
     @Test
     public void canNotHandleWrongEventType() {
         assertThat(handler
-                        .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CLOSE),
-                is(false));
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CLOSE),
+            is(false));
     }
 
     @Test
     public void canNotHandleWrongCallbackType() {
         assertThat(handler
-                        .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
-                is(false));
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
+            is(false));
     }
 
     @Test
@@ -132,77 +132,77 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTestSe
         assertEquals("No", generalApplicationItems.getGeneralApplicationHearingRequired());
         String directionGiven = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired(), null);
         assertEquals(directionGiven == null
-                        ? GeneralApplicationStatus.CREATED.getId() : DIRECTION_APPROVED.getId(),
-                generalApplicationItems.getGeneralApplicationStatus());
+                ? GeneralApplicationStatus.CREATED.getId() : DIRECTION_APPROVED.getId(),
+            generalApplicationItems.getGeneralApplicationStatus());
         System.out.println(generalApplicationItems.getGeneralApplicationStatus());
         assertNull(generalApplicationItems.getGeneralApplicationTimeEstimate());
         assertNull(generalApplicationItems.getGeneralApplicationSpecialMeasures());
         CaseDocument generalApplicationDocument = generalApplicationItems.getGeneralApplicationDocument();
         assertNotNull(generalApplicationDocument);
         assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
-                generalApplicationDocument.getDocumentUrl());
+            generalApplicationDocument.getDocumentUrl());
         assertEquals("InterimHearingNotice.pdf",
-                generalApplicationDocument.getDocumentFilename());
+            generalApplicationDocument.getDocumentFilename());
         assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary",
-                generalApplicationDocument.getDocumentBinaryUrl());
+            generalApplicationDocument.getDocumentBinaryUrl());
         CaseDocument generalApplicationDraftOrderDocument = generalApplicationItems.getGeneralApplicationDocument();
         assertNotNull(generalApplicationDraftOrderDocument);
         assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
-                generalApplicationDraftOrderDocument.getDocumentUrl());
+            generalApplicationDraftOrderDocument.getDocumentUrl());
         assertEquals("InterimHearingNotice.pdf",
-                generalApplicationDraftOrderDocument.getDocumentFilename());
+            generalApplicationDraftOrderDocument.getDocumentFilename());
         assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary",
-                generalApplicationDraftOrderDocument.getDocumentBinaryUrl());
+            generalApplicationDraftOrderDocument.getDocumentBinaryUrl());
         CaseDocument generalApplicationDirectionOrderDocument = generalApplicationItems.getGeneralApplicationDirectionsDocument();
         assertNotNull(generalApplicationDirectionOrderDocument);
         assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
-                generalApplicationDirectionOrderDocument.getDocumentUrl());
+            generalApplicationDirectionOrderDocument.getDocumentUrl());
         assertEquals("InterimHearingNotice.pdf",
-                generalApplicationDirectionOrderDocument.getDocumentFilename());
+            generalApplicationDirectionOrderDocument.getDocumentFilename());
         assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary",
-                generalApplicationDirectionOrderDocument.getDocumentBinaryUrl());
+            generalApplicationDirectionOrderDocument.getDocumentBinaryUrl());
     }
 
     public DynamicRadioListElement getDynamicListElement(String code, String label) {
         return DynamicRadioListElement.builder()
-                .code(code)
-                .label(label)
-                .build();
+            .code(code)
+            .label(label)
+            .build();
     }
 
     public DynamicRadioList buildDynamicIntervenerList() {
 
         List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
-                getDynamicListElement(RESPONDENT, RESPONDENT),
-                getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+            getDynamicListElement(RESPONDENT, RESPONDENT),
+            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
-                .value(dynamicListElements.get(0))
-                .listItems(dynamicListElements)
-                .build();
+            .value(dynamicListElements.get(0))
+            .listItems(dynamicListElements)
+            .build();
     }
 
     protected FinremCallbackRequest buildCallbackRequest() {
         GeneralApplicationItems generalApplicationItems =
-                GeneralApplicationItems.builder().generalApplicationSender(
-                                buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
-                        .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
-                        .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
-                                LocalDate.of(2022, 8, 2)).build();
+            GeneralApplicationItems.builder().generalApplicationSender(
+                buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+                .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
+                    LocalDate.of(2022, 8, 2)).build();
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder().build();
         GeneralApplicationsCollection generalApplicationsBefore = GeneralApplicationsCollection.builder().build();
         generalApplications.setValue(generalApplicationItems);
         generalApplicationsBefore.setId(UUID.randomUUID());
         generalApplications.setId(UUID.randomUUID());
         CaseDocument caseDocument = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
-                .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
-                .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
+            .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
+            .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
         GeneralApplicationItems generalApplicationItemsAdded =
-                GeneralApplicationItems.builder().generalApplicationDocument(caseDocument).generalApplicationDraftOrder(caseDocument)
-                        .generalApplicationDirectionsDocument(caseDocument).generalApplicationSender(buildDynamicIntervenerList())
-                        .generalApplicationCreatedBy("Claire Mumford")
-                        .generalApplicationStatus(String.valueOf(DIRECTION_APPROVED)).generalApplicationHearingRequired("No")
-                        .generalApplicationCreatedDate(LocalDate.now()).build();
+            GeneralApplicationItems.builder().generalApplicationDocument(caseDocument).generalApplicationDraftOrder(caseDocument)
+                .generalApplicationDirectionsDocument(caseDocument).generalApplicationSender(buildDynamicIntervenerList())
+                .generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationStatus(String.valueOf(DIRECTION_APPROVED)).generalApplicationHearingRequired("No")
+                .generalApplicationCreatedDate(LocalDate.now()).build();
         generalApplicationsBefore.setValue(generalApplicationItemsAdded);
         List<GeneralApplicationsCollection> generalApplicationsCollection = new ArrayList<>();
         List<GeneralApplicationsCollection> generalApplicationsCollectionBefore = new ArrayList<>();
@@ -210,32 +210,32 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTestSe
         generalApplicationsCollection.add(generalApplications);
         generalApplicationsCollection.add(generalApplicationsBefore);
         FinremCaseData caseData = FinremCaseData.builder()
-                .generalApplicationWrapper(GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.YES)
-                        .generalApplicationCreatedBy("Claire Mumford").generalApplicationPreState("applicationIssued")
-                        .generalApplications(generalApplicationsCollection).generalApplicationOutcome(GeneralApplicationOutcome.APPROVED)
-                        .build()).build();
+            .generalApplicationWrapper(GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.YES)
+                .generalApplicationCreatedBy("Claire Mumford").generalApplicationPreState("applicationIssued")
+                .generalApplications(generalApplicationsCollection).generalApplicationOutcome(GeneralApplicationOutcome.APPROVED)
+                .build()).build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
-                .generalApplicationWrapper(GeneralApplicationWrapper.builder()
-                        .generalApplicationCreatedBy("Claire Mumford").generalApplicationOutcome(GeneralApplicationOutcome.APPROVED)
-                        .generalApplicationPreState("applicationIssued")
-                        .generalApplications(generalApplicationsCollectionBefore)
-                        .build()).build();
+            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                .generalApplicationCreatedBy("Claire Mumford").generalApplicationOutcome(GeneralApplicationOutcome.APPROVED)
+                .generalApplicationPreState("applicationIssued")
+                .generalApplications(generalApplicationsCollectionBefore)
+                .build()).build();
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-                .caseType(CaseType.CONTESTED)
-                .id(12345L)
-                .state(State.CASE_ADDED)
-                .data(caseData)
-                .build();
+            .caseType(CaseType.CONTESTED)
+            .id(12345L)
+            .state(State.CASE_ADDED)
+            .data(caseData)
+            .build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder()
-                .caseType(CaseType.CONTESTED)
-                .id(12345L)
-                .state(State.CASE_ADDED)
-                .data(caseDataBefore)
-                .build();
+            .caseType(CaseType.CONTESTED)
+            .id(12345L)
+            .state(State.CASE_ADDED)
+            .data(caseDataBefore)
+            .build();
         return FinremCallbackRequest.builder()
-                .caseDetails(finremCaseDetails)
-                .caseDetailsBefore(finremCaseDetailsBefore)
-                .build();
+            .caseDetails(finremCaseDetails)
+            .caseDetailsBefore(finremCaseDetailsBefore)
+            .build();
     }
 
 }

@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RoleApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RoleConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrdersHolder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,10 +34,11 @@ public abstract class SendOrderPartyDocumentHandler {
             final Long caseId = finremCaseDetails.getId();
             FinremCaseData caseData = finremCaseDetails.getData();
             log.info("Received request to send hearing pack to {} for case {}:", caseRoleCode,  caseId);
-            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData))
-                .orElse(new ArrayList<>());
+            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData)).orElse(new ArrayList<>());
+            if (orderColl.isEmpty()) {
+                addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
+            }
             orderDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
-            addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
             addOrdersToPartyCollection(caseData, orderColl);
         }
     }
@@ -69,6 +72,16 @@ public abstract class SendOrderPartyDocumentHandler {
         if (partyList.contains(caseRoleCode)) {
             CaseDocument coverSheet = getPartyCoverSheet(caseDetails, authToken);
             addCoverSheetToPartyField(caseDetails, coverSheet);
+        }
+    }
+
+    public void setUpOrderDocumentsOnPartiesTab(FinremCaseDetails finremCaseDetails, List<String> partyList) {
+        if (partyList.contains(caseRoleCode)) {
+            final Long caseId = finremCaseDetails.getId();
+            FinremCaseData caseData = finremCaseDetails.getData();
+            log.info("Received request to set consolidate document for {} for case {}:", caseRoleCode,  caseId);
+            List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData)).orElse(new ArrayList<>());
+            setConsolidateCollection(caseData, orderColl);
         }
     }
 
@@ -106,8 +119,6 @@ public abstract class SendOrderPartyDocumentHandler {
 
     protected abstract List<UnapprovedOrderCollection> getUnapprovedOrderCollectionForParty(FinremCaseData caseData);
 
-    protected abstract void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
-
     protected abstract void addApprovedConsentOrdersToPartyCollection(FinremCaseData caseData, List<RoleConsentOrderCollection> orderColl);
 
     protected abstract void addUnapprovedOrdersToPartyCollection(FinremCaseData caseData, List<UnapprovedOrderCollection> orderColl);
@@ -116,4 +127,12 @@ public abstract class SendOrderPartyDocumentHandler {
 
     protected abstract CaseDocument getPartyCoverSheet(FinremCaseDetails caseDetails, String authToken);
 
+    protected abstract void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
+
+    protected abstract void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
+
+    protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {
+        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
+            .approveOrders(orderCollection).orderReceivedAt(LocalDateTime.now()).build()).build();
+    }
 }

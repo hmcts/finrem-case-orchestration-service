@@ -30,7 +30,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
     private final GeneralApplicationService service;
 
     public GeneralApplicationReferToJudgeAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-                                                             GeneralApplicationService service) {
+                                        GeneralApplicationService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;

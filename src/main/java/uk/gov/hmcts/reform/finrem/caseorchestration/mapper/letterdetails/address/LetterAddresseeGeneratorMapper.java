@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,15 +31,12 @@ public class LetterAddresseeGeneratorMapper {
 
 
     private Map<DocumentHelper.PaperNotificationRecipient, LetterAddresseeGenerator> addresseeGeneratorMap() {
-        ImmutableMap<DocumentHelper.PaperNotificationRecipient, LetterAddresseeGenerator>
-            map =
-            ImmutableMap.of(DocumentHelper.PaperNotificationRecipient.APPLICANT, applicantAddresseeGenerator,
-                DocumentHelper.PaperNotificationRecipient.RESPONDENT, respondentAddresseeGenerator,
-                DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE, intervenerOneAddresseeGenerator,
-                DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO, intervenerTwoAddresseeGenerator,
-                DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE, intervenerThreeAddresseeGenerator,
-                DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR, intervenerFourAddresseeGenerator
-            );
-        return map;
+        return Map.of(DocumentHelper.PaperNotificationRecipient.APPLICANT, applicantAddresseeGenerator,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT, respondentAddresseeGenerator,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE, intervenerOneAddresseeGenerator,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO, intervenerTwoAddresseeGenerator,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE, intervenerThreeAddresseeGenerator,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR, intervenerFourAddresseeGenerator
+        );
     }
 }

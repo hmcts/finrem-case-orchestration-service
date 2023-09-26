@@ -18,11 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerFourDocumentHandler;
@@ -64,23 +61,17 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private DocumentHelper documentHelper;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-    @Mock
-    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-    @Mock
-    private NotificationService notificationService;
-    @Mock
-    private CaseDataService caseDataService;
 
     @BeforeEach
     public void setUpTest() {
         sendOrderContestedAboutToSubmitHandler = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper, generalOrderService,
             genericDocumentService, documentHelper, List.of(
-                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
-                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
-                new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService))
+                new SendOrderApplicantDocumentHandler(),
+                new SendOrderRespondentDocumentHandler(),
+                new SendOrderIntervenerOneDocumentHandler(),
+                new SendOrderIntervenerTwoDocumentHandler(),
+                new SendOrderIntervenerThreeDocumentHandler(),
+                new SendOrderIntervenerFourDocumentHandler())
         );
     }
 
@@ -229,9 +220,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
         assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertEquals(5, caseData.getIntv1OrderCollection().size());
-        assertEquals(5, caseData.getAppOrderCollection().size());
-        assertEquals(5, caseData.getRespOrderCollection().size());
+        assertNull(caseData.getIntv1OrderCollection());
+        assertEquals(1, caseData.getIntv1OrderCollections().size());
+        assertNull(caseData.getAppOrderCollection());
+        assertEquals(1, caseData.getAppOrderCollections().size());
+        assertNull(caseData.getRespOrderCollection());
+        assertEquals(1, caseData.getRespOrderCollections().size());
         assertEquals(4, caseData.getOrdersSentToPartiesCollection().size());
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
@@ -273,7 +267,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size());
         assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertEquals(2, caseData.getIntv1OrderCollection().size());
+        assertNull(caseData.getIntv1OrderCollection());
+        assertEquals(1, caseData.getIntv1OrderCollections().size());
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);

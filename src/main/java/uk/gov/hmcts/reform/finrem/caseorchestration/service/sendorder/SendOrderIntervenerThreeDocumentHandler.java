@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,4 +79,11 @@ public class SendOrderIntervenerThreeDocumentHandler extends SendOrderPartyDocum
         }
     }
 
+    protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
+        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getIntv3OrderCollections())
+            .orElse(new ArrayList<>());
+        orders.add(getConsolidateCollection(orderCollection));
+        caseData.setIntv3OrderCollections(orders);
+        caseData.setIntv3OrderCollection(null);
+    }
 }

@@ -132,7 +132,12 @@ public class HearingDocumentController extends BaseController {
             }
         }
         if (callbackRequest.getEventId().equals(EventType.LIST_FOR_HEARING.getCcdType())) {
-            hearingDocumentService.sendListForHearingCorrespondence(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
+            errors = hearingDocumentService.sendListForHearingCorrespondence(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
+            if (!errors.isEmpty()) {
+                return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errors)
+                    .build());
+            }
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }

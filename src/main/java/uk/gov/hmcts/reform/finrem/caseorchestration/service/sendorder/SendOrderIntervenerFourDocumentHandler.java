@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,5 +77,13 @@ public class SendOrderIntervenerFourDocumentHandler extends SendOrderPartyDocume
         if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(wrapper, caseDetails)) {
             caseData.setBulkPrintCoverSheetIntv4(bulkPrintSheet);
         }
+    }
+
+    protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
+        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getIntv4OrderCollections())
+            .orElse(new ArrayList<>());
+        orders.add(getConsolidateCollection(orderCollection));
+        caseData.setIntv4OrderCollections(orders);
+        caseData.setIntv4OrderCollection(null);
     }
 }

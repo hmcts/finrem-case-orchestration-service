@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -99,4 +100,20 @@ public class SelectablePartiesCorrespondenceService {
         return false;
     }
 
+
+    public List<String> validateApplicantAndRespondentCorrespondenceAreSelected(FinremCaseData data, String errorMessage) {
+        List<String> errors = new ArrayList<>();
+        if (!data.isApplicantCorrespondenceEnabled() || !data.isRespondentCorrespondenceEnabled()) {
+            errors.add(errorMessage);
+        }
+        return errors;
+    }
+
+    public List<String> validateApplicantAndRespondentCorrespondenceAreInSynch(FinremCaseData data, String errorMessage) {
+        List<String> errors = new ArrayList<>();
+        if (data.isApplicantCorrespondenceEnabled() == data.isRespondentCorrespondenceEnabled()) {
+            errors.add(errorMessage);
+        }
+        return errors;
+    }
 }

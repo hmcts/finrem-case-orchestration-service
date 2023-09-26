@@ -265,22 +265,6 @@ public class GeneralOrderService {
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
 
-    public void setPartiesToReceiveCommunication(FinremCaseDetails caseDetails, List<String> parties) {
-        FinremCaseData data = caseDetails.getData();
-        parties.forEach(role -> {
-            data.setApplicantCorrespondenceEnabled(isOrderSharedWithApplicant(caseDetails));
-            data.setRespondentCorrespondenceEnabled(isOrderSharedWithRespondent(caseDetails));
-            data.getIntervenerOneWrapper()
-                .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener1(caseDetails));
-            data.getIntervenerTwoWrapper()
-                .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener2(caseDetails));
-            data.getIntervenerThreeWrapper()
-                .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener3(caseDetails));
-            data.getIntervenerFourWrapper()
-                .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener4(caseDetails));
-        });
-    }
-
     public boolean isOrderSharedWithApplicant(FinremCaseDetails caseDetails) {
         List<String> parties = getParties(caseDetails);
         return (parties.contains(CaseRole.APP_SOLICITOR.getCcdCode())
@@ -344,5 +328,21 @@ public class GeneralOrderService {
             return listElement.isPresent();
         }
         return false;
+    }
+
+    public void setPartiesToReceiveCommunication(FinremCaseDetails caseDetails, List<String> parties) {
+        FinremCaseData data = caseDetails.getData();
+        parties.forEach(role -> {
+            data.setApplicantCorrespondenceEnabled(isOrderSharedWithApplicant(caseDetails));
+            data.setRespondentCorrespondenceEnabled(isOrderSharedWithRespondent(caseDetails));
+            data.getIntervenerOneWrapper()
+                .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener1(caseDetails));
+            data.getIntervenerTwoWrapper()
+                .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener2(caseDetails));
+            data.getIntervenerThreeWrapper()
+                .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener3(caseDetails));
+            data.getIntervenerFourWrapper()
+                .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener4(caseDetails));
+        });
     }
 }

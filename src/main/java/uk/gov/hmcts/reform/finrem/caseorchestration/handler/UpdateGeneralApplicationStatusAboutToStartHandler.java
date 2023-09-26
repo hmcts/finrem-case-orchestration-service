@@ -26,7 +26,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandler extends FinremCal
     private final GeneralApplicationService generalApplicationService;
 
     public UpdateGeneralApplicationStatusAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-                                                             GeneralApplicationService service) {
+                                                        GeneralApplicationService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.generalApplicationService = service;

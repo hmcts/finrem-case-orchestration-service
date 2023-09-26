@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -16,11 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -79,28 +75,6 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest extends BaseHandle
         assertThat(submitHandler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.REJECT_GENERAL_APPLICATION),
             is(false));
-    }
-
-    @Ignore
-    @Test
-    public void givenCase_whenRejectingAnApplication_thenRemoveElementFromCollection() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        FinremCaseData caseData = startHandle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationList());
-        assertEquals(2, dynamicList.getListItems().size());
-        assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason());
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        FinremCaseData data = submitHandle.getData();
-
-        List<GeneralApplicationCollectionData> generalApplicationCollectionData
-            = helper.covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
-        assertEquals(1, generalApplicationCollectionData.size());
-        assertEquals("applicationIssued", submitHandle.getState());
     }
 
     @Test

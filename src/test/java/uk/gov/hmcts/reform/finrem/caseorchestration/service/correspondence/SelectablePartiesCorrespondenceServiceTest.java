@@ -18,12 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.List.of;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SelectablePartiesCorrespondenceServiceTest {
 
+    protected static final String ERROR_MESSAGE = "errorMessage";
     SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
     FinremCaseData finremCaseData;
 
@@ -218,6 +221,18 @@ public class SelectablePartiesCorrespondenceServiceTest {
             .thenReturn(FinremCaseDetails.builder().data(finremCaseData).build());
 
         assertTrue(selectablePartiesCorrespondenceService.shouldSendIntervenerFourCorrespondence(caseDetails));
+    }
+
+    @Test
+    public void shouldValidateListingNoticeCorrespondence() {
+
+        finremCaseData = FinremCaseData.builder().partiesOnCase(buildDynamicSelectableParties(of(CaseRole.INTVR_BARRISTER_4.getCcdCode()))).build();
+
+        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseData);
+        List<String> errors = selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseData,
+            ERROR_MESSAGE);
+        assertThat(errors.size(), is(1));
+        assertThat(errors.get(0), is(ERROR_MESSAGE));
     }
 
     private DynamicMultiSelectList buildDynamicSelectableParties(List<String> parties) {
