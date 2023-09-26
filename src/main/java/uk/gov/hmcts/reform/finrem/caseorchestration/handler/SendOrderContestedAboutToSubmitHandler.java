@@ -95,6 +95,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 });
             }
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
+            caseData.setAdditionalDocument(null);
         } catch (RuntimeException e) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();

@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,8 +67,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     private NotificationService notificationService;
     @MockBean
     private GenerateCoverSheetService coverSheetService;
-    @MockBean
-    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
 
     @Before
@@ -113,7 +110,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
-        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(), any());
+        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(CaseDetails.class), any());
     }
 
     @Test
@@ -193,6 +190,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.bulkPrintCoverSheetAppConfidential.document_url", is(DOC_URL)))
             .andExpect(jsonPath("$.data.bulkPrintCoverSheetResConfidential.document_url", is(DOC_URL)));
+
 
         verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
         verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());

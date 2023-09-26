@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
 public class PaperNotificationServiceTest extends BaseServiceTest {
@@ -109,5 +111,20 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
             .thenReturn(caseDocument);
         paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenValidCaseData_whenPrintIntervenerRejection_thenCallBulkPrintService() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("paperApplication", "YES");
+        CaseDocument caseDocument = CaseDocument.builder().documentFilename("general_application_rejected").build();
+        IntervenerOneWrapper intervenerWrapper = IntervenerOneWrapper.builder().build();
+        when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(INTERVENER_ONE)))
+            .thenReturn(caseDocument);
+        paperNotificationService.printIntervenerRejectionGeneralApplication(caseDetails, intervenerWrapper, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails,
+            intervenerWrapper.getIntervenerType().getTypeValue(), AUTH_TOKEN);
     }
 }

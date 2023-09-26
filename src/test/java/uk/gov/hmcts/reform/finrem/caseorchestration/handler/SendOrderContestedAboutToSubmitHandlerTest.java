@@ -181,7 +181,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getIntv1OrderCollection());
         assertNull(caseData.getAppOrderCollection());
         assertNull(caseData.getRespOrderCollection());
-
+        assertNull(caseData.getAdditionalDocument());
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
 

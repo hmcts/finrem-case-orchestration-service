@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -58,8 +57,6 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     private GenericDocumentService documentService;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-    @Mock
-    private PartyService partyService;
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -71,47 +68,47 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
         handler = new GeneralApplicationDirectionsAboutToStartHandler(assignCaseAccessService,
-                finremCaseDetailsMapper, helper, service, partyService);
+            finremCaseDetailsMapper, helper, service);
     }
 
     @Test
     public void givenCase_whenCorrectConfigSupplied_thenHandlerCanHandle() {
         assertThat(handler
-                        .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-                is(true));
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
+            is(true));
     }
 
     @Test
     public void givenCase_whenInCorrectConfigCaseTypeSupplied_thenHandlerCanHandle() {
         assertThat(handler
-                        .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-                is(false));
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
+            is(false));
     }
 
     @Test
     public void givenCase_whenInCorrectConfigEventTypeSupplied_thenHandlerCanHandle() {
         assertThat(handler
-                        .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CLOSE),
-                is(false));
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CLOSE),
+            is(false));
     }
 
     @Test
     public void givenCase_whenInCorrectConfigCallbackTypeSupplied_thenHandlerCanHandle() {
         assertThat(handler
-                        .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-                is(false));
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
+            is(false));
     }
 
     @Test
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_NON_COLL_JSON);
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
-                buildCaseDetailsFromJson(GA_NON_COLL_JSON));
+            buildCaseDetailsFromJson(GA_NON_COLL_JSON));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(
-                caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList()
+            caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList()
         );
 
         assertEquals(1, dynamicList.getListItems().size());
@@ -122,13 +119,13 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-                .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle =
-                handler.handle(callbackRequest, AUTH_TOKEN);
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(
-                caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList()
+            caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList()
         );
 
         assertEquals(1, dynamicList.getListItems().size());
@@ -140,11 +137,11 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(
-                caseData, GENERAL_APPLICATION_COLLECTION);
+            caseData, GENERAL_APPLICATION_COLLECTION);
         List<GeneralApplicationCollectionData> updatedList
-                = existingList.stream().map(obj -> updateStatus(obj)).collect(Collectors.toList());
+            = existingList.stream().map(obj -> updateStatus(obj)).collect(Collectors.toList());
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
-                helper.convertToGeneralApplicationsCollection(updatedList));
+            helper.convertToGeneralApplicationsCollection(updatedList));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for issue direction."));
@@ -153,21 +150,21 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
 
     public DynamicRadioListElement getDynamicListElement(String code, String label) {
         return DynamicRadioListElement.builder()
-                .code(code)
-                .label(label)
-                .build();
+            .code(code)
+            .label(label)
+            .build();
     }
 
     public DynamicRadioList buildDynamicIntervenerList() {
 
         List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
-                getDynamicListElement(RESPONDENT, RESPONDENT),
-                getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+            getDynamicListElement(RESPONDENT, RESPONDENT),
+            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
-                .value(dynamicListElements.get(0))
-                .listItems(dynamicListElements)
-                .build();
+            .value(dynamicListElements.get(0))
+            .listItems(dynamicListElements)
+            .build();
     }
 
     private GeneralApplicationCollectionData updateStatus(GeneralApplicationCollectionData obj) {
@@ -180,7 +177,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     private FinremCallbackRequest buildFinremCallbackRequest(String path) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
             FinremCaseDetails caseDetails =
-                    objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+                objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
             return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
         } catch (Exception e) {
             throw new RuntimeException(e);

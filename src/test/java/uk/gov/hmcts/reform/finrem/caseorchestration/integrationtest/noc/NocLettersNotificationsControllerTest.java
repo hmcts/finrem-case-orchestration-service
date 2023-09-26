@@ -18,6 +18,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsCon
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.ApplicantLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerFourLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerOneLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerThreeLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerTwoLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.RespondentLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -45,7 +52,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
-@ContextConfiguration(classes = {NocTestConfig.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class})
+@ContextConfiguration(classes = {NocTestConfig.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class,
+    LetterAddresseeGeneratorMapper.class, ApplicantLetterAddresseeGenerator.class,
+    RespondentLetterAddresseeGenerator.class, IntervenerOneLetterAddresseeGenerator.class, IntervenerTwoLetterAddresseeGenerator.class,
+    IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class})
 public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     public static final String AUTH_TOKEN = "authToken";

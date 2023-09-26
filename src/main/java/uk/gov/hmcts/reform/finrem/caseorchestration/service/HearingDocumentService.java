@@ -7,7 +7,11 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FormCandGCorresponder;
 
 import java.util.HashMap;
@@ -32,6 +36,14 @@ public class HearingDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final FormCandGCorresponder formCandGCorresponder;
+
+    private final FinremFormCandGCorresponder finremFormCandGCorresponder;
+
+    private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+
+    private final AdditionalHearingDocumentService additionalHearingDocumentService;
+
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public Map<String, CaseDocument> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
@@ -94,8 +106,13 @@ public class HearingDocumentService {
         return caseDetails;
     }
 
+    @Deprecated
     public void sendInitialHearingCorrespondence(CaseDetails caseDetails, String authorisationToken) {
         formCandGCorresponder.sendCorrespondence(caseDetails, authorisationToken);
+    }
+
+    public void sendInitialHearingCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+        finremFormCandGCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
     /**
@@ -107,6 +124,27 @@ public class HearingDocumentService {
      */
     public boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
         return caseDetails.getData().containsKey(FORM_C);
+    }
+
+    public void sendListForHearingCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
+
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDetails finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore);
+
+        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+
+        if (finremCaseDetailsBefore != null && finremCaseDetailsBefore.getData().getFormC() != null) {
+            log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
+            additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, finremCaseDetails);
+            log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
+        } else {
+            log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
+            this.sendInitialHearingCorrespondence(finremCaseDetails, authorisationToken);
+            log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
+        }
+        CaseDetails caseDetailsCopy = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        caseDetails.getData().putAll(caseDetailsCopy.getData());
+        log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
     }
 
 }

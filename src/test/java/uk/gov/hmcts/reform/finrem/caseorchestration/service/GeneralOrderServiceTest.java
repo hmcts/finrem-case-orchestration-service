@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContes
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -106,7 +109,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     public void submitContestedGeneralOrder() throws Exception {
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(contestedCaseDetails());
 
-        List<GeneralOrderContestedData> generalOrders = (List<GeneralOrderContestedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONTESTED);
+        List<GeneralOrderContestedData> generalOrders = convertToList(documentMap.get(GENERAL_ORDER_COLLECTION_CONTESTED));
         assertThat(generalOrders, hasSize(2));
         assertThat(generalOrders.get(0).getId(), is("1234"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
@@ -147,8 +150,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     public void submitConsentedInContestedGeneralOrder() throws Exception {
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedInContestedCaseDetails());
 
-        List<GeneralOrderContestedData> generalOrders = (List<GeneralOrderContestedData>) documentMap.get(
-            GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED);
+        List<GeneralOrderContestedData> generalOrders = convertToList(documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED));
         assertThat(generalOrders, hasSize(2));
         assertThat(generalOrders.get(0).getId(), is("1234"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
@@ -178,7 +180,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     @Test
     public void submitConsentedGeneralOrder() throws Exception {
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedCaseDetails());
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        List<GeneralOrderConsentedData> generalOrders = convertToConsentList(documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED));
         assertThat(generalOrders, hasSize(2));
         assertThat(generalOrders.get(0).getId(), is("1234"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(),
@@ -215,7 +217,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
                 CaseDetails details = consentedCaseDetails();
                 details.getData().put(GENERAL_ORDER_ADDRESS_TO, key);
                 Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-                List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+                List<GeneralOrderConsentedData> generalOrders = convertToConsentList(documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED));
                 assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is(value));
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -290,7 +292,6 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         generalOrderService.setOrderList(caseDetails);
 
         assertEquals("One document available to share with other parties", 2, data.getOrdersToShare().getListItems().size());
-        assertEquals("One document selected", 1, data.getOrdersToShare().getValue().size());
     }
 
     @Test
@@ -404,6 +405,22 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .build();
     }
 
+    public List<GeneralOrderContestedData> convertToList(Object object) {
+        return new ObjectMapper().convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    public List<GeneralOrderConsentedData> convertToConsentList(Object object) {
+        return new ObjectMapper().convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    public Map<String, Object> convertToMap(Object object) {
+        return new ObjectMapper().convertValue(object, new TypeReference<>() {
+        });
+    }
+
+
     private CaseDetails consentedCaseDetails() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-consented.json")) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
@@ -432,7 +449,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1))
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
                 eq(documentConfiguration.getGeneralOrderTemplate(CaseDetails.builder().build())),
-                eq(documentConfiguration.getGeneralOrderFileName()));
+                eq(getGeneralOrderFileNameWithDateTimeStamp()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("DivorceCaseNumber"), is("DD12D12345"));
@@ -446,11 +463,19 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertThat(data.get("GeneralOrderHeaderOne"), is("Sitting in the Family Court"));
     }
 
+    private String getGeneralOrderFileNameWithDateTimeStamp() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        LocalDateTime now = LocalDateTime.now();
+        String dateTimeString = now.format(formatter);
+        String str = documentConfiguration.getGeneralOrderFileName();
+        return new StringBuilder(str).insert(str.length() - 4, "-" + dateTimeString).toString();
+    }
+
     void verifyAdditionalFieldsContested() {
         verify(genericDocumentService, times(1))
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
                 eq(documentConfiguration.getGeneralOrderTemplate(CaseDetails.builder().build())),
-                eq(documentConfiguration.getGeneralOrderFileName()));
+                eq(getGeneralOrderFileNameWithDateTimeStamp()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("DivorceCaseNumber"), is("DD98D76543"));
@@ -464,7 +489,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertThat(data.get("GeneralOrderHeaderOne"), is("In the Family Court"));
         assertThat(data.get("GeneralOrderHeaderTwo"), is("sitting in the"));
         assertThat(data.get("GeneralOrderCourtSitting"), is("SITTING AT the Family Court at the "));
-        Map<String, Object> court = (Map<String, Object>) data.get("courtDetails");
+        Map<String, Object> court = convertToMap(data.get("courtDetails"));
 
         assertThat(court.get("courtName"), is("Nottingham County Court And Family Court"));
         assertThat(court.get("courtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));

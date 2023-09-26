@@ -14,10 +14,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.AdditionalHearingCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -59,7 +60,7 @@ public class AdditionalHearingDocumentService {
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
     private final NotificationService notificationService;
-    private final AdditionalHearingCorresponder additionalHearingCorresponder;
+    private final FinremAdditionalHearingCorresponder finremAdditionalHearingCorresponder;
 
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
@@ -78,8 +79,8 @@ public class AdditionalHearingDocumentService {
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
     }
 
-    public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
-        additionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
+    public void sendAdditionalHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
+        finremAdditionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
     public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken, CaseDetails caseDetails) {

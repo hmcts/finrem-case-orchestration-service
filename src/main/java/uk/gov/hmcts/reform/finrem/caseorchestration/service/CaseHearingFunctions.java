@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
@@ -296,6 +297,7 @@ public final class CaseHearingFunctions {
     /**
      * Return BulkPrintDocument.
      * <p>Please use @{@link #buildFrcCourtDetails(FinremCaseData)}</p>
+     *
      * @param data instance of Map
      * @deprecated Use {@link Map data}
      */
@@ -311,6 +313,7 @@ public final class CaseHearingFunctions {
                 .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
                 .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
                 .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .openingHours(CTSC_OPENING_HOURS)
                 .build(), Map.class);
         } catch (IOException | NullPointerException e) {
             return Collections.emptyMap();

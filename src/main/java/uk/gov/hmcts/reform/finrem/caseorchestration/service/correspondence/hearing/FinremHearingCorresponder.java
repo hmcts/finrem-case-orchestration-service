@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hear
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -15,8 +16,8 @@ public abstract class FinremHearingCorresponder extends FinremMultiLetterOrEmail
 
     @Autowired
     protected FinremHearingCorresponder(BulkPrintService bulkPrintService,
-                                     NotificationService notificationService) {
-        super(bulkPrintService, notificationService);
+                                        NotificationService notificationService, DocumentHelper documentHelper) {
+        super(bulkPrintService, notificationService, documentHelper);
     }
 
     @Override

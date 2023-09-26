@@ -270,6 +270,11 @@ public class FinremCaseData {
     private List<UnapprovedOrderCollection> intv2RefusedOrderCollection;
     private List<UnapprovedOrderCollection> intv3RefusedOrderCollection;
     private List<UnapprovedOrderCollection> intv4RefusedOrderCollection;
+
+    private List<IntervenerHearingNoticeCollection> intv1HearingNoticesCollection;
+    private List<IntervenerHearingNoticeCollection> intv2HearingNoticesCollection;
+    private List<IntervenerHearingNoticeCollection> intv3HearingNoticesCollection;
+    private List<IntervenerHearingNoticeCollection> intv4HearingNoticesCollection;
     private List<JudgeNotApprovedReasonsCollection> judgeNotApprovedReasons;
     private JudgeType refusalOrderJudgeType;
     private String refusalOrderJudgeName;

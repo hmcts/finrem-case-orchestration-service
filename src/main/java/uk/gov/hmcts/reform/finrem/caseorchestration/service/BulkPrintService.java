@@ -205,7 +205,6 @@ public class BulkPrintService {
      * Please upgrade your code.
      * This method will be removed in future versions.
      * <p>Use @link generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) instead </p>
-     *
      * @return BulkPrintDocument to be return
      * @deprecated deprecated since 15-Feb-2023
      */

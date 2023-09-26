@@ -7,14 +7,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -41,6 +42,8 @@ class FinremContestedSendOrderCorresponderTest {
     private NotificationService notificationService;
     @Mock
     private BulkPrintService bulkPrintService;
+    @Mock
+    private DocumentHelper documentHelper;
 
 
     private FinremCaseDetails caseDetails;
@@ -122,7 +125,7 @@ class FinremContestedSendOrderCorresponderTest {
         List<OrderSentToPartiesCollection> orders = new ArrayList<>();
         orders.add(OrderSentToPartiesCollection.builder().value(SendOrderDocuments.builder().caseDocument(caseDocument()).build()).build());
         caseDetails.getData().setOrdersSentToPartiesCollection(orders);
-        List<BulkPrintDocument> documentsToPrint = corresponder.getDocumentsToPrint(caseDetails);
+        List<CaseDocument> documentsToPrint = corresponder.getCaseDocuments(caseDetails);
         assertEquals(1, documentsToPrint.size());
     }
 
