@@ -72,7 +72,7 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
             if (caseDataService.isRespondentAddressConfidential(caseData)) {
                 setConfidentialBulkPrintFieldForRespondent(caseDetails, bulkPrintSheet, caseData);
             } else {
-                caseData.setBulkPrintCoverSheetApp(bulkPrintSheet);
+                caseData.setBulkPrintCoverSheetRes(bulkPrintSheet);
             }
         }
     }
