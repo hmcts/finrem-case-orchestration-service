@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;

@@ -9,16 +9,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderNotApprovedDocumentService;
@@ -33,7 +30,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -68,7 +64,8 @@ class FinremConsentInContestedSendOrderCorresponderTest {
         orders.add(OrderSentToPartiesCollection.builder().value(SendOrderDocuments.builder().caseDocument(caseDocument()).build()).build());
         when(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(any(), any())).thenReturn(false);
         caseDetails.getData().setOrdersSentToPartiesCollection(orders);
-        List<BulkPrintDocument> documentsToPrint = corresponder.getDocumentsToPrint(caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
+        List<BulkPrintDocument> documentsToPrint = corresponder.getDocumentsToPrint(
+            caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
         assertEquals(1, documentsToPrint.size());
         verify(consentOrderNotApprovedDocumentService).addNotApprovedConsentCoverLetter(any(FinremCaseDetails.class), anyList(), any(), any());
     }
@@ -79,7 +76,8 @@ class FinremConsentInContestedSendOrderCorresponderTest {
         orders.add(OrderSentToPartiesCollection.builder().value(SendOrderDocuments.builder().caseDocument(caseDocument()).build()).build());
         when(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(any(), any())).thenReturn(true);
         caseDetails.getData().setOrdersSentToPartiesCollection(orders);
-        List<BulkPrintDocument> documentsToPrint = corresponder.getDocumentsToPrint(caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
+        List<BulkPrintDocument> documentsToPrint = corresponder.getDocumentsToPrint(
+            caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
         assertEquals(1, documentsToPrint.size());
         verify(consentOrderApprovedDocumentService).addApprovedConsentCoverLetter(any(), any(), any(), any());
     }

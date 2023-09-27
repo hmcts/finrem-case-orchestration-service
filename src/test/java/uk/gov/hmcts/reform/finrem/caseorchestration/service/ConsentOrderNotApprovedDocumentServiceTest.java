@@ -2,10 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -31,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +37,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -180,10 +175,12 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         setupContestedCase();
         List<CaseDocument> documents = new ArrayList<>();
         CaseDocument docToAdd = caseDocument("url", "filename", "binary");
-        List<CaseDocument> expectedDocuments = List.of(docToAdd);
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(docToAdd);
-        when(documentHelper.prepareLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(caseDetails);
-        consentOrderNotApprovedDocumentService.addNotApprovedConsentCoverLetter(finremCaseDetails, documents, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+        when(documentHelper.prepareLetterTemplateData(
+            finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(caseDetails);
+        consentOrderNotApprovedDocumentService.addNotApprovedConsentCoverLetter(
+            finremCaseDetails, documents, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+        List<CaseDocument> expectedDocuments = List.of(docToAdd);
         assertThat(expectedDocuments, equalTo(documents));
     }
 
