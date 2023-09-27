@@ -362,6 +362,8 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ConsentOrderWrapper consentOrderWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
     private OrderWrapper orderWrapper;
     private YesOrNo additionalHearingDocumentsOption;
     private CaseDocument additionalListOfHearingDocuments;
