@@ -66,6 +66,15 @@
       "authorisationFirm": "test",
       "authorisationName": "test",
       "divorceCaseNumber": "DD12D12345",
+      "applicantAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "50 Applicant Street",
+        "AddressLine2": "Second Address Line",
+        "AddressLine3": "Third Address Line"
+      },
       "respondentAddress": {
         "County": "Greater London",
         "Country": "United Kingdom",
