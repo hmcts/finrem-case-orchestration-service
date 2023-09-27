@@ -325,11 +325,15 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .data(caseData)
             .build();
 
+        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(expectedDocument);
+
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, caseDetails);
+
         assertTrue(caseDetails.getData().containsKey(LATEST_DRAFT_HEARING_ORDER));
         CaseDocument actualDocument = mapper.convertValue(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER),
             CaseDocument.class);
         assertEquals(expectedDocument, actualDocument);
+        verify(genericDocumentService).stampDocument(any(), any(), any(), any());
     }
 
 
