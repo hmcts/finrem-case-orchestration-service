@@ -22,12 +22,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantRepresent
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
@@ -356,7 +356,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void givenApprovedOrderModifiedLatest_whenThereIsANotApprovedOrder_thenReturnTrue() {
         CaseDocument caseDocument = CaseDocument.builder().documentBinaryUrl("test_url_").build();
         CaseDocument caseDocument2 = CaseDocument.builder().documentBinaryUrl("test_url_2").build();
-        ConsentInContestedApprovedOrder approvedOrder = ConsentInContestedApprovedOrder.builder().consentOrder(caseDocument).orderLetter(caseDocument).build();
+        ConsentInContestedApprovedOrder approvedOrder = ConsentInContestedApprovedOrder.builder()
+            .consentOrder(caseDocument).orderLetter(caseDocument).build();
         UnapproveOrder approvedOrder2 = UnapproveOrder.builder().caseDocument(caseDocument2).orderReceivedAt(LocalDateTime.now()).build();
         ConsentInContestedApprovedOrderCollection collection1 = ConsentInContestedApprovedOrderCollection.builder()
             .approvedOrder(approvedOrder).id(UUID.randomUUID().toString()).build();
@@ -375,7 +376,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void givenNotApprovedOrderModifiedLatest_whenThereIsAApprovedOrder_thenReturnFalse() {
         CaseDocument caseDocument = CaseDocument.builder().documentBinaryUrl("test_url_").build();
         CaseDocument caseDocument2 = CaseDocument.builder().documentBinaryUrl("test_url_2").build();
-        ConsentInContestedApprovedOrder approvedOrder = ConsentInContestedApprovedOrder.builder().consentOrder(caseDocument).orderLetter(caseDocument).build();
+        ConsentInContestedApprovedOrder approvedOrder = ConsentInContestedApprovedOrder.builder()
+            .consentOrder(caseDocument).orderLetter(caseDocument).build();
         UnapproveOrder approvedOrder2 = UnapproveOrder.builder().caseDocument(caseDocument2).orderReceivedAt(LocalDateTime.now()).build();
         ConsentInContestedApprovedOrderCollection collection1 = ConsentInContestedApprovedOrderCollection.builder()
             .approvedOrder(approvedOrder).id(UUID.randomUUID().toString()).build();
