@@ -209,6 +209,14 @@ public class CaseDataService {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.getPaperApplication()));
     }
 
+    /**
+     * Please upgrade your code.
+     * This method will be removed in future versions.
+     * <p>Use @link isConsentedInContestedCase(FinremCaseDetails caseDetails) instead </p>
+     *
+     * @return boolean to be return
+     * @deprecated deprecated since 05-Sep-2023
+     */
     @Deprecated(since = "15-Feb-2023")
     @SuppressWarnings("java:S1133")
     public boolean isConsentedInContestedCase(CaseDetails caseDetails) {
@@ -243,7 +251,15 @@ public class CaseDataService {
         return CaseType.CONSENTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType()));
     }
 
-    @Deprecated(since = "15-Feb-2023")
+    /**
+     * Please upgrade your code.
+     * This method will be removed in future versions.
+     * <p>Use @link isContestedApplication(FinremCaseDetails caseDetails) instead </p>
+     *
+     * @return boolean to be return
+     * @deprecated deprecated since 05-Sep-2023
+     */
+    @Deprecated(since = "05-Sep-2023")
     @SuppressWarnings("java:S1133")
     public boolean isContestedApplication(CaseDetails caseDetails) {
         return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
@@ -271,6 +287,14 @@ public class CaseDataService {
             && !caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders().isEmpty();
     }
 
+    /**
+     * Please upgrade your code.
+     * This method will be removed in future versions.
+     * <p>Use @link isApplicantAddressConfidential(FinremCaseData caseData) instead </p>
+     *
+     * @return boolean to be return
+     * @deprecated deprecated since 05-Sep-2023
+     */
     @Deprecated(since = "05-september-2023")
     @SuppressWarnings("java:S1133")
     public boolean isApplicantAddressConfidential(Map<String, Object> caseData) {
@@ -281,6 +305,14 @@ public class CaseDataService {
         return caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent().isYes();
     }
 
+    /**
+     * Please upgrade your code.
+     * This method will be removed in future versions.
+     * <p>Use @link isRespondentAddressConfidential(FinremCaseData caseData) instead </p>
+     *
+     * @return boolean to be return
+     * @deprecated deprecated since 05-Sep-2023
+     */
     @Deprecated(since = "05-september-2023")
     @SuppressWarnings("java:S1133")
     public boolean isRespondentAddressConfidential(Map<String, Object> caseData) {
