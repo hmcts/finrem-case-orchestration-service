@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -227,12 +228,6 @@ public class GeneralOrderService {
     public void setOrderList(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
-        List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
-
-        if (hearingOrderDocuments != null) {
-            hearingOrderDocuments.forEach(obj -> dynamicListElements.add(partyService.getDynamicMultiSelectListElement(obj.getId(),
-                "Case documents tab [Approved Order]" + " - " + obj.getValue().getUploadDraftDocument().getDocumentFilename())));
-        }
 
         if (ObjectUtils.isNotEmpty(data.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
             CaseDocument orderLatestDocument = data.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
@@ -240,6 +235,14 @@ public class GeneralOrderService {
             dynamicListElements.add(partyService.getDynamicMultiSelectListElement(orderLatestDocumentFilename,
                 "Orders tab [Lastest general order]" + " - " + orderLatestDocumentFilename));
         }
+
+        List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
+        Collections.reverse(hearingOrderDocuments);
+        if (hearingOrderDocuments != null) {
+            hearingOrderDocuments.forEach(obj -> dynamicListElements.add(partyService.getDynamicMultiSelectListElement(obj.getId(),
+                "Case documents tab [Approved Order]" + " - " + obj.getValue().getUploadDraftDocument().getDocumentFilename())));
+        }
+
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
         data.setOrdersToShare(dynamicOrderList);
