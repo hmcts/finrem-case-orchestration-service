@@ -889,15 +889,21 @@ public class FinremCaseData {
         return Optional.ofNullable(courtList).orElse(new DefaultCourt());
     }
 
+
     @JsonIgnore
     public List<String> getSelectedParties() {
         DynamicMultiSelectList parties = this.getPartiesOnCase();
+        return this.getSelectedParties(parties);
+    }
+
+
+    @JsonIgnore
+    public List<String> getSelectedParties(DynamicMultiSelectList parties) {
         if (parties == null) {
             return List.of();
         }
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
-
 
 }
 

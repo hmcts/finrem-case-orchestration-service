@@ -73,10 +73,10 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         log.info("logged-in user role {} in case {}", caseAssignedUserRoleList, caseId);
         String loggedInUserCaseRole = caseAssignedUserRoleList.get(0).getCaseRole();
         FinremCaseData caseData = caseDetails.getData();
-
+        caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
         if (loggedInUserCaseRole == null) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
-                .errors(List.of("Logged in user do not have sufficient role to execute this event")).build();
+                .errors(List.of("Logged in user does not have sufficient role access to execute this event")).build();
         }
 
         List<CaseAssignmentUserRole> allCaseRole = getUniqueRoleList(accessService.getAllCaseRole(String.valueOf(caseId)));

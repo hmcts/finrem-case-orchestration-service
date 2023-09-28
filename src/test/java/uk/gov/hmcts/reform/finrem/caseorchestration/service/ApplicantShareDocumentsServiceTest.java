@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,16 +61,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_STATEMENTS_EXHIBITS_COLLECTION;
 
 @ExtendWith(MockitoExtension.class)
-class ApplicantShareDocumentsServiceTest {
+public class ApplicantShareDocumentsServiceTest {
 
     private ApplicantShareDocumentsService service;
     private IntervenerShareDocumentsService intervenerShareDocumentsService;
     private final ThreadLocal<UUID> uuid = new ThreadLocal<>();
 
+    @MockBean
+    private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+
     @BeforeEach
     void beforeEach() {
         service = new ApplicantShareDocumentsService();
-        intervenerShareDocumentsService = new IntervenerShareDocumentsService();
+        intervenerShareDocumentsService = new IntervenerShareDocumentsService(selectablePartiesCorrespondenceService);
         uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
 

@@ -11,10 +11,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHandler {
+
     private final IntervenerShareDocumentsService intervenerShareDocumentsService;
+
 
     public ShareSelectedDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                       IntervenerShareDocumentsService intervenerShareDocumentsService) {
@@ -38,10 +42,13 @@ public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHa
             callbackRequest.getEventType(), caseId);
 
         FinremCaseData caseData = caseDetails.getData();
+
+        List<String> warnings = intervenerShareDocumentsService.checkThatApplicantAndRespondentAreBothSelected(caseData);
+
         intervenerShareDocumentsService.shareSelectedDocumentWithOtherSelectedSolicitors(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).build();
+            .data(caseData).warnings(warnings).build();
     }
 
 

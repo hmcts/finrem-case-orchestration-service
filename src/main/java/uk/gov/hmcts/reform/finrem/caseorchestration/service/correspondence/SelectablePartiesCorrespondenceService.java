@@ -20,8 +20,7 @@ public class SelectablePartiesCorrespondenceService {
 
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public void setPartiesToReceiveCorrespondence(FinremCaseData data) {
-        List<String> selectedParties = data.getSelectedParties();
+    public void setPartiesToReceiveCorrespondence(FinremCaseData data,  List<String> selectedParties) {
         if (selectedParties != null && !selectedParties.isEmpty()) {
             log.info("Setting parties to receive correspondence {} on case {}", selectedParties, data.getCcdCaseId());
             data.setApplicantCorrespondenceEnabled(
@@ -47,6 +46,11 @@ public class SelectablePartiesCorrespondenceService {
                     isCorrespondenceShareableWithParties(selectedParties,
                         List.of(CaseRole.INTVR_SOLICITOR_4.getCcdCode(), CaseRole.INTVR_BARRISTER_4.getCcdCode())));
         }
+    }
+
+    public void setPartiesToReceiveCorrespondence(FinremCaseData data) {
+        List<String> selectedParties = data.getSelectedParties();
+        setPartiesToReceiveCorrespondence(data, selectedParties);
     }
 
     public FinremCaseDetails setPartiesToReceiveCorrespondence(CaseDetails caseDetails) {
@@ -109,11 +113,5 @@ public class SelectablePartiesCorrespondenceService {
         return errors;
     }
 
-    public List<String> validateApplicantAndRespondentCorrespondenceAreInSynch(FinremCaseData data, String errorMessage) {
-        List<String> errors = new ArrayList<>();
-        if (data.isApplicantCorrespondenceEnabled() == data.isRespondentCorrespondenceEnabled()) {
-            errors.add(errorMessage);
-        }
-        return errors;
-    }
+
 }
