@@ -210,6 +210,7 @@ public class CaseDataService {
     }
 
     @Deprecated(since = "15-Feb-2023")
+    @SuppressWarnings("java:S1133")
     public boolean isConsentedInContestedCase(CaseDetails caseDetails) {
         return isContestedApplication(caseDetails) && caseDetails.getData().get(CONSENT_D81_QUESTION) != null;
     }
@@ -243,6 +244,7 @@ public class CaseDataService {
     }
 
     @Deprecated(since = "15-Feb-2023")
+    @SuppressWarnings("java:S1133")
     public boolean isContestedApplication(CaseDetails caseDetails) {
         return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
@@ -270,6 +272,7 @@ public class CaseDataService {
     }
 
     @Deprecated(since = "05-september-2023")
+    @SuppressWarnings("java:S1133")
     public boolean isApplicantAddressConfidential(Map<String, Object> caseData) {
         return isAddressConfidential(caseData, APPLICANT_CONFIDENTIAL_ADDRESS);
     }
@@ -279,6 +282,7 @@ public class CaseDataService {
     }
 
     @Deprecated(since = "05-september-2023")
+    @SuppressWarnings("java:S1133")
     public boolean isRespondentAddressConfidential(Map<String, Object> caseData) {
         return isAddressConfidential(caseData, RESPONDENT_CONFIDENTIAL_ADDRESS);
     }
