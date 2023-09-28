@@ -25,6 +25,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -134,6 +136,8 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
             .appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
         verify(approvedOrderNoticeOfHearingService, never())
             .createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
+        verify(additionalHearingDocumentService).getHearingOrderAdditionalDocuments(anyMap());
+        verify(additionalHearingDocumentService).getApprovedHearingOrderCollection(any());
     }
 
     @Test
