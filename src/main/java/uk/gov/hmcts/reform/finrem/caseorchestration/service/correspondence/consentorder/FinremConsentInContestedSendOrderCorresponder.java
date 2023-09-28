@@ -49,10 +49,8 @@ public class FinremConsentInContestedSendOrderCorresponder extends FinremMultiLe
             consentOrderNotApprovedDocumentService.addNotApprovedConsentCoverLetter(caseDetails, consentOrderDocuments, authToken, recipient);
         }
         List<BulkPrintDocument> bulkPrintDocumentList = new ArrayList<>();
-        consentOrderDocuments.forEach(caseDocument -> {
-            bulkPrintDocumentList.add(BulkPrintDocument.builder()
-                .fileName(caseDocument.getDocumentFilename()).binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build());
-        });
+        consentOrderDocuments.forEach(caseDocument -> bulkPrintDocumentList.add(BulkPrintDocument.builder()
+            .fileName(caseDocument.getDocumentFilename()).binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build()));
         return bulkPrintDocumentList;
     }
 }
