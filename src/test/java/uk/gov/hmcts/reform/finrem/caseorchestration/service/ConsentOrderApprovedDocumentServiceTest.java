@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaul
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.variationDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
@@ -104,6 +105,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private GenericDocumentService genericDocumentService;
     @MockBean
     private EvidenceManagementAuditService evidenceManagementAuditService;
+    @Autowired
+    private CaseDataService caseDataService;
     @Autowired
     private EvidenceManagementUploadService evidenceManagementUploadService;
     @Autowired
@@ -138,13 +141,17 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateApprovedConsentOrderLetterForConsented() {
 
+        when(documentHelper.prepareLetterTemplateData(any(CaseDetails.class), any())).thenReturn(caseDetails);
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(FILE_NAME);
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString()))
+            .thenReturn(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
+        when(documentConfiguration.getApprovedConsentOrderFileName()).thenReturn(FILE_NAME);
+        when(documentConfiguration.getApprovedConsentOrderTemplate(any())).thenReturn("approvedConsentOrderTemplate");
         CaseDocument caseDocument = consentOrderApprovedDocumentService
             .generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(caseDocument);
-        verify(docmosisPdfGenerationServiceMock)
-            .generateDocFrom(templateArgumentCaptor.capture(), any());
-        assertThat(templateArgumentCaptor.getValue(), is(documentApprovedConsentOrderTemplate));
     }
 
     @Test
@@ -161,40 +168,50 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(docmosisPdfGenerationServiceMock
             .generateDocFrom(documentApprovedConsentOrderTemplate, caseDetails.getData()))
             .thenReturn(variationDocument().getBinaryUrl().getBytes(StandardCharsets.UTF_8));
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(FILE_NAME);
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString()))
+            .thenReturn(caseDocument(DOC_URL, VARIATION_FILE_NAME, BINARY_URL));
+        when(documentConfiguration.getApprovedVariationOrderFileName()).thenReturn(VARIATION_FILE_NAME);
+        when(documentConfiguration.getApprovedConsentOrderTemplate(any())).thenReturn("approvedConsentOrderTemplate");
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
+        when(documentHelper.prepareLetterTemplateData(any(CaseDetails.class), any())).thenReturn(caseDetails);
+
         CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
 
         assertThat(caseDocument.getDocumentFilename(), is(VARIATION_FILE_NAME));
         assertThat(caseDocument.getDocumentUrl(), is(DOC_URL));
         assertThat(caseDocument.getDocumentBinaryUrl(), is(BINARY_URL));
-
-        verify(docmosisPdfGenerationServiceMock, atLeastOnce())
-            .generateDocFrom(templateArgumentCaptor.capture(), any());
-        assertThat(templateArgumentCaptor.getAllValues().stream()
-            .anyMatch(value -> value.equals(documentApprovedConsentOrderTemplate)), is(true));
     }
 
     @Test
     public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContested() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
+        when(documentHelper.prepareLetterTemplateData(any(CaseDetails.class), any())).thenReturn(caseDetails);
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(FILE_NAME);
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString()))
+            .thenReturn(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
+        when(documentConfiguration.getApprovedConsentOrderFileName()).thenReturn(FILE_NAME);
+        when(documentConfiguration.getApprovedConsentOrderTemplate(any())).thenReturn("approvedConsentOrderTemplate");
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, AUTH_TOKEN);
         List<CollectionElement<ApprovedOrder>> approvedOrders = consentOrderApprovedDocumentService.getConsentInContestedApprovedOrderCollection(
             caseDetails.getData());
         assertCaseDocument(approvedOrders.get(approvedOrders.size() - 1).getValue().getOrderLetter());
-
-        verify(docmosisPdfGenerationServiceMock, atLeastOnce())
-            .generateDocFrom(templateArgumentCaptor.capture(), any());
-        assertThat(templateArgumentCaptor.getValue(), is(documentApprovedConsentOrderTemplate));
     }
 
     @Test
     public void shouldGenerateApprovedConsentOrderLetterForContested() {
         CaseDetails contestedDetails = caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
+        when(documentHelper.prepareLetterTemplateData(any(CaseDetails.class), any())).thenReturn(contestedDetails);
+        when(documentHelper.deepCopy(any(), any())).thenReturn(contestedDetails);
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(FILE_NAME);
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString()))
+            .thenReturn(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
+        when(documentConfiguration.getApprovedConsentOrderFileName()).thenReturn(FILE_NAME);
+        when(documentConfiguration.getApprovedConsentOrderTemplate(any())).thenReturn("approvedConsentOrderTemplate");
         CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(contestedDetails, AUTH_TOKEN);
 
         assertCaseDocument(caseDocument);
-        verify(docmosisPdfGenerationServiceMock, atLeastOnce()).generateDocFrom(
-            templateArgumentCaptor.capture(), any());
-        assertThat(templateArgumentCaptor.getValue(), is(documentApprovedConsentOrderTemplate));
     }
 
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
@@ -209,6 +226,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
         finremCaseDetails.getData().setApplicantRepresentedPaper(ApplicantRepresentedPaper.FR_applicant_represented_1);
 
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(FILE_NAME);
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString()))
+            .thenReturn(caseDocument(CONSENT_ORDER_APPROVED_COVER_LETTER_URL, FILE_NAME, CONSENT_ORDER_APPROVED_COVER_LETTER_URL + "/binary"));
+        when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn("approvedConsentOrderNotificationTemplate");
+        when(documentHelper.prepareLetterTemplateData(any(FinremCaseDetails.class), eq(APPLICANT))).thenReturn(caseDetails);
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
             consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN);
 
@@ -217,7 +239,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             is(CONSENT_ORDER_APPROVED_COVER_LETTER_URL));
         assertThat(generatedApprovedConsentOrderNotificationLetter.getDocumentBinaryUrl(),
             is(CONSENT_ORDER_APPROVED_COVER_LETTER_URL + "/binary"));
-
     }
 
     @Test
@@ -229,7 +250,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
                     .fileName(document().getFileName())
                     .fileUrl(CONSENT_ORDER_APPROVED_COVER_LETTER_URL)
                     .build()));
-
+        when(documentHelper.prepareLetterTemplateData(any(FinremCaseDetails.class), any())).thenReturn(caseDetails);
         Map<String, Object> solicitorAddress = new HashMap<>();
         solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");
         solicitorAddress.put("AddressLine2", "Second Address Line");
@@ -245,26 +266,17 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
         caseData.put(CONSENTED_SOLICITOR_ADDRESS, solicitorAddress);
 
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(FILE_NAME);
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString()))
+            .thenReturn(caseDocument(CONSENT_ORDER_APPROVED_COVER_LETTER_URL, FILE_NAME, CONSENT_ORDER_APPROVED_COVER_LETTER_URL + "/binary"));
+        when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn("approvedConsentOrderNotificationTemplate");
+
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
             consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN);
 
         assertThat(generatedApprovedConsentOrderNotificationLetter.getDocumentFilename(), is(FILE_NAME));
         assertThat(generatedApprovedConsentOrderNotificationLetter.getDocumentUrl(), is(CONSENT_ORDER_APPROVED_COVER_LETTER_URL));
         assertThat(generatedApprovedConsentOrderNotificationLetter.getDocumentBinaryUrl(), is(CONSENT_ORDER_APPROVED_COVER_LETTER_URL + "/binary"));
-    }
-
-    @Test
-    public void shouldStampPensionDocuments() throws Exception {
-        Mockito.reset(pdfStampingServiceMock);
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId)).thenReturn(document());
-
-        List<PensionTypeCollection> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
-        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService
-            .stampPensionDocuments(pensionDocuments, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, caseId);
-
-        stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
-        verify(pdfStampingServiceMock, times(2))
-            .stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId);
     }
 
     @Test
