@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoleConsentOrderCollection {
+public class ConsentInContestedApprovedOrderCollection {
     @JsonProperty("id")
     private String id;
 
     @JsonProperty("value")
-    private RoleApprovedOrder approvedOrder;
+    private ConsentInContestedApprovedOrder approvedOrder;
 }

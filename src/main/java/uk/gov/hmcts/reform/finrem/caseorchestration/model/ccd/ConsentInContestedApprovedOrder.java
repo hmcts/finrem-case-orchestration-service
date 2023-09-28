@@ -17,7 +17,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleApprovedOrder {
+public class ConsentInContestedApprovedOrder {
     @JsonProperty("orderLetter")
     private CaseDocument orderLetter;
 

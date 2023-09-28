@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OtherDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionProvider;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RoleConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationDocumentTypeCollection;
@@ -81,12 +81,12 @@ public class ConsentOrderWrapper {
     private String otherDocLabel;
     private List<VariationDocumentTypeCollection> otherVariationCollection;
     private CaseDocument uploadApprovedConsentOrder;
-    private List<RoleConsentOrderCollection> appConsentApprovedOrders;
-    private List<RoleConsentOrderCollection> respConsentApprovedOrders;
-    private List<RoleConsentOrderCollection> intv1ConsentApprovedOrders;
-    private List<RoleConsentOrderCollection> intv2ConsentApprovedOrders;
-    private List<RoleConsentOrderCollection> intv3ConsentApprovedOrders;
-    private List<RoleConsentOrderCollection> intv4ConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> appConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> respConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> intv1ConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> intv2ConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> intv3ConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> intv4ConsentApprovedOrders;
     private List<UnapprovedOrderCollection> appRefusedOrderCollection;
     private List<UnapprovedOrderCollection> respRefusedOrderCollection;
     private List<UnapprovedOrderCollection> intv1RefusedOrderCollection;

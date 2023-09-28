@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RoleApprovedOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RoleConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 
@@ -48,7 +48,7 @@ public abstract class SendOrderPartyDocumentHandler {
                                                          List<DocumentCollection> additionalDocuments) {
         if (partyList.contains(caseRoleCode)) {
             FinremCaseData caseData = caseDetails.getData();
-            List<RoleConsentOrderCollection> orderColl = Optional.ofNullable(getConsentOrderCollectionForParty(caseData))
+            List<ConsentInContestedApprovedOrderCollection> orderColl = Optional.ofNullable(getConsentOrderCollectionForParty(caseData))
                     .orElse(new ArrayList<>());
             approvedConsentOrders.forEach(order -> orderColl.add(getConsentApprovedOrderCollection(order)));
             orderColl.get(orderColl.size() - 1).getApprovedOrder().setAdditionalConsentDocuments(additionalDocuments);
@@ -92,8 +92,8 @@ public abstract class SendOrderPartyDocumentHandler {
                 .orderReceivedAt(LocalDateTime.now()).build()).build();
     }
 
-    private RoleConsentOrderCollection getConsentApprovedOrderCollection(ConsentOrderCollection approvedOrder) {
-        return RoleConsentOrderCollection.builder().approvedOrder(RoleApprovedOrder.builder()
+    private ConsentInContestedApprovedOrderCollection getConsentApprovedOrderCollection(ConsentOrderCollection approvedOrder) {
+        return ConsentInContestedApprovedOrderCollection.builder().approvedOrder(ConsentInContestedApprovedOrder.builder()
                 .consentOrder(approvedOrder.getApprovedOrder().getConsentOrder())
                 .orderLetter(approvedOrder.getApprovedOrder().getOrderLetter())
                 .pensionDocuments(approvedOrder.getApprovedOrder().getPensionDocuments())
@@ -116,11 +116,11 @@ public abstract class SendOrderPartyDocumentHandler {
 
     protected abstract List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData);
 
-    protected abstract List<RoleConsentOrderCollection> getConsentOrderCollectionForParty(FinremCaseData caseData);
+    protected abstract List<ConsentInContestedApprovedOrderCollection> getConsentOrderCollectionForParty(FinremCaseData caseData);
 
     protected abstract List<UnapprovedOrderCollection> getUnapprovedOrderCollectionForParty(FinremCaseData caseData);
 
-    protected abstract void addApprovedConsentOrdersToPartyCollection(FinremCaseData caseData, List<RoleConsentOrderCollection> orderColl);
+    protected abstract void addApprovedConsentOrdersToPartyCollection(FinremCaseData caseData, List<ConsentInContestedApprovedOrderCollection> orderColl);
 
     protected abstract void addUnapprovedOrdersToPartyCollection(FinremCaseData caseData, List<UnapprovedOrderCollection> orderColl);
 
