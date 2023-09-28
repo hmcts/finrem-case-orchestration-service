@@ -336,7 +336,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWheIntvr1SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER1);
+        assertEquals(INTERVENER1, assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN));
     }
 
     @Test
@@ -350,7 +350,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWhenIntvr2SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER2);
+        assertEquals(INTERVENER2, assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN));
     }
 
     @Test
@@ -364,7 +364,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWhenIntvr3SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER3);
+        assertEquals(INTERVENER3, assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN));
     }
 
     @Test
@@ -378,7 +378,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWhenIntvr4SolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), INTERVENER4);
+        assertEquals(INTERVENER4, assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN));
     }
 
     @Test
@@ -392,7 +392,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(generateResourceWhenAppSolOnCase()))));
-        assertEquals(assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN), APPLICANT);
+        assertEquals(APPLICANT, assignCaseAccessService.getActiveUser(TEST_CASE_ID, AUTH_TOKEN));
     }
 
     private CaseAssignmentUserRolesResource generateResourceWhenCreatorWasSolicitor() {

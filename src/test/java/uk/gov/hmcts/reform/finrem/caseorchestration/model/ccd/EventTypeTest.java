@@ -28,7 +28,6 @@ public class EventTypeTest {
         GeneralApplicationHandler.class, CallbackHandler.class, IntervenerHandler.class, AssignApplicantSolicitorHandler.class);
 
     @Test
-    @Ignore
     public void givenEventHandler_whenMoreThanOneEventMatches_thenThrowError() throws ClassNotFoundException {
         List<String> errors = new ArrayList<>();
         var handlerClasses = getHandlerClasses();

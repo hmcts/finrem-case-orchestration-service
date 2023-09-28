@@ -227,6 +227,7 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
             callbackRequest, AUTH_TOKEN);
         FinremCaseData resultingData = response.getData();
         List<OrderSentToPartiesCollection> partyOrders = resultingData.getOrdersSentToPartiesCollection();
+        assertThat(partyOrders.get(0).getValue().getCaseDocument(), equalTo(firstRefusedOrder.getConsentOrder()));
     }
 
     private DynamicMultiSelectList getParties() {
