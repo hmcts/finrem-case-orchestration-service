@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
@@ -88,10 +89,27 @@ public class AdditionalHearingDocumentService {
 
     public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken, CaseDetails caseDetails) {
         List<HearingOrderCollectionData> hearingOrderCollectionData = getApprovedHearingOrderCollection(caseDetails);
+        String caseId = String.valueOf(caseDetails.getId());
+        hearingOrderCollectionData.forEach(hearingOrder ->
+            convertHearingOrderCollectionDocumentsToPdf(hearingOrder, authorisationToken, caseId));
 
-        if (hearingOrderCollectionHasEntries(hearingOrderCollectionData)) {
-            populateLatestDraftHearingOrderWithLatestEntry(caseDetails, hearingOrderCollectionData, authorisationToken);
+        List<HearingOrderCollectionData> hearingOrderStampedCollection = new ArrayList<>();
+        Map<String, Object> caseData = caseDetails.getData();
+        hearingOrderCollectionData.forEach(hearingOrder -> {
+            StampType stampType = documentHelper.getStampType(caseData);
+            CaseDocument stampedDocs = genericDocumentService.stampDocument(hearingOrder.getHearingOrderDocuments().getUploadDraftDocument(),
+                authorisationToken, stampType, caseId);
+            hearingOrderStampedCollection.add(buildHearingOrderDataObject(stampedDocs));
+        });
+
+        if (hearingOrderCollectionHasEntries(hearingOrderStampedCollection)) {
+            populateLatestDraftHearingOrderWithLatestEntry(caseDetails, hearingOrderStampedCollection);
         }
+    }
+
+    private static HearingOrderCollectionData buildHearingOrderDataObject(CaseDocument stampedDocs) {
+        return HearingOrderCollectionData.builder()
+            .hearingOrderDocuments(HearingOrderDocument.builder().uploadDraftDocument(stampedDocs).build()).build();
     }
 
     public List<HearingOrderCollectionData> getApprovedHearingOrderCollection(CaseDetails caseDetail) {
@@ -111,11 +129,7 @@ public class AdditionalHearingDocumentService {
     }
 
     private void populateLatestDraftHearingOrderWithLatestEntry(CaseDetails caseDetails,
-                                                                List<HearingOrderCollectionData> hearingOrderCollectionData,
-                                                                String authorisationToken) {
-        String caseId = caseDetails.getId().toString();
-        hearingOrderCollectionData.forEach(element ->
-            convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken, caseId));
+                                                                List<HearingOrderCollectionData> hearingOrderCollectionData) {
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
         caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
             hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
