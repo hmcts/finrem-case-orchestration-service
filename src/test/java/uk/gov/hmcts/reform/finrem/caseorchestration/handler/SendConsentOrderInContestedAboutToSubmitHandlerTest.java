@@ -137,10 +137,11 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
             "OrderLetter2Binary")).build();
         ConsentOrderCollection firstConsentOrderCollection = ConsentOrderCollection.builder().approvedOrder(firstApprovedOrder).build();
         ConsentOrderCollection secondConsentOrderCollection = ConsentOrderCollection.builder().approvedOrder(secondApprovedOrder).build();
-        List<ConsentOrderCollection> approvedOrders = List.of(firstConsentOrderCollection, secondConsentOrderCollection);
+        when(generalOrderService.getParties(any())).thenReturn(partyList());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), any(), any())).thenReturn(additionalDocument);
         when(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(any(), any())).thenReturn(true);
         ConsentOrderWrapper wrapper = data.getConsentOrderWrapper();
+        List<ConsentOrderCollection> approvedOrders = List.of(firstConsentOrderCollection, secondConsentOrderCollection);
         wrapper.setContestedConsentedApprovedOrders(approvedOrders);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = sendConsentOrderInContestedAboutToSubmitHandler.handle(
             callbackRequest, AUTH_TOKEN);
@@ -168,6 +169,7 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
         ConsentOrderCollection secondConsentOrderCollection = ConsentOrderCollection.builder().approvedOrder(secondRefusedOrder).build();
         List<ConsentOrderCollection> refusedOrders = List.of(firstConsentOrderCollection, secondConsentOrderCollection);
         wrapper.setConsentedNotApprovedOrders(refusedOrders);
+        when(generalOrderService.getParties(any())).thenReturn(partyList());
         when(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(any(), any())).thenReturn(false);
         when(consentOrderNotApprovedDocumentService.getLatestOrderDocument(any(), any(), any()))
             .thenReturn(wrapper.getConsentedNotApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
@@ -190,7 +192,7 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
             "generalOrderBinary");
 
         wrapper.setGeneralOrderLatestDocument(latestGeneralOrderDocument);
-
+        when(generalOrderService.getParties(any())).thenReturn(partyList());
         when(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(any(), any())).thenReturn(false);
         when(consentOrderNotApprovedDocumentService.getLatestOrderDocument(any(), any(), any())).thenReturn(wrapper.getGeneralOrderLatestDocument());
 
@@ -201,14 +203,50 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
         assertThat(partyOrders.get(0).getValue().getCaseDocument(), equalTo(wrapper.getGeneralOrderLatestDocument()));
     }
 
+    @Test
+    void givenConsentInContestedCase_whenRefusedOrdersButNoApprovedOrderAvailableToShareAndNoParties_thenAddUnapprovedOrdersToPartyColl() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        ConsentOrderWrapper wrapper = data.getConsentOrderWrapper();
+        data.setPartiesOnCase(getParties());
+
+        ApprovedOrder firstRefusedOrder = ApprovedOrder.builder().consentOrder(caseDocument("consentOrder1Url", "consentOrder1Name",
+            "consentOrder1Binary")).build();
+        ApprovedOrder secondRefusedOrder = ApprovedOrder.builder().consentOrder(caseDocument("consentOrder2Url", "consentOrder2Name",
+            "consentOrder2Binary")).build();
+        ConsentOrderCollection firstConsentOrderCollection = ConsentOrderCollection.builder().approvedOrder(firstRefusedOrder).build();
+        ConsentOrderCollection secondConsentOrderCollection = ConsentOrderCollection.builder().approvedOrder(secondRefusedOrder).build();
+        List<ConsentOrderCollection> refusedOrders = List.of(firstConsentOrderCollection, secondConsentOrderCollection);
+        wrapper.setConsentedNotApprovedOrders(refusedOrders);
+        when(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(any(), any())).thenReturn(false);
+        when(consentOrderNotApprovedDocumentService.getLatestOrderDocument(any(), any(), any()))
+            .thenReturn(wrapper.getConsentedNotApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = sendConsentOrderInContestedAboutToSubmitHandler.handle(
+            callbackRequest, AUTH_TOKEN);
+        FinremCaseData resultingData = response.getData();
+        List<OrderSentToPartiesCollection> partyOrders = resultingData.getOrdersSentToPartiesCollection();
+    }
 
     private DynamicMultiSelectList getParties() {
-
         List<DynamicMultiSelectListElement> list = new ArrayList<>();
         partyList().forEach(role -> list.add(getElementList(role)));
-
         return DynamicMultiSelectList.builder()
-            .value(list)
+            .value(of(DynamicMultiSelectListElement.builder()
+                .code(CaseRole.APP_SOLICITOR.getCcdCode())
+                .label(CaseRole.APP_SOLICITOR.getCcdCode())
+                .code(CaseRole.RESP_SOLICITOR.getCcdCode())
+                .label(CaseRole.RESP_SOLICITOR.getCcdCode())
+                .code(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                .code(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                .code(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+                .code(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+                .build()))
             .listItems(list)
             .build();
     }

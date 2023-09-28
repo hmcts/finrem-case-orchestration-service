@@ -9,32 +9,49 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantRepresentedPaper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RoleApprovedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RoleConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
@@ -76,12 +93,24 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     @Autowired
     private ObjectMapper mapper;
+    @MockBean
+    private BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
+    @MockBean
+    private DocumentHelper documentHelper;
+    @MockBean
+    private DocumentConfiguration documentConfiguration;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private EvidenceManagementAuditService evidenceManagementAuditService;
     @Autowired
     private EvidenceManagementUploadService evidenceManagementUploadService;
     @Autowired
     private PdfStampingService pdfStampingServiceMock;
     @Autowired
     private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
+    @Autowired
+    private DocumentOrderingService documentOrderingService;
 
     @Value("${document.approvedConsentOrderTemplate}")
     private String documentApprovedConsentOrderTemplate;
@@ -293,6 +322,81 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
            .addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);
 
         assertThat(finremCaseDetails.getData().getApprovedOrderCollection(), hasSize(1));
+    }
+
+    @Test
+    public void givenFinremCaseDetails_whenAddApprovedConsentCoverLetter_thenCaseDocsAdded() {
+        CaseDocument coverLetter = CaseDocument.builder()
+            .documentFilename("approvedConsentOrderNotificationFileName")
+            .documentUrl("approvedConsentOrderNotificationUrl")
+            .documentBinaryUrl("approvedConsentOrderNotificationBinaryUrl")
+            .build();
+        when(documentHelper.prepareLetterTemplateData(
+            finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(caseDetails);
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn("approvedConsentOrderNotificationFileName");
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString())).thenReturn(coverLetter);
+        when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn("approvedConsentOrderNotificationTemplate");
+        List<CaseDocument> documents = new ArrayList<>();
+        consentOrderApprovedDocumentService.addApprovedConsentCoverLetter(
+            finremCaseDetails, documents, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+        assertThat(documents, hasSize(1));
+        assertThat(documents, hasItem(coverLetter));
+    }
+
+    @Test
+    public void givenApprovedOrderModifiedLatest_whenThereIsANotApprovedOrder_thenReturnTrue() {
+        CaseDocument caseDocument = CaseDocument.builder().documentBinaryUrl("test_url_").build();
+        CaseDocument caseDocument2 = CaseDocument.builder().documentBinaryUrl("test_url_2").build();
+        RoleApprovedOrder approvedOrder = RoleApprovedOrder.builder().consentOrder(caseDocument).orderLetter(caseDocument).build();
+        UnapproveOrder approvedOrder2 = UnapproveOrder.builder().caseDocument(caseDocument2).orderReceivedAt(LocalDateTime.now()).build();
+        RoleConsentOrderCollection collection1 = RoleConsentOrderCollection.builder()
+            .approvedOrder(approvedOrder).id(UUID.randomUUID().toString()).build();
+        UnapprovedOrderCollection collection2 = UnapprovedOrderCollection.builder()
+            .value(approvedOrder2).id(UUID.randomUUID().toString()).build();
+        ConsentOrderWrapper wrapper = ConsentOrderWrapper.builder()
+            .appConsentApprovedOrders(List.of(collection1)).appRefusedOrderCollection(List.of(collection2)).build();
+        consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, AUTH_TOKEN);
+        when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(asList(
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().toString()).build(),
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().minusDays(2).toString()).build()));
+        assertThat(documentOrderingService.isDocumentModifiedLater(caseDocument, caseDocument2, AUTH_TOKEN), is(true));
+    }
+
+    @Test
+    public void givenNotApprovedOrderModifiedLatest_whenThereIsAApprovedOrder_thenReturnFalse() {
+        CaseDocument caseDocument = CaseDocument.builder().documentBinaryUrl("test_url_").build();
+        CaseDocument caseDocument2 = CaseDocument.builder().documentBinaryUrl("test_url_2").build();
+        RoleApprovedOrder approvedOrder = RoleApprovedOrder.builder().consentOrder(caseDocument).orderLetter(caseDocument).build();
+        UnapproveOrder approvedOrder2 = UnapproveOrder.builder().caseDocument(caseDocument2).orderReceivedAt(LocalDateTime.now()).build();
+        RoleConsentOrderCollection collection1 = RoleConsentOrderCollection.builder()
+            .approvedOrder(approvedOrder).id(UUID.randomUUID().toString()).build();
+        UnapprovedOrderCollection collection2 = UnapprovedOrderCollection.builder().value(approvedOrder2).id(UUID.randomUUID().toString()).build();
+        ConsentOrderWrapper wrapper = ConsentOrderWrapper.builder().appConsentApprovedOrders(List.of(collection1))
+            .appRefusedOrderCollection(List.of(collection2)).build();
+        consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, AUTH_TOKEN);
+        when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(asList(
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().minusDays(2).toString()).build(),
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().toString()).build()
+        ));
+        assertThat(documentOrderingService.isDocumentModifiedLater(caseDocument, caseDocument2, AUTH_TOKEN), is(false));
+    }
+
+    @Test
+    public void givenNoNotApprovedOrder_whenThereIsAApprovedOrder_thenReturnTrue() {
+        CaseDocument caseDocument = CaseDocument.builder().documentBinaryUrl("test_url_").build();
+        ApprovedOrder approvedOrder = ApprovedOrder.builder().consentOrder(caseDocument).orderLetter(caseDocument).build();
+        ConsentOrderCollection collection1 = ConsentOrderCollection.builder().approvedOrder(approvedOrder).id(UUID.randomUUID().toString()).build();
+        ConsentOrderWrapper wrapper = ConsentOrderWrapper.builder().contestedConsentedApprovedOrders(List.of(collection1)).build();
+        assertThat(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, AUTH_TOKEN), equalTo(true));
+    }
+
+    @Test
+    public void givenNoApprovedOrder_whenThereIsANotApprovedOrder_thenReturnFalse() {
+        CaseDocument caseDocument = CaseDocument.builder().documentBinaryUrl("test_url_2").build();
+        ApprovedOrder approvedOrder = ApprovedOrder.builder().consentOrder(caseDocument).build();
+        ConsentOrderCollection collection = ConsentOrderCollection.builder().approvedOrder(approvedOrder).id(UUID.randomUUID().toString()).build();
+        ConsentOrderWrapper wrapper = ConsentOrderWrapper.builder().consentedNotApprovedOrders(List.of(collection)).build();
+        assertThat(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, AUTH_TOKEN), equalTo(false));
     }
 
     private List<CaseDocument> getDocumentList(Map<String, Object> data) {
