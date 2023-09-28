@@ -174,6 +174,38 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenNoExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnCollectionWithExistingOrder() throws JsonProcessingException {
+
+        Map<String, Object> caseData = new HashMap<>();
+        HearingOrderCollectionData collectionData =  HearingOrderCollectionData.builder()
+            .hearingOrderDocuments(HearingOrderDocument.builder().uploadDraftDocument(caseDocument()).build()).build();
+        List<HearingOrderCollectionData> list = new ArrayList<>();
+        list.add(collectionData);
+        caseData.put(HEARING_ORDER_COLLECTION, list);
+
+        HearingOrderAdditionalDocCollectionData collectionAdditionalData =  HearingOrderAdditionalDocCollectionData.builder()
+            .hearingOrderAdditionalDocuments(HearingOrderAdditionalDocument.builder().additionalDocuments(caseDocument())
+                .additionalDocumentType("other").build()).build();
+        List<HearingOrderAdditionalDocCollectionData> list1 = new ArrayList<>();
+        list1.add(collectionAdditionalData);
+        caseData.put(HEARING_UPLOADED_DOCUMENT, list1);
+        setHearingDirectionDetailsCollection(YES_VALUE);
+        CaseDetails details = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONTESTED.getCcdType()).data(caseData).build();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONTESTED.getCcdType()).data(caseData).build();
+        when(additionalHearingDocumentService.getApprovedHearingOrderCollection(caseDetailsBefore)).thenReturn(list);
+        when(additionalHearingDocumentService.getHearingOrderAdditionalDocuments(caseDetailsBefore.getData())).thenReturn(list1);
+        when(additionalHearingDocumentService.getApprovedHearingOrderCollection(details)).thenReturn(list);
+        when(additionalHearingDocumentService.getHearingOrderAdditionalDocuments(details.getData())).thenReturn(list1);
+
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response
+            = uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(details, caseDetailsBefore, AUTH_TOKEN);
+
+        Map<String, Object> data = response.getData();
+        assertEquals(2, getHearingOrderDocuments(data).size());
+        assertEquals(2, getHearingOrderAdditionalDocuments(data).size());
+    }
+
+    @Test
     public void givenNoExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnValidatedResponse() throws JsonProcessingException {
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
         setHearingDirectionDetailsCollection(YES_VALUE);
