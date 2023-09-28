@@ -54,9 +54,6 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -280,7 +277,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() throws Exception {
+    public void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() {
         Mockito.reset(pdfStampingServiceMock);
         when(pdfStampingServiceMock.stampDocument(
             document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
@@ -321,8 +318,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
-        FinremCaseDetails finremCaseDetails = finremCaseDetails();
-
         when(pdfStampingServiceMock.stampDocument(
             any(Document.class), eq(AUTH_TOKEN), eq(false), eq(StampType.FAMILY_COURT_STAMP), eq(caseId)))
             .thenReturn(document());
@@ -331,6 +326,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             .thenReturn(document());
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
+        FinremCaseDetails finremCaseDetails = finremCaseDetails();
         consentOrderApprovedDocumentService
            .addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);
 
