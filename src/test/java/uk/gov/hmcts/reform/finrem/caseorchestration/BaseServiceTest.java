@@ -98,7 +98,7 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected CaseDetails buildCaseDetailsBefore() {
         Map<String, Object> caseData = new HashMap<>();
-        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
+        return CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
     }
 
     protected CaseDetails buildCaseDetails() {
@@ -112,7 +112,7 @@ public abstract class BaseServiceTest extends BaseTest {
             "A settlement or a transfer of property",
             "Property Adjustment Order");
         caseData.put("natureOfApplication2", natureOfApplication);
-        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
+        return CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
     }
 
     protected FinremCaseDetails buildFinremCaseDetails() {

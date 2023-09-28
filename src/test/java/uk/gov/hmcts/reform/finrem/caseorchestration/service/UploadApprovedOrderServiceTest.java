@@ -13,12 +13,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
@@ -114,6 +120,44 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
         verify(additionalHearingDocumentService).getApprovedHearingOrderCollection(caseDetails);
         verify(additionalHearingDocumentService).getHearingOrderAdditionalDocuments(caseDetails.getData());
+    }
+
+    @Test
+    public void givenAboutToStart_whenPrepareFieldsForApprovedLetter_thenRemoveFieldsAndHearingOrderCollections() {
+        Map<String, Object> caseData = new HashMap<>();
+        HearingOrderCollectionData collectionData =  HearingOrderCollectionData.builder()
+            .hearingOrderDocuments(HearingOrderDocument.builder().uploadDraftDocument(caseDocument()).build()).build();
+        List<HearingOrderCollectionData> list = new ArrayList<>();
+        list.add(collectionData);
+        caseData.put(HEARING_ORDER_COLLECTION, list);
+
+        HearingOrderAdditionalDocCollectionData collectionAdditionalData =  HearingOrderAdditionalDocCollectionData.builder()
+            .hearingOrderAdditionalDocuments(HearingOrderAdditionalDocument.builder().additionalDocuments(caseDocument())
+                .additionalDocumentType("other").build()).build();
+        List<HearingOrderAdditionalDocCollectionData> list1 = new ArrayList<>();
+        list1.add(collectionAdditionalData);
+        caseData.put(HEARING_UPLOADED_DOCUMENT, list1);
+
+        CaseDetails details = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONTESTED.getCcdType()).data(caseData).build();
+
+        when(hearingOrderService.draftDirectionOrderCollectionTail(details, AUTH_TOKEN))
+            .thenReturn(Optional.of(draftDirectionOrder));
+        when(additionalHearingDocumentService.getApprovedHearingOrderCollection(details)).thenReturn(list);
+        when(additionalHearingDocumentService.getHearingOrderAdditionalDocuments(details.getData())).thenReturn(list1);
+
+
+        Map<String, Object> responseData = uploadApprovedOrderService.prepareFieldsForOrderApprovedCoverLetter(details);
+
+        assertFalse(responseData.containsKey(CONTESTED_ORDER_APPROVED_JUDGE_TYPE));
+        assertFalse(responseData.containsKey(CONTESTED_ORDER_APPROVED_JUDGE_NAME));
+        assertFalse(responseData.containsKey(CONTESTED_ORDER_APPROVED_DATE));
+        assertFalse(responseData.containsKey(HEARING_NOTICE_DOCUMENT_PACK));
+
+        assertTrue(getHearingOrderDocuments(responseData).isEmpty());
+        assertTrue(getHearingOrderAdditionalDocuments(responseData).isEmpty());
+
+        verify(additionalHearingDocumentService).getApprovedHearingOrderCollection(details);
+        verify(additionalHearingDocumentService).getHearingOrderAdditionalDocuments(details.getData());
     }
 
 
