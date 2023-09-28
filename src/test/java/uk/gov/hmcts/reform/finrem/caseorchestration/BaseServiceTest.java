@@ -96,6 +96,11 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected String formattedNowDate = DateTimeFormatter.ofPattern(CCDConfigConstant.LETTER_DATE_FORMAT).format(LocalDate.now());
 
+    protected CaseDetails buildCaseDetailsBefore() {
+        Map<String, Object> caseData = new HashMap<>();
+        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
+    }
+
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         List<String> natureOfApplication = List.of("Lump Sum Order",

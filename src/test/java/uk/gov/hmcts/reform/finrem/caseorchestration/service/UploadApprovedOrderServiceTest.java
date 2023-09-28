@@ -68,12 +68,14 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     private UploadApprovedOrderService uploadApprovedOrderService;
 
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
 
     private DraftDirectionOrder draftDirectionOrder;
 
     @Before
     public void setUp() {
         caseDetails = buildCaseDetails();
+        caseDetailsBefore = buildCaseDetailsBefore();
         caseDetails.getData().put(CONTESTED_ORDER_APPROVED_JUDGE_TYPE, JUDGE_TYPE);
         caseDetails.getData().put(CONTESTED_ORDER_APPROVED_JUDGE_NAME, JUDGE_NAME);
         caseDetails.getData().put(CONTESTED_ORDER_APPROVED_DATE, APPROVED_DATE);
@@ -106,7 +108,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     public void givenNoExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnValidatedResponse() throws JsonProcessingException {
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
         setHearingDirectionDetailsCollection(YES_VALUE);
-        uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
+        uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
@@ -122,7 +124,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     public void givenNoExceptions_whenHandleAboutToSubmitAndNoNextHearing_thenDoNotGenerateDocumentPack() {
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
         setHearingDirectionDetailsCollection(NO_VALUE);
-        uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
+        uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
@@ -141,7 +143,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderService
-            .handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
+            .handleUploadApprovedOrderAboutToSubmit(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         assertThat(response.getErrors(), hasSize(1));
         assertEquals(COURT_DETAILS_PARSE_EXCEPTION_MESSAGE, response.getErrors().get(0));
