@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 import java.util.Comparator;
 import java.util.List;
@@ -19,6 +21,10 @@ public abstract class DocumentHandler {
 
     protected abstract List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections);
+
+    protected abstract DocumentCategory getDocumentCategoryFromDocumentType(
+        CaseDocumentType caseDocumentType
+    );
 
     public void replaceManagedDocumentsInCollectionType(FinremCallbackRequest callbackRequest,
                                                         List<UploadCaseDocumentCollection> screenCollection) {
@@ -40,6 +46,15 @@ public abstract class DocumentHandler {
             caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
         List<UploadCaseDocumentCollection> uploadedCollectionForType =
             getAlteredCollectionForType(screenCollection);
+
+        for (UploadCaseDocumentCollection uploadCaseDocumentCollection : uploadedCollectionForType) {
+            uploadCaseDocumentCollection.getUploadCaseDocument()
+                .getCaseDocuments().
+                setCategoryId(getDocumentCategoryFromDocumentType(
+                    uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType()
+                ).getDocumentCategoryId()
+            );
+        }
 
         originalCollectionForType.addAll(uploadedCollectionForType);
 

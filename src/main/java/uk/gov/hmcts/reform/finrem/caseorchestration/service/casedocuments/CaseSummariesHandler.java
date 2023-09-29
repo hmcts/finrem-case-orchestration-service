@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 public class CaseSummariesHandler extends PartyDocumentsHandler {
 
@@ -21,5 +22,10 @@ public class CaseSummariesHandler extends PartyDocumentsHandler {
             && (caseDocumentType.equals(CaseDocumentType.POSITION_STATEMENT)
             || caseDocumentType.equals(CaseDocumentType.SKELETON_ARGUMENT)
             || caseDocumentType.equals(CaseDocumentType.CASE_SUMMARY));
+    }
+
+    @Override
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+        return DocumentCategory.HEARING_DOCUMENTS;
     }
 }

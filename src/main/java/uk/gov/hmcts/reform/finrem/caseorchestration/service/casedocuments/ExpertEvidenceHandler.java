@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 public class ExpertEvidenceHandler extends PartyDocumentsHandler {
 
@@ -20,5 +21,10 @@ public class ExpertEvidenceHandler extends PartyDocumentsHandler {
         return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.NO)
             && (caseDocumentType.equals(CaseDocumentType.VALUATION_REPORT)
             || caseDocumentType.equals(CaseDocumentType.EXPERT_EVIDENCE));
+    }
+
+    @Override
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+        return DocumentCategory.REPORTS;
     }
 }
