@@ -8,15 +8,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 
 @Slf4j
 @Service
 public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHandler {
+    private final PartyService partyService;
 
-    public ListForHearingContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    public ListForHearingContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, PartyService partyService) {
         super(finremCaseDetailsMapper);
+        this.partyService = partyService;
     }
 
     @Override
@@ -32,10 +36,13 @@ public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHa
                                                                               String userAuthorisation) {
         log.info("Handling contested event {} about to start callback for case id: {}",
             EventType.LIST_FOR_HEARING, callbackRequest.getCaseDetails().getId());
+
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         if (caseData.getAdditionalHearingDocumentsOption() == null) {
             caseData.setAdditionalHearingDocumentsOption(YesOrNo.NO);
         }
+        caseData.setPartiesOnCase(partyService.getAllActivePartyList(caseDetails));
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 }

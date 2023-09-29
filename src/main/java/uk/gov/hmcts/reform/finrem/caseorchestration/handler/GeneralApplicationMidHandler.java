@@ -7,25 +7,37 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Slf4j
 @Service
 public class GeneralApplicationMidHandler extends FinremCallbackHandler {
 
-    private final BulkPrintDocumentService service;
+    private final GeneralApplicationService service;
+    private final AssignCaseAccessService assignCaseAccessService;
 
     public GeneralApplicationMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                        BulkPrintDocumentService service) {
+                                        GeneralApplicationService service, AssignCaseAccessService assignCaseAccessService) {
         super(finremCaseDetailsMapper);
         this.service = service;
+        this.assignCaseAccessService = assignCaseAccessService;
     }
 
     @Override
@@ -36,42 +48,102 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
     }
 
     @Override
+    @SuppressWarnings({"java:S6541","java:S3776"})
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId  = String.valueOf(caseDetails.getId());
+
         log.info("Mid callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
-        List<String> errors = new ArrayList<>();
+        String caseId = caseDetails.getId().toString();
 
-        List<GeneralApplicationsCollection> generalApplications = caseData.getGeneralApplicationWrapper().getGeneralApplications();
-        if (generalApplications == null || generalApplications.isEmpty()) {
-            log.info("Please complete the general application for case Id {}", caseDetails.getId());
-            errors.add("Please complete the General Application. No information has been entered for this application.");
-        } else {
-            generalApplications.forEach(ga -> {
-                service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDocument(),
-                    caseId, errors, userAuthorisation);
-                service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDraftOrder(),
-                    caseId, errors, userAuthorisation);
-                List<GeneralApplicationSupportingDocumentData> gaSupportDocuments = ga.getValue().getGaSupportDocuments();
-                if (gaSupportDocuments != null && !gaSupportDocuments.isEmpty()) {
-                    gaSupportDocuments.forEach(doc -> service.validateEncryptionOnUploadedDocument(doc.getValue().getSupportDocument(),
-                        caseId, errors, userAuthorisation));
-                }
-            });
-        }
+        String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(
+            caseId, userAuthorisation);
+        log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
+        caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+        GeneralApplicationWrapper wrapper = caseData.getGeneralApplicationWrapper();
+        GeneralApplicationWrapper wrapperBefore = caseDataBefore.getGeneralApplicationWrapper();
 
-        List<GeneralApplicationsCollection> generalApplicationsBefore = caseDataBefore.getGeneralApplicationWrapper().getGeneralApplications();
+        List<GeneralApplicationsCollection> generalApplicationsBefore;
+        List<GeneralApplicationsCollection> generalApplications;
 
-        if (generalApplicationsBefore != null && generalApplications != null && (generalApplicationsBefore.size() == generalApplications.size())) {
-            log.info("Please complete the general application for case Id {}", caseDetails.getId());
-            errors.add("Any changes to an existing General Applications will not be saved. "
-                + "Please add a new General Application in order to progress.");
+        DynamicRadioListElement listElement = DynamicRadioListElement.builder().build();
+        switch (loggedInUserCaseRole) {
+            case APPLICANT, RESPONDENT -> {
+                generalApplications = wrapper.getAppRespGeneralApplications();
+                generalApplicationsBefore = wrapperBefore.getAppRespGeneralApplications();
+                listElement.setCode(loggedInUserCaseRole);
+                listElement.setLabel(loggedInUserCaseRole);
+                DynamicRadioList radioList = DynamicRadioList.builder()
+                    .value(listElement)
+                    .listItems(List.of(listElement))
+                    .build();
+                if (generalApplications != null && !generalApplications.isEmpty()) {
+                    generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
+                }
+            }
+            case INTERVENER1 -> {
+                generalApplications = wrapper.getIntervener1GeneralApplications();
+                generalApplicationsBefore = wrapperBefore.getIntervener1GeneralApplications();
+                listElement.setCode(INTERVENER1);
+                listElement.setLabel(INTERVENER1);
+                DynamicRadioList radioList = DynamicRadioList.builder()
+                    .value(listElement)
+                    .listItems(List.of(listElement))
+                    .build();
+                if (generalApplications != null && !generalApplications.isEmpty()) {
+                    generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
+                }
+            }
+            case INTERVENER2 -> {
+                generalApplications = wrapper.getIntervener2GeneralApplications();
+                generalApplicationsBefore = wrapperBefore.getIntervener2GeneralApplications();
+                listElement.setCode(INTERVENER2);
+                listElement.setLabel(INTERVENER2);
+                DynamicRadioList radioList = DynamicRadioList.builder()
+                    .value(listElement)
+                    .listItems(List.of(listElement))
+                    .build();
+                if (generalApplications != null && !generalApplications.isEmpty()) {
+                    generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
+                }
+            }
+            case INTERVENER3 -> {
+                generalApplications = wrapper.getIntervener3GeneralApplications();
+                generalApplicationsBefore = wrapperBefore.getIntervener3GeneralApplications();
+                listElement.setCode(INTERVENER3);
+                listElement.setLabel(INTERVENER3);
+                DynamicRadioList radioList = DynamicRadioList.builder()
+                    .value(listElement)
+                    .listItems(List.of(listElement))
+                    .build();
+                if (generalApplications != null && !generalApplications.isEmpty()) {
+                    generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
+                }
+            }
+            case INTERVENER4 -> {
+                generalApplications = wrapper.getIntervener4GeneralApplications();
+                generalApplicationsBefore = wrapperBefore.getIntervener4GeneralApplications();
+                listElement.setCode(INTERVENER4);
+                listElement.setLabel(INTERVENER4);
+                DynamicRadioList radioList = DynamicRadioList.builder()
+                    .value(listElement)
+                    .listItems(List.of(listElement))
+                    .build();
+                if (generalApplications != null && !generalApplications.isEmpty()) {
+                    generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
+                }
+            }
+            default -> {
+                generalApplications = wrapper.getGeneralApplications();
+                generalApplicationsBefore = wrapperBefore.getGeneralApplications();
+            }
         }
+        List<String> errors = new ArrayList<>();
+        service.checkIfApplicationCompleted(caseDetails, errors, generalApplications, generalApplicationsBefore);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();

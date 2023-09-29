@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -15,11 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,26 +27,25 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationMidHandler handler;
+    @InjectMocks
+    private GeneralApplicationService gaService;
     @Mock
-    private BulkPrintDocumentService bulkPrintDocumentService;
+    private AssignCaseAccessService assignCaseAccessService;
 
     public static final String AUTH_TOKEN = "tokien:)";
-
 
     @Before
     public void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler = new GeneralApplicationMidHandler(finremCaseDetailsMapper, bulkPrintDocumentService);
+        handler = new GeneralApplicationMidHandler(finremCaseDetailsMapper, gaService, assignCaseAccessService);
     }
 
     @Test
@@ -78,22 +77,30 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
     }
 
     @Test
-    public void givenContestedCase_whenGeneralApplicationEventStartButNotAddedDetails_thenThrowErrorMessage() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertTrue(handle.getErrors().get(0)
-            .contains("Please complete the General Application. No information has been entered for this application."));
+    public void givenContestedCase_whenGeneralApplicationEventStartButNotAddedDetailsParty_thenThrowErrorMessage() {
+        List<String> roleList = List.of("Case", "Intervener1", "Intervener2", "Intervener3", "Intervener4", "Applicant");
+        roleList.forEach(role -> {
+            FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+            when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn(role);
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+            assertTrue(handle.getErrors().get(0)
+                .contains("Please complete the General Application. No information has been entered for this application."));
+        });
+
     }
 
     @Test
-    public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplication_thenThrowErrorMessage() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestWithCaseDetailsBefore();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+    public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplicationWithSelectedParty_thenThrowErrorMessage() {
+        List<String> roleList = List.of("Case", "Intervener1", "Intervener2", "Intervener3", "Intervener4", "Applicant");
+        roleList.forEach(role -> {
+            FinremCallbackRequest finremCallbackRequest = buildCallbackRequestWithCaseDetailsBefore();
+            when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn(role);
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertTrue(response.getErrors().get(0)
-            .contains("Any changes to an existing General Applications will not be saved."
-                + " Please add a new General Application in order to progress."));
-        verify(bulkPrintDocumentService, times(5)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+            assertTrue(response.getErrors().get(0)
+                .contains("Any changes to an existing General Applications will not be saved."
+                    + " Please add a new General Application in order to progress."));
+        });
     }
 
 
@@ -110,23 +117,27 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
 
 
     private FinremCallbackRequest buildCallbackRequestWithCaseDetailsBefore() {
-        GeneralApplicationSupportingDocumentData supportingDocumentData = GeneralApplicationSupportingDocumentData.builder()
-            .value(GeneralApplicationSuportingDocumentItems.builder().supportDocument(caseDocument()).build()).build();
         GeneralApplicationsCollection record1 = GeneralApplicationsCollection.builder().id(UUID.randomUUID())
-            .value(GeneralApplicationItems.builder().generalApplicationCreatedBy("Test1")
-                .generalApplicationDocument(caseDocument()).gaSupportDocuments(List.of(supportingDocumentData)).build()).build();
+            .value(GeneralApplicationItems.builder().generalApplicationCreatedBy("Test1").build()).build();
         GeneralApplicationsCollection record2 = GeneralApplicationsCollection.builder().id(UUID.randomUUID())
             .value(GeneralApplicationItems.builder().generalApplicationCreatedBy("Test2").build()).build();
 
-        GeneralApplicationWrapper wrapper1 = GeneralApplicationWrapper.builder().generalApplications(List.of(record1, record2)).build();
+        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder()
+            .generalApplications(List.of(record1, record2))
+            .intervener1GeneralApplications(List.of(record1, record2))
+            .intervener2GeneralApplications(List.of(record1, record2))
+            .intervener3GeneralApplications(List.of(record1, record2))
+            .intervener4GeneralApplications(List.of(record1, record2))
+            .appRespGeneralApplications(List.of(record1, record2))
+            .build();
 
         return FinremCallbackRequest
             .builder()
             .eventType(EventType.GENERAL_APPLICATION)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().generalApplicationWrapper(wrapper1).build()).build())
+                .data(FinremCaseData.builder().generalApplicationWrapper(wrapper).build()).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().generalApplicationWrapper(wrapper1).build()).build())
+                .data(FinremCaseData.builder().generalApplicationWrapper(wrapper).build()).build())
             .build();
     }
 }
