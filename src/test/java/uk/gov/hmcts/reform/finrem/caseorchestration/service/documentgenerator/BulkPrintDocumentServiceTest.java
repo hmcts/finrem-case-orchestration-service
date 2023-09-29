@@ -23,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,7 +71,7 @@ class BulkPrintDocumentServiceTest {
 
         List<String> errors =  new ArrayList<>();
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-        assertEquals("Failed to parse the documents for abc.docx", errors.get(0));
+        assertTrue(errors.get(0).contains("Failed to parse the documents for abc.docx"));
     }
 
     @Test
@@ -89,7 +90,8 @@ class BulkPrintDocumentServiceTest {
 
         List<String> errors =  new ArrayList<>();
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-        assertEquals("Failed to parse the documents for abc.pdf", errors.get(0));
+        assertEquals("Failed to parse the documents for abc.pdf; Error: End-of-File, expected line at offset 11",
+            errors.get(0));
     }
 
     @Test

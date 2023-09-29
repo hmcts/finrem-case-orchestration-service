@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequ
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 
-import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -56,10 +55,9 @@ public class BulkPrintDocumentService {
                     errors.add("Uploaded document " + documentFilename + " contains encryption. "
                         + "Please remove encryption before uploading or upload another document.");
                 }
-            } catch (IOException exc) {
+            } catch (Exception exc) {
                 String errorMessage = "Failed to parse the documents for " + documentFilename;
-                errors.add(errorMessage);
-                log.error(errorMessage);
+                errors.add(errorMessage + "; " + exc.getMessage());
                 log.error(exc.getMessage());
             }
         }
