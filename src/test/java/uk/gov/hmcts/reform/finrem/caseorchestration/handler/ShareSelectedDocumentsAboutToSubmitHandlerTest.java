@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,7 +28,8 @@ class ShareSelectedDocumentsAboutToSubmitHandlerTest {
 
     @Mock
     private IntervenerShareDocumentsService intervenerShareDocumentsService;
-
+    @Mock
+    private AssignCaseAccessService assignCaseAccessService;
 
     @Test
     void givenContestedCase_whenRequiredEventCallbackIsSubmitted_thenHandlerCanNotHandle() {
@@ -61,6 +63,7 @@ class ShareSelectedDocumentsAboutToSubmitHandlerTest {
     void givenContestedCase_whenInvokedSharedService_thenHandlerCanHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(assignCaseAccessService).getActiveUserCaseRole(any(), any());
         verify(intervenerShareDocumentsService).shareSelectedDocumentWithOtherSelectedSolicitors(any());
     }
 

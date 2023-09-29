@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApplicantShareDocumentsService;
@@ -73,7 +74,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         log.info("logged-in user role {} in case {}", caseAssignedUserRoleList, caseId);
         String loggedInUserCaseRole = caseAssignedUserRoleList.get(0).getCaseRole();
         FinremCaseData caseData = caseDetails.getData();
-        caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
+
         if (loggedInUserCaseRole == null) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                 .errors(List.of("Logged in user does not have sufficient role access to execute this event")).build();
@@ -114,7 +115,8 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
                     .errors(List.of(PARTY_ERROR)).build();
             }
         }
-        if (applicantDocumentsService.getIntervenerRoles(loggedInUserCaseRole)) {
+        if (applicantDocumentsService.isIntervenerRole(loggedInUserCaseRole)) {
+            List<DynamicMultiSelectListElement> defaultDynamicListElements = new ArrayList<>();
             DynamicMultiSelectList sourceDocumentList
                 = intervenerShareDocumentsService.intervenerSourceDocumentList(caseDetails, loggedInUserCaseRole);
             log.info("Intervener sourceDocumentList {} caseId {}", sourceDocumentList, caseId);

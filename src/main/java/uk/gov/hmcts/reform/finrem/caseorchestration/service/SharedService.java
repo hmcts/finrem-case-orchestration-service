@@ -77,7 +77,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 
 public interface SharedService {
 
-    default boolean getIntervenerRoles(String role) {
+    default boolean isIntervenerRole(String role) {
         return role.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
             || role.equals(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
             || role.equals(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
