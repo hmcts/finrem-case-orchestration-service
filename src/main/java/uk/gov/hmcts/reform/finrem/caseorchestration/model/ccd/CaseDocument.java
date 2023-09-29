@@ -22,4 +22,6 @@ public class CaseDocument {
     private String documentFilename;
     @JsonProperty("document_binary_url")
     private String documentBinaryUrl;
+    @JsonProperty("category_id")
+    private String categoryId;
 }
