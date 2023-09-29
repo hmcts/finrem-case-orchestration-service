@@ -66,7 +66,7 @@ public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfo
             updateFrcInfoLetterDetailsCaptor.capture(),
             eq(LIT_DOC_TEMPLATE),
             eq(LIT_DOC_FILENAME), eq("1234")))
-            .thenReturn(new CaseDocument(APP_LITIGANT_URL, LIT_DOC_FILENAME, null));
+            .thenReturn(new CaseDocument(APP_LITIGANT_URL, LIT_DOC_FILENAME, null, ""));
         when(updateFrcInfoLetterDetailsGenerator.generate(any(), any(), any())).thenReturn(updateFrcInfoLetterDetails);
     }
 
@@ -79,7 +79,7 @@ public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfo
             updateFrcInfoLetterDetailsCaptor.capture(),
             eq(SOL_DOC_TEMPLATE),
             eq(SOL_DOC_FILENAME), eq("1234")))
-            .thenReturn(new CaseDocument(APP_SOLICITOR_URL, SOL_DOC_FILENAME, null));
+            .thenReturn(new CaseDocument(APP_SOLICITOR_URL, SOL_DOC_FILENAME, null, ""));
         when(updateFrcInfoLetterDetailsGenerator.generate(any(), any(), any())).thenReturn(updateFrcInfoLetterDetails);
     }
 
