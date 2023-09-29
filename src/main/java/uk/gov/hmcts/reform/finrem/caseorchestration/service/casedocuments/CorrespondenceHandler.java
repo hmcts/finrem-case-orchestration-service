@@ -26,6 +26,6 @@ public class CorrespondenceHandler extends PartyDocumentsHandler {
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         return DocumentCategory.CORRESPONDENCE;
-//        TODO - Check if this is correct category (Looks like it from name of Correspondence and category name)
+        //TODO - Check if this is correct category (Looks like it from name of Correspondence and category name)
     }
 }

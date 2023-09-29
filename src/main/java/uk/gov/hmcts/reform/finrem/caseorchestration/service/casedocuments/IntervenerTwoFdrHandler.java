@@ -24,6 +24,6 @@ public class IntervenerTwoFdrHandler extends PartyDocumentsHandler {
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
-//        TODO Check that this is correct category
+        //TODO Check that this is correct category
     }
 }

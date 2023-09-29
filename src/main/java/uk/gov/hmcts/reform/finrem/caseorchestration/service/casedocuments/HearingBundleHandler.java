@@ -9,8 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 
 public class HearingBundleHandler extends PartyDocumentsHandler {
 
-    public HearingBundleHandler(CaseDocumentCollectionType caseDocumentCollectionType,
-                                CaseDocumentParty party) {
+    public HearingBundleHandler(CaseDocumentCollectionType caseDocumentCollectionType, CaseDocumentParty party) {
         super(caseDocumentCollectionType, party);
     }
 
@@ -18,13 +17,12 @@ public class HearingBundleHandler extends PartyDocumentsHandler {
     protected boolean canHandleDocument(UploadCaseDocument uploadCaseDocument) {
 
         CaseDocumentType caseDocumentType = uploadCaseDocument.getCaseDocumentType();
-        return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.NO)
-            && caseDocumentType.equals(CaseDocumentType.TRIAL_BUNDLE);
+        return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.NO) && caseDocumentType.equals(CaseDocumentType.TRIAL_BUNDLE);
     }
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         return DocumentCategory.HEARING_BUNDLE;
-//        TODO - Check if this is correct category (Looks like it from name of Handler and category name)
+        //TODO - Check if this is correct category (Looks like it from name of Handler and category name)
     }
 }

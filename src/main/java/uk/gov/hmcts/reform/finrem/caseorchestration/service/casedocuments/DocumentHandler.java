@@ -49,11 +49,11 @@ public abstract class DocumentHandler {
 
         for (UploadCaseDocumentCollection uploadCaseDocumentCollection : uploadedCollectionForType) {
             uploadCaseDocumentCollection.getUploadCaseDocument()
-                .getCaseDocuments().
-                setCategoryId(getDocumentCategoryFromDocumentType(
-                    uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType()
-                ).getDocumentCategoryId()
-            );
+                .getCaseDocuments()
+                .setCategoryId(getDocumentCategoryFromDocumentType(
+                        uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType()
+                    ).getDocumentCategoryId()
+                );
         }
 
         originalCollectionForType.addAll(uploadedCollectionForType);

@@ -20,7 +20,7 @@ public class RespondentOtherDocumentsHandler extends OtherDocumentsHandler {
         switch (caseDocumentType) {
             case OTHER, FORM_F, CARE_PLAN, PENSION_PLAN -> {
                 return DocumentCategory.RESPONDENT_DOCUMENTS;
-//                TODO: Check category is correct for Form F, Care Plan & Pension Plan
+                //TODO: Check category is correct for Form F, Care Plan & Pension Plan
             }
             case FORM_B -> {
                 return DocumentCategory.APPLICATIONS;
