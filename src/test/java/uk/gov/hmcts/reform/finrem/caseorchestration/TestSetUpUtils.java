@@ -179,6 +179,7 @@ public class TestSetUpUtils {
         caseDocument.setDocumentUrl(DOC_URL);
         caseDocument.setDocumentFilename(FILE_NAME);
         caseDocument.setDocumentBinaryUrl(BINARY_URL);
+        caseDocument.setCategoryId("");
 
         return caseDocument;
     }
