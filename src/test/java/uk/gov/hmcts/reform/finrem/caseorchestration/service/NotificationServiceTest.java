@@ -189,7 +189,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
             .thenReturn(notificationRequest);
         when(finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(FinremCaseDetails.class),
-                any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
+            any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
         when(evidenceManagementDownloadService.downloadInResponseEntity(anyString(), anyString()))
             .thenReturn(ResponseEntity.status(HttpStatus.OK).body(new ByteArrayResource(new byte[2048])));
     }
@@ -1030,6 +1030,17 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void sendGeneralApplicationRejectionEmailIntervenerSolicitor() {
+        finremCallbackRequest = getContestedNewCallbackRequest();
+        IntervenerWrapper intervenerOneWrapper = IntervenerOneWrapper.builder().build();
+        notificationService.sendGeneralApplicationRejectionEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            intervenerOneWrapper);
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
+            SolicitorCaseDataKeysWrapper.builder().build());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_REJECT_GENERAL_APPLICATION);
+    }
+
+    @Test
     public void shouldEmailApplicantSolicitorWhenApplicantSolicitorIsRegisteredAndAcceptingEmails() {
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorEmailPopulated(any())).thenReturn(true);
@@ -1515,37 +1526,6 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldReturnCaseDataKeysForIntervenersSolicitor() {
-        SolicitorCaseDataKeysWrapper intervener1DataKey = notificationService
-            .getCaseDataKeysForIntervenerSolicitor(IntervenerOneWrapper.builder().build());
-
-        assertEquals("intervener1SolEmail", intervener1DataKey.getSolicitorEmailKey());
-        assertEquals("intervener1SolName", intervener1DataKey.getSolicitorNameKey());
-        assertEquals("intervener1SolicitorReference", intervener1DataKey.getSolicitorReferenceKey());
-
-        SolicitorCaseDataKeysWrapper intervener2DataKey = notificationService
-            .getCaseDataKeysForIntervenerSolicitor(IntervenerTwoWrapper.builder().build());
-
-        assertEquals("intervener2SolEmail", intervener2DataKey.getSolicitorEmailKey());
-        assertEquals("intervener2SolName", intervener2DataKey.getSolicitorNameKey());
-        assertEquals("intervener2SolicitorReference", intervener2DataKey.getSolicitorReferenceKey());
-
-        SolicitorCaseDataKeysWrapper intervener3DataKey = notificationService
-            .getCaseDataKeysForIntervenerSolicitor(IntervenerThreeWrapper.builder().build());
-
-        assertEquals("intervener3SolEmail", intervener3DataKey.getSolicitorEmailKey());
-        assertEquals("intervener3SolName", intervener3DataKey.getSolicitorNameKey());
-        assertEquals("intervener3SolicitorReference", intervener3DataKey.getSolicitorReferenceKey());
-
-        SolicitorCaseDataKeysWrapper intervener4DataKey = notificationService
-            .getCaseDataKeysForIntervenerSolicitor(IntervenerFourWrapper.builder().build());
-
-        assertEquals("intervener4SolEmail", intervener4DataKey.getSolicitorEmailKey());
-        assertEquals("intervener4SolName", intervener4DataKey.getSolicitorNameKey());
-        assertEquals("intervener4SolicitorReference", intervener4DataKey.getSolicitorReferenceKey());
-    }
-
-    @Test
-    public void shouldReturnFinremCaseDataKeysForIntervenersSolicitor() {
         FinremCaseData caseData = FinremCaseData.builder()
             .intervenerOneWrapper(IntervenerOneWrapper.builder()
                 .intervenerSolName("1Name")
@@ -1565,28 +1545,28 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .intervenerSolicitorReference("4Ref").build())
             .build();
 
-        SolicitorCaseDataKeysWrapper oneDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+        SolicitorCaseDataKeysWrapper oneDataKey = notificationService.getCaseDataKeysForIntervenerSolicitor(caseData
             .getInterveners().get(0));
 
         assertEquals("1Email", oneDataKey.getSolicitorEmailKey());
         assertEquals("1Name", oneDataKey.getSolicitorNameKey());
         assertEquals("1Ref", oneDataKey.getSolicitorReferenceKey());
 
-        SolicitorCaseDataKeysWrapper twoDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+        SolicitorCaseDataKeysWrapper twoDataKey = notificationService.getCaseDataKeysForIntervenerSolicitor(caseData
             .getInterveners().get(1));
 
         assertEquals("2Email", twoDataKey.getSolicitorEmailKey());
         assertEquals("2Name", twoDataKey.getSolicitorNameKey());
         assertEquals("2Ref", twoDataKey.getSolicitorReferenceKey());
 
-        SolicitorCaseDataKeysWrapper threeDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+        SolicitorCaseDataKeysWrapper threeDataKey = notificationService.getCaseDataKeysForIntervenerSolicitor(caseData
             .getInterveners().get(2));
 
         assertEquals("3Email", threeDataKey.getSolicitorEmailKey());
         assertEquals("3Name", threeDataKey.getSolicitorNameKey());
         assertEquals("3Ref", threeDataKey.getSolicitorReferenceKey());
 
-        SolicitorCaseDataKeysWrapper fourDataKey = notificationService.getFinremCaseDataKeysForIntervenerSolicitor(caseData
+        SolicitorCaseDataKeysWrapper fourDataKey = notificationService.getCaseDataKeysForIntervenerSolicitor(caseData
             .getInterveners().get(3));
 
         assertEquals("4Email", fourDataKey.getSolicitorEmailKey());

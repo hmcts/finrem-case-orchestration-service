@@ -27,6 +27,11 @@ public class FinremAssignToJudgeConsentInContestedCorresponder extends FinremSin
     }
 
     @Override
+    protected boolean shouldSendIntervenerLetter(IntervenerWrapper intervenerWrapper) {
+        return false;
+    }
+
+    @Override
     public CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                            DocumentHelper.PaperNotificationRecipient recipient) {
         return assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(

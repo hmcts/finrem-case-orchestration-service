@@ -196,7 +196,7 @@ class FinremCaseDetailMapperTest {
         assertNotNull(finremCaseDetails);
         assertEquals("Test", finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName());
     }
-    
+
     @Test
     void givenValidCallbackRequest_thenSuccessfullyMapped() {
         caseDetails = buildCaseDetailsFromJson(REFUSAL_ORDER_CALLBACK_REQUEST);
@@ -407,7 +407,7 @@ class FinremCaseDetailMapperTest {
             PeriodicalPaymentSubstitute.PENSION_SHARING_ORDER
         )));
         assertEquals(PensionProvider.THE_COURT, caseData.getServePensionProviderResponsibility());
-        assertEquals(EvidenceParty.CASE, caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom());
+        assertEquals(EvidenceParty.CASE.getValue(), caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom());
         assertEquals(JudgeType.DEPUTY_DISTRICT_JUDGE,
             caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsJudgeType());
         assertEquals(GeneralLetterAddressToType.APPLICANT_SOLICITOR, caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo());

@@ -9,8 +9,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.generalapplication.GeneralApplicationRejectionLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.time.LocalDate;
@@ -56,10 +58,15 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
     @Mock
     CaseDataService caseDataService;
 
+    @Mock
+    LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper;
+
     @InjectMocks
     GeneralApplicationRejectionLetterGenerator generalApplicationRejectionLetterGenerator;
 
     private CaseDetails caseDetails;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
     public void setUp() {
@@ -96,15 +103,18 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         when(caseDataService.buildFullApplicantName(caseDetails)).thenReturn("Poor Guy");
         when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("Contested Respondent");
 
+
         generalApplicationRejectionLetterGenerator =
-            new GeneralApplicationRejectionLetterGenerator(new ObjectMapper(), caseDataService, documentHelper);
+            new GeneralApplicationRejectionLetterGenerator(new ObjectMapper(), caseDataService, documentHelper, letterAddresseeGeneratorMapper);
     }
 
     @Test
     public void givenApplicantRecipient_whenGenerateGeneralApplicationRejectionLetterDetails_thenGenerateCorrectDetails() {
         caseDetails.getData().put(APPLICANT_REPRESENTED, NO_VALUE);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn("50 Applicant Street");
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
+            AddresseeDetails.builder().addresseeName("Poor Guy")
+                .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(APPLICANT_ADDRESS), Map.class)).build());
 
         GeneralApplicationRejectionLetterDetails letterDetails = generalApplicationRejectionLetterGenerator
             .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT, null);
@@ -127,7 +137,9 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         caseDetails.getData().put(CONTESTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
 
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn("50 Applicant Solicitor Street");
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
+            AddresseeDetails.builder().addresseeName(TEST_SOLICITOR_NAME)
+                .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(CONTESTED_SOLICITOR_ADDRESS), Map.class)).build());
 
         GeneralApplicationRejectionLetterDetails letterDetails = generalApplicationRejectionLetterGenerator
             .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT, null);
@@ -142,7 +154,9 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         caseDetails.getData().put(CONTESTED_RESPONDENT_REPRESENTED, NO_VALUE);
 
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn("50 Respondent Street");
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+        when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(
+            AddresseeDetails.builder().addresseeName("Contested Respondent")
+                .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(RESPONDENT_ADDRESS), Map.class)).build());
 
         GeneralApplicationRejectionLetterDetails letterDetails = generalApplicationRejectionLetterGenerator
             .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT, null);
@@ -158,7 +172,9 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         caseDetails.getData().put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
 
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn("50 Respondent Solicitor Street");
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(
+            AddresseeDetails.builder().addresseeName(TEST_RESP_SOLICITOR_NAME)
+                .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(RESP_SOLICITOR_ADDRESS), Map.class)).build());
 
         GeneralApplicationRejectionLetterDetails letterDetails = generalApplicationRejectionLetterGenerator
             .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT, null);
