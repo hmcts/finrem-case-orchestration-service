@@ -17,6 +17,7 @@ import java.util.Optional;
 @Slf4j
 public abstract class SendOrderPartyDocumentHandler {
     private final String caseRoleCode;
+    protected final String additionalHearingFileName = "AdditionalHearingDocument.pdf";
 
     protected SendOrderPartyDocumentHandler(String caseRoleCode) {
         this.caseRoleCode = caseRoleCode;
@@ -32,7 +33,11 @@ public abstract class SendOrderPartyDocumentHandler {
             if (orderColl.isEmpty()) {
                 addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
             }
-            orderDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
+            orderDocumentPack.forEach(document -> {
+                if (shouldAddDocumentToOrderColl(caseData, document, orderColl)) {
+                    orderColl.add(getApprovedOrderCollection(document));
+                }
+            });
             addOrdersToPartyCollection(caseData, orderColl);
         }
     }
@@ -65,6 +70,10 @@ public abstract class SendOrderPartyDocumentHandler {
     protected abstract void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
 
     protected abstract void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
+
+    protected abstract boolean shouldAddDocumentToOrderColl(FinremCaseData caseData,
+                                                            CaseDocument document,
+                                                            List<ApprovedOrderCollection> orderColl);
 
     protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {
         return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
