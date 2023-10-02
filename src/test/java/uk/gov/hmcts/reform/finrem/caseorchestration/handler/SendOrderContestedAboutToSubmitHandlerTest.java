@@ -329,14 +329,19 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
         String additionalHearingDocumentUrl = "http://dm-store:8080/documents/123456-654321-123456-654321";
-        String coverLetterUrl = "http://dm-store:8080/documents/129456-654321-123456-654321";
+
         String additionalHearingDocumentFilename = "AdditionalHearingDocument.pdf";
-        String coverLetterDocumentFilename = "contestedOrderApprovedCoverLetter.pdf";
+
         String previousOrderDocumentUrl = "http://dm-store:8080/documents/929756-654321-123456-654381";
         String previousOrderDocumentFilename = "PreviousOrder.pdf";
         data.setPartiesOnCase(getParties());
-        ApproveOrder additionalHearingOrder = ApproveOrder.builder().orderReceivedAt(LocalDateTime.of(LocalDate.of(2019, 12, 31), LocalTime.of(6, 30, 45)))
-            .caseDocument(caseDocument(additionalHearingDocumentUrl, additionalHearingDocumentFilename, additionalHearingDocumentUrl + "/binary")).build();
+        ApproveOrder additionalHearingOrder = ApproveOrder.builder().orderReceivedAt(
+            LocalDateTime.of(LocalDate.of(2019, 12, 31),
+            LocalTime.of(6, 30, 45)))
+            .caseDocument(caseDocument(additionalHearingDocumentUrl,
+                                       additionalHearingDocumentFilename,
+                              additionalHearingDocumentUrl + "/binary"))
+            .build();
         ApproveOrder previousOrder = ApproveOrder.builder().orderReceivedAt(LocalDateTime.now())
             .caseDocument(caseDocument(previousOrderDocumentUrl, previousOrderDocumentFilename, previousOrderDocumentUrl + "/binary")).build();
         ApproveOrdersHolder approveOrdersHolder = ApproveOrdersHolder.builder().orderReceivedAt(LocalDateTime.now())
@@ -351,11 +356,13 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         mutableList.add(existingCollection1);
         mutableList.add(existingCollection2);
         data.setIntv1OrderCollections(mutableList);
+        String coverLetterDocumentFilename = "contestedOrderApprovedCoverLetter.pdf";
+        String coverLetterUrl = "http://dm-store:8080/documents/129456-654321-123456-654321";
         data.setOrderApprovedCoverLetter(caseDocument(coverLetterUrl, coverLetterDocumentFilename, "http://dm-store:8080/documents/129456-654321-123456-654321/binary"));
 
         DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder().value(List.of(DynamicMultiSelectListElement.builder()
-        .code(uuid).label("app_docs.pdf").build())).listItems(List.of(DynamicMultiSelectListElement.builder()
-        .code(uuid).label("app_docs.pdf").build())).build();
+            .code(uuid).label("app_docs.pdf").build())).listItems(List.of(DynamicMultiSelectListElement.builder()
+            .code(uuid).label("app_docs.pdf").build())).build();
 
         data.setOrdersToShare(selectedDocs);
 
@@ -363,8 +370,13 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.hasAnotherHearing(any(FinremCaseData.class))).thenReturn(true);
-        when(documentHelper.getLatestAdditionalHearingDocument(any(FinremCaseData.class))).thenReturn(Optional.of(Optional.of(caseDocument(additionalHearingDocumentUrl, additionalHearingDocumentFilename, additionalHearingDocumentUrl + "/binary")).orElse(null)));
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
+        when(documentHelper.getLatestAdditionalHearingDocument(any(FinremCaseData.class)))
+                .thenReturn(Optional.of(Optional.of(caseDocument(additionalHearingDocumentUrl,
+                            additionalHearingDocumentFilename,
+                            additionalHearingDocumentUrl + "/binary"))
+                .orElse(null)));
+        when(genericDocumentService.stampDocument(
+                any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
