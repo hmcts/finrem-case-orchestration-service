@@ -11,6 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrdersHolder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -29,9 +32,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderI
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerTwoDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderRespondentDocumentHandler;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.List.of;
@@ -315,6 +321,68 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
 
+    }
+
+    @Test
+    void givenContestedCase_whenAdditionalHearingDocumentAlreadyDisplayed_thenDoesNotAddAdditionalHearingDocumentToNewColl() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        String additionalHearingDocumentUrl = "http://dm-store:8080/documents/123456-654321-123456-654321";
+        String coverLetterUrl = "http://dm-store:8080/documents/129456-654321-123456-654321";
+        String additionalHearingDocumentFilename = "AdditionalHearingDocument.pdf";
+        String coverLetterDocumentFilename = "contestedOrderApprovedCoverLetter.pdf";
+        String previousOrderDocumentUrl = "http://dm-store:8080/documents/929756-654321-123456-654381";
+        String previousOrderDocumentFilename = "PreviousOrder.pdf";
+        data.setPartiesOnCase(getParties());
+        ApproveOrder additionalHearingOrder = ApproveOrder.builder().orderReceivedAt(LocalDateTime.of(LocalDate.of(2019, 12, 31), LocalTime.of(6, 30, 45)))
+            .caseDocument(caseDocument(additionalHearingDocumentUrl, additionalHearingDocumentFilename, additionalHearingDocumentUrl + "/binary")).build();
+        ApproveOrder previousOrder = ApproveOrder.builder().orderReceivedAt(LocalDateTime.now())
+            .caseDocument(caseDocument(previousOrderDocumentUrl, previousOrderDocumentFilename, previousOrderDocumentUrl + "/binary")).build();
+        ApproveOrdersHolder approveOrdersHolder = ApproveOrdersHolder.builder().orderReceivedAt(LocalDateTime.now())
+            .approveOrders(of(ApprovedOrderCollection.builder().value(additionalHearingOrder).build())
+            ).build();
+        ApproveOrdersHolder previousOrdersHolder = ApproveOrdersHolder.builder().orderReceivedAt(LocalDateTime.now().minusDays(2))
+            .approveOrders(of(ApprovedOrderCollection.builder().value(previousOrder).build())
+            ).build();
+        ApprovedOrderConsolidateCollection existingCollection1 = ApprovedOrderConsolidateCollection.builder().value(approveOrdersHolder).build();
+        ApprovedOrderConsolidateCollection existingCollection2 = ApprovedOrderConsolidateCollection.builder().value(previousOrdersHolder).build();
+        List<ApprovedOrderConsolidateCollection> mutableList = new ArrayList<>();
+        mutableList.add(existingCollection1);
+        mutableList.add(existingCollection2);
+        data.setIntv1OrderCollections(mutableList);
+        data.setOrderApprovedCoverLetter(caseDocument(coverLetterUrl, coverLetterDocumentFilename, "http://dm-store:8080/documents/129456-654321-123456-654321/binary"));
+
+        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder().value(List.of(DynamicMultiSelectListElement.builder()
+        .code(uuid).label("app_docs.pdf").build())).listItems(List.of(DynamicMultiSelectListElement.builder()
+        .code(uuid).label("app_docs.pdf").build())).build();
+
+        data.setOrdersToShare(selectedDocs);
+
+        when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
+        when(documentHelper.hasAnotherHearing(any(FinremCaseData.class))).thenReturn(true);
+        when(documentHelper.getLatestAdditionalHearingDocument(any(FinremCaseData.class))).thenReturn(Optional.of(Optional.of(caseDocument(additionalHearingDocumentUrl, additionalHearingDocumentFilename, additionalHearingDocumentUrl + "/binary")).orElse(null)));
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
+            .thenReturn(caseDocument());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
+            = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+        assertEquals(1, caseData.getFinalOrderCollection().size());
+        assertNull(caseData.getIntv1OrderCollection());
+        assertEquals(3, caseData.getIntv1OrderCollections().size());
+        assertThat(caseData.getIntv1OrderCollections().get(0).getValue().getApproveOrders().size(), is(2));
+        assertThat(caseData.getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(0)
+                .getValue().getCaseDocument().getDocumentFilename(), is("app_docs.pdf"));
+        assertThat(caseData.getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(1)
+                .getValue().getCaseDocument().getDocumentFilename(), is("contestedOrderApprovedCoverLetter.pdf"));
+        assertThat(caseData.getIntv1OrderCollections().get(1).getValue().getApproveOrders().get(0)
+                .getValue().getCaseDocument().getDocumentFilename(), is("AdditionalHearingDocument.pdf"));
+        assertThat(caseData.getIntv1OrderCollections().get(2).getValue().getApproveOrders().get(0)
+                .getValue().getCaseDocument().getDocumentFilename(), is("PreviousOrder.pdf"));
     }
 
     private DynamicMultiSelectList getParties() {
