@@ -84,27 +84,31 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
         List<UploadCaseDocumentCollection> manageCaseDocumentCollection = caseData.getManageCaseDocumentCollection();
 
         if (StringUtils.isBlank(caseData.getIntervenerOneWrapper().getIntervenerName())
-            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageCaseDocumentCollection)) {
+            && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageCaseDocumentCollection)) {
             warnings.add(INTERVENER_1 + CHOOSE_A_DIFFERENT_PARTY);
         }
         if (StringUtils.isBlank(caseData.getIntervenerTwoWrapper().getIntervenerName())
-            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_TWO, manageCaseDocumentCollection)) {
+            && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_TWO, manageCaseDocumentCollection)) {
             warnings.add(INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY);
         }
         if (StringUtils.isBlank(caseData.getIntervenerThreeWrapper().getIntervenerName())
-            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_THREE, manageCaseDocumentCollection)) {
+            && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_THREE, manageCaseDocumentCollection)) {
             warnings.add(INTERVENER_3 + CHOOSE_A_DIFFERENT_PARTY);
         }
         if (StringUtils.isBlank(caseData.getIntervenerFourWrapper().getIntervenerName())
-            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_FOUR, manageCaseDocumentCollection)) {
+            && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_FOUR, manageCaseDocumentCollection)) {
             warnings.add(INTERVENER_4 + CHOOSE_A_DIFFERENT_PARTY);
         }
     }
 
-    private boolean isIntervernerPartySelected(CaseDocumentParty caseDocumentParty,
-                                               List<UploadCaseDocumentCollection> manageCaseDocumentCollection) {
-        return manageCaseDocumentCollection.stream().anyMatch(documentCollection ->
-            caseDocumentParty.equals(documentCollection.getUploadCaseDocument().getCaseDocumentParty()));
+    private boolean isIntervenerPartySelected(CaseDocumentParty caseDocumentParty,
+                                              List<UploadCaseDocumentCollection> manageCaseDocumentCollection) {
+        return manageCaseDocumentCollection.stream().anyMatch(documentCollection -> {
+            if (documentCollection.getUploadCaseDocument().getCaseDocumentParty() != null) {
+                return caseDocumentParty.equals(documentCollection.getUploadCaseDocument().getCaseDocumentParty());
+            }
+            return false;
+        });
     }
 
     private void deleteRemovedDocuments(FinremCaseData caseData,
