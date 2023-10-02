@@ -81,6 +81,7 @@ public class AdditionalHearingDocumentService {
     }
 
     public void sendAdditionalHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
+        log.info("Reached sendAdditionalHearingDocuments method on case " + caseDetails.getId());
         finremAdditionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 

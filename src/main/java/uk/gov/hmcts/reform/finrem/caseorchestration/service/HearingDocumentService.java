@@ -126,6 +126,7 @@ public class HearingDocumentService {
     }
 
     public void sendInitialHearingCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+        log.info("Reached sendInitialHearingCorrespondence method on case " + caseDetails.getId());
         finremFormCandGCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 

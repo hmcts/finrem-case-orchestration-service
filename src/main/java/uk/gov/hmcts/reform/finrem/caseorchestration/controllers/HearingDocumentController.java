@@ -132,6 +132,7 @@ public class HearingDocumentController extends BaseController {
             }
         }
         if (callbackRequest.getEventId().equals(EventType.LIST_FOR_HEARING.getCcdType())) {
+            log.info("Calling hearingDocumentService.sendListForHearingCorrespondence method on case " + caseDetails.getId());
             errors = hearingDocumentService.sendListForHearingCorrespondence(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
             if (!errors.isEmpty()) {
                 return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
