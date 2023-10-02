@@ -17,7 +17,7 @@ import java.util.Optional;
 @Slf4j
 public abstract class SendOrderPartyDocumentHandler {
     private final String caseRoleCode;
-    protected static final String additionalHearingFileName = "AdditionalHearingDocument.pdf";
+    protected static final String ADDITIONAL_HEARING_FILE_NAME = "AdditionalHearingDocument.pdf";
 
     protected SendOrderPartyDocumentHandler(String caseRoleCode) {
         this.caseRoleCode = caseRoleCode;

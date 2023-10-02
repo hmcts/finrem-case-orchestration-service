@@ -46,7 +46,7 @@ public class SendOrderIntervenerFourDocumentHandler extends SendOrderPartyDocume
             return true;
         }
         return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order ->
-            order.getValue().getCaseDocument().getDocumentFilename().equals(additionalHearingFileName)
+            order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
                 && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl())
         ));
     }
