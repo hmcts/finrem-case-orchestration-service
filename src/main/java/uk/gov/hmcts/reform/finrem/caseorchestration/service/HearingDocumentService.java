@@ -126,7 +126,6 @@ public class HearingDocumentService {
     }
 
     public void sendInitialHearingCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        log.info("Reached sendInitialHearingCorrespondence method on case " + caseDetails.getId());
         finremFormCandGCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
@@ -162,9 +161,6 @@ public class HearingDocumentService {
             this.sendInitialHearingCorrespondence(finremCaseDetails, authorisationToken);
             log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
         }
-        CaseDetails caseDetailsCopy = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-        caseDetails.getData().putAll(caseDetailsCopy.getData());
-        log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
         return errors;
     }
 

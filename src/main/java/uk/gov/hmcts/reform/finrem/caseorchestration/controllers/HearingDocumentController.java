@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
@@ -131,15 +130,7 @@ public class HearingDocumentController extends BaseController {
                 caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES, coverSheet);
             }
         }
-        if (callbackRequest.getEventId().equals(EventType.LIST_FOR_HEARING.getCcdType())) {
-            log.info("Calling hearingDocumentService.sendListForHearingCorrespondence method on case " + caseDetails.getId());
-            errors = hearingDocumentService.sendListForHearingCorrespondence(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
-            if (!errors.isEmpty()) {
-                return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(errors)
-                    .build());
-            }
-        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
 
