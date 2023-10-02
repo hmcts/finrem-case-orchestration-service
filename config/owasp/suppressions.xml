@@ -215,13 +215,6 @@
    file name: spring-plugin-metadata-1.2.0.RELEASE.jar
    ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework\.plugin/spring\-plugin\-metadata@.*$</packageUrl>
-        <cpe>cpe:/a:spring:spring</cpe>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: spring-plugin-metadata-1.2.0.RELEASE.jar
-   ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.springframework\.plugin/spring\-plugin\-metadata@.*$</packageUrl>
         <cpe>cpe:/a:vmware:spring</cpe>
     </suppress>
 </suppressions>
