@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
@@ -37,17 +36,8 @@ public class SendOrderIntervenerTwoDocumentHandler extends SendOrderPartyDocumen
         caseData.setIntv2OrderCollection(null);
     }
 
-    protected boolean shouldAddDocumentToOrderColl(FinremCaseData caseData,
-                                                   CaseDocument document,
-                                                   List<ApprovedOrderCollection> orderColl) {
-        List<ApprovedOrderConsolidateCollection> existingCollection =
-            Optional.ofNullable(caseData.getIntv2OrderCollections()).orElse(new ArrayList<>());
-        if (existingCollection.isEmpty()) {
-            return true;
-        }
-        return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order ->
-            order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
-                && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl())
-        ));
+    protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getIntv2OrderCollections())
+                .orElse(new ArrayList<>());
     }
 }

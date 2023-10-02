@@ -34,7 +34,7 @@ public abstract class SendOrderPartyDocumentHandler {
                 addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
             }
             orderDocumentPack.forEach(document -> {
-                if (shouldAddDocumentToOrderColl(caseData, document, orderColl)) {
+                if (shouldAddDocumentToOrderColl(document, getExistingConsolidateCollection(caseData))) {
                     orderColl.add(getApprovedOrderCollection(document));
                 }
             });
@@ -65,18 +65,29 @@ public abstract class SendOrderPartyDocumentHandler {
         }
     }
 
+    protected boolean shouldAddDocumentToOrderColl(CaseDocument document,
+                                                   List<ApprovedOrderConsolidateCollection> orderCollForRole) {
+        List<ApprovedOrderConsolidateCollection> existingCollection = Optional.ofNullable(orderCollForRole)
+                .orElse(new ArrayList<>());
+        if (existingCollection.isEmpty()) {
+            return true;
+        }
+        return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order ->
+                order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
+                        && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl())
+        ));
+    }
+
+    protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {
+        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
+                .approveOrders(orderCollection).orderReceivedAt(LocalDateTime.now()).build()).build();
+    }
+
     protected abstract List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData);
 
     protected abstract void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
 
     protected abstract void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
 
-    protected abstract boolean shouldAddDocumentToOrderColl(FinremCaseData caseData,
-                                                            CaseDocument document,
-                                                            List<ApprovedOrderCollection> orderColl);
-
-    protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {
-        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
-            .approveOrders(orderCollection).orderReceivedAt(LocalDateTime.now()).build()).build();
-    }
+    protected abstract List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData);
 }
