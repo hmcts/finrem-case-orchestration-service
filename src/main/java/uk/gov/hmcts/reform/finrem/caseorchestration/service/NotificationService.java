@@ -1615,8 +1615,8 @@ public class NotificationService {
     public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerSolicitor(IntervenerWrapper intervenerWrapper) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(intervenerWrapper.getIntervenerSolEmail())
-            .solicitorNameKey(Objects.toString(intervenerWrapper.getIntervenerSolName(), intervenerWrapper.getIntervenerSolicitorFirm()))
-            .solicitorReferenceKey(intervenerWrapper.getIntervenerSolicitorReference())
+            .solicitorNameKey(nullToEmpty(Objects.toString(intervenerWrapper.getIntervenerSolName(), intervenerWrapper.getIntervenerSolicitorFirm())))
+            .solicitorReferenceKey(nullToEmpty(intervenerWrapper.getIntervenerSolicitorReference()))
             .build();
     }
 
