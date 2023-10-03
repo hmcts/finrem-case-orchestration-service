@@ -237,8 +237,8 @@ public class GeneralOrderService {
         }
 
         List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
-        Collections.reverse(hearingOrderDocuments);
         if (hearingOrderDocuments != null) {
+            Collections.reverse(hearingOrderDocuments);
             hearingOrderDocuments.forEach(obj -> dynamicListElements.add(partyService.getDynamicMultiSelectListElement(obj.getId(),
                 "Case documents tab [Approved Order]" + " - " + obj.getValue().getUploadDraftDocument().getDocumentFilename())));
         }
