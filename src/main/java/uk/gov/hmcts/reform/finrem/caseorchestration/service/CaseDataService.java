@@ -257,13 +257,40 @@ public class CaseDataService {
         return caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty();
     }
 
+    /**
+     * Please upgrade your code.
+     * This method will be removed in future versions.
+     * <p>Use @link isApplicantAddressConfidential(FinremCaseData caseData) instead </p>
+     *
+     * @return boolean to be returned
+     * @deprecated deprecated since 05-Sep-2023
+     */
+    @Deprecated(since = "05-september-2023")
+    @SuppressWarnings("java:S1133")
     public boolean isApplicantAddressConfidential(Map<String, Object> caseData) {
         return isAddressConfidential(caseData, APPLICANT_CONFIDENTIAL_ADDRESS);
     }
 
+    public boolean isApplicantAddressConfidential(FinremCaseData caseData) {
+        return caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent().isYes();
+    }
 
+    /**
+     * Please upgrade your code.
+     * This method will be removed in future versions.
+     * <p>Use @link isRespondentAddressConfidential(FinremCaseData caseData) instead </p>
+     *
+     * @return boolean to be returned
+     * @deprecated deprecated since 05-Sep-2023
+     */
+    @Deprecated(since = "05-september-2023")
+    @SuppressWarnings("java:S1133")
     public boolean isRespondentAddressConfidential(Map<String, Object> caseData) {
         return isAddressConfidential(caseData, RESPONDENT_CONFIDENTIAL_ADDRESS);
+    }
+
+    public boolean isRespondentAddressConfidential(FinremCaseData caseData) {
+        return caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant().isYes();
     }
 
     private boolean isAddressConfidential(Map<String, Object> caseData, String address) {

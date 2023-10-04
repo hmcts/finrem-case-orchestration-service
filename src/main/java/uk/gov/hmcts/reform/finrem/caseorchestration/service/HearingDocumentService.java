@@ -136,8 +136,8 @@ public class HearingDocumentService {
      * both non-fast track and fast track cases. Fast track cases will have
      * additionally form G populated.</p>
      */
-    public boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
-        return caseDetails.getData().containsKey(FORM_C);
+    public boolean alreadyHadFirstHearing(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getFormC() != null;
     }
 
     public List<String> sendListForHearingCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {

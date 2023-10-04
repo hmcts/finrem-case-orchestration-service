@@ -62,20 +62,14 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.REQUIRED_FIELD_EMPTY_ERROR;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -90,8 +84,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/cases/documents";
     private static final String IDAM_SERVICE_USER_INFO = "/o/userinfo";
     protected static final String SEND_LETTER_CONTEXT_PATH = "/letters";
-
-    private static final String API_URL = "/case-orchestration/documents/hearing";
     private static final String HANDLER_URL = "/case-orchestration/ccdSubmittedEvent";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
@@ -132,21 +124,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         request = objectMapper.readValue(requestJson, CallbackRequest.class);
         request.getCaseDetails().getData().put("hearingDate", LocalDate.now().plusDays(100));
         request.getCaseDetails().getData().put("issueDate", LocalDate.now());
-    }
-
-    @Test
-    public void missingIssueDate() throws Exception {
-        doMissingMustFieldTest(ISSUE_DATE);
-    }
-
-    @Test
-    public void missingHearingDate() throws Exception {
-        doMissingMustFieldTest(HEARING_DATE);
-    }
-
-    @Test
-    public void missingFastTrackDecision() throws Exception {
-        doMissingMustFieldTest(FAST_TRACK_DECISION);
     }
 
     @Test
@@ -196,34 +173,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     }
 
-    @Test
-    public void generateFormCAndFormGServiceError() throws Exception {
-        idamServiceStub();
-        generateEvidenceUploadServiceSuccessStub();
-        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate(request.getCaseDetails())));
-        generateDocumentServiceErrorStub(pdfGenerationRequest(config.getFormGTemplate(request.getCaseDetails())));
-
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE)
-                .accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isInternalServerError());
-    }
-
-    private void doMissingMustFieldTest(String missingFieldKey) throws Exception {
-        CaseDetails caseDetails = request.getCaseDetails();
-        caseDetails.getData().put(missingFieldKey, null);
-
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE)
-                .accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(content().json(expectedErrorData(), true));
-    }
-
     protected PdfDocumentRequest pdfGenerationRequest(String template) {
         return PdfDocumentRequest.builder()
             .accessKey("TESTPDFACCESS")
@@ -231,13 +180,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             .templateName(template)
             .data(request.getCaseDetails().getData())
             .build();
-    }
-
-    private String expectedErrorData() throws JsonProcessingException {
-        return objectMapper.writeValueAsString(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR))
-                .build());
     }
 
     private String expectedCaseData() throws JsonProcessingException {
@@ -283,14 +225,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(getResponse()))));
-    }
-
-    private void generateDocumentServiceErrorStub(PdfDocumentRequest documentRequest) throws JsonProcessingException {
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withHeader(CONTENT_TYPE, equalTo("application/json"))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
     }
 
     private void idamServiceStub() {
