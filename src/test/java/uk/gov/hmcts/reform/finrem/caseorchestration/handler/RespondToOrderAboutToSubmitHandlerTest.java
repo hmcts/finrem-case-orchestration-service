@@ -11,47 +11,37 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.InputStream;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
+public class RespondToOrderAboutToSubmitHandlerTest {
 
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
     private static final String APPROVE_ORDER_VALID_JSON = "/fixtures/pba-validate.json";
 
     @InjectMocks
-    private SolicitorCreateConsentedAboutToSubmitHandler handler;
+    private RespondToOrderAboutToSubmitHandler handler;
     @Mock
     private ConsentOrderService consentOrderService;
-    @Mock
-    private IdamService idamService;
-    @Mock
-    private CaseFlagsService caseFlagsService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void given_case_whenEvent_type_is_solicitorCreate_thenCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.SOLICITOR_CREATE),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.RESPOND_TO_ORDER),
             is(true));
     }
 
@@ -78,35 +68,16 @@ public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
 
 
     @Test
-    public void givenCase_whenRequestToUpdateLatestConsentOrderAndUserDoNotHaveAdminRole_thenHandlerCanHandle() {
+    public void givenCase_whenRequestToUpdateLatestConsentOrder_thenHandlerCanHandle() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp();
-        when(idamService.isUserRoleAdmin(any())).thenReturn(false);
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(response.getData().get(LATEST_CONSENT_ORDER));
-        assertEquals(YES_VALUE, response.getData().get(APPLICANT_REPRESENTED));
-        verify(idamService).isUserRoleAdmin(any());
         verify(consentOrderService).getLatestConsentOrderData(any(CallbackRequest.class));
-        verify(caseFlagsService).setCaseFlagInformation(callbackRequest.getCaseDetails());
     }
 
-
-    @Test
-    public void givenCase_whenRequestToUpdateLatestConsentOrderAndUserDoHaveAdminRole_thenHandlerCanHandle() {
-        when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(caseDocument());
-        CallbackRequest callbackRequest = doValidCaseDataSetUp();
-        when(idamService.isUserRoleAdmin(any())).thenReturn(true);
-
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertNotNull(response.getData().get(LATEST_CONSENT_ORDER));
-        assertNull(response.getData().get(APPLICANT_REPRESENTED));
-        verify(idamService).isUserRoleAdmin(any());
-        verify(consentOrderService).getLatestConsentOrderData(any(CallbackRequest.class));
-        verify(caseFlagsService).setCaseFlagInformation(callbackRequest.getCaseDetails());
-    }
 
     private CallbackRequest doValidCaseDataSetUp() {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(APPROVE_ORDER_VALID_JSON)) {
