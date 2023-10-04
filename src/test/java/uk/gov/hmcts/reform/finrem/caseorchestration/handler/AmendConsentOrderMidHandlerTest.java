@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
@@ -33,6 +34,8 @@ class AmendConsentOrderMidHandlerTest extends BaseHandlerTestSetup {
     private AmendConsentOrderMidHandler handler;
     @Mock
     private BulkPrintDocumentService service;
+    @Mock
+    private ConsentedApplicationHelper helper;
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
     private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
     private static final String FILE_NAME = "abc.pdf";
@@ -42,7 +45,7 @@ class AmendConsentOrderMidHandlerTest extends BaseHandlerTestSetup {
     @BeforeEach
     void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler = new AmendConsentOrderMidHandler(finremCaseDetailsMapper, service);
+        handler = new AmendConsentOrderMidHandler(finremCaseDetailsMapper, service, helper);
     }
 
     @Test
@@ -85,5 +88,6 @@ class AmendConsentOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         assertTrue(response.getErrors().isEmpty());
         verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(helper).setConsentVariationOrderLabelField(caseData);
     }
 }

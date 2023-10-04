@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
@@ -21,11 +22,14 @@ import java.util.List;
 public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
 
     private final BulkPrintDocumentService service;
+    private final ConsentedApplicationHelper helper;
 
     public AmendConsentOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                       BulkPrintDocumentService service) {
+                                       BulkPrintDocumentService service,
+                                       ConsentedApplicationHelper helper) {
         super(finremCaseDetailsMapper);
         this.service = service;
+        this.helper = helper;
     }
 
     @Override
@@ -43,6 +47,8 @@ public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
         log.info("Invoking contested event {} mid callback for case id: {}",
             EventType.AMEND_CONSENT_ORDER, caseId);
         FinremCaseData finremCaseData = caseDetails.getData();
+        helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
+
         List<String> errors = new ArrayList<>();
 
         List<AmendedConsentOrderCollection> amendedCollection = finremCaseData.getAmendedConsentOrderCollection();
