@@ -1,36 +1,31 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
-import java.io.InputStream;
-import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AmendConsentOrderAboutToSubmitHandlerTest {
-
+@ExtendWith(MockitoExtension.class)
+class AmendConsentOrderAboutToSubmitHandlerTest {
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
-    private static final String APPROVE_ORDER_VALID_JSON = "/fixtures/pba-validate.json";
 
     @InjectMocks
     private AmendConsentOrderAboutToSubmitHandler handler;
@@ -39,54 +34,44 @@ public class AmendConsentOrderAboutToSubmitHandlerTest {
     @Mock
     private CaseFlagsService caseFlagsService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @Test
-    public void given_case_whenEvent_type_is_amend_consent_order_thenCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.AMEND_CONSENT_ORDER),
-            is(true));
+    void given_case_whenEvent_type_is_amend_consent_order_thenCanHandle() {
+        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.AMEND_CONSENT_ORDER));
     }
 
     @Test
-    public void given_case_when_wrong_callback_then_case_can_not_handle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.SOLICITOR_CREATE),
-            is(false));
+    void given_case_when_wrong_callback_then_case_can_not_handle() {
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.AMEND_CONSENT_ORDER));
     }
 
     @Test
-    public void given_case_when_wrong_casetype_then_case_can_not_handle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
-            is(false));
+    void given_case_when_wrong_casetype_then_case_can_not_handle() {
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.AMEND_CONSENT_ORDER));
     }
 
     @Test
-    public void given_case_when_wrong_eventtype_then_case_can_not_handle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CLOSE),
-            is(false));
+    void given_case_when_wrong_eventtype_then_case_can_not_handle() {
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CLOSE));
     }
 
-
     @Test
-    public void givenCase_whenRequestToUpdateLatestConsentOrderAndUserDoNotHaveAdminRole_thenHandlerCanHandle() {
-        CallbackRequest callbackRequest = doValidCaseDataSetUp();
-        when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(caseDocument());
+    void givenCase_whenRequestToUpdateLatestConsentOrderAndUserDoNotHaveAdminRole_thenHandlerCanHandle() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(consentOrderService.getLatestConsentOrderData(any(FinremCallbackRequest.class))).thenReturn(caseDocument());
 
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertNotNull(response.getData().get(LATEST_CONSENT_ORDER));
-        verify(consentOrderService).getLatestConsentOrderData(any(CallbackRequest.class));
+        assertNotNull(response.getData().getLatestConsentOrder());
+        verify(consentOrderService).getLatestConsentOrderData(any(FinremCallbackRequest.class));
         verify(caseFlagsService).setCaseFlagInformation(callbackRequest.getCaseDetails());
     }
 
-    private CallbackRequest doValidCaseDataSetUp() {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(APPROVE_ORDER_VALID_JSON)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.AMEND_CONSENT_ORDER)
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
+                .data(FinremCaseData.builder().ccdCaseType(CONSENTED).build()).build())
+            .build();
     }
 }
