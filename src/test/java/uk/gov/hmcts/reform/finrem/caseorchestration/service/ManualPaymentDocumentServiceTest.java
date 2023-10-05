@@ -70,7 +70,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
         Addressee addressee = (Addressee) caseData.get(ADDRESSEE);
         assertThat(addressee.getName(), is("Applicant Solicitor Firm"));
-        assertThat(addressee.getFormattedAddress(), is("67 Pears Road\nNear Roundabout\nMiddlesex\nHounslow\nTW3 1SS"));
+        assertThat(addressee.getFormattedAddress(), is("67 Pears Road\nNear Roundabout\nOpposite Tesco\nMiddlesex\nHounslow\nTW3 1SS"));
 
         FrcCourtDetails frcCourtDetails = convertToCourtDetails(caseData.get("courtDetails"));
         assertThat(frcCourtDetails, is(notNullValue()));

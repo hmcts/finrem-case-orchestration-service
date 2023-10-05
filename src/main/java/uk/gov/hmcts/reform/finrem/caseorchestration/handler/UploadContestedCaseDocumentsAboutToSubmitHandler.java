@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
@@ -45,18 +44,15 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
     private final UploadedDocumentService uploadedDocumentHelper;
 
     private final CaseAssignedRoleService caseAssignedRoleService;
-    private FeatureToggleService featureToggleService;
 
     public UploadContestedCaseDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                             List<DocumentHandler> documentHandlers,
                                                             UploadedDocumentService uploadedDocumentHelper,
-                                                            CaseAssignedRoleService caseAssignedRoleService,
-                                                            FeatureToggleService featureToggleService) {
+                                                            CaseAssignedRoleService caseAssignedRoleService) {
         super(mapper);
         this.documentHandlers = documentHandlers;
         this.uploadedDocumentHelper = uploadedDocumentHelper;
         this.caseAssignedRoleService = caseAssignedRoleService;
-        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -79,12 +75,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
 
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
 
-        if (featureToggleService.isIntervenerEnabled()) {
-            CaseDocumentParty loggedInUserRole =
-                getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
+        CaseDocumentParty loggedInUserRole =
+            getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
 
-            managedCollections.forEach(doc -> doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole));
-        }
+        managedCollections.forEach(doc -> doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole));
+
 
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.addUploadedDocumentToDocumentCollectionType(callbackRequest, managedCollections));

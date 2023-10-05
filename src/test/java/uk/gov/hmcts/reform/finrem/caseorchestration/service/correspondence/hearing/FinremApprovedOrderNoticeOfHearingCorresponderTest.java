@@ -7,13 +7,10 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -35,8 +32,7 @@ public class FinremApprovedOrderNoticeOfHearingCorresponderTest extends FinremHe
 
     @Test
     public void shouldGetDocumentsToPrint() {
-        when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(anyList())).thenReturn(List.of(getBulkPrintDocument(), getBulkPrintDocument()));
-        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails);
+        List<CaseDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getCaseDocuments(caseDetails);
         assertEquals(2, documentsToPrint.size());
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,11 +35,16 @@ public class InterimHearingContestedAboutToStartHandlerTest extends BaseHandlerT
     private ObjectMapper objectMapper;
     private InterimHearingHelper interimHearingHelper;
 
+    @Mock
+    private PartyService partyService;
+
     public static final String AUTH_TOKEN = "tokien:)";
 
     private static final String CONTESTED_INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing.json";
     private static final String TEST_NEW_JSON = "/fixtures/contested/interim-hearing-with-no-existing-hearing.json";
     private static final String TEST_NEW_JSON_NO_UPLOADED_DOC = "/fixtures/contested/interim-hearing-nouploaded-doc.json";
+
+
 
 
     @Before
@@ -46,7 +53,7 @@ public class InterimHearingContestedAboutToStartHandlerTest extends BaseHandlerT
         interimHearingHelper = new InterimHearingHelper(objectMapper);
         InterimHearingItemMapper interimHearingItemMapper = new InterimHearingItemMapper(interimHearingHelper);
         interimHearingContestedAboutToStartHandler =
-            new InterimHearingContestedAboutToStartHandler(interimHearingHelper, interimHearingItemMapper);
+            new InterimHearingContestedAboutToStartHandler(interimHearingHelper, interimHearingItemMapper, partyService);
     }
 
     @Test

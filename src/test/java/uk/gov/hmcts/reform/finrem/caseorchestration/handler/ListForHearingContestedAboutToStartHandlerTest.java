@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -24,11 +26,13 @@ public class ListForHearingContestedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     private ListForHearingContestedAboutToStartHandler handler;
+    @Mock
+    private PartyService partyService;
 
     @Before
     public void setup() {
         handler = new ListForHearingContestedAboutToStartHandler(
-            new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())));
+            new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())), partyService);
     }
 
     @Test

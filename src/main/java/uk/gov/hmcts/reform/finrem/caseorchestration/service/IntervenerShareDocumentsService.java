@@ -68,7 +68,7 @@ public class IntervenerShareDocumentsService implements SharedService {
     public static final String FORM_E_EXHIBITS = "FORM_E_EXHIBITS";
     public static final String FORM_H = "FORM_H";
     public static final String HEARING_BUNDLES = "HEARING_BUNDLES";
-    public static final String OTHER = "OTHER";
+    public static final String OTHER = "Other";
     public static final String QUESTIONNAIRES_ANSWERS = "QUESTIONNAIRES_ANSWERS";
     public static final String STATEMENTS_EXHIBITS = "STATEMENTS_EXHIBITS";
 

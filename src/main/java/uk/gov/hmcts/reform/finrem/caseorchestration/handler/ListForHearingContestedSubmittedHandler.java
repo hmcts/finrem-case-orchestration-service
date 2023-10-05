@@ -1,26 +1,35 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-
-import java.util.Map;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class ListForHearingContestedSubmittedHandler implements CallbackHandler<Map<String, Object>> {
+public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandler {
 
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
+
+    private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+
+    public ListForHearingContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
+                                                   AdditionalHearingDocumentService additionalHearingDocumentService,
+                                                   SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService) {
+        super(finremCaseDetailsMapper);
+        this.hearingDocumentService = hearingDocumentService;
+        this.additionalHearingDocumentService = additionalHearingDocumentService;
+        this.selectablePartiesCorrespondenceService = selectablePartiesCorrespondenceService;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -30,15 +39,17 @@ public class ListForHearingContestedSubmittedHandler implements CallbackHandler<
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Handling contested event {} submit callback for case id: {}",
             EventType.getEventType(callbackRequest.getEventId()), caseDetails.getId());
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
+        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails.getData());
+
+        if (caseDetailsBefore != null && caseDetailsBefore.getData().getFormC() != null) {
             log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
             additionalHearingDocumentService.sendAdditionalHearingDocuments(userAuthorisation, caseDetails);
             log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
@@ -49,7 +60,7 @@ public class ListForHearingContestedSubmittedHandler implements CallbackHandler<
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse
-            .<Map<String, Object>>builder()
+            .<FinremCaseData>builder()
             .data(caseDetails.getData())
             .build();
     }
