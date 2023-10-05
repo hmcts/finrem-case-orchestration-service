@@ -99,6 +99,7 @@ public class SendOrderApplicantDocumentHandler extends SendOrderPartyDocumentHan
         List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getOrderWrapper().getAppOrderCollections())
             .orElse(new ArrayList<>());
         orders.add(getConsolidateCollection(orderCollection));
+        orders.sort((m1, m2) -> m2.getValue().getOrderReceivedAt().compareTo(m1.getValue().getOrderReceivedAt()));
         caseData.getOrderWrapper().setAppOrderCollections(orders);
         caseData.getOrderWrapper().setAppOrderCollection(null);
     }

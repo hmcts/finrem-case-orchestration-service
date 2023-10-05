@@ -100,6 +100,7 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
         List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getOrderWrapper().getRespOrderCollections())
             .orElse(new ArrayList<>());
         orders.add(getConsolidateCollection(orderCollection));
+        orders.sort((m1, m2) -> m2.getValue().getOrderReceivedAt().compareTo(m1.getValue().getOrderReceivedAt()));
         caseData.getOrderWrapper().setRespOrderCollections(orders);
         caseData.getOrderWrapper().setRespOrderCollection(null);
     }

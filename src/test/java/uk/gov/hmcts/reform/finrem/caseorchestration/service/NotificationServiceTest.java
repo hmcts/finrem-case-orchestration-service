@@ -1036,7 +1036,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendGeneralApplicationRejectionEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
             intervenerOneWrapper);
         verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
-            SolicitorCaseDataKeysWrapper.builder().build());
+            SolicitorCaseDataKeysWrapper.builder().solicitorReferenceKey("").solicitorNameKey("").build());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_REJECT_GENERAL_APPLICATION);
     }
 

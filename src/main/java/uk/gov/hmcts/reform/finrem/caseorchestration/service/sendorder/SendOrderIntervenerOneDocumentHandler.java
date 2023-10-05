@@ -82,6 +82,7 @@ public class SendOrderIntervenerOneDocumentHandler extends SendOrderPartyDocumen
         List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getOrderWrapper().getIntv1OrderCollections())
             .orElse(new ArrayList<>());
         orders.add(getConsolidateCollection(orderCollection));
+        orders.sort((m1, m2) -> m2.getValue().getOrderReceivedAt().compareTo(m1.getValue().getOrderReceivedAt()));
         caseData.getOrderWrapper().setIntv1OrderCollections(orders);
         caseData.getOrderWrapper().setIntv1OrderCollection(null);
     }

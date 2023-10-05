@@ -43,6 +43,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -185,6 +186,23 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             AUTH_TOKEN);
 
         assertEquals(response.getWarnings().get(0), INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY);
+    }
+
+
+    @Test
+    public void givenACaseWithoutIntervenersAndManagedDocIntoIntv2WhichIsNull_WhenHandle_thenThrowValidationError() {
+        setUpRemovedDocuments();
+        setUpAddedDocuments();
+
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentCollection().get(0).getUploadCaseDocument()
+            .setCaseDocumentParty(null);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            AUTH_TOKEN);
+
+        assertTrue(response.getWarnings().isEmpty());
     }
 
     @Test

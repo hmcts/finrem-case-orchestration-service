@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderI
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerTwoDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderRespondentDocumentHandler;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,10 +42,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -187,6 +191,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("java:S5961")
     void givenContestedCase_whenOrderAvailableToShareWithParties_thenHandlerHandleRequest() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -240,6 +245,43 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(generalOrderService).isSelectedOrderMatches(any(), any());
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
+
+
+        response
+            = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        caseData = response.getData();
+        assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
+        assertEquals(2, caseData.getFinalOrderCollection().size());
+        assertNull(caseData.getIntv1OrderCollection());
+        assertEquals(2, caseData.getIntv1OrderCollections().size());
+        List<ApprovedOrderConsolidateCollection> intv1OrderCollections = caseData.getIntv1OrderCollections();
+        LocalDateTime orderReceivedAt1 = intv1OrderCollections.get(0).getValue().getOrderReceivedAt();
+        LocalDateTime orderReceivedAt2 = intv1OrderCollections.get(1).getValue().getOrderReceivedAt();
+
+        assertTrue(orderReceivedAt1.isAfter(orderReceivedAt2));
+
+        assertNull(caseData.getAppOrderCollection());
+        assertEquals(2, caseData.getAppOrderCollections().size());
+        List<ApprovedOrderConsolidateCollection> appOrderCollections = caseData.getAppOrderCollections();
+        LocalDateTime orderReceivedAt1a = appOrderCollections.get(0).getValue().getOrderReceivedAt();
+        LocalDateTime orderReceivedAt2a = appOrderCollections.get(1).getValue().getOrderReceivedAt();
+
+        assertTrue(orderReceivedAt1a.isAfter(orderReceivedAt2a));
+
+        assertNull(caseData.getRespOrderCollection());
+
+        assertEquals(2, caseData.getRespOrderCollections().size());
+        List<ApprovedOrderConsolidateCollection> respOrderCollections = caseData.getRespOrderCollections();
+        LocalDateTime orderReceivedAtR1 = respOrderCollections.get(0).getValue().getOrderReceivedAt();
+        LocalDateTime orderReceivedAtR2 = respOrderCollections.get(1).getValue().getOrderReceivedAt();
+
+        assertTrue(orderReceivedAtR1.isAfter(orderReceivedAtR2));
+
+        verify(genericDocumentService, times(2)).stampDocument(any(), any(), any(), anyString());
+        verify(generalOrderService, times(2)).isSelectedOrderMatches(any(), any());
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
+        verify(documentHelper, times(2)).getStampType(caseData);
 
     }
 
