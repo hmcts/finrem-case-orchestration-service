@@ -103,29 +103,39 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
             CaseDocument coverSheet = coverSheetService.generateApplicantCoverSheet(finremCaseDetails, userAuthorisation);
             log.info("Applicant coversheet generated and attach to case {}  for case Id {}", caseId, coverSheet);
-            if (caseDataService.isApplicantAddressConfidential(finremCaseData)) {
-                log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseId);
-                finremCaseData.setBulkPrintCoverSheetApp(null);
-                finremCaseData.setBulkPrintCoverSheetAppConfidential(coverSheet);
-            } else {
-                log.info("Applicant adding coversheet to coversheet field for caseId {}", caseId);
-                finremCaseData.setBulkPrintCoverSheetApp(coverSheet);
-            }
+            populateApplicantBulkPrintFieldsWithCoverSheet(finremCaseData, caseId, coverSheet);
         }
+
         if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
             CaseDocument coverSheet = coverSheetService.generateRespondentCoverSheet(finremCaseDetails, userAuthorisation);
             log.info("Respondent coversheet generated and attach to case {}  for case Id {}", caseId, coverSheet);
-            if (caseDataService.isRespondentAddressConfidential(finremCaseData)) {
-                log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseId);
-                finremCaseData.setBulkPrintCoverSheetRes(null);
-                finremCaseData.setBulkPrintCoverSheetResConfidential(coverSheet);
-            } else {
-                log.info("Respondent adding coversheet to coversheet field for caseId {}", caseId);
-                finremCaseData.setBulkPrintCoverSheetRes(coverSheet);
-            }
+            populateRespondentBulkPrintFieldsWithCoverSheet(finremCaseData, coverSheet, caseId);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(finremCaseData).warnings(warnings).build();
     }
+
+    private void populateApplicantBulkPrintFieldsWithCoverSheet(FinremCaseData finremCaseData, String caseId, CaseDocument coverSheet) {
+        if (caseDataService.isApplicantAddressConfidential(finremCaseData)) {
+            log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseId);
+            finremCaseData.setBulkPrintCoverSheetApp(null);
+            finremCaseData.setBulkPrintCoverSheetAppConfidential(coverSheet);
+        } else {
+            log.info("Applicant adding coversheet to coversheet field for caseId {}", caseId);
+            finremCaseData.setBulkPrintCoverSheetApp(coverSheet);
+        }
+    }
+
+    private void populateRespondentBulkPrintFieldsWithCoverSheet(FinremCaseData finremCaseData, CaseDocument coverSheet, String caseId) {
+        if (caseDataService.isRespondentAddressConfidential(finremCaseData)) {
+            log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseId);
+            finremCaseData.setBulkPrintCoverSheetRes(null);
+            finremCaseData.setBulkPrintCoverSheetResConfidential(coverSheet);
+        } else {
+            log.info("Respondent adding coversheet to coversheet field for caseId {}", caseId);
+            finremCaseData.setBulkPrintCoverSheetRes(coverSheet);
+        }
+    }
+
 }
