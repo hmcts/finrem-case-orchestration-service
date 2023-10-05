@@ -117,7 +117,7 @@ public class GeneralApplicationService {
 
         if (!generalApplicationListBefore.isEmpty()) {
             generalApplicationCollectionDataList.addAll(generalApplicationListBefore);
-        }
+        }//temporary comment
 
         if (initialCollectionId != null) {
             GeneralApplicationCollectionData originalGeneralApplicationList
