@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.junit.Before;
+import org.junit.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -17,19 +19,58 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+
 public abstract class BaseManageDocumentsHandlerTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
-    protected final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
+    protected List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
     protected FinremCaseDetails caseDetails;
     protected FinremCaseDetails caseDetailsBefore;
     protected FinremCaseData caseData;
+    protected DocumentHandler handler;
 
     @Before
     public void setUp() {
         caseDetails = buildCaseDetails();
         caseDetailsBefore = buildCaseDetails();
         caseData = caseDetails.getData();
+        setUpscreenUploadDocumentList();
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        handler = getDocumentHandler();
+    }
+    
+    public abstract void setUpscreenUploadDocumentList();
+    
+    public abstract DocumentHandler getDocumentHandler();
+
+    public abstract void assertExpectedCollectionType();
+
+    protected abstract List<UploadCaseDocumentCollection> getDocumentCollection();
+
+
+
+    public void assertDocumentCategoryIdAppliedForDocumentCollection() {
+        for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
+            assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), not(nullValue()));
+        }
+    }
+
+
+//    @Test
+//    public abstract void determineDocumentCategoryCorrectly();
+
+    @Test
+    public void handleDocumentCollectionsCorrectly() {
+
+        handler.replaceManagedDocumentsInCollectionType(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
+            screenUploadDocumentList);
+
+        assertExpectedCollectionType();
+        assertDocumentCategoryIdAppliedForDocumentCollection();
     }
 
     protected UploadCaseDocumentCollection createContestedUploadDocumentItem(CaseDocumentType type,

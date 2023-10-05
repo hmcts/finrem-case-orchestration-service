@@ -1,15 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
+
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -20,8 +22,9 @@ public class RespondentCaseSummariesCollectionServiceTest extends BaseManageDocu
     @InjectMocks
     RespondentCaseSummariesHandler collectionService;
 
-    @Test
-    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
+
+    @Override
+    public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.SKELETON_ARGUMENT,
@@ -29,16 +32,24 @@ public class RespondentCaseSummariesCollectionServiceTest extends BaseManageDocu
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+    }
 
-        collectionService.replaceManagedDocumentsInCollectionType(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+    @Override
+    public DocumentHandler getDocumentHandler() {
+        return collectionService;
+    }
 
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CASE_SUMMARIES_COLLECTION),
+    @Override
+    public void assertExpectedCollectionType() {
+        assertThat(getDocumentCollection(),
             hasSize(3));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
+    }
+
+    @Override
+    protected List<UploadCaseDocumentCollection> getDocumentCollection() {
+        return caseData.getUploadCaseDocumentWrapper()
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CASE_SUMMARIES_COLLECTION);
     }
 }

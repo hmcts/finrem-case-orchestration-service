@@ -1,13 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -18,21 +19,30 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     @InjectMocks
     FdrDocumentsHandler handler;
 
-    @Test
-    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
+
+    @Override
+    public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             null, YesOrNo.NO, YesOrNo.YES, "Other Example"));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+    }
 
-        handler.replaceManagedDocumentsInCollectionType(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+    @Override
+    public DocumentHandler getDocumentHandler() {
+        return handler;
+    }
 
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
+    @Override
+    public void assertExpectedCollectionType() {
+        assertThat(getDocumentCollection(),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
+    }
+
+    @Override
+    protected List<UploadCaseDocumentCollection> getDocumentCollection() {
+        return caseData.getUploadCaseDocumentWrapper()
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION);
     }
 }

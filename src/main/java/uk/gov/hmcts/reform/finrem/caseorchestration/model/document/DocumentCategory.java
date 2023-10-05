@@ -22,6 +22,7 @@ public enum DocumentCategory {
     CONFIDENTIAL_DOCUMENTS("confidentialDocuments"),
     DIVORCE_DOCUMENTS("divorceDocuments"),
     JUDGMENT_TRANSCRIPT("judgmentOrTranscript"),
+    CASE_DOCUMENTS("caseDocuments"),
     UNCATEGORISED(null);
 
     private final String documentCategoryId;
