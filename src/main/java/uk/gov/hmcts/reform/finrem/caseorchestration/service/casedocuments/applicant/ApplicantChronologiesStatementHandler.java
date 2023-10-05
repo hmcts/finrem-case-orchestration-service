@@ -21,8 +21,11 @@ public class ApplicantChronologiesStatementHandler extends ChronologiesStatement
             case CHRONOLOGY -> {
                 return DocumentCategory.HEARING_DOCUMENTS;
             }
-            case STATEMENT_OF_ISSUES, FORM_G -> {
-                return DocumentCategory.APPLICANT_DOCUMENTS;
+            case STATEMENT_OF_ISSUES -> {
+                return DocumentCategory.APPLICANT_STATEMENT_OF_ISSUES;
+            }
+            case FORM_G -> {
+                return DocumentCategory.APPLICANT_FORM_G;
             }
             default -> {
                 return DocumentCategory.UNCATEGORISED;
