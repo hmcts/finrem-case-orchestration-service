@@ -50,12 +50,7 @@ class AmendConsentOrderMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void canHandle() {
-        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.AMEND_CONSENT_ORDER));
-    }
-
-    @Test
-    void canNotHandle() {
-        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.AMEND_CONSENT_ORDER));
+        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.AMEND_CONSENT_ORDER));
     }
 
     @Test

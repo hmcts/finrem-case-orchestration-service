@@ -35,7 +35,7 @@ public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
+            && CaseType.CONSENTED.equals(caseType)
             && (EventType.AMEND_CONSENT_ORDER.equals(eventType));
     }
 
