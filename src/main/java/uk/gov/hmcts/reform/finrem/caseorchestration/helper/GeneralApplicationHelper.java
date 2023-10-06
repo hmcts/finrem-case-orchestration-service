@@ -252,8 +252,20 @@ public class GeneralApplicationHelper {
                         .listItems(dynamicListElements).build();
                     generalApplicationItems.setGeneralApplicationSender(existingRadioList);
                     generalApplicationItems.setGeneralApplicationReceivedFrom(null);
+                    addExistingAppRespGeneralApplications(ga, caseData);
                 }
             });
+        }
+    }
+
+    public void addExistingAppRespGeneralApplications(GeneralApplicationsCollection ga, FinremCaseData caseData) {
+        List<GeneralApplicationsCollection> existingAppRespGeneralApplications =
+                caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications();
+        if (existingAppRespGeneralApplications == null || existingAppRespGeneralApplications.isEmpty()) {
+            caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(List.of(ga));
+        } else {
+            existingAppRespGeneralApplications.add(ga);
+            caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(existingAppRespGeneralApplications);
         }
     }
 
@@ -287,19 +299,19 @@ public class GeneralApplicationHelper {
             getDynamicListElements(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         ));
         IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapperIfPopulated();
-        if (oneWrapper != null) {
+        if (oneWrapper != null && oneWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER1, INTERVENER1));
         }
         IntervenerTwoWrapper twoWrapper = caseData.getIntervenerTwoWrapperIfPopulated();
-        if (twoWrapper != null) {
+        if (twoWrapper != null && twoWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER2, INTERVENER2));
         }
         IntervenerThreeWrapper threeWrapper = caseData.getIntervenerThreeWrapperIfPopulated();
-        if (threeWrapper != null) {
+        if (threeWrapper != null && threeWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER3, INTERVENER3));
         }
         IntervenerFourWrapper fourWrapper = caseData.getIntervenerFourWrapperIfPopulated();
-        if (fourWrapper != null) {
+        if (fourWrapper != null && fourWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER4, INTERVENER4));
         }
     }
