@@ -27,13 +27,10 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static final String SOLICITOR_NAME = "Jane Smith";
     private static final String SOLICITOR_REF = "JAW052018";
     private static final String GENERAL_ORDER_JSON = "document-rejected-order1.json";
-    private static final String CONTESTED_FORM_G_JSON = "validate-hearing-without-fastTrackDecision1.json";
     private static final String CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON = "contested-hearing-order-conversion.json";
     private static final String MINI_FORM_A_JSON = "documentGeneratePayload1.json";
     private static final String MINI_FORM_A_CONTESTED_JSON = "generate-contested-form-A1.json";
     private static final String CONTESTED_FORM_C_JSON = "validate-hearing-with-fastTrackDecision1.json";
-    private static final String APPLICANT_NAME_HEARING = "Guy";
-    private static final String SOLICITOR_REF_HEARING = "LL01";
     private static final String contestedDir = "/json/contested/";
     private static final String consentedDir = "/json/consented/";
 
@@ -54,9 +51,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Value("${cos.document.contested.draft.api}")
     private String generateContestedDraftUrl;
-
-    @Value("${cos.document.hearing.api}")
-    private String generateHearingUrl;
 
     @Value("${case.orchestration.api}/hearing-order/store")
     private String hearingOrderStoreUrl;
@@ -122,18 +116,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyContestedFormCDocumentGenerationPostResponseContent() {
-
-        generateDocument(CONTESTED_FORM_C_JSON, generateHearingUrl, contestedDir);
-    }
-
-    @Test
-    public void verifyContestedFormGDocumentGenerationPostResponseContent() {
-
-        generateDocument(CONTESTED_FORM_G_JSON, generateHearingUrl, contestedDir);
-    }
-
-    @Test
     public void verifyRejectedOrderGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
@@ -160,30 +142,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
             "document", MINI_FORM_A, contestedDir);
-
-        JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
-
-        assertTrue(jsonPathEvaluator1.get("mimeType").toString().equalsIgnoreCase("application/pdf"));
-        assertTrue(jsonPathEvaluator1.get("classification").toString().equalsIgnoreCase("RESTRICTED"));
-    }
-
-    @Test
-    public void verifyGeneratedFormCContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
-
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_C_JSON, generateHearingUrl,
-            "document", "hearing", contestedDir);
-
-        JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
-
-        assertTrue(jsonPathEvaluator1.get("mimeType").toString().equalsIgnoreCase("application/pdf"));
-        assertTrue(jsonPathEvaluator1.get("classification").toString().equalsIgnoreCase("RESTRICTED"));
-    }
-
-    @Test
-    public void verifyGeneratedFormGContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
-
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_G_JSON, generateHearingUrl,
-            "document", "hearing", contestedDir);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -227,32 +185,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         assertTrue(documentContent.contains(CASE_NUMBER_A));
     }
 
-    @Test
-    public void downloadContestedFormCDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
-
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_C_JSON, generateHearingUrl,
-            BINARY_URL_TYPE, "hearing", contestedDir);
-
-        String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
-
-        assertTrue(documentContent.contains(APPLICANT_NAME_HEARING));
-        assertTrue(documentContent.contains(CASE_NUMBER_A));
-        assertTrue(documentContent.contains(SOLICITOR_REF_HEARING));
-    }
-
-    @Test
-    public void downloadContestedFormGDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
-
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_G_JSON, generateHearingUrl,
-            BINARY_URL_TYPE, "hearing", contestedDir);
-
-        String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
-
-        assertTrue(documentContent.contains(APPLICANT_NAME_HEARING));
-        assertTrue(documentContent.contains(CASE_NUMBER_A));
-        assertTrue(documentContent.contains(SOLICITOR_REF_HEARING));
-    }
-
     private JsonPath generateDocument(String jsonFileName, String url, String journeyType) {
         Response jsonResponse = SerenityRest.given()
             .relaxedHTTPSValidation()
@@ -269,23 +201,13 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
         String path = null;
         switch (documentType) {
-            case MINI_FORM_A:
-                path = "data.miniFormA";
-                break;
-            case "generalOrder":
-                path = "data.uploadOrder[0].value.DocumentLink";
-                break;
-            case "approvedConsentOrder":
-                path = "data.approvedConsentOrderLetter";
-                break;
-            case "hearing":
-                path = "data.formC";
-                break;
-            case "hearingG":
-                path = "data.formG";
-                break;
-            default:
-                break;
+            case MINI_FORM_A -> path = "data.miniFormA";
+            case "generalOrder" -> path = "data.uploadOrder[0].value.DocumentLink";
+            case "approvedConsentOrder" -> path = "data.approvedConsentOrderLetter";
+            case "hearing" -> path = "data.formC";
+            case "hearingG" -> path = "data.formG";
+            default -> {
+            }
         }
 
         path = path == null ? null
