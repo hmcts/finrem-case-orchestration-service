@@ -19,7 +19,7 @@ public class ApplicantFormEExhibitsHandler extends FormEExhibitsHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        if (Objects.requireNonNull(caseDocumentType) == CaseDocumentType.APPLICANT_FORM_E) {
+        if (caseDocumentType == CaseDocumentType.APPLICANT_FORM_E) {
             return DocumentCategory.APPLICANT_DOCUMENTS;
         }
         return DocumentCategory.UNCATEGORISED;

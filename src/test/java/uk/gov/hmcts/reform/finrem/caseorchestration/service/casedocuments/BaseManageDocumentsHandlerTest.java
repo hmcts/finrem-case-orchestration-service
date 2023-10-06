@@ -51,6 +51,10 @@ public abstract class BaseManageDocumentsHandlerTest {
     protected abstract List<UploadCaseDocumentCollection> getDocumentCollection();
 
 
+    @Test
+    public abstract void assertCorrectCategoryAssignedFromDocumentType();
+
+
 
     public void assertDocumentCategoryIdAppliedForDocumentCollection() {
         for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
@@ -59,8 +63,6 @@ public abstract class BaseManageDocumentsHandlerTest {
     }
 
 
-//    @Test
-//    public abstract void determineDocumentCategoryCorrectly();
 
     @Test
     public void handleDocumentCollectionsCorrectly() {

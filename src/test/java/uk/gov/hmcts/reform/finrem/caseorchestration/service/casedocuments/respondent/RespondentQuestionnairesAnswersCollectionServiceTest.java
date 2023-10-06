@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -85,5 +87,23 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
     protected List<UploadCaseDocumentCollection> getDocumentCollection() {
         return caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION);
+    }
+
+    @Override
+    public void assertCorrectCategoryAssignedFromDocumentType() {
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.QUESTIONNAIRE),
+            is(DocumentCategory.HEARING_DOCUMENTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.REPLY_TO_QUESTIONNAIRE),
+            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
+            is(DocumentCategory.UNCATEGORISED)
+        );
     }
 }

@@ -22,7 +22,8 @@ public class IntervenerFourFdrHandler extends PartyDocumentsHandler {
 
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+        // TODO This had to be changed to public - discuss with Ruban
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
         //TODO Check that this is correct category
     }

@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RespondentStatementsExhibitsCollectionServiceTest extends BaseManageDocumentsHandlerTest {
@@ -51,5 +53,23 @@ public class RespondentStatementsExhibitsCollectionServiceTest extends BaseManag
     @Override
     protected List<UploadCaseDocumentCollection> getDocumentCollection() {
         return caseDetails.getData().getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection();
+    }
+
+    @Override
+    public void assertCorrectCategoryAssignedFromDocumentType() {
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_AFFIDAVIT),
+            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT),
+            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
+            is(DocumentCategory.UNCATEGORISED)
+        );
     }
 }

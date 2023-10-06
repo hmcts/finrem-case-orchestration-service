@@ -8,8 +8,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ExpertEvidenceHandlerTest;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(MockitoJUnitRunner.class)
-public class IntervenerOneExpertEvidenceHandlerTest extends BaseManageDocumentsHandlerTest {
+public class IntervenerOneExpertEvidenceHandlerTest extends ExpertEvidenceHandlerTest {
 
     @InjectMocks
     IntervenerOneExpertEvidenceHandler handler;

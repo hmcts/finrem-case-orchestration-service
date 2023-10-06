@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
@@ -53,5 +55,38 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
     protected List<UploadCaseDocumentCollection> getDocumentCollection() {
         return caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_TWO_OTHER_COLLECTION);
+    }
+
+    @Override
+    public void assertCorrectCategoryAssignedFromDocumentType() {
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            is(DocumentCategory.INTERVENER_DOCUMENTS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
+            is(DocumentCategory.APPLICATIONS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F),
+            is(DocumentCategory.INTERVENER_DOCUMENTS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN),
+            is(DocumentCategory.INTERVENER_DOCUMENTS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
+            is(DocumentCategory.INTERVENER_DOCUMENTS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_H),
+            is(DocumentCategory.UNCATEGORISED)
+        );
     }
 }

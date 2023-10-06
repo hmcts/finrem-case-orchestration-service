@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.IntervenerThreeFdrHandler;
@@ -19,6 +20,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -79,5 +81,13 @@ public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTes
     protected List<UploadCaseDocumentCollection> getDocumentCollection() {
         return caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_THREE_FDR_DOCS_COLLECTION);
+    }
+
+    @Override
+    public void assertCorrectCategoryAssignedFromDocumentType() {
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE)
+        );
     }
 }

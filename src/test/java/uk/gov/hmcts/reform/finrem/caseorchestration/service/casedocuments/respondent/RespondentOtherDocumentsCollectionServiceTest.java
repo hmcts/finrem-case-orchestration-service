@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDocumentsHandlerTest {
@@ -54,5 +56,38 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
     protected List<UploadCaseDocumentCollection> getDocumentCollection() {
         return caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_OTHER_COLLECTION);
+    }
+
+    @Override
+    public void assertCorrectCategoryAssignedFromDocumentType() {
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
+            is(DocumentCategory.APPLICATIONS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F),
+            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN),
+            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
+            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
+            is(DocumentCategory.UNCATEGORISED)
+        );
     }
 }
