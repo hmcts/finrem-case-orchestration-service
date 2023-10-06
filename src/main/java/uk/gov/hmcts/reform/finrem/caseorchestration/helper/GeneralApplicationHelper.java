@@ -259,13 +259,20 @@ public class GeneralApplicationHelper {
     }
 
     public void addExistingAppRespGeneralApplications(GeneralApplicationsCollection ga, FinremCaseData caseData) {
+        log.info("reached addExistingAppRespGeneralApplications7");
         List<GeneralApplicationsCollection> existingAppRespGeneralApplications =
                 caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications();
+        log.info("reached addExistingAppRespGeneralApplications6");
         if (existingAppRespGeneralApplications == null || existingAppRespGeneralApplications.isEmpty()) {
+            log.info("reached addExistingAppRespGeneralApplications " + ga);
             caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(List.of(ga));
+            log.info("reached addExistingAppRespGeneralApplications2");
         } else {
+            log.info("reached addExistingAppRespGeneralApplications3");
             existingAppRespGeneralApplications.add(ga);
+            log.info("reached addExistingAppRespGeneralApplications4 " + ga);
             caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(existingAppRespGeneralApplications);
+            log.info("reached addExistingAppRespGeneralApplications5");
         }
     }
 
