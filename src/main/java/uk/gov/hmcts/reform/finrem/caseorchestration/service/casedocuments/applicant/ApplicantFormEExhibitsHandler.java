@@ -7,8 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FormEExhibitsHandler;
 
-import java.util.Objects;
-
 @Service
 public class ApplicantFormEExhibitsHandler extends FormEExhibitsHandler {
 
