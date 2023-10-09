@@ -170,6 +170,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateIntervenerCoverSheet() throws Exception {
+
         CaseDetails caseDetails = caseDetailsWithIntervener1Unrepresented();
 
         CaseDocument caseDocument = generateCoverSheetService.generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN,
@@ -180,7 +181,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
 
         assertCoversheetAddressFromMap("Intervener 1 Address Line 1\nIntervener 1 Address Line 2"
-            + "\nIntervener 1 County\nIntervener 1 Post Town\nIntervener 1 Post Code");
+            + "\nIntervener 1 Address Line 3\nIntervener 1 County\nIntervener 1 Post Town\nIntervener 1 Post Code");
     }
 
     private CaseDetails caseDetailsConsented() throws Exception {
@@ -188,7 +189,6 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
-
 
     }
 
@@ -201,7 +201,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
     private FinremCaseDetails finremCaseDetailsConsented() throws Exception {
         try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json")) {
             return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         }
     }

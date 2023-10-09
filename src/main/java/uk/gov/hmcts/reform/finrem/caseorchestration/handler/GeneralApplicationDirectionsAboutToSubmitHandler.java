@@ -1,62 +1,79 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_OTHER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class GeneralApplicationDirectionsAboutToSubmitHandler implements CallbackHandler<Map<String, Object>> {
+public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
+    private final GeneralApplicationService gaService;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    public GeneralApplicationDirectionsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                            GeneralApplicationHelper helper,
+                                                            GeneralApplicationDirectionsService service,
+                                                            GeneralApplicationService gaService) {
+        super(finremCaseDetailsMapper);
+        this.helper = helper;
+        this.service = service;
+        this.gaService = gaService;
+        this.finremCaseDetailsMapper = finremCaseDetailsMapper;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType) && CaseType.CONTESTED.equals(caseType)
             && EventType.GENERAL_APPLICATION_DIRECTIONS.equals(eventType);
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
+        FinremCallbackRequest callbackRequest, String userAuthorisation) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Processing About to Submit callback for event {} with Case ID : {}",
             EventType.GENERAL_APPLICATION_DIRECTIONS, callbackRequest.getCaseDetails().getId());
 
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getData();
+        helper.populateGeneralApplicationSender(caseData,
+            caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
         List<BulkPrintDocument> documents = new ArrayList<>();
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
-        if (existingList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
+        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData,
+            GENERAL_APPLICATION_COLLECTION);
+        if (existingList.isEmpty()
+            && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             migrateExistingApplication(caseDetails, documents, userAuthorisation);
 
         } else {
@@ -74,38 +91,44 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
 
         log.info("Post state {} for caseId {}", postState, caseDetails.getId());
         if (postState != null) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                 .errors(errors).state(postState).build();
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
-    private void migrateExistingApplication(CaseDetails caseDetails,
+    private void migrateExistingApplication(FinremCaseDetails caseDetails,
                                             List<BulkPrintDocument> bulkPrintDocuments,
                                             String userAuthorisation) {
-        Map<String, Object> caseData = caseDetails.getData();
-        List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
+        FinremCaseData caseData = caseDetails.getData();
+        List<GeneralApplicationCollectionData> existingGeneralApplication =
+            helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         String caseId = caseDetails.getId().toString();
         log.info("Migrating existing general application to collection for case id {}", caseId);
-        GeneralApplicationCollectionData data =
-            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
+        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(
+            caseData, userAuthorisation, caseId);
         if (data != null) {
-            String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+            String status = Objects.toString(caseData.getGeneralApplicationWrapper()
+                .getGeneralApplicationOutcome(), null);
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
                 status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
             setStatusForNonCollAndBulkPrintDocuments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
-            caseData.put(GENERAL_APPLICATION_COLLECTION, existingGeneralApplication);
+            gaService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
-        caseData.remove(GENERAL_APPLICATION_DIRECTIONS_LIST);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
     }
 
-    private void updateApplications(CaseDetails caseDetails, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation) {
-        Map<String, Object> caseData = caseDetails.getData();
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
+    private void updateApplications(FinremCaseDetails caseDetails,
+                                    List<BulkPrintDocument> bulkPrintDocuments,
+                                    String userAuthorisation) {
+        FinremCaseData caseData = caseDetails.getData();
+        List<GeneralApplicationCollectionData> existingList =
+            helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper()
+            .getGeneralApplicationDirectionsList());
 
         String[] choice = dynamicList.getValueCode().split("#");
         final String status = choice[1];
@@ -117,14 +140,15 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
             .sorted(helper::getCompareTo).toList();
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
-        caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
-        caseData.remove(GENERAL_APPLICATION_DIRECTIONS_LIST);
+        gaService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
+        caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
+            ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
     }
 
-    private GeneralApplicationCollectionData setStatusAndBulkPrintDouments(CaseDetails caseDetails,
+    private GeneralApplicationCollectionData setStatusAndBulkPrintDouments(FinremCaseDetails caseDetails,
                                                                            GeneralApplicationCollectionData data,
-                                                                           String code,
-                                                                           String status,
+                                                                           String code, String status,
                                                                            List<BulkPrintDocument> bulkPrintDocuments,
                                                                            String userAuthorisation) {
         if (code.equals(data.getId())) {
@@ -133,27 +157,27 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         return data;
     }
 
-    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDocuments(CaseDetails caseDetails,
-                                                                                      GeneralApplicationCollectionData data,
-                                                                                      List<BulkPrintDocument> bulkPrintDocuments,
-                                                                                      String status,
-                                                                                      String userAuthorisation) {
+    private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDocuments(
+        FinremCaseDetails finremCaseDetails, GeneralApplicationCollectionData data,
+        List<BulkPrintDocument> bulkPrintDocuments, String status, String userAuthorisation) {
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
         items.setGeneralApplicationDirectionsDocument(caseDocument);
-        items.setGeneralApplicationOutcomeOther(Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
+        items.setGeneralApplicationOutcomeOther(Objects.toString(
+            caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         String caseId = caseDetails.getId().toString();
-        log.info("status {} for general application for Case ID: {} Event type {}",
-            status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
+        log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
+            EventType.GENERAL_APPLICATION_DIRECTIONS);
 
-        switch (gaElementStatus) {
-            case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
-            case "Not Approved" ->
+        switch (gaElementStatus.toLowerCase()) {
+            case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
+            case "not approved" ->
                 items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
-            case "Other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
+            case "other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
             default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
         }
 
@@ -163,7 +187,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
             .build();
         bulkPrintDocuments.add(bpDoc);
 
-        log.info("items getGeneralApplicationDocument {}, for caseId {}", items.getGeneralApplicationDocument(), caseId);
+        log.info("items getGeneralApplicationDocument {}, for caseId {}",
+            items.getGeneralApplicationDocument(), caseId);
 
         if (items.getGeneralApplicationDocument() != null) {
             items.setGeneralApplicationDocument(
@@ -185,6 +210,13 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
                 .fileName(items.getGeneralApplicationDraftOrder().getDocumentFilename())
                 .build();
             bulkPrintDocuments.add(draftDoc);
+        }
+
+        if (items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER1)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER2)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER3)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
+            gaService.updateIntervenerDirectionsOrders(items, finremCaseDetails);
         }
         return data;
     }

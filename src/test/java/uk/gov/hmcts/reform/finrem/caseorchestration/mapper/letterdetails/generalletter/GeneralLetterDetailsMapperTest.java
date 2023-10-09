@@ -6,16 +6,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralLetterDetails;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.formatAddressForLetterPrinting;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER_RECIPIENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
 
 public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
 
@@ -23,6 +31,8 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
 
     private static final String APPLICANT_FULL_NAME = "Poor Guy";
     private static final String RESPONDENT_FULL_NAME = "test Korivi";
+    private static final String APPLICANT_SOLICITOR_LABEL = "Applicant Solicitor";
+    private static final String RESPONDENT_SOLICITOR_LABEL = "Respondent Solicitor";
     private static final String CCD_CASE_NUMBER = "1234567890";
     private static final String APP_SOLICITOR_NAME = "Solictor";
     private static final String RESPONDENT_SOLICITOR_NAME = "RespondentSolicitor";
@@ -39,6 +49,9 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
 
     @Test
     public void givenAppSolRecipient_whenBuildDocumentTemplateDetails_thenReturnExpectedTemplateDetails() {
+        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(APPLICANT_SOLICITOR).label(APPLICANT_SOLICITOR_LABEL).build();
+        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems()).value(chosenOption).build();
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         DocumentTemplateDetails actual = generalLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
@@ -49,7 +62,9 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
 
     @Test
     public void givenRespSolRecipient_whenBuildDocumentTemplateDetails_thenReturnExpectedTemplateDetails() {
-        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressTo(GeneralLetterAddressToType.RESPONDENT_SOLICITOR);
+        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(RESPONDENT_SOLICITOR).label(RESPONDENT_SOLICITOR_LABEL).build();
+        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems()).value(chosenOption).build();
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorName(RESPONDENT_SOLICITOR_NAME);
 
         DocumentTemplateDetails actual = generalLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails,
@@ -62,6 +77,9 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
 
     @Test
     public void givenRespondentRecipient_whenBuildDocumentTemplateDetails_thenReturnExpectedTemplateDetails() {
+        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(RESPONDENT).label(RESPONDENT).build();
+        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems()).value(chosenOption).build();
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressTo(GeneralLetterAddressToType.RESPONDENT);
 
         DocumentTemplateDetails actual = generalLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails,
@@ -74,7 +92,9 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
 
     @Test
     public void givenOtherRecipient_whenBuildDocumentTemplateDetails_thenReturnExpectedTemplateDetails() {
-        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressTo(GeneralLetterAddressToType.OTHER);
+        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(OTHER_RECIPIENT).label(OTHER_RECIPIENT).build();
+        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems()).value(chosenOption).build();
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterRecipient(OTHER_NAME);
 
         DocumentTemplateDetails actual = generalLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails,
@@ -91,7 +111,7 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
                 if (!field.getName().contains(GENERAL_LETTER_CREATED_DATE)) {
                     field.setAccessible(true);
                     try {
-                        assertEquals(field.get(actual), field.get(expected));
+                        assertEquals(field.get(expected), field.get(actual));
                     } catch (IllegalAccessException e) {
                         throw new IllegalStateException();
                     }
@@ -162,5 +182,14 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
             .postCode("SE12 9SE")
             .country("United Kingdom")
             .build();
+    }
+
+    private List<DynamicRadioListElement> getDynamicRadioListItems() {
+        return List.of(
+            DynamicRadioListElement.builder().code(APPLICANT).label(APPLICANT).build(),
+            DynamicRadioListElement.builder().code(APPLICANT_SOLICITOR).label(APPLICANT_SOLICITOR_LABEL).build(),
+            DynamicRadioListElement.builder().code(RESPONDENT).label(RESPONDENT).build(),
+            DynamicRadioListElement.builder().code(RESPONDENT_SOLICITOR).label(RESPONDENT_SOLICITOR_LABEL).build(),
+            DynamicRadioListElement.builder().code(OTHER_RECIPIENT).label(OTHER_RECIPIENT).build());
     }
 }
