@@ -252,7 +252,6 @@ public class GeneralApplicationHelperTest {
 
     @Test
     public void givenGeneralApplicationReceivedFromFieldNull_ThenShouldUpdateApplicantAndRespondentColl() {
-        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
         List<GeneralApplicationsCollection> collection2 = new ArrayList<>(caseData.getGeneralApplicationWrapper()
@@ -262,6 +261,7 @@ public class GeneralApplicationHelperTest {
                 .getGeneralApplications();
         collection.get(0).getValue().setGeneralApplicationReceivedFrom(APPLICANT);
         collection.forEach(x -> x.getValue().setGeneralApplicationSender(null));
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         helper.populateGeneralApplicationSender(caseData, collection);
         assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
                 .getValue().getGeneralApplicationSender().getValue().getLabel());
