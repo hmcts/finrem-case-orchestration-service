@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -24,22 +23,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ApprovedOrderNoticeOfHearingCorresponder extends HearingCorresponder {
 
     private final ObjectMapper objectMapper;
-    private final DocumentHelper documentHelper;
 
     @Autowired
     public ApprovedOrderNoticeOfHearingCorresponder(BulkPrintService bulkPrintService,
                                                     NotificationService notificationService,
                                                     FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     ObjectMapper objectMapper, DocumentHelper documentHelper) {
-        super(bulkPrintService, notificationService, finremCaseDetailsMapper);
+        super(bulkPrintService, notificationService, finremCaseDetailsMapper, documentHelper);
         this.objectMapper = objectMapper;
-        this.documentHelper = documentHelper;
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
-        List<CaseDocument> hearingNoticePack = getHearingNoticeDocumentPackFromCaseData(caseDetails);
-        return documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
+    public List<CaseDocument> getCaseDocuments(CaseDetails caseDetails) {
+        return getHearingNoticeDocumentPackFromCaseData(caseDetails);
     }
 
     private List<CaseDocument> getHearingNoticeDocumentPackFromCaseData(CaseDetails caseDetails) {

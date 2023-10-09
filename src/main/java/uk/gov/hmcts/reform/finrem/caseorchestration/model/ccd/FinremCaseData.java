@@ -114,6 +114,7 @@ public class FinremCaseData {
     private String pbaPaymentReference;
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
+    private CaseDocument additionalDocument;
     private String orderDirectionOpt2;
     private YesOrNo orderDirectionAbsolute;
     private YesOrNo servePensionProvider;
@@ -147,13 +148,13 @@ public class FinremCaseData {
     private List<ScannedDocumentCollection> scannedDocuments;
     private YesOrNo evidenceHandled;
     private CaseDocument approvedConsentOrderLetter;
-    private CaseDocument bulkPrintCoverSheetRes;
-    private String bulkPrintLetterIdRes;
     private CaseDocument bulkPrintCoverSheetApp;
+    private CaseDocument bulkPrintCoverSheetRes;
     private CaseDocument bulkPrintCoverSheetIntervener1;
     private CaseDocument bulkPrintCoverSheetIntervener2;
     private CaseDocument bulkPrintCoverSheetIntervener3;
     private CaseDocument bulkPrintCoverSheetIntervener4;
+    private String bulkPrintLetterIdRes;
     private String bulkPrintLetterIdApp;
     private List<ConsentOrderCollection> approvedOrderCollection;
     private ApplicantRole divRoleOfFrApplicant;
@@ -222,6 +223,7 @@ public class FinremCaseData {
     private List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollection;
     private List<DocumentCollection> hearingNoticeDocumentPack;
     private List<DocumentCollection> hearingNoticesDocumentCollection;
+
     private HearingTypeDirection hearingType;
     private String timeEstimate;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -251,8 +253,26 @@ public class FinremCaseData {
     private SolicitorToDraftOrder solicitorResponsibleForDraftingOrder;
     private List<DirectionOrderCollection> uploadHearingOrder;
     private List<DocumentCollection> hearingOrderOtherDocuments;
+
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;
+    private List<ApprovedOrderConsolidateCollection> appOrderCollections;
+    private List<ApprovedOrderConsolidateCollection> respOrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv1OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv2OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv3OrderCollections;
+    private List<ApprovedOrderConsolidateCollection> intv4OrderCollections;
+    private List<ApprovedOrderCollection> appOrderCollection;
+    private List<ApprovedOrderCollection> respOrderCollection;
+    private List<ApprovedOrderCollection> intv1OrderCollection;
+    private List<ApprovedOrderCollection> intv2OrderCollection;
+    private List<ApprovedOrderCollection> intv3OrderCollection;
+    private List<ApprovedOrderCollection> intv4OrderCollection;
+
+    private List<IntervenerHearingNoticeCollection> intv1HearingNoticesCollection;
+    private List<IntervenerHearingNoticeCollection> intv2HearingNoticesCollection;
+    private List<IntervenerHearingNoticeCollection> intv3HearingNoticesCollection;
+    private List<IntervenerHearingNoticeCollection> intv4HearingNoticesCollection;
     private List<JudgeNotApprovedReasonsCollection> judgeNotApprovedReasons;
     private JudgeType refusalOrderJudgeType;
     private String refusalOrderJudgeName;
@@ -279,6 +299,8 @@ public class FinremCaseData {
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
+    private DynamicMultiSelectList ordersToShare;
+    private DynamicMultiSelectList partiesOnCase;
     private List<ConfidentialUploadedDocumentData> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")
@@ -287,6 +309,7 @@ public class FinremCaseData {
     private OrganisationPolicy respondentOrganisationPolicy;
     private CaseRole currentUserCaseRole;
     private String currentUserCaseRoleLabel;
+    private String currentUserCaseRoleType;
     private CaseDocument outOfFamilyCourtResolution;
 
     private DynamicMultiSelectList sourceDocumentList;
@@ -382,6 +405,14 @@ public class FinremCaseData {
     private IntervenerChangeDetails currentIntervenerChangeDetails;
     @JsonIgnore
     private Addressee currentAddressee;
+
+    @Builder.Default
+    @JsonIgnore
+    private boolean applicantCorrespondenceEnabled = true;
+    @Builder.Default
+    @JsonIgnore
+    private boolean respondentCorrespondenceEnabled = true;
+    private List<OrderSentToPartiesCollection> ordersSentToPartiesCollection;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -505,11 +536,27 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public IntervenerOneWrapper getIntervenerOneWrapperIfPopulated() {
+        if (intervenerOneWrapper != null) {
+            return this.intervenerOneWrapper;
+        }
+        return null;
+    }
+
+    @JsonIgnore
     public IntervenerTwoWrapper getIntervenerTwoWrapper() {
         if (intervenerTwoWrapper == null) {
             this.intervenerTwoWrapper = IntervenerTwoWrapper.builder().build();
         }
         return intervenerTwoWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerTwoWrapper getIntervenerTwoWrapperIfPopulated() {
+        if (intervenerTwoWrapper != null) {
+            return this.intervenerTwoWrapper;
+        }
+        return null;
     }
 
     @JsonIgnore
@@ -521,11 +568,28 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public IntervenerThreeWrapper getIntervenerThreeWrapperIfPopulated() {
+        if (intervenerThreeWrapper != null) {
+            return this.intervenerThreeWrapper;
+        }
+        return null;
+    }
+
+
+    @JsonIgnore
     public IntervenerFourWrapper getIntervenerFourWrapper() {
         if (intervenerFourWrapper == null) {
             this.intervenerFourWrapper = IntervenerFourWrapper.builder().build();
         }
         return intervenerFourWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerFourWrapper getIntervenerFourWrapperIfPopulated() {
+        if (intervenerFourWrapper != null) {
+            return this.intervenerFourWrapper;
+        }
+        return null;
     }
 
     @JsonIgnore
@@ -824,5 +888,16 @@ public class FinremCaseData {
     private CourtList getCourtListIdOrDefault(CourtList courtList) {
         return Optional.ofNullable(courtList).orElse(new DefaultCourt());
     }
+
+    @JsonIgnore
+    public List<String> getSelectedParties() {
+        DynamicMultiSelectList parties = this.getPartiesOnCase();
+        if (parties == null) {
+            return List.of();
+        }
+        return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
+    }
+
+
 }
 

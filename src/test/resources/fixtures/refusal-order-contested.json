@@ -22,6 +22,26 @@
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
         "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
       },
+      "intervener1": {
+        "intervenerName": "Intervener 1",
+        "intervenerAddress": {
+          "AddressLine1": "Intervener 1 Address Line 1",
+          "AddressLine2": "Intervener 1 Address Line 2",
+          "AddressLine3": "Intervener 1 Address Line 3",
+          "PostTown": "Intervener 1 Post Town",
+          "County": "Intervener 1 County",
+          "PostCode": "Intervener 1 Post Code",
+          "Country": "Intervener 1 Country"
+        },
+        "intervenerPhone": "Intervener 1 Phone",
+        "intervenerEmail": "Intervener 1 Email",
+        "intervenerRepresented": "Yes",
+        "intervenerSolName" : "Intervener 1 Solicitor Name",
+        "intervenerSolPhone" : "Intervener 1 Solicitor Phone",
+        "intervenerSolEmail" : "Intervener 1 Solicitor Email",
+        "intervenerSolicitorFirm" : "Intervener 1 Solicitor Firm",
+        "intervenerSolicitorReference" : "Intervener 1 Solicitor Reference"
+      },
       "solicitorFirm": "Mr",
       "solicitorName": "Solictor",
       "authorisation3": "2010-01-01",

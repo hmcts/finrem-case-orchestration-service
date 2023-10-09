@@ -19,11 +19,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetai
 import java.io.InputStream;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -150,7 +153,38 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(caseDataService, times(1)).setFinancialRemediesCourtDetails(any());
+        verify(caseDataService).setFinancialRemediesCourtDetails(any());
+        verify(idamService, never()).isUserRoleAdmin(anyString());
+    }
+
+    @Test
+    public void givenContestedCase_whenSolicitorTryToCreateCaseWithNonEligiableCourtSelected_thenShowError() throws Exception {
+        doValidCourtDataSetUp();
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+        mvc.perform(post("/case-orchestration/contested/set-frc-details")
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors").isArray())
+            .andExpect(jsonPath("$.errors",
+                hasItem(endsWith("You cannot select High Court or Royal Court of Justice. Please select another court."))));
+
+        verify(caseDataService).setFinancialRemediesCourtDetails(any());
+    }
+
+    @Test
+    public void givenContestedCase_whenCaseWorkerTryToCreateCase_thenDoNotShowError() throws Exception {
+        doValidCourtDataSetUp();
+        when(idamService.isUserRoleAdmin(anyString())).thenReturn(true);
+        mvc.perform(post("/case-orchestration/contested/set-frc-details")
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors").isEmpty());
+
+        verify(caseDataService).setFinancialRemediesCourtDetails(any());
     }
 
     @Test
@@ -317,7 +351,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 is(APP_SOLICITOR_POLICY)))
             .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole",
                 is(RESP_SOLICITOR_POLICY)))
-            .andExpect(jsonPath("$.data.changeOrganisationRequestField").exists());
+            .andExpect(jsonPath("$.data.changeOrganisationRequestField").exists())
+            .andExpect(jsonPath("$.errors.errors").doesNotExist());
     }
 
     @Test

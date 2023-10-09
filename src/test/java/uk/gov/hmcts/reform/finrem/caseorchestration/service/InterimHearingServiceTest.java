@@ -8,9 +8,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -20,9 +26,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
@@ -75,6 +83,12 @@ public class InterimHearingServiceTest extends BaseServiceTest {
     @Autowired
     private InterimHearingHelper interimHearingHelper;
 
+    @MockBean
+    SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+
+    @MockBean
+    FinremCaseDetailsMapper finremCaseDetailsMapper;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String AUTH_TOKEN = "tokien:)";
     private static final String BEFORE_MIGRATION_TEST_JSON =
@@ -89,17 +103,23 @@ public class InterimHearingServiceTest extends BaseServiceTest {
 
 
     @Test
-    public void givenContestedPaperCaseWithBeforeMigrationToHearingCollection_WhenModifiedDuringMigration_ThenItShouldSendToBulkPrint() {
+    public void givenContestedCaseWithBeforeMigrationToHearingCollection_WhenModifiedDuringMigration_ThenItShouldSendToBulkPrint() {
         CaseDetails caseDetails = buildCaseDetails(BEFORE_MIGRATION_TEST_JSON);
-        CaseDetails caseDetailsBefore = buildCaseDetails(MODIFIED_DURING_MIGRATION_TEST_JSON);
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOneWrapper, caseDetails)).thenReturn(Boolean.FALSE);
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
+        CaseDetails caseDetailsBefore = buildCaseDetails(MODIFIED_DURING_MIGRATION_TEST_JSON);
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerWrapper.class), any(CaseDetails.class), any(), any());
 
         Map<String, Object> caseData = caseDetails.getData();
         List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
@@ -114,14 +134,20 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         assertEquals(1, interimHearingList.size());
     }
 
+
     @Test
-    public void givenContestedPaperCaseWithTwoHearing_WhenExistingHearingModified_ThenItShouldSendBothToBulkPrint() {
+    public void givenContestedCaseWithTwoHearing_WhenExistingHearingModified_ThenItShouldSendBothToBulkPrint() {
         CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
+
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
+
+
         CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON);
-
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
-
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
@@ -141,13 +167,18 @@ public class InterimHearingServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenContestedPaperCase_WhenOneNewHearingAddedToExistingCase_ThenItShouldSendOnlyNewHEaringDetailsToBulkPrint() {
+    public void givenContestedCase_WhenOneNewHearingAddedToExistingCase_ThenItShouldSendOnlyNewHEaringDetailsToBulkPrint() {
         CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
-        CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
 
+
+        CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
@@ -163,13 +194,17 @@ public class InterimHearingServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenContestedPaperCase_WhenMultipleHearingAdded_ThenItShouldSendAllToBulkPrint() {
+    public void givenContestedCase_WhenMultipleHearingAdded_ThenItShouldSendAllToBulkPrint() {
         CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
-        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
 
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
+        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
@@ -185,6 +220,30 @@ public class InterimHearingServiceTest extends BaseServiceTest {
             interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseDetails.getData());
 
         assertEquals(3, bulkPrintDocumentsList.size());
+
+    }
+
+
+    @Test
+    public void givenCoreLitigantNotSelectedForCorrespondenceShouldReturnWithErrorOnSubmitInterimHearing() {
+        CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
+
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
+
+        when(selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(any(), anyString())).thenReturn(
+            List.of("error"));
+
+        CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON);
+        List<String> errors = interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
+
+        verifyNoMoreInteractions(bulkPrintService);
+
+        assertEquals(1, errors.size());
     }
 
     @Test
@@ -195,6 +254,19 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
         caseDetails.getData().put("respondentRepresented", "No");
 
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
+
+
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+        when(selectablePartiesCorrespondenceService.shouldSendApplicantCorrespondence(any(CaseDetails.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+        when(selectablePartiesCorrespondenceService.shouldSendRespondentCorrespondence(any(CaseDetails.class))).thenReturn(true);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
+            any(FinremCaseDetails.class))).thenReturn(false);
+
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
@@ -203,6 +275,7 @@ public class InterimHearingServiceTest extends BaseServiceTest {
 
         verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOneWrapper.class), any(CaseDetails.class), any(), any());
 
         List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseDetails.getData());
 
@@ -211,46 +284,30 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         assertEquals("2030-10-10", interimHearingList.get(2).getValue().getInterimHearingDate());
     }
 
-
     @Test
-    public void givenContestedPaperCase_WhenPaperCase_ThenItShouldNotSendNotificaton() {
-        CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
-        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
-
-        caseDetails.getData().put("paperApplication", "Yes");
-
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
-
-        interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
-
-        verify(caseDataService).isPaperApplication(any());
-        verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
-
-        verify(notificationService, never()).isRespondentSolicitorEmailCommunicationEnabled(any());
-        verify(notificationService, never()).isIntervenerSolicitorDigitalAndEmailPopulated(any(), any(CaseDetails.class));
-        verify(notificationService, never()).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
-        verify(notificationService, never()).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
-        verify(notificationService, never()).sendInterimHearingNotificationEmailToIntervenerSolicitor(any(), anyMap(),
-            any(SolicitorCaseDataKeysWrapper.class));
-    }
-
-    @Test
-    public void givenContestedNotPaperCase_WhenPaperCase_ThenItShouldSendNotificaton() {
+    public void givenContestedCase_ThenItShouldSendNotificaton() {
         CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
         caseDetails.getData().put("paperApplication", "No");
 
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
+
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDeets(intervenerOneWrapper);
+
+        when(selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails)).thenReturn(finremCaseDetails);
+
+
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
         interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
 
-        verify(caseDataService).isPaperApplication(any());
 
-        verify(caseDataService, times(3)).isApplicantSolicitorAgreeToReceiveEmails(any());
         verify(notificationService, never()).isIntervenerSolicitorDigitalAndEmailPopulated(any(), any(CaseDetails.class));
-        verify(notificationService, times(3)).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, times(3)).isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
         verify(notificationService, times(3)).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
         verify(notificationService, times(3)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
         verify(notificationService, never()).sendInterimHearingNotificationEmailToIntervenerSolicitor(any(), anyMap(),
@@ -300,5 +357,15 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         assertNull(data.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
         assertNull(data.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
         assertNull(data.get(INTERIM_HEARING_DOCUMENT));
+    }
+
+    private static FinremCaseDetails buildFinremCaseDeets(IntervenerOneWrapper intervenerOneWrapper) {
+        FinremCaseDetails finremCaseDetails =
+            FinremCaseDetails.builder().data(FinremCaseData.builder()
+                    .intervenerOneWrapper(
+                        intervenerOneWrapper)
+                    .build())
+                .build();
+        return finremCaseDetails;
     }
 }
