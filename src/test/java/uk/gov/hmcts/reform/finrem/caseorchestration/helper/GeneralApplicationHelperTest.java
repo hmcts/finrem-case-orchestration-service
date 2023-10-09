@@ -232,6 +232,43 @@ public class GeneralApplicationHelperTest {
         assertData(resultingList);
     }
 
+    @Test
+    public void givenGeneralApplicationReceivedFromFieldSet_ThenShouldUpdateApplicantAndRespondentColl() {
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
+        List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
+            .getGeneralApplications();
+        collection.get(0).getValue().setGeneralApplicationReceivedFrom(APPLICANT);
+        collection.forEach(x -> x.getValue().setGeneralApplicationSender(null));
+        helper.populateGeneralApplicationSender(caseData, collection);
+        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
+                .getValue().getGeneralApplicationSender().getValue().getLabel());
+        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
+                .getValue().getGeneralApplicationSender().getValue().getCode());
+        assertNull(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0).getValue()
+                .getGeneralApplicationReceivedFrom());
+    }
+
+    @Test
+    public void givenGeneralApplicationReceivedFromFieldNull_ThenShouldUpdateApplicantAndRespondentColl() {
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
+        List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
+                .getGeneralApplications();
+        collection.get(0).getValue().setGeneralApplicationReceivedFrom(APPLICANT);
+        collection.forEach(x -> x.getValue().setGeneralApplicationSender(null));
+
+        helper.populateGeneralApplicationSender(caseData, collection);
+        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
+                .getValue().getGeneralApplicationSender().getValue().getLabel());
+        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
+                .getValue().getGeneralApplicationSender().getValue().getCode());
+        assertNull(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0).getValue()
+                .getGeneralApplicationReceivedFrom());
+    }
+
     private void assertData(List<GeneralApplicationItems> resultingList) {
         assertEquals(APPLICANT, resultingList.get(0).getGeneralApplicationSender().getValue().getCode());
         assertEquals(APPLICANT, resultingList.get(0).getGeneralApplicationSender().getValue().getLabel());
