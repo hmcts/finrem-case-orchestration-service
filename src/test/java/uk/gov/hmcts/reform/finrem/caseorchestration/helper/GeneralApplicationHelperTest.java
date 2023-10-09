@@ -22,6 +22,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
@@ -42,9 +46,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESP_GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3_GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
@@ -277,6 +285,30 @@ public class GeneralApplicationHelperTest {
                 .getGeneralApplicationReceivedFrom());
     }
 
+    @Test
+    public void givenIntervenersOnCase_ThenShouldAddToDynamicList() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper.builder().intervenerName("firstIntervener").build();
+        caseData.setIntervenerOneWrapper(oneWrapper);
+        IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper.builder().intervenerName("secondIntervener").build();
+        caseData.setIntervenerTwoWrapper(twoWrapper);
+        IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper.builder().intervenerName("thirdIntervener").build();
+        caseData.setIntervenerThreeWrapper(threeWrapper);
+        IntervenerFourWrapper fourWrapper = IntervenerFourWrapper.builder().intervenerName("fourthIntervener").build();
+        caseData.setIntervenerFourWrapper(fourWrapper);
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
+        helper.buildDynamicIntervenerList(dynamicListElements, caseData);
+        assertEquals(dynamicListElements.get(3).getLabel(), INTERVENER1);
+        assertEquals(dynamicListElements.get(4).getLabel(), INTERVENER2);
+        assertEquals(dynamicListElements.get(5).getLabel(), INTERVENER3);
+        assertEquals(dynamicListElements.get(6).getLabel(), INTERVENER4);
+        assertEquals(dynamicListElements.get(3).getCode(), INTERVENER1);
+        assertEquals(dynamicListElements.get(4).getCode(), INTERVENER2);
+        assertEquals(dynamicListElements.get(5).getCode(), INTERVENER3);
+        assertEquals(dynamicListElements.get(6).getCode(), INTERVENER4);
+    }
     private void assertData(List<GeneralApplicationItems> resultingList) {
         assertEquals(APPLICANT, resultingList.get(0).getGeneralApplicationSender().getValue().getCode());
         assertEquals(APPLICANT, resultingList.get(0).getGeneralApplicationSender().getValue().getLabel());
