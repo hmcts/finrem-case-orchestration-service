@@ -48,6 +48,8 @@ public class GeneralApplicationAboutToStartHandler implements CallbackHandler<Ma
             caseData.put(GENERAL_APPLICATION_COLLECTION, existingGeneralApplication);
         }
 
+        //comment to remove later
+
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 }
