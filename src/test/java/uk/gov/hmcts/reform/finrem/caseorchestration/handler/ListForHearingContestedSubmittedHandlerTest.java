@@ -5,23 +5,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
+import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ListForHearingContestedSubmittedHandlerTest {
@@ -31,6 +36,9 @@ class ListForHearingContestedSubmittedHandlerTest {
     private HearingDocumentService hearingDocumentService;
     @Mock
     private AdditionalHearingDocumentService additionalHearingDocumentService;
+
+    @Mock
+    private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     @InjectMocks
     private ListForHearingContestedSubmittedHandler handler;
@@ -65,51 +73,73 @@ class ListForHearingContestedSubmittedHandlerTest {
 
     @Test
     void givenCase_whenSchedulingFirstTime_thenSendInitialCorrespondence() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
-        caseDetailsBefore.setData(new HashMap<>());
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetailsBefore =
+            FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
-        when(hearingDocumentService.alreadyHadFirstHearing(caseDetails)).thenReturn(false);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(), any());
-        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any());
+        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
+        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
     }
 
     @Test
     void givenCase_whenSchedulingSecondTime_thenSendAdditionalHearingDocuments() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
-        caseDetailsBefore.setData(new HashMap<>());
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetailsBefore =
+            FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().formC(CaseDocument.builder().build()).build()).build();
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
-        when(hearingDocumentService.alreadyHadFirstHearing(caseDetails)).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(any(), any());
-        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(), any());
+        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
+        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
     }
 
     @Test
     void givenCase_whenCaseDetailsBeforeDoNotExist_thenSendInitialCorrespondence() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(), any());
-        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any());
+        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
+        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
     }
 
-    private CallbackRequest buildCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
-        caseDetails.setData(caseData);
-        return CallbackRequest.builder().eventId(EventType.SEND_ORDER.getCcdType())
+    private FinremCallbackRequest buildCallbackRequest() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L)
+            .data(FinremCaseData.builder().partiesOnCase(getParties()).build()).build();
+        return FinremCallbackRequest.builder().eventType(EventType.SEND_ORDER)
             .caseDetails(caseDetails).build();
+    }
+
+    private DynamicMultiSelectList getParties() {
+
+        List<DynamicMultiSelectListElement> list = new ArrayList<>();
+        partyList().forEach(role -> list.add(getElementList(role)));
+
+        return DynamicMultiSelectList.builder()
+            .value(of(DynamicMultiSelectListElement.builder()
+                .code(CaseRole.APP_SOLICITOR.getCcdCode())
+                .label(CaseRole.APP_SOLICITOR.getCcdCode())
+                .build()))
+            .listItems(list)
+            .build();
+    }
+
+
+    private List<String> partyList() {
+        return of(CaseRole.APP_SOLICITOR.getCcdCode(),
+            CaseRole.RESP_SOLICITOR.getCcdCode(), CaseRole.INTVR_SOLICITOR_1.getCcdCode(), CaseRole.INTVR_SOLICITOR_2.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode(), CaseRole.INTVR_SOLICITOR_4.getCcdCode());
+    }
+
+    private DynamicMultiSelectListElement getElementList(String role) {
+        return DynamicMultiSelectListElement.builder()
+            .code(role)
+            .label(role)
+            .build();
     }
 
 }

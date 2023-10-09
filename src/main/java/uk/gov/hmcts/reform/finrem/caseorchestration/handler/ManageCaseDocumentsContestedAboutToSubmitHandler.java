@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ import java.util.Optional;
 @Service
 public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
-    public static final String CHOOSE_A_DIFFERENT_PARTY = " not present on the case, please choose a different party";
+    public static final String CHOOSE_A_DIFFERENT_PARTY = " not present on the case, do you want to continue?";
     public static final String INTERVENER_1 = "Intervener 1 ";
     public static final String INTERVENER_2 = "Intervener 2 ";
     public static final String INTERVENER_3 = "Intervener 3 ";
@@ -60,11 +61,9 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = getValidatedResponse(caseData);
-        if (response.hasErrors()) {
-            return response;
-        }
+        List<String> warnings = new ArrayList<>();
 
+        getValidatedResponse(caseData, warnings);
 
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
@@ -78,34 +77,38 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
             deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
     }
 
-    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> getValidatedResponse(FinremCaseData caseData) {
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+    private void getValidatedResponse(FinremCaseData caseData, List<String> warnings) {
         List<UploadCaseDocumentCollection> manageCaseDocumentCollection = caseData.getManageCaseDocumentCollection();
 
         if (StringUtils.isBlank(caseData.getIntervenerOneWrapper().getIntervenerName())
-            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageCaseDocumentCollection)) {
-            response.getErrors().add(INTERVENER_1 + CHOOSE_A_DIFFERENT_PARTY);
-        } else if (StringUtils.isBlank(caseData.getIntervenerTwoWrapper().getIntervenerName())
-            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_TWO, manageCaseDocumentCollection)) {
-            response.getErrors().add(INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY);
-        } else if (StringUtils.isBlank(caseData.getIntervenerThreeWrapper().getIntervenerName())
-            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_THREE, manageCaseDocumentCollection)) {
-            response.getErrors().add(INTERVENER_3 + CHOOSE_A_DIFFERENT_PARTY);
-        } else if (StringUtils.isBlank(caseData.getIntervenerFourWrapper().getIntervenerName())
-            && isIntervernerPartySelected(CaseDocumentParty.INTERVENER_FOUR, manageCaseDocumentCollection)) {
-            response.getErrors().add(INTERVENER_4 + CHOOSE_A_DIFFERENT_PARTY);
+            && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageCaseDocumentCollection)) {
+            warnings.add(INTERVENER_1 + CHOOSE_A_DIFFERENT_PARTY);
         }
-        return response;
+        if (StringUtils.isBlank(caseData.getIntervenerTwoWrapper().getIntervenerName())
+            && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_TWO, manageCaseDocumentCollection)) {
+            warnings.add(INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY);
+        }
+        if (StringUtils.isBlank(caseData.getIntervenerThreeWrapper().getIntervenerName())
+            && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_THREE, manageCaseDocumentCollection)) {
+            warnings.add(INTERVENER_3 + CHOOSE_A_DIFFERENT_PARTY);
+        }
+        if (StringUtils.isBlank(caseData.getIntervenerFourWrapper().getIntervenerName())
+            && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_FOUR, manageCaseDocumentCollection)) {
+            warnings.add(INTERVENER_4 + CHOOSE_A_DIFFERENT_PARTY);
+        }
     }
 
-    private boolean isIntervernerPartySelected(CaseDocumentParty caseDocumentParty,
-                                               List<UploadCaseDocumentCollection> manageCaseDocumentCollection) {
-        return manageCaseDocumentCollection.stream().anyMatch(documentCollection ->
-            documentCollection.getUploadCaseDocument().getCaseDocumentParty().equals(caseDocumentParty));
+    private boolean isIntervenerPartySelected(CaseDocumentParty caseDocumentParty,
+                                              List<UploadCaseDocumentCollection> manageCaseDocumentCollection) {
+        return manageCaseDocumentCollection.stream().anyMatch(documentCollection -> {
+            if (documentCollection.getUploadCaseDocument().getCaseDocumentParty() != null) {
+                return caseDocumentParty.equals(documentCollection.getUploadCaseDocument().getCaseDocumentParty());
+            }
+            return false;
+        });
     }
 
     private void deleteRemovedDocuments(FinremCaseData caseData,

@@ -10,12 +10,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.frcupateinfo.UpdateFrcInfoLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,7 +26,11 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator.LETTER_DATE_FORMAT;
@@ -35,12 +41,14 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
     private DocumentHelper documentHelper;
 
     @Mock
-    private CaseDataService caseDataService;
+    LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper;
 
     @InjectMocks
     UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator;
 
     private CaseDetails caseDetails;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     protected static final String APPLICANT_FULL_NAME = "applicantFullName";
     protected static final String RESPONDENT_FULL_NAME_CONTESTED = "respondentFullNameContested";
@@ -60,9 +68,11 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
 
     @Test
     public void givenApplicant_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())).thenReturn(false);
-        when(caseDataService.buildFullApplicantName(caseDetails)).thenReturn(APPLICANT_FULL_NAME);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(APP_FORMATTED_ADDRESS);
+
+        when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
+            AddresseeDetails.builder().addresseeName(APPLICANT_FULL_NAME)
+                .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(APPLICANT_ADDRESS), Map.class)).build());
 
         UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, APPLICANT, null);
         assertLetterDetails(letterDetails, (String) caseDetails.getData().get(SOLICITOR_REFERENCE));
@@ -73,9 +83,12 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
 
     @Test
     public void givenRespondent_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())).thenReturn(false);
-        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(RESP_FORMATTED_ADDRESS);
+
+        when(letterAddresseeGeneratorMapper.generate(caseDetails, RESPONDENT)).thenReturn(
+            AddresseeDetails.builder().addresseeName(RESPONDENT_FULL_NAME_CONTESTED)
+                .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(RESPONDENT_ADDRESS), Map.class)).build());
+
 
         UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, RESPONDENT, null);
         assertLetterDetails(letterDetails, (String) caseDetails.getData().get(RESP_SOLICITOR_REFERENCE));
@@ -86,8 +99,11 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
 
     @Test
     public void givenAppSolicitor_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())).thenReturn(true);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(APP_SOL_FORMATTED_ADDRESS);
+
+        when(letterAddresseeGeneratorMapper.generate(caseDetails, APPLICANT)).thenReturn(
+            AddresseeDetails.builder().addresseeName("Solicitor")
+                .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(CONTESTED_SOLICITOR_ADDRESS), Map.class)).build());
 
         UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, APPLICANT, null);
         assertLetterDetails(letterDetails, (String) caseDetails.getData().get(SOLICITOR_REFERENCE));
@@ -98,8 +114,10 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
 
     @Test
     public void givenRespSolicitor_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())).thenReturn(true);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(RESP_SOL_FORMATTED_ADDRESS);
+        when(letterAddresseeGeneratorMapper.generate(caseDetails, RESPONDENT)).thenReturn(
+            AddresseeDetails.builder().addresseeName("respSolicitor")
+                .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(RESP_SOLICITOR_ADDRESS), Map.class)).build());
 
         UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, RESPONDENT, null);
         assertLetterDetails(letterDetails, (String) caseDetails.getData().get(RESP_SOLICITOR_REFERENCE));
