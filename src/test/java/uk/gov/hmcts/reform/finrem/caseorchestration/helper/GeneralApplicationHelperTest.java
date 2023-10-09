@@ -255,17 +255,25 @@ public class GeneralApplicationHelperTest {
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
+        List<GeneralApplicationsCollection> collection2 = new ArrayList<>(caseData.getGeneralApplicationWrapper()
+                .getGeneralApplications());
+        caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(collection2);
         List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
                 .getGeneralApplications();
         collection.get(0).getValue().setGeneralApplicationReceivedFrom(APPLICANT);
         collection.forEach(x -> x.getValue().setGeneralApplicationSender(null));
-
         helper.populateGeneralApplicationSender(caseData, collection);
         assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
                 .getValue().getGeneralApplicationSender().getValue().getLabel());
         assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
                 .getValue().getGeneralApplicationSender().getValue().getCode());
+        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(1)
+                .getValue().getGeneralApplicationSender().getValue().getLabel());
+        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(1)
+                .getValue().getGeneralApplicationSender().getValue().getCode());
         assertNull(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0).getValue()
+                .getGeneralApplicationReceivedFrom());
+        assertNull(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(1).getValue()
                 .getGeneralApplicationReceivedFrom());
     }
 
