@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderOtherDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderOtherDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
@@ -36,6 +38,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationOrderType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -175,6 +179,42 @@ public class DocumentHelper {
             .toList();
     }
 
+
+    /**
+     * Return List Object for given Case with the given indentation used.
+     * <p>Please use @{@link #getVariationOrderDocumentsData(Map)}</p>
+     * @param caseData instance of Map
+     * @return List Object
+     */
+    public List<CaseDocument> getVariationOrderDocumentsData(Map<String, Object> caseData) {
+        return ofNullable(caseData.get("otherVariationCollection"))
+            .map(this::convertToVariationOrderDataList)
+            .orElse(emptyList())
+            .stream()
+            .map(VariationOrderCollection::getTypeOfDocument)
+            .map(VariationOrderType::getUploadedDocument)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+
+    /**
+     * Return List Object for given Case with the given indentation used.
+     * <p>Please use @{@link #getConsentOrderOtherDocumentsData(Map)}</p>
+     * @param caseData instance of Map
+     * @return List Object
+     */
+    public List<CaseDocument> getConsentOrderOtherDocumentsData(Map<String, Object> caseData) {
+        return ofNullable(caseData.get("otherCollection"))
+            .map(this::convertToOtherDataList)
+            .orElse(emptyList())
+            .stream()
+            .map(ConsentOrderOtherDocumentCollection::getTypeOfDocument)
+            .map(ConsentOrderOtherDocumentType::getUploadedDocument)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
     /**
      * Return List Object for given Case with the given indentation used.
      * <p>Please use @{@link #getFormADocumentsData(FinremCaseData)}</p>
@@ -265,6 +305,15 @@ public class DocumentHelper {
         });
     }
 
+    private List<VariationOrderCollection> convertToVariationOrderDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    private List<ConsentOrderOtherDocumentCollection> convertToOtherDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
 
     private List<PaymentDocumentCollection> convertToPaymentDocumentCollectionList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {

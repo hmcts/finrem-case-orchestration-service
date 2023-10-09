@@ -15,10 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -69,6 +72,8 @@ public class CaseDataController extends BaseController {
     private final FeatureToggleService featureToggleService;
     private final CaseFlagsService caseFlagsService;
     private final IdamAuthService idamAuthService;
+    private final BulkPrintDocumentService service;
+    private final ConsentOrderService consentOrderService;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Set default values for consented journey")
@@ -181,14 +186,19 @@ public class CaseDataController extends BaseController {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Add empty org policies for both parties")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setOrgPolicies(
-        @RequestBody CallbackRequest callbackRequest
+        @RequestBody CallbackRequest callbackRequest,
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (featureToggleService.isSolicitorNoticeOfChangeEnabled()) {
             addDefaultChangeOrganisationRequest(caseData);
         }
         addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        List<String> errors = new ArrayList<>();
+        List<CaseDocument> caseDocuments = consentOrderService.checkIfD81DocumentContainsEncryption(caseData);
+
+        caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, "na", errors, authToken));
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
 
     private void addDefaultChangeOrganisationRequest(Map<String, Object> caseData) {
