@@ -1,38 +1,40 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFERRED_DETAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
-
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class GeneralApplicationReferToJudgeAboutToStartHandler
-    implements CallbackHandler<Map<String, Object>>, GeneralApplicationHandler {
+public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCallbackHandler
+    implements GeneralApplicationHandler {
 
     private final GeneralApplicationHelper helper;
+    private final GeneralApplicationService service;
+
+    public GeneralApplicationReferToJudgeAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
+                                        GeneralApplicationService service) {
+        super(finremCaseDetailsMapper);
+        this.helper = helper;
+        this.service = service;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -42,26 +44,28 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
-        CallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
+        FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
         log.info("Received on start request to refer general application for Case ID: {}", caseId);
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.remove(GENERAL_APPLICATION_REFER_LIST);
+        FinremCaseData caseData = caseDetails.getData();
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferList(null);
+
+        helper.populateGeneralApplicationSender(caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getReadyForRejectOrReadyForReferList(caseData);
         AtomicInteger index = new AtomicInteger(0);
-        if (existingGeneralApplicationList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
-            String judgeEmail = Objects.toString(caseData.get(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL), null);
+        if (existingGeneralApplicationList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
+            String judgeEmail = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationReferToJudgeEmail(), null);
             log.info("general application has referred to judge while existing ga not moved to collection for Case ID: {}",
                 caseDetails.getId());
             if (existingGeneralApplicationList.isEmpty() && judgeEmail != null) {
                 List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
                 if (dynamicListElements.isEmpty()) {
-                    return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
+                    return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                         .errors(List.of("There are no general application available to refer.")).build();
                 }
             }
@@ -73,15 +77,15 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler
             log.info("setting refer list for Case ID: {}", caseDetails.getId());
             List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
             if (dynamicListElements.isEmpty()) {
-                return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of("There are no general application available to refer.")).build();
             }
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
-            caseData.put(GENERAL_APPLICATION_REFER_LIST, dynamicList);
+            caseData.getGeneralApplicationWrapper().setGeneralApplicationReferList(dynamicList);
         }
-        caseData.remove(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL);
-        caseData.remove(GENERAL_APPLICATION_REFERRED_DETAIL);
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(null);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferDetail(null);
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
     private List<DynamicListElement> getDynamicListElements(List<GeneralApplicationCollectionData> existingGeneralApplicationList,
@@ -91,7 +95,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler
             .toList();
     }
 
-    private void setReferListForNonCollectionGeneralApplication(Map<String, Object> caseData,
+    private void setReferListForNonCollectionGeneralApplication(FinremCaseData caseData,
                                                                 AtomicInteger index,
                                                                 String userAuthorisation, String caseId) {
         GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);
@@ -102,6 +106,6 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler
         dynamicListElementsList.add(dynamicListElements);
 
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
-        caseData.put(GENERAL_APPLICATION_REFER_LIST, dynamicList);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferList(dynamicList);
     }
 }

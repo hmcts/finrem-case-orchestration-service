@@ -28,6 +28,7 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
+            && CaseType.CONTESTED.equals(caseType)
             && (EventType.CREATE_GENERAL_LETTER.equals(eventType)
             || EventType.CREATE_GENERAL_LETTER_JUDGE.equals(eventType));
     }

@@ -10,15 +10,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.barristers.BarristerLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,7 +29,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator.LETTER_DATE_FORMAT;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,7 +50,7 @@ public class BarristerLetterDetailsGeneratorTest {
     private DocumentHelper documentHelper;
 
     @Mock
-    private CaseDataService caseDataService;
+    private LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper;
 
     @Mock
     private PrdOrganisationService prdOrganisationService;
@@ -55,6 +59,8 @@ public class BarristerLetterDetailsGeneratorTest {
     private BarristerLetterDetailsGenerator barristerLetterDetailsGenerator;
 
     private CaseDetails caseDetails;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
     public void setUp() {
@@ -67,11 +73,13 @@ public class BarristerLetterDetailsGeneratorTest {
 
     @Test
     public void givenApplicant_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())).thenReturn(false);
-        when(caseDataService.buildFullApplicantName(caseDetails)).thenReturn(APPLICANT_FULL_NAME);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(APP_FORMATTED_ADDRESS);
         when(prdOrganisationService.findOrganisationByOrgId(APP_BARR_ORG_ID))
             .thenReturn(organisationsResponse(APP_BARR_ORG_NAME));
+
+        when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
+            AddresseeDetails.builder().addresseeName(APPLICANT_FULL_NAME)
+                .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(APPLICANT_ADDRESS), Map.class)).build());
 
         BarristerLetterDetails letterDetails = barristerLetterDetailsGenerator.generate(caseDetails, APPLICANT, barrister(APP_BARR_ORG_ID));
         assertLetterDetails(letterDetails);
@@ -84,11 +92,13 @@ public class BarristerLetterDetailsGeneratorTest {
 
     @Test
     public void givenRespondent_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())).thenReturn(false);
-        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(RESP_FORMATTED_ADDRESS);
         when(prdOrganisationService.findOrganisationByOrgId(RESP_BARR_ORG_ID))
             .thenReturn(organisationsResponse(RESP_BARR_ORG_NAME));
+
+        when(letterAddresseeGeneratorMapper.generate(caseDetails, RESPONDENT)).thenReturn(
+            AddresseeDetails.builder().addresseeName(RESPONDENT_FULL_NAME_CONTESTED)
+                .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(RESPONDENT_ADDRESS), Map.class)).build());
 
         BarristerLetterDetails letterDetails = barristerLetterDetailsGenerator.generate(caseDetails, RESPONDENT, barrister(RESP_BARR_ORG_ID));
         assertLetterDetails(letterDetails);
