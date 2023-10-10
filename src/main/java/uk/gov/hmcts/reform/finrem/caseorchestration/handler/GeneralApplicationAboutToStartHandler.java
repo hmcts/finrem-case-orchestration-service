@@ -37,7 +37,6 @@ public class GeneralApplicationAboutToStartHandler implements CallbackHandler<Ma
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
         log.info("Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseId);
-        //remove comment later
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
