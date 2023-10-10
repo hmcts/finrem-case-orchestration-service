@@ -1,13 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag.FlagDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag.FlagDetailData;
@@ -19,6 +23,7 @@ import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -26,12 +31,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_FLAGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_RESPONDENT_FLAGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CaseFlagsServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CaseFlagsServiceTest {
 
-    public static final String APPLICANT_NAME = "App Name";
-    public static final String RESPONDENT_NAME = "Resp Name";
+    static final String APPLICANT_NAME = "App Name";
+    static final String RESPONDENT_NAME = "Resp Name";
 
     @Mock
     private CaseDataService caseDataService;
@@ -41,7 +47,7 @@ public class CaseFlagsServiceTest {
     private CaseFlagsService caseFlagsService;
 
     @Test
-    public void givenCaseFlags_whenHandleAboutToSubmit_thenSetApplicantFlagDetails() {
+    void givenCaseFlags_whenHandleAboutToSubmit_thenSetApplicantFlagDetails() {
         when(caseDataService.buildFullApplicantName(any())).thenReturn(APPLICANT_NAME);
 
         CaseDetails caseDetails = caseData();
@@ -58,7 +64,27 @@ public class CaseFlagsServiceTest {
     }
 
     @Test
-    public void givenCaseFlags_whenHandleAboutToSubmit_thenSetRespondentFlagDetails() {
+    void givenCaseFlags_whenHandleAboutToSubmit_thenSetApplicantFlagDetails_v1() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = caseDetails.getData();
+        finremCaseData.getCaseFlagsWrapper().setApplicantFlags(flagDetailsData());
+        finremCaseData.getContactDetailsWrapper().setApplicantFmName("App");
+        finremCaseData.getContactDetailsWrapper().setApplicantLname("Name");
+
+        caseFlagsService.setCaseFlagInformation(caseDetails);
+
+        FinremCaseData data = caseDetails.getData();
+
+        CaseFlag applicantFlags = data.getCaseFlagsWrapper().getApplicantFlags();
+
+        assertEquals(APPLICANT_NAME, applicantFlags.getPartyName());
+        assertEquals(APPLICANT, applicantFlags.getRoleOnCase());
+    }
+
+
+    @Test
+    void givenCaseFlags_whenHandleAboutToSubmit_thenSetRespondentFlagDetails() {
         when(caseDataService.buildFullRespondentName(any())).thenReturn(RESPONDENT_NAME);
 
         CaseDetails caseDetails = caseData();
@@ -75,7 +101,26 @@ public class CaseFlagsServiceTest {
     }
 
     @Test
-    public void givenNoCaseFlags_whenHandleAboutToSubmit_thenSetDefaultCaseFlagField() {
+    void givenCaseFlags_whenHandleAboutToSubmit_thenSetRespondentFlagDetails_v1() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = caseDetails.getData();
+        finremCaseData.getCaseFlagsWrapper().setRespondentFlags(flagDetailsData());
+        finremCaseData.getContactDetailsWrapper().setAppRespondentFmName("Resp");
+        finremCaseData.getContactDetailsWrapper().setAppRespondentLName("Name");
+
+        caseFlagsService.setCaseFlagInformation(caseDetails);
+
+        FinremCaseData data = caseDetails.getData();
+
+        CaseFlag applicantFlags = data.getCaseFlagsWrapper().getRespondentFlags();
+
+        assertEquals(RESPONDENT_NAME, applicantFlags.getPartyName());
+        assertEquals(RESPONDENT, applicantFlags.getRoleOnCase());
+    }
+
+    @Test
+    void givenNoCaseFlags_whenHandleAboutToSubmit_thenSetDefaultCaseFlagField() {
         when(caseDataService.buildFullApplicantName(any())).thenReturn(APPLICANT_NAME);
         when(caseDataService.buildFullRespondentName(any())).thenReturn(RESPONDENT_NAME);
 
@@ -95,7 +140,7 @@ public class CaseFlagsServiceTest {
     }
 
     @Test
-    public void givenNoCaseFlags_whenHandleAboutToSubmit_thenSetCaseLevelFlags() {
+    void givenNoCaseFlags_whenHandleAboutToSubmit_thenSetCaseLevelFlags() {
         CaseDetails caseDetails = caseData();
 
         caseFlagsService.setCaseFlagInformation(caseDetails);
@@ -103,6 +148,20 @@ public class CaseFlagsServiceTest {
         Map<String, Object> caseData = caseDetails.getData();
 
         CaseFlag caseFlag = objectMapper.convertValue(caseData.get(CASE_LEVEL_FLAGS), CaseFlag.class);
+        assertThat(caseFlag.getPartyName(), is("Case"));
+        assertThat(caseFlag.getRoleOnCase(), is("Case"));
+    }
+
+    @Test
+    void givenNoCaseFlags_whenHandleAboutToSubmit_thenSetCaseLevelFlags_v1() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        caseFlagsService.setCaseFlagInformation(caseDetails);
+
+        FinremCaseData data = caseDetails.getData();
+
+        CaseFlag caseFlag = data.getCaseFlagsWrapper().getCaseFlags();
         assertThat(caseFlag.getPartyName(), is("Case"));
         assertThat(caseFlag.getRoleOnCase(), is("Case"));
     }
@@ -120,5 +179,14 @@ public class CaseFlagsServiceTest {
                     .value(FlagDetail.builder().build())
                     .build()
             )).build();
+    }
+
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.AMEND_CONSENT_ORDER)
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
+                .data(FinremCaseData.builder().ccdCaseType(CONSENTED).build()).build())
+            .build();
     }
 }

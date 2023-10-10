@@ -10,26 +10,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 @Slf4j
 @Service
-public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallbackHandler {
+public class AmendConsentOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ConsentOrderService consentOrderService;
-    private final IdamService idamService;
     private final CaseFlagsService caseFlagsService;
 
-    public SolicitorCreateConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                 ConsentOrderService consentOrderService,
-                                                 IdamService idamService,
+    public AmendConsentOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                              ConsentOrderService consentOrderService,
                                                  CaseFlagsService caseFlagsService) {
         super(finremCaseDetailsMapper);
         this.consentOrderService = consentOrderService;
-        this.idamService = idamService;
         this.caseFlagsService = caseFlagsService;
     }
 
@@ -37,7 +32,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.SOLICITOR_CREATE.equals(eventType);
+            && EventType.AMEND_CONSENT_ORDER.equals(eventType);
     }
 
     @Override
@@ -45,16 +40,13 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested event {} about to start callback for case id: {}",
-            EventType.SOLICITOR_CREATE, caseDetails.getId());
+            EventType.RESPOND_TO_ORDER, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.setLatestConsentOrder(caseDocument);
-        caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
 
-        if (!idamService.isUserRoleAdmin(userAuthorisation)) {
-            caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        }
+        caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
     }

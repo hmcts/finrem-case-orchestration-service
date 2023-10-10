@@ -9,8 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.io.InputStream;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class ConsentOrderServiceTest extends BaseServiceTest {
@@ -28,6 +30,13 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
                  getClass().getResourceAsStream(PATH + fileName)) {
             callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
+    }
+
+    @Test
+    public void checkIfDocumentIsEncrypted() throws Exception {
+        setUpCaseDetails("draft-consent-order.json");
+        List<CaseDocument> caseDocuments = consentOrderService.checkIfD81DocumentContainsEncryption(callbackRequest.getCaseDetails().getData());
+        assertEquals(5, caseDocuments.size());
     }
 
     @Test
