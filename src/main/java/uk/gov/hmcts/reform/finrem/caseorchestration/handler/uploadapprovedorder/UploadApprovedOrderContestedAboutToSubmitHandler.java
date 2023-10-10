@@ -33,6 +33,8 @@ public class UploadApprovedOrderContestedAboutToSubmitHandler
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
         CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        return uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, userAuthorisation);
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+
+        return uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, caseDetailsBefore, userAuthorisation);
     }
 }
