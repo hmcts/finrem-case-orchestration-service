@@ -65,54 +65,54 @@ public class GeneralApplicationHelper {
         switch (collectionName) {
             case INTERVENER1_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getIntervener1GeneralApplications())
-                    .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
+                        .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
             }
             case INTERVENER2_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getIntervener2GeneralApplications())
-                    .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
+                        .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
             }
             case INTERVENER3_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getIntervener3GeneralApplications())
-                    .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
+                        .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
             }
             case INTERVENER4_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getIntervener4GeneralApplications())
-                    .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
+                        .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
             }
             case APP_RESP_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getAppRespGeneralApplications())
-                    .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
+                        .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
             }
             default -> {
                 return Optional.ofNullable(wrapper.getGeneralApplications())
-                    .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
+                        .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
             }
         }
     }
 
     public List<GeneralApplicationCollectionData> getReadyForRejectOrReadyForReferList(FinremCaseData caseData) {
         return getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION).stream()
-            .filter(obj -> Objects.equals(obj.getGeneralApplicationItems().getGeneralApplicationStatus(), CREATED.getId()))
-            .toList();
+                .filter(obj -> Objects.equals(obj.getGeneralApplicationItems().getGeneralApplicationStatus(), CREATED.getId()))
+                .toList();
     }
 
     public List<GeneralApplicationCollectionData> getReferredList(FinremCaseData caseData) {
         return getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION).stream()
-            .filter(obj -> Objects.equals(obj.getGeneralApplicationItems().getGeneralApplicationStatus(), REFERRED.getId()))
-            .toList();
+                .filter(obj -> Objects.equals(obj.getGeneralApplicationItems().getGeneralApplicationStatus(), REFERRED.getId()))
+                .toList();
     }
 
     public List<GeneralApplicationCollectionData> getOutcomeList(FinremCaseData caseData) {
         return getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION).stream()
-            .filter(this::isEquals)
-            .toList();
+                .filter(this::isEquals)
+                .toList();
     }
 
     private boolean isEquals(GeneralApplicationCollectionData obj) {
         String generalApplicationStatus = obj.getGeneralApplicationItems().getGeneralApplicationStatus();
         return (Objects.equals(generalApplicationStatus, APPROVED.getId())
-            || Objects.equals(generalApplicationStatus, NOT_APPROVED.getId())
-            || Objects.equals(generalApplicationStatus, OTHER.getId()));
+                || Objects.equals(generalApplicationStatus, NOT_APPROVED.getId())
+                || Objects.equals(generalApplicationStatus, OTHER.getId()));
     }
 
 
@@ -151,9 +151,9 @@ public class GeneralApplicationHelper {
             String collectionId = UUID.randomUUID().toString();
             caseData.getGeneralApplicationWrapper().setGeneralApplicationTracking(collectionId);
             return GeneralApplicationCollectionData.builder()
-                .id(collectionId)
-                .generalApplicationItems(getApplicationItems(caseData, userAuthorisation, caseId))
-                .build();
+                    .id(collectionId)
+                    .generalApplicationItems(getApplicationItems(caseData, userAuthorisation, caseId))
+                    .build();
         }
         return null;
     }
@@ -163,9 +163,9 @@ public class GeneralApplicationHelper {
                                                                                   String userAuthorisation, String caseId) {
         if (caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             return GeneralApplicationCollectionData.builder()
-                .id(collectionId)
-                .generalApplicationItems(getApplicationItems(caseData, userAuthorisation, caseId))
-                .build();
+                    .id(collectionId)
+                    .generalApplicationItems(getApplicationItems(caseData, userAuthorisation, caseId))
+                    .build();
         }
         return null;
     }
@@ -173,13 +173,13 @@ public class GeneralApplicationHelper {
 
     public int getCompareTo(GeneralApplicationCollectionData e1, GeneralApplicationCollectionData e2) {
         if (e2 == null || e2.getGeneralApplicationItems() == null
-            || e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate() == null
-            || e1 == null || e1.getGeneralApplicationItems() == null
-            || e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate() == null) {
+                || e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate() == null
+                || e1 == null || e1.getGeneralApplicationItems() == null
+                || e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate() == null) {
             return 0;
         }
         return e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate()
-            .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+                .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
     }
 
     public DynamicList objectToDynamicList(Object object) {
@@ -201,9 +201,9 @@ public class GeneralApplicationHelper {
             caseData.getGeneralApplicationWrapper().setGeneralApplicationTracking(null);
 
             List<GeneralApplicationData> generalApplicationList
-                = Optional.ofNullable(caseData.getGeneralApplicationWrapper().getGeneralApplicationDocumentCollection())
-                .map(this::convertToGeneralApplicationDataList)
-                .orElse(new ArrayList<>());
+                    = Optional.ofNullable(caseData.getGeneralApplicationWrapper().getGeneralApplicationDocumentCollection())
+                    .map(this::convertToGeneralApplicationDataList)
+                    .orElse(new ArrayList<>());
 
             if (generalApplicationList.size() == 1) {
                 caseData.getGeneralApplicationWrapper().setGeneralApplicationDocumentCollection(null);
@@ -221,16 +221,16 @@ public class GeneralApplicationHelper {
 
     public DynamicRadioListElement getDynamicListElements(String code, String label) {
         return DynamicRadioListElement.builder()
-            .code(code)
-            .label(label)
-            .build();
+                .code(code)
+                .label(label)
+                .build();
     }
 
     public DynamicRadioList getDynamicRadioList(List<DynamicRadioListElement> dynamicRadioListElement) {
         return DynamicRadioList.builder()
-            .value(dynamicRadioListElement.get(0))
-            .listItems(dynamicRadioListElement)
-            .build();
+                .value(dynamicRadioListElement.get(0))
+                .listItems(dynamicRadioListElement)
+                .build();
     }
 
     public void populateGeneralApplicationSender(FinremCaseData caseData,
@@ -241,20 +241,31 @@ public class GeneralApplicationHelper {
             generalApplications.forEach(ga -> {
                 GeneralApplicationItems generalApplicationItems = ga.getValue();
                 if (generalApplicationItems.getGeneralApplicationReceivedFrom() != null
-                    && !generalApplicationItems.getGeneralApplicationReceivedFrom().isEmpty()) {
+                        && !generalApplicationItems.getGeneralApplicationReceivedFrom().isEmpty()) {
                     String existingCode = StringUtils.capitalize(
-                        generalApplicationItems.getGeneralApplicationReceivedFrom());
+                            generalApplicationItems.getGeneralApplicationReceivedFrom());
                     String existingLabel = StringUtils.capitalize(
-                        generalApplicationItems.getGeneralApplicationReceivedFrom());
+                            generalApplicationItems.getGeneralApplicationReceivedFrom());
                     DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
-                        .code(existingCode).label(existingLabel).build();
+                            .code(existingCode).label(existingLabel).build();
                     DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
-                        .listItems(dynamicListElements).build();
+                            .listItems(dynamicListElements).build();
                     generalApplicationItems.setGeneralApplicationSender(existingRadioList);
                     generalApplicationItems.setGeneralApplicationReceivedFrom(null);
+                    addExistingAppRespGeneralApplications(ga, caseData);
                 }
             });
         }
+    }
+
+    private void addExistingAppRespGeneralApplications(GeneralApplicationsCollection ga, FinremCaseData caseData) {
+        List<GeneralApplicationsCollection> existingAppRespGeneralApplications = new ArrayList<>();
+        if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
+                && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
+            existingAppRespGeneralApplications.addAll(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications());
+        }
+        existingAppRespGeneralApplications.add(ga);
+        caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(existingAppRespGeneralApplications);
     }
 
     public void populateGeneralApplicationDataSender(FinremCaseData caseData,
@@ -264,15 +275,15 @@ public class GeneralApplicationHelper {
         if (generalApplicationData != null && !generalApplicationData.isEmpty()) {
             generalApplicationData.forEach(ga -> {
                 if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null
-                    && !ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().isEmpty()) {
+                        && !ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().isEmpty()) {
                     String existingCode = StringUtils.capitalize(
-                        ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom());
+                            ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom());
                     String existingLabel = StringUtils.capitalize(
-                        ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom());
+                            ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom());
                     DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
-                        .code(existingCode).label(existingLabel).build();
+                            .code(existingCode).label(existingLabel).build();
                     DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
-                        .listItems(dynamicListElements).build();
+                            .listItems(dynamicListElements).build();
                     ga.getGeneralApplicationItems().setGeneralApplicationSender(existingRadioList);
                     ga.getGeneralApplicationItems().setGeneralApplicationReceivedFrom(null);
                 }
@@ -283,30 +294,30 @@ public class GeneralApplicationHelper {
     public void buildDynamicIntervenerList(List<DynamicRadioListElement> dynamicListElements,
                                            FinremCaseData caseData) {
         dynamicListElements.addAll(List.of(getDynamicListElements(APPLICANT, APPLICANT),
-            getDynamicListElements(RESPONDENT, RESPONDENT),
-            getDynamicListElements(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+                getDynamicListElements(RESPONDENT, RESPONDENT),
+                getDynamicListElements(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         ));
         IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapperIfPopulated();
-        if (oneWrapper != null) {
+        if (oneWrapper != null && oneWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER1, INTERVENER1));
         }
         IntervenerTwoWrapper twoWrapper = caseData.getIntervenerTwoWrapperIfPopulated();
-        if (twoWrapper != null) {
+        if (twoWrapper != null && twoWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER2, INTERVENER2));
         }
         IntervenerThreeWrapper threeWrapper = caseData.getIntervenerThreeWrapperIfPopulated();
-        if (threeWrapper != null) {
+        if (threeWrapper != null && threeWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER3, INTERVENER3));
         }
         IntervenerFourWrapper fourWrapper = caseData.getIntervenerFourWrapperIfPopulated();
-        if (fourWrapper != null) {
+        if (fourWrapper != null && fourWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER4, INTERVENER4));
         }
     }
 
     public GeneralApplicationItems getApplicationItems(FinremCaseData caseData, String userAuthorisation, String caseId) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
-            GeneralApplicationItems.builder();
+                GeneralApplicationItems.builder();
 
         buildGeneralApplicantionSenderDynamicList(caseData, builder);
 
@@ -347,13 +358,13 @@ public class GeneralApplicationHelper {
 
     private void buildGeneralApplicationHearingDetails(FinremCaseData caseData, GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
         builder.generalApplicationCreatedBy(Objects.toString(caseData.getGeneralApplicationWrapper()
-            .getGeneralApplicationCreatedBy(), null));
+                .getGeneralApplicationCreatedBy(), null));
         builder.generalApplicationHearingRequired(Objects.toString(caseData.getGeneralApplicationWrapper()
-            .getGeneralApplicationHearingRequired(), null));
+                .getGeneralApplicationHearingRequired(), null));
         builder.generalApplicationTimeEstimate(Objects.toString(caseData.getGeneralApplicationWrapper()
-            .getGeneralApplicationTimeEstimate(), null));
+                .getGeneralApplicationTimeEstimate(), null));
         builder.generalApplicationSpecialMeasures(Objects.toString(caseData.getGeneralApplicationWrapper()
-            .getGeneralApplicationSpecialMeasures(), null));
+                .getGeneralApplicationSpecialMeasures(), null));
         builder.generalApplicationCreatedDate(objectToDateTime(caseData.getGeneralApplicationWrapper().getGeneralApplicationLatestDocumentDate()));
         builder.generalApplicationOutcomeOther(Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcomeOther(), null));
 
@@ -372,11 +383,11 @@ public class GeneralApplicationHelper {
             buildDynamicIntervenerList(dynamicListElements, caseData);
             String existingValue = caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom();
             DynamicRadioListElement listElement = DynamicRadioListElement.builder()
-                .code(existingValue)
-                .label(caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom())
-                .build();
+                    .code(existingValue)
+                    .label(caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom())
+                    .build();
             DynamicRadioList existingRadioList = DynamicRadioList.builder().value(listElement)
-                .listItems(dynamicListElements).build();
+                    .listItems(dynamicListElements).build();
             builder.generalApplicationSender(existingRadioList);
         } else {
             builder.generalApplicationSender(null);
