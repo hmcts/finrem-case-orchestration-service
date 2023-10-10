@@ -50,7 +50,7 @@ public class UploadApprovedOrderContestedAboutToSubmitHandlerTest extends Upload
     @Test
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrderAndNoErrors_thenHandle() {
         when(uploadApprovedOrderService
-            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), AUTH_TOKEN))
+            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN))
             .thenReturn(GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderContestedAboutToSubmitHandler
@@ -58,13 +58,13 @@ public class UploadApprovedOrderContestedAboutToSubmitHandlerTest extends Upload
 
         assertTrue(response.getData().containsKey(SUCCESS_KEY));
         verify(uploadApprovedOrderService, times(1))
-            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN);
     }
 
     @Test
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrderAndErrors_thenHandle() {
         when(uploadApprovedOrderService
-            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), AUTH_TOKEN))
+            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN))
             .thenReturn(GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().errors(List.of("ERROR")).build());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderContestedAboutToSubmitHandler
@@ -73,6 +73,6 @@ public class UploadApprovedOrderContestedAboutToSubmitHandlerTest extends Upload
         assertThat(response.getErrors(), hasSize(1));
         assertEquals("ERROR", response.getErrors().get(0));
         verify(uploadApprovedOrderService, times(1))
-            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN);
     }
 }
