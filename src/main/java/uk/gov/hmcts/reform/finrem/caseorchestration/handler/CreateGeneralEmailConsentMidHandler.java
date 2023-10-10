@@ -7,30 +7,33 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
-public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
+public class CreateGeneralEmailConsentMidHandler extends FinremCallbackHandler {
 
-    private final GeneralLetterService generalLetterService;
+    private final BulkPrintDocumentService service;
 
     @Autowired
-    public CreateGeneralLetterMidHandler(FinremCaseDetailsMapper mapper,
-                                         GeneralLetterService generalLetterService) {
+    public CreateGeneralEmailConsentMidHandler(FinremCaseDetailsMapper mapper,
+                                               BulkPrintDocumentService service) {
         super(mapper);
-        this.generalLetterService = generalLetterService;
+        this.service = service;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && (EventType.CREATE_GENERAL_LETTER.equals(eventType)
-            || EventType.CREATE_GENERAL_LETTER_JUDGE.equals(eventType));
+            && CaseType.CONSENTED.equals(caseType)
+            && EventType.CREATE_GENERAL_EMAIL.equals(eventType);
     }
 
     @Override
@@ -38,16 +41,18 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to preview general letter for Case ID: {}", caseDetails.getId());
+        String caseId = String.valueOf(caseDetails.getId());
+        log.info("Received request to consent general email for Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
+        FinremCaseData finremCaseData = caseDetails.getData();
 
-        if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
-            generalLetterService.previewGeneralLetter(userAuthorisation, caseDetails);
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
-        } else {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .errors(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails))
-                .build();
+        CaseDocument caseDocument = finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
+        List<String> errors = new ArrayList<>();
+        if (caseDocument != null) {
+            service.validateEncryptionOnUploadedDocument(caseDocument,
+                caseId, errors, userAuthorisation);
         }
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).errors(errors).build();
+
     }
 }

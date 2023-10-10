@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag.CaseFlag;
 
 import java.util.Map;
@@ -25,6 +27,16 @@ public class CaseFlagsService {
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
 
+    public void setCaseFlagInformation(FinremCaseDetails caseDetails) {
+        log.info("Received request to update case flags with Case ID: {}", caseDetails.getId());
+
+        FinremCaseData caseData = caseDetails.getData();
+
+        updateCaseFlagsForParty(caseData, CASE_APPLICANT_FLAGS, caseData.getFullApplicantName(), APPLICANT);
+        updateCaseFlagsForParty(caseData, CASE_RESPONDENT_FLAGS, caseData.getRespondentFullName(), RESPONDENT);
+        updateCaseFlagsAtCaseLevel(caseData);
+    }
+
     public void setCaseFlagInformation(CaseDetails caseDetails) {
         log.info("Received request to update case flags with Case ID: {}", caseDetails.getId());
 
@@ -35,12 +47,39 @@ public class CaseFlagsService {
         updateCaseFlagsAtCaseLevel(caseData);
     }
 
+    private void updateCaseFlagsAtCaseLevel(FinremCaseData caseData) {
+        CaseFlag caseFlagDetailsData = Optional.ofNullable(caseData.getCaseFlagsWrapper().getCaseFlags())
+            .orElse(new CaseFlag());
+        caseFlagDetailsData.setPartyName(CASE_LEVEL_ROLE);
+        caseFlagDetailsData.setRoleOnCase(CASE_LEVEL_ROLE);
+        caseData.getCaseFlagsWrapper().setCaseFlags(caseFlagDetailsData);
+    }
+
     private void updateCaseFlagsAtCaseLevel(Map<String, Object> caseData) {
         CaseFlag caseFlagDetailsData = Optional.ofNullable(objectMapper.convertValue(caseData.get(CASE_LEVEL_FLAGS), CaseFlag.class))
             .orElse(new CaseFlag());
         caseFlagDetailsData.setPartyName(CASE_LEVEL_ROLE);
         caseFlagDetailsData.setRoleOnCase(CASE_LEVEL_ROLE);
         caseData.put(CASE_LEVEL_FLAGS, caseFlagDetailsData);
+    }
+
+    private void updateCaseFlagsForParty(FinremCaseData caseData,
+                                         String flagLevel,
+                                         String party,
+                                         String roleOnCase) {
+        if (flagLevel.equalsIgnoreCase(CASE_APPLICANT_FLAGS)) {
+            CaseFlag caseFlag = Optional.ofNullable(caseData.getCaseFlagsWrapper().getApplicantFlags())
+                .orElse(new CaseFlag());
+            caseFlag.setPartyName(party);
+            caseFlag.setRoleOnCase(roleOnCase);
+            caseData.getCaseFlagsWrapper().setApplicantFlags(caseFlag);
+        } else if (flagLevel.equalsIgnoreCase(CASE_RESPONDENT_FLAGS)) {
+            CaseFlag caseFlag = Optional.ofNullable(caseData.getCaseFlagsWrapper().getRespondentFlags())
+                .orElse(new CaseFlag());
+            caseFlag.setPartyName(party);
+            caseFlag.setRoleOnCase(roleOnCase);
+            caseData.getCaseFlagsWrapper().setRespondentFlags(caseFlag);
+        }
     }
 
     private void updateCaseFlagsForParty(Map<String, Object> caseData,

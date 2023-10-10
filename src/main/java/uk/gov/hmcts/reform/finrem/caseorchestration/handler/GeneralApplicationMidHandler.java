@@ -143,7 +143,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
             }
         }
         List<String> errors = new ArrayList<>();
-        service.checkIfApplicationCompleted(caseDetails, errors, generalApplications, generalApplicationsBefore);
+        service.checkIfApplicationCompleted(caseDetails, errors, generalApplications, generalApplicationsBefore, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
