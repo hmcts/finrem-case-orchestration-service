@@ -69,7 +69,8 @@ public class UpdateRepresentationWorkflowService {
         caseDetails.getData().putAll(caseData);
         caseDetails = noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails,
             originalCaseDetails);
-        log.info("DEBUGGING NOC - noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess entered and applicant name is still present {} with Case ID: {}",
+        log.info("DEBUGGING NOC - noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess "
+                + "entered and applicant name is still present {} with Case ID: {}",
             caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null, caseDetails.getId());
 
         return assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), caseDetails);
