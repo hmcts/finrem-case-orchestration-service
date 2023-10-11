@@ -70,8 +70,6 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
         String caseId = finremCaseDetails.getId().toString();
         log.info("Received request for validating a hearing for Case ID: {}", caseId);
 
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-
         List<String> errors = validateHearingService.validateHearingErrors(finremCaseDetails);
 
         if (!errors.isEmpty()) {
@@ -84,7 +82,7 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
             CaseDocument pdfDocument = additionalHearingDocumentService.convertToPdf(caseDocument, userAuthorisation, caseId);
             finremCaseData.setAdditionalListOfHearingDocuments(pdfDocument);
         }
-
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         if (hearingDocumentService.alreadyHadFirstHearing(finremCaseDetails)) {
             if (caseDataService.isContestedFinremCaseDetailsApplication(finremCaseDetails)) {
                 try {
@@ -96,7 +94,7 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
         } else {
             caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(userAuthorisation, caseDetails));
         }
-
+        finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         List<String> warnings = validateHearingService.validateHearingWarnings(finremCaseDetails);
         log.info("Hearing date warning {} Case ID: {}", warnings, caseId);
 
