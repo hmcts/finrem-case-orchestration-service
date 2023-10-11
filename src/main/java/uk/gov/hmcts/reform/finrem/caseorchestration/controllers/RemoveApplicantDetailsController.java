@@ -92,11 +92,11 @@ public class RemoveApplicantDetailsController extends BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         removeApplicantDetails(caseData);
-        log.info("DEBUGGING NOC - removeApplicantDetails entered and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+        log.info("DEBUGGING NOC - removeApplicantDetails entered and applicant name is still present {} for Case ID: {}\",",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null, caseDetails.getId());
         removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
-        log.info("DEBUGGING NOC - removeRespondentDetails entered and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+        log.info("DEBUGGING NOC - removeRespondentDetails entered and applicant name is still present {} for Case ID: {}",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null, caseDetails.getId());
 
         String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);
         String respondentConfidentialAddress = Objects.toString(caseData.get(RESPONDENT_CONFIDENTIAL_ADDRESS), null);
@@ -104,8 +104,8 @@ public class RemoveApplicantDetailsController extends BaseController {
             || respondentConfidentialAddress != null && respondentConfidentialAddress.equalsIgnoreCase(YES_VALUE)) {
             CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
             caseData.put(MINI_FORM_A, document);
-            log.info("DEBUGGING NOC - generateContestedMiniFormA entered and applicant name is still present",
-                caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+            log.info("DEBUGGING NOC - generateContestedMiniFormA entered and applicant name is still present {} for Case ID: {}",
+                caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null, caseDetails.getId());
         }
 
         if (featureToggleService.isCaseworkerNoCEnabled()
@@ -117,8 +117,8 @@ public class RemoveApplicantDetailsController extends BaseController {
                 originalCaseDetails));
         }
         persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
-        log.info("DEBUGGING NOC - persistOrgPolicies entered and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+        log.info("DEBUGGING NOC - persistOrgPolicies entered and applicant name is still present {}  for Case ID: {}",
+            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null, caseDetails.getId());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
