@@ -144,15 +144,16 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         aboutToStartHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(caseDetails);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCallbackRequest.getCaseDetails());
 
         when(hearingDocumentService.alreadyHadFirstHearing(any(FinremCaseDetails.class))).thenReturn(true);
 
         when(validateHearingService.validateHearingErrors(any(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(any(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(finremCallbackRequest.getCaseDetails())).thenReturn(ImmutableList.of());
         when(caseDataService.isApplicantAddressConfidential(any(FinremCaseData.class))).thenReturn(false);
         when(caseDataService.isRespondentAddressConfidential(any(FinremCaseData.class))).thenReturn(false);
-        when(coverSheetService.generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
-        when(coverSheetService.generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(coverSheetService.generateApplicantCoverSheet(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument());
+        when(coverSheetService.generateRespondentCoverSheet(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument());
         CaseDocument document = caseDocument("http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
                 "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
         when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
@@ -189,15 +190,16 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         aboutToStartHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(caseDetails);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCallbackRequest.getCaseDetails());
 
-        when(hearingDocumentService.alreadyHadFirstHearing(any(FinremCaseDetails.class))).thenReturn(true);
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
-        when(validateHearingService.validateHearingErrors(any(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(any(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingErrors(any())).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(any())).thenReturn(ImmutableList.of());
         when(caseDataService.isApplicantAddressConfidential(any(FinremCaseData.class))).thenReturn(true);
         when(caseDataService.isRespondentAddressConfidential(any(FinremCaseData.class))).thenReturn(true);
-        when(coverSheetService.generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
-        when(coverSheetService.generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(coverSheetService.generateApplicantCoverSheet(isA(FinremCaseDetails.class), anyString())).thenReturn(caseDocument());
+        when(coverSheetService.generateRespondentCoverSheet(isA(FinremCaseDetails.class), anyString())).thenReturn(caseDocument());
         CaseDocument document = caseDocument("http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
                 "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
         when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
@@ -214,8 +216,8 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
-        verify(coverSheetService).generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
-        verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
+        verify(coverSheetService).generateApplicantCoverSheet(eq(finremCallbackRequest.getCaseDetails()), eq(AUTH_TOKEN));
+        verify(coverSheetService).generateRespondentCoverSheet(eq(finremCallbackRequest.getCaseDetails()), eq(AUTH_TOKEN));
 
     }
 
