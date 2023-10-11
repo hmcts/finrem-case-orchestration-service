@@ -74,7 +74,7 @@ public class BulkPrintDocumentGeneratorService {
         } else {
             additionalData.put(RECIPIENTS, new String[]{"%s:%d".formatted(recipient, System.nanoTime())});
         }
-        log.info("additional data {}", additionalData);
+        log.info("sending additional data {}  party is {} and caseId {}", additionalData, recipient, caseId);
         return additionalData;
     }
 
