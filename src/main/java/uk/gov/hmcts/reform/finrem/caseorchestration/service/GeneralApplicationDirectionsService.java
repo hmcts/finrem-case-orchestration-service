@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -289,6 +290,7 @@ public class GeneralApplicationDirectionsService {
     private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
                                                            List<BulkPrintDocument> documents) {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
+        log.info("The relevant party {} for caseId {}", ObjectUtils.nullSafeConciseToString(referDetail), caseDetails.getId());
         if (referDetail.contains(APPLICANT) || referDetail.contains(APPLICANT.toLowerCase())
             || referDetail.contains(RESPONDENT.toLowerCase()) || referDetail.contains(RESPONDENT)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
