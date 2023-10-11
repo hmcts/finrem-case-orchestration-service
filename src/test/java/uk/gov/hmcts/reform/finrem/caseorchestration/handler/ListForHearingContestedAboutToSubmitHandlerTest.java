@@ -105,8 +105,8 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
 
     @Test
     void givenContestedCase_whenNotFastTrackDecision_thenShouldThrowWarnings() {
-        when(validateHearingService.validateHearingErrors(isA(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(FinremCaseDetails.class)))
+        when(validateHearingService.validateHearingErrors(any())).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(any()))
                 .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
         FinremCallbackRequest finremCallbackRequest =
