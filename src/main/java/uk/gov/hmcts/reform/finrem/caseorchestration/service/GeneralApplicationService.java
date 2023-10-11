@@ -71,6 +71,7 @@ public class GeneralApplicationService {
     private final GenericDocumentService genericDocumentService;
     private final AssignCaseAccessService accessService;
     private final GeneralApplicationHelper helper;
+    private final BulkPrintDocumentService service;
 
     public FinremCaseData updateGeneralApplications(FinremCallbackRequest callbackRequest, String userAuthorisation) {
 
@@ -429,17 +430,34 @@ public class GeneralApplicationService {
 
     public void checkIfApplicationCompleted(FinremCaseDetails caseDetails, List<String> errors,
                                             List<GeneralApplicationsCollection> generalApplications,
-                                            List<GeneralApplicationsCollection> generalApplicationsBefore) {
+                                            List<GeneralApplicationsCollection> generalApplicationsBefore,
+                                            String userAuthorisation) {
+        String caseId = String.valueOf(caseDetails.getId());
+
+        if ((generalApplications == null || generalApplications.isEmpty())) {
+            log.info("Please complete the general application for case Id {}", caseDetails.getId());
+            errors.add("Please complete the General Application. No information has been entered for this application.");
+        } else {
+            generalApplications.forEach(ga -> {
+                service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDocument(),
+                    caseId, errors, userAuthorisation);
+                service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDraftOrder(),
+                    caseId, errors, userAuthorisation);
+                List<GeneralApplicationSupportingDocumentData> gaSupportDocuments = ga.getValue().getGaSupportDocuments();
+                if (gaSupportDocuments != null && !gaSupportDocuments.isEmpty()) {
+                    gaSupportDocuments.forEach(doc -> service.validateEncryptionOnUploadedDocument(doc.getValue().getSupportDocument(),
+                        caseId, errors, userAuthorisation));
+                }
+            });
+        }
+
         if (generalApplicationsBefore != null && generalApplications != null
             && (generalApplicationsBefore.size() == generalApplications.size())) {
             log.info("Please complete the general application for case Id {}", caseDetails.getId());
             errors.add("Any changes to an existing General Applications will not be saved. "
                 + "Please add a new General Application in order to progress.");
         }
-        if ((generalApplications == null || generalApplications.isEmpty())) {
-            log.info("Please complete the general application for case Id {}", caseDetails.getId());
-            errors.add("Please complete the General Application. No information has been entered for this application.");
-        }
+
     }
 
     public void updateIntervenerDirectionsOrders(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
