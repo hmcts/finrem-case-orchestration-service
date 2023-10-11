@@ -26,7 +26,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
         if (caseDetails.isContestedApplication()) {
-            sendIntervenerCorrespondence(caseDetails);
+            sendIntervenerCorrespondence(caseDetails, authToken);
         }
     }
 
@@ -58,7 +58,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         }
     }
 
-    protected void sendIntervenerCorrespondence(FinremCaseDetails caseDetails) {
+    protected void sendIntervenerCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         FinremCaseData caseData = caseDetails.getData();
         List<IntervenerWrapper> interveners = caseData.getInterveners();
         interveners.forEach(intervenerWrapper -> {
@@ -67,6 +67,16 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
                 this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
+            } else if (shouldSendIntervenerLetter(intervenerWrapper)) {
+                log.info("Sending letter correspondence to {} for case: {}",
+                    intervenerWrapper.getIntervenerType().getTypeValue(),
+                    caseDetails.getId());
+                bulkPrintService.sendDocumentForPrint(
+                    getDocumentToPrint(
+                        caseDetails,
+                        authorisationToken,
+                        intervenerWrapper.getPaperNotificationRecipient()), caseDetails,
+                    intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
             }
         });
     }
@@ -83,6 +93,8 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
 
+    protected abstract boolean shouldSendIntervenerLetter(IntervenerWrapper intervenerWrapper);
+
     public abstract CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                                     DocumentHelper.PaperNotificationRecipient recipient);
 
@@ -91,4 +103,5 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
     protected abstract void emailRespondentSolicitor(FinremCaseDetails caseDetails);
 
     protected abstract void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails);
+
 }

@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
@@ -63,8 +62,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     protected UploadedDocumentService uploadedDocumentHelper;
     @Mock
     private CaseAssignedRoleService caseAssignedRoleService;
-    @Mock
-    private FeatureToggleService featureToggleService;
 
     private ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
     private RespondentChronologiesStatementHandler respondentChronologiesStatementHandler;
@@ -115,9 +112,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         uploadContestedCaseDocumentsHandler =
             new UploadContestedCaseDocumentsAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentHandlers, uploadedDocumentHelper, caseAssignedRoleService, featureToggleService);
+                documentHandlers, uploadedDocumentHelper, caseAssignedRoleService);
 
-        when(featureToggleService.isIntervenerEnabled()).thenReturn(true);
     }
 
     @Test

@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
@@ -118,7 +119,7 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = caseDetailsWithSolicitors();
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
-        assertCoversheetAddress("123 Applicant Solicitor Street\nSecond Address Line\nGreater London\nLondon\nSE1");
+        assertCoversheetAddress("123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nGreater London\nLondon\nSE1");
     }
 
     @Test
@@ -151,6 +152,23 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         assertAddresseeName(2, "Jane Doe");
     }
 
+
+    @Test
+    public void shouldGenerateIntervenerCoverSheet() throws Exception {
+        FinremCaseDetails caseDetails = caseDetailsWithIntervener1Unrepresented();
+
+        CaseDocument caseDocument =
+            generateCoverSheetService.generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN,
+                DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
+
+        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
+        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
+        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
+
+        assertCoversheetAddressFromMap("Intervener 1 Address Line 1\nIntervener 1 Address Line 2"
+            + "\nIntervener 1 Address Line 3\nIntervener 1 County\nIntervener 1 Post Town\nIntervener 1 Post Code");
+    }
+
     private FinremCaseDetails caseDetailsConsented() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
@@ -175,6 +193,14 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
     private FinremCaseDetails caseDetailsWithSolicitors() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-with-solicitors.json")) {
+            return getFinremCaseDetails(resourceAsStream);
+        }
+    }
+
+
+    private FinremCaseDetails caseDetailsWithIntervener1Unrepresented() throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json")) {
             return getFinremCaseDetails(resourceAsStream);
         }
     }
@@ -221,5 +247,13 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         MatcherAssert.assertThat(data, hasKey(COURT_CONTACT_DETAILS));
         assertEquals(expectedCourtContactDetails, data.get(COURT_CONTACT_DETAILS));
         MatcherAssert.assertThat(data, hasKey(CASE_NUMBER));
+    }
+
+    private void assertCoversheetAddressFromMap(String formattedAddress) {
+        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(), generateDocumentCaseDetailsCaptor.capture(),
+            any(), any(), any());
+        Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptor);
+        Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
+        assertThat(addressee.getFormattedAddress(), is(formattedAddress));
     }
 }

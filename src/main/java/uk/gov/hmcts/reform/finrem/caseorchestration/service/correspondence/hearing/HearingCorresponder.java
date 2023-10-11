@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -16,9 +17,10 @@ public abstract class HearingCorresponder extends CaseDetailsMultiLetterOrEmailA
 
     @Autowired
     protected HearingCorresponder(BulkPrintService bulkPrintService,
-                               NotificationService notificationService,
-                               FinremCaseDetailsMapper finremCaseDetailsMapper) {
-        super(bulkPrintService, notificationService, finremCaseDetailsMapper);
+                                  NotificationService notificationService,
+                                  FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                  DocumentHelper documentHelper) {
+        super(bulkPrintService, notificationService, finremCaseDetailsMapper, documentHelper);
     }
 
     @Override

@@ -29,6 +29,7 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_PHONE = "respondentPhone";
     public static final String RESPONDENT_EMAIL = "respondentEmail";
     public static final String RESPONDENT = "Respondent";
+    public static final String OTHER_RECIPIENT = "Other";
 
     // Intervener related
     public static final String INTERVENER1_FIRST_MIDDLE_NAME = "intervener1FMName";
@@ -41,9 +42,13 @@ public class CCDConfigConstant {
     public static final String INTERVENER4_LAST_NAME = "intervener4LName";
     public static final String INTERVENER = "Intervener";
     public static final String INTERVENER1 = "Intervener1";
+    public static final String INTERVENER1_SOLICITOR = "Intervener1Solicitor";
     public static final String INTERVENER2 = "Intervener2";
+    public static final String INTERVENER2_SOLICITOR = "Intervener2Solicitor";
     public static final String INTERVENER3 = "Intervener3";
+    public static final String INTERVENER3_SOLICITOR = "Intervener3Solicitor";
     public static final String INTERVENER4 = "Intervener4";
+    public static final String INTERVENER4_SOLICITOR = "Intervener4Solicitor";
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
@@ -322,7 +327,10 @@ public class CCDConfigConstant {
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED = "generalOrdersConsent";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED = "generalOrderCollection";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
+
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
+    public static final String FINAL_ADDITIONAL_ORDER_COLLECTION = "additionalOrderDocsCollection";
+
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
     public static final String HEARING_NOTICES_COLLECTION = "hearingNoticesDocumentCollection";
     public static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
@@ -336,6 +344,7 @@ public class CCDConfigConstant {
     public static final String ORDER_REFUSAL_COLLECTION = "orderRefusalCollection";
     public static final String ORDER_REFUSAL_PREVIEW_COLLECTION = "orderRefusalPreviewDocument";
     public static final String GENERAL_LETTER_ADDRESS_TO = "generalLetterAddressTo";
+    public static final String GENERAL_LETTER_ADDRESSEE = "generalLetterAddressee";
     public static final String GENERAL_LETTER_RECIPIENT = "generalLetterRecipient";
     public static final String GENERAL_LETTER_RECIPIENT_ADDRESS = "generalLetterRecipientAddress";
     public static final String CONTESTED_CONSENT_ORDER_COLLECTION = "Contested_ConsentedApprovedOrders";
@@ -372,6 +381,11 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_LIST = "generalApplicationList";
     public static final String GENERAL_APPLICATION_TRACKING = "generalApplicationTracking";
     public static final String GENERAL_APPLICATION_COLLECTION = "generalApplications";
+    public static final String APP_RESP_GENERAL_APPLICATION_COLLECTION = "appRespGeneralApplications";
+    public static final String INTERVENER1_GENERAL_APPLICATION_COLLECTION = "intervener1GeneralApplications";
+    public static final String INTERVENER2_GENERAL_APPLICATION_COLLECTION = "intervener2GeneralApplications";
+    public static final String INTERVENER3_GENERAL_APPLICATION_COLLECTION = "intervener3GeneralApplications";
+    public static final String INTERVENER4_GENERAL_APPLICATION_COLLECTION = "intervener4GeneralApplications";
     public static final String GENERAL_APPLICATION_DOCUMENT_LATEST = "generalApplicationLatestDocument";
     public static final String GENERAL_APPLICATION_DOCUMENT = "generalApplicationDocument";
     public static final String GENERAL_APPLICATION_RECEIVED_FROM = "generalApplicationReceivedFrom";
@@ -451,6 +465,10 @@ public class CCDConfigConstant {
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
     public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER1 = "bulkPrintCoverSheetIntervener1";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER2 = "bulkPrintCoverSheetIntervener2";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER3 = "bulkPrintCoverSheetIntervener3";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER4 = "bulkPrintCoverSheetIntervener4";
     public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL = "bulkPrintCoverSheetAppConfidential";
@@ -621,6 +639,8 @@ public class CCDConfigConstant {
     public static final String CASE_APPLICANT_FLAGS = "applicantFlags";
     public static final String CASE_RESPONDENT_FLAGS = "respondentFlags";
     public static final String CASE_LEVEL_ROLE = "Case";
-    
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
+
+    public static final String PARTIES_ON_CASE = "partiesOnCase";
+
 }

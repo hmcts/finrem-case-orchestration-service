@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.barristers.BarristerLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -24,8 +25,9 @@ public class BarristerLetterDetailsGenerator extends BaseContestedLetterDetailsG
 
     public BarristerLetterDetailsGenerator(CaseDataService caseDataService,
                                            DocumentHelper documentHelper,
+                                           LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper,
                                            PrdOrganisationService prdOrganisationService) {
-        super(caseDataService, documentHelper);
+        super(caseDataService, documentHelper, letterAddresseeGeneratorMapper);
         this.prdOrganisationService = prdOrganisationService;
     }
 

@@ -21,7 +21,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RespondentShareDocumentsService;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -76,7 +79,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
                 .errors(List.of("Logged in user do not have sufficient role to execute this event")).build();
         }
 
-        List<CaseAssignmentUserRole> allCaseRole = accessService.getAllCaseRole(String.valueOf(caseId));
+        List<CaseAssignmentUserRole> allCaseRole = getUniqueRoleList(accessService.getAllCaseRole(String.valueOf(caseId)));
 
         log.info("caseAssignedUserRoles {} caseId {}", loggedInUserCaseRole, caseId);
         if (loggedInUserCaseRole.equals(CaseRole.APP_SOLICITOR.getCcdCode()) || loggedInUserCaseRole.equals(CaseRole.APP_BARRISTER.getCcdCode())) {
@@ -128,6 +131,33 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
             }
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+    }
+
+    private List<CaseAssignmentUserRole> getUniqueRoleList(List<CaseAssignmentUserRole> allCaseRole) {
+        List<String> validRoleList = List.of(CaseRole.APP_SOLICITOR.getCcdCode(),
+            CaseRole.APP_BARRISTER.getCcdCode(),
+            CaseRole.RESP_SOLICITOR.getCcdCode(),
+            CaseRole.RESP_BARRISTER.getCcdCode(),
+            CaseRole.INTVR_BARRISTER_1.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode(),
+            CaseRole.INTVR_BARRISTER_2.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode(),
+            CaseRole.INTVR_BARRISTER_3.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode(),
+            CaseRole.INTVR_BARRISTER_4.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_4.getCcdCode()
+            );
+
+        List<CaseAssignmentUserRole> uniqueRoleList = new ArrayList<>();
+        Set<String> uniqueRoleSet = new HashSet<>();
+        allCaseRole.forEach(role -> {
+                if (!uniqueRoleSet.contains(role.getCaseRole()) && validRoleList.contains(role.getCaseRole())) {
+                    uniqueRoleSet.add(role.getCaseRole());
+                    uniqueRoleList.add(role);
+                }
+            }
+        );
+        return uniqueRoleList;
     }
 
     private boolean validateSolicitorList(FinremCaseData caseData,
