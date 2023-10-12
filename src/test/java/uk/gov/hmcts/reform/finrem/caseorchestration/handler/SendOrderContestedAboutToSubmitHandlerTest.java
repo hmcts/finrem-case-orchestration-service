@@ -253,26 +253,26 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
         assertEquals(2, caseData.getFinalOrderCollection().size());
-        assertNull(caseData.getIntv1OrderCollection());
-        assertEquals(2, caseData.getIntv1OrderCollections().size());
-        List<ApprovedOrderConsolidateCollection> intv1OrderCollections = caseData.getIntv1OrderCollections();
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertEquals(2, caseData.getOrderWrapper().getIntv1OrderCollections().size());
+        List<ApprovedOrderConsolidateCollection> intv1OrderCollections = caseData.getOrderWrapper().getIntv1OrderCollections();
         LocalDateTime orderReceivedAt1 = intv1OrderCollections.get(0).getValue().getOrderReceivedAt();
         LocalDateTime orderReceivedAt2 = intv1OrderCollections.get(1).getValue().getOrderReceivedAt();
 
         assertTrue(orderReceivedAt1.isAfter(orderReceivedAt2));
 
-        assertNull(caseData.getAppOrderCollection());
-        assertEquals(2, caseData.getAppOrderCollections().size());
-        List<ApprovedOrderConsolidateCollection> appOrderCollections = caseData.getAppOrderCollections();
+        assertNull(caseData.getOrderWrapper().getAppOrderCollection());
+        assertEquals(2, caseData.getOrderWrapper().getAppOrderCollections().size());
+        List<ApprovedOrderConsolidateCollection> appOrderCollections = caseData.getOrderWrapper().getAppOrderCollections();
         LocalDateTime orderReceivedAt1a = appOrderCollections.get(0).getValue().getOrderReceivedAt();
         LocalDateTime orderReceivedAt2a = appOrderCollections.get(1).getValue().getOrderReceivedAt();
 
         assertTrue(orderReceivedAt1a.isAfter(orderReceivedAt2a));
 
-        assertNull(caseData.getRespOrderCollection());
+        assertNull(caseData.getOrderWrapper().getRespOrderCollection());
 
-        assertEquals(2, caseData.getRespOrderCollections().size());
-        List<ApprovedOrderConsolidateCollection> respOrderCollections = caseData.getRespOrderCollections();
+        assertEquals(2, caseData.getOrderWrapper().getRespOrderCollections().size());
+        List<ApprovedOrderConsolidateCollection> respOrderCollections = caseData.getOrderWrapper().getRespOrderCollections();
         LocalDateTime orderReceivedAtR1 = respOrderCollections.get(0).getValue().getOrderReceivedAt();
         LocalDateTime orderReceivedAtR2 = respOrderCollections.get(1).getValue().getOrderReceivedAt();
 
