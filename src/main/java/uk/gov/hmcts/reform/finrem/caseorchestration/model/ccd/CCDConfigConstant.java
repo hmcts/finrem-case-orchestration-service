@@ -643,4 +643,41 @@ public class CCDConfigConstant {
 
     public static final String PARTIES_ON_CASE = "partiesOnCase";
 
+    public static final String HEARING_PREFIX = "hearing_";
+
+    public static final String HEARING_REGION_LIST = "hearing_regionList";
+    public static final String HEARING_LONDON_FRC_LIST = "hearing_londonFRCList";
+    public static final String HEARING_MIDLANDS_FRC_LIST = "hearing_midlandsFRCList";
+    public static final String HEARING_NORTHEAST_FRC_LIST = "hearing_northEastFRCList";
+    public static final String HEARING_NORTHWEST_FRC_LIST = "hearing_northWestFRCList";
+    public static final String HEARING_SOUTHEAST_FRC_LIST = "hearing_southEastFRCList";
+    public static final String HEARING_SOUTHWEST_FRC_LIST = "hearing_southWestFRCList";
+    public static final String HEARING_WALES_FRC_LIST = "hearing_walesFRCList";
+    public static final String HEARING_HIGHCOURT_FRC_LIST = "hearing_highCourtFRCList";
+    public static final String HEARING_CFC_COURT_LIST = "hearing_cfcCourtList";
+    public static final String HEARING_WALES_FRC_COURT_LIST = "hearing_walesFRCList";
+    public static final String HEARING_LONDON_FRC_COURT_LIST = "hearing_londonFRCList";
+    public static final String HEARING_DEVON_COURT_LIST = "hearing_devonCourtList";
+    public static final String HEARING_DORSET_COURT_LIST = "hearing_dorsetCourtList";
+    public static final String HEARING_HUMBER_COURT_LIST = "hearing_humberCourtList";
+    public static final String HEARING_MIDLANDS_FRC_COURT_LIST = "hearing_midlandsFRCList";
+    public static final String HEARING_BRISTOL_COURT_LIST = "hearing_bristolCourtList";
+    public static final String HEARING_NEWPORT_COURT_LIST = "hearing_newportCourtList";
+    public static final String HEARING_NORTHEAST_COURT_LIST = "hearing_northEastFRCList";
+    public static final String HEARING_NORTHWEST_COURT_LIST = "hearing_northWestFRCList";
+    public static final String HEARING_SOUTHEAST_COURT_LIST = "hearing_southEastFRCList";
+    public static final String HEARING_SOUTHWEST_COURT_LIST = "hearing_southWestFRCList";
+    public static final String HEARING_SWANSEA_COURT_LIST = "hearing_swanseaCourtList";
+    public static final String HEARING_LIVERPOOL_COURT_LIST = "hearing_liverpoolCourtList";
+    public static final String HEARING_BIRMINGHAM_COURT_LIST = "hearing_birminghamCourtList";
+    public static final String HEARING_CLEAVELAND_COURT_LIST = "hearing_cleavelandCourtList";
+    public static final String HEARING_KENT_SURREY_COURT_LIST = "hearing_kentSurreyCourtList";
+    public static final String HEARING_LANCASHIRE_COURT_LIST = "hearing_lancashireCourtList";
+    public static final String HEARING_MANCHESTER_COURT_LIST = "hearing_manchesterCourtList";
+    public static final String HEARING_NORTHWALES_COURT_LIST = "hearing_northWalesCourtList";
+    public static final String HEARING_NOTTINGHAM_COURT_LIST = "hearing_nottinghamCourtList";
+    public static final String HEARING_NWYORKSHIRE_COURT_LIST = "hearing_nwyorkshireCourtList";
+    public static final String HEARING_BEDFORDSHIRE_COURT_LIST = "hearing_bedfordshireCourtList";
+    public static final String HEARING_THAMESVALLEY_COURT_LIST = "hearing_thamesvalleyCourtList";
+
 }

@@ -215,9 +215,9 @@ public class DocumentConfiguration {
         FinremCaseData caseData = caseDetails.getData();
         return ObjectUtils.isNotEmpty(caseData)
             && ObjectUtils.isNotEmpty(caseData.getRegionWrapper())
-            && ObjectUtils.isNotEmpty(caseData.getRegionWrapper().getDefaultRegionWrapper())
-            && ObjectUtils.isNotEmpty(caseData.getRegionWrapper().getDefaultRegionWrapper().getHighCourtFrcList())
-            && caseData.getRegionWrapper().getDefaultRegionWrapper().getHighCourtFrcList()
+            && ObjectUtils.isNotEmpty(caseData.getRegionWrapper().getAllocatedRegionWrapper())
+            && ObjectUtils.isNotEmpty(caseData.getRegionWrapper().getAllocatedRegionWrapper().getHighCourtFrcList())
+            && caseData.getRegionWrapper().getAllocatedRegionWrapper().getHighCourtFrcList()
             .getValue().equalsIgnoreCase(HIGHCOURT);
     }
 }

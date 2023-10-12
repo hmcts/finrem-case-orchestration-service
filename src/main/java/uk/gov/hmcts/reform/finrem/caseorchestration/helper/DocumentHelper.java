@@ -771,7 +771,7 @@ public class DocumentHelper {
     }
 
     public boolean isHighCourtSelected(FinremCaseData caseData) {
-        Region region = caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList();
+        Region region = caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList();
         return Region.HIGHCOURT.equals(region);
     }
 
