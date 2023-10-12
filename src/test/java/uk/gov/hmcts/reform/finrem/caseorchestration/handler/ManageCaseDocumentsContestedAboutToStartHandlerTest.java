@@ -65,13 +65,11 @@ public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
             FinremCallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
         callbackRequest.getCaseDetails().getData().getUploadCaseDocumentWrapper()
             .setAppCaseSummariesCollection(getTestUploadCaseDocumentCollection());
-        callbackRequest.getCaseDetails().getData().getUploadCaseDocumentWrapper()
-            .setAppCorrespondenceDocsCollShared(getTestUploadCaseDocumentCollection());
 
         GenericAboutToStartOrSubmitCallbackResponse response =
             manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentCollection().size(), is(2));
+        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentCollection().size(), is(1));
     }
 
     @Test
