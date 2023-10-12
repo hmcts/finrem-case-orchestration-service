@@ -136,6 +136,22 @@ public class DocumentHelperTest {
 
 
     @Test
+    public void shouldGetVariationOrderDocuments() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
+        List<CaseDocument> pensionDocuments = documentHelper.getVariationOrderDocumentsData(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(pensionDocuments.size(), is(1));
+    }
+
+    @Test
+    public void shouldGetConsentOrderOtherDocuments() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
+        List<CaseDocument> pensionDocuments = documentHelper.getConsentOrderOtherDocumentsData(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(pensionDocuments.size(), is(1));
+    }
+
+    @Test
     public void castToList() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
         List<String> natureList = documentHelper.convertToList(

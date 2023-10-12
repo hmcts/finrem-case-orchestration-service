@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -58,6 +59,8 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
     private IdamService idamService;
     private GeneralApplicationHelper helper;
     private DocumentHelper documentHelper;
+    @Mock
+    private BulkPrintDocumentService bulkPrintDocumentService;
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application-finrem.json";
 
@@ -68,7 +71,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
         handler = new UpdateGeneralApplicationStatusAboutToStartHandler(
             finremCaseDetailsMapper, helper, generalApplicationService);
         generalApplicationService = new GeneralApplicationService(
-            documentHelper, objectMapper, idamService, service, assignCaseAccessService, helper);
+            documentHelper, objectMapper, idamService, service, assignCaseAccessService, helper, bulkPrintDocumentService);
     }
 
     @Test
