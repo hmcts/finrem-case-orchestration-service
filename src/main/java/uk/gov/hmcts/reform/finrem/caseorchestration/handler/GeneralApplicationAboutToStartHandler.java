@@ -54,7 +54,6 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
         log.info("Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseId);
-        log.info("All the new changes have been loaded on case with id {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplication =
