@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
@@ -42,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
@@ -84,11 +88,38 @@ public class AdditionalHearingDocumentService {
     }
 
     public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken, CaseDetails caseDetails) {
-        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseDetails.getData());
+        List<HearingOrderCollectionData> hearingOrderCollectionData = getApprovedHearingOrderCollection(caseDetails);
+        String caseId = String.valueOf(caseDetails.getId());
+        hearingOrderCollectionData.forEach(hearingOrder ->
+            convertHearingOrderCollectionDocumentsToPdf(hearingOrder, authorisationToken, caseId));
 
-        if (hearingOrderCollectionHasEntries(hearingOrderCollectionData)) {
-            populateLatestDraftHearingOrderWithLatestEntry(caseDetails, hearingOrderCollectionData, authorisationToken);
+        List<HearingOrderCollectionData> hearingOrderStampedCollection = new ArrayList<>();
+        Map<String, Object> caseData = caseDetails.getData();
+        hearingOrderCollectionData.forEach(hearingOrder -> {
+            StampType stampType = documentHelper.getStampType(caseData);
+            CaseDocument stampedDocs = genericDocumentService.stampDocument(hearingOrder.getHearingOrderDocuments().getUploadDraftDocument(),
+                authorisationToken, stampType, caseId);
+            hearingOrderStampedCollection.add(buildHearingOrderDataObject(stampedDocs));
+        });
+
+        if (hearingOrderCollectionHasEntries(hearingOrderStampedCollection)) {
+            populateLatestDraftHearingOrderWithLatestEntry(caseDetails, hearingOrderStampedCollection);
         }
+    }
+
+    private static HearingOrderCollectionData buildHearingOrderDataObject(CaseDocument stampedDocs) {
+        return HearingOrderCollectionData.builder()
+            .hearingOrderDocuments(HearingOrderDocument.builder().uploadDraftDocument(stampedDocs).build()).build();
+    }
+
+    public List<HearingOrderCollectionData> getApprovedHearingOrderCollection(CaseDetails caseDetail) {
+        return documentHelper.getHearingOrderDocuments(caseDetail.getData());
+    }
+
+    public List<HearingOrderAdditionalDocCollectionData> getHearingOrderAdditionalDocuments(Map<String, Object> caseData) {
+        return new ObjectMapper().convertValue(caseData.get(HEARING_UPLOADED_DOCUMENT),
+            new TypeReference<>() {
+            });
     }
 
     private boolean hearingOrderCollectionHasEntries(List<HearingOrderCollectionData> hearingOrderCollectionData) {
@@ -98,11 +129,7 @@ public class AdditionalHearingDocumentService {
     }
 
     private void populateLatestDraftHearingOrderWithLatestEntry(CaseDetails caseDetails,
-                                                                List<HearingOrderCollectionData> hearingOrderCollectionData,
-                                                                String authorisationToken) {
-        String caseId = caseDetails.getId().toString();
-        hearingOrderCollectionData.forEach(element ->
-            convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken, caseId));
+                                                                List<HearingOrderCollectionData> hearingOrderCollectionData) {
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
         caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
             hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)

@@ -7,12 +7,15 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +24,12 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_CAMELCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_LOWERCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_OTHER_DOC_LABEL_VALUE;
@@ -39,10 +48,16 @@ public class SolicitorCreateConsentedMidHandlerTest {
 
     @Mock
     DocumentConfiguration documentConfiguration;
+    @Mock
+    private BulkPrintDocumentService service;
+
+    @Mock
+    private ConsentOrderService consentOrderService;
 
     @Before
     public void setup() {
-        solicitorCreateConsentedMidHandler = new SolicitorCreateConsentedMidHandler(new ConsentedApplicationHelper(documentConfiguration));
+        solicitorCreateConsentedMidHandler = new SolicitorCreateConsentedMidHandler(
+            new ConsentedApplicationHelper(documentConfiguration), service, consentOrderService);
     }
 
     @Test
@@ -74,6 +89,28 @@ public class SolicitorCreateConsentedMidHandlerTest {
     }
 
     @Test
+    public void given_case_checkIfUploadedConsentOrderIsNotEncrypted() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+        List<String> orderList = List.of("Variation Order", "Property Adjustment Order");
+        data.put("natureOfApplication2", orderList);
+        data.put("consentOrder", TestSetUpUtils.caseDocument());
+        when(consentOrderService.checkIfD81DocumentContainsEncryption(data)).thenReturn(List.of(TestSetUpUtils.caseDocument()));
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
+            solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        final String camelCaseLabel = (String) response.getData().get(CV_ORDER_CAMELCASE_LABEL_FIELD);
+        assertEquals(VARIATION_ORDER_CAMELCASE_LABEL_VALUE, camelCaseLabel);
+        final String lowerCaseLabel = (String) response.getData().get(CV_LOWERCASE_LABEL_FIELD);
+        assertEquals(VARIATION_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
+        final String docLabel = (String) response.getData().get(CV_OTHER_DOC_LABEL_FIELD);
+        assertEquals(CV_OTHER_DOC_LABEL_VALUE, docLabel);
+        assertFalse(response.hasErrors());
+        verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(consentOrderService).checkIfD81DocumentContainsEncryption(anyMap());
+    }
+
+    @Test
     public void given_case_when_natureOfApplicationIsVariation_thenReturnVariationOrderLabels() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         List<String> orderList = List.of("Variation Order", "Property Adjustment Order");
@@ -88,6 +125,7 @@ public class SolicitorCreateConsentedMidHandlerTest {
         assertEquals(VARIATION_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
         final String docLabel = (String) response.getData().get(CV_OTHER_DOC_LABEL_FIELD);
         assertEquals(CV_OTHER_DOC_LABEL_VALUE, docLabel);
+        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
     @Test
