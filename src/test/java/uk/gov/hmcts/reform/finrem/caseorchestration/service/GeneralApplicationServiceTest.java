@@ -87,11 +87,13 @@ public class GeneralApplicationServiceTest {
     private GenericDocumentService genericDocumentService;
     @Mock
     private AssignCaseAccessService accessService;
+    @Mock
+    private BulkPrintDocumentService service;
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
     private CaseDetails caseDetails;
     private CaseDetails caseDetailsBefore;
-    private String caseId = "123123123";
+    private final String caseId = "123123123";
 
     @Before
     public void setUp() {
@@ -100,7 +102,7 @@ public class GeneralApplicationServiceTest {
         caseDetails = CaseDetails.builder().data(new LinkedHashMap<>()).build();
         helper = new GeneralApplicationHelper(objectMapper, genericDocumentService);
         generalApplicationService = new GeneralApplicationService(documentHelper,
-            objectMapper, idamService, genericDocumentService, accessService, helper);
+            objectMapper, idamService, genericDocumentService, accessService, helper, service);
 
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
