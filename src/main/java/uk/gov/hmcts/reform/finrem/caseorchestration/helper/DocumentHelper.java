@@ -518,7 +518,7 @@ public class DocumentHelper {
             caseData.put("courtDetails", buildFrcCourtDetails(finremCaseDetails.getData()));
         } else {
             log.info("Failed to prepare template data as not all required address details were present on case {}", caseId);
-            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
+            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document for caseId " + caseId);
         }
 
         return caseDetails;
