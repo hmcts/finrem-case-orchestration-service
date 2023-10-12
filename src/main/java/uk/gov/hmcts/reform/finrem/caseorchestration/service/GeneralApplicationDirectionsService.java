@@ -291,17 +291,19 @@ public class GeneralApplicationDirectionsService {
                                                            List<BulkPrintDocument> documents) {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
         log.info("The relevant party {} for caseId {}", ObjectUtils.nullSafeConciseToString(referDetail), caseDetails.getId());
-        if (referDetail.contains(APPLICANT) || referDetail.contains(APPLICANT.toLowerCase())
-            || referDetail.contains(RESPONDENT.toLowerCase()) || referDetail.contains(RESPONDENT)) {
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to respondent via bulk print for Case {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
-        } else if (referDetail.contains(INTERVENER1.toLowerCase()) || referDetail.contains(INTERVENER1)) {
+        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
+        log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}",
+            documents.size(), caseDetails.getId(),
+            documents);
+        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
+        log.info("Sending {} document(s) to respondent via bulk print for Case {}, document(s) are {}",
+            documents.size(), caseDetails.getId(),
+            documents);
+        sendIntervenerDocuments(caseDetails, authorisationToken, documents, referDetail);
+    }
+
+    private void sendIntervenerDocuments(FinremCaseDetails caseDetails, String authorisationToken, List<BulkPrintDocument> documents, String referDetail) {
+        if (referDetail.contains(INTERVENER1.toLowerCase()) || referDetail.contains(INTERVENER1)) {
             IntervenerOneWrapper intervenerWrapper = caseDetails.getData().getIntervenerOneWrapper();
             sendToBulkprintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
         } else if (referDetail.contains(INTERVENER2.toLowerCase()) || referDetail.contains(INTERVENER2)) {
@@ -313,12 +315,7 @@ public class GeneralApplicationDirectionsService {
         } else if (referDetail.contains(INTERVENER4.toLowerCase()) || referDetail.contains(INTERVENER4)) {
             IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerFourWrapper();
             sendToBulkprintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
-        } else {
-            throw new NoSuchUserException(
-                "The relevant party to print the general application document pack for could not be found on case "
-                    + caseDetails.getId());
         }
-
     }
 
     private void sendToBulkprintForIntervener(FinremCaseDetails caseDetails, String authorisationToken,
