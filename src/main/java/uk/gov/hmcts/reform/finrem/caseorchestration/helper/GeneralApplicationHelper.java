@@ -77,7 +77,7 @@ public class GeneralApplicationHelper {
             }
             case INTERVENER4_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getIntervener4GeneralApplications())
-                    .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
+                        .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
             }
             case APP_RESP_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getAppRespGeneralApplications())
@@ -179,7 +179,7 @@ public class GeneralApplicationHelper {
             return 0;
         }
         return e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate()
-            .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+                .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
     }
 
     public DynamicList objectToDynamicList(Object object) {
@@ -252,9 +252,20 @@ public class GeneralApplicationHelper {
                         .listItems(dynamicListElements).build();
                     generalApplicationItems.setGeneralApplicationSender(existingRadioList);
                     generalApplicationItems.setGeneralApplicationReceivedFrom(null);
+                    addExistingAppRespGeneralApplications(ga, caseData);
                 }
             });
         }
+    }
+
+    private void addExistingAppRespGeneralApplications(GeneralApplicationsCollection ga, FinremCaseData caseData) {
+        List<GeneralApplicationsCollection> existingAppRespGeneralApplications = new ArrayList<>();
+        if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
+                && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
+            existingAppRespGeneralApplications.addAll(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications());
+        }
+        existingAppRespGeneralApplications.add(ga);
+        caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(existingAppRespGeneralApplications);
     }
 
     public void populateGeneralApplicationDataSender(FinremCaseData caseData,
@@ -287,19 +298,19 @@ public class GeneralApplicationHelper {
             getDynamicListElements(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         ));
         IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapperIfPopulated();
-        if (oneWrapper != null) {
+        if (oneWrapper != null && oneWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER1, INTERVENER1));
         }
         IntervenerTwoWrapper twoWrapper = caseData.getIntervenerTwoWrapperIfPopulated();
-        if (twoWrapper != null) {
+        if (twoWrapper != null && twoWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER2, INTERVENER2));
         }
         IntervenerThreeWrapper threeWrapper = caseData.getIntervenerThreeWrapperIfPopulated();
-        if (threeWrapper != null) {
+        if (threeWrapper != null && threeWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER3, INTERVENER3));
         }
         IntervenerFourWrapper fourWrapper = caseData.getIntervenerFourWrapperIfPopulated();
-        if (fourWrapper != null) {
+        if (fourWrapper != null && fourWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER4, INTERVENER4));
         }
     }
