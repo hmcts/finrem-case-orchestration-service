@@ -38,6 +38,7 @@ public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHa
             callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         if (caseData.getAdditionalHearingDocumentsOption() == null) {
             caseData.setAdditionalHearingDocumentsOption(YesOrNo.NO);
         }
