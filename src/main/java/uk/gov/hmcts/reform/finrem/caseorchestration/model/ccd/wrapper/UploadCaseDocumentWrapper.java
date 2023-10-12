@@ -130,8 +130,6 @@ public class UploadCaseDocumentWrapper {
     private List<UploadCaseDocumentCollection> intv4FdrCaseDocuments;
     private List<UploadCaseDocumentCollection> confidentialDocumentCollection;
 
-
-
     private List<UploadCaseDocumentCollection> intv1HearingBundlesShared;
     @JsonProperty("intv1FormEExhibitsShared")
     private List<UploadCaseDocumentCollection> intv1FormEsExhibitsShared;
@@ -200,22 +198,16 @@ public class UploadCaseDocumentWrapper {
                 appFormsHCollection, appExpertEvidenceCollection, appCorrespondenceDocsCollection, appOtherCollection,
                 respHearingBundlesCollection, respFormEExhibitsCollection, respChronologiesCollection, respQaCollection,
                 respStatementsExhibitsCollection, respCaseSummariesCollection, respFormsHCollection,
-                respExpertEvidenceCollection, respCorrespondenceDocsColl, respOtherCollection,
-                appHearingBundlesCollectionShared, appFormEExhibitsCollectionShared, appChronologiesCollectionShared,
-                appQaCollectionShared, appStatementsExhibitsCollShared, appCaseSummariesCollectionShared,
-                appFormsHCollectionShared, appExpertEvidenceCollectionShared, appCorrespondenceDocsCollShared,
-                appOtherCollectionShared, respHearingBundlesCollShared, respFormEExhibitsCollectionShared,
-                respChronologiesCollectionShared, respStatementsExhibitsCollShared, respQaCollectionShared,
-                respCaseSummariesCollectionShared, respFormsHCollectionShared, respExpertEvidenceCollShared,
-                respCorrespondenceDocsCollShared, respOtherCollectionShared, intv1Summaries, intv1Chronologies,
-                intv1CorrespDocs, intv1ExpertEvidence, intv1FormEsExhibits, intv1FormHs, intv1HearingBundles,
-                intv1Other, intv1Qa, intv1StmtsExhibits, intv2Summaries, intv2Chronologies, intv2CorrespDocs,
-                intv2ExpertEvidence, intv2FormEsExhibits, intv2FormHs, intv2HearingBundles, intv2Other, intv2Qa,
-                intv2StmtsExhibits, intv3Summaries, intv3Chronologies, intv3CorrespDocs, intv3ExpertEvidence,
-                intv3FormEsExhibits, intv3FormHs, intv3HearingBundles, intv3Other, intv3Qa, intv3StmtsExhibits,
-                intv4Summaries, intv4Chronologies, intv4CorrespDocs, intv4ExpertEvidence, intv4FormEsExhibits,
-                intv4FormHs, intv4HearingBundles, intv4Other, intv4Qa, intv4StmtsExhibits, intv1FdrCaseDocuments,
-                intv2FdrCaseDocuments, intv3FdrCaseDocuments, intv4FdrCaseDocuments, confidentialDocumentCollection)
+                respExpertEvidenceCollection, respCorrespondenceDocsColl, respOtherCollection, intv1Summaries,
+                intv1Chronologies, intv1CorrespDocs, intv1ExpertEvidence, intv1FormEsExhibits, intv1FormHs,
+                intv1HearingBundles, intv1Other, intv1Qa, intv1StmtsExhibits, intv2Summaries, intv2Chronologies,
+                intv2CorrespDocs, intv2ExpertEvidence, intv2FormEsExhibits, intv2FormHs, intv2HearingBundles,
+                intv2Other, intv2Qa, intv2StmtsExhibits, intv3Summaries, intv3Chronologies, intv3CorrespDocs,
+                intv3ExpertEvidence, intv3FormEsExhibits, intv3FormHs, intv3HearingBundles, intv3Other, intv3Qa,
+                intv3StmtsExhibits, intv4Summaries, intv4Chronologies, intv4CorrespDocs, intv4ExpertEvidence,
+                intv4FormEsExhibits, intv4FormHs, intv4HearingBundles, intv4Other, intv4Qa, intv4StmtsExhibits,
+                intv1FdrCaseDocuments, intv2FdrCaseDocuments, intv3FdrCaseDocuments, intv4FdrCaseDocuments,
+                confidentialDocumentCollection)
             .filter(Objects::nonNull)
             .flatMap(Collection::stream).collect(Collectors.toList());
     }

@@ -47,6 +47,10 @@ public abstract class BaseControllerTest extends BaseTest {
         loadRequestContentWith("/fixtures/pba-validate.json");
     }
 
+    protected void doValidCourtDataSetUp() {
+        loadRequestContentWith("/fixtures/validateCourtForSolicitor.json");
+    }
+
     protected void doValidConsentOrderApprovedSetup() {
         loadRequestContentWith("/fixtures/contested/consent-in-contested-application-approved.json");
     }
