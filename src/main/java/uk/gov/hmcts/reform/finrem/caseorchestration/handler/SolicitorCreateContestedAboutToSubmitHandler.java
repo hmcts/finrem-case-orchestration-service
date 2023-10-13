@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
@@ -27,13 +28,16 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     private final OnlineFormDocumentService service;
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
+    private final FeatureToggleService featureToggleService;
+
 
     @Autowired
-    public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, OnlineFormDocumentService service, CaseFlagsService caseFlagsService, IdamService idamService) {
+    public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, OnlineFormDocumentService service, CaseFlagsService caseFlagsService, IdamService idamService, FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.service = service;
         this.caseFlagsService = caseFlagsService;
         this.idamService = idamService;
+        this.featureToggleService = featureToggleService;
     }
 
 
@@ -61,13 +65,14 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, caseDetails);
         caseData.setMiniFormA(document);
 
-        List<UploadAdditionalDocumentCollection> uploadAdditionDocumentsList = caseData.getUploadAdditionalDocument();
-        for (UploadAdditionalDocumentCollection uploadAdditionalDocument : uploadAdditionDocumentsList) {
-            uploadAdditionalDocument.getValue().getAdditionalDocuments().setCategoryId(
-                DocumentCategory.APPLICATIONS_FORM_A.getDocumentCategoryId()
-            );
+        if (featureToggleService.isCaseFileViewEnabled()) {
+            List<UploadAdditionalDocumentCollection> uploadAdditionDocumentsList = caseData.getUploadAdditionalDocument();
+            for (UploadAdditionalDocumentCollection uploadAdditionalDocument : uploadAdditionDocumentsList) {
+                uploadAdditionalDocument.getValue().getAdditionalDocuments().setCategoryId(
+                    DocumentCategory.APPLICATIONS_FORM_A.getDocumentCategoryId()
+                );
+            }
         }
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 }

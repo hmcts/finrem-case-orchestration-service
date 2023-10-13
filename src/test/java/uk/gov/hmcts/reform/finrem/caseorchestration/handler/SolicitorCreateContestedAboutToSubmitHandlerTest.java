@@ -1,21 +1,19 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import java.util.HashMap;
@@ -41,6 +39,8 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     CaseFlagsService caseFlagsService;
     @Mock
     IdamService idamService;
+    @Mock
+    FeatureToggleService featureToggleService;
 
 
     @Before
@@ -49,8 +49,8 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
             finremCaseDetailsMapper,
             onlineFormDocumentService,
             caseFlagsService,
-            idamService
-        );
+            idamService,
+            featureToggleService);
     }
 
     @Test
