@@ -48,7 +48,7 @@ class CaseFlagsServiceTest {
 
     @Test
     void givenCaseFlags_whenHandleAboutToSubmit_thenSetApplicantFlagDetails() {
-        when(caseDataService.buildFullApplicantName(any())).thenReturn(APPLICANT_NAME);
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn(APPLICANT_NAME);
 
         CaseDetails caseDetails = caseData();
         caseDetails.getData().put(CASE_APPLICANT_FLAGS, flagDetailsData());
@@ -85,7 +85,7 @@ class CaseFlagsServiceTest {
 
     @Test
     void givenCaseFlags_whenHandleAboutToSubmit_thenSetRespondentFlagDetails() {
-        when(caseDataService.buildFullRespondentName(any())).thenReturn(RESPONDENT_NAME);
+        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn(RESPONDENT_NAME);
 
         CaseDetails caseDetails = caseData();
         caseDetails.getData().put(CASE_RESPONDENT_FLAGS, flagDetailsData());
@@ -121,8 +121,8 @@ class CaseFlagsServiceTest {
 
     @Test
     void givenNoCaseFlags_whenHandleAboutToSubmit_thenSetDefaultCaseFlagField() {
-        when(caseDataService.buildFullApplicantName(any())).thenReturn(APPLICANT_NAME);
-        when(caseDataService.buildFullRespondentName(any())).thenReturn(RESPONDENT_NAME);
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn(APPLICANT_NAME);
+        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn(RESPONDENT_NAME);
 
         CaseDetails caseDetails = caseData();
 
