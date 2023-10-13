@@ -111,11 +111,13 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
         FinremCallbackRequest finremCallbackRequest =
                 buildFinremCallbackRequest("/fixtures/contested/validate-hearing-withoutfastTrackDecision.json");
+        CallbackRequest callbackRequest = buildCallbackRequest("/fixtures/contested/validate-hearing-withoutfastTrackDecision.json");
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCallbackRequest.getCaseDetails());
+        when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(callbackRequest.getCaseDetails());
         finremCallbackRequest.getCaseDetails().getData().setIssueDate(LocalDate.now().minusDays(1));
         finremCallbackRequest.getCaseDetails().getData().setHearingDate(LocalDate.now().plusDays(1));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getWarnings().get(0), equalTo(FAST_TRACK_WARNING));
-
     }
 
     @Test
