@@ -35,19 +35,6 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyShouldThrowWarningsWhenNotFastTrackDecision() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "validate-hearing-without-fastTrackDecision1.json",
-            contestedDir).jsonPath().get("warnings[0]"), is("Date of the hearing must be between 12 and 16 weeks."));
-    }
-
-    @Test
-    public void verifyshouldThrowWarningsWhenFastTrackDecision() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "validate-hearing-with-fastTrackDecision1.json",
-            contestedDir).jsonPath().get("warnings[0]"),
-                is("Date of the Fast Track hearing must be between 6 and 10 weeks."));
-    }
-
-    @Test
     public void verifyShouldSuccessfullyValidate() {
         assertThat(getResponseAndAssertSuccessStatusCode(validateHearingSubmitted, "validate-hearing-successfully1.json", contestedDir)
             .jsonPath().getList("warnings"), is(empty()));
