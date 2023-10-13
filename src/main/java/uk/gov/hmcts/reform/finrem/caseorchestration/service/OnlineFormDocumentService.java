@@ -128,6 +128,26 @@ public class OnlineFormDocumentService {
         return caseDocument;
     }
 
+    public CaseDocument generateDraftContestedMiniFormA(String authorisationToken, FinremCaseDetails caseDetails) {
+        log.info("Generating Draft Contested Mini Form A for Case ID : {}", caseDetails.getId());
+        FinremCaseData caseData = caseDetails.getData();
+        String contestedDraftMiniFormTemplate;
+        if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {
+            contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplate();
+        } else {
+            contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplateSchedule();
+        }
+        log.info("Generating Draft Contested Mini Form A for Case ID : {} using template {}", caseDetails.getId(), contestedDraftMiniFormTemplate);
+        Map<String, Object> contestedDraftMiniFormPlaceholdersMap = contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(
+            caseDetails, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(
+            authorisationToken,
+            contestedDraftMiniFormPlaceholdersMap,
+            contestedDraftMiniFormTemplate,
+            documentConfiguration.getContestedDraftMiniFormFileName(),
+            caseDetails.getId().toString());
+    }
+
     private CaseDetails translateOptions(CaseDetails caseDetails) {
         CaseDetails copy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         optionIdToValueTranslator.translateOptionsValues.accept(copy);

@@ -142,11 +142,19 @@ public class CaseDataService {
         return buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
     }
 
+    public String buildFullApplicantName(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getFullApplicantName();
+    }
+
     public String buildFullRespondentName(CaseDetails caseDetails) {
         boolean isConsentedApplication = isConsentedApplication(caseDetails);
         return buildFullName(caseDetails.getData(),
             isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
             isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
+    }
+
+    public String buildFullRespondentName(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getRespondentFullName();
     }
 
     public String buildFullIntervener1Name(CaseDetails caseDetails) {

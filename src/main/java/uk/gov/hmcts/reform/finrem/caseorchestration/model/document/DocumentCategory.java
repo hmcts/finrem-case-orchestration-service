@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum DocumentCategory {
     APPLICATIONS("applications"),
+    APPLICATIONS_FORM_A("formA"),
     HEARING_NOTICES("hearingNotices"),
     ORDERS("orders"),
     LIP_SCANNED_DOCUMENTS("lipOrScannedDocuments"),
