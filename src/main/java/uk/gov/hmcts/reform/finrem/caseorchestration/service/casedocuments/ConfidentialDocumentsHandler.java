@@ -6,14 +6,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
 
 @Service
 public class ConfidentialDocumentsHandler extends DocumentHandler {
 
-    public ConfidentialDocumentsHandler() {
-        super(CaseDocumentCollectionType.CONFIDENTIAL_DOCS_COLLECTION);
+    private final FeatureToggleService featureToggleService;
+
+    public ConfidentialDocumentsHandler(FeatureToggleService featureToggleService) {
+        super(CaseDocumentCollectionType.CONFIDENTIAL_DOCS_COLLECTION, featureToggleService);
+        this.featureToggleService = featureToggleService;
     }
 
     protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(

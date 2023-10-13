@@ -7,12 +7,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 @Service
 public class IntervenerThreeFdrHandler extends PartyDocumentsHandler {
 
-    public IntervenerThreeFdrHandler() {
-        super(CaseDocumentCollectionType.INTERVENER_THREE_FDR_DOCS_COLLECTION, CaseDocumentParty.INTERVENER_THREE);
+    private final FeatureToggleService featureToggleService;
+
+    public IntervenerThreeFdrHandler(FeatureToggleService featureToggleService) {
+        super(CaseDocumentCollectionType.INTERVENER_THREE_FDR_DOCS_COLLECTION, CaseDocumentParty.INTERVENER_THREE, featureToggleService);
+        this.featureToggleService = featureToggleService;
     }
 
     @Override

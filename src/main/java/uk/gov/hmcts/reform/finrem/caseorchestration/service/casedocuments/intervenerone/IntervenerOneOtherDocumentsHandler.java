@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.OtherDocumentsHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_ONE;
@@ -11,8 +12,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerOneOtherDocumentsHandler extends OtherDocumentsHandler {
 
-    public IntervenerOneOtherDocumentsHandler() {
-        super(INTERVENER_ONE_OTHER_COLLECTION, INTERVENER_ONE);
+    private final FeatureToggleService featureToggleService;
+
+    public IntervenerOneOtherDocumentsHandler(FeatureToggleService featureToggleService) {
+        super(INTERVENER_ONE_OTHER_COLLECTION, INTERVENER_ONE, featureToggleService);
+        this.featureToggleService = featureToggleService;
     }
 
     @Override

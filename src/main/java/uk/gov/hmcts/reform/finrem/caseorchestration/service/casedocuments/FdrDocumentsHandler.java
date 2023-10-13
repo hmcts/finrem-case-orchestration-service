@@ -8,15 +8,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
 
 @Service
 public class FdrDocumentsHandler extends DocumentHandler {
 
+    private final FeatureToggleService featureToggleService;
 
-    public FdrDocumentsHandler() {
-        super(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION);
+    public FdrDocumentsHandler(FeatureToggleService featureToggleService) {
+        super(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION, featureToggleService);
+        this.featureToggleService = featureToggleService;
     }
 
     protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(

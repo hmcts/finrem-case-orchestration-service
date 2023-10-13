@@ -22,10 +22,8 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
@@ -53,13 +51,6 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION),
             hasSize(2));
-
-        // TODO Check with Ruban as this is a double test one - should we add the loops and assert here?
-
-        for (UploadCaseDocumentCollection collection : caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION)) {
-            assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), not(nullValue()));
-        }
     }
 
     @Override

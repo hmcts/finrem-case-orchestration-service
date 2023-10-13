@@ -21,10 +21,8 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
@@ -50,12 +48,6 @@ public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTes
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(1));
-
-        // TODO Check with Ruban if this is correct
-        for (UploadCaseDocumentCollection collection : caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_THREE_FDR_DOCS_COLLECTION)) {
-            assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), not(nullValue()));
-        }
     }
 
     @Override

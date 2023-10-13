@@ -17,7 +17,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class IntervenerThreeCaseSummariesHandlerTest extends CaseSummariesHandlerTest {
 
     @InjectMocks

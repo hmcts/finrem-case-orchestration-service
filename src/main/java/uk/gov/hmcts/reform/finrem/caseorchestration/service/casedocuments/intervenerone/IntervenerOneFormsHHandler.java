@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FormsHHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_ONE;
@@ -10,8 +11,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerOneFormsHHandler extends FormsHHandler {
 
+    private final FeatureToggleService featureToggleService;
+
     @Autowired
-    public IntervenerOneFormsHHandler() {
-        super(INTERVENER_ONE_FORM_H_COLLECTION, INTERVENER_ONE);
+    public IntervenerOneFormsHHandler(FeatureToggleService featureToggleService) {
+        super(INTERVENER_ONE_FORM_H_COLLECTION, INTERVENER_ONE, featureToggleService);
+        this.featureToggleService = featureToggleService;
     }
 }

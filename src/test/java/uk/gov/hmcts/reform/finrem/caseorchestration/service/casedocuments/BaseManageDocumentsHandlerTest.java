@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 
 public abstract class BaseManageDocumentsHandlerTest {
 
@@ -31,6 +34,9 @@ public abstract class BaseManageDocumentsHandlerTest {
     protected FinremCaseDetails caseDetailsBefore;
     protected FinremCaseData caseData;
     protected DocumentHandler handler;
+
+    @Mock
+    protected FeatureToggleService featureToggleService;
 
     @Before
     public void setUp() {
@@ -55,17 +61,21 @@ public abstract class BaseManageDocumentsHandlerTest {
     public abstract void assertCorrectCategoryAssignedFromDocumentType();
 
 
-
-    public void assertDocumentCategoryIdAppliedForDocumentCollection() {
-        for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
-            assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), not(nullValue()));
+    private void assertDocumentCategoryIdAppliedForDocumentCollection() {
+        if (featureToggleService.isCaseFileViewEnabled()) {
+            for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
+                assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), not(nullValue()));
+            }
+        } else {
+            for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
+                assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), nullValue());
+            }
         }
     }
 
+    private void handleDocumentCollectionsCorrectly(Boolean cfvSwitch) {
 
-
-    @Test
-    public void handleDocumentCollectionsCorrectly() {
+        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(cfvSwitch);
 
         handler.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
@@ -74,6 +84,17 @@ public abstract class BaseManageDocumentsHandlerTest {
         assertExpectedCollectionType();
         assertDocumentCategoryIdAppliedForDocumentCollection();
     }
+
+    @Test
+    public void handleDocumentCollectionCorrectlyCvfOn() {
+        handleDocumentCollectionsCorrectly(true);
+    }
+
+    @Test
+    public void handleDocumentCollectionCorrectlyCfvOff() {
+        handleDocumentCollectionsCorrectly(false);
+    }
+
 
     protected UploadCaseDocumentCollection createContestedUploadDocumentItem(CaseDocumentType type,
                                                                              CaseDocumentParty party,

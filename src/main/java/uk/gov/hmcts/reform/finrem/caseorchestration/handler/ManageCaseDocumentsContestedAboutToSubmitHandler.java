@@ -42,12 +42,12 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
                                                             List<DocumentHandler> documentHandlers,
                                                             UploadedDocumentService uploadedDocumentHelper,
                                                             EvidenceManagementDeleteService evidenceManagementDeleteService,
-                                                            FeatureToggleService featureToggleService) {
+                                                            FeatureToggleService featureToggleService1) {
         super(mapper);
         this.documentHandlers = documentHandlers;
         this.uploadedDocumentHelper = uploadedDocumentHelper;
         this.evidenceManagementDeleteService = evidenceManagementDeleteService;
-        this.featureToggleService = featureToggleService;
+        this.featureToggleService = featureToggleService1;
     }
 
     @Override

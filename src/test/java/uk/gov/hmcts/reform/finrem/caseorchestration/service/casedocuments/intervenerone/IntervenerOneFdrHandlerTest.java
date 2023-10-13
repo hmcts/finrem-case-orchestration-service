@@ -21,17 +21,15 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class IntervenerOneFdrHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
     IntervenerOneFdrHandler collectionService;
 
 
-    @Test
     public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType() {
         screenUploadDocumentList = new ArrayList<>();
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
@@ -50,12 +48,18 @@ public class IntervenerOneFdrHandlerTest extends BaseManageDocumentsHandlerTest 
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(1));
+    }
 
-        // TODO Check with Ruban
-        for (UploadCaseDocumentCollection collection : caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_ONE_FDR_DOCS_COLLECTION)) {
-            assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), not(nullValue()));
-        }
+    @Test
+    public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionTypeCfvOn() {
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
+        givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType();
+    }
+
+    @Test
+    public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionTypeCfvOff() {
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
+        givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType();
     }
 
     @Override

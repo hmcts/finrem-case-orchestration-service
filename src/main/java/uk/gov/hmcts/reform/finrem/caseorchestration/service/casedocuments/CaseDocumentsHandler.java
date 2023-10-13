@@ -6,13 +6,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 @Service
 public class CaseDocumentsHandler extends PartyDocumentsHandler {
 
-    public CaseDocumentsHandler() {
+    private final FeatureToggleService featureToggleService;
+
+    public CaseDocumentsHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.CONTESTED_UPLOADED_DOCUMENTS,
-            CaseDocumentParty.CASE);
+            CaseDocumentParty.CASE, featureToggleService);
+        this.featureToggleService = featureToggleService;
     }
 
     @Override

@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASEWORKER_NOTICE_OF_CHANGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASE_FILE_VIEW_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.INTERVENER_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
@@ -93,6 +94,10 @@ public class FeatureToggleService {
 
     public boolean isIntervenerEnabled() {
         return isFeatureEnabled(INTERVENER_ENABLED);
+    }
+
+    public boolean isCaseFileViewEnabled() {
+        return isFeatureEnabled(CASE_FILE_VIEW_ENABLED);
     }
 
     /**

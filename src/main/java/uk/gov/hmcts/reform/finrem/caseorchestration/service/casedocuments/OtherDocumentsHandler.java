@@ -5,12 +5,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
 
     public OtherDocumentsHandler(CaseDocumentCollectionType caseDocumentCollectionType,
-                                 CaseDocumentParty party) {
-        super(caseDocumentCollectionType, party);
+                                 CaseDocumentParty party, FeatureToggleService featureToggleService) {
+        super(caseDocumentCollectionType, party, featureToggleService);
     }
 
     @Override

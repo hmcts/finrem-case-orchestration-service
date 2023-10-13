@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.List;
 public abstract class DocumentHandler {
 
     protected final CaseDocumentCollectionType collectionType;
+    
+    private final FeatureToggleService featureToggleService;
 
     protected abstract List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections);
@@ -47,14 +50,7 @@ public abstract class DocumentHandler {
         List<UploadCaseDocumentCollection> uploadedCollectionForType =
             getAlteredCollectionForType(screenCollection);
 
-        for (UploadCaseDocumentCollection uploadCaseDocumentCollection : uploadedCollectionForType) {
-            uploadCaseDocumentCollection.getUploadCaseDocument()
-                .getCaseDocuments()
-                .setCategoryId(getDocumentCategoryFromDocumentType(
-                        uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType()
-                    ).getDocumentCategoryId()
-                );
-        }
+        applyDocumentCategory(uploadedCollectionForType);
 
         originalCollectionForType.addAll(uploadedCollectionForType);
 
@@ -65,5 +61,18 @@ public abstract class DocumentHandler {
         log.info("Adding items: {}, to {} Collection", uploadedCollectionForType,
             collectionType);
         screenCollection.removeAll(uploadedCollectionForType);
+    }
+
+    private void applyDocumentCategory(List<UploadCaseDocumentCollection> uploadedCollectionForType) {
+        if (featureToggleService.isCaseFileViewEnabled()) {
+            for (UploadCaseDocumentCollection uploadCaseDocumentCollection : uploadedCollectionForType) {
+                uploadCaseDocumentCollection.getUploadCaseDocument()
+                    .getCaseDocuments()
+                    .setCategoryId(getDocumentCategoryFromDocumentType(
+                            uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType()
+                        ).getDocumentCategoryId()
+                    );
+            }
+        }
     }
 }

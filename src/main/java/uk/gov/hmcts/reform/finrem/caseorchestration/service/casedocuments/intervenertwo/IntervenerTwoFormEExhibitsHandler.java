@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FormEExhibitsHandler;
 
 import java.util.Objects;
@@ -13,8 +14,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerTwoFormEExhibitsHandler extends FormEExhibitsHandler {
 
-    public IntervenerTwoFormEExhibitsHandler() {
-        super(INTERVENER_TWO_FORM_E_EXHIBITS_COLLECTION, INTERVENER_TWO);
+    private final FeatureToggleService featureToggleService;
+
+    public IntervenerTwoFormEExhibitsHandler(FeatureToggleService featureToggleService) {
+        super(INTERVENER_TWO_FORM_E_EXHIBITS_COLLECTION, INTERVENER_TWO, featureToggleService);
+        this.featureToggleService = featureToggleService;
     }
 
     @Override

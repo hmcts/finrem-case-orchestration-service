@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.HearingBundleHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_FOUR;
@@ -10,8 +11,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerFourHearingBundleHandler extends HearingBundleHandler {
 
+    private final FeatureToggleService featureToggleService;
+
     @Autowired
-    public IntervenerFourHearingBundleHandler() {
-        super(INTERVENER_FOUR_HEARING_BUNDLES_COLLECTION, INTERVENER_FOUR);
+    public IntervenerFourHearingBundleHandler(FeatureToggleService featureToggleService) {
+        super(INTERVENER_FOUR_HEARING_BUNDLES_COLLECTION, INTERVENER_FOUR, featureToggleService);
+        this.featureToggleService = featureToggleService;
     }
 }
