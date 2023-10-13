@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.List;
@@ -27,7 +28,10 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -39,6 +43,8 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
     private GeneralApplicationService gaService;
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
+    @Mock
+    private BulkPrintDocumentService service;
 
     public static final String AUTH_TOKEN = "tokien:)";
 
@@ -101,6 +107,7 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
                 .contains("Any changes to an existing General Applications will not be saved."
                     + " Please add a new General Application in order to progress."));
         });
+        verify(service, times(24)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
 

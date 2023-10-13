@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -54,6 +55,8 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
     private IdamService idamService;
     private AssignCaseAccessService accessService;
 
+    @Mock
+    private BulkPrintDocumentService bulkPrintDocumentService;
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String NO_GA_JSON = "/fixtures/contested/no-general-application-finrem.json";
     private static final String GA_JSON = "/fixtures/contested/general-application-details.json";
@@ -63,7 +66,8 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
-        gaService = new GeneralApplicationService(documentHelper, objectMapper, idamService, service, accessService, helper);
+        gaService = new GeneralApplicationService(documentHelper, objectMapper, idamService, service, accessService, helper,
+            bulkPrintDocumentService);
         startHandler = new GeneralApplicationReferToJudgeAboutToStartHandler(finremCaseDetailsMapper, helper, gaService);
         submitHandler = new GeneralApplicationReferToJudgeAboutToSubmitHandler(finremCaseDetailsMapper, helper, gaService);
     }
