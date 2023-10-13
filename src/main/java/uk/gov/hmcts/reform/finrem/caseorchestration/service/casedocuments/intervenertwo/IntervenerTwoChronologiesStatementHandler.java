@@ -12,11 +12,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerTwoChronologiesStatementHandler extends ChronologiesStatementsHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public IntervenerTwoChronologiesStatementHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION, INTERVENER_TWO, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override

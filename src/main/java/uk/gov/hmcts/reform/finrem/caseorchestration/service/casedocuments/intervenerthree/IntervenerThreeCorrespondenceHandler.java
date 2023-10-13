@@ -11,11 +11,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerThreeCorrespondenceHandler extends CorrespondenceHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     @Autowired
     public IntervenerThreeCorrespondenceHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_THREE_CORRESPONDENCE_COLLECTION, INTERVENER_THREE, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 }

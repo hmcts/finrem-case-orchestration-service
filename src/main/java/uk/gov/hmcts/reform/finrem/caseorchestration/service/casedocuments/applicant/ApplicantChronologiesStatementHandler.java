@@ -11,12 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Chrono
 @Service
 public class ApplicantChronologiesStatementHandler extends ChronologiesStatementsHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public ApplicantChronologiesStatementHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION,
                 CaseDocumentParty.APPLICANT, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override

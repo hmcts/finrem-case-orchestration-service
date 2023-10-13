@@ -11,12 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.OtherD
 @Service
 public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public ApplicantOtherDocumentsHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.APP_OTHER_COLLECTION,
             CaseDocumentParty.APPLICANT, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override

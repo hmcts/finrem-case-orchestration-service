@@ -12,11 +12,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerFourOtherDocumentsHandler extends OtherDocumentsHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public IntervenerFourOtherDocumentsHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_FOUR_OTHER_COLLECTION, INTERVENER_FOUR, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override

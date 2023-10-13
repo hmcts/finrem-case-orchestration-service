@@ -10,13 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Hearin
 @Service
 public class RespondentHearingBundleHandler extends HearingBundleHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     @Autowired
     public RespondentHearingBundleHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.RESP_HEARING_BUNDLES_COLLECTION,
                 CaseDocumentParty.RESPONDENT, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
 }

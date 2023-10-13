@@ -11,11 +11,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerOneCaseSummariesHandler extends CaseSummariesHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     @Autowired
     public IntervenerOneCaseSummariesHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_ONE_SUMMARIES_COLLECTION, INTERVENER_ONE, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 }

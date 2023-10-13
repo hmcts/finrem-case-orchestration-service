@@ -11,11 +11,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerFourExpertEvidenceHandler extends ExpertEvidenceHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     @Autowired
     public IntervenerFourExpertEvidenceHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_FOUR_EXPERT_EVIDENCE_COLLECTION, INTERVENER_FOUR, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 }

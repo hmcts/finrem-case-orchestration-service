@@ -11,12 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Questi
 @Service
 public class RespondentQuestionnairesAnswersHandler extends QuestionnairesAnswersHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public RespondentQuestionnairesAnswersHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION,
             CaseDocumentParty.RESPONDENT, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override

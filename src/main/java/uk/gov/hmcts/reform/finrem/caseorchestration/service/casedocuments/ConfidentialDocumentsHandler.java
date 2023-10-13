@@ -13,11 +13,8 @@ import java.util.List;
 @Service
 public class ConfidentialDocumentsHandler extends DocumentHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public ConfidentialDocumentsHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.CONFIDENTIAL_DOCS_COLLECTION, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(

@@ -10,12 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FormsH
 @Service
 public class RespondentFormsHHandler extends FormsHHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     @Autowired
     public RespondentFormsHHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.RESP_FORM_H_COLLECTION,
             CaseDocumentParty.RESPONDENT, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 }

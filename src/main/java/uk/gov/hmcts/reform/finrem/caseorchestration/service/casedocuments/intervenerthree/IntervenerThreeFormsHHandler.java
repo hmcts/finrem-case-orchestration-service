@@ -11,11 +11,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerThreeFormsHHandler extends FormsHHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     @Autowired
     public IntervenerThreeFormsHHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_THREE_FORM_H_COLLECTION, INTERVENER_THREE, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 }

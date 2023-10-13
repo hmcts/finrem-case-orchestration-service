@@ -12,11 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 @Service
 public class IntervenerFourFdrHandler extends PartyDocumentsHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public IntervenerFourFdrHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.INTERVENER_FOUR_FDR_DOCS_COLLECTION, CaseDocumentParty.INTERVENER_FOUR, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override

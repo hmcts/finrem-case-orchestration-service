@@ -10,12 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseSu
 @Service
 public class RespondentCaseSummariesHandler extends CaseSummariesHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     @Autowired
     public RespondentCaseSummariesHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.RESP_CASE_SUMMARIES_COLLECTION,
                 CaseDocumentParty.RESPONDENT, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 }

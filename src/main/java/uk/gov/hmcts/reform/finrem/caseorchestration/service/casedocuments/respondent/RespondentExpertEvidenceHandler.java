@@ -10,12 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Expert
 @Service
 public class RespondentExpertEvidenceHandler extends ExpertEvidenceHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     @Autowired
     public RespondentExpertEvidenceHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.RESP_EXPERT_EVIDENCE_COLLECTION,
                 CaseDocumentParty.RESPONDENT, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 }

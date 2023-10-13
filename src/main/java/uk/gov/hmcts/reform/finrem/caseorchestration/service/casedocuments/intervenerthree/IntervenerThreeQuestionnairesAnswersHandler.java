@@ -12,11 +12,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerThreeQuestionnairesAnswersHandler extends QuestionnairesAnswersHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public IntervenerThreeQuestionnairesAnswersHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_THREE_QUESTIONNAIRES_ANSWERS_COLLECTION, INTERVENER_THREE, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override

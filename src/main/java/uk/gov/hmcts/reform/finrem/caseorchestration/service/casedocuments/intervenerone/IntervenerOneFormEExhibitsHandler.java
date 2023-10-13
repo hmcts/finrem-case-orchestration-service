@@ -12,11 +12,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerOneFormEExhibitsHandler extends FormEExhibitsHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public IntervenerOneFormEExhibitsHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_ONE_FORM_E_EXHIBITS_COLLECTION, INTERVENER_ONE, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override

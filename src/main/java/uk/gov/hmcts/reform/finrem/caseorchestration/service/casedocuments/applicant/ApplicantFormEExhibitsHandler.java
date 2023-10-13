@@ -11,12 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FormEE
 @Service
 public class ApplicantFormEExhibitsHandler extends FormEExhibitsHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public ApplicantFormEExhibitsHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.APP_FORM_E_EXHIBITS_COLLECTION,
             CaseDocumentParty.APPLICANT,featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override

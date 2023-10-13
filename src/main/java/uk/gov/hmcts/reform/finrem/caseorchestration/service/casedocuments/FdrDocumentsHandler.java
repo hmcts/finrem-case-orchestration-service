@@ -15,11 +15,8 @@ import java.util.List;
 @Service
 public class FdrDocumentsHandler extends DocumentHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public FdrDocumentsHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(

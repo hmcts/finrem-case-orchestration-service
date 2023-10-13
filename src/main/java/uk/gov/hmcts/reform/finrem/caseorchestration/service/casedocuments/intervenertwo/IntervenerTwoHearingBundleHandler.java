@@ -11,11 +11,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 @Component
 public class IntervenerTwoHearingBundleHandler extends HearingBundleHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     @Autowired
     public IntervenerTwoHearingBundleHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_TWO_HEARING_BUNDLES_COLLECTION, INTERVENER_TWO, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 }

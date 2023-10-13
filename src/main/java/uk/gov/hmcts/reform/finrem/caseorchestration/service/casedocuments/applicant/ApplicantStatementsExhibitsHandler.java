@@ -11,13 +11,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Statem
 @Service
 public class ApplicantStatementsExhibitsHandler extends StatementExhibitsHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public ApplicantStatementsExhibitsHandler(FeatureToggleService featureToggleService) {
 
         super(CaseDocumentCollectionType.APP_STATEMENTS_EXHIBITS_COLLECTION,
             CaseDocumentParty.APPLICANT, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override

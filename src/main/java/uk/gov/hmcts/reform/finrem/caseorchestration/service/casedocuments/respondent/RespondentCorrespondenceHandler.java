@@ -10,12 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Corres
 @Service
 public class RespondentCorrespondenceHandler extends CorrespondenceHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     @Autowired
     public RespondentCorrespondenceHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.RESP_CORRESPONDENCE_COLLECTION,
                 CaseDocumentParty.RESPONDENT, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 }

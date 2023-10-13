@@ -11,12 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 @Service
 public class CaseDocumentsHandler extends PartyDocumentsHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public CaseDocumentsHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.CONTESTED_UPLOADED_DOCUMENTS,
             CaseDocumentParty.CASE, featureToggleService);
-        this.featureToggleService = featureToggleService;
     }
 
     @Override
