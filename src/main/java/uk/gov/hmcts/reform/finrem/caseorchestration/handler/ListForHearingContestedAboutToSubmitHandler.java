@@ -95,6 +95,7 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
             caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(userAuthorisation, caseDetails));
         }
         finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        finremCaseData = finremCaseDetails.getData();
         List<String> warnings = validateHearingService.validateHearingWarnings(finremCaseDetails);
         log.info("Hearing date warning {} Case ID: {}", warnings, caseId);
 
