@@ -179,10 +179,28 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void generateContestedDraftMiniFormAFinRemCaseDetails() {
+        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, emptyCaseDetails()));
+
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq(documentConfiguration.getContestedDraftMiniFormTemplate()), eq(documentConfiguration.getContestedDraftMiniFormFileName()));
+    }
+
+    @Test
     public void generateContestedDraftMiniFormASchedule() {
         Map<String, Object> data = caseData();
         data.put(TYPE_OF_APPLICATION, "Under paragraph 1 or 2 of schedule 1 children act 1989");
         assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(data).build()));
+
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq(documentConfiguration.getContestedDraftMiniFormTemplateSchedule()), eq(documentConfiguration.getContestedDraftMiniFormFileName()));
+    }
+
+    @Test
+    public void generateContestedDraftMiniFormAScheduleFinRemCaseDetails() {
+        Map<String, Object> data = caseData();
+        data.put(TYPE_OF_APPLICATION, "Under paragraph 1 or 2 of schedule 1 children act 1989");
+        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, FinremCaseDetails.builder().data(new FinremCaseData()).build()));
 
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
             eq(documentConfiguration.getContestedDraftMiniFormTemplateSchedule()), eq(documentConfiguration.getContestedDraftMiniFormFileName()));
