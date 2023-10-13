@@ -34,8 +34,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.sendletter.api.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
@@ -241,9 +241,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         caseDetails.getData().put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
         caseDetails.getData().put("bulkPrintCoverSheetApp", caseDocument());
         caseDetails.getData().put("bulkPrintCoverSheetRes", caseDocument());
-//        List<AdditionalHearingDocumentCollection> collection = List.of(AdditionalHearingDocumentCollection.builder()
-//            .value(AdditionalHearingDocument.builder().document(caseDocument()).build()).build());
-//        caseDetails.getData().put("additionalHearingDocuments", collection);
 
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
