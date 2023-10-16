@@ -33,9 +33,11 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.sendletter.api.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
@@ -64,17 +66,23 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_INFO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.REQUIRED_FIELD_EMPTY_ERROR;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -120,6 +128,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     private static String requestJson;
     protected CallbackRequest request;
+    protected FinremCallbackRequest finremRequest;
 
     @BeforeClass
     public static void loadJsonString() throws IOException {
@@ -131,6 +140,54 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         request = objectMapper.readValue(requestJson, CallbackRequest.class);
         request.getCaseDetails().getData().put("hearingDate", LocalDate.now().plusDays(100));
         request.getCaseDetails().getData().put("issueDate", LocalDate.now());
+        finremRequest = objectMapper.readValue(requestJson, FinremCallbackRequest.class);
+        finremRequest.getCaseDetails().getData().setHearingDate(LocalDate.now().plusDays(100));
+        finremRequest.getCaseDetails().getData().setIssueDate(LocalDate.now());
+    }
+
+    @Test
+    public void missingIssueDate() throws Exception {
+        doMissingMustFieldTest(ISSUE_DATE);
+    }
+
+    @Test
+    public void missingHearingDate() throws Exception {
+        doMissingMustFieldTest(HEARING_DATE);
+    }
+
+    @Test
+    public void missingFastTrackDecision() throws Exception {
+        doMissingMustFieldTest(FAST_TRACK_DECISION);
+    }
+
+    private void doMissingMustFieldTest(String missingFieldKey) throws Exception {
+//        CaseDetails caseDetails = request.getCaseDetails();
+//        caseDetails.getData().put(missingFieldKey, null);
+        FinremCaseDetails finremCaseDetails = finremRequest.getCaseDetails();
+        if (missingFieldKey.equals(FAST_TRACK_DECISION)) {
+            finremCaseDetails.getData().setFastTrackDecision(null);
+        }
+        if (missingFieldKey.equals(HEARING_DATE)) {
+            finremCaseDetails.getData().setHearingDate(null);
+        }
+        if (missingFieldKey.equals(ISSUE_DATE)) {
+            finremCaseDetails.getData().setIssueDate(null);
+        }
+        webClient.perform(MockMvcRequestBuilders.post(ABOUTTOSUBMIT_HANDLER_URL)
+                .content(objectMapper.writeValueAsString(finremRequest))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(content().json(expectedErrorData(), true));
+    }
+
+    private String expectedErrorData() throws JsonProcessingException {
+        return objectMapper.writeValueAsString(
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR))
+                .warnings(ImmutableList.of())
+                .build());
     }
 
     @Test

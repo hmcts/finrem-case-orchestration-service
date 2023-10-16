@@ -76,6 +76,8 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
     @InjectMocks
     private ListForHearingContestedAboutToStartHandler aboutToStartHandler;
 
+    private static final String BULK_PRINT_ADDITIONAL_HEARING_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
+    private static final String NON_FAST_TRACK_HEARING_JSON = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
     private static final String ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY = "Issue Date, fast track decision or hearingDate is empty";
     private static final String FAST_TRACK_WARNING = "Date of the hearing must be between 12 and 14 weeks.";
 
@@ -110,8 +112,8 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
                 .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
         FinremCallbackRequest finremCallbackRequest =
-                buildFinremCallbackRequest("/fixtures/contested/validate-hearing-withoutfastTrackDecision.json");
-        CallbackRequest callbackRequest = buildCallbackRequest("/fixtures/contested/validate-hearing-withoutfastTrackDecision.json");
+                buildFinremCallbackRequest(NON_FAST_TRACK_HEARING_JSON);
+        CallbackRequest callbackRequest = buildCallbackRequest(NON_FAST_TRACK_HEARING_JSON);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCallbackRequest.getCaseDetails());
         when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(callbackRequest.getCaseDetails());
         finremCallbackRequest.getCaseDetails().getData().setIssueDate(LocalDate.now().minusDays(1));
@@ -132,8 +134,8 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
 
     @Test
     void givenContestedCase_whenHandled_thenSuccessfullyGeneratesAdditionalHearingDocument() throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print-additional-hearing.json");
-        CallbackRequest callbackRequest = buildCallbackRequest("/fixtures/bulkprint/bulk-print-additional-hearing.json");
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(BULK_PRINT_ADDITIONAL_HEARING_JSON);
+        CallbackRequest callbackRequest = buildCallbackRequest(BULK_PRINT_ADDITIONAL_HEARING_JSON);
         FinremCaseDetails finremCaseDetailsBefore =
             FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
         finremCallbackRequest.setCaseDetailsBefore(finremCaseDetailsBefore);
@@ -178,8 +180,8 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
 
     @Test
     void givenContestedCase_whenHandledForConfidentialLitigants_thenSuccessfullyGeneratesAdditionalHearingDocument() throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest("/fixtures/bulkprint/bulk-print-additional-hearing.json");
-        CallbackRequest callbackRequest = buildCallbackRequest("/fixtures/bulkprint/bulk-print-additional-hearing.json");
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(BULK_PRINT_ADDITIONAL_HEARING_JSON);
+        CallbackRequest callbackRequest = buildCallbackRequest(BULK_PRINT_ADDITIONAL_HEARING_JSON);
         FinremCaseDetails finremCaseDetailsBefore =
                 FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
         finremCallbackRequest.setCaseDetailsBefore(finremCaseDetailsBefore);
