@@ -44,12 +44,12 @@ public class UploadOrderContestedSubmittedHandler extends FinremCallbackHandler 
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Handling contested event {} submit callback for case id: {}",
-            callbackRequest.getEventType(), caseDetails.getId());
+            EventType.UPLOAD_ORDER, caseDetails.getId());
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails.getData());
 
-        if (caseDetailsBefore != null && caseDetailsBefore.getData().getFormC() != null) {
+        if (caseDetailsBefore != null && caseDetailsBefore.getData() != null && caseDetailsBefore.getData().getFormC() != null) {
             log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
             additionalHearingDocumentService.sendAdditionalHearingDocuments(userAuthorisation, caseDetails);
             log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());

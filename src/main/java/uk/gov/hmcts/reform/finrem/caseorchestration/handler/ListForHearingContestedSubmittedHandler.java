@@ -44,7 +44,7 @@ public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandl
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Handling contested event {} submit callback for case id: {}",
-            callbackRequest.getEventType(), caseDetails.getId());
+            EventType.LIST_FOR_HEARING, caseDetails.getId());
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails.getData());
