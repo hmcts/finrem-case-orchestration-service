@@ -244,7 +244,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
-        assertEquals(2, caseData.getFinalOrderCollection().size());
+        assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getIntv1OrderCollection());
         assertEquals(2, caseData.getIntv1OrderCollections().size());
         List<ApprovedOrderConsolidateCollection> intv1OrderCollections = caseData.getIntv1OrderCollections();
@@ -270,10 +270,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         assertTrue(orderReceivedAtR1.isAfter(orderReceivedAtR2));
 
-        verify(genericDocumentService, times(2)).stampDocument(any(), any(), any(), anyString());
+        verify(genericDocumentService, times(1)).stampDocument(any(), any(), any(), anyString());
         verify(generalOrderService, times(2)).isSelectedOrderMatches(any(), any());
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
-        verify(documentHelper, times(2)).getStampType(caseData);
+        verify(documentHelper, times(1)).getStampType(caseData);
 
     }
 

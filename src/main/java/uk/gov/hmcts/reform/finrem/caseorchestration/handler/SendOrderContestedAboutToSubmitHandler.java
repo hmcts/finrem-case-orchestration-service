@@ -22,8 +22,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Slf4j
@@ -177,19 +179,30 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                          String authToken) {
         String caseId = String.valueOf(caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
-
-        StampType stampType = documentHelper.getStampType(caseData);
-        CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, caseId);
-        log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
-
         List<DirectionOrderCollection> finalOrderCollection = Optional.ofNullable(caseData.getFinalOrderCollection())
             .orElse(new ArrayList<>());
+        if (!checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, latestHearingOrder)) {
+            StampType stampType = documentHelper.getStampType(caseData);
+            CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, caseId);
+            log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
 
-        finalOrderCollection.add(prepareFinalOrderList(stampedDocs));
-        log.info("Existing final order collection = {}", finalOrderCollection);
+            finalOrderCollection.add(prepareFinalOrderList(stampedDocs));
+            log.info("Existing final order collection = {}", finalOrderCollection);
 
-        caseData.setFinalOrderCollection(finalOrderCollection);
-        log.info("Finished stamping final order for caseId {}", caseId);
+            caseData.setFinalOrderCollection(finalOrderCollection);
+            log.info("Finished stamping final order for caseId {}", caseId);
+        } else {
+            log.info("Final order {} already in final collection for caseId {}", latestHearingOrder, caseId);
+        }
+    }
+
+    private boolean checkIfOrderAlreadyInFinalOrderCollection(List<DirectionOrderCollection> finalOrderCollection, CaseDocument latestHearingOrder) {
+        if (!finalOrderCollection.isEmpty()) {
+            Set<String> filenames = new HashSet<>();
+            finalOrderCollection.forEach(obj -> filenames.add(obj.getValue().getUploadDraftDocument().getDocumentFilename()));
+            return filenames.contains(latestHearingOrder.getDocumentFilename());
+        }
+        return false;
     }
 
     private OrderSentToPartiesCollection addToPrintOrderCollection(CaseDocument document) {
