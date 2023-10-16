@@ -161,8 +161,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     }
 
     private void doMissingMustFieldTest(String missingFieldKey) throws Exception {
-//        CaseDetails caseDetails = request.getCaseDetails();
-//        caseDetails.getData().put(missingFieldKey, null);
         FinremCaseDetails finremCaseDetails = finremRequest.getCaseDetails();
         if (missingFieldKey.equals(FAST_TRACK_DECISION)) {
             finremCaseDetails.getData().setFastTrackDecision(null);
