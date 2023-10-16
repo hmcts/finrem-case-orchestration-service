@@ -53,7 +53,8 @@ public class FeatureToggleServiceTest {
         "feature.toggle.assign_case_access=false",
         "feature.toggle.pba_case_type=false",
         "feature.toggle.send_letter_recipient_check=false",
-        "feature.toggle.intervener_enabled=false"
+        "feature.toggle.intervener_enabled=false",
+        "feature.toggle.case_file_view_enabled=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
 
@@ -90,6 +91,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isIntervenerEnabled() {
             assertThat(featureToggleService.isIntervenerEnabled(), is(false));
+        }
+
+        @Test
+        public void isCaseFileViewEnabled() {
+            assertThat(featureToggleService.isCaseFileViewEnabled(), is(false));
         }
 
     }
