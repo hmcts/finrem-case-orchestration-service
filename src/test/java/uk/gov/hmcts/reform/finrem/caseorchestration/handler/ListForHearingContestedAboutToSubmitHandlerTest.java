@@ -179,6 +179,50 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
+    void givenContestedCase_whenHandledAndNotHadFirstHearing_thenSuccessfullyGeneratesFormCAndG() throws JsonProcessingException {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(BULK_PRINT_ADDITIONAL_HEARING_JSON);
+        CallbackRequest callbackRequest = buildCallbackRequest(BULK_PRINT_ADDITIONAL_HEARING_JSON);
+        FinremCaseDetails finremCaseDetailsBefore =
+            FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
+        finremCallbackRequest.setCaseDetailsBefore(finremCaseDetailsBefore);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseDetails.getData().put(PARTIES_ON_CASE, getParties());
+        caseDetails.getData().put(ADDITIONAL_HEARING_DOCUMENTS_OPTION, YesOrNo.NO);
+
+        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class))).thenReturn(getParties());
+
+        aboutToStartHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(caseDetails);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCallbackRequest.getCaseDetails());
+
+        when(hearingDocumentService.alreadyHadFirstHearing(any(FinremCaseDetails.class))).thenReturn(false);
+
+        when(validateHearingService.validateHearingErrors(any(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(finremCallbackRequest.getCaseDetails())).thenReturn(ImmutableList.of());
+        when(caseDataService.isApplicantAddressConfidential(any(FinremCaseData.class))).thenReturn(false);
+        when(caseDataService.isRespondentAddressConfidential(any(FinremCaseData.class))).thenReturn(false);
+        when(coverSheetService.generateApplicantCoverSheet(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument());
+        when(coverSheetService.generateRespondentCoverSheet(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument());
+        CaseDocument document = caseDocument("http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
+            "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
+        when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
+        when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), anyString())).thenReturn(document);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertThat(response.getData().getBulkPrintCoverSheetRes(), equalTo(caseDocument()));
+        assertThat(response.getData().getBulkPrintCoverSheetApp(), equalTo(caseDocument()));
+        assertThat(response.getData().getBulkPrintCoverSheetResConfidential(), nullValue());
+        assertThat(response.getData().getBulkPrintCoverSheetAppConfidential(), nullValue());
+
+        verify(hearingDocumentService, times(1)).generateHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService, times(0)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
+        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
+        verify(coverSheetService).generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
+        verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
+    }
+
+    @Test
     void givenContestedCase_whenHandledForConfidentialLitigants_thenSuccessfullyGeneratesAdditionalHearingDocument() throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(BULK_PRINT_ADDITIONAL_HEARING_JSON);
         CallbackRequest callbackRequest = buildCallbackRequest(BULK_PRINT_ADDITIONAL_HEARING_JSON);
