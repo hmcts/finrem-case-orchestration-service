@@ -61,10 +61,10 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateHearingDocumentDirectionOrder_isAnotherHearingTrue() throws Exception {
         mvc.perform(post(DIRECTION_ORDER_URL)
-                        .content(requestContent.toString())
-                        .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any());
     }
@@ -84,15 +84,15 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateHearingDocumentDirectionOrderMostRecentEnteredAtTheTop() throws Exception {
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
-                .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
+            .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
         mvc.perform(post(DIRECTION_ORDER_URL)
-                        .content(requestContent.toString())
-                        .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.directionDetailsCollection[0].value.dateOfHearing", is("2020-07-01")))
-                .andExpect(jsonPath("$.data.directionDetailsCollection[1].value.dateOfHearing", is("2022-12-01")))
-                .andExpect(jsonPath("$.data.directionDetailsCollection[2].value.dateOfHearing", is("2023-10-01")));
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.directionDetailsCollection[0].value.dateOfHearing", is("2020-07-01")))
+            .andExpect(jsonPath("$.data.directionDetailsCollection[1].value.dateOfHearing", is("2022-12-01")))
+            .andExpect(jsonPath("$.data.directionDetailsCollection[2].value.dateOfHearing", is("2023-10-01")));
 
         verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any());
     }

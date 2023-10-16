@@ -73,7 +73,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         JsonPath jsonPathEvaluator = generateDocument(CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON, hearingOrderStoreUrl, contestedDir);
 
         assertTrue(jsonPathEvaluator.get("data.latestDraftHearingOrder.document_filename").toString()
-                .equalsIgnoreCase("approvedConvertedHearingOrder.pdf"));
+            .equalsIgnoreCase("approvedConvertedHearingOrder.pdf"));
     }
 
 
@@ -81,10 +81,10 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
-                BINARY_URL_TYPE, "generalOrder", consentedDir);
+            BINARY_URL_TYPE, "generalOrder", consentedDir);
 
         String payload = utils.getJsonFromFile("bulk-print.json", consentedDir)
-                .replace("$DOCUMENT-BINARY-URL", documentUrl);
+            .replace("$DOCUMENT-BINARY-URL", documentUrl);
         jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/bulk-print", payload, "data");
 
         if (jsonPathEvaluator.get("bulkPrintLetterIdRes") == null) {
@@ -108,7 +108,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         JsonPath jsonPathEvaluator = generateDocument(GENERAL_ORDER_JSON, documentRejectedOrderUrl, consentedDir);
 
         assertTrue(jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentType").toString()
-                .equalsIgnoreCase("generalOrder"));
+            .equalsIgnoreCase("generalOrder"));
     }
 
     @Test
@@ -139,7 +139,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyRejectedOrderGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
-                "document", "generalOrder", consentedDir);
+            "document", "generalOrder", consentedDir);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -150,7 +150,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
-                "document", MINI_FORM_A, consentedDir);
+            "document", MINI_FORM_A, consentedDir);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
         assertTrue(jsonPathEvaluator1.get("mimeType").toString().equalsIgnoreCase("application/pdf"));
@@ -161,7 +161,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyGeneratedContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
-                "document", MINI_FORM_A, contestedDir);
+            "document", MINI_FORM_A, contestedDir);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -173,7 +173,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
-                BINARY_URL_TYPE, MINI_FORM_A, consentedDir);
+            BINARY_URL_TYPE, MINI_FORM_A, consentedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -188,7 +188,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadRejectOrderDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
-                BINARY_URL_TYPE, "generalOrder", consentedDir);
+            BINARY_URL_TYPE, "generalOrder", consentedDir);
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
         assertTrue(documentContent.contains("Approved by:  District Judge test3"));
     }
@@ -197,7 +197,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadContestedDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
-                BINARY_URL_TYPE, MINI_FORM_A, contestedDir);
+            BINARY_URL_TYPE, MINI_FORM_A, contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -207,10 +207,10 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     private JsonPath generateDocument(String jsonFileName, String url, String journeyType) {
         Response jsonResponse = SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeaders())
-                .body(utils.getJsonFromFile(jsonFileName, journeyType))
-                .when().post(url).andReturn();
+            .relaxedHTTPSValidation()
+            .headers(utils.getHeaders())
+            .body(utils.getJsonFromFile(jsonFileName, journeyType))
+            .when().post(url).andReturn();
 
         assertEquals(HttpStatus.OK, HttpStatus.valueOf(jsonResponse.getStatusCode()));
 
@@ -231,9 +231,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         }
 
         path = path == null ? null
-                : urlType.equals("document") ? path + ".document_url"
-                : urlType.equals(BINARY_URL_TYPE) ? path + ".document_binary_url"
-                : path;
+            : urlType.equals("document") ? path + ".document_url"
+            : urlType.equals(BINARY_URL_TYPE) ? path + ".document_binary_url"
+            : path;
 
         if (path != null) {
             url1 = jsonPathEvaluator.get(path);
@@ -244,10 +244,10 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     private JsonPath accessGeneratedDocument(String url) {
         Response jsonResponse = SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeadersWithUserId())
-                .when().get(url)
-                .andReturn();
+            .relaxedHTTPSValidation()
+            .headers(utils.getHeadersWithUserId())
+            .when().get(url)
+            .andReturn();
 
         int statusCode = jsonResponse.getStatusCode();
         assertEquals(200, statusCode);
@@ -257,7 +257,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     private String fileRetrieveUrl(String url) {
         return url != null && url.contains("dm-store:8080")
-                ? url.replace("http://dm-store:8080", dmStoreBaseUrl)
-                : url;
+            ? url.replace("http://dm-store:8080", dmStoreBaseUrl)
+            : url;
     }
 }
