@@ -15,16 +15,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Selec
 
 @Slf4j
 @Service
-public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandler {
+public class UploadOrderContestedSubmittedHandler extends FinremCallbackHandler {
 
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
 
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
-    public ListForHearingContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
-                                                   AdditionalHearingDocumentService additionalHearingDocumentService,
-                                                   SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService) {
+    public UploadOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
+                                                AdditionalHearingDocumentService additionalHearingDocumentService,
+                                                SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService) {
         super(finremCaseDetailsMapper);
         this.hearingDocumentService = hearingDocumentService;
         this.additionalHearingDocumentService = additionalHearingDocumentService;
@@ -35,7 +35,7 @@ public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandl
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.LIST_FOR_HEARING.equals(eventType);
+            && EventType.UPLOAD_ORDER.equals(eventType);
     }
 
     @Override

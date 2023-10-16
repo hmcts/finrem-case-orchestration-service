@@ -22,23 +22,23 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ListForHearingContestedAboutToStartHandlerTest {
+public class UploadOrderContestedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private ListForHearingContestedAboutToStartHandler handler;
+    private UploadOrderContestedAboutToStartHandler handler;
     @Mock
     private PartyService partyService;
 
     @Before
     public void setup() {
-        handler = new ListForHearingContestedAboutToStartHandler(
+        handler = new UploadOrderContestedAboutToStartHandler(
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())), partyService);
     }
 
     @Test
-    public void givenContestedCase_whenEventIsListForHearing_thenHandlerCanHandle() {
+    public void givenContestedCase_whenEventIsUploadOrder_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.UPLOAD_ORDER),
             is(true));
     }
 
@@ -53,14 +53,14 @@ public class ListForHearingContestedAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenCallbackIsSubmit_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_ORDER),
             is(false));
     }
 
     @Test
     public void givenConsentCase_whenEventIsListForHearing_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_ORDER),
             is(false));
     }
 
@@ -79,7 +79,7 @@ public class ListForHearingContestedAboutToStartHandlerTest {
             .<FinremCaseDetails>builder()
             .eventType(EventType.LIST_FOR_HEARING)
             .caseDetails(FinremCaseDetails.builder().id(123L)
-                .caseType(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED)
+                .caseType(CaseType.CONTESTED)
                 .data(new FinremCaseData()).build())
             .build();
     }

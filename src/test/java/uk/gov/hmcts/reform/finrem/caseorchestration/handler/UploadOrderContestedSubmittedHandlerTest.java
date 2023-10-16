@@ -7,13 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
@@ -29,7 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ListForHearingContestedSubmittedHandlerTest {
+class UploadOrderContestedSubmittedHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     @Mock
@@ -41,26 +35,27 @@ class ListForHearingContestedSubmittedHandlerTest {
     private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     @InjectMocks
-    private ListForHearingContestedSubmittedHandler handler;
+    private UploadOrderContestedSubmittedHandler handler;
+
 
     @Test
-    void givenACcdCallbackContestedCase_WhenASubmitEventListForHearing_thenHandlerCanHandle() {
+    void givenACcdCallbackContestedCase_WhenASubmitEventUploadOrder_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.UPLOAD_ORDER),
             is(true));
     }
 
     @Test
     void givenACcdCallbackConsentedCase_WhenCaseTypeIsConsented_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.UPLOAD_ORDER),
             is(false));
     }
 
     @Test
     void givenACcdCallbackConsentedCase_WhenASubmitEventListForHearing_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_ORDER),
             is(false));
     }
 

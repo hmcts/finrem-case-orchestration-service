@@ -15,10 +15,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 @Slf4j
 @Service
-public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHandler {
+public class UploadOrderContestedAboutToStartHandler extends FinremCallbackHandler {
     private final PartyService partyService;
 
-    public ListForHearingContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, PartyService partyService) {
+    public UploadOrderContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, PartyService partyService) {
         super(finremCaseDetailsMapper);
         this.partyService = partyService;
     }
@@ -27,7 +27,7 @@ public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHa
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.LIST_FOR_HEARING.equals(eventType);
+            && EventType.UPLOAD_ORDER.equals(eventType);
     }
 
 
