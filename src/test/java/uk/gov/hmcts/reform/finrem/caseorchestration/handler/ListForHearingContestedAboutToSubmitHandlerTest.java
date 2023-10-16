@@ -39,9 +39,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -264,8 +264,8 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
-        verify(coverSheetService).generateApplicantCoverSheet(eq(finremCallbackRequest.getCaseDetails()), eq(AUTH_TOKEN));
-        verify(coverSheetService).generateRespondentCoverSheet(eq(finremCallbackRequest.getCaseDetails()), eq(AUTH_TOKEN));
+        verify(coverSheetService).generateApplicantCoverSheet(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(coverSheetService).generateRespondentCoverSheet(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
 
     }
 
