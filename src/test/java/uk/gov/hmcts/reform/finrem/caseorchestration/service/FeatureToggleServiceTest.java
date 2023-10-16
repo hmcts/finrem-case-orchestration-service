@@ -53,6 +53,7 @@ public class FeatureToggleServiceTest {
         "feature.toggle.assign_case_access=false",
         "feature.toggle.pba_case_type=false",
         "feature.toggle.send_letter_recipient_check=false",
+        "feature.toggle.secure_doc_enabled=false",
         "feature.toggle.intervener_enabled=false",
         "feature.toggle.case_file_view_enabled=false"
     })
@@ -86,6 +87,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isSendLetterDuplicateCheckReturnsFalse() {
             assertThat(featureToggleService.isSendLetterDuplicateCheckEnabled(), is(false));
+        }
+
+        @Test
+        public void isSecureDocEnabled() {
+            assertThat(featureToggleService.isSecureDocEnabled(), is(false));
         }
 
         @Test
