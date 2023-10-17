@@ -120,7 +120,7 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
             prdOrganisationService.findUserByEmail(TEST_EMAIL, AUTH_TOKEN);
         } catch (RuntimeException e) {
             if (e instanceof FeignException) {
-                assertEquals("expecting exception to throw when user not found in am",
+                assertEquals("expecting exception to throw when email is null",
                     "Email is not valid or null", e.getMessage());
             }
         }
