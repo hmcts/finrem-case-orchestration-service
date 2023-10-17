@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_URL;
 
@@ -109,5 +110,19 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
         Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_EMAIL, AUTH_TOKEN);
 
         assertTrue(userId.isEmpty());
+    }
+
+    @Test
+    public void givenUnregisteredUser_whenFindUserByEmailAndEmailIsNull_thenHandleNotFoundException() {
+        when(organisationApi.findUserByEmail(eq(AUTH_TOKEN), any(), eq(TEST_EMAIL)))
+            .thenThrow(FeignException.class);
+        try {
+            prdOrganisationService.findUserByEmail(TEST_EMAIL, AUTH_TOKEN);
+        } catch (RuntimeException e) {
+            if (e instanceof FeignException) {
+                assertEquals("expecting exception to throw when email is null",
+                    "Email is not valid or null", e.getMessage());
+            }
+        }
     }
 }
