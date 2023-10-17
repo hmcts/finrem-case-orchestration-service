@@ -6,7 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -22,6 +24,8 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
@@ -42,6 +46,9 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     private FinremConsentOrderMadeCorresponder consentOrderMadeCorresponder;
     @Mock
     private FinremConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
+
+    @Mock
+    private DocumentHelper documentHelper;
     private FinremCaseDetails caseDetails;
 
 
@@ -74,13 +81,26 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     }
 
     @Test
-    public void givenConsentOrderCase_WhenAppAndRespConsentToEmail_ThenSendNotification() {
+    public void givenConsentOrderCase_WhenAppAndRespConsentToEmail_AndNoPensionDocs_ThenSendNotifications() {
         FinremCallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(consentOrderMadeCorresponder).sendCorrespondence(caseDetails);
         verify(consentOrderAvailableCorresponder).sendCorrespondence(caseDetails);
+
+    }
+
+    @Test
+    public void givenConsentOrderCase_WhenAppAndRespConsentToEmail_AndHasPensionDocs_ThenSendNotifications() {
+        FinremCallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
+
+        when(documentHelper.getPensionDocumentsData(caseDetails.getData())).thenReturn(List.of(CaseDocument.builder().build()));
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(consentOrderMadeCorresponder).sendCorrespondence(caseDetails);
+        verifyNoMoreInteractions(consentOrderAvailableCorresponder);
 
     }
 
