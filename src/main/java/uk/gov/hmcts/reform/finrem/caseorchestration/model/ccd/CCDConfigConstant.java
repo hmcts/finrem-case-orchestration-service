@@ -250,6 +250,12 @@ public class CCDConfigConstant {
     public static final String COURT_DETAILS_PHONE_KEY = "phoneNumber";
     public static final String COURT_DETAILS_EMAIL_KEY = "email";
 
+    public static final String HEARING_COURT_DETAILS_NAME_KEY = "hearingCourtName";
+    public static final String HEARING_COURT_DETAILS_ADDRESS_KEY = "hearingCourtAddress";
+    public static final String HEARING_COURT_DETAILS_PHONE_KEY = "hearingCourtPhoneNumber";
+    public static final String HEARING_COURT_DETAILS_EMAIL_KEY = "hearingCourtEmail";
+
+
     // IDAM
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";

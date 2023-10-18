@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class RejectedOrderDetails implements DocumentTemplateDetails {
     private List<TranslatedOrderRefusalDocumentCollection> orderRefusalCollectionNew;
     @JsonProperty("CourtName")
     private String courtName;
-    private FrcCourtDetails courtDetails;
+    private CourtDetailsTemplateFields courtDetails;
     @JsonProperty("RefusalOrderHeader")
     private String refusalOrderHeader;
     private String orderType;

@@ -49,10 +49,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
@@ -61,6 +57,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_BIRMINGHAM_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_CFC_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_CLEAVELAND_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_COURT_DETAILS_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_COURT_DETAILS_EMAIL_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_COURT_DETAILS_NAME_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_HUMBER_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_KENT_SURREY_COURT_LIST;
@@ -95,6 +95,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.CourtDetailsMigration.SWANSEA_COURT_LIST;
 
 public class HearingDocumentServiceTest extends BaseServiceTest {
 
@@ -487,7 +489,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     private CaseDetails caseDetailsWithHearingCourtDetails(String region, String frcList, String frc, String courtList, String court) {
         Map<String, Object> caseData =
             ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE, HEARING_DATE, DATE_OF_HEARING, HEARING_REGION_LIST,
-                region, frcList, frc, courtList, court);
+                region, frcList, frc, courtList, court, REGION, WALES, WALES_FRC_LIST, SWANSEA, SWANSEA_COURT_LIST,
+                "FR_swansea_hc_list_1");
         return CaseDetails.builder().data(caseData).build();
     }
 
@@ -532,10 +535,10 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         @SuppressWarnings("unchecked")
         Map<String, Object> courtDetails = (Map<String, Object>) data.get("courtDetails");
-        assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is(courtName));
-        assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY), is(courtAddress));
-        assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is(email));
-        assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is(phone));
+        assertThat(courtDetails.get(HEARING_COURT_DETAILS_NAME_KEY), is(courtName));
+        assertThat(courtDetails.get(HEARING_COURT_DETAILS_ADDRESS_KEY), is(courtAddress));
+        assertThat(courtDetails.get(HEARING_COURT_DETAILS_EMAIL_KEY), is(email));
+        assertThat(courtDetails.get(HEARING_COURT_DETAILS_PHONE_KEY), is(phone));
     }
 
     void verifyCourtDetailsFieldsNotSet() {
