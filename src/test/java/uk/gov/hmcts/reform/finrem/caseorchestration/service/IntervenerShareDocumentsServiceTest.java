@@ -20,6 +20,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.ChronologiesDocumentSharer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.CorrespondenceDocumentSharer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.ExpertEvidenceDocumentSharer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.FormEDocumentSharer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.FormHDocumentSharer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.HearingDocumentSharer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.OtherDocumentSharer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.QuestionnaireAnswersDocumentSharer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.ShareSelectedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.StatementExhibitsDocumentSharer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.SummariesDocumentSharer;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -54,9 +65,24 @@ class IntervenerShareDocumentsServiceTest {
     private IntervenerShareDocumentsService intervenerShareDocumentsService;
     private final ThreadLocal<UUID> uuid = new ThreadLocal<>();
 
+    private List documentSharers = List.of(new ChronologiesDocumentSharer(),
+        new CorrespondenceDocumentSharer(),
+        new ExpertEvidenceDocumentSharer(),
+        new FormEDocumentSharer(),
+        new FormHDocumentSharer(),
+        new HearingDocumentSharer(),
+        new OtherDocumentSharer(),
+        new QuestionnaireAnswersDocumentSharer(),
+        new StatementExhibitsDocumentSharer(),
+        new SummariesDocumentSharer()
+    );
+
+
     @BeforeEach
     void beforeEach() {
-        intervenerShareDocumentsService = new IntervenerShareDocumentsService();
+
+        ShareSelectedDocumentService shareSelectedDocumentService = new ShareSelectedDocumentService(documentSharers);
+        intervenerShareDocumentsService = new IntervenerShareDocumentsService(shareSelectedDocumentService);
         uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
 
@@ -285,7 +311,7 @@ class IntervenerShareDocumentsServiceTest {
             .build();
     }
 
-    private List<CaseAssignmentUserRole>  getCaseRoleList() {
+    private List<CaseAssignmentUserRole> getCaseRoleList() {
 
         List<String> roleList = List.of("[APPSOLICITOR]", "[APPBARRISTER]", "[RESPSOLICITOR]",
             "[RESPBARRISTER]", "[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]",
