@@ -364,10 +364,6 @@ dependencyManagement {
             entry 'spring-jcl'
             entry 'spring-webmvc'
         }
-        //CVE-2023-5072
-        dependencySet(group: 'org.json', version: '20231013') {
-            entry 'json'
-        }
     }
 }
 
