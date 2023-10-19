@@ -32,7 +32,11 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
 
     @Autowired
-    public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, OnlineFormDocumentService service, CaseFlagsService caseFlagsService, IdamService idamService, FeatureToggleService featureToggleService) {
+    public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                        OnlineFormDocumentService service,
+                                                        CaseFlagsService caseFlagsService,
+                                                        IdamService idamService,
+                                                        FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.service = service;
         this.caseFlagsService = caseFlagsService;
