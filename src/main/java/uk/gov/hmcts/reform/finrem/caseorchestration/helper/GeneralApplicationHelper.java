@@ -334,13 +334,15 @@ public class GeneralApplicationHelper {
     public void checkAndRemoveDuplicateGeneralApplications(FinremCaseData caseData) {
         List<GeneralApplicationsCollection> generalApplicationList = caseData.getGeneralApplicationWrapper().getGeneralApplications();
 
-        log.info("Before removing duplicate General application count -> {}", generalApplicationList.size());
+        log.info("Before removing duplicate General application count: {} for Case ID: ", generalApplicationList.size(),
+            caseData.getCcdCaseId());
 
         List<GeneralApplicationsCollection> uniqueGeneralApplicationList = generalApplicationList.stream().collect(Collectors.groupingBy(ga ->
                 new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(),ga.getValue().getGeneralApplicationCreatedDate()),
             Collectors.toList())).entrySet().stream().map(entry -> entry.getValue().get(0)).collect(Collectors.toList());
 
-        log.info("After removing duplicate General application count -> {}", uniqueGeneralApplicationList.size());
+        log.info("After removing duplicate General application count: {} for Case ID: ", uniqueGeneralApplicationList.size(),
+            caseData.getCcdCaseId());
 
         caseData.getGeneralApplicationWrapper().setGeneralApplications(uniqueGeneralApplicationList);
     }
