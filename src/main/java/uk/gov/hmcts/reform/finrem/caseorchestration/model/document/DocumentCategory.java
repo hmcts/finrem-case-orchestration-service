@@ -23,7 +23,9 @@ public enum DocumentCategory {
     DIVORCE_DOCUMENTS("divorceDocuments"),
     JUDGMENT_TRANSCRIPT("judgmentOrTranscript"),
     CASE_DOCUMENTS("caseDocuments"),
-    UNCATEGORISED(null);
+    SHARED("shared"),
+    UNCATEGORISED(null)
+   ;
 
     private final String documentCategoryId;
 

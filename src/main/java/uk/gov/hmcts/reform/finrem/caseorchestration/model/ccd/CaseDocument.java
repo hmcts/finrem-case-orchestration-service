@@ -26,4 +26,11 @@ public class CaseDocument {
     private String documentBinaryUrl;
     @JsonProperty("category_id")
     private String categoryId;
+
+    public CaseDocument(CaseDocument caseDocuments) {
+        this.documentUrl = caseDocuments.getDocumentUrl();
+        this.documentFilename = caseDocuments.getDocumentFilename();
+        this.documentBinaryUrl = caseDocuments.getDocumentBinaryUrl();
+        this.categoryId = caseDocuments.getCategoryId();
+    }
 }

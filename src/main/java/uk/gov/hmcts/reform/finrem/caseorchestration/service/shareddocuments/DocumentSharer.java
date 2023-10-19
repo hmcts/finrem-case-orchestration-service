@@ -2,8 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments;
 
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +14,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public abstract class DocumentSharer {
+
+    private final FeatureToggleService featureToggleService;
+
+    protected DocumentSharer(FeatureToggleService featureToggleService) {
+        this.featureToggleService = featureToggleService;
+    }
 
     public void shareDocumentsToSharedPartyCollection(FinremCaseData caseData,
                                                       String collId, String collName, String caseRole) {
@@ -72,9 +81,14 @@ public abstract class DocumentSharer {
     }
 
     private UploadCaseDocumentCollection copyUploadCaseDocumentCollection(UploadCaseDocumentCollection sd) {
+        UploadCaseDocument uploadCaseDocument = sd.getUploadCaseDocument();
+        UploadCaseDocument uploadCaseDocumentToCopy = new UploadCaseDocument(uploadCaseDocument);
+        if (featureToggleService.isCaseFileViewEnabled()) {
+            uploadCaseDocumentToCopy.getCaseDocuments().setCategoryId(DocumentCategory.SHARED.getDocumentCategoryId());
+        }
         return UploadCaseDocumentCollection.builder()
             .id(UUID.randomUUID().toString())
-            .uploadCaseDocument(sd.getUploadCaseDocument()).build();
+            .uploadCaseDocument(uploadCaseDocumentToCopy).build();
     }
 
     protected abstract List<UploadCaseDocumentCollection> getIntervenerFourCollection(UploadCaseDocumentWrapper documentWrapper);
@@ -104,9 +118,9 @@ public abstract class DocumentSharer {
     protected abstract void setRespondentSharedCollection(FinremCaseData caseData,
                                                           List<UploadCaseDocumentCollection> andAddToExistingSharedCollection);
 
-    protected abstract  List<UploadCaseDocumentCollection> getRespondentSharedCollection(FinremCaseData caseData);
+    protected abstract List<UploadCaseDocumentCollection> getRespondentSharedCollection(FinremCaseData caseData);
 
-    protected abstract  void setApplicantSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list);
+    protected abstract void setApplicantSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list);
 
     protected abstract List<UploadCaseDocumentCollection> getIntervenerOneSharedCollection(FinremCaseData caseData);
 
