@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.core.Tuple;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.CREATED;
@@ -327,6 +329,20 @@ public class GeneralApplicationHelper {
 
 
         return builder.build();
+    }
+
+    public void checkAndRemoveDuplicateGeneralApplications(FinremCaseData caseData) {
+        List<GeneralApplicationsCollection> generalApplicationList = caseData.getGeneralApplicationWrapper().getGeneralApplications();
+
+        log.info("Before removing duplicate General application count -> {}", generalApplicationList.size());
+
+        List<GeneralApplicationsCollection> uniqueGeneralApplicationList = generalApplicationList.stream().collect(Collectors.groupingBy(ga ->
+                new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(),ga.getValue().getGeneralApplicationCreatedDate()),
+            Collectors.toList())).entrySet().stream().map(entry -> entry.getValue().get(0)).collect(Collectors.toList());
+
+        log.info("After removing duplicate General application count -> {}", uniqueGeneralApplicationList.size());
+
+        caseData.getGeneralApplicationWrapper().setGeneralApplications(uniqueGeneralApplicationList);
     }
 
     private void buildGeneralApplicationDocuments(FinremCaseData caseData, String userAuthorisation, String caseId,
