@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCase
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.ChronologiesDocumentSharer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.CorrespondenceDocumentSharer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.DocumentSharer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.ExpertEvidenceDocumentSharer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.FormEDocumentSharer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.FormHDocumentSharer;
@@ -65,22 +67,24 @@ class IntervenerShareDocumentsServiceTest {
     private IntervenerShareDocumentsService intervenerShareDocumentsService;
     private final ThreadLocal<UUID> uuid = new ThreadLocal<>();
 
-    private List documentSharers = List.of(new ChronologiesDocumentSharer(),
-        new CorrespondenceDocumentSharer(),
-        new ExpertEvidenceDocumentSharer(),
-        new FormEDocumentSharer(),
-        new FormHDocumentSharer(),
-        new HearingDocumentSharer(),
-        new OtherDocumentSharer(),
-        new QuestionnaireAnswersDocumentSharer(),
-        new StatementExhibitsDocumentSharer(),
-        new SummariesDocumentSharer()
-    );
+    @Mock
+    private FeatureToggleService featureToggleService;
+    private List<DocumentSharer> documentSharers;
 
 
     @BeforeEach
     void beforeEach() {
 
+        documentSharers = List.of(new ChronologiesDocumentSharer(featureToggleService),
+            new CorrespondenceDocumentSharer(featureToggleService),
+            new ExpertEvidenceDocumentSharer(featureToggleService),
+            new FormEDocumentSharer(featureToggleService),
+            new FormHDocumentSharer(featureToggleService),
+            new HearingDocumentSharer(featureToggleService),
+            new OtherDocumentSharer(featureToggleService),
+            new QuestionnaireAnswersDocumentSharer(featureToggleService),
+            new StatementExhibitsDocumentSharer(featureToggleService),
+            new SummariesDocumentSharer(featureToggleService));
         ShareSelectedDocumentService shareSelectedDocumentService = new ShareSelectedDocumentService(documentSharers);
         intervenerShareDocumentsService = new IntervenerShareDocumentsService(shareSelectedDocumentService);
         uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));

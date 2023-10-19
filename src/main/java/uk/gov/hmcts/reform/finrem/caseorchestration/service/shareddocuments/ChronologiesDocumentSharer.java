@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments;
 
-import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
 
@@ -16,9 +17,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 
 @Component
-@NoArgsConstructor
 public class ChronologiesDocumentSharer extends DocumentSharer {
 
+    @Autowired
+    public ChronologiesDocumentSharer(FeatureToggleService featureToggleService) {
+        super(featureToggleService);
+    }
 
     @Override
     protected void setRespondentSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list) {

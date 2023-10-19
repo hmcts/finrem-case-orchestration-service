@@ -24,6 +24,7 @@ public enum DocumentCategory {
     ORDERS("orders"),
     REPORTS("reports"),
     RESPONDENT_DOCUMENTS("respondentDocuments"),
+    SHARED("shared"),
     UNCATEGORISED(null);
 
     private final String documentCategoryId;

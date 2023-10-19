@@ -1,14 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.APP_HEARING_BUNDLES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_HEARING_BUNDLES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_HEARING_BUNDLES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_HEARING_BUNDLES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_HEARING_BUNDLES_COLLECTION;
@@ -17,7 +18,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 
 @Component
 public class HearingDocumentSharer extends DocumentSharer {
-    
+
+    @Autowired
+    public HearingDocumentSharer(FeatureToggleService featureToggleService) {
+        super(featureToggleService);
+    }
+
     @Override
     protected void setRespondentSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list) {
         caseData.getUploadCaseDocumentWrapper().setRespHearingBundlesCollShared(list);
