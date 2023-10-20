@@ -200,7 +200,7 @@ public class GeneralApplicationDirectionsService {
 
     private List<BulkPrintDocument> prepareInterimHearingDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
-        String caseId = caseDetails.getId().toString();
+        String caseId = String.valueOf(caseDetails.getId());
         List<BulkPrintDocument> documents = new ArrayList<>();
         CaseDocument interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails, authorisationToken);
         documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(interimDocument));

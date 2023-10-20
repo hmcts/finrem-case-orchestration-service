@@ -131,7 +131,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
         data.getGeneralApplicationWrapper().getGeneralApplications().forEach(ga -> ga.getValue()
             .setGeneralApplicationSender(buildDynamicIntervenerList()));
         List<GeneralApplicationCollectionData> collection = helper.getGeneralApplicationList(data, GENERAL_APPLICATION_COLLECTION);
-        generalApplicationService.updateGeneralApplicationCollectionData(collection, data);
+        generalApplicationService.updateGeneralApplicationCollectionData(collection, callbackRequest.getCaseDetails());
         CaseDocument document = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
@@ -140,7 +140,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
             helper.migrateExistingGeneralApplication(data, AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString());
         migratedData.getGeneralApplicationItems().setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId());
         collection.add(migratedData);
-        generalApplicationService.updateGeneralApplicationCollectionData(collection, data);
+        generalApplicationService.updateGeneralApplicationCollectionData(collection, callbackRequest.getCaseDetails());
 
         assertData(data.getGeneralApplicationWrapper().getGeneralApplications().get(1).getValue());
     }
@@ -155,7 +155,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
         data.getGeneralApplicationWrapper().setGeneralApplicationOutcome(GeneralApplicationOutcome.APPROVED);
         data.getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
         List<GeneralApplicationCollectionData> collection = helper.getGeneralApplicationList(data, GENERAL_APPLICATION_COLLECTION);
-        generalApplicationService.updateGeneralApplicationCollectionData(collection, data);
+        generalApplicationService.updateGeneralApplicationCollectionData(collection, callbackRequest.getCaseDetails());
         CaseDocument document = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
@@ -164,7 +164,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
             helper.migrateExistingGeneralApplication(data, AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString());
         migratedData.getGeneralApplicationItems().setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId());
         collection.add(migratedData);
-        generalApplicationService.updateGeneralApplicationCollectionData(collection, data);
+        generalApplicationService.updateGeneralApplicationCollectionData(collection, callbackRequest.getCaseDetails());
 
         assertData(data.getGeneralApplicationWrapper().getGeneralApplications().get(1).getValue());
     }

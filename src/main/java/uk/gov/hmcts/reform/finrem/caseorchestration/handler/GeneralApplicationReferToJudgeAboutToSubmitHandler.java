@@ -45,7 +45,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
         FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = caseDetails.getId().toString();
+        String caseId = String.valueOf(caseDetails.getId());
         log.info("Received on start request to {} for Case ID: {}",
             EventType.GENERAL_APPLICATION_REFER_TO_JUDGE,
             caseId);
@@ -56,35 +56,37 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
         DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationReferList());
 
         if (existingList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
-            migrateExistingApplication(caseData, userAuthorisation, caseId);
+            migrateExistingApplication(caseDetails, userAuthorisation, caseId);
 
         } else {
             if (dynamicList == null) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of("There is no general application available to refer.")).build();
             }
-            setGeneralApplicationList(caseData, existingList, dynamicList);
+            setGeneralApplicationList(caseDetails, existingList, dynamicList);
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void setGeneralApplicationList(FinremCaseData caseData,
+    private void setGeneralApplicationList(FinremCaseDetails caseDetails,
                                            List<GeneralApplicationCollectionData> existingList,
                                            DynamicList dynamicList) {
         final String valueCode = dynamicList.getValueCode();
         String label = dynamicList.getValue().getLabel();
         String referredApplicationDetails = label.substring(label.indexOf("-") + 1);
+        FinremCaseData caseData = caseDetails.getData();
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferDetail(referredApplicationDetails);
 
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
             = existingList.stream().map(ga -> setStatus(ga, valueCode)).sorted(helper::getCompareTo).toList();
 
-        service.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
+        service.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseDetails);
         caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
             ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
     }
 
-    private void migrateExistingApplication(FinremCaseData caseData, String userAuthorisation, String caseId) {
+    private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation, String caseId) {
+        FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         GeneralApplicationCollectionData data =
@@ -92,7 +94,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
         if (data != null) {
             data.getGeneralApplicationItems().setGeneralApplicationStatus(REFERRED.getId());
             existingGeneralApplication.add(data);
-            service.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
+            service.updateGeneralApplicationCollectionData(existingGeneralApplication, caseDetails);
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
     }

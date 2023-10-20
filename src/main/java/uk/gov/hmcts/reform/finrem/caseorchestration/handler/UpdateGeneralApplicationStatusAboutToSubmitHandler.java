@@ -52,7 +52,7 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandler extends FinremCa
         helper.populateGeneralApplicationDataSender(caseData, generalApplicationList);
         if (!generalApplicationList.isEmpty()) {
             List<GeneralApplicationCollectionData> list = generalApplicationList.stream().map(this::updateStatus).toList();
-            service.updateGeneralApplicationCollectionData(list, caseData);
+            service.updateGeneralApplicationCollectionData(list, caseDetails);
             caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
                 ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
 

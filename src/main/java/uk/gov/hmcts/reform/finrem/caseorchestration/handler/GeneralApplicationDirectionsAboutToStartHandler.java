@@ -54,7 +54,7 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
                                                                               String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
-        String caseId = finremCaseDetails.getId().toString();
+        String caseId = String.valueOf(finremCaseDetails.getId());
         log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
 
         FinremCaseData caseData = finremCaseDetails.getData();

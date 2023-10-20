@@ -55,7 +55,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
 
         log.info("Mid callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
-        String caseId = caseDetails.getId().toString();
+        String caseId = String.valueOf(caseDetails.getId());
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(
             caseId, userAuthorisation);

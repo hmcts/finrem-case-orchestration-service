@@ -45,7 +45,7 @@ public class GeneralApplicationController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        String caseId = caseDetails.getId().toString();
+        String caseId = String.valueOf(caseDetails.getId());
         log.info("Received request to submit general application for Case ID: {}", caseId);
         validateCaseData(callback);
 

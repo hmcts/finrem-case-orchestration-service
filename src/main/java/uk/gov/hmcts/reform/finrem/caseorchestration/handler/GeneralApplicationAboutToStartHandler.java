@@ -52,7 +52,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = caseDetails.getId().toString();
+        String caseId = String.valueOf(caseDetails.getId());
         log.info("Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseId);
         FinremCaseData caseData = caseDetails.getData();
 
@@ -75,7 +75,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
 
         helper.populateGeneralApplicationDataSender(caseData, existingGeneralApplication);
 
-        generalApplicationService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
+        generalApplicationService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseDetails);
 
         if (loggedInUserCaseRole.equalsIgnoreCase("Case")) {
             List<GeneralApplicationsCollection> generalApplications = caseData.getGeneralApplicationWrapper()
