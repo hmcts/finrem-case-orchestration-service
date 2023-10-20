@@ -341,7 +341,7 @@ public class GeneralApplicationHelper {
         List<GeneralApplicationsCollection> uniqueGeneralApplicationList = generalApplicationList.stream().collect(Collectors.groupingBy(ga ->
                 new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(),ga.getValue().getGeneralApplicationCreatedDate()),
             toList())).entrySet().stream().map(entry -> findBestGeneralApplicationInDuplicate(entry.getValue()))
-            .collect(toList());
+            .toList();
 
         log.info("After removing duplicate General application count: {} for Case ID: ", uniqueGeneralApplicationList.size(),
             caseData.getCcdCaseId());
