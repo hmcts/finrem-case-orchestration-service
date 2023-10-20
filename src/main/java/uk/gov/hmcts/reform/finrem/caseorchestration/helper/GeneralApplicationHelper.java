@@ -339,12 +339,17 @@ public class GeneralApplicationHelper {
 
         List<GeneralApplicationsCollection> uniqueGeneralApplicationList = generalApplicationList.stream().collect(Collectors.groupingBy(ga ->
                 new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(),ga.getValue().getGeneralApplicationCreatedDate()),
-            Collectors.toList())).entrySet().stream().map(entry -> entry.getValue().get(0)).collect(Collectors.toList());
+            Collectors.toList())).entrySet().stream().map(entry -> findBestGeneralApplicationInDuplicate(entry.getValue())).collect(Collectors.toList());
 
         log.info("After removing duplicate General application count: {} for Case ID: ", uniqueGeneralApplicationList.size(),
             caseData.getCcdCaseId());
 
         caseData.getGeneralApplicationWrapper().setGeneralApplications(uniqueGeneralApplicationList);
+    }
+
+    private GeneralApplicationsCollection findBestGeneralApplicationInDuplicate(List<GeneralApplicationsCollection> duplicateGas) {
+        return duplicateGas.stream().filter(ga ->
+            !ga.getValue().getGeneralApplicationStatus().equals(CREATED.getId())).findAny().orElse(duplicateGas.stream().findFirst().get());
     }
 
     private void buildGeneralApplicationDocuments(FinremCaseData caseData, String userAuthorisation, String caseId,
