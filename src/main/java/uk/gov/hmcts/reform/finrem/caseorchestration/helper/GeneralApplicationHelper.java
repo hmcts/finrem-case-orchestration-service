@@ -351,7 +351,8 @@ public class GeneralApplicationHelper {
 
     private GeneralApplicationsCollection findBestGeneralApplicationInDuplicate(List<GeneralApplicationsCollection> duplicateGas) {
         return duplicateGas.stream().filter(ga ->
-            !ga.getValue().getGeneralApplicationStatus().equals(CREATED.getId())).findAny().orElse(duplicateGas.stream().findFirst().get());
+            !ga.getValue().getGeneralApplicationStatus().equals(CREATED.getId())).findAny()
+            .orElse(duplicateGas.stream().findFirst().orElse(null));
     }
 
     private void buildGeneralApplicationDocuments(FinremCaseData caseData, String userAuthorisation, String caseId,
