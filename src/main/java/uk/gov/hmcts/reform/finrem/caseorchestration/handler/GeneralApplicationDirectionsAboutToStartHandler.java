@@ -75,6 +75,8 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
             setDirectionListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
         } else {
             if (outcomeList.isEmpty()) {
+                log.info("The user cannot carry out the directions as there are no general applications in the outcome state"
+                    + "for Case ID: {}", caseId);
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of("There are no general application available for issue direction.")).build();
             }
