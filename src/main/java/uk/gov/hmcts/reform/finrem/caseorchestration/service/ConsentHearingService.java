@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_HEARING_COLLECTION_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildHearingCourtDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedHearingCourt;
@@ -139,16 +139,16 @@ public class ConsentHearingService {
                                          List<BulkPrintDocument> documents,
                                          String authorisationToken) {
 
-        Map<String, Object> hearingCaseData = helper.convertToMap(hearingData.getValue());
 
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
+        Map<String, Object> hearingCaseData = helper.convertToMap(hearingData.getValue());
 
+        addHearingVenueDetails(caseDetailsCopy, hearingCaseData);
         caseData.put("ccdCaseNumber", caseDetailsCopy.getId());
-        caseData.put("courtDetails", buildHearingCourtDetails(hearingCaseData));
+        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
         caseData.put("respondentName",  caseDataService.buildFullRespondentName(caseDetails));
-        addHearingVenueDetails(caseDetailsCopy, hearingCaseData);
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
         caseData.put("hearingType", hearingCaseData.get("hearingType"));
         caseData.put("hearingDate", hearingCaseData.get("hearingDate"));
