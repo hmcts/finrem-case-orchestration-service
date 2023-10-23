@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.CREATED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
@@ -339,12 +340,19 @@ public class GeneralApplicationHelper {
 
         List<GeneralApplicationsCollection> uniqueGeneralApplicationList = generalApplicationList.stream().collect(Collectors.groupingBy(ga ->
                 new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(),ga.getValue().getGeneralApplicationCreatedDate()),
-            Collectors.toList())).entrySet().stream().map(entry -> entry.getValue().get(0)).collect(Collectors.toList());
+            toList())).entrySet().stream().map(entry -> findBestGeneralApplicationInDuplicate(entry.getValue()))
+            .collect(toList());
 
         log.info("After removing duplicate General application count: {} for Case ID: ", uniqueGeneralApplicationList.size(),
             caseData.getCcdCaseId());
 
         caseData.getGeneralApplicationWrapper().setGeneralApplications(uniqueGeneralApplicationList);
+    }
+
+    private GeneralApplicationsCollection findBestGeneralApplicationInDuplicate(List<GeneralApplicationsCollection> duplicateGas) {
+        return duplicateGas.stream().filter(ga ->
+            !ga.getValue().getGeneralApplicationStatus().equals(CREATED.getId())).findAny()
+            .orElse(duplicateGas.stream().findFirst().orElse(null));
     }
 
     private void buildGeneralApplicationDocuments(FinremCaseData caseData, String userAuthorisation, String caseId,
