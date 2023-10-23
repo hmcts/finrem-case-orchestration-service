@@ -298,10 +298,7 @@ public final class CaseHearingFunctions {
         String londonList = (String) mapOfCaseData.get(frcListName);
         if (CFC.equalsIgnoreCase(londonList)) {
             return CFC_COURTLIST;
-        } else if (LONDON.equalsIgnoreCase(londonList)) {
-            return LONDON_COURTLIST;
         }
-
         return null;
     }
 

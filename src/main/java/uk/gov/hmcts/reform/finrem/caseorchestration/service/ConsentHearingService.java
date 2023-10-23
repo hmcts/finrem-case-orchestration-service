@@ -33,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourt;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedHearingCourt;
 
 @Service
@@ -57,12 +58,14 @@ public class ConsentHearingService {
             List<ConsentedHearingDataWrapper> listForHearings = data.getListForHearings();
             List<ConsentedHearingDataWrapper> listForHearingsBefore =
                 Optional.ofNullable(caseDetailsBefore.getData().getListForHearings()).orElse(new ArrayList<>());
+            List<ConsentedHearingDataWrapper> hearingList = listForHearings;
+
 
             List<String> hearingIdsToProcess =
                 getNewOrDateTimeModifiedHearingIdsList(listForHearings,
                     listForHearingsBefore);
 
-            listForHearings.forEach(hearingCaseData -> notify(caseDetails, hearingCaseData, hearingIdsToProcess));
+            hearingList.forEach(hearingCaseData -> notify(caseDetails, hearingCaseData, hearingIdsToProcess));
         }
     }
 
@@ -139,16 +142,16 @@ public class ConsentHearingService {
                                          List<BulkPrintDocument> documents,
                                          String authorisationToken) {
 
+        Map<String, Object> hearingCaseData = helper.convertToMap(hearingData.getValue());
 
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
-        Map<String, Object> hearingCaseData = helper.convertToMap(hearingData.getValue());
 
-        addHearingVenueDetails(caseDetailsCopy, hearingCaseData);
         caseData.put("ccdCaseNumber", caseDetailsCopy.getId());
-        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
+        caseData.put("courtDetails", buildFrcCourtDetails(hearingCaseData));
         caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
         caseData.put("respondentName",  caseDataService.buildFullRespondentName(caseDetails));
+        addHearingVenueDetails(caseDetailsCopy, hearingCaseData);
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
         caseData.put("hearingType", hearingCaseData.get("hearingType"));
         caseData.put("hearingDate", hearingCaseData.get("hearingDate"));
@@ -187,7 +190,7 @@ public class ConsentHearingService {
         try {
             log.info("Hearing Case Data {} for caseId {}", hearingCaseData, caseDetailsCopy.getId());
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
-            String selectedCourt = getSelectedHearingCourt(hearingCaseData);
+            String selectedCourt = getSelectedCourt(hearingCaseData);
             log.info("SELECTED COURT ---> {} for caseId {}", selectedCourt, caseDetailsCopy.getId());//FR_londonList
             String courtDetailsObj = Objects.toString(hearingCaseData.get(selectedCourt), null);
             log.info("HEARING COURT ---> {} for caseId {}", courtDetailsObj, caseDetailsCopy.getId());
