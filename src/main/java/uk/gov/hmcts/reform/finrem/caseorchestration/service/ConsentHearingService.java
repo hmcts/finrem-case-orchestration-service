@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourt;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedHearingCourt;
 
 @Service
 @RequiredArgsConstructor
@@ -189,7 +189,7 @@ public class ConsentHearingService {
         try {
             log.info("Hearing Case Data {} for caseId {}", hearingCaseData, caseDetailsCopy.getId());
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
-            String selectedCourt = getSelectedCourt(hearingCaseData);
+            String selectedCourt = getSelectedHearingCourt(hearingCaseData);
             log.info("SELECTED COURT ---> {} for caseId {}", selectedCourt, caseDetailsCopy.getId());//FR_londonList
             String courtDetailsObj = Objects.toString(hearingCaseData.get(selectedCourt), null);
             log.info("HEARING COURT ---> {} for caseId {}", courtDetailsObj, caseDetailsCopy.getId());
