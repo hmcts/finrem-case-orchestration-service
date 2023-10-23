@@ -23,61 +23,61 @@ public class ConsentedHearingDataElement {
     public String hearingDate;
     @JsonProperty("hearingTime")
     public String hearingTime;
-    @JsonProperty("hearing_regionList")
+    @JsonProperty("regionList")
     public String regionList;
-    @JsonProperty("hearing_midlandsFRCList")
+    @JsonProperty("midlandsFRCList")
     public String midlandsFRCList;
-    @JsonProperty("hearing_londonFRCList")
+    @JsonProperty("londonFRCList")
     public String londonFRCList;
-    @JsonProperty("hearing_northWestFRCList")
+    @JsonProperty("northWestFRCList")
     public String northWestFRCList;
-    @JsonProperty("hearing_northEastFRCList")
+    @JsonProperty("northEastFRCList")
     public String northEastFRCList;
-    @JsonProperty("hearing_southEastFRCList")
+    @JsonProperty("southEastFRCList")
     public String southEastFRCList;
-    @JsonProperty("hearing_southWestFRCList")
+    @JsonProperty("southWestFRCList")
     public String southWestFRCList;
-    @JsonProperty("hearing_walesFRCList")
+    @JsonProperty("walesFRCList")
     public String walesFRCList;
-    @JsonProperty("hearing_highCourtFRCList")
+    @JsonProperty("highCourtFRCList")
     public String highCourtFRCList;
-    @JsonProperty("hearing_nottinghamCourtList")
+    @JsonProperty("nottinghamCourtList")
     public String nottinghamCourtList;
-    @JsonProperty("hearing_cfcCourtList")
+    @JsonProperty("cfcCourtList")
     public String cfcCourtList;
-    @JsonProperty("hearing_birminghamCourtList")
+    @JsonProperty("birminghamCourtList")
     public String birminghamCourtList;
-    @JsonProperty("hearing_liverpoolCourtList")
+    @JsonProperty("liverpoolCourtList")
     public String liverpoolCourtList;
-    @JsonProperty("hearing_manchesterCourtList")
+    @JsonProperty("manchesterCourtList")
     public String manchesterCourtList;
-    @JsonProperty("hearing_lancashireCourtList")
+    @JsonProperty("lancashireCourtList")
     public String lancashireCourtList;
-    @JsonProperty("hearing_cleavelandCourtList")
+    @JsonProperty("cleavelandCourtList")
     public String cleavelandCourtList;
-    @JsonProperty("hearing_nwyorkshireCourtList")
+    @JsonProperty("nwyorkshireCourtList")
     public String nwyorkshireCourtList;
-    @JsonProperty("hearing_humberCourtList")
+    @JsonProperty("humberCourtList")
     public String humberCourtList;
-    @JsonProperty("hearing_kentSurreyCourtList")
+    @JsonProperty("kentSurreyCourtList")
     public String kentSurreyCourtList;
-    @JsonProperty("hearing_bedfordshireCourtList")
+    @JsonProperty("bedfordshireCourtList")
     public String bedfordshireCourtList;
-    @JsonProperty("hearing_thamesvalleyCourtList")
+    @JsonProperty("thamesvalleyCourtList")
     public String thamesvalleyCourtList;
-    @JsonProperty("hearing_devonCourtList")
+    @JsonProperty("devonCourtList")
     public String devonCourtList;
-    @JsonProperty("hearing_dorsetCourtList")
+    @JsonProperty("dorsetCourtList")
     public String dorsetCourtList;
-    @JsonProperty("hearing_bristolCourtList")
+    @JsonProperty("bristolCourtList")
     public String bristolCourtList;
-    @JsonProperty("hearing_newportCourtList")
+    @JsonProperty("newportCourtList")
     public String newportCourtList;
-    @JsonProperty("hearing_swanseaCourtList")
+    @JsonProperty("swanseaCourtList")
     public String swanseaCourtList;
-    @JsonProperty("hearing_northWalesCourtList")
+    @JsonProperty("northWalesCourtList")
     public String northWalesCourtList;
-    @JsonProperty("hearing_highCourtList")
+    @JsonProperty("highCourtList")
     public String highCourtList;
     @JsonProperty("additionalInformationAboutHearing")
     public String additionalInformationAboutHearing;

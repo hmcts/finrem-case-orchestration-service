@@ -467,8 +467,8 @@ public class ContestedCourtHelper {
         return getMidlandsCourtName(midlandsList);
     }
 
-    public static String getSelectedFrc(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+    public static String getSelectedFrc(Map<String, Object> caseData) {
+
         String region = (String) caseData.get(REGION);
 
         if (MIDLANDS.equalsIgnoreCase(region)) {
@@ -496,6 +496,11 @@ public class ContestedCourtHelper {
             return getHighCourtFRC(caseData);
         }
         return EMPTY;
+    }
+
+    public static String getSelectedFrc(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        return getSelectedFrc(caseData);
     }
 
     public static String getSelectedFrc(FinremCaseDetails caseDetails) {
@@ -619,8 +624,6 @@ public class ContestedCourtHelper {
         }
         return EMPTY;
     }
-
-
 
     public static String getNottinghamCourt(Map<String, Object> caseData) {
         return nottinghamMap.getOrDefault(caseData.get(NOTTINGHAM_COURTLIST), "");
