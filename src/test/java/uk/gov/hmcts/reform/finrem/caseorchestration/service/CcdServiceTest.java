@@ -55,6 +55,20 @@ public class CcdServiceTest {
     }
 
     @Test
+    public void givenCallback_WhenExecuteEventWithData_ThenCcdApiCalled() {
+        CaseDetails caseDetails = buildCaseDetails();
+        when(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
+            .thenReturn(StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
+        FinremCaseDetails finremCaseDetails = buildCallbackRequest().getCaseDetails();
+        ccdService.executeCcdEventOnCase(caseDetails, AUTH_TOKEN, caseDetails.getId().toString(),
+            finremCaseDetails.getCaseType().getCcdType(), EventType.AMEND_CASE.getCcdType(), "Test", "Test");
+
+        verify(coreCaseDataApi).startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any());
+        verify(coreCaseDataApi).submitEventForCaseWorker(any(), any(), any(), any(), any(), any(), anyBoolean(), any());
+    }
+
+    @Test
     public void givenCallback_WhenExecuteGetEvents_ThenCcdApiCalled() {
         when(caseEventsApi.findEventDetailsForCase(any(), any(), any(), any(), any(), any()))
             .thenReturn(any());
