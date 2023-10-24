@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.FormADocumentCategorizer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -54,14 +55,17 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     @Mock
     FeatureToggleService featureToggleService;
 
+    FormADocumentCategorizer formADocumentCategorizer;
+
     @Before
     public void setup() {
-        handler =  new SolicitorCreateContestedAboutToSubmitHandler(
+        formADocumentCategorizer = new FormADocumentCategorizer(featureToggleService);
+        handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
             caseFlagsService,
             idamService,
-            featureToggleService);
+            formADocumentCategorizer);
     }
 
     @Test
@@ -118,7 +122,7 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         assertNull(responseCaseData.getContactDetailsWrapper().getApplicantRepresented());
         assertEquals(caseDocument(), responseCaseData.getMiniFormA());
         assertEquals(DocumentCategory.APPLICATIONS_FORM_A.getDocumentCategoryId(),
-                responseCaseData.getUploadAdditionalDocument().get(0).getValue().getAdditionalDocuments().getCategoryId()
+            responseCaseData.getUploadAdditionalDocument().get(0).getValue().getAdditionalDocuments().getCategoryId()
         );
     }
 
@@ -141,12 +145,12 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
         ScheduleOneWrapper wrapper = ScheduleOneWrapper.builder().typeOfApplication(
-                Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build();
+            Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build();
         UploadAdditionalDocument uploadAdditionalDocument = UploadAdditionalDocument.builder().additionalDocuments(caseDocument()).build();
         UploadAdditionalDocumentCollection collection = UploadAdditionalDocumentCollection.builder().value(uploadAdditionalDocument).build();
         FinremCaseData caseData = FinremCaseData.builder().civilPartnership(YesOrNo.NO)
-                .promptForUrgentCaseQuestion(YesOrNo.NO).uploadAdditionalDocument(List.of(collection))
-                .scheduleOneWrapper(wrapper).build();
+            .promptForUrgentCaseQuestion(YesOrNo.NO).uploadAdditionalDocument(List.of(collection))
+            .scheduleOneWrapper(wrapper).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
         return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }

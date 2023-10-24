@@ -11,15 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-
-import java.util.List;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.FormADocumentCategorizer;
 
 @Slf4j
 @Service
@@ -28,7 +24,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     private final OnlineFormDocumentService service;
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
-    private final FeatureToggleService featureToggleService;
+    private final FormADocumentCategorizer formADocumentCategorizer;
 
 
     @Autowired
@@ -36,12 +32,12 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
                                                         OnlineFormDocumentService service,
                                                         CaseFlagsService caseFlagsService,
                                                         IdamService idamService,
-                                                        FeatureToggleService featureToggleService) {
+                                                        FormADocumentCategorizer formADocumentCategorizer) {
         super(finremCaseDetailsMapper);
         this.service = service;
         this.caseFlagsService = caseFlagsService;
         this.idamService = idamService;
-        this.featureToggleService = featureToggleService;
+        this.formADocumentCategorizer = formADocumentCategorizer;
     }
 
 
@@ -69,14 +65,8 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, caseDetails);
         caseData.setMiniFormA(document);
 
-        if (featureToggleService.isCaseFileViewEnabled()) {
-            List<UploadAdditionalDocumentCollection> uploadAdditionDocumentsList = caseData.getUploadAdditionalDocument();
-            for (UploadAdditionalDocumentCollection uploadAdditionalDocument : uploadAdditionDocumentsList) {
-                uploadAdditionalDocument.getValue().getAdditionalDocuments().setCategoryId(
-                    DocumentCategory.APPLICATIONS_FORM_A.getDocumentCategoryId()
-                );
-            }
-        }
+        formADocumentCategorizer.categorize(caseData);
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 }
