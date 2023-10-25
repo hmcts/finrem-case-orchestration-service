@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderAvailableCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderMadeCorresponder;
 
 import java.util.List;
 
@@ -42,8 +41,6 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     @InjectMocks
     private ApprovedConsentOrderSubmittedHandler handler;
 
-    @Mock
-    private FinremConsentOrderMadeCorresponder consentOrderMadeCorresponder;
     @Mock
     private FinremConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
 
@@ -86,7 +83,6 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(consentOrderMadeCorresponder).sendCorrespondence(caseDetails);
         verify(consentOrderAvailableCorresponder).sendCorrespondence(caseDetails);
 
     }
@@ -99,7 +95,6 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verifyNoMoreInteractions(consentOrderMadeCorresponder);
         verifyNoMoreInteractions(consentOrderAvailableCorresponder);
 
     }

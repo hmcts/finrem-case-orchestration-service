@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderAvailableCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderMadeCorresponder;
 
 import java.util.List;
 
@@ -21,16 +20,14 @@ import java.util.List;
 @Service
 public class ApprovedConsentOrderSubmittedHandler extends FinremCallbackHandler {
 
-    private final FinremConsentOrderMadeCorresponder consentOrderMadeCorresponder;
     private final FinremConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final DocumentHelper documentHelper;
 
     @Autowired
-    public ApprovedConsentOrderSubmittedHandler(FinremConsentOrderMadeCorresponder consentOrderMadeCorresponder,
-                                                FinremConsentOrderAvailableCorresponder consentOrderAvailableCorresponder,
-                                                FinremCaseDetailsMapper finremCaseDetailsMapper, DocumentHelper documentHelper) {
+    public ApprovedConsentOrderSubmittedHandler(
+        FinremConsentOrderAvailableCorresponder consentOrderAvailableCorresponder,
+        FinremCaseDetailsMapper finremCaseDetailsMapper, DocumentHelper documentHelper) {
         super(finremCaseDetailsMapper);
-        this.consentOrderMadeCorresponder = consentOrderMadeCorresponder;
         this.consentOrderAvailableCorresponder = consentOrderAvailableCorresponder;
         this.documentHelper = documentHelper;
     }
@@ -49,7 +46,6 @@ public class ApprovedConsentOrderSubmittedHandler extends FinremCallbackHandler 
         FinremCaseData caseData = caseDetails.getData();
         if (Boolean.TRUE.equals(isPensionDocumentsEmpty(caseData))) {
             consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
-            consentOrderMadeCorresponder.sendCorrespondence(caseDetails);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse
