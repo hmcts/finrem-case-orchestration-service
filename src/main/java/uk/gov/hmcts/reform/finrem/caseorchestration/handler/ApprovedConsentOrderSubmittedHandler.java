@@ -49,8 +49,8 @@ public class ApprovedConsentOrderSubmittedHandler extends FinremCallbackHandler 
         FinremCaseData caseData = caseDetails.getData();
         if (Boolean.TRUE.equals(isPensionDocumentsEmpty(caseData))) {
             consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
+            consentOrderMadeCorresponder.sendCorrespondence(caseDetails);
         }
-        consentOrderMadeCorresponder.sendCorrespondence(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse
             .<FinremCaseData>builder()

@@ -92,14 +92,14 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     }
 
     @Test
-    public void givenConsentOrderCase_WhenAppAndRespConsentToEmail_AndHasPensionDocs_ThenSendNotifications() {
+    public void givenConsentOrderCase_WhenAppAndRespConsentToEmail_AndHasPensionDocs_ThenDoNotSendNotifications() {
         FinremCallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
 
         when(documentHelper.getPensionDocumentsData(caseDetails.getData())).thenReturn(List.of(CaseDocument.builder().build()));
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(consentOrderMadeCorresponder).sendCorrespondence(caseDetails);
+        verifyNoMoreInteractions(consentOrderMadeCorresponder);
         verifyNoMoreInteractions(consentOrderAvailableCorresponder);
 
     }
