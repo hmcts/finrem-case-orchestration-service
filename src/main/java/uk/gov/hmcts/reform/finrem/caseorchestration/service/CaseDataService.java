@@ -302,7 +302,8 @@ public class CaseDataService {
     }
 
     public boolean isApplicantAddressConfidential(FinremCaseData caseData) {
-        return caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent().isYes();
+        return caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent() != null
+            && caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent().isYes();
     }
 
     /**
@@ -320,7 +321,8 @@ public class CaseDataService {
     }
 
     public boolean isRespondentAddressConfidential(FinremCaseData caseData) {
-        return caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant().isYes();
+        return caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant() != null
+            && caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant().isYes();
     }
 
     private boolean isAddressConfidential(Map<String, Object> caseData, String address) {
