@@ -1,6 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -43,6 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESP_GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
@@ -308,6 +315,24 @@ public class GeneralApplicationHelperTest {
         assertEquals(dynamicListElements.get(4).getCode(), INTERVENER2);
         assertEquals(dynamicListElements.get(5).getCode(), INTERVENER3);
         assertEquals(dynamicListElements.get(dynamicListElements.size() - 1).getCode(), INTERVENER4);
+    }
+
+    @Test
+    public void givenGeneralApplications_checkForDuplicates() {
+        ObjectMapper objectMapper = JsonMapper
+            .builder()
+            .addModule(new JavaTimeModule())
+            .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/general-application-duplicate.json", objectMapper);
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        assertEquals(3, caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplications().size());
+
+        helper.checkAndRemoveDuplicateGeneralApplications(caseDetails.getData());
+
+        assertEquals(2, caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplications().size());
     }
 
     private void assertData(List<GeneralApplicationItems> resultingList) {
