@@ -57,12 +57,52 @@ public class CcdService {
             getCaseDataContent(startEventResponse.getCaseDetails().getData(), startEventResponse));
     }
 
+    public void executeCcdEventOnCase(CaseDetails caseDetails, String authorisation, String caseId, String caseTypeId,
+                                      String eventType, String summary, String description) {
+
+        log.info("Executing eventType {} on caseId {}", eventType, caseId);
+
+        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
+
+        StartEventResponse startEventResponse = coreCaseDataApi
+            .startEventForCaseWorker(idamToken.getIdamOauth2Token(),
+                idamToken.getServiceAuthorization(),
+                idamToken.getUserId(),
+                JURISDICTION,
+                caseTypeId,
+                caseId,
+                eventType);
+
+        coreCaseDataApi.submitEventForCaseWorker(
+            idamToken.getIdamOauth2Token(),
+            idamToken.getServiceAuthorization(),
+            idamToken.getUserId(),
+            JURISDICTION,
+            caseTypeId,
+            caseId,
+            true,
+            getCaseDataContent(caseDetails.getData(), summary, description, startEventResponse));
+    }
+
     private CaseDataContent getCaseDataContent(Object caseData,
                                                StartEventResponse startEventResponse) {
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
                 .id(startEventResponse.getEventId())
+                .build())
+            .data(caseData)
+            .build();
+    }
+
+    private CaseDataContent getCaseDataContent(Object caseData, String summary, String description,
+                                               StartEventResponse startEventResponse) {
+        return CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                .id(startEventResponse.getEventId())
+                .summary(summary)
+                .description(description)
                 .build())
             .data(caseData)
             .build();
