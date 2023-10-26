@@ -79,7 +79,7 @@ public class GeneralApplicationRemoveTask implements Runnable {
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
-                    log.error("Error processing caseRef {} ", caseReference.getCaseReference());
+                    log.error("Error processing caseRef {} and error is {}", caseReference.getCaseReference(), e);
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }
