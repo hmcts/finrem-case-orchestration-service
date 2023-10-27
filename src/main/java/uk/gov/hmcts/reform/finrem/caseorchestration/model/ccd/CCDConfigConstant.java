@@ -648,6 +648,7 @@ public class CCDConfigConstant {
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 
     public static final String PARTIES_ON_CASE = "partiesOnCase";
+    public static final String ORDERS_TO_SHARE = "ordersToShare";
 
     public static final String HEARING_PREFIX = "hearing_";
 

@@ -136,6 +136,14 @@ public class ConsentOrderNotApprovedDocumentService {
         return latestGeneralOrder;
     }
 
+    public boolean getFirstOrderModifiedAfterSecondOrder(CaseDocument firstOrder,
+                                                         CaseDocument secondOrder,
+                                                         String userAuthorisation) {
+        if (firstOrder != null && secondOrder != null) {
+            return documentOrderingService.isDocumentModifiedLater(firstOrder, secondOrder, userAuthorisation);
+        } else return firstOrder != null;
+    }
+
     public void addNotApprovedConsentCoverLetter(FinremCaseDetails caseDetails,
                                                  List<CaseDocument> consentOrderDocumentPack,
                                                  String authToken,
