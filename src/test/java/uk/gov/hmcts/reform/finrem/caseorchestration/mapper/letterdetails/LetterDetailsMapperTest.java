@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BristolCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
 
 import java.time.LocalDate;
@@ -187,7 +187,7 @@ public class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
             .build();
     }
 
-    private FrcCourtDetails getCourtDetails() {
+    private CourtDetailsTemplateFields getCourtDetails() {
         DefaultCourtListWrapper courtListWrapper = new DefaultCourtListWrapper();
         courtListWrapper.setBristolCourtList(BristolCourt.BRISTOL_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
         return new CourtDetailsMapper(new ObjectMapper()).getCourtDetails(courtListWrapper);

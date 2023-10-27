@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,6 +57,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_HIGHCOURT_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_PREFIX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_REGION_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_SOUTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST;
@@ -82,6 +92,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER;
@@ -133,6 +144,13 @@ public final class CaseHearingFunctions {
 
         return caseDetails;
     };
+
+    public static String getSelectedHearingCourt(Map<String, Object> mapOfCaseData) {
+        return HEARING_PREFIX + getSelectedCourt(mapOfCaseData, HEARING_REGION_LIST,
+            HEARING_MIDLANDS_FRC_LIST, HEARING_LONDON_FRC_LIST, HEARING_NORTHWEST_FRC_LIST,
+            HEARING_NORTHEAST_FRC_LIST, HEARING_SOUTHWEST_FRC_LIST, HEARING_SOUTHEAST_FRC_LIST,
+            HEARING_WALES_FRC_LIST, HEARING_HIGHCOURT_FRC_LIST);
+    }
 
     static UnaryOperator<CaseDetails> addNonFastTrackFields = caseDetails -> {
         Map<String, Object> data = caseDetails.getData();
@@ -280,7 +298,10 @@ public final class CaseHearingFunctions {
         String londonList = (String) mapOfCaseData.get(frcListName);
         if (CFC.equalsIgnoreCase(londonList)) {
             return CFC_COURTLIST;
+        } else if (LONDON.equalsIgnoreCase(londonList)) {
+            return LONDON_COURTLIST;
         }
+
         return null;
     }
 
@@ -308,7 +329,7 @@ public final class CaseHearingFunctions {
             Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
 
-            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+            return new ObjectMapper().convertValue(CourtDetailsTemplateFields.builder()
                 .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
                 .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
                 .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
@@ -324,9 +345,9 @@ public final class CaseHearingFunctions {
     public static Map<String, Object> buildFrcCourtDetails(FinremCaseData data) {
         try {
             Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.getSelectedCourt());
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.getSelectedAllocatedCourt());
 
-            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+            return new ObjectMapper().convertValue(CourtDetailsTemplateFields.builder()
                 .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
                 .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
                 .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
@@ -337,12 +358,33 @@ public final class CaseHearingFunctions {
         }
     }
 
+    public static Map<String, Object> buildHearingCourtDetails(Map<String, Object> data) {
+        try {
+            Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> allocatedCourtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
+            Map<String, Object> hearingCourtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedHearingCourt(data)));
+
+            return new ObjectMapper().convertValue(CourtDetailsTemplateFields.builder()
+                .courtName((String) allocatedCourtDetails.get(COURT_DETAILS_NAME_KEY))
+                .courtAddress((String) allocatedCourtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+                .phoneNumber((String) allocatedCourtDetails.get(COURT_DETAILS_PHONE_KEY))
+                .email((String) allocatedCourtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .hearingCourtName((String) hearingCourtDetails.get(COURT_DETAILS_NAME_KEY))
+                .hearingCourtAddress((String) hearingCourtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+                .hearingCourtPhoneNumber((String) hearingCourtDetails.get(COURT_DETAILS_PHONE_KEY))
+                .hearingCourtEmail((String) hearingCourtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .build(), Map.class);
+        } catch (Exception e) {
+            return Collections.emptyMap();
+        }
+    }
+
     public static Map<String, Object> buildInterimFrcCourtDetails(Map<String, Object> data) {
         try {
             Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourtIH(data)));
 
-            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+            return new ObjectMapper().convertValue(CourtDetailsTemplateFields.builder()
                 .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
                 .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
                 .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
@@ -354,7 +396,7 @@ public final class CaseHearingFunctions {
     }
 
     public static Map<String, Object> buildConsentedFrcCourtDetails() {
-        return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+        return new ObjectMapper().convertValue(CourtDetailsTemplateFields.builder()
             .courtName(OrchestrationConstants.CTSC_COURT_NAME)
             .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
             .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
@@ -362,8 +404,8 @@ public final class CaseHearingFunctions {
             .build(), Map.class);
     }
 
-    public static FrcCourtDetails buildConsentedFrcCourtDetailsObject() {
-        return FrcCourtDetails.builder()
+    public static CourtDetailsTemplateFields buildConsentedFrcCourtDetailsObject() {
+        return CourtDetailsTemplateFields.builder()
             .courtName(OrchestrationConstants.CTSC_COURT_NAME)
             .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
             .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
@@ -388,7 +430,7 @@ public final class CaseHearingFunctions {
             Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourtIH(data)));
 
-            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+            return new ObjectMapper().convertValue(CourtDetailsTemplateFields.builder()
                 .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
                 .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
                 .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
