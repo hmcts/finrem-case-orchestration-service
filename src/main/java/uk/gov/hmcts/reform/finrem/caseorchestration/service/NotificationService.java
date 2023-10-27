@@ -76,6 +76,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_SOL;
@@ -533,8 +534,13 @@ public class NotificationService {
     @Deprecated(since = "15-june-2023")
     public void sendPrepareForHearingEmailIntervener(CaseDetails caseDetails,
                                                      SolicitorCaseDataKeysWrapper dataKeysWrapper) {
-        sendPrepareForHearingEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            dataKeysWrapper));
+
+        NotificationRequest notificationRequest =
+            notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
+            dataKeysWrapper);
+        log.info("Received request for notification email for 'Prepare for hearing'. Case ID : {}",
+            notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
     }
 
     public void sendPrepareForHearingEmailIntervener(FinremCaseDetails caseDetails,
