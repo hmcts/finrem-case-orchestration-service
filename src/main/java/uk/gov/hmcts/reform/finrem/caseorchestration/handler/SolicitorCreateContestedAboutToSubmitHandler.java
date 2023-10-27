@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.FormADocumentCategorizer;
 
 @Slf4j
 @Service
@@ -24,20 +23,16 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     private final OnlineFormDocumentService service;
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
-    private final FormADocumentCategorizer formADocumentCategorizer;
-
 
     @Autowired
     public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnlineFormDocumentService service,
                                                         CaseFlagsService caseFlagsService,
-                                                        IdamService idamService,
-                                                        FormADocumentCategorizer formADocumentCategorizer) {
+                                                        IdamService idamService) {
         super(finremCaseDetailsMapper);
         this.service = service;
         this.caseFlagsService = caseFlagsService;
         this.idamService = idamService;
-        this.formADocumentCategorizer = formADocumentCategorizer;
     }
 
 
@@ -64,8 +59,6 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         }
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, caseDetails);
         caseData.setMiniFormA(document);
-
-        formADocumentCategorizer.categorize(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

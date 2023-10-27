@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.FormADocumentCategorizer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,17 +54,13 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     @Mock
     FeatureToggleService featureToggleService;
 
-    FormADocumentCategorizer formADocumentCategorizer;
-
     @Before
     public void setup() {
-        formADocumentCategorizer = new FormADocumentCategorizer(featureToggleService);
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
             caseFlagsService,
-            idamService,
-            formADocumentCategorizer);
+            idamService);
     }
 
     @Test
