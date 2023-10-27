@@ -32,8 +32,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
@@ -386,7 +386,7 @@ public class TestSetUpUtils {
 
     private static void populateCourtDetails(FinremCaseData caseData) {
         caseData.setRegionWrapper(RegionWrapper.builder()
-            .defaultRegionWrapper(DefaultRegionWrapper.builder()
+            .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
                 .regionList(Region.MIDLANDS)
                 .midlandsFrcList(RegionMidlandsFrc.NOTTINGHAM)
                 .courtListWrapper(DefaultCourtListWrapper.builder()

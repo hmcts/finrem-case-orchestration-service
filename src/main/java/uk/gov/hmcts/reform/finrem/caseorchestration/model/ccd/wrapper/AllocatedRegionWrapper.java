@@ -27,7 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DefaultRegionWrapper {
+public class AllocatedRegionWrapper {
     @JsonProperty("regionList")
     private Region regionList;
     @JsonProperty("midlandsFRCList")

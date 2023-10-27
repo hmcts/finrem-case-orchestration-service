@@ -22,7 +22,7 @@ public class RegionWrapper {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.PUBLIC)
-    DefaultRegionWrapper defaultRegionWrapper;
+    AllocatedRegionWrapper allocatedRegionWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     InterimRegionWrapper interimRegionWrapper;
@@ -30,12 +30,16 @@ public class RegionWrapper {
     @Getter(AccessLevel.NONE)
     GeneralApplicationRegionWrapper generalApplicationRegionWrapper;
 
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    HearingRegionWrapper hearingRegionWrapper;
+
     @JsonIgnore
-    public DefaultRegionWrapper getDefaultRegionWrapper() {
-        if (defaultRegionWrapper == null) {
-            this.defaultRegionWrapper = new DefaultRegionWrapper();
+    public AllocatedRegionWrapper getAllocatedRegionWrapper() {
+        if (allocatedRegionWrapper == null) {
+            this.allocatedRegionWrapper = new AllocatedRegionWrapper();
         }
-        return defaultRegionWrapper;
+        return allocatedRegionWrapper;
     }
 
     @JsonIgnore
@@ -56,11 +60,11 @@ public class RegionWrapper {
 
     @JsonIgnore
     public DefaultCourtListWrapper getDefaultCourtList() {
-        if (defaultRegionWrapper == null) {
-            this.defaultRegionWrapper = new DefaultRegionWrapper();
-            this.defaultRegionWrapper.setCourtListWrapper(new DefaultCourtListWrapper());
+        if (allocatedRegionWrapper == null) {
+            this.allocatedRegionWrapper = new AllocatedRegionWrapper();
+            this.allocatedRegionWrapper.setCourtListWrapper(new DefaultCourtListWrapper());
         }
-        return defaultRegionWrapper.getDefaultCourtListWrapper();
+        return allocatedRegionWrapper.getDefaultCourtListWrapper();
     }
 
     @JsonIgnore
