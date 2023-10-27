@@ -9,28 +9,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremContestedSendOrderCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentInContestedSendOrderCorresponder;
 
 import java.util.List;
 
 @Slf4j
 @Service
-public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
+public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackHandler {
     private final GeneralOrderService generalOrderService;
-    private final CcdService ccdService;
-    private final FinremContestedSendOrderCorresponder contestedSendOrderCorresponder;
+    private final FinremConsentInContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
-
-    public SendOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                              GeneralOrderService generalOrderService,
-                                              CcdService ccdService,
-                                              FinremContestedSendOrderCorresponder contestedSendOrderCorresponder) {
+    public SendConsentOrderInContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                       GeneralOrderService generalOrderService,
+                                                       FinremConsentInContestedSendOrderCorresponder contestedSendOrderCorresponder) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
-        this.ccdService = ccdService;
         this.contestedSendOrderCorresponder = contestedSendOrderCorresponder;
     }
 
@@ -39,7 +33,7 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.SEND_ORDER.equals(eventType);
+            && EventType.SEND_CONSENT_IN_CONTESTED_ORDER.equals(eventType);
     }
 
     @Override
@@ -54,30 +48,9 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
 
         sendNotifications(callbackRequest, parties, userAuthorisation);
 
-        updateCaseWithPostStateOption(caseDetails, userAuthorisation);
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData()).build();
     }
-
-    private void updateCaseWithPostStateOption(FinremCaseDetails caseDetails, String userAuthorisation) {
-
-        SendOrderEventPostStateOption sendOrderPostStateOption = caseDetails.getData().getSendOrderPostStateOption();
-        if (isOptionThatRequireUpdate(sendOrderPostStateOption)) {
-            caseDetails.getData().setSendOrderPostStateOption(null);
-            ccdService.executeCcdEventOnCase(
-                userAuthorisation,
-                String.valueOf(caseDetails.getId()),
-                caseDetails.getCaseType().getCcdType(),
-                sendOrderPostStateOption.getEventToTrigger().getCcdType());
-        }
-    }
-
-    private boolean isOptionThatRequireUpdate(SendOrderEventPostStateOption postStateOption) {
-        return postStateOption.getEventToTrigger().equals(EventType.PREPARE_FOR_HEARING)
-            || postStateOption.getEventToTrigger().equals(EventType.CLOSE);
-    }
-
 
     private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -86,5 +59,4 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
         contestedSendOrderCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
         log.info("Finish sending order correspondence for case {}", caseDetails.getId());
     }
-
 }

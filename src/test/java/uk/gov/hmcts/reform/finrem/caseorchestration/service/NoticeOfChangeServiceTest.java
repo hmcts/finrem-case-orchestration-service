@@ -158,7 +158,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .build());
 
         setUpHelper();
-        when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH
             + "consented-change-of-reps-before.json")) {
 
@@ -192,7 +192,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                 .build())
             .build());
 
-        when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "consented-change-of-reps.json")) {
             CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH + "consented-change-of-reps-original.json");
@@ -216,7 +216,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     public void shouldUpdateRepresentationUpdateHistory_whenNatureIsRemoving() throws Exception {
         setUpCaseDetails("change-of-reps-removing.json");
         setUpHelper();
-        when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), eq(true))).thenReturn(
             ChangedRepresentative.builder()
@@ -388,7 +388,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
         when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
-        when(mockCaseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
     }
 
 }
