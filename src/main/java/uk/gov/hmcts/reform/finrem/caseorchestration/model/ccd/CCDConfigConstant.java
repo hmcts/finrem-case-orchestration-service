@@ -471,10 +471,10 @@ public class CCDConfigConstant {
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
     public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
-    public static final String BULK_PRINT_COVER_SHEET_INTERVENER1 = "bulkPrintCoverSheetIntervener1";
-    public static final String BULK_PRINT_COVER_SHEET_INTERVENER2 = "bulkPrintCoverSheetIntervener2";
-    public static final String BULK_PRINT_COVER_SHEET_INTERVENER3 = "bulkPrintCoverSheetIntervener3";
-    public static final String BULK_PRINT_COVER_SHEET_INTERVENER4 = "bulkPrintCoverSheetIntervener4";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER1 = "bulkPrintCoverSheetIntv1";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER2 = "bulkPrintCoverSheetIntv2";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER3 = "bulkPrintCoverSheetIntv3";
+    public static final String BULK_PRINT_COVER_SHEET_INTERVENER4 = "bulkPrintCoverSheetIntv4";
     public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL = "bulkPrintCoverSheetAppConfidential";
