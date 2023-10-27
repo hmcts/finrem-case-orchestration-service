@@ -141,7 +141,9 @@ public class ConsentOrderNotApprovedDocumentService {
                                                          String userAuthorisation) {
         if (firstOrder != null && secondOrder != null) {
             return documentOrderingService.isDocumentModifiedLater(firstOrder, secondOrder, userAuthorisation);
-        } else return firstOrder != null;
+        } else {
+            return firstOrder != null;
+        }
     }
 
     public void addNotApprovedConsentCoverLetter(FinremCaseDetails caseDetails,
