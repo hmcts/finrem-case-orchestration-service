@@ -288,15 +288,17 @@ public class GeneralApplicationDirectionsService {
                                                            List<BulkPrintDocument> documents) {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
         log.info("The relevant party {} for caseId {}", ObjectUtils.nullSafeConciseToString(referDetail), caseDetails.getId());
-        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
-        log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}",
-            documents.size(), caseDetails.getId(),
-            documents);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
-        log.info("Sending {} document(s) to respondent via bulk print for Case {}, document(s) are {}",
-            documents.size(), caseDetails.getId(),
-            documents);
-        sendIntervenerDocuments(caseDetails, authorisationToken, documents, referDetail);
+        if (StringUtils.isNotEmpty(referDetail)) {
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
+            log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}",
+                documents.size(), caseDetails.getId(),
+                documents);
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
+            log.info("Sending {} document(s) to respondent via bulk print for Case {}, document(s) are {}",
+                documents.size(), caseDetails.getId(),
+                documents);
+            sendIntervenerDocuments(caseDetails, authorisationToken, documents, referDetail);
+        }
     }
 
     private void sendIntervenerDocuments(FinremCaseDetails caseDetails, String authorisationToken,
