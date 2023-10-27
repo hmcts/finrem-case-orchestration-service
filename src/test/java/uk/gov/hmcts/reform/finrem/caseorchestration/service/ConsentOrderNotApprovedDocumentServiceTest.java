@@ -202,6 +202,15 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         assertThat(result, equalTo(true));
     }
 
+    @Test
+    public void givenFirstOrderIsNull_whenCheckingIfFirstOrderModifiedAfterSecondOrder_thenShouldReturnFalse() {
+        when(documentOrderingService.isDocumentModifiedLater(any(), any(), anyString())).thenReturn(false);
+        CaseDocument secondCaseDocument = caseDocument("url2", "filename2", "binary2");
+        boolean result = consentOrderNotApprovedDocumentService.getFirstOrderModifiedAfterSecondOrder(
+            null, secondCaseDocument, "token");
+        assertThat(result, equalTo(false));
+    }
+
     private void addConsentedInContestedConsentOrderNotApproved() {
         FinremCaseData caseData = finremCaseDetails.getData();
         CaseDocument caseDocument = CaseDocument.builder().documentBinaryUrl("test_url_").build();
