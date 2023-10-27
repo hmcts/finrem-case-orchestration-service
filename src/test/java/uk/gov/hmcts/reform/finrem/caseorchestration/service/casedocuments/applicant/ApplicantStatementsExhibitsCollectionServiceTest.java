@@ -60,7 +60,7 @@ public class ApplicantStatementsExhibitsCollectionServiceTest extends BaseManage
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT),
-            is(DocumentCategory.APPLICANT_WITNESS_STATEMENT)
+            is(DocumentCategory.APPLICANT_DOCUMENTS_WITNESS_STATEMENTS)
         );
 
         assertThat(

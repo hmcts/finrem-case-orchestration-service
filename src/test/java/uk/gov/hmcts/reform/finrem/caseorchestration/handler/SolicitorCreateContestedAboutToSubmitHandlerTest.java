@@ -121,7 +121,7 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         assertEquals(YesOrNo.NO, responseCaseData.getPromptForUrgentCaseQuestion());
         assertNull(responseCaseData.getContactDetailsWrapper().getApplicantRepresented());
         assertEquals(caseDocument(), responseCaseData.getMiniFormA());
-        assertEquals(DocumentCategory.APPLICATIONS_FORM_A.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B.getDocumentCategoryId(),
             responseCaseData.getUploadAdditionalDocument().get(0).getValue().getAdditionalDocuments().getCategoryId()
         );
     }

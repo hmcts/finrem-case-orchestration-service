@@ -57,7 +57,7 @@ public class ApplicantChronologiesStatementCollectionServiceTest extends BaseMan
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_OF_ISSUES),
-            is(DocumentCategory.APPLICANT_STATEMENT_OF_ISSUES)
+            is(DocumentCategory.APPLICANT_DOCUMENTS_CONCISE_STATEMENT_OF_ISSUES)
         );
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CHRONOLOGY),
@@ -65,7 +65,7 @@ public class ApplicantChronologiesStatementCollectionServiceTest extends BaseMan
         );
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
-            is(DocumentCategory.APPLICANT_FORM_G)
+            is(DocumentCategory.APPLICANT_DOCUMENTS_FORM_G)
         );
 
         assertThat(
