@@ -111,10 +111,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
             sendOrderPartyDocumentList.forEach(
                 handler -> handler.setUpConsentOrderApprovedDocumentsOnCase(caseDetails, parties, approvedConsentOrders, additionalDocuments));
         } else {
-            CaseDocument latestGeneralOrder = null;
-            if (caseData.getGeneralOrderWrapper() != null) {
-                latestGeneralOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
-            }
+            CaseDocument latestGeneralOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
             CaseDocument latestRefusedConsentOrder = null;
             if (wrapper.getConsentedNotApprovedOrders() != null && !wrapper.getConsentedNotApprovedOrders().isEmpty()) {
                 latestRefusedConsentOrder = wrapper.getConsentedNotApprovedOrders()
