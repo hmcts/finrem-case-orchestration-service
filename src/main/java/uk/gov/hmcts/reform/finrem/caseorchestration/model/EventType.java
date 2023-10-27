@@ -70,8 +70,6 @@ public enum EventType {
     DIRECTION_UPLOAD_ORDER("FR_directionOrder"),
     CONSENT_ORDER("FR_consentOrder"),
 
-    UPLOAD_ORDER("FR_uploadOrder"),
-
     @JsonEnumDefaultValue
     NONE("");
 

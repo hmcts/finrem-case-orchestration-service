@@ -15,14 +15,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Selec
 
 @Slf4j
 @Service
-public class UploadOrderContestedSubmittedHandler extends FinremCallbackHandler {
+public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler {
 
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
 
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
-    public UploadOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
+    public DirectionUploadOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
                                                 AdditionalHearingDocumentService additionalHearingDocumentService,
                                                 SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService) {
         super(finremCaseDetailsMapper);
@@ -35,7 +35,7 @@ public class UploadOrderContestedSubmittedHandler extends FinremCallbackHandler 
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.UPLOAD_ORDER.equals(eventType);
+            && EventType.DIRECTION_UPLOAD_ORDER.equals(eventType);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class UploadOrderContestedSubmittedHandler extends FinremCallbackHandler 
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Handling contested event {} submit callback for case id: {}",
-            EventType.UPLOAD_ORDER, caseDetails.getId());
+            EventType.DIRECTION_UPLOAD_ORDER, caseDetails.getId());
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails.getData());

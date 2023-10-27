@@ -29,7 +29,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class UploadOrderContestedSubmittedHandlerTest {
+class DirectionUploadOrderSubmittedHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     @Mock
@@ -41,27 +41,27 @@ class UploadOrderContestedSubmittedHandlerTest {
     private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     @InjectMocks
-    private UploadOrderContestedSubmittedHandler handler;
+    private DirectionUploadOrderSubmittedHandler handler;
 
 
     @Test
-    void givenACcdCallbackContestedCase_WhenASubmitEventUploadOrder_thenHandlerCanHandle() {
+    void givenACcdCallbackContestedCase_WhenASubmitEventDirectionUploadOrder_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.UPLOAD_ORDER),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER),
             is(true));
     }
 
     @Test
     void givenACcdCallbackConsentedCase_WhenCaseTypeIsConsented_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.UPLOAD_ORDER),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.DIRECTION_UPLOAD_ORDER),
             is(false));
     }
 
     @Test
     void givenACcdCallbackConsentedCase_WhenASubmitEventListForHearing_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_ORDER),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.DIRECTION_UPLOAD_ORDER),
             is(false));
     }
 
