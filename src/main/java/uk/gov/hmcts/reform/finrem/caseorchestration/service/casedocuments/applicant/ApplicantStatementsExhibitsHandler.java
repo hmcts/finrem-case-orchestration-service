@@ -24,7 +24,7 @@ public class ApplicantStatementsExhibitsHandler extends StatementExhibitsHandler
                 return DocumentCategory.APPLICANT_DOCUMENTS;
             }
             case WITNESS_STATEMENT_AFFIDAVIT -> {
-                return DocumentCategory.APPLICANT_WITNESS_STATEMENT;
+                return DocumentCategory.APPLICANT_DOCUMENTS_WITNESS_STATEMENTS;
             }
             default -> {
                 return DocumentCategory.UNCATEGORISED;

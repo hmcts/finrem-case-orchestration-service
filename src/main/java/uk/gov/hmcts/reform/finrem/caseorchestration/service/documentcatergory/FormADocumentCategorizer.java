@@ -21,11 +21,12 @@ public class FormADocumentCategorizer extends DocumentCategorizer {
     protected void categorizeDocuments(FinremCaseData finremCaseData) {
 
         List<UploadAdditionalDocumentCollection> uploadAdditionDocumentsList = finremCaseData.getUploadAdditionalDocument();
-        for (UploadAdditionalDocumentCollection uploadAdditionalDocument : uploadAdditionDocumentsList) {
-            if (uploadAdditionalDocument.getValue().getAdditionalDocuments() != null) {
-                uploadAdditionalDocument.getValue().getAdditionalDocuments().setCategoryId(
-                    DocumentCategory.APPLICATIONS_FORM_A.getDocumentCategoryId()
-                );
+        if (uploadAdditionDocumentsList != null && !uploadAdditionDocumentsList.isEmpty()) {
+            for (UploadAdditionalDocumentCollection uploadAdditionalDocument : uploadAdditionDocumentsList) {
+                if (uploadAdditionalDocument.getValue().getAdditionalDocuments() != null) {
+                    uploadAdditionalDocument.getValue().getAdditionalDocuments().setCategoryId(
+                        DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B.getDocumentCategoryId());
+                }
             }
         }
 
