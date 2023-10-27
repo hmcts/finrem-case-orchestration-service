@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 @Data
 @Builder
@@ -21,7 +21,7 @@ public class BasicLetterDetails {
     private Address respondentAddress;
     private String caseNumber;
     private String letterDate;
-    private FrcCourtDetails courtDetails;
+    private CourtDetailsTemplateFields courtDetails;
     private Addressee addressee;
     private CtscContactDetails ctscContactDetails;
     private String divorceCaseNumber;

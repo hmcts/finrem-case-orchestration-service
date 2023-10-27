@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -531,5 +532,72 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .listItems(dynamicElementList)
             .build();
         assertFalse(generalOrderService.isSelectedOrderMatches(selectList, null));
+    }
+
+    @Test
+    public void isCommunicationEnabledCorrectlyForSelectedParties() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setPartiesOnCase(buildDynamicSelectableParties());
+        generalOrderService.setPartiesToReceiveCommunication(caseDetails, List.of(CaseRole.APP_SOLICITOR.getCcdCode(),
+            CaseRole.RESP_SOLICITOR.getCcdCode(), CaseRole.INTVR_SOLICITOR_1.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode(), CaseRole.INTVR_SOLICITOR_3.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
+        assertThat(data.isApplicantCorrespondenceEnabled(),
+            equalTo(generalOrderService.isOrderSharedWithApplicant(caseDetails)));
+        assertThat(data.isRespondentCorrespondenceEnabled(),
+            equalTo(generalOrderService.isOrderSharedWithRespondent(caseDetails)));
+        assertThat(data.getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled(),
+            equalTo(generalOrderService.isOrderSharedWithIntervener1(caseDetails)));
+        assertThat(data.getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled(),
+            equalTo(generalOrderService.isOrderSharedWithIntervener2(caseDetails)));
+        assertThat(data.getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled(),
+            equalTo(generalOrderService.isOrderSharedWithIntervener3(caseDetails)));
+        assertThat(data.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled(),
+            equalTo(generalOrderService.isOrderSharedWithIntervener4(caseDetails)));
+    }
+
+    private DynamicMultiSelectList buildDynamicSelectableParties() {
+        return DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiSelectListElement.builder()
+                .code(CaseRole.APP_SOLICITOR.getCcdCode())
+                .label(CaseRole.APP_SOLICITOR.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.RESP_SOLICITOR.getCcdCode())
+                .label(CaseRole.RESP_SOLICITOR.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+                .build()))
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+                .code(CaseRole.APP_SOLICITOR.getCcdCode())
+                .label(CaseRole.APP_SOLICITOR.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.RESP_SOLICITOR.getCcdCode())
+                .label(CaseRole.RESP_SOLICITOR.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+                .build()))
+            .build();
     }
 }

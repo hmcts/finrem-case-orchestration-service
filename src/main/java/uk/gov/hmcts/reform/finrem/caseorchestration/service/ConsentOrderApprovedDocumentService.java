@@ -13,14 +13,18 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
@@ -55,11 +59,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ConsentOrderApprovedDocumentService {
 
     private final GenericDocumentService genericDocumentService;
+    private final DocumentOrderingService documentOrderingService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
     private final CaseDataService caseDataService;
     private final ConsentedApplicationHelper consentedApplicationHelper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final BulkPrintCoverLetterDetailsMapper bulkPrintLetterDetailsMapper;
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         String fileName;
@@ -89,8 +96,7 @@ public class ConsentOrderApprovedDocumentService {
             fileName);
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
-    public CaseDocument generateApprovedConsentOrderCoverLetter(CaseDetails caseDetails, String authToken) {
+    public CaseDocument generateApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authToken) {
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, APPLICANT);
         String approvedOrderNotificationFileName;
         if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getData()))) {
@@ -131,9 +137,9 @@ public class ConsentOrderApprovedDocumentService {
         return stampedPensionData;
     }
 
-    public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
+    public List<BulkPrintDocument> prepareApplicantLetterPack(FinremCaseDetails caseDetails, String authorisationToken) {
         log.info("Sending Approved Consent Order to applicant / solicitor for Bulk Print, case {}", caseDetails.getId());
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getData();
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
@@ -223,7 +229,8 @@ public class ConsentOrderApprovedDocumentService {
         });
     }
 
-    private CaseDetails prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(CaseDetails caseDetails) {
+    public CaseDetails prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(CaseDetails caseDetails) {
+
         CaseDetails detailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = detailsCopy.getData();
 
@@ -237,16 +244,17 @@ public class ConsentOrderApprovedDocumentService {
         return detailsCopy;
     }
 
-    public List<CaseDocument> approvedOrderDocuments(CaseDetails caseDetails, String authorisationToken) {
+    public List<CaseDocument> approvedOrderDocuments(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         Map<String, Object> caseData = caseDetails.getData();
         List<CaseDocument> documents = new ArrayList<>();
         String approvedOrderCollectionFieldName = caseDataService.isConsentedInContestedCase(caseDetails)
             ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
 
         List<ConsentOrderCollection> convertedData = new ArrayList<>();
-        Object approveOderColl = caseData.get(approvedOrderCollectionFieldName);
+        Object approveOrderColl = caseData.get(approvedOrderCollectionFieldName);
         List<ConsentOrderCollection> approvedOrderList = mapper.registerModule(new JavaTimeModule())
-            .convertValue(approveOderColl != null ? approveOderColl : Collections.emptyList(), new TypeReference<>() {
+            .convertValue(approveOrderColl != null ? approveOrderColl : Collections.emptyList(), new TypeReference<>() {
             });
 
         if (!approvedOrderList.isEmpty()) {
@@ -360,5 +368,54 @@ public class ConsentOrderApprovedDocumentService {
         finremCaseDetails.getData().setApprovedOrderCollection(approvedOrders);
 
         log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseId);
+    }
+
+    public void addApprovedConsentCoverLetter(FinremCaseDetails caseDetails,
+                                              List<CaseDocument> consentOrderDocumentPack,
+                                              String authToken,
+                                              DocumentHelper.PaperNotificationRecipient recipient) {
+        final Long caseId = caseDetails.getId();
+        CaseDetails bulkPrintCaseDetails = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
+        bulkPrintCaseDetails.getData().put(ORDER_TYPE, CONSENT);
+        String approvedOrderNotificationFileName = documentConfiguration.getApprovedConsentOrderNotificationFileName();
+        CaseDocument approvedCoverLetter = genericDocumentService
+            .generateDocument(authToken, bulkPrintCaseDetails,
+                documentConfiguration.getApprovedConsentOrderNotificationTemplate(),
+                approvedOrderNotificationFileName);
+        log.info("Generating approved consent order cover letter {} from {} for role {} on case {}", approvedOrderNotificationFileName,
+            documentConfiguration.getApprovedConsentOrderNotificationTemplate(), recipient, caseId);
+        consentOrderDocumentPack.add(approvedCoverLetter);
+    }
+
+    public boolean getApprovedOrderModifiedAfterNotApprovedOrder(ConsentOrderWrapper wrapper, String userAuthorisation) {
+        CaseDocument latestRefusedConsentOrder;
+        CaseDocument latestApprovedConsentOrder;
+        List<ConsentOrderCollection> refusedOrders = wrapper.getConsentedNotApprovedOrders();
+        List<ConsentOrderCollection> approvedOrders = wrapper.getContestedConsentedApprovedOrders();
+        if (refusedOrders != null && !refusedOrders.isEmpty()) {
+            latestRefusedConsentOrder = refusedOrders.get(refusedOrders.size() - 1).getApprovedOrder().getConsentOrder();
+        } else {
+            return true;
+        }
+        if (approvedOrders != null && !approvedOrders.isEmpty()) {
+            latestApprovedConsentOrder = approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder().getConsentOrder();
+        } else {
+            return false;
+        }
+        return documentOrderingService.isDocumentModifiedLater(latestApprovedConsentOrder, latestRefusedConsentOrder, userAuthorisation);
+    }
+
+    public CaseDocument getPopulatedConsentCoverSheet(FinremCaseDetails caseDetails,
+                                                      String authToken,
+                                                      DocumentHelper.PaperNotificationRecipient recipient) {
+        final Long caseId = caseDetails.getId();
+        Map<String, Object> placeholdersMap = bulkPrintLetterDetailsMapper
+                .getLetterDetailsAsMap(caseDetails, recipient, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+        CaseDocument bulkPrintCoverSheet = genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, placeholdersMap,
+                documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName(),
+                caseDetails.getId().toString());
+        log.info("Generating consent order cover sheet {} from {} for role {} on case {}", documentConfiguration.getBulkPrintFileName(),
+                documentConfiguration.getBulkPrintTemplate(), recipient, caseId);
+        return bulkPrintCoverSheet;
     }
 }

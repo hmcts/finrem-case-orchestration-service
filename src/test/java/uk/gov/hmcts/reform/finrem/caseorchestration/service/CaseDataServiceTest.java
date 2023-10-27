@@ -590,7 +590,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
     public void isContestedFinremCaseDetailsApplication() {
         FinremCaseDetails finremCaseDetails
             = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L).build();
-        assertTrue(caseDataService.isContestedFinremCaseDetailsApplication(finremCaseDetails));
+        assertTrue(caseDataService.isContestedApplication(finremCaseDetails));
     }
 
     @Test
