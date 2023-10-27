@@ -31,7 +31,7 @@ def versions = [
         springDoc            : '1.7.0',
         wiremock             : '2.33.2',
         apacheLogging        : '2.20.0',
-        idamClient           : '2.1.1',
+        idamClient           : '3.0.2',
         jjwt                 : '0.9.1',
         skyscreamer          : '1.5.1',
         jaxbOsgi             : '2.3.8',
