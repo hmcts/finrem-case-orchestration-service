@@ -56,12 +56,12 @@ public class IntervenerThreeStatementsExhibitsHandlerTest extends BaseManageDocu
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_AFFIDAVIT),
-            is(DocumentCategory.INTERVENER_DOCUMENTS)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_S25_STATEMENT)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT),
-            is(DocumentCategory.INTERVENER_DOCUMENTS)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_WITNESS_STATEMENTS)
         );
 
         assertThat(

@@ -19,8 +19,11 @@ public class IntervenerThreeStatementsExhibitsHandler extends StatementExhibitsH
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
-            case STATEMENT_AFFIDAVIT, WITNESS_STATEMENT_AFFIDAVIT -> {
-                return DocumentCategory.INTERVENER_DOCUMENTS;
+            case STATEMENT_AFFIDAVIT -> {
+                return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_S25_STATEMENT;
+            }
+            case WITNESS_STATEMENT_AFFIDAVIT -> {
+                return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_WITNESS_STATEMENTS;
             }
             default -> {
                 return DocumentCategory.UNCATEGORISED;

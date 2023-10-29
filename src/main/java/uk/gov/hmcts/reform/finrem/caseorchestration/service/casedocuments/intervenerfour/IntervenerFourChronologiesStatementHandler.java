@@ -20,10 +20,13 @@ public class IntervenerFourChronologiesStatementHandler extends ChronologiesStat
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
             case CHRONOLOGY -> {
-                return DocumentCategory.HEARING_DOCUMENTS;
+                return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_CHRONOLOGY;
             }
-            case STATEMENT_OF_ISSUES, FORM_G -> {
-                return DocumentCategory.INTERVENER_DOCUMENTS;
+            case STATEMENT_OF_ISSUES -> {
+                return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_CONCISE_STATEMENT_OF_ISSUES;
+            }
+            case FORM_G -> {
+                return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_FORM_G;
             }
             default -> {
                 return DocumentCategory.UNCATEGORISED;

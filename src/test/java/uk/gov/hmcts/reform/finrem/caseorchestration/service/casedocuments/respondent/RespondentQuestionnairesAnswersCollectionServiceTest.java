@@ -84,12 +84,12 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.QUESTIONNAIRE),
-            is(DocumentCategory.HEARING_DOCUMENTS)
+            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_QUESTIONNAIRES)
         );
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.REPLY_TO_QUESTIONNAIRE),
-            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+            is(DocumentCategory.RESPONDENT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE)
         );
 
         assertThat(

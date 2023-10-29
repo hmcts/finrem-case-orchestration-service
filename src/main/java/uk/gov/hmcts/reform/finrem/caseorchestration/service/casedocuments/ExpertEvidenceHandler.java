@@ -26,6 +26,16 @@ public class ExpertEvidenceHandler extends PartyDocumentsHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        return DocumentCategory.REPORTS;
+        switch (caseDocumentType) {
+            case VALUATION_REPORT -> {
+                return DocumentCategory.REPORTS;
+            }
+            case EXPERT_EVIDENCE -> {
+                return DocumentCategory.REPORTS_EXPERT_REPORTS;
+            }
+            default -> {
+                return DocumentCategory.UNCATEGORISED;
+            }
+        }
     }
 }

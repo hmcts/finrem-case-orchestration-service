@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseSummariesHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class IntervenerFourCaseSummariesHandlerTest extends CaseSummariesHandlerTest {
@@ -50,5 +52,23 @@ public class IntervenerFourCaseSummariesHandlerTest extends CaseSummariesHandler
     protected List<UploadCaseDocumentCollection> getDocumentCollection() {
         return caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_SUMMARIES_COLLECTION);
+    }
+
+    @Override
+    public void assertCorrectCategoryAssignedFromDocumentType() {
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT),
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_POSITION_STATEMENT)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.SKELETON_ARGUMENT),
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_SKELETON_ARGUMENT)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY),
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_CASE_SUMMARY)
+        );
     }
 }

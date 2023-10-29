@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
-public class CaseSummariesHandler extends PartyDocumentsHandler {
+public abstract class CaseSummariesHandler extends PartyDocumentsHandler {
 
     public CaseSummariesHandler(CaseDocumentCollectionType caseDocumentCollectionType,
                                 CaseDocumentParty party, FeatureToggleService featureToggleService) {
@@ -25,8 +25,4 @@ public class CaseSummariesHandler extends PartyDocumentsHandler {
             || caseDocumentType.equals(CaseDocumentType.CASE_SUMMARY));
     }
 
-    @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        return DocumentCategory.HEARING_DOCUMENTS;
-    }
 }

@@ -20,10 +20,10 @@ public class ApplicantChronologiesStatementHandler extends ChronologiesStatement
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
             case CHRONOLOGY -> {
-                return DocumentCategory.HEARING_DOCUMENTS;
+                return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CHRONOLOGY;
             }
             case STATEMENT_OF_ISSUES -> {
-                return DocumentCategory.APPLICANT_DOCUMENTS_CONCISE_STATEMENT_OF_ISSUES;
+                return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CONCISE_STATEMENT_OF_ISSUES;
             }
             case FORM_G -> {
                 return DocumentCategory.APPLICANT_DOCUMENTS_FORM_G;

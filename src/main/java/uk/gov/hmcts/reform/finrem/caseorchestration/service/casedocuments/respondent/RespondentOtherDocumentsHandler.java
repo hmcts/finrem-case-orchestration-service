@@ -13,21 +13,20 @@ public class RespondentOtherDocumentsHandler extends OtherDocumentsHandler {
 
     public RespondentOtherDocumentsHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.RESP_OTHER_COLLECTION,
-                CaseDocumentParty.RESPONDENT, featureToggleService);
+            CaseDocumentParty.RESPONDENT, featureToggleService);
     }
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
-            case OTHER, FORM_F, CARE_PLAN, PENSION_PLAN -> {
-                return DocumentCategory.RESPONDENT_DOCUMENTS;
-                //TODO: Check category is correct for Form F, Care Plan & Pension Plan
+            case OTHER -> {
+                return DocumentCategory.RESPONDENT_DOCUMENTS_MISCELLANEOUS_OR_OTHER;
             }
-            case FORM_B -> {
-                return DocumentCategory.APPLICATIONS;
+            case PENSION_PLAN -> {
+                return DocumentCategory.RESPONDENT_DOCUMENTS_PENSION_PLAN;
             }
             default -> {
-                return DocumentCategory.UNCATEGORISED;
+                return DocumentCategory.RESPONDENT_DOCUMENTS;
             }
         }
     }

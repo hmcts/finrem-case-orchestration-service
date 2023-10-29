@@ -56,12 +56,12 @@ public class ApplicantQuestionnairesAnswersCollectionServiceTest extends BaseMan
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.QUESTIONNAIRE),
-            is(DocumentCategory.HEARING_DOCUMENTS)
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_QUESTIONNAIRES)
         );
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.REPLY_TO_QUESTIONNAIRE),
-            is(DocumentCategory.APPLICANT_DOCUMENTS)
+            is(DocumentCategory.APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE)
         );
 
         assertThat(

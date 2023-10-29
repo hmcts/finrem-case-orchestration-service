@@ -9,14 +9,4 @@ import static org.hamcrest.Matchers.is;
 
 public abstract class FormsHHandlerTest extends BaseManageDocumentsHandlerTest {
 
-    @InjectMocks
-    FormsHHandler formsHHandler;
-
-    @Override
-    public void assertCorrectCategoryAssignedFromDocumentType() {
-        assertThat(
-            formsHHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_H),
-            is(DocumentCategory.HEARING_DOCUMENTS)
-        );
-    }
 }

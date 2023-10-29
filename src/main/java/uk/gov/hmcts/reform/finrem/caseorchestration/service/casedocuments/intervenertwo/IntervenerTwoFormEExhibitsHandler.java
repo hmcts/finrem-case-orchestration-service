@@ -20,10 +20,7 @@ public class IntervenerTwoFormEExhibitsHandler extends FormEExhibitsHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        if (Objects.requireNonNull(caseDocumentType) == CaseDocumentType.APPLICANT_FORM_E) {
-            return DocumentCategory.INTERVENER_DOCUMENTS;
-        }
-        return DocumentCategory.UNCATEGORISED;
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_FORM_E;
     }
 
 }

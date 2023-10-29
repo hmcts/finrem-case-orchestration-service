@@ -18,10 +18,7 @@ public class IntervenerThreeFormEExhibitsHandler extends FormEExhibitsHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        if (caseDocumentType == CaseDocumentType.APPLICANT_FORM_E) {
-            return DocumentCategory.INTERVENER_DOCUMENTS;
-        }
-        return DocumentCategory.UNCATEGORISED;
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_FORM_E;
     }
 
 }

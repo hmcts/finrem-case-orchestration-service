@@ -20,10 +20,10 @@ public class ApplicantQuestionnairesAnswersHandler extends QuestionnairesAnswers
     public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
             case REPLY_TO_QUESTIONNAIRE -> {
-                return DocumentCategory.APPLICANT_DOCUMENTS;
+                return DocumentCategory.APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE;
             }
             case QUESTIONNAIRE -> {
-                return DocumentCategory.HEARING_DOCUMENTS;
+                return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_QUESTIONNAIRES;
             }
             default -> {
                 return DocumentCategory.UNCATEGORISED;

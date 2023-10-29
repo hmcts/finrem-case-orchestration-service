@@ -56,12 +56,12 @@ public class IntervenerThreeQuestionnairesAnswersHandlerTest extends BaseManageD
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.QUESTIONNAIRE),
-            is(DocumentCategory.HEARING_DOCUMENTS)
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_QUESTIONNAIRES)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.REPLY_TO_QUESTIONNAIRE),
-            is(DocumentCategory.INTERVENER_DOCUMENTS)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_REPLIES_TO_QUESTIONNAIRE)
         );
 
         assertThat(
