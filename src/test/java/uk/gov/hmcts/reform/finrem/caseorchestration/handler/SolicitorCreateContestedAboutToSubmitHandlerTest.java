@@ -20,10 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.FormADocumentCategorizer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -52,20 +50,14 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     CaseFlagsService caseFlagsService;
     @Mock
     IdamService idamService;
-    @Mock
-    FeatureToggleService featureToggleService;
-
-    FormADocumentCategorizer formADocumentCategorizer;
 
     @Before
     public void setup() {
-        formADocumentCategorizer = new FormADocumentCategorizer(featureToggleService);
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
             caseFlagsService,
-            idamService,
-            formADocumentCategorizer);
+            idamService);
     }
 
     @Test
@@ -86,12 +78,14 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     public void givenContestedCase_whenHandledAndUserIsAdminAndCaseFileViewEnabled_thenReturnExpectedResponseCaseData() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+        finremCallbackRequest.getCaseDetails().getData().getUploadAdditionalDocument().forEach(ad ->
+            ad.getValue().getAdditionalDocuments().setCategoryId(
+                DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B.getDocumentCategoryId()));
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
             .thenReturn(finremCallbackRequest.getCaseDetails());
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(true);
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(anyString(),
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
-        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
 
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
@@ -107,7 +101,6 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(false);
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(anyString(),
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
-        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(false);
 
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
