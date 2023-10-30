@@ -701,7 +701,7 @@ public class DocumentHelperTest {
     @Test
     public void shouldReturnTrueWhenCourtIsHighCourtInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
-        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.HIGHCOURT);
+        preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         boolean isHighCourt = documentHelper.isHighCourtSelected(preparedCaseDetails.getData());
         assertTrue(isHighCourt);
     }
@@ -725,7 +725,7 @@ public class DocumentHelperTest {
     @Test
     public void shouldReturnHighCourtStampWhenCourtIsHighCourtInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
-        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.HIGHCOURT);
+        preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
         assertEquals(StampType.HIGH_COURT_STAMP, actualStampType);
     }
@@ -733,7 +733,7 @@ public class DocumentHelperTest {
     @Test
     public void shouldReturnFamilyCourtStampWhenCourtIsLondonInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
-        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.LONDON);
+        preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.LONDON);
         StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
         assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
     }
@@ -812,31 +812,37 @@ public class DocumentHelperTest {
     }
 
     @Test
-    public void getIntervenerOnePaperNotificationRecipient() {
+    public void whenIntervenerOneOnCase_thenGetIntervenerOnePaperNotificationRecipient() {
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder().build();
         DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerOneWrapper);
         assertThat(recipient, is(INTERVENER_ONE));
     }
 
     @Test
-    public void getIntervenerTwoPaperNotificationRecipient() {
+    public void whenIntervenerTwoOnCase_thenGetIntervenerTwoPaperNotificationRecipient() {
         IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder().build();
         DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerTwoWrapper);
         assertThat(recipient, is(INTERVENER_TWO));
     }
 
     @Test
-    public void getIntervenerThreePaperNotificationRecipient() {
+    public void whenIntervenerThreeOnCase_thenGetIntervenerThreePaperNotificationRecipient() {
         IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder().build();
         DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerThreeWrapper);
         assertThat(recipient, is(INTERVENER_THREE));
     }
 
     @Test
-    public void getIntervenerFourPaperNotificationRecipient() {
+    public void whenIntervenerFourOnCase_thenGetIntervenerFourPaperNotificationRecipient() {
         IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder().build();
         DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerFourWrapper);
         assertThat(recipient, is(INTERVENER_FOUR));
+    }
+
+    @Test
+    public void whenNoLatestGeneralOrder_thenReturnNull() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        assertNull(documentHelper.getLatestGeneralOrder(caseDetails.getData()));
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

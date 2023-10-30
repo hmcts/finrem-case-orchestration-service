@@ -26,6 +26,7 @@ import java.util.Objects;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
@@ -147,9 +148,9 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         doValidCaseDataSetUpForAdditionalHearing();
 
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantAddressConfidential(any())).thenReturn(false);
-        when(caseDataService.isRespondentAddressConfidential(any())).thenReturn(false);
+        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
+        when(caseDataService.isApplicantAddressConfidential(anyMap())).thenReturn(false);
+        when(caseDataService.isRespondentAddressConfidential(anyMap())).thenReturn(false);
         when(coverSheetService.generateApplicantCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
         when(coverSheetService.generateRespondentCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
 
@@ -176,9 +177,9 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .getResource("/fixtures/bulkprint/bulk-print-additional-hearing-confidential.json")).toURI()));
 
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantAddressConfidential(any())).thenReturn(true);
-        when(caseDataService.isRespondentAddressConfidential(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
+        when(caseDataService.isApplicantAddressConfidential(anyMap())).thenReturn(true);
+        when(caseDataService.isRespondentAddressConfidential(anyMap())).thenReturn(true);
         when(coverSheetService.generateApplicantCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
         when(coverSheetService.generateRespondentCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
 

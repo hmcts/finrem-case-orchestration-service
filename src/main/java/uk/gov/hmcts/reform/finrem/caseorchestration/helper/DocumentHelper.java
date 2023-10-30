@@ -288,6 +288,14 @@ public class DocumentHelper {
         return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
     }
 
+    public CaseDocument getLatestGeneralOrder(FinremCaseData caseData) {
+        if (isNull(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
+            log.warn("Latest general order not found for printing for case");
+            return null;
+        }
+        return convertToCaseDocument(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument());
+    }
+
     public CaseDocument convertToCaseDocumentIfObjNotNull(Object object) {
         return object != null ? objectMapper.convertValue(object, CaseDocument.class) : null;
     }
@@ -420,7 +428,6 @@ public class DocumentHelper {
         }
         return Optional.empty();
     }
-
 
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
@@ -666,7 +673,6 @@ public class DocumentHelper {
         return documents;
     }
 
-
     public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
                                                                                   String documentName) {
         List<CaseDocument> documents = new ArrayList<>();
@@ -778,7 +784,7 @@ public class DocumentHelper {
     }
 
     public boolean isHighCourtSelected(FinremCaseData caseData) {
-        Region region = caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList();
+        Region region = caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList();
         return Region.HIGHCOURT.equals(region);
     }
 

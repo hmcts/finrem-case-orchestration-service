@@ -378,10 +378,10 @@ class FinremCaseDetailMapperTest {
         assertEquals(SolicitorToDraftOrder.APPLICANT_SOLICITOR, caseData.getSolicitorResponsibleForDraftingOrder());
         assertEquals(JudgeType.HER_HONOUR_JUDGE, caseData.getRefusalOrderJudgeType());
         assertEquals(SendOrderEventPostStateOption.PREPARE_FOR_HEARING, caseData.getSendOrderPostStateOption());
-        assertEquals(Region.SOUTHEAST, caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList());
-        assertEquals(RegionSouthEastFrc.KENT, caseData.getRegionWrapper().getDefaultRegionWrapper().getSouthEastFrcList());
+        assertEquals(Region.SOUTHEAST, caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList());
+        assertEquals(RegionSouthEastFrc.KENT, caseData.getRegionWrapper().getAllocatedRegionWrapper().getSouthEastFrcList());
         assertEquals(KentSurreyCourt.FR_kent_surreyList_1,
-            caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper().getKentSurreyCourtList());
+            caseData.getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper().getKentSurreyCourtList());
         assertEquals(OrderDirection.ORDER_ACCEPTED_AS_DRAFTED, caseData.getOrderDirection());
         assertEquals(JudgeType.DISTRICT_JUDGE, caseData.getOrderDirectionJudge());
         assertEquals(Region.SOUTHWEST, caseData.getRegionWrapper().getInterimRegionWrapper().getInterimRegionList());
