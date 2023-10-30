@@ -56,22 +56,17 @@ public class IntervenerFourChronologiesStatementHandlerTest extends BaseManageDo
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_OF_ISSUES),
-            is(DocumentCategory.INTERVENER_DOCUMENTS)
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_CONCISE_STATEMENT_OF_ISSUES)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CHRONOLOGY),
-            is(DocumentCategory.HEARING_DOCUMENTS)
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_CHRONOLOGY)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
-            is(DocumentCategory.INTERVENER_DOCUMENTS)
-        );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
-            is(DocumentCategory.UNCATEGORISED)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_FORM_G)
         );
     }
 }

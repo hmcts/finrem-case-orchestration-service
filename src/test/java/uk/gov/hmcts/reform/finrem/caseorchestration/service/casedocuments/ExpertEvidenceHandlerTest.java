@@ -18,7 +18,7 @@ public abstract class ExpertEvidenceHandlerTest extends BaseManageDocumentsHandl
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             expertEvidenceHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.EXPERT_EVIDENCE),
-            is(DocumentCategory.REPORTS)
+            is(DocumentCategory.REPORTS_EXPERT_REPORTS)
         );
 
         assertThat(

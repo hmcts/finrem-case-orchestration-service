@@ -59,12 +59,12 @@ public class RespondentStatementsExhibitsCollectionServiceTest extends BaseManag
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_AFFIDAVIT),
-            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+            is(DocumentCategory.RESPONDENT_DOCUMENTS_S25_STATEMENT)
         );
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT),
-            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+            is(DocumentCategory.RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS)
         );
 
         assertThat(

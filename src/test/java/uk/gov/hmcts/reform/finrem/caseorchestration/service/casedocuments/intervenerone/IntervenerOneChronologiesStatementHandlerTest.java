@@ -60,17 +60,17 @@ public class IntervenerOneChronologiesStatementHandlerTest extends BaseManageDoc
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_OF_ISSUES),
-            is(DocumentCategory.INTERVENER_DOCUMENTS)
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_CONCISE_STATEMENT_OF_ISSUES)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CHRONOLOGY),
-            is(DocumentCategory.HEARING_DOCUMENTS)
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_CHRONOLOGY)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
-            is(DocumentCategory.INTERVENER_DOCUMENTS)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_FORM_G)
         );
 
         assertThat(

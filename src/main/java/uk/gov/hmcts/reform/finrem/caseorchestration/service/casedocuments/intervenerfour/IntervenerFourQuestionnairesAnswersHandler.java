@@ -20,10 +20,10 @@ public class IntervenerFourQuestionnairesAnswersHandler extends QuestionnairesAn
     public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
             case REPLY_TO_QUESTIONNAIRE -> {
-                return DocumentCategory.INTERVENER_DOCUMENTS;
+                return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_REPLIES_TO_QUESTIONNAIRE;
             }
             case QUESTIONNAIRE -> {
-                return DocumentCategory.HEARING_DOCUMENTS;
+                return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_QUESTIONNAIRES;
             }
             default -> {
                 return DocumentCategory.UNCATEGORISED;

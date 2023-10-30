@@ -25,6 +25,5 @@ public class HearingBundleHandler extends PartyDocumentsHandler {
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         return DocumentCategory.HEARING_BUNDLE;
-        //TODO - Check if this is correct category (Looks like it from name of Handler and category name)
     }
 }

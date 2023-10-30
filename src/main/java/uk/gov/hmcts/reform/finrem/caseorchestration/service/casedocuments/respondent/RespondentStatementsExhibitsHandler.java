@@ -19,8 +19,11 @@ public class RespondentStatementsExhibitsHandler extends StatementExhibitsHandle
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
-            case STATEMENT_AFFIDAVIT, WITNESS_STATEMENT_AFFIDAVIT -> {
-                return DocumentCategory.RESPONDENT_DOCUMENTS;
+            case STATEMENT_AFFIDAVIT -> {
+                return DocumentCategory.RESPONDENT_DOCUMENTS_S25_STATEMENT;
+            }
+            case WITNESS_STATEMENT_AFFIDAVIT -> {
+                return DocumentCategory.RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS;
             }
             default -> {
                 return DocumentCategory.UNCATEGORISED;

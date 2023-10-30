@@ -57,17 +57,17 @@ public class RespondentChronologiesStatementCollectionServiceTest extends BaseMa
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CHRONOLOGY),
-            is(DocumentCategory.HEARING_DOCUMENTS)
+            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CHRONOLOGY)
         );
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_OF_ISSUES),
-            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+            is(DocumentCategory.RESPONDENT_DOCUMENTS_CONCISE_STATEMENT_OF_ISSUES)
         );
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
-            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+            is(DocumentCategory.RESPONDENT_DOCUMENTS_FORM_G)
         );
 
         assertThat(

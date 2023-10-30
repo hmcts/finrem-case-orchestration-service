@@ -80,7 +80,7 @@ public class IntervenerTwoFdrHandlerTest extends BaseManageDocumentsHandlerTest 
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE),
-                is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE)
+                is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2)
         );
     }
 }

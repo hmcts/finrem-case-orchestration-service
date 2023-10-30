@@ -63,12 +63,12 @@ public class ApplicantOtherDocumentsCollectionServiceTest extends BaseManageDocu
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
-            is(DocumentCategory.APPLICANT_DOCUMENTS)
+            is(DocumentCategory.APPLICANT_DOCUMENTS_MISCELLANEOUS_OR_OTHER)
         );
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
-            is(DocumentCategory.APPLICATIONS)
+            is(DocumentCategory.APPLICANT_DOCUMENTS)
         );
 
         assertThat(
@@ -83,12 +83,7 @@ public class ApplicantOtherDocumentsCollectionServiceTest extends BaseManageDocu
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
-            is(DocumentCategory.APPLICANT_DOCUMENTS)
-        );
-
-        assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_H),
-            is(DocumentCategory.UNCATEGORISED)
+            is(DocumentCategory.APPLICANT_DOCUMENTS_PENSION_PLAN)
         );
     }
 }
