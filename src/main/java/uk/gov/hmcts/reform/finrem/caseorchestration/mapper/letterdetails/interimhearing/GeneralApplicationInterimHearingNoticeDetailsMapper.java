@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralApplicationInterimHearingNoticeDetails;
 
@@ -28,7 +28,7 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapper extends Abstrac
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getData();
 
-        final FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
+        final CourtDetailsTemplateFields courtDetails = courtDetailsMapper.getCourtDetails(courtList);
         final InterimWrapper interimWrapper = caseData.getInterimWrapper();
         return GeneralApplicationInterimHearingNoticeDetails.builder()
             .ccdCaseNumber(caseDetails.getId())

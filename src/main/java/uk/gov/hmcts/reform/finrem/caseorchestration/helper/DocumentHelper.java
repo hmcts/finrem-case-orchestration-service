@@ -283,6 +283,14 @@ public class DocumentHelper {
         return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
     }
 
+    public CaseDocument getLatestGeneralOrder(FinremCaseData caseData) {
+        if (isNull(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
+            log.warn("Latest general order not found for printing for case");
+            return null;
+        }
+        return convertToCaseDocument(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument());
+    }
+
     public CaseDocument convertToCaseDocumentIfObjNotNull(Object object) {
         return object != null ? objectMapper.convertValue(object, CaseDocument.class) : null;
     }
@@ -416,7 +424,6 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
      * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, PaperNotificationRecipient)}</p>
@@ -485,8 +492,9 @@ public class DocumentHelper {
             caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
             caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         } else {
-            log.info("Failed to prepare template data as not all required address details were present");
-            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
+            log.info("Failed to prepare template data as not all required address details were present for caseId {}", ccdNumber);
+            throw new IllegalArgumentException("DocumentHelper CaseDetails Mandatory data missing from address when "
+                + "trying to generate document for caseId " + ccdNumber);
         }
 
         return caseDetailsCopy;
@@ -518,7 +526,8 @@ public class DocumentHelper {
             caseData.put("courtDetails", buildFrcCourtDetails(finremCaseDetails.getData()));
         } else {
             log.info("Failed to prepare template data as not all required address details were present on case {}", caseId);
-            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
+            throw new IllegalArgumentException("DocumentHelper FinremCaseDetails Mandatory data missing from address"
+                + " when trying to generate document for caseId " + caseId);
         }
 
         return caseDetails;
@@ -659,7 +668,6 @@ public class DocumentHelper {
         return documents;
     }
 
-
     public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
                                                                                   String documentName) {
         List<CaseDocument> documents = new ArrayList<>();
@@ -771,7 +779,7 @@ public class DocumentHelper {
     }
 
     public boolean isHighCourtSelected(FinremCaseData caseData) {
-        Region region = caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList();
+        Region region = caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList();
         return Region.HIGHCOURT.equals(region);
     }
 

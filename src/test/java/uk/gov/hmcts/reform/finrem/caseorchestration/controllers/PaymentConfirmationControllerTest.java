@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
@@ -87,7 +88,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnConsentedHWFConfirmationMarkdown() throws Exception {
         doConfirmationSetup(true, true);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
@@ -102,7 +103,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnConsentedPBAConfirmationMarkdown() throws Exception {
         doConfirmationSetup(true, false);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
@@ -117,7 +118,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnContestedHWFConfirmationMarkdown() throws Exception {
         doConfirmationSetup(false, true);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
 
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
@@ -132,7 +133,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnContestedPBAConfirmationMarkdown() throws Exception {
         doConfirmationSetup(false, false);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
 
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
