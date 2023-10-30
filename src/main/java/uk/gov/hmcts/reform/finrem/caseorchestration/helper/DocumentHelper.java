@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderOtherD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -53,12 +55,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -783,5 +788,24 @@ public class DocumentHelper {
 
     public StampType getStampType(FinremCaseData caseData) {
         return isHighCourtSelected(caseData) ? StampType.HIGH_COURT_STAMP : StampType.FAMILY_COURT_STAMP;
+    }
+
+    public boolean checkIfOrderAlreadyInFinalOrderCollection(List<DirectionOrderCollection> finalOrderCollection, CaseDocument caseDocument) {
+        if (!finalOrderCollection.isEmpty()) {
+            Set<String> filenames = new HashSet<>();
+            finalOrderCollection.forEach(obj -> filenames.add(obj.getValue().getUploadDraftDocument().getDocumentFilename()));
+            return filenames.contains(caseDocument.getDocumentFilename());
+        }
+        return false;
+    }
+
+    public DirectionOrderCollection prepareFinalOrder(CaseDocument document) {
+        return DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(document)
+                .isOrderStamped(YesOrNo.YES)
+                .orderDateTime(LocalDateTime.now())
+                .build())
+            .build();
     }
 }

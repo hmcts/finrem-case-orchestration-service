@@ -208,12 +208,12 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any());
+        verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any(CaseDetails.class));
     }
 
     @Test
     public void generateHearingDocumentDirectionOrder_CourtDetailsParseException() throws Exception {
-        doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(any(), any());
+        doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(any(), any(CaseDetails.class));
 
         mvc.perform(post(DIRECTION_ORDER_URL)
                 .content(requestContent.toString())
@@ -316,6 +316,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.directionDetailsCollection[1].value.dateOfHearing", is("2022-12-01")))
             .andExpect(jsonPath("$.data.directionDetailsCollection[2].value.dateOfHearing", is("2023-10-01")));
 
-        verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any());
+        verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any(CaseDetails.class));
     }
 }

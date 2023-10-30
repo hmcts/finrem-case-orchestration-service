@@ -10,22 +10,31 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +74,9 @@ public class AdditionalHearingDocumentService {
     private final CaseDataService caseDataService;
     private final NotificationService notificationService;
     private final FinremAdditionalHearingCorresponder finremAdditionalHearingCorresponder;
-
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final OrderDateService dateService;
+    private static final String ADDITIONAL_MESSAGE = "Additional hearing document not required for case: {}";
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
         Map<String, Object> caseData = caseDetails.getData();
@@ -136,6 +147,97 @@ public class AdditionalHearingDocumentService {
                 .getHearingOrderDocuments().getUploadDraftDocument());
     }
 
+    public void sortDirectionDetailsCollection(FinremCaseData caseData) {
+        List<DirectionDetailCollection> directionDetailsCollection = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
+
+        if (!directionDetailsCollection.isEmpty()) {
+            List<DirectionDetailCollection> sortedList = directionDetailsCollection
+                .stream()
+                .filter(e -> (e.getValue().getDateOfHearing() != null))
+                .sorted(Comparator.comparing(e -> e.getValue().getDateOfHearing()))
+                .toList();
+            caseData.setDirectionDetailsCollection(sortedList);
+        }
+    }
+
+    private DirectionOrderCollection getDirectionOrderCollection(CaseDocument caseDocument, LocalDateTime orderDateTime) {
+        return DirectionOrderCollection.builder().value(DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument)
+            .orderDateTime(orderDateTime)
+            .isOrderStamped(YesOrNo.YES)
+            .build()).build();
+    }
+
+    public void createAndStoreAdditionalHearingDocuments(FinremCaseDetails caseDetails, String authorisationToken)
+        throws CourtDetailsParseException, JsonProcessingException {
+        log.info("Dealing with caseId {}", caseDetails.getId());
+        FinremCaseData caseData = caseDetails.getData();
+
+        List<DirectionOrderCollection> finalOrderCollection = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authorisationToken);
+        List<DirectionOrderCollection> uploadHearingOrder = dateService.addCreatedDateInUploadedOrder(caseData.getUploadHearingOrder(), authorisationToken);
+        if (!uploadHearingOrder.isEmpty()) {
+            String caseId = caseDetails.getId().toString();
+            List<DirectionOrderCollection> orderCollections = uploadHearingOrder.stream().map(doc -> {
+                CaseDocument uploadDraftDocument = doc.getValue().getUploadDraftDocument();
+                LocalDateTime orderDateTime = doc.getValue().getOrderDateTime();
+                if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, uploadDraftDocument)) {
+                    CaseDocument stampedDocs = getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument);
+                    log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
+                    if (!finalOrderCollection.isEmpty()) {
+                        caseData.getFinalOrderCollection().add(documentHelper.prepareFinalOrder(stampedDocs));
+                    } else {
+                        caseData.setFinalOrderCollection(List.of(documentHelper.prepareFinalOrder(stampedDocs)));
+                    }
+                    return getDirectionOrderCollection(stampedDocs, orderDateTime);
+                }
+                caseData.setFinalOrderCollection(finalOrderCollection);
+                //This scenario should not come - when uploaded same order again then stamp order instead leaving unstamped.
+                return getDirectionOrderCollection(getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument), orderDateTime);
+            }).toList();
+            caseData.setUploadHearingOrder(orderCollections);
+            caseData.setLatestDraftHearingOrder(orderCollections.get(orderCollections.size() - 1).getValue().getUploadDraftDocument());
+        }
+
+        List<DirectionDetailCollection> directionDetailsCollection = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
+
+        //check that the list contains one or more values for the court hearing information
+        if (!directionDetailsCollection.isEmpty()) {
+            DirectionDetail directionDetail = directionDetailsCollection.get(directionDetailsCollection.size() - 1).getValue();
+
+            //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
+            if (NO_VALUE.equalsIgnoreCase(nullToEmpty(directionDetail.getIsAnotherHearingYN()))) {
+                log.info(ADDITIONAL_MESSAGE, caseDetails.getId());
+                return;
+            }
+
+            Map<String, Object> localCourt = directionDetail.getLocalCourt();
+            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(
+                localCourt.get(CaseHearingFunctions.getSelectedCourtComplexType(localCourt)));
+
+            CaseDetails mapToCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
+            CaseDetails caseDetailsCopy = documentHelper.deepCopy(mapToCaseDetails, CaseDetails.class);
+            prepareHearingCaseDetails(caseDetailsCopy, courtDetails,
+                directionDetail.getTypeOfHearing(),
+                directionDetail.getDateOfHearing(),
+                directionDetail.getHearingTime(),
+                directionDetail.getTimeEstimate());
+
+            CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
+            addAdditionalHearingDocumentToCaseData(mapToCaseDetails, document);
+            sortDirectionDetailsCollection(caseData);
+        } else {
+            log.info(ADDITIONAL_MESSAGE, caseDetails.getId());
+        }
+    }
+
+    private CaseDocument getStampedDocs(String authorisationToken, FinremCaseData caseData, String caseId, CaseDocument uploadDraftDocument) {
+        CaseDocument caseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(uploadDraftDocument, authorisationToken, caseId);
+        StampType stampType = documentHelper.getStampType(caseData);
+        return genericDocumentService.stampDocument(caseDocument, authorisationToken, stampType, caseId);
+    }
+
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)
         throws CourtDetailsParseException, JsonProcessingException {
 
@@ -165,7 +267,7 @@ public class AdditionalHearingDocumentService {
 
             //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
             if (NO_VALUE.equalsIgnoreCase(nullToEmpty(latestDirectionDetailsCollectionItem.getIsAnotherHearingYN()))) {
-                log.info("Additional hearing document not required for case: {}", caseDetails.getId());
+                log.info(ADDITIONAL_MESSAGE, caseDetails.getId());
                 return;
             }
 
@@ -189,7 +291,7 @@ public class AdditionalHearingDocumentService {
             CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
             addAdditionalHearingDocumentToCaseData(caseDetails, document);
         } else {
-            log.info("Additional hearing document not required for case: {}", caseDetails.getId());
+            log.info(ADDITIONAL_MESSAGE, caseDetails.getId());
         }
     }
 
