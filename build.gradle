@@ -34,7 +34,7 @@ def versions = [
         idamClient           : '2.1.1',
         jjwt                 : '0.9.1',
         skyscreamer          : '1.5.1',
-        jaxbOsgi             : '2.3.8',
+        jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.5',
         tika                 : '2.8.0',
         amClient             : '1.7.3',
