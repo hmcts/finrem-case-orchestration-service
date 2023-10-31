@@ -72,7 +72,7 @@ public class GeneralApplicationRemoveTask implements Runnable {
                         ccdService.executeCcdEventOnCase(caseDetails, systemUserService.getSysUserToken(),
                             caseDetails.getId().toString(),
                             CaseType.CONTESTED.getCcdType(),
-                            EventType.AMEND_CASE.getCcdType(),
+                            EventType.AMEND_CASE_CRON.getCcdType(),
                             "Remove duplicate General application DFR-2388",
                             "Remove duplicate General application DFR-2388");
                         log.info("Updated general applications for Case ID: {}", caseDetails.getId());
