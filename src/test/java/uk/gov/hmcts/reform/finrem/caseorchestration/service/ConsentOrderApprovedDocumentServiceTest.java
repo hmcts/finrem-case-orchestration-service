@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
@@ -51,6 +52,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -194,6 +196,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         List<CollectionElement<ApprovedOrder>> approvedOrders = consentOrderApprovedDocumentService.getConsentInContestedApprovedOrderCollection(
             caseDetails.getData());
         assertCaseDocument(approvedOrders.get(approvedOrders.size() - 1).getValue().getOrderLetter());
+        assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId(),
+            approvedOrders.get(approvedOrders.size() - 1).getValue().getOrderLetter().getCategoryId());
     }
 
     @Test

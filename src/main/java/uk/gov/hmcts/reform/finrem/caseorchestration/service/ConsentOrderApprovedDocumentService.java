@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -163,6 +164,7 @@ public class ConsentOrderApprovedDocumentService {
     public void generateAndPopulateConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         Map<String, Object> caseData = caseDetails.getData();
         CaseDocument orderLetter = generateApprovedConsentOrderLetter(caseDetails, authToken);
+        orderLetter.setCategoryId(DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId());
         List<CollectionElement<ApprovedOrder>> approvedOrders = getConsentInContestedApprovedOrderCollection(caseData);
         if (approvedOrders != null && !approvedOrders.isEmpty()) {
             ApprovedOrder approvedOrder = approvedOrders.get(approvedOrders.size() - 1).getValue();
