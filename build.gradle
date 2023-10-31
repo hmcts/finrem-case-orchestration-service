@@ -14,7 +14,7 @@ plugins {
 }
 
 def versions = [
-        guava                : '32.1.2-jre',
+        guava                : '32.1.3-jre',
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.9.2',
         commonsIo            : '2.7',
@@ -336,7 +336,6 @@ bootWithCCD {
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
 
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
-    environment("FEATURE_USE_USER_TOKEN", "true")
 }
 
 dependencyManagement {

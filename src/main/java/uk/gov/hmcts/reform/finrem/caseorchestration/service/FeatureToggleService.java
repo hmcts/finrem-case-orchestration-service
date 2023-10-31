@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SOLICITOR_NOTICE_OF_CHANGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.USE_USER_TOKEN;
+
 
 /**
  * To add a feature toggle flag:
@@ -61,10 +61,6 @@ public class FeatureToggleService {
 
     public boolean isPBAUsingCaseTypeEnabled() {
         return isFeatureEnabled(PAYMENT_REQUEST_USING_CASE_TYPE);
-    }
-
-    public boolean isUseUserTokenEnabled() {
-        return isFeatureEnabled(USE_USER_TOKEN);
     }
 
     public boolean isSolicitorNoticeOfChangeEnabled() {
