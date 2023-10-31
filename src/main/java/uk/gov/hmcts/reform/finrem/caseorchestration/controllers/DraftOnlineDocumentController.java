@@ -85,8 +85,8 @@ public class DraftOnlineDocumentController {
     private void setDefaultOrgIfNotSetAlready(Map<String, Object> caseData, String policy, String caseAssignedRole) {
         Map<String, Object> partyPolicy = (Map<String, Object>) caseData.get(policy);
         if (partyPolicy == null) {
-            Map<String, Object> respSolPolicy = buildOrganisationPolicy(caseAssignedRole);
-            caseData.put(policy, respSolPolicy);
+            Map<String, Object> partyPolicyObj = buildOrganisationPolicy(caseAssignedRole);
+            caseData.put(policy, partyPolicyObj);
         }
     }
 
