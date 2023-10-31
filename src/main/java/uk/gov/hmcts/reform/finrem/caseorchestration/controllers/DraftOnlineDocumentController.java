@@ -91,12 +91,12 @@ public class DraftOnlineDocumentController {
     }
 
     private Map<String, Object> buildOrganisationPolicy(String caseAssignedRole) {
-        Map<String, Object> appPolicy = new HashMap<>();
-        appPolicy.put(ORGANISATION_POLICY_ROLE, caseAssignedRole);
-        appPolicy.put(ORGANISATION_POLICY_REF, null);
+        Map<String, Object> policy = new HashMap<>();
+        policy.put(ORGANISATION_POLICY_ROLE, caseAssignedRole);
+        policy.put(ORGANISATION_POLICY_REF, null);
         Map<String, Object> org = new HashMap<>();
         org.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
-        appPolicy.put(ORGANISATION_POLICY_ORGANISATION, org);
-        return appPolicy;
+        policy.put(ORGANISATION_POLICY_ORGANISATION, org);
+        return policy;
     }
 }
