@@ -51,7 +51,7 @@ public class OrderDateService {
                                                            List<FileUploadResponse> auditResponse,
                                                            DirectionOrderCollection order) {
         YesOrNo isOrderStamped = order.getValue().getIsOrderStamped();
-        if (isOrderStamped.isNoOrNull()) {
+        if (isOrderStamped != null && isOrderStamped.equals(YesOrNo.NO)) {
             String filename = order.getValue().getUploadDraftDocument().getDocumentFilename();
             for (FileUploadResponse fileUploadResponse : auditResponse) {
                 if (filename.equals(fileUploadResponse.getFileName())) {
@@ -62,6 +62,8 @@ public class OrderDateService {
                     break;
                 }
             }
+        } else {
+            returnCollection.add(order);
         }
     }
 

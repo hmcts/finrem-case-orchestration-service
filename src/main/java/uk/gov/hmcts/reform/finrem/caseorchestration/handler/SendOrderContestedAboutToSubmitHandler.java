@@ -16,14 +16,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 @Slf4j
@@ -34,18 +37,21 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList;
+    private final OrderDateService dateService;
 
 
     public SendOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                   GeneralOrderService generalOrderService,
                                                   GenericDocumentService genericDocumentService,
                                                   DocumentHelper documentHelper,
-                                                  List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList) {
+                                                  List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
+                                                  OrderDateService dateService) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
         this.sendOrderPartyDocumentList = sendOrderPartyDocumentList;
+        this.dateService =  dateService;
     }
 
     @Override
@@ -177,19 +183,39 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                          String authToken) {
         String caseId = String.valueOf(caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
+        List<DirectionOrderCollection> finalOrderCollection
+            = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authToken);
+        if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, latestHearingOrder)) {
+            AtomicReference<YesOrNo> result = isOrderAlreadyStamped(caseData, latestHearingOrder);
+            if (result.get() == null || result.get().equals(YesOrNo.NO)) {
+                StampType stampType = documentHelper.getStampType(caseData);
+                CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, caseId);
+                log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
+                finalOrderCollection.add(prepareFinalOrderList(stampedDocs));
+                log.info("If Existing final order collection = {}", finalOrderCollection);
+            } else {
+                finalOrderCollection.add(prepareFinalOrderList(latestHearingOrder));
+                log.info("Else Existing final order collection = {}", finalOrderCollection);
+            }
+            caseData.setFinalOrderCollection(finalOrderCollection);
+            log.info("Finished stamping final order for caseId {}", caseId);
+        }
+    }
 
-        StampType stampType = documentHelper.getStampType(caseData);
-        CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, caseId);
-        log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
-
-        List<DirectionOrderCollection> finalOrderCollection = Optional.ofNullable(caseData.getFinalOrderCollection())
-            .orElse(new ArrayList<>());
-
-        finalOrderCollection.add(prepareFinalOrderList(stampedDocs));
-        log.info("Existing final order collection = {}", finalOrderCollection);
-
-        caseData.setFinalOrderCollection(finalOrderCollection);
-        log.info("Finished stamping final order for caseId {}", caseId);
+    private AtomicReference<YesOrNo> isOrderAlreadyStamped(FinremCaseData caseData, CaseDocument latestHearingOrder) {
+        List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
+        AtomicReference<YesOrNo> result = new AtomicReference<>();
+        if (hearingOrders != null && !hearingOrders.isEmpty()) {
+            hearingOrders.forEach(order -> {
+                CaseDocument document = order.getValue().getUploadDraftDocument();
+                if (latestHearingOrder.getDocumentFilename().equals(
+                    document.getDocumentFilename())
+                    && latestHearingOrder.getDocumentUrl().equals(document.getDocumentUrl())) {
+                    result.set(order.getValue().getIsOrderStamped());
+                }
+            });
+        }
+        return result;
     }
 
     private OrderSentToPartiesCollection addToPrintOrderCollection(CaseDocument document) {

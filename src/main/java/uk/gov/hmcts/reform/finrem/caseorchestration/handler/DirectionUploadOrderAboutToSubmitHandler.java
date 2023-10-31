@@ -45,8 +45,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         FinremCaseData caseData = caseDetails.getData();
 
         List<String> errors = new ArrayList<>();
-
-        log.info("Storing Additional Hearing Document for Case ID: {}", caseDetails.getId());
+        log.info("Storing Additional Hearing Document for Case ID: {}", caseId);
         try {
             service.createAndStoreAdditionalHearingDocuments(caseDetails, userAuthorisation);
         } catch (CourtDetailsParseException | JsonProcessingException e) {

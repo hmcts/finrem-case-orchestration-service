@@ -214,7 +214,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateHearingDocumentDirectionOrder_CourtDetailsParseException() throws Exception {
-        doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(any(), any(CaseDetails.class));
+        doThrow(new CourtDetailsParseException())
+            .when(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(any(), any(CaseDetails.class));
 
         mvc.perform(post(DIRECTION_ORDER_URL)
                 .content(requestContent.toString())

@@ -148,7 +148,8 @@ public class AdditionalHearingDocumentService {
     }
 
     public void sortDirectionDetailsCollection(FinremCaseData caseData) {
-        List<DirectionDetailCollection> directionDetailsCollection = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
+        List<DirectionDetailCollection> directionDetailsCollection
+            = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
 
         if (!directionDetailsCollection.isEmpty()) {
             List<DirectionDetailCollection> sortedList = directionDetailsCollection
@@ -173,8 +174,10 @@ public class AdditionalHearingDocumentService {
         log.info("Dealing with caseId {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 
-        List<DirectionOrderCollection> finalOrderCollection = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authorisationToken);
-        List<DirectionOrderCollection> uploadHearingOrder = dateService.addCreatedDateInUploadedOrder(caseData.getUploadHearingOrder(), authorisationToken);
+        List<DirectionOrderCollection> finalOrderCollection
+            = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authorisationToken);
+        List<DirectionOrderCollection> uploadHearingOrder
+            = dateService.addCreatedDateInUploadedOrder(caseData.getUploadHearingOrder(), authorisationToken);
         if (!uploadHearingOrder.isEmpty()) {
             String caseId = caseDetails.getId().toString();
             List<DirectionOrderCollection> orderCollections = uploadHearingOrder.stream().map(doc -> {
@@ -198,7 +201,8 @@ public class AdditionalHearingDocumentService {
             caseData.setLatestDraftHearingOrder(orderCollections.get(orderCollections.size() - 1).getValue().getUploadDraftDocument());
         }
 
-        List<DirectionDetailCollection> directionDetailsCollection = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
+        List<DirectionDetailCollection> directionDetailsCollection
+            = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
 
         //check that the list contains one or more values for the court hearing information
         if (!directionDetailsCollection.isEmpty()) {
@@ -230,12 +234,6 @@ public class AdditionalHearingDocumentService {
         } else {
             log.info(ADDITIONAL_MESSAGE, caseDetails.getId());
         }
-    }
-
-    private CaseDocument getStampedDocs(String authorisationToken, FinremCaseData caseData, String caseId, CaseDocument uploadDraftDocument) {
-        CaseDocument caseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(uploadDraftDocument, authorisationToken, caseId);
-        StampType stampType = documentHelper.getStampType(caseData);
-        return genericDocumentService.stampDocument(caseDocument, authorisationToken, stampType, caseId);
     }
 
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)
@@ -389,5 +387,11 @@ public class AdditionalHearingDocumentService {
 
     public CaseDocument convertToPdf(CaseDocument document, String authorisationToken, String caseId) {
         return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
+    }
+
+    private CaseDocument getStampedDocs(String authorisationToken, FinremCaseData caseData, String caseId, CaseDocument uploadDraftDocument) {
+        CaseDocument caseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(uploadDraftDocument, authorisationToken, caseId);
+        StampType stampType = documentHelper.getStampType(caseData);
+        return genericDocumentService.stampDocument(caseDocument, authorisationToken, stampType, caseId);
     }
 }

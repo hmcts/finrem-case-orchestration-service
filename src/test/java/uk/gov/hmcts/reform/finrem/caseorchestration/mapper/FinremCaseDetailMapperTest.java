@@ -147,6 +147,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -594,13 +595,12 @@ class FinremCaseDetailMapperTest {
                     .typeOfHearing(HearingTypeDirection.FH)
                     .timeEstimate("standardTime")
                     .dateOfHearing(LocalDate.of(2022, 6, 20))
-                    .localCourt(Court.builder()
-                        .region(Region.LONDON)
-                        .londonList(RegionLondonFrc.LONDON)
-                        .courtListWrapper(DefaultCourtListWrapper.builder()
-                            .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
-                            .build())
-                        .build())
+                    .localCourt(Map.of("region", "london",
+                        "londonList", "cfc",
+                        "cfcCourtList", "FR_s_CFCList_1"))
+                    .cfcList(null)
+                    .hearingTime(null)
+                    .nottinghamList(null)
                     .build())
                 .build()
         );
