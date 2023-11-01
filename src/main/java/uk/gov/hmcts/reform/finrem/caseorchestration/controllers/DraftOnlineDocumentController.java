@@ -76,18 +76,14 @@ public class DraftOnlineDocumentController {
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
 
-        setDefaultOrgIfNotSetAlready(caseData, ORGANISATION_POLICY_APPLICANT, CaseRole.APP_SOLICITOR.getCcdCode());
-        setDefaultOrgIfNotSetAlready(caseData, ORGANISATION_POLICY_RESPONDENT, CaseRole.RESP_SOLICITOR.getCcdCode());
+        setDefaultOrgIfNotSetAlready(caseData);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private void setDefaultOrgIfNotSetAlready(Map<String, Object> caseData, String policy, String caseAssignedRole) {
-        Map<String, Object> partyPolicy = (Map<String, Object>) caseData.get(policy);
-        if (partyPolicy == null) {
-            Map<String, Object> partyPolicyObj = buildOrganisationPolicy(caseAssignedRole);
-            caseData.put(policy, partyPolicyObj);
-        }
+    private void setDefaultOrgIfNotSetAlready(Map<String, Object> caseData) {
+        caseData.computeIfAbsent(ORGANISATION_POLICY_APPLICANT, k -> buildOrganisationPolicy(CaseRole.APP_SOLICITOR.getCcdCode()));
+        caseData.computeIfAbsent(ORGANISATION_POLICY_RESPONDENT, k -> buildOrganisationPolicy(CaseRole.RESP_SOLICITOR.getCcdCode()));
     }
 
     private Map<String, Object> buildOrganisationPolicy(String caseAssignedRole) {

@@ -134,9 +134,10 @@ public class CaseDataController extends BaseController {
         log.info("Setting default values for contested paper case journey.");
         validateCaseData(callbackRequest);
         caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
-        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setPaperCaseData(caseData);
+        addOrganisationPoliciesIfPartiesNotRepresented(caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
