@@ -11,19 +11,26 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +42,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,6 +55,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
@@ -86,6 +95,12 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     BulkPrintService bulkPrintService;
     @MockBean
     NotificationService notificationService;
+
+    @MockBean
+    OrderDateService orderDateService;
+
+    @MockBean
+    FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Before
     public void setUp() {
@@ -331,6 +346,186 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderHasSameOrder_thenHandlerWillNotAddNewOrderToFinalOrder()
+        throws JsonProcessingException {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
+        LocalDateTime orderDateTime = LocalDateTime.of(2022, 11, 1, 17, 10, 10);
+        DirectionOrderCollection orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
+        orderCollections.add(orderCollection);
+        data.setFinalOrderCollection(orderCollections);
+        when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
+
+        List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
+        LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
+        DirectionOrderCollection uploadOrderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
+        uploadOrderCollections.add(uploadOrderCollection);
+        data.setUploadHearingOrder(uploadOrderCollections);
+        when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
+        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+
+        List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
+        Map<String, Object> localCourtMap = Map.of(REGION_CT, SOUTHEAST,
+            SOUTHEAST_FRC_LIST_CT, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_9");
+
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .isAnotherHearingYN(YesOrNo.YES)
+            .typeOfHearing(HearingTypeDirection.FH)
+            .hearingTime("12")
+            .timeEstimate("12")
+            .dateOfHearing(LocalDate.of(2020, 1, 1))
+            .localCourt(localCourtMap).build();
+        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
+        directionDetailsCollection.add(detailCollection);
+        data.setDirectionDetailsCollection(directionDetailsCollection);
+
+        Map<String, Object> caseData = baseCaseData();
+        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
+        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
+        CaseDetails details = CaseDetails
+            .builder()
+            .id(1234567890L)
+            .data(caseData)
+            .build();
+        when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(details);
+
+        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        assertEquals(1, data.getFinalOrderCollection().size());
+        assertEquals(1, data.getUploadHearingOrder().size());
+        assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
+        assertEquals(caseDocument(), data.getAdditionalHearingDocuments().get(0).getValue().getDocument());
+    }
+
+    @Test
+    public void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrder_thenHandlerWillAddNewOrderToFinalOrder()
+        throws JsonProcessingException {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
+        LocalDateTime orderDateTime = LocalDateTime.of(2022, 11, 1, 17, 10, 10);
+        DirectionOrderCollection orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument("url", "abc","binary"))
+            .isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
+        orderCollections.add(orderCollection);
+        data.setFinalOrderCollection(orderCollections);
+        when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
+
+        List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
+        LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
+        DirectionOrderCollection uploadOrderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
+        uploadOrderCollections.add(uploadOrderCollection);
+        data.setUploadHearingOrder(uploadOrderCollections);
+        when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
+        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+
+        List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
+        Map<String, Object> localCourtMap = Map.of(REGION_CT, SOUTHEAST,
+            SOUTHEAST_FRC_LIST_CT, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_9");
+
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .isAnotherHearingYN(YesOrNo.YES)
+            .typeOfHearing(HearingTypeDirection.FH)
+            .hearingTime("12")
+            .timeEstimate("12")
+            .dateOfHearing(LocalDate.of(2020, 1, 1))
+            .localCourt(localCourtMap).build();
+        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
+        directionDetailsCollection.add(detailCollection);
+        data.setDirectionDetailsCollection(directionDetailsCollection);
+
+        Map<String, Object> caseData = baseCaseData();
+        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
+        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
+        CaseDetails details = CaseDetails
+            .builder()
+            .id(1234567890L)
+            .data(caseData)
+            .build();
+        when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(details);
+
+        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        assertEquals(2, data.getFinalOrderCollection().size());
+        assertEquals(1, data.getUploadHearingOrder().size());
+        assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
+        assertEquals(caseDocument(), data.getAdditionalHearingDocuments().get(0).getValue().getDocument());
+    }
+
+    @Test
+    public void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrderAndNoAnotherHearing_thenHandle()
+        throws JsonProcessingException {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
+        LocalDateTime orderDateTime = LocalDateTime.of(2022, 11, 1, 17, 10, 10);
+        DirectionOrderCollection orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument("url", "abc","binary"))
+            .isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
+        orderCollections.add(orderCollection);
+        data.setFinalOrderCollection(orderCollections);
+        when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
+
+        List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
+        LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
+        DirectionOrderCollection uploadOrderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
+        uploadOrderCollections.add(uploadOrderCollection);
+        data.setUploadHearingOrder(uploadOrderCollections);
+        when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
+        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+
+        List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
+        Map<String, Object> localCourtMap = Map.of(REGION_CT, SOUTHEAST,
+            SOUTHEAST_FRC_LIST_CT, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_9");
+
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .isAnotherHearingYN(YesOrNo.NO)
+            .typeOfHearing(HearingTypeDirection.FH)
+            .hearingTime("12")
+            .timeEstimate("12")
+            .dateOfHearing(LocalDate.of(2020, 1, 1))
+            .localCourt(localCourtMap).build();
+        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
+        directionDetailsCollection.add(detailCollection);
+        data.setDirectionDetailsCollection(directionDetailsCollection);
+
+        Map<String, Object> caseData = baseCaseData();
+        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
+        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
+
+        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        assertEquals(2, data.getFinalOrderCollection().size());
+        assertEquals(1, data.getUploadHearingOrder().size());
+        assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
+        assertNull(data.getAdditionalHearingDocuments());
+    }
+
+    private DirectionOrderCollection getFinalOrder() {
+        return DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(caseDocument("url", "abc","binary"))
+                .isOrderStamped(YesOrNo.YES)
+                .orderDateTime(LocalDateTime.now())
+                .build())
+            .build();
+    }
+
+    @Test
     public void givenAdditionalDocumentsToBeStored_whenCreateAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
         CaseDocument expectedDocument = CaseDocument.builder().documentBinaryUrl("docBin").documentFilename("docFilename")
             .documentUrl("docUrl").build();
@@ -555,9 +750,9 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .builder()
             .eventType(EventType.DIRECTION_UPLOAD_ORDER)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(new FinremCaseData()).state(State.APPLICATION_ISSUED).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(new FinremCaseData()).state(State.APPLICATION_ISSUED).build())
             .build();
     }
 

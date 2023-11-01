@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseExcep
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
@@ -223,10 +224,8 @@ public class AdditionalHearingDocumentService {
                 directionDetail.getTimeEstimate());
 
             CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
-            addAdditionalHearingDocumentToCaseData(mapToCaseDetails, document);
+            addAdditionalHearingDocumentToCaseData(caseDetails, document);
             sortDirectionDetailsCollection(caseData);
-        } else {
-            log.info(ADDITIONAL_MESSAGE, caseDetails.getId());
         }
     }
 
@@ -323,6 +322,23 @@ public class AdditionalHearingDocumentService {
         caseData.put("ApplicantName", caseDataService.buildFullApplicantName(caseDetails));
         caseData.put("RespondentName", caseDataService.buildFullRespondentName(caseDetails));
     }
+
+    protected void addAdditionalHearingDocumentToCaseData(FinremCaseDetails caseDetails, CaseDocument document) {
+        AdditionalHearingDocumentCollection generatedDocumentData = AdditionalHearingDocumentCollection.builder()
+            .value(AdditionalHearingDocument.builder()
+                .document(document)
+                .build())
+            .build();
+
+        FinremCaseData data = caseDetails.getData();
+        List<AdditionalHearingDocumentCollection> additionalHearingDocumentCollections
+            = Optional.ofNullable(data.getAdditionalHearingDocuments()).orElse(new ArrayList<>(1));
+
+        additionalHearingDocumentCollections.add(generatedDocumentData);
+
+        data.setAdditionalHearingDocuments(additionalHearingDocumentCollections);
+    }
+
 
     protected void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
         AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
