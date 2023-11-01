@@ -339,6 +339,52 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
     }
 
+    @Test
+    void givenContestedCase_whenAlreadyStampedOrderThen_handleAndDoNotStampAgain() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setPartiesOnCase(getParties());
+        List<DirectionOrderCollection> orderList = new ArrayList<>();
+        CaseDocument caseDocument = caseDocument("docurl", "abc.pdf", "binaryurl");
+        DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument)
+            .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
+        orderList.add(order);
+        data.setUploadHearingOrder(orderList);
+        data.setFinalOrderCollection(orderList);
+
+        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .build();
+
+        data.setOrdersToShare(selectedDocs);
+        when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
+        when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
+        when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
+            = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+        assertEquals(12, caseData.getPartiesOnCase().getValue().size());
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().size());
+        assertEquals(2, caseData.getFinalOrderCollection().size());
+
+        verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
+        verify(documentHelper, never()).getStampType(caseData);
+
+    }
+
     private DynamicMultiSelectList getParties() {
 
         List<DynamicMultiSelectListElement> list = new ArrayList<>();

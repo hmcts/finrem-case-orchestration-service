@@ -209,8 +209,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             hearingOrders.forEach(order -> {
                 CaseDocument document = order.getValue().getUploadDraftDocument();
                 if (latestHearingOrder.getDocumentFilename().equals(
-                    document.getDocumentFilename())
-                    && latestHearingOrder.getDocumentUrl().equals(document.getDocumentUrl())) {
+                    document.getDocumentFilename())) {
                     result.set(order.getValue().getIsOrderStamped());
                 }
             });
