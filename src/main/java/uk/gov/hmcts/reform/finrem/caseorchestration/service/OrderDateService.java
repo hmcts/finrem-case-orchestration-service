@@ -33,7 +33,7 @@ public class OrderDateService {
         return addCreatedDateInOrder(orderCollections, authorisationToken, YesOrNo.NO);
     }
 
-    public List<DirectionOrderCollection> addCreatedDateInOrder(List<DirectionOrderCollection> orderCollections,
+    private List<DirectionOrderCollection> addCreatedDateInOrder(List<DirectionOrderCollection> orderCollections,
                                                                 String authorisationToken,
                                                                 YesOrNo isStamped) {
         List<DirectionOrderCollection> returnCollection = new ArrayList<>();
@@ -51,7 +51,7 @@ public class OrderDateService {
                                                            List<FileUploadResponse> auditResponse,
                                                            DirectionOrderCollection order) {
         YesOrNo isOrderStamped = order.getValue().getIsOrderStamped();
-        if (isOrderStamped != null && isOrderStamped.equals(YesOrNo.NO)) {
+        if (isOrderStamped == null || isOrderStamped.equals(YesOrNo.NO)) {
             String filename = order.getValue().getUploadDraftDocument().getDocumentFilename();
             for (FileUploadResponse fileUploadResponse : auditResponse) {
                 if (filename.equals(fileUploadResponse.getFileName())) {
