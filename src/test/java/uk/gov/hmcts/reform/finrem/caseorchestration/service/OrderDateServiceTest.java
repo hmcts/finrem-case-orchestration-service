@@ -69,6 +69,26 @@ public class OrderDateServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void addCreatedDateInFinalOrderWhenFinalOrderIsNotEmptyAndDocumentIsStampedThenReturnOriginalOrder() {
+        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
+        LocalDateTime orderDateTime = LocalDateTime.of(2023, 11, 1, 17, 10, 10);
+        DirectionOrderCollection orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
+        orderCollections.add(orderCollection);
+
+        List<DirectionOrderCollection> directionOrderCollections
+            = orderDateService.addCreatedDateInFinalOrder(orderCollections, TOKEN);
+
+        DirectionOrder value = directionOrderCollections.get(0).getValue();
+
+        assertEquals(orderDateTime, value.getOrderDateTime());
+        assertEquals(YesOrNo.YES, value.getIsOrderStamped());
+        verify(emService).audit(anyList(), any());
+    }
+
+
+    @Test
     public void addCreatedDateInFinalOrderWhenFinalOrderIsEmptyThenDoNotCallEvidenceService() {
         List<DirectionOrderCollection> orderCollections = new ArrayList<>();
 
