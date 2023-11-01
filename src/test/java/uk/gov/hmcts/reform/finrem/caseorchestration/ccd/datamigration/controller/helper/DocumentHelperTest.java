@@ -851,6 +851,9 @@ public class DocumentHelperTest {
     @Test
     public void checkIfOrderAlreadyInFinalOrderCollection() {
         List<DirectionOrderCollection> list = new ArrayList<>();
+
+        assertFalse(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+
         DirectionOrderCollection orderCollection
             = DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build()).build();
         list.add(orderCollection);
