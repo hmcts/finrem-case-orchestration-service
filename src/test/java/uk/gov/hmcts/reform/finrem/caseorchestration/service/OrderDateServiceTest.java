@@ -16,8 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -48,7 +50,7 @@ public class OrderDateServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void addCreatedDateInFinalOrder() {
+    public void addCreatedDateInFinalOrderWhenFinalOrderIsNotEmptyThenSetDate() {
         List<DirectionOrderCollection> orderCollections = new ArrayList<>();
         DirectionOrderCollection orderCollection
             = DirectionOrderCollection.builder().value(DirectionOrder
@@ -67,7 +69,18 @@ public class OrderDateServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void addCreatedDateInUploadedOrder() {
+    public void addCreatedDateInFinalOrderWhenFinalOrderIsEmptyThenDoNotCallEvidenceService() {
+        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
+
+        List<DirectionOrderCollection> directionOrderCollections
+            = orderDateService.addCreatedDateInFinalOrder(orderCollections, TOKEN);
+
+        assertTrue(directionOrderCollections.isEmpty());
+        verify(emService, never()).audit(anyList(), any());
+    }
+
+    @Test
+    public void addCreatedDateInUploadedOrderWhenCollectionIsNotEmptyThenSetDate() {
         List<DirectionOrderCollection> orderCollections = new ArrayList<>();
         DirectionOrderCollection orderCollection
             = DirectionOrderCollection.builder().value(DirectionOrder
@@ -82,5 +95,16 @@ public class OrderDateServiceTest extends BaseServiceTest {
         assertEquals(dateTime, value.getOrderDateTime());
         assertEquals(YesOrNo.NO, value.getIsOrderStamped());
         verify(emService).audit(anyList(), any());
+    }
+
+    @Test
+    public void addCreatedDateInUploadedOrderWhenCollectionIsEmptyThenDoNotCallEvidenceService() {
+        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
+
+        List<DirectionOrderCollection> directionOrderCollections
+            = orderDateService.addCreatedDateInUploadedOrder(orderCollections, TOKEN);
+
+        assertTrue(directionOrderCollections.isEmpty());
+        verify(emService, never()).audit(anyList(), any());
     }
 }
