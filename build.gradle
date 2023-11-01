@@ -399,7 +399,7 @@ dependencies {
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
-    implementation("org.apache.poi:poi-ooxml:5.2.3") {
+    implementation("org.apache.poi:poi-ooxml:5.2.4") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
 
