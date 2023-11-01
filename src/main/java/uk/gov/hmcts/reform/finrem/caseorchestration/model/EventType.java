@@ -25,6 +25,7 @@ public enum EventType {
     SEND_CONSENT_IN_CONTESTED_ORDER("FR_consentSendOrder"),
     RESPOND_TO_ORDER("FR_respondToOrder"),
     AMEND_CASE("FR_amendCase"),
+    AMEND_CASE_CRON("FR_amendCaseCron"),
     APPROVE_ORDER("FR_approveApplication"),
     REJECT_ORDER("FR_orderRefusal"),
     CONSENT_ORDER_NOT_APPROVED("FR_consentOrderNotApproved"),
