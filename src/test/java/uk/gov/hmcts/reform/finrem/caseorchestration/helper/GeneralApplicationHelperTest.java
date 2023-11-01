@@ -333,6 +333,8 @@ public class GeneralApplicationHelperTest {
         helper.checkAndRemoveDuplicateGeneralApplications(caseDetails.getData());
 
         assertEquals(2, caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplications().size());
+        assertEquals("2023-10-04", caseDetails.getData().getGeneralApplicationWrapper()
+            .getGeneralApplications().get(0).getValue().getGeneralApplicationCreatedDate().toString());
     }
 
     private void assertData(List<GeneralApplicationItems> resultingList) {
