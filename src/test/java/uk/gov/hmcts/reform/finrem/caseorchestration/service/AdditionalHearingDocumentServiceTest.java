@@ -10,13 +10,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,6 +68,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST_CT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
@@ -504,4 +512,53 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         verify(bulkPrintService, timeout(100).times(1))
             .printApplicantDocuments(any(CaseDetails.class), any(), any());
     }
+
+    @Test
+    public void sortDirectionDetailsCollection() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        List<DirectionDetailCollection> orderCollections = new ArrayList<>();
+        data.setDirectionDetailsCollection(orderCollections);
+
+        additionalHearingDocumentService.sortDirectionDetailsCollection(data);
+
+        List<DirectionDetailCollection> directionDetailsList = data.getDirectionDetailsCollection();
+        assertTrue(directionDetailsList.isEmpty());
+
+        LocalDate firstDate = LocalDate.of(2000, 1, 2);
+        DirectionDetailCollection firstOrder
+            = DirectionDetailCollection.builder().value(DirectionDetail.builder().dateOfHearing(firstDate).build())
+            .build();
+        orderCollections.add(firstOrder);
+
+        LocalDate secondDate = LocalDate.of(2023, 1, 2);
+        DirectionDetailCollection secondOrder
+            = DirectionDetailCollection.builder().value(DirectionDetail.builder().dateOfHearing(secondDate).build())
+            .build();
+        orderCollections.add(secondOrder);
+
+        data.setDirectionDetailsCollection(orderCollections);
+
+        additionalHearingDocumentService.sortDirectionDetailsCollection(data);
+
+        List<DirectionDetailCollection> directionDetailsCollection = data.getDirectionDetailsCollection();
+        DirectionDetail value0 = directionDetailsCollection.get(0).getValue();
+        assertEquals(secondDate, value0.getDateOfHearing());
+        DirectionDetail value1 = directionDetailsCollection.get(1).getValue();
+        assertEquals(firstDate, value1.getDateOfHearing());
+    }
+
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.DIRECTION_UPLOAD_ORDER)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .build();
+    }
+
 }
