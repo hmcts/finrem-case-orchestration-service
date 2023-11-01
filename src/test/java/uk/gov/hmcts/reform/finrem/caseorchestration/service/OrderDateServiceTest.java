@@ -80,6 +80,15 @@ public class OrderDateServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void addCreatedDateInFinalOrderWhenFinalOrderIsNullThenDoNotCallEvidenceService() {
+        List<DirectionOrderCollection> directionOrderCollections
+            = orderDateService.addCreatedDateInFinalOrder(null, TOKEN);
+
+        assertTrue(directionOrderCollections.isEmpty());
+        verify(emService, never()).audit(anyList(), any());
+    }
+
+    @Test
     public void addCreatedDateInUploadedOrderWhenCollectionIsNotEmptyThenSetDate() {
         List<DirectionOrderCollection> orderCollections = new ArrayList<>();
         DirectionOrderCollection orderCollection
@@ -103,6 +112,15 @@ public class OrderDateServiceTest extends BaseServiceTest {
 
         List<DirectionOrderCollection> directionOrderCollections
             = orderDateService.addCreatedDateInUploadedOrder(orderCollections, TOKEN);
+
+        assertTrue(directionOrderCollections.isEmpty());
+        verify(emService, never()).audit(anyList(), any());
+    }
+
+    @Test
+    public void addCreatedDateInUploadedOrderWhenCollectionIsNullThenDoNotCallEvidenceService() {
+        List<DirectionOrderCollection> directionOrderCollections
+            = orderDateService.addCreatedDateInUploadedOrder(null, TOKEN);
 
         assertTrue(directionOrderCollections.isEmpty());
         verify(emService, never()).audit(anyList(), any());

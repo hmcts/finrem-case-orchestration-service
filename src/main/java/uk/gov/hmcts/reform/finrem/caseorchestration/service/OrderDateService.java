@@ -30,14 +30,16 @@ public class OrderDateService {
 
     public List<DirectionOrderCollection> addCreatedDateInUploadedOrder(List<DirectionOrderCollection> orderCollections,
                                                                         String authorisationToken) {
-        return addCreatedDateInOrder(orderCollections, authorisationToken, YesOrNo.NO);
+        List<DirectionOrderCollection> directionOrderCollections = Optional.ofNullable(orderCollections)
+            .orElse(new ArrayList<>());
+        return addCreatedDateInOrder(directionOrderCollections, authorisationToken, YesOrNo.NO);
     }
 
     private List<DirectionOrderCollection> addCreatedDateInOrder(List<DirectionOrderCollection> orderCollections,
                                                                 String authorisationToken,
                                                                 YesOrNo isStamped) {
         List<DirectionOrderCollection> returnCollection = new ArrayList<>();
-        if (orderCollections != null && !orderCollections.isEmpty()) {
+        if (!orderCollections.isEmpty()) {
             List<String> documentUrls = new ArrayList<>();
             orderCollections.forEach(order -> documentUrls.add(order.getValue().getUploadDraftDocument().getDocumentUrl()));
             List<FileUploadResponse> auditResponse = evidenceManagementAuditService.audit(documentUrls, authorisationToken);
