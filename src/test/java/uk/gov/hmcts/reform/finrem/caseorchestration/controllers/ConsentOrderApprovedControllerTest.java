@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
@@ -296,7 +297,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesNotificationLetter() {
-        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(isA(CaseDetails.class), eq(AUTH_TOKEN)));
+        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(isA(FinremCaseDetails.class), eq(AUTH_TOKEN)));
     }
 
     private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {

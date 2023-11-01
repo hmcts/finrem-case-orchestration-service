@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CourtList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public class CourtDetailsMapper {
         }
     };
 
-    public FrcCourtDetails getCourtDetails(CourtListWrapper courtListWrapper) {
+    public CourtDetailsTemplateFields getCourtDetails(CourtListWrapper courtListWrapper) {
         List<Field> initialisedCourtField = getInitialisedCourtField(courtListWrapper);
 
         if (initialisedCourtField.size() != 1) {
@@ -65,8 +65,8 @@ public class CourtDetailsMapper {
     }
 
     @SuppressWarnings("java:S112")
-    private FrcCourtDetails convertToFrcCourtDetails(Field initialisedCourtField,
-                                                     CourtListWrapper courtListWrapper) throws Exception {
+    private CourtDetailsTemplateFields convertToFrcCourtDetails(Field initialisedCourtField,
+                                                                CourtListWrapper courtListWrapper) throws Exception {
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(),
             TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
 
@@ -74,7 +74,7 @@ public class CourtDetailsMapper {
         Object selectedCourtDetailsObject = courtDetailsMap.get(nullToEmpty(selectedCourtField.getSelectedCourtId()));
 
         if (selectedCourtDetailsObject == null) {
-            return FrcCourtDetails.builder().courtName("").courtAddress("").phoneNumber("").email("").build();
+            return CourtDetailsTemplateFields.builder().courtName("").courtAddress("").phoneNumber("").email("").build();
         }
 
         return objectMapper.convertValue(selectedCourtDetailsObject, new TypeReference<>() {});
