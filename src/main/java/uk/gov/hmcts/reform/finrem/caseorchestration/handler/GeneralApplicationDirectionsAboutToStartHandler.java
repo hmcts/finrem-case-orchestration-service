@@ -28,7 +28,6 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
     private final AssignCaseAccessService assignCaseAccessService;
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public GeneralApplicationDirectionsAboutToStartHandler(AssignCaseAccessService assignCaseAccessService,
                                                            FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -38,7 +37,6 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         this.helper = helper;
         this.service = service;
         this.assignCaseAccessService = assignCaseAccessService;
-        this.finremCaseDetailsMapper = finremCaseDetailsMapper;
     }
 
     @Override

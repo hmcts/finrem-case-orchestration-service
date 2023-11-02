@@ -38,6 +38,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,6 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_D
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
@@ -64,6 +66,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
+
+    private static final String GA_DIRECTIONS = "/fixtures/contested/general-application-direction-start-reset.json";
 
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
     private static final String INTERIM_HEARING_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
@@ -108,6 +112,45 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         when(ccdService.getCcdEventDetailsOnCase(any(), any(), any())).thenReturn(new ArrayList<>());
         caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
         assertNull(generalApplicationDirectionsService.getEventPostState(finremCaseDetails, AUTH_TOKEN));
+    }
+
+    @Test
+    public void givenExistingGenAppDirections_whenAboutToStart_thenResetOldFields() {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsFromResource(GA_DIRECTIONS, objectMapper);
+        FinremCaseData caseData = finremCaseDetails.getData();
+        generalApplicationDirectionsService.resetGeneralApplicationDirectionsFields(caseData);
+
+        GeneralApplicationWrapper generalApplicationWrapper = caseData.getGeneralApplicationWrapper();
+        assertThat(generalApplicationWrapper.getGeneralApplicationDirectionsHearingRequired(),
+            Matchers.is(nullValue()));
+        assertThat(generalApplicationWrapper.getGeneralApplicationDirectionsHearingTime(), Matchers.is(nullValue()));
+        assertThat(generalApplicationWrapper.getGeneralApplicationDirectionsHearingTimeEstimate(),
+            Matchers.is(nullValue()));
+        assertThat(generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation(),
+            Matchers.is(nullValue()));
+        assertThat(generalApplicationWrapper.getGeneralApplicationDirectionsCourtOrderDate(), Matchers.is(nullValue()));
+        assertThat(generalApplicationWrapper.getGeneralApplicationDirectionsJudgeType(), Matchers.is(nullValue()));
+        assertThat(generalApplicationWrapper.getGeneralApplicationDirectionsJudgeName(), Matchers.is(nullValue()));
+        assertThat(generalApplicationWrapper.getGeneralApplicationDirectionsRecitals(), Matchers.is(nullValue()));
+        assertThat(generalApplicationWrapper.getGeneralApplicationDirectionsTextFromJudge(), Matchers.is(nullValue()));
+        assertThat(caseData.getRegionWrapper().getGeneralApplicationRegionWrapper()
+            .getGeneralApplicationDirectionsRegionList(), Matchers.is(nullValue()));
+        assertThat(caseData.getRegionWrapper().getGeneralApplicationRegionWrapper()
+            .getGeneralApplicationDirectionsLondonFrcList(), Matchers.is(nullValue()));
+        assertThat(caseData.getRegionWrapper().getGeneralApplicationRegionWrapper()
+            .getGeneralApplicationDirectionsHighCourtFrcList(), Matchers.is(nullValue()));
+        assertThat(caseData.getRegionWrapper().getGeneralApplicationRegionWrapper()
+            .getGeneralApplicationDirectionsNorthEastFrcList(), Matchers.is(nullValue()));
+        assertThat(caseData.getRegionWrapper().getGeneralApplicationRegionWrapper()
+            .getGeneralApplicationDirectionsMidlandsFrcList(), Matchers.is(nullValue()));
+        assertThat(caseData.getRegionWrapper().getGeneralApplicationRegionWrapper()
+            .getGeneralApplicationDirectionsNorthWestFrcList(), Matchers.is(nullValue()));
+        assertThat(caseData.getRegionWrapper().getGeneralApplicationRegionWrapper()
+            .getGeneralApplicationDirectionsSouthEastFrcList(), Matchers.is(nullValue()));
+        assertThat(caseData.getRegionWrapper().getGeneralApplicationRegionWrapper()
+            .getGeneralApplicationDirectionsSouthWestFrcList(), Matchers.is(nullValue()));
+        assertThat(caseData.getRegionWrapper().getGeneralApplicationRegionWrapper()
+            .getGeneralApplicationDirectionsWalesFrcList(), Matchers.is(nullValue()));
     }
 
     @Test

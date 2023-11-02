@@ -35,9 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
@@ -49,7 +47,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildInterimFrcCourtDetails;
@@ -199,17 +196,6 @@ public class GeneralApplicationDirectionsService {
             : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
     }
 
-    private List<BulkPrintDocument> prepareDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
-        Map<String, Object> caseData = caseDetails.getData();
-        List<BulkPrintDocument> documents = new ArrayList<>();
-        CaseDocument directionsDocument = caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED).equals(YES_VALUE)
-            ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
-            : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
-        documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(directionsDocument));
-        caseData.put(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT, directionsDocument);
-        return documents;
-    }
-
     @SuppressWarnings("java:S1874")
     private void printDocumentPackAndSendToRelevantParties(CaseDetails caseDetails, String authorisationToken,
                                                            List<BulkPrintDocument> documents) {
@@ -260,14 +246,6 @@ public class GeneralApplicationDirectionsService {
         log.info("Sending {} document(s) to {} via bulk print for Case {}, document(s) are {}",
             intervenerWrapper.getIntervenerType(), documents.size(), caseDetails.getId(),
             documents);
-    }
-
-    private void resetStateToGeneralApplicationPrestate(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        String generalApplicationPreState = (String) caseData.get(GENERAL_APPLICATION_PRE_STATE);
-        if (generalApplicationPreState != null) {
-            caseData.put(STATE, generalApplicationPreState);
-        }
     }
 
     @SuppressWarnings("java:S1874")
