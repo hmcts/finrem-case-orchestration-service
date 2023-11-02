@@ -78,15 +78,18 @@ public class GeneralApplicationService {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
-        helper.populateGeneralApplicationSender(caseDetailsBefore.getData(), caseDetailsBefore.getData()
+        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+
+        helper.populateGeneralApplicationSender(caseDataBefore, caseDataBefore
             .getGeneralApplicationWrapper().getGeneralApplications());
 
         List<GeneralApplicationCollectionData> generalApplicationListBefore =
-            helper.getGeneralApplicationList(caseDetailsBefore.getData(), GENERAL_APPLICATION_COLLECTION);
+            helper.getGeneralApplicationList(caseDataBefore, GENERAL_APPLICATION_COLLECTION);
         List<GeneralApplicationCollectionData> generalApplicationList =
-            helper.getGeneralApplicationList(caseDetails.getData(), GENERAL_APPLICATION_COLLECTION);
+            helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
 
-        String initialCollectionId = Objects.toString(caseDetails.getData().getGeneralApplicationWrapper()
+        String initialCollectionId = Objects.toString(caseData.getGeneralApplicationWrapper()
             .getGeneralApplicationTracking(), null);
 
         String loggedInUserCaseRole = accessService.getActiveUser(caseDetails.getId().toString(), userAuthorisation);
@@ -101,8 +104,6 @@ public class GeneralApplicationService {
         final List<GeneralApplicationCollectionData> processableList = interimGeneralApplicationList.stream()
             .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).toList();
 
-        FinremCaseData caseData = caseDetails.getData();
-        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
         caseData.getGeneralApplicationWrapper().setGeneralApplicationPreState(caseDetailsBefore.getState().getStateId());
 
         String caseId = caseDetails.getId().toString();
