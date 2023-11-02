@@ -146,7 +146,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotDoPBAPaymentWhenPaymentIsDoneWithHWF() throws Exception {
         doHWFSetUp();
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
@@ -167,7 +167,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnErrorWhenPbaPaymentFails() throws Exception {
         doPBASetUp(false);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
@@ -184,7 +184,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldDoPbaPayment() throws Exception {
         doPBASetUp(true);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
@@ -205,7 +205,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
@@ -237,7 +237,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotAssignApplicantSolicitor_assignCaseAccessDraftCaseActive() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(false);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
@@ -252,7 +252,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotAssignApplicantSolicitor_organisationIdNoMatch() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(true);
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
             .contactInformation(singletonList(organisationContactInformation))
@@ -274,7 +274,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         doPBASetUp(true);
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/pba-payment-no-app-org.json").toURI()));
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(true);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
@@ -290,7 +290,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotAssignApplicantSolicitor_acaApiFailure() throws Exception {
         doPBASetUp(true);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(true);
         doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(any(CaseDetails.class), eq(AUTH_TOKEN));
 

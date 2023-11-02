@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralApplicationOrderDetails;
 
@@ -28,7 +28,7 @@ public class GeneralApplicationOrderDetailsMapper extends AbstractLetterDetailsM
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getData();
         final GeneralApplicationWrapper generalApplication = caseData.getGeneralApplicationWrapper();
-        final FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
+        final CourtDetailsTemplateFields courtDetails = courtDetailsMapper.getCourtDetails(courtList);
 
         return GeneralApplicationOrderDetails.builder()
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
