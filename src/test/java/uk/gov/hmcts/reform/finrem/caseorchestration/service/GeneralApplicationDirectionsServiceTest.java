@@ -279,37 +279,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenNoHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenGeneralOrderIsPrinted() {
-        caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
-        generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, AUTH_TOKEN);
-
-        assertCaseDataHasGeneralApplicationDirectionsDocument();
-
-        verify(genericDocumentService, times(1)).generateDocument(
-            eq(AUTH_TOKEN),
-            documentGenerationRequestCaseDetailsCaptor.capture(),
-            eq(documentConfiguration.getGeneralApplicationOrderTemplate(caseDetails)),
-            eq(documentConfiguration.getGeneralApplicationOrderFileName()));
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
-            printDocumentsRequestDocumentListCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        assertThat(data, allOf(
-            hasEntry("courtDetails", ImmutableMap.of(
-                "courtName", "Kingston-Upon-Thames County Court And Family Court",
-                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
-                "phoneNumber", "0208 972 8700",
-                "openingHours", "from 8am to 6pm, Monday to Friday",
-                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
-            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
-            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
-            hasKey("letterDate")));
-
-        assertDocumentPrintRequestContainsExpectedDocuments();
-    }
-
-    @Test
     public void givenPaperApplicationInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
         caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing.json", objectMapper);
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,

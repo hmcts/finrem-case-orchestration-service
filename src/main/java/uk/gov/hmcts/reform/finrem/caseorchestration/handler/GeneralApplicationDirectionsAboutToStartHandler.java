@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -62,9 +61,8 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
         log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails());
 
-        service.startGeneralApplicationDirections(caseDetails);
+        service.resetGeneralApplicationDirectionsFields(caseData);
 
         helper.populateGeneralApplicationSender(caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
 

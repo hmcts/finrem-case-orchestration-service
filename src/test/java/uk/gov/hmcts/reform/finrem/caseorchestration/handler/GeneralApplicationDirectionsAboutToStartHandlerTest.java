@@ -35,7 +35,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
@@ -102,8 +101,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     @Test
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_NON_COLL_JSON);
-        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
-            buildCaseDetailsFromJson(GA_NON_COLL_JSON));
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = handle.getData();
@@ -112,7 +110,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         );
 
         assertEquals(1, dynamicList.getListItems().size());
-        verify(service).startGeneralApplicationDirections(any());
+        verify(service).resetGeneralApplicationDirectionsFields(any());
     }
 
     @Test
@@ -129,7 +127,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         );
 
         assertEquals(1, dynamicList.getListItems().size());
-        verify(service).startGeneralApplicationDirections(any());
+        verify(service).resetGeneralApplicationDirectionsFields(any());
     }
 
     @Test
@@ -145,7 +143,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for issue direction."));
-        verify(service).startGeneralApplicationDirections(any());
+        verify(service).resetGeneralApplicationDirectionsFields(any());
     }
 
     public DynamicRadioListElement getDynamicListElement(String code, String label) {
