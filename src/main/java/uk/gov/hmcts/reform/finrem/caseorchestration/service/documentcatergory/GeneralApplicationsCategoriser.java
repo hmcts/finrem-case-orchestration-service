@@ -36,7 +36,6 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
         if (finremCaseData.getGeneralApplicationWrapper().getGeneralApplications() != null) {
             finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
                 ga -> {
-                    // TODO 10 or more will break this
                     generalApplicationCounter.getAndIncrement();
                     DocumentCategory categoryToApply;
 
