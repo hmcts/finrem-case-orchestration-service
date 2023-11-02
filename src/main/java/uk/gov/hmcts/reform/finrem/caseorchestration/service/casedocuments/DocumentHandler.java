@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
@@ -19,7 +20,7 @@ import java.util.List;
 public abstract class DocumentHandler {
 
     protected final CaseDocumentCollectionType collectionType;
-    
+
     private final FeatureToggleService featureToggleService;
 
     protected abstract List<UploadCaseDocumentCollection> getAlteredCollectionForType(
@@ -66,13 +67,19 @@ public abstract class DocumentHandler {
     private void applyDocumentCategory(List<UploadCaseDocumentCollection> uploadedCollectionForType) {
         if (featureToggleService.isCaseFileViewEnabled()) {
             for (UploadCaseDocumentCollection uploadCaseDocumentCollection : uploadedCollectionForType) {
-                uploadCaseDocumentCollection.getUploadCaseDocument()
-                    .getCaseDocuments()
-                    .setCategoryId(getDocumentCategoryFromDocumentType(
+                CaseDocument caseDocument = uploadCaseDocumentCollection.getUploadCaseDocument()
+                    .getCaseDocuments();
+                if (caseDocument.getCategoryId() == null) {
+                    caseDocument.setCategoryId(getDocumentCategoryFromDocumentType(
                             uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType()
                         ).getDocumentCategoryId()
                     );
+                }
             }
         }
+    }
+
+    public void assignDocumentCategoryToUploadDocumentsCollection(FinremCaseData caseData) {
+        applyDocumentCategory(caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType));
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -11,15 +12,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import java.util.List;
 
 @Component
-public class ApprovedConsentOrderDocumentCategorizer extends DocumentCategorizer {
+@Slf4j
+public class ApprovedConsentOrderDocumentCategoriser extends DocumentCategoriser {
 
     @Autowired
-    public ApprovedConsentOrderDocumentCategorizer(FeatureToggleService featureToggleService) {
+    public ApprovedConsentOrderDocumentCategoriser(FeatureToggleService featureToggleService) {
         super(featureToggleService);
     }
 
     @Override
-    protected void categorizeDocuments(FinremCaseData finremCaseData) {
+    protected void categoriseDocuments(FinremCaseData finremCaseData) {
+        log.info("Categorising approved consent order documents for case with Case ID: {}", finremCaseData.getCcdCaseId());
         List<ConsentOrderCollection> approvedOrders =
             finremCaseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
         if (approvedOrders != null && !approvedOrders.isEmpty()) {

@@ -47,9 +47,9 @@ public abstract class BaseManageDocumentsHandlerTest {
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
         handler = getDocumentHandler();
     }
-    
+
     public abstract void setUpscreenUploadDocumentList();
-    
+
     public abstract DocumentHandler getDocumentHandler();
 
     public abstract void assertExpectedCollectionType();
@@ -73,6 +73,18 @@ public abstract class BaseManageDocumentsHandlerTest {
         }
     }
 
+    private void assertAssignDocumentCategoryForDocumentCollection() {
+        if (featureToggleService.isCaseFileViewEnabled()) {
+            for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
+                assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), not(nullValue()));
+            }
+        } else {
+            for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
+                assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), nullValue());
+            }
+        }
+    }
+
     private void handleDocumentCollectionsCorrectly(Boolean cfvSwitch) {
 
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(cfvSwitch);
@@ -85,6 +97,16 @@ public abstract class BaseManageDocumentsHandlerTest {
         assertDocumentCategoryIdAppliedForDocumentCollection();
     }
 
+
+    private void handleAssignDocumentCatergoryForUploadDocumentCollections(Boolean cfvSwitch) {
+
+        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(cfvSwitch);
+
+        handler.assignDocumentCategoryToUploadDocumentsCollection(caseData);
+
+        assertDocumentCategoryIdAppliedForDocumentCollection();
+    }
+
     @Test
     public void handleDocumentCollectionCorrectlyCvfOn() {
         handleDocumentCollectionsCorrectly(true);
@@ -93,6 +115,16 @@ public abstract class BaseManageDocumentsHandlerTest {
     @Test
     public void handleDocumentCollectionCorrectlyCfvOff() {
         handleDocumentCollectionsCorrectly(false);
+    }
+
+    @Test
+    public void handleAssignDocumentCategoryForDocumentCollectionCorrectlyCvfOn() {
+        handleAssignDocumentCatergoryForUploadDocumentCollections(true);
+    }
+
+    @Test
+    public void handleAssignDocumentCategoryForDocumentCollectionCorrectlyCvfOff() {
+        handleAssignDocumentCatergoryForUploadDocumentCollections(false);
     }
 
 

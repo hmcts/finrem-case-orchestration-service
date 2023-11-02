@@ -26,7 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.ApprovedConsentOrderDocumentCategorizer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.ApprovedConsentOrderDocumentCategoriser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,7 +68,7 @@ public class ConsentOrderApprovedDocumentService {
     private final ConsentedApplicationHelper consentedApplicationHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintLetterDetailsMapper;
-    private final ApprovedConsentOrderDocumentCategorizer approvedConsentOrderCategoriser;
+    private final ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser;
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         String fileName;
@@ -172,7 +172,7 @@ public class ConsentOrderApprovedDocumentService {
             caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrders);
         }
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        approvedConsentOrderCategoriser.categorize(finremCaseDetails.getData());
+        approvedConsentOrderCategoriser.categorise(finremCaseDetails.getData());
         return finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
     }
 
