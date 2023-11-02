@@ -60,6 +60,19 @@ class AmendCaseContestedAboutToSubmitHandlerTest {
             Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getValue());
     }
 
+    @Test
+    void givenContestedCase_whenTypeOfApplicationFieldIsNotMissing_thenDoNotUpdate() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData data = finremCallbackRequest.getCaseDetails().getData();
+        data.getScheduleOneWrapper()
+            .setTypeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> callbackResponse
+            = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(callbackResponse.getData().getScheduleOneWrapper().getTypeOfApplication().getValue(),
+            Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getValue());
+    }
+
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()
