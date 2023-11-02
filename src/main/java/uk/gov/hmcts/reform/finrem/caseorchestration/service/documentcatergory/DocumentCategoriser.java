@@ -3,11 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
-public abstract class DocumentCategorizer {
+public abstract class DocumentCategoriser {
 
     private final FeatureToggleService featureToggleService;
 
-    public DocumentCategorizer(FeatureToggleService featureToggleService) {
+    public DocumentCategoriser(FeatureToggleService featureToggleService) {
         this.featureToggleService = featureToggleService;
     }
 
