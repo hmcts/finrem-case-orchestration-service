@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -72,6 +73,7 @@ public class GeneralApplicationService {
     private final AssignCaseAccessService accessService;
     private final GeneralApplicationHelper helper;
     private final BulkPrintDocumentService service;
+    private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
 
     public FinremCaseData updateGeneralApplications(FinremCallbackRequest callbackRequest, String userAuthorisation) {
 
@@ -155,6 +157,11 @@ public class GeneralApplicationService {
 
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
+
+        generalApplicationsCategoriser.categorize(caseData);
+
+        generalApplicationsCategoriser.uncategoriseDuplicatedCollections(caseData);
+
         return caseData;
     }
 
