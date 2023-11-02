@@ -346,6 +346,59 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderCollIsEmpty_thenHandlerWillAddNewOrderToFinalOrder()
+        throws JsonProcessingException {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
+
+        when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
+
+        List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
+        LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
+        DirectionOrderCollection uploadOrderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
+        uploadOrderCollections.add(uploadOrderCollection);
+        data.setUploadHearingOrder(uploadOrderCollections);
+        when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
+        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+
+        List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
+        Map<String, Object> localCourtMap = Map.of(REGION_CT, SOUTHEAST,
+            SOUTHEAST_FRC_LIST_CT, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_9");
+
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .isAnotherHearingYN(YesOrNo.YES)
+            .typeOfHearing(HearingTypeDirection.FH)
+            .hearingTime("12")
+            .timeEstimate("12")
+            .dateOfHearing(LocalDate.of(2020, 1, 1))
+            .localCourt(localCourtMap).build();
+        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
+        directionDetailsCollection.add(detailCollection);
+        data.setDirectionDetailsCollection(directionDetailsCollection);
+
+        Map<String, Object> caseData = baseCaseData();
+        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
+        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
+        CaseDetails details = CaseDetails
+            .builder()
+            .id(1234567890L)
+            .data(caseData)
+            .build();
+        when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(details);
+
+        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        assertEquals(1, data.getFinalOrderCollection().size());
+        assertEquals(1, data.getUploadHearingOrder().size());
+        assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
+        assertEquals(caseDocument(), data.getAdditionalHearingDocuments().get(0).getValue().getDocument());
+    }
+
+    @Test
     public void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderHasSameOrder_thenHandlerWillNotAddNewOrderToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
