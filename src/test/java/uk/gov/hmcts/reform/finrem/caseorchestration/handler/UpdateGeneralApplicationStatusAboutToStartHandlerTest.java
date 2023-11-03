@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 
 import java.io.InputStream;
 import java.util.List;
@@ -60,6 +61,8 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
     private GeneralApplicationHelper helper;
     private DocumentHelper documentHelper;
     @Mock
+    private GeneralApplicationsCategoriser generalApplicationsCategoriser;
+    @Mock
     private BulkPrintDocumentService bulkPrintDocumentService;
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application-finrem.json";
@@ -71,7 +74,8 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
         handler = new UpdateGeneralApplicationStatusAboutToStartHandler(
             finremCaseDetailsMapper, helper, generalApplicationService);
         generalApplicationService = new GeneralApplicationService(
-            documentHelper, objectMapper, idamService, service, assignCaseAccessService, helper, bulkPrintDocumentService);
+            documentHelper, objectMapper, idamService, service, assignCaseAccessService, helper, bulkPrintDocumentService,
+            generalApplicationsCategoriser);
     }
 
     @Test
