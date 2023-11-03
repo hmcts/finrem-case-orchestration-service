@@ -342,7 +342,7 @@ public class GeneralApplicationServiceTest {
 
         List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
             .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {
-        });
+            });
         assertThat(generalApplicationDataList, hasSize(1));
         assertThat(
             matchesUploadedDocumentFields(
@@ -368,7 +368,7 @@ public class GeneralApplicationServiceTest {
 
         List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
             .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {
-        });
+            });
         assertThat(generalApplicationDataList, hasSize(2));
         assertThat(generalApplicationDataList.get(0).getGeneralApplication().getGeneralApplicationDocument().getDocumentUrl(),
             is(DOC_IN_EXISTING_COLLECTION_URL));

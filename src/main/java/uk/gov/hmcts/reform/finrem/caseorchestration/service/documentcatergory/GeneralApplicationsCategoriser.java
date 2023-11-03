@@ -15,7 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Configuration
 public class GeneralApplicationsCategoriser extends DocumentCategoriser {
 
-    private static final Map<Integer, DocumentCategory> gaNumberToCategory = Map.of(1, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_1,
+    private static final Map<Integer, DocumentCategory> gaNumberToCategory = Map.of(
+        1, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_1,
         2, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_2,
         3, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_3,
         4, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_4,
@@ -113,12 +114,12 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
 
                 if (generalApplicationDraftOrder != null) {
                     generalApplicationDraftOrder.setCategoryId(
-                        DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId()                        );
+                        DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
                 }
 
                 if (generalApplicationDirectionsDocument != null) {
                     generalApplicationDirectionsDocument.setCategoryId(
-                        DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId()                        );
+                        DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
                 }
             }
         );
