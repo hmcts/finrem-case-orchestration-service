@@ -80,7 +80,7 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     public abstract CaseRole getIntervenerSolicitorCaseRole();
 
-    public abstract List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData);
+    public abstract List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseDataContested caseData);
 
     public abstract String getIntervenerHearingNoticesCollectionName();
 

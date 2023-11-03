@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class SelectablePartiesCorrespondenceService {
 
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public void setPartiesToReceiveCorrespondence(FinremCaseData data) {
+    public void setPartiesToReceiveCorrespondence(FinremCaseDataContested data) {
         List<String> selectedParties = data.getSelectedParties();
         if (selectedParties != null && !selectedParties.isEmpty()) {
             log.info("Setting parties to receive correspondence {} on case {}", selectedParties, data.getCcdCaseId());
@@ -50,43 +51,43 @@ public class SelectablePartiesCorrespondenceService {
     }
 
     public FinremCaseDetails setPartiesToReceiveCorrespondence(CaseDetails caseDetails) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         return finremCaseDetails;
     }
 
     public boolean shouldSendApplicantCorrespondence(CaseDetails caseDetails) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         return finremCaseDetails.getData().isApplicantCorrespondenceEnabled();
     }
 
     public boolean shouldSendRespondentCorrespondence(CaseDetails caseDetails) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         return finremCaseDetails.getData().isRespondentCorrespondenceEnabled();
     }
 
     public boolean shouldSendIntervenerOneCorrespondence(CaseDetails caseDetails) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         return finremCaseDetails.getData().getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled();
     }
 
     public boolean shouldSendIntervenerTwoCorrespondence(CaseDetails caseDetails) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         return finremCaseDetails.getData().getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled();
     }
 
     public boolean shouldSendIntervenerThreeCorrespondence(CaseDetails caseDetails) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         return finremCaseDetails.getData().getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled();
     }
 
     public boolean shouldSendIntervenerFourCorrespondence(CaseDetails caseDetails) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         return finremCaseDetails.getData().getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled();
     }

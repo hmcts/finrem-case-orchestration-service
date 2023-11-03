@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
@@ -150,7 +151,8 @@ public class HearingDocumentService {
     public List<String> sendListForHearingCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
 
         List<String> errors = new ArrayList<>();
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails =
+            finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         errors.addAll(selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseDetails.getData(),
@@ -158,7 +160,8 @@ public class HearingDocumentService {
         if (!errors.isEmpty()) {
             return errors;
         }
-        FinremCaseDetails finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore);
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetailsBefore =
+            finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore);
         if (finremCaseDetailsBefore != null && finremCaseDetailsBefore.getData().getFormC() != null) {
             log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
             additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, finremCaseDetails);

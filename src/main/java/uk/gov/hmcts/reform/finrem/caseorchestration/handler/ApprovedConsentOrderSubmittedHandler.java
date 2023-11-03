@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderAvailableCorresponder;
 
@@ -18,7 +20,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ApprovedConsentOrderSubmittedHandler extends FinremCallbackHandler {
+public class ApprovedConsentOrderSubmittedHandler extends FinremCallbackHandler<FinremCaseDataConsented> {
 
     private final FinremConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final DocumentHelper documentHelper;
@@ -40,21 +42,21 @@ public class ApprovedConsentOrderSubmittedHandler extends FinremCallbackHandler 
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> handle(
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest, String userAuthorisation) {
+        FinremCaseDetails<FinremCaseDataConsented> caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDataConsented caseData = caseDetails.getData();
         if (Boolean.TRUE.equals(isPensionDocumentsEmpty(caseData))) {
             consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse
-            .<FinremCaseData>builder()
+            .<FinremCaseDataConsented>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .build();
     }
 
-    private Boolean isPensionDocumentsEmpty(FinremCaseData caseData) {
+    private Boolean isPensionDocumentsEmpty(FinremCaseDataConsented caseData) {
         List<CaseDocument> pensionDocumentsData = documentHelper.getPensionDocumentsData(caseData);
         return pensionDocumentsData.isEmpty();
     }

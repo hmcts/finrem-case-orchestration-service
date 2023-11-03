@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
@@ -149,9 +150,9 @@ public class GeneralLetterService {
         data.put("reference", reference);
     }
 
-    private String getRecipientSolicitorReference(FinremCaseDetails caseDetails) {
-        FinremCaseData data = caseDetails.getData();
-        ContactDetailsWrapper wrapper = data.getContactDetailsWrapper();
+    private String getRecipientSolicitorReference(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
+        FinremCaseDataContested data = caseDetails.getData();
+        ContestedContactDetailsWrapper wrapper = data.getContactDetailsWrapper();
         IntervenerOneWrapper intervenerOneWrapper = data.getIntervenerOneWrapper();
         IntervenerTwoWrapper intervenerTwoWrapper = data.getIntervenerTwoWrapper();
         IntervenerThreeWrapper intervenerThreeWrapper = data.getIntervenerThreeWrapper();
@@ -168,8 +169,8 @@ public class GeneralLetterService {
         };
     }
 
-    private String getRecipientName(FinremCaseDetails caseDetails) {
-        FinremCaseData data = caseDetails.getData();
+    private String getRecipientName(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
+        FinremCaseDataContested data = caseDetails.getData();
         String generalLetterAddressee = data.getGeneralLetterWrapper().getGeneralLetterAddressee().getValue().getCode();
 
         return switch (generalLetterAddressee) {
@@ -186,8 +187,8 @@ public class GeneralLetterService {
         };
     }
 
-    private Address getRecipientAddress(FinremCaseDetails caseDetails) {
-        FinremCaseData data = caseDetails.getData();
+    private Address getRecipientAddress(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
+        FinremCaseDataContested data = caseDetails.getData();
         String letterAddresseeType = data.getGeneralLetterWrapper().getGeneralLetterAddressee().getValue().getCode();
 
         return switch (letterAddresseeType) {

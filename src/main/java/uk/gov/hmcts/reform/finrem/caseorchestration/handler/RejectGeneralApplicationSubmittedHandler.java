@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -29,7 +30,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHandler {
+public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     public static final String APPLICANT = "applicant";
     public static final String RESPONDENT = "respondent";
@@ -60,10 +61,10 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String receivedFrom = getApplicationReceivedFrom(caseDetails, callbackRequest.getCaseDetailsBefore()) == null
             ? null : getApplicationReceivedFrom(
                 caseDetails, callbackRequest.getCaseDetailsBefore()).getValue().getCode();
@@ -85,7 +86,7 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
             }
         });
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseDetails.getData()).build();
     }
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
@@ -124,7 +125,8 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
         }
     }
 
-    private DynamicRadioList getApplicationReceivedFrom(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
+    private DynamicRadioList getApplicationReceivedFrom(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                                        FinremCaseDetails<FinremCaseDataContested> caseDetailsBefore) {
 
         List<GeneralApplicationCollectionData> applicationCollectionDataList = new ArrayList<>();
 

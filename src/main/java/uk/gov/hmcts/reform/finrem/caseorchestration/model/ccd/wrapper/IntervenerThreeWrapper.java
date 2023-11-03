@@ -93,7 +93,7 @@ public class IntervenerThreeWrapper extends IntervenerWrapper {
 
     @Override
     @JsonIgnore
-    public List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData) {
+    public List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseDataContested caseData) {
         if (caseData.getIntv3HearingNoticesCollection() == null) {
             caseData.setIntv3HearingNoticesCollection(new ArrayList<>());
         }

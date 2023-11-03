@@ -160,7 +160,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         return uniqueRoleList;
     }
 
-    private boolean validateSolicitorList(FinremCaseData caseData,
+    private boolean validateSolicitorList(FinremCaseDataContested caseData,
                                                  DynamicMultiSelectList roleList,
                                                  String party,
                                                  Long caseId) {

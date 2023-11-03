@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
@@ -224,7 +226,9 @@ public class CaseDataService {
     }
 
     public boolean isConsentedInContestedCase(FinremCaseDetails caseDetails) {
-        return isContestedApplication(caseDetails) && caseDetails.getData().getConsentOrderWrapper().getConsentD81Question() != null;
+        return isContestedApplication(caseDetails)
+            && ((FinremCaseDataContested) caseDetails.getData())
+            .getConsentOrderWrapper().getConsentD81Question() != null;
     }
 
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
@@ -274,17 +278,20 @@ public class CaseDataService {
     }
 
     public boolean isOrderApprovedCollectionPresent(FinremCaseData caseData) {
-        return isConsentedApprovedOrderCollectionPresent(caseData)
+        return  isConsentedApprovedOrderCollectionPresent(caseData)
             || isContestedApprovedOrderCollectionPresent(caseData);
     }
 
     private boolean isConsentedApprovedOrderCollectionPresent(FinremCaseData caseData) {
-        return caseData.getApprovedOrderCollection() != null && !caseData.getApprovedOrderCollection().isEmpty();
+        return caseData.isConsentedApplication()
+            && ((FinremCaseDataConsented) caseData).getApprovedOrderCollection() != null
+            && !((FinremCaseDataConsented) caseData).getApprovedOrderCollection().isEmpty();
     }
 
     private boolean isContestedApprovedOrderCollectionPresent(FinremCaseData caseData) {
-        return caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders() != null
-            && !caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders().isEmpty();
+        return caseData.isContestedApplication()
+            && ((FinremCaseDataContested) caseData).getConsentOrderWrapper().getContestedConsentedApprovedOrders() != null
+            && !((FinremCaseDataContested) caseData).getConsentOrderWrapper().getContestedConsentedApprovedOrders().isEmpty();
     }
 
     /**
@@ -330,8 +337,9 @@ public class CaseDataService {
     }
 
     public boolean isContestedOrderNotApprovedCollectionPresent(FinremCaseData caseData) {
-        return caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders() != null
-            && !caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders().isEmpty();
+        return caseData.isContestedApplication()
+            && ((FinremCaseDataContested) caseData).getConsentOrderWrapper().getConsentedNotApprovedOrders() != null
+            && !((FinremCaseDataContested) caseData).getConsentOrderWrapper().getConsentedNotApprovedOrders().isEmpty();
     }
 
     @SuppressWarnings("java:S112")

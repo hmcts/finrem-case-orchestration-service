@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -73,10 +74,10 @@ public class GeneralApplicationService {
     private final GeneralApplicationHelper helper;
     private final BulkPrintDocumentService service;
 
-    public FinremCaseData updateGeneralApplications(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+    public FinremCaseData updateGeneralApplications(FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         helper.populateGeneralApplicationSender(caseDetailsBefore.getData(), caseDetailsBefore.getData()
             .getGeneralApplicationWrapper().getGeneralApplications());
@@ -101,8 +102,8 @@ public class GeneralApplicationService {
         final List<GeneralApplicationCollectionData> processableList = interimGeneralApplicationList.stream()
             .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).toList();
 
-        FinremCaseData caseData = caseDetails.getData();
-        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
+        FinremCaseDataContested caseDataBefore = caseDetailsBefore.getData();
         caseData.getGeneralApplicationWrapper().setGeneralApplicationPreState(caseDetailsBefore.getState().getStateId());
 
         String caseId = caseDetails.getId().toString();
@@ -157,10 +158,11 @@ public class GeneralApplicationService {
         return caseData;
     }
 
-    private void processGeneralApplicationsForLitigants(String userAuthorisation, FinremCaseDetails caseDetails,
+    private void processGeneralApplicationsForLitigants(String userAuthorisation,
+                                                        FinremCaseDetails<FinremCaseDataContested> caseDetails,
                                                         String initialCollectionId, String loggedInUserCaseRole,
                                                         List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
-                                                        FinremCaseData caseData,
+                                                        FinremCaseDataContested caseData,
                                                         List<GeneralApplicationCollectionData> generalApplicationCollectionDataList) {
         List<GeneralApplicationCollectionData> applicationsForRoleType;
         List<GeneralApplicationCollectionData> processableListForRoleType =
@@ -207,7 +209,7 @@ public class GeneralApplicationService {
         }
     }
 
-    private static void processGeneralApplicationForMainLititgants(FinremCaseData caseData,
+    private static void processGeneralApplicationForMainLititgants(FinremCaseDataContested caseData,
                                                                    List<GeneralApplicationsCollection> applicationCollection) {
         List<GeneralApplicationsCollection> appRespCollection = new ArrayList<>();
         appRespCollection.addAll(applicationCollection);
@@ -225,9 +227,10 @@ public class GeneralApplicationService {
         caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(applicationCollection);
     }
 
-    private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(FinremCaseDetails caseDetails, String loggedInUserCaseRole,
+    private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(
+        FinremCaseDetails<FinremCaseDataContested> caseDetails, String loggedInUserCaseRole,
          List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
-         FinremCaseData caseData, FinremCaseData caseDataBefore) {
+        FinremCaseDataContested caseData, FinremCaseDataContested caseDataBefore) {
         switch (loggedInUserCaseRole) {
             case INTERVENER1 -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
@@ -276,7 +279,7 @@ public class GeneralApplicationService {
     }
 
     public List<GeneralApplicationCollectionData> getInterimGeneralApplicationList(
-        String generalApplicationCollection, FinremCaseData caseData, FinremCaseData caseDataBefore) {
+        String generalApplicationCollection, FinremCaseDataContested caseData, FinremCaseDataContested caseDataBefore) {
         List<GeneralApplicationCollectionData> generalApplicationListForRoleType =
             helper.getGeneralApplicationList(caseData, generalApplicationCollection);
         List<GeneralApplicationCollectionData> generalApplicationListBeforeForRoleType =
@@ -400,7 +403,7 @@ public class GeneralApplicationService {
     }
 
     public void updateGeneralApplicationCollectionData(List<GeneralApplicationCollectionData> generalApplications,
-                                                       FinremCaseData caseData) {
+                                                       FinremCaseDataContested caseData) {
         log.info("entering updateGeneralApplicationCollection Data for case Id {}", caseData.getCcdCaseId());
         helper.populateGeneralApplicationDataSender(caseData, generalApplications);
         logGeneralApplications(generalApplications);
@@ -460,8 +463,9 @@ public class GeneralApplicationService {
 
     }
 
-    public void updateIntervenerDirectionsOrders(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
-        FinremCaseData caseData = caseDetails.getData();
+    public void updateIntervenerDirectionsOrders(GeneralApplicationItems items,
+                                                 FinremCaseDetails<FinremCaseDataContested> caseDetails) {
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<GeneralApplicationsCollection> intvOrders = new ArrayList<>();
         if (caseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders() != null
             && !caseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders().isEmpty()) {

@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -34,7 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Slf4j
 @Service
-public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
+public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested>{
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
@@ -59,13 +60,13 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
-        FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         log.info("Processing About to Submit callback for event {} with Case ID : {}",
             EventType.GENERAL_APPLICATION_DIRECTIONS, callbackRequest.getCaseDetails().getId());
 
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         helper.populateGeneralApplicationSender(caseData,
             caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
@@ -91,16 +92,16 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
 
         log.info("Post state {} for caseId {}", postState, caseDetails.getId());
         if (postState != null) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData)
                 .errors(errors).state(postState).build();
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).errors(errors).build();
     }
 
-    private void migrateExistingApplication(FinremCaseDetails caseDetails,
+    private void migrateExistingApplication(FinremCaseDetails<FinremCaseDataContested> caseDetails,
                                             List<BulkPrintDocument> bulkPrintDocuments,
                                             String userAuthorisation) {
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         String caseId = caseDetails.getId().toString();
@@ -121,10 +122,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
     }
 
-    private void updateApplications(FinremCaseDetails caseDetails,
+    private void updateApplications(FinremCaseDetails<FinremCaseDataContested> caseDetails,
                                     List<BulkPrintDocument> bulkPrintDocuments,
                                     String userAuthorisation) {
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingList =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper()

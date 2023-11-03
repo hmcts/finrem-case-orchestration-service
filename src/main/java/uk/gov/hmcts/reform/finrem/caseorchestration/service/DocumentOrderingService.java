@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
@@ -62,8 +64,10 @@ public class DocumentOrderingService {
         return isDocumentModifiedLater(latestOrderApproved, latestOrderNotApproved, authorisationToken);
     }
 
-    public boolean isOrderApprovedCollectionModifiedLaterThanNotApprovedCollection(FinremCaseDetails caseDetails, String authorisationToken) {
-        FinremCaseData caseData = caseDetails.getData();
+    public boolean isOrderApprovedCollectionModifiedLaterThanNotApprovedCollection(
+        FinremCaseDetails<FinremCaseDataContested> caseDetails, String authorisationToken) {
+
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<ContestedConsentOrderData> orderNotApprovedOrders = documentHelper.convertToContestedConsentOrderData(
             caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders());
         CaseDocument latestOrderNotApproved = orderNotApprovedOrders.get(orderNotApprovedOrders.size() - 1).getConsentOrder().getConsentOrder();
@@ -83,10 +87,12 @@ public class DocumentOrderingService {
 
     private List<CollectionElement<ApprovedOrder>> getApprovedOrderCollection(FinremCaseDetails caseDetails) {
         return caseDataService.isConsentedInContestedCase(caseDetails)
-            ? objectMapper.convertValue(caseDetails.getData().getConsentOrderWrapper().getContestedConsentedApprovedOrders(),
+            ? objectMapper.convertValue(((FinremCaseDataContested) caseDetails.getData()).getConsentOrderWrapper()
+                .getContestedConsentedApprovedOrders(),
                 new TypeReference<>() {
                 })
-            : objectMapper.convertValue(caseDetails.getData().getApprovedOrderCollection(), new TypeReference<>() {
+            : objectMapper.convertValue(((FinremCaseDataConsented) caseDetails.getData()).getApprovedOrderCollection(),
+            new TypeReference<>() {
             });
     }
 }

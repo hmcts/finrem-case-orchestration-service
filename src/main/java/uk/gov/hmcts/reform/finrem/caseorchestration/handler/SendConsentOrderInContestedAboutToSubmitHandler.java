@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
@@ -27,7 +28,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final GeneralOrderService generalOrderService;
     private final GenericDocumentService genericDocumentService;
@@ -58,15 +59,15 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {}, callback {} for case id {}",
             callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
 
         try {
-            FinremCaseData caseData = caseDetails.getData();
+            FinremCaseDataContested caseData = caseDetails.getData();
             List<String> parties = generalOrderService.getParties(caseDetails);
             log.info("Selected parties {} on case id {}", parties, caseId);
 
@@ -79,11 +80,11 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
 
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
         } catch (RuntimeException e) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(caseDetails.getData()).build();
     }
 
@@ -93,12 +94,12 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
             .build();
     }
 
-    private void setUpOrderDocumentsOnCase(FinremCaseDetails caseDetails,
+    private void setUpOrderDocumentsOnCase(FinremCaseDetails<FinremCaseDataContested> caseDetails,
                                            List<OrderSentToPartiesCollection> printOrderCollection,
                                            String userAuthorisation,
                                            List<String> parties) {
         String caseId = caseDetails.getId().toString();
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         log.info("Setting up order documents for case {}:", caseId);
         List<CaseDocument> consentOrderDocumentPack;
         ConsentOrderWrapper wrapper = caseData.getConsentOrderWrapper();
@@ -151,7 +152,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
         return approvedConsentOrderDocumentPack;
     }
 
-    private List<DocumentCollection> getAdditionalDocuments(FinremCaseData caseData,
+    private List<DocumentCollection> getAdditionalDocuments(FinremCaseDataContested caseData,
                                                             String userAuthorisation,
                                                             String caseId,
                                                             List<OrderSentToPartiesCollection> printOrderCollection) {

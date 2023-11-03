@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
@@ -18,7 +19,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
+public class JudgeDraftOrderMidHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final BulkPrintDocumentService service;
 
@@ -36,13 +37,15 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+        String userAuthorisation) {
+
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {} mid callback for case id: {}",
             EventType.JUDGE_DRAFT_ORDER, caseId);
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
 
         DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = draftDirectionWrapper.getDraftDirectionOrderCollection();
@@ -54,7 +57,7 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
                 caseId, errors, userAuthorisation)
         );
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(caseData).errors(errors).build();
     }
 }

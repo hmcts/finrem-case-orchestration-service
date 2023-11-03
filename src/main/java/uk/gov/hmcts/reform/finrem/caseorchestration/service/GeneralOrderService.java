@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
@@ -225,8 +226,8 @@ public class GeneralOrderService {
         }
     }
 
-    public void setOrderList(FinremCaseDetails caseDetails) {
-        FinremCaseData data = caseDetails.getData();
+    public void setOrderList(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
+        FinremCaseDataContested data = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
         if (ObjectUtils.isNotEmpty(data.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
@@ -262,8 +263,8 @@ public class GeneralOrderService {
         }
     }
 
-    public List<String> getParties(FinremCaseDetails caseDetails) {
-        FinremCaseData data = caseDetails.getData();
+    public List<String> getParties(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
+        FinremCaseDataContested data = caseDetails.getData();
         DynamicMultiSelectList parties = data.getPartiesOnCase();
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
@@ -304,8 +305,9 @@ public class GeneralOrderService {
             || parties.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
     }
 
-    public List<CaseDocument> hearingOrdersToShare(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {
-        FinremCaseData caseData = caseDetails.getData();
+    public List<CaseDocument> hearingOrdersToShare(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                                   DynamicMultiSelectList selectedDocs) {
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<CaseDocument> orders = new ArrayList<>();
         List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
         if (selectedDocs != null && hearingOrders != null) {
@@ -333,8 +335,9 @@ public class GeneralOrderService {
         return false;
     }
 
-    public void setPartiesToReceiveCommunication(FinremCaseDetails caseDetails, List<String> parties) {
-        FinremCaseData data = caseDetails.getData();
+    public void setPartiesToReceiveCommunication(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                                 List<String> parties) {
+        FinremCaseDataContested data = caseDetails.getData();
         parties.forEach(role -> {
             data.setApplicantCorrespondenceEnabled(isOrderSharedWithApplicant(caseDetails));
             data.setRespondentCorrespondenceEnabled(isOrderSharedWithRespondent(caseDetails));

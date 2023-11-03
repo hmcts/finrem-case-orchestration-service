@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
@@ -58,10 +59,10 @@ public class FinremCaseDataContested extends FinremCaseData {
     private String urgentCaseQuestionDetailsTextArea;
     private List<NatureApplication> natureOfApplicationChecklist;
     private List<PensionTypeCollection> consentPensionCollection;
-    private CaseDocument bulkPrintCoverSheetIntervener1;
-    private CaseDocument bulkPrintCoverSheetIntervener2;
-    private CaseDocument bulkPrintCoverSheetIntervener3;
-    private CaseDocument bulkPrintCoverSheetIntervener4;
+    private CaseDocument bulkPrintCoverSheetIntv1;
+    private CaseDocument bulkPrintCoverSheetIntv2;
+    private CaseDocument bulkPrintCoverSheetIntv3;
+    private CaseDocument bulkPrintCoverSheetIntv4;
     private Document d11;
     private String propertyAddress;
     private String mortgageDetail;
@@ -185,6 +186,18 @@ public class FinremCaseDataContested extends FinremCaseData {
     private YesOrNo isNocRejected;
     private List<ContestedGeneralOrderCollection> generalOrders;
     private List<ContestedGeneralOrderCollection> generalOrdersConsent;
+    private List<DocumentCollection> additionalCicDocuments;
+    private CaseDocument additionalDocument;
+    private List<IntervenerHearingNoticeCollection> intv1HearingNoticesCollection;
+    private List<IntervenerHearingNoticeCollection> intv2HearingNoticesCollection;
+    private List<IntervenerHearingNoticeCollection> intv3HearingNoticesCollection;
+    private List<IntervenerHearingNoticeCollection> intv4HearingNoticesCollection;
+    private DynamicMultiSelectList ordersToShare;
+    private DynamicMultiSelectList partiesOnCase;
+    private String currentUserCaseRoleType;
+    private List<OrderSentToPartiesCollection> ordersSentToPartiesCollection;
+
+    private List<PensionTypeCollection> pensionCollection;
 
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener1")
@@ -201,6 +214,19 @@ public class FinremCaseDataContested extends FinremCaseData {
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener4")
     private IntervenerFourWrapper intervenerFourWrapper;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private OrderWrapper orderWrapper;
+
+    @JsonIgnore
+    public OrderWrapper getOrderWrapper() {
+        if (orderWrapper == null) {
+            this.orderWrapper = new OrderWrapper();
+        }
+
+        return orderWrapper;
+    }
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -238,6 +264,38 @@ public class FinremCaseDataContested extends FinremCaseData {
     @Getter(AccessLevel.NONE)
     private MiamWrapper miamWrapper;
 
+
+    @JsonIgnore
+    public IntervenerOneWrapper getIntervenerOneWrapperIfPopulated() {
+        if (intervenerOneWrapper != null) {
+            return this.intervenerOneWrapper;
+        }
+        return null;
+    }
+
+    @JsonIgnore
+    public IntervenerTwoWrapper getIntervenerTwoWrapperIfPopulated() {
+        if (intervenerTwoWrapper != null) {
+            return this.intervenerTwoWrapper;
+        }
+        return null;
+    }
+
+    @JsonIgnore
+    public IntervenerThreeWrapper getIntervenerThreeWrapperIfPopulated() {
+        if (intervenerThreeWrapper != null) {
+            return this.intervenerThreeWrapper;
+        }
+        return null;
+    }
+
+    @JsonIgnore
+    public IntervenerFourWrapper getIntervenerFourWrapperIfPopulated() {
+        if (intervenerFourWrapper != null) {
+            return this.intervenerFourWrapper;
+        }
+        return null;
+    }
 
     @JsonIgnore
     public MiamWrapper getMiamWrapper() {
@@ -374,6 +432,15 @@ public class FinremCaseDataContested extends FinremCaseData {
             this.uploadCaseDocumentWrapper = new UploadCaseDocumentWrapper();
         }
         return uploadCaseDocumentWrapper;
+    }
+
+    @JsonIgnore
+    public List<String> getSelectedParties() {
+        DynamicMultiSelectList parties = this.getPartiesOnCase();
+        if (parties == null) {
+            return List.of();
+        }
+        return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
 
     @JsonIgnore

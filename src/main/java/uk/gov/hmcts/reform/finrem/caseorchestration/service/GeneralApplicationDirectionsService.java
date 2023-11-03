@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -111,7 +112,8 @@ public class GeneralApplicationDirectionsService {
     private static final String RESPONDENT_NAME = "respondentName";
     private static final String LETTER_DATE = "letterDate";
 
-    public String getEventPostState(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
+    public String getEventPostState(FinremCaseDetails<FinremCaseDataContested> finremCaseDetails,
+                                    String userAuthorisation) {
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         List<String> eventDetailsOnCase = ccdService.getCcdEventDetailsOnCase(
                 userAuthorisation,
@@ -284,7 +286,7 @@ public class GeneralApplicationDirectionsService {
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
     }
 
-    private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
+    private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails<FinremCaseDataContested> caseDetails, String authorisationToken,
                                                            List<BulkPrintDocument> documents) {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
         log.info("The relevant party {} for caseId {}", ObjectUtils.nullSafeConciseToString(referDetail), caseDetails.getId());
@@ -301,7 +303,7 @@ public class GeneralApplicationDirectionsService {
         }
     }
 
-    private void sendIntervenerDocuments(FinremCaseDetails caseDetails, String authorisationToken,
+    private void sendIntervenerDocuments(FinremCaseDetails<FinremCaseDataContested> caseDetails, String authorisationToken,
                                          List<BulkPrintDocument> documents, String referDetail) {
         if (referDetail.contains(INTERVENER1.toLowerCase()) || referDetail.contains(INTERVENER1)) {
             IntervenerOneWrapper intervenerWrapper = caseDetails.getData().getIntervenerOneWrapper();

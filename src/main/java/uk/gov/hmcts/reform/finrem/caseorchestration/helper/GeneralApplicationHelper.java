@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -64,7 +65,8 @@ public class GeneralApplicationHelper {
     private final ObjectMapper objectMapper;
     private final GenericDocumentService service;
 
-    public List<GeneralApplicationCollectionData> getGeneralApplicationList(FinremCaseData caseData, String collectionName) {
+    public List<GeneralApplicationCollectionData> getGeneralApplicationList(FinremCaseDataContested caseData,
+                                                                            String collectionName) {
         GeneralApplicationWrapper wrapper = caseData.getGeneralApplicationWrapper();
         switch (collectionName) {
             case INTERVENER1_GENERAL_APPLICATION_COLLECTION -> {
@@ -94,19 +96,19 @@ public class GeneralApplicationHelper {
         }
     }
 
-    public List<GeneralApplicationCollectionData> getReadyForRejectOrReadyForReferList(FinremCaseData caseData) {
+    public List<GeneralApplicationCollectionData> getReadyForRejectOrReadyForReferList(FinremCaseDataContested caseData) {
         return getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION).stream()
             .filter(obj -> Objects.equals(obj.getGeneralApplicationItems().getGeneralApplicationStatus(), CREATED.getId()))
             .toList();
     }
 
-    public List<GeneralApplicationCollectionData> getReferredList(FinremCaseData caseData) {
+    public List<GeneralApplicationCollectionData> getReferredList(FinremCaseDataContested caseData) {
         return getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION).stream()
             .filter(obj -> Objects.equals(obj.getGeneralApplicationItems().getGeneralApplicationStatus(), REFERRED.getId()))
             .toList();
     }
 
-    public List<GeneralApplicationCollectionData> getOutcomeList(FinremCaseData caseData) {
+    public List<GeneralApplicationCollectionData> getOutcomeList(FinremCaseDataContested caseData) {
         return getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION).stream()
             .filter(this::isEquals)
             .toList();
@@ -149,7 +151,7 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    public GeneralApplicationCollectionData migrateExistingGeneralApplication(FinremCaseData caseData,
+    public GeneralApplicationCollectionData migrateExistingGeneralApplication(FinremCaseDataContested caseData,
                                                                               String userAuthorisation, String caseId) {
         if (caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             String collectionId = UUID.randomUUID().toString();
@@ -162,7 +164,7 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    public GeneralApplicationCollectionData retrieveInitialGeneralApplicationData(FinremCaseData caseData,
+    public GeneralApplicationCollectionData retrieveInitialGeneralApplicationData(FinremCaseDataContested caseData,
                                                                                   String collectionId,
                                                                                   String userAuthorisation, String caseId) {
         if (caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
@@ -193,7 +195,7 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    public void deleteNonCollectionGeneralApplication(FinremCaseData caseData) {
+    public void deleteNonCollectionGeneralApplication(FinremCaseDataContested caseData) {
         if (caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
             caseData.getGeneralApplicationWrapper().setGeneralApplicationReceivedFrom(null);
@@ -237,7 +239,7 @@ public class GeneralApplicationHelper {
             .build();
     }
 
-    public void populateGeneralApplicationSender(FinremCaseData caseData,
+    public void populateGeneralApplicationSender(FinremCaseDataContested caseData,
                                                  List<GeneralApplicationsCollection> generalApplications) {
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         buildDynamicIntervenerList(dynamicListElements, caseData);
@@ -262,7 +264,7 @@ public class GeneralApplicationHelper {
         }
     }
 
-    private void addExistingAppRespGeneralApplications(GeneralApplicationsCollection ga, FinremCaseData caseData) {
+    private void addExistingAppRespGeneralApplications(GeneralApplicationsCollection ga, FinremCaseDataContested caseData) {
         List<GeneralApplicationsCollection> existingAppRespGeneralApplications = new ArrayList<>();
         if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
                 && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
@@ -272,7 +274,7 @@ public class GeneralApplicationHelper {
         caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(existingAppRespGeneralApplications);
     }
 
-    public void populateGeneralApplicationDataSender(FinremCaseData caseData,
+    public void populateGeneralApplicationDataSender(FinremCaseDataContested caseData,
                                                      List<GeneralApplicationCollectionData> generalApplicationData) {
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         buildDynamicIntervenerList(dynamicListElements, caseData);
@@ -296,7 +298,7 @@ public class GeneralApplicationHelper {
     }
 
     public void buildDynamicIntervenerList(List<DynamicRadioListElement> dynamicListElements,
-                                           FinremCaseData caseData) {
+                                           FinremCaseDataContested caseData) {
         dynamicListElements.addAll(List.of(getDynamicListElements(APPLICANT, APPLICANT),
             getDynamicListElements(RESPONDENT, RESPONDENT),
             getDynamicListElements(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
@@ -319,7 +321,7 @@ public class GeneralApplicationHelper {
         }
     }
 
-    public GeneralApplicationItems getApplicationItems(FinremCaseData caseData, String userAuthorisation, String caseId) {
+    public GeneralApplicationItems getApplicationItems(FinremCaseDataContested caseData, String userAuthorisation, String caseId) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
 
@@ -333,7 +335,7 @@ public class GeneralApplicationHelper {
         return builder.build();
     }
 
-    public void checkAndRemoveDuplicateGeneralApplications(FinremCaseData caseData) {
+    public void checkAndRemoveDuplicateGeneralApplications(FinremCaseDataContested caseData) {
         List<GeneralApplicationsCollection> generalApplicationList = caseData.getGeneralApplicationWrapper().getGeneralApplications();
 
         log.info("Before removing duplicate General application count: {} for Case ID: ", generalApplicationList.size(),
@@ -359,7 +361,7 @@ public class GeneralApplicationHelper {
             .orElse(duplicateGas.stream().findFirst().orElse(null));
     }
 
-    private void buildGeneralApplicationDocuments(FinremCaseData caseData, String userAuthorisation, String caseId,
+    private void buildGeneralApplicationDocuments(FinremCaseDataContested caseData, String userAuthorisation, String caseId,
                                                   GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
         CaseDocument caseDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDocument());
         if (caseDocument != null) {
@@ -386,7 +388,7 @@ public class GeneralApplicationHelper {
 
     }
 
-    private void buildGeneralApplicationHearingDetails(FinremCaseData caseData, GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
+    private void buildGeneralApplicationHearingDetails(FinremCaseDataContested caseData, GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
         builder.generalApplicationCreatedBy(Objects.toString(caseData.getGeneralApplicationWrapper()
             .getGeneralApplicationCreatedBy(), null));
         builder.generalApplicationHearingRequired(Objects.toString(caseData.getGeneralApplicationWrapper()
@@ -407,7 +409,7 @@ public class GeneralApplicationHelper {
         }
     }
 
-    private void buildGeneralApplicantionSenderDynamicList(FinremCaseData caseData, GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
+    private void buildGeneralApplicantionSenderDynamicList(FinremCaseDataContested caseData, GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
         if (caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom() != null) {
             List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
             buildDynamicIntervenerList(dynamicListElements, caseData);

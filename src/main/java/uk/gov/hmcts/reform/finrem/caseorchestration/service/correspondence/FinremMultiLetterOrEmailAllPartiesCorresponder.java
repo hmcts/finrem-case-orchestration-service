@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNotice;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
@@ -53,8 +54,9 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         }
     }
 
-    public void sendIntervenerCorrespondence(String authorisationToken, FinremCaseDetails caseDetails) {
-        FinremCaseData caseData = caseDetails.getData();
+    public void sendIntervenerCorrespondence(String authorisationToken,
+                                             FinremCaseDetails<FinremCaseDataContested> caseDetails) {
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<IntervenerWrapper> interveners = caseData.getInterveners();
         interveners.forEach(intervenerWrapper -> {
             log.info("Intervener type {}, communication enabled {}, caseId {}", intervenerWrapper.getIntervenerType(),
@@ -91,7 +93,7 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
 
-    private List<CaseDocument> returnAndAddCaseDocumentsToIntervenerHearingNotices(FinremCaseDetails caseDetails,
+    private List<CaseDocument> returnAndAddCaseDocumentsToIntervenerHearingNotices(FinremCaseDetails<FinremCaseDataContested> caseDetails,
                                                                                    IntervenerWrapper intervenerWrapper) {
         List<CaseDocument> caseDocuments = getCaseDocuments(caseDetails);
         List<IntervenerHearingNoticeCollection> intervenerHearingNoticesCollection =

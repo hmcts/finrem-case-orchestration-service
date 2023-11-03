@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -101,12 +102,13 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_NON_COLL_JSON);
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest = buildFinremCallbackRequest(GA_NON_COLL_JSON);
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
             buildCaseDetailsFromJson(GA_NON_COLL_JSON));
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        FinremCaseData caseData = handle.getData();
+        FinremCaseDataContested caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(
             caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList()
         );
@@ -117,13 +119,13 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest = buildFinremCallbackRequest(GA_JSON);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
             .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle =
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
             handler.handle(callbackRequest, AUTH_TOKEN);
 
-        FinremCaseData caseData = handle.getData();
+        FinremCaseDataContested caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(
             caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList()
         );
@@ -134,8 +136,8 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenNoApplicationAvailable_thenShowErrorMessage() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest = buildFinremCallbackRequest(GA_JSON);
+        FinremCaseDataContested caseData = callbackRequest.getCaseDetails().getData();
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(
             caseData, GENERAL_APPLICATION_COLLECTION);
         List<GeneralApplicationCollectionData> updatedList
@@ -143,7 +145,8 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(updatedList));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle =
+            handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for issue direction."));
         verify(service).startGeneralApplicationDirections(any());
     }

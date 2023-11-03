@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContested
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
@@ -28,11 +29,11 @@ public abstract class SendOrderPartyDocumentHandler {
         this.caseRoleCode = caseRoleCode;
     }
 
-    public void setUpOrderDocumentsOnCase(FinremCaseDetails finremCaseDetails, List<String> partyList,
+    public void setUpOrderDocumentsOnCase(FinremCaseDetails<FinremCaseDataContested> finremCaseDetails, List<String> partyList,
                                           List<CaseDocument> orderDocumentPack) {
         if (partyList.contains(caseRoleCode)) {
             final Long caseId = finremCaseDetails.getId();
-            FinremCaseData caseData = finremCaseDetails.getData();
+            FinremCaseDataContested caseData = finremCaseDetails.getData();
             log.info("Received request to send hearing pack to {} for case {}:", caseRoleCode,  caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData)).orElse(new ArrayList<>());
             if (orderColl.isEmpty()) {
@@ -43,11 +44,12 @@ public abstract class SendOrderPartyDocumentHandler {
         }
     }
 
-    public void setUpConsentOrderApprovedDocumentsOnCase(FinremCaseDetails caseDetails, List<String> partyList,
+    public void setUpConsentOrderApprovedDocumentsOnCase(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                                         List<String> partyList,
                                                          List<ConsentOrderCollection> approvedConsentOrders,
                                                          List<DocumentCollection> additionalDocuments) {
         if (partyList.contains(caseRoleCode)) {
-            FinremCaseData caseData = caseDetails.getData();
+            FinremCaseDataContested caseData = caseDetails.getData();
             List<ConsentInContestedApprovedOrderCollection> orderColl = Optional.ofNullable(getConsentOrderCollectionForParty(caseData))
                     .orElse(new ArrayList<>());
             approvedConsentOrders.forEach(order -> orderColl.add(getConsentApprovedOrderCollection(order)));
@@ -56,11 +58,12 @@ public abstract class SendOrderPartyDocumentHandler {
         }
     }
 
-    public void setUpConsentOrderUnapprovedDocumentsOnCase(FinremCaseDetails caseDetails, List<String> partyList,
+    public void setUpConsentOrderUnapprovedDocumentsOnCase(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                                           List<String> partyList,
                                                            CaseDocument latestOrderDocument,
                                                            List<DocumentCollection> additionalDocuments) {
         if (partyList.contains(caseRoleCode)) {
-            FinremCaseData caseData = caseDetails.getData();
+            FinremCaseDataContested caseData = caseDetails.getData();
             List<UnapprovedOrderCollection> orderColl = Optional.ofNullable(getUnapprovedOrderCollectionForParty(caseData))
                 .orElse(new ArrayList<>());
             orderColl.add(getUnapprovedOrderCollection(latestOrderDocument, additionalDocuments));
@@ -68,18 +71,19 @@ public abstract class SendOrderPartyDocumentHandler {
         }
     }
 
-    public void setUpCoverSheetOnCase(FinremCaseDetails caseDetails, List<String> partyList, String authToken) {
+    public void setUpCoverSheetOnCase(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                      List<String> partyList, String authToken) {
         if (partyList.contains(caseRoleCode)) {
             CaseDocument coverSheet = getPartyCoverSheet(caseDetails, authToken);
             addCoverSheetToPartyField(caseDetails, coverSheet);
         }
     }
 
-    public void setUpOrderDocumentsOnPartiesTab(FinremCaseDetails finremCaseDetails, List<String> partyList) {
+    public void setUpOrderDocumentsOnPartiesTab(FinremCaseDetails<FinremCaseDataContested> finremCaseDetails, List<String> partyList) {
         log.info("in send order party doc handler");
         if (partyList.contains(caseRoleCode)) {
             final Long caseId = finremCaseDetails.getId();
-            FinremCaseData caseData = finremCaseDetails.getData();
+            FinremCaseDataContested caseData = finremCaseDetails.getData();
             log.info("Received request to set consolidate document for {} for case {}:", caseRoleCode,  caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData)).orElse(new ArrayList<>());
             setConsolidateCollection(caseData, orderColl);
@@ -107,31 +111,32 @@ public abstract class SendOrderPartyDocumentHandler {
                 .orderReceivedAt(LocalDateTime.now()).build()).build();
     }
 
-    private void addAdditionalOrderDocumentToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> approvedOrderCollections) {
+    private void addAdditionalOrderDocumentToPartyCollection(FinremCaseDataContested caseData,
+                                                             List<ApprovedOrderCollection> approvedOrderCollections) {
         CaseDocument additionalDocument = caseData.getAdditionalDocument();
         if (additionalDocument != null) {
             approvedOrderCollections.add(getApprovedOrderCollection(additionalDocument));
         }
     }
 
-    protected abstract List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData);
+    protected abstract List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseDataContested caseData);
 
-    protected abstract List<ConsentInContestedApprovedOrderCollection> getConsentOrderCollectionForParty(FinremCaseData caseData);
+    protected abstract List<ConsentInContestedApprovedOrderCollection> getConsentOrderCollectionForParty(FinremCaseDataContested caseData);
 
-    protected abstract List<UnapprovedOrderCollection> getUnapprovedOrderCollectionForParty(FinremCaseData caseData);
+    protected abstract List<UnapprovedOrderCollection> getUnapprovedOrderCollectionForParty(FinremCaseDataContested caseData);
 
-    protected abstract void addApprovedConsentOrdersToPartyCollection(FinremCaseData caseData,
+    protected abstract void addApprovedConsentOrdersToPartyCollection(FinremCaseDataContested caseData,
                                                                       List<ConsentInContestedApprovedOrderCollection> orderColl);
 
-    protected abstract void addUnapprovedOrdersToPartyCollection(FinremCaseData caseData, List<UnapprovedOrderCollection> orderColl);
+    protected abstract void addUnapprovedOrdersToPartyCollection(FinremCaseDataContested caseData, List<UnapprovedOrderCollection> orderColl);
 
     protected abstract void addCoverSheetToPartyField(FinremCaseDetails caseDetails, CaseDocument coverSheet);
 
     protected abstract CaseDocument getPartyCoverSheet(FinremCaseDetails caseDetails, String authToken);
 
-    protected abstract void addOrdersToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
+    protected abstract void addOrdersToPartyCollection(FinremCaseDataContested caseData, List<ApprovedOrderCollection> orderColl);
 
-    protected abstract void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
+    protected abstract void setConsolidateCollection(FinremCaseDataContested caseData, List<ApprovedOrderCollection> orderColl);
 
     protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {
         return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()

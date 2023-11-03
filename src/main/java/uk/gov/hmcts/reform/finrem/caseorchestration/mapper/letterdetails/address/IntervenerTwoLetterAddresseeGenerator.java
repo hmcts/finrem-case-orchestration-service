@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
@@ -25,7 +26,7 @@ public class IntervenerTwoLetterAddresseeGenerator extends IntervenerLetterAddre
     }
 
     @Override
-    protected IntervenerTwoWrapper getIntervenerWrapper(FinremCaseDetails caseDetails) {
+    protected IntervenerTwoWrapper getIntervenerWrapper(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
         return caseDetails.getData().getIntervenerTwoWrapper();
     }
 

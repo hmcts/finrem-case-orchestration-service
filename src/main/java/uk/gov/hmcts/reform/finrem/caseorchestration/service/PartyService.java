@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
@@ -37,10 +38,10 @@ public class PartyService {
     }
 
 
-    public DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
+    public DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
         log.info("Event {} fetching all partys solicitor case role for caseId {}", EventType.SEND_ORDER, caseDetails.getId());
 
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
         List<DynamicMultiSelectListElement> defaultDynamicListElements = new ArrayList<>();
 
@@ -72,7 +73,7 @@ public class PartyService {
 
     }
 
-    private List<DynamicMultiSelectListElement> intervenerCaseRoleList(FinremCaseData caseData,
+    private List<DynamicMultiSelectListElement> intervenerCaseRoleList(FinremCaseDataContested caseData,
                                                                        List<DynamicMultiSelectListElement> dynamicListElements) {
         IntervenerWrapper oneWrapper = caseData.getIntervenerOneWrapperIfPopulated();
         setIntervener(dynamicListElements, oneWrapper, INTERVENER_ONE);

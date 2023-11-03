@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
@@ -37,5 +38,5 @@ public abstract class IntervenerLetterAddresseeGenerator<T extends IntervenerWra
 
     protected abstract T getIntervenerWrapper(CaseDetails caseDetails);
 
-    protected abstract T getIntervenerWrapper(FinremCaseDetails caseDetails);
+    protected abstract T getIntervenerWrapper(FinremCaseDetails<FinremCaseDataContested> caseDetails);
 }

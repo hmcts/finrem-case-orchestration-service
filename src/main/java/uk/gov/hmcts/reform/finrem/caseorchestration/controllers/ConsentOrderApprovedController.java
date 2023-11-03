@@ -61,36 +61,6 @@ public class ConsentOrderApprovedController extends BaseController {
     private final ObjectMapper mapper;
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
 
-    @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @Operation(summary = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentOrderApproved(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
-
-        validateCaseData(callback);
-        CaseDetails caseDetails = callback.getCaseDetails();
-        CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
-
-        if (!isEmpty(latestConsentOrder)) {
-            generateAndPrepareDocuments(authToken, caseDetails);
-        } else {
-            log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for case: {}",
-                caseDetails.getId());
-        }
-
-        return ResponseEntity.ok(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDetails.getData())
-                .errors(List.of())
-                .warnings(List.of())
-                .build());
-    }
 
     @PostMapping(path = "/consent-in-contested/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "'Consent Order Approved' callback handler for consent in contested. Stamps Consent Order Approved documents\"\n"
@@ -118,84 +88,6 @@ public class ConsentOrderApprovedController extends BaseController {
                 .errors(List.of())
                 .warnings(List.of())
                 .build());
-    }
-
-    @PostMapping(path = "/consent-in-contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @Operation(summary = """
-        Consent Order Approved' and 'Consent Order Not Approved' callback handler for consent in contested.
-        Checks state and if not/approved generates docs else puts latest general order into uploadOrder fields
-        Then sends the data to bulk print
-        """)
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedSendOrder(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
-        CaseDetails caseDetails = callback.getCaseDetails();
-
-        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDetails.getData())
-            .build());
-    }
-
-    private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails) {
-        String caseId = caseDetails.getId().toString();
-        log.info("Generating and preparing documents for latest consent order, case {}", caseId);
-
-        Map<String, Object> caseData = caseDetails.getData();
-        CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
-        StampType stampType = documentHelper.getStampType(caseData);
-        CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType, caseId);
-
-        ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
-            .orderLetter(approvedConsentOrderLetter)
-            .consentOrder(consentOrderAnnexStamped);
-
-        ApprovedOrder approvedOrder = approvedOrderBuilder.build();
-
-        if (!documentHelper.getPensionDocumentsData(caseData).isEmpty()) {
-            log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
-                caseId);
-
-            List<PensionTypeCollection> pensionDocList = documentHelper.getPensionDocuments(caseData);
-            List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
-                pensionDocList, authToken, stampType, caseId);
-            log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
-            approvedOrder.setPensionDocuments(stampedPensionDocs);
-        }
-
-        List<CollectionElement<ApprovedOrder>> approvedOrders = singletonList(CollectionElement.<ApprovedOrder>builder()
-            .value(approvedOrder).build());
-        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseId);
-
-        caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
-
-        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseId);
-
-        if (documentHelper.getPensionDocumentsData(caseData).isEmpty()) {
-            log.info("Case {} has no pension documents, updating status to {} and sending for bulk print",
-                caseId,
-                CONSENT_ORDER_MADE.toString());
-            try {
-                // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
-                caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
-                caseDetails.setData(caseData);
-                consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
-                caseData.put(STATE, CONSENT_ORDER_MADE.toString());
-                notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
-                consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
-
-            } catch (JsonProcessingException e) {
-                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseId, e.getMessage());
-            }
-        }
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
@@ -33,7 +34,7 @@ public class IntervenerThreeLetterAddresseeGenerator extends IntervenerLetterAdd
     }
 
     @Override
-    protected IntervenerThreeWrapper getIntervenerWrapper(FinremCaseDetails caseDetails) {
+    protected IntervenerThreeWrapper getIntervenerWrapper(FinremCaseDetails<FinremCaseDataContested> caseDetails) {
         return caseDetails.getData().getIntervenerThreeWrapper();
     }
 }

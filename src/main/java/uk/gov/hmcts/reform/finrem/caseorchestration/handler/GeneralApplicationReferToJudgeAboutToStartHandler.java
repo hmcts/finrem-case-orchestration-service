@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -23,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
-public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCallbackHandler
+public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCallbackHandler<FinremCaseDataContested>
     implements GeneralApplicationHandler {
 
     private final GeneralApplicationHelper helper;
@@ -44,14 +45,14 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
-        FinremCallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
         String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
         log.info("Received on start request to refer general application for Case ID: {}", caseId);
 
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferList(null);
 
         helper.populateGeneralApplicationSender(caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
@@ -65,7 +66,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
             if (existingGeneralApplicationList.isEmpty() && judgeEmail != null) {
                 List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
                 if (dynamicListElements.isEmpty()) {
-                    return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                    return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData)
                         .errors(List.of("There are no general application available to refer.")).build();
                 }
             }
@@ -77,7 +78,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
             log.info("setting refer list for Case ID: {}", caseDetails.getId());
             List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
             if (dynamicListElements.isEmpty()) {
-                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData)
                     .errors(List.of("There are no general application available to refer.")).build();
             }
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
@@ -85,7 +86,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
         }
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(null);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferDetail(null);
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
     }
 
     private List<DynamicListElement> getDynamicListElements(List<GeneralApplicationCollectionData> existingGeneralApplicationList,
@@ -95,7 +96,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
             .toList();
     }
 
-    private void setReferListForNonCollectionGeneralApplication(FinremCaseData caseData,
+    private void setReferListForNonCollectionGeneralApplication(FinremCaseDataContested caseData,
                                                                 AtomicInteger index,
                                                                 String userAuthorisation, String caseId) {
         GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);

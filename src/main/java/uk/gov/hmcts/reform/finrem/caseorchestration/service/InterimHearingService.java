@@ -103,7 +103,8 @@ public class InterimHearingService {
 
         List<String> errors = new ArrayList<>();
         if (!interimHearingList.isEmpty()) {
-            final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+            final FinremCaseDetails<FinremCaseDataContested> finremCaseDetails =
+                finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
             selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
             errors = selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseDetails.getData(),
                 HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
@@ -139,7 +140,8 @@ public class InterimHearingService {
     }
 
     @SuppressWarnings("java:S1874")
-    private void sendToBulkPrintForInterveners(String authorisationToken, CaseDetails caseDetails, FinremCaseDetails finremCaseDetails,
+    private void sendToBulkPrintForInterveners(String authorisationToken, CaseDetails caseDetails,
+                                               FinremCaseDetails<FinremCaseDataContested> finremCaseDetails,
                                                CaseDocumentsHolder caseDocumentsHolder) {
 
         final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
@@ -160,7 +162,7 @@ public class InterimHearingService {
     }
 
     private void addCaseDocumentsToIntervenerHearingNotices(IntervenerWrapper intervenerWrapper, CaseDocumentsHolder caseDocumentsHolder,
-                                                            FinremCaseData finremCaseData, Map<String, Object> caseData) {
+                                                            FinremCaseDataContested finremCaseData, Map<String, Object> caseData) {
         List<IntervenerHearingNoticeCollection> hearingNotices = intervenerWrapper.getIntervenerHearingNoticesCollection(finremCaseData);
         caseDocumentsHolder.getCaseDocuments().forEach(cd -> hearingNotices.add(getHearingNoticesDocumentCollection(cd)));
         caseData.put(intervenerWrapper.getIntervenerHearingNoticesCollectionName(), hearingNotices);
@@ -418,7 +420,8 @@ public class InterimHearingService {
 
     private void notify(CaseDetails caseDetails, Map<String, Object> interimHearingData) {
 
-        final FinremCaseDetails finremCaseDetails = selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails);
+        final FinremCaseDetails<FinremCaseDataContested> finremCaseDetails =
+            selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails);
 
         if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
             && finremCaseDetails.getData().isApplicantCorrespondenceEnabled()) {

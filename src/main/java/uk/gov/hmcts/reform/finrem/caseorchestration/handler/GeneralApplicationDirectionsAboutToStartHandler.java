@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -24,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
-public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallbackHandler implements GeneralApplicationHandler {
+public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallbackHandler<FinremCaseDataContested> implements GeneralApplicationHandler {
 
     private final AssignCaseAccessService assignCaseAccessService;
     private final GeneralApplicationHelper helper;
@@ -50,14 +51,15 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+                                                        FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+                                                        String userAuthorisation) {
+        FinremCaseDetails<FinremCaseDataContested> finremCaseDetails = callbackRequest.getCaseDetails();
 
         String caseId = finremCaseDetails.getId().toString();
         log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
 
-        FinremCaseData caseData = finremCaseDetails.getData();
+        FinremCaseDataContested caseData = finremCaseDetails.getData();
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
         log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
@@ -75,7 +77,7 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
             setDirectionListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
         } else {
             if (outcomeList.isEmpty()) {
-                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData)
                     .errors(List.of("There are no general application available for issue direction.")).build();
             }
             List<DynamicListElement> dynamicListElements = outcomeList.stream()
@@ -86,10 +88,10 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
             caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicList);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
     }
 
-    private void setDirectionListForNonCollectionGeneralApplication(FinremCaseData caseData,
+    private void setDirectionListForNonCollectionGeneralApplication(FinremCaseDataContested caseData,
                                                                     AtomicInteger index,
                                                                     String userAuthorisation, String caseId) {
         GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);

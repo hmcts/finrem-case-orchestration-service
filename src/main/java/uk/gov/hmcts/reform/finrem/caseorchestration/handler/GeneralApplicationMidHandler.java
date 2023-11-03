@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
@@ -49,12 +50,12 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler<FinremCa
 
     @Override
     @SuppressWarnings({"java:S6541","java:S3776"})
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
 
         log.info("Mid callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         String caseId = caseDetails.getId().toString();
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(
@@ -62,8 +63,8 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler<FinremCa
         log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+        FinremCaseDetails<FinremCaseDataContested> caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseDataContested caseDataBefore = caseDetailsBefore.getData();
         GeneralApplicationWrapper wrapper = caseData.getGeneralApplicationWrapper();
         GeneralApplicationWrapper wrapperBefore = caseDataBefore.getGeneralApplicationWrapper();
 

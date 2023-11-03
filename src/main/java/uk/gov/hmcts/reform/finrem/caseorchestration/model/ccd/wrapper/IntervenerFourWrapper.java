@@ -92,7 +92,7 @@ public class IntervenerFourWrapper extends IntervenerWrapper {
 
     @Override
     @JsonIgnore
-    public List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData) {
+    public List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseDataContested caseData) {
         if (caseData.getIntv4HearingNoticesCollection() == null) {
             caseData.setIntv4HearingNoticesCollection(new ArrayList<>());
         }

@@ -95,7 +95,8 @@ public class ConsentOrderApprovedDocumentService {
             fileName);
     }
 
-    public CaseDocument generateApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authToken) {
+    public CaseDocument generateApprovedConsentOrderCoverLetter(FinremCaseDetails<FinremCaseDataConsented> caseDetails,
+                                                                String authToken) {
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, APPLICANT);
         String approvedOrderNotificationFileName;
         if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getData()))) {
@@ -136,9 +137,10 @@ public class ConsentOrderApprovedDocumentService {
         return stampedPensionData;
     }
 
-    public List<BulkPrintDocument> prepareApplicantLetterPack(FinremCaseDetails caseDetails, String authorisationToken) {
+    public List<BulkPrintDocument> prepareApplicantLetterPack(FinremCaseDetails<FinremCaseDataConsented> caseDetails,
+                                                              String authorisationToken) {
         log.info("Sending Approved Consent Order to applicant / solicitor for Bulk Print, case {}", caseDetails.getId());
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataConsented caseData = caseDetails.getData();
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 

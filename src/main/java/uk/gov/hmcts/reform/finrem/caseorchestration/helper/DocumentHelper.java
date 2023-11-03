@@ -181,7 +181,7 @@ public class DocumentHelper {
             .toList();
     }
 
-    public List<CaseDocument> getPensionDocumentsData(FinremCaseData caseData) {
+    public List<CaseDocument> getPensionDocumentsData(FinremCaseDataConsented caseData) {
         return ofNullable(caseData.getPensionCollection())
             .orElse(emptyList())
             .stream()
@@ -280,7 +280,7 @@ public class DocumentHelper {
             nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()));
     }
 
-    public boolean hasAnotherHearing(FinremCaseData caseData) {
+    public boolean hasAnotherHearing(FinremCaseDataContested caseData) {
         List<DirectionDetailCollection> directionDetailsCollection
             = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
         Optional<DirectionDetailCollection> detailCollection
@@ -423,7 +423,7 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-    public Optional<CaseDocument> getLatestAdditionalHearingDocument(FinremCaseData caseData) {
+    public Optional<CaseDocument> getLatestAdditionalHearingDocument(FinremCaseDataContested caseData) {
         List<AdditionalHearingDocumentCollection> additionalHearingDocuments  =  caseData.getAdditionalHearingDocuments();
         Optional<AdditionalHearingDocumentCollection> documentCollection
             = ofNullable(additionalHearingDocuments)
@@ -664,8 +664,9 @@ public class DocumentHelper {
         });
     }
 
-    public List<CaseDocument> getHearingDocumentsAsPdfDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
-        FinremCaseData data = caseDetails.getData();
+    public List<CaseDocument> getHearingDocumentsAsPdfDocuments(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                                                String authorisationToken) {
+        FinremCaseDataContested data = caseDetails.getData();
         List<CaseDocument> documents = new ArrayList<>();
         List<DocumentCollection> pdfDocuments = new ArrayList<>();
         List<DocumentCollection> documentCollections
