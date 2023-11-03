@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -196,6 +197,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(CaseRole.APP_SOLICITOR.getCcdCode())))
+            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole", is(CaseRole.RESP_SOLICITOR.getCcdCode())))
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.fastTrackDecision", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
