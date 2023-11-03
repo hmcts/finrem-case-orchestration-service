@@ -19,11 +19,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulk
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNotice;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,11 +36,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ALL_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST;
@@ -73,13 +72,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_WALES_FRC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildInterimHearingFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtIH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -89,22 +87,31 @@ public class InterimHearingService {
     private final BulkPrintService bulkPrintService;
     private final DocumentConfiguration documentConfiguration;
     private final GenericDocumentService genericDocumentService;
-    private final CaseDataService caseDataService;
     private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final InterimHearingHelper interimHearingHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public void submitInterimHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
+    private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+
+    public List<String> submitInterimHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
         log.info("In submitInterimHearing for case id {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
         Map<String, Object> caseDataBefore = caseDetailsBefore.getData();
         List<InterimHearingData> interimHearingList = filterInterimHearingToProcess(caseData, caseDataBefore);
 
+        List<String> errors = new ArrayList<>();
         if (!interimHearingList.isEmpty()) {
-            List<BulkPrintDocument> documents = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
-            sendToBulkPrint(caseDetails, caseData, authorisationToken, documents);
+            final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+            selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
+            errors = selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseDetails.getData(),
+                HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
+            if (!errors.isEmpty()) {
+                return errors;
+            }
+            CaseDocumentsHolder caseDocumentsHolder = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
+            sendToBulkPrint(caseDetails, finremCaseDetails, authorisationToken, caseDocumentsHolder);
         }
 
         //Need only for existing Interim Hearing
@@ -112,56 +119,102 @@ public class InterimHearingService {
             removeNonCollectionInterimData(caseData);
         }
         caseDetails.setData(caseData);
+        return errors;
     }
 
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
-    private void sendToBulkPrint(CaseDetails caseDetails, Map<String, Object> caseData, String authorisationToken,
-                                 List<BulkPrintDocument> documents) {
-        if (isPaperApplication(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+    private void sendToBulkPrint(CaseDetails caseDetails, FinremCaseDetails finremCaseDetails, String authorisationToken,
+                                 CaseDocumentsHolder caseDocumentsHolder) {
+
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
             log.info("Sending interim hearing documents to applicant - bulk print for caseid {}", caseDetails.getId());
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
         }
-        if (isPaperApplication(caseData) || !isRespondentSolicitorAgreeToReceiveEmails(caseData)) {
+        if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
             log.info("Sending interim hearing documents to respondent - bulk print for caseid {}", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
         }
+        sendToBulkPrintForInterveners(authorisationToken, caseDetails, finremCaseDetails, caseDocumentsHolder);
+    }
+
+    @SuppressWarnings("java:S1874")
+    private void sendToBulkPrintForInterveners(String authorisationToken, CaseDetails caseDetails, FinremCaseDetails finremCaseDetails,
+                                               CaseDocumentsHolder caseDocumentsHolder) {
+
+        final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
+        interveners.forEach(intervenerWrapper -> {
+            if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
+                && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
+                addCaseDocumentsToIntervenerHearingNotices(intervenerWrapper, caseDocumentsHolder, finremCaseDetails.getData(),
+                    caseDetails.getData());
+                if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, finremCaseDetails)) {
+                    log.info("Sending letter correspondence to {} for case: {}",
+                        intervenerWrapper.getIntervenerType().getTypeValue(),
+                        caseDetails.getId());
+                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
+                        caseDocumentsHolder.getBulkPrintDocuments());
+                }
+            }
+        });
+    }
+
+    private void addCaseDocumentsToIntervenerHearingNotices(IntervenerWrapper intervenerWrapper, CaseDocumentsHolder caseDocumentsHolder,
+                                                            FinremCaseData finremCaseData, Map<String, Object> caseData) {
+        List<IntervenerHearingNoticeCollection> hearingNotices = intervenerWrapper.getIntervenerHearingNoticesCollection(finremCaseData);
+        caseDocumentsHolder.getCaseDocuments().forEach(cd -> hearingNotices.add(getHearingNoticesDocumentCollection(cd)));
+        caseData.put(intervenerWrapper.getIntervenerHearingNoticesCollectionName(), hearingNotices);
+    }
+
+    private IntervenerHearingNoticeCollection getHearingNoticesDocumentCollection(CaseDocument hearingNotice) {
+        return IntervenerHearingNoticeCollection.builder()
+            .value(IntervenerHearingNotice.builder().caseDocument(hearingNotice)
+                .noticeReceivedAt(LocalDateTime.now()).build()).build();
     }
 
     @SuppressWarnings("java:S6204")
-    private List<BulkPrintDocument> prepareDocumentsForPrint(CaseDetails caseDetails,
-                                                             List<InterimHearingData> interimHearingList,
-                                                             String authorisationToken) {
+    private CaseDocumentsHolder prepareDocumentsForPrint(CaseDetails caseDetails,
+                                                         List<InterimHearingData> interimHearingList,
+                                                         String authorisationToken) {
+
+
         String caseId = caseDetails.getId().toString();
         log.info("preparing for bulk print document for case id {}", caseId);
         Map<String, Object> caseData = caseDetails.getData();
         List<CaseDocument> interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails,
             interimHearingList, authorisationToken);
 
+
         List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
             interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseData);
-
-        interimDocument.forEach(doc -> bulkPrintDocumentsList.add(loadBulkPrintDocument(doc)));
         caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
+
+        CaseDocumentsHolder caseDocumentsHolder = CaseDocumentsHolder.builder()
+            .caseDocuments(new ArrayList<>())
+            .bulkPrintDocuments(new ArrayList<>())
+            .build();
+        interimDocument.forEach(doc -> bulkPrintDocumentsList.add(loadBulkPrintDocument(doc)));
+        caseDocumentsHolder.getCaseDocuments().addAll(interimDocument);
 
         List<BulkPrintDocument> documents = interimDocument.stream()
             .map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList());
+        caseDocumentsHolder.getBulkPrintDocuments().addAll(documents);
 
-        addUploadedDocumentsToBulkPrintList(caseId, interimHearingList, documents, authorisationToken);
+        addUploadedDocumentsToBulkPrintList(caseId, interimHearingList, caseDocumentsHolder, authorisationToken);
 
-        return documents;
+        return caseDocumentsHolder;
     }
 
     private void addUploadedDocumentsToBulkPrintList(String caseId,
                                                      List<InterimHearingData> interimHearingList,
-                                                     List<BulkPrintDocument> documents,
+                                                     CaseDocumentsHolder caseDocumentsHolder,
                                                      String authorisationToken) {
         List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
-        interimCaseData.forEach(interimData -> addToBulkPrintList(caseId, interimData, documents, authorisationToken));
+        interimCaseData.forEach(interimData -> addToBulkPrintList(caseId, interimData, caseDocumentsHolder, authorisationToken));
     }
 
     private void addToBulkPrintList(String caseId, Map<String, Object> interimData,
-                                    List<BulkPrintDocument> documents, String authorisationToken) {
+                                    CaseDocumentsHolder caseDocumentsHolder, String authorisationToken) {
         String isDocUploaded = nullToEmpty(interimData.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
         if ("Yes".equalsIgnoreCase(isDocUploaded)) {
             log.warn("Additional uploaded interim document found for printing for case id {}", caseId);
@@ -169,7 +222,8 @@ public class InterimHearingService {
                 documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments =
                 genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
-            documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
+            caseDocumentsHolder.getBulkPrintDocuments().add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
+            caseDocumentsHolder.getCaseDocuments().add(additionalUploadedDocuments);
         }
     }
 
@@ -242,26 +296,6 @@ public class InterimHearingService {
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
         }
-    }
-
-    private boolean isPaperApplication(Map<String, Object> caseData) {
-        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(PAPER_APPLICATION)));
-    }
-
-    private boolean isRespondentRepresentedByASolicitor(Map<String, Object> caseData) {
-        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED)));
-    }
-
-    private boolean isApplicantSolicitorAgreeToReceiveEmails(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
-    }
-
-    private boolean isRespondentSolicitorAgreeToReceiveEmails(Map<String, Object> caseData) {
-        return !isPaperApplication(caseData)
-            && isRespondentRepresentedByASolicitor(caseData)
-            && isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)
-            && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
@@ -376,29 +410,33 @@ public class InterimHearingService {
         log.info("Sending email notification for case id {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
         Map<String, Object> caseDataBefore = caseDetailsBefore.getData();
+        List<InterimHearingData> caseDataList = filterInterimHearingToProcess(caseData, caseDataBefore);
+        List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(caseDataList);
+        interimCaseData.forEach(interimHearingData -> notify(caseDetails, interimHearingData));
 
-        if (!caseDataService.isPaperApplication(caseData)) {
-            List<InterimHearingData> caseDataList = filterInterimHearingToProcess(caseData, caseDataBefore);
-            List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(caseDataList);
-            interimCaseData.forEach(interimHearingData -> notify(caseDetails, interimHearingData));
-        }
     }
 
     private void notify(CaseDetails caseDetails, Map<String, Object> interimHearingData) {
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+
+        final FinremCaseDetails finremCaseDetails = selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails);
+
+        if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
+            && finremCaseDetails.getData().isApplicantCorrespondenceEnabled()) {
             log.info("Sending email notification to Applicant Solicitor about interim hearing for case id {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(caseDetails, interimHearingData);
         }
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+        if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
+            && finremCaseDetails.getData().isRespondentCorrespondenceEnabled()) {
             log.info("Sending email notification to Respondent Solicitor about interim hearing for case id {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(caseDetails, interimHearingData);
         }
         if (notificationService.isContestedApplication(caseDetails)) {
-            final FinremCaseDetails<FinremCaseDataContested> finremCaseDetails =
-                finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+
             final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
             interveners.forEach(intervenerWrapper -> {
-                if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)) {
+                if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)
+                    && (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
+                    && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled()))) {
                     log.info("Sending email notification to {} Solicitor about interim hearing for case id {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
                         caseDetails.getId());
@@ -408,4 +446,6 @@ public class InterimHearingService {
             });
         }
     }
+
+
 }

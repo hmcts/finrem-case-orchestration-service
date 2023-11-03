@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasKey;
@@ -126,7 +128,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+        when(documentHelper.getPensionDocumentsData(any(Map.class))).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -148,7 +150,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+        when(documentHelper.getPensionDocumentsData(any(Map.class))).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -217,7 +219,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+        when(documentHelper.getPensionDocumentsData(any(Map.class))).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -295,7 +297,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesNotificationLetter() {
-        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(isA(CaseDetails.class), eq(AUTH_TOKEN)));
+        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(isA(FinremCaseDetails.class), eq(AUTH_TOKEN)));
     }
 
     private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {

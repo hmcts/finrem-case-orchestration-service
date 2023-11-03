@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -10,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
@@ -56,5 +60,64 @@ public class ConsentOrderService {
         } else {
             return caseData.getConsentOrder();
         }
+    }
+
+
+    public List<CaseDocument> checkIfD81DocumentContainsEncryption(Map<String, Object> caseData) {
+        List<CaseDocument> caseDocumentList = new ArrayList<>();
+
+        CaseDocument consentOrderDocument = convertToCaseDocument(caseData.get("consentOrder"));
+        if (consentOrderDocument != null) {
+            caseDocumentList.add(consentOrderDocument);
+        }
+
+        setD81Document(caseData, caseDocumentList);
+
+        List<CaseDocument> pensionDocumentsData = documentHelper.getPensionDocumentsData(caseData);
+        if (pensionDocumentsData != null && !pensionDocumentsData.isEmpty()) {
+            caseDocumentList.addAll(pensionDocumentsData);
+        }
+
+        List<CaseDocument> variationOrderDocumentsData = documentHelper.getVariationOrderDocumentsData(caseData);
+        if (variationOrderDocumentsData != null && !variationOrderDocumentsData.isEmpty()) {
+            caseDocumentList.addAll(variationOrderDocumentsData);
+        }
+
+        List<CaseDocument> otherDocumentsData = documentHelper.getConsentOrderOtherDocumentsData(caseData);
+        if (otherDocumentsData != null && !otherDocumentsData.isEmpty()) {
+            caseDocumentList.addAll(otherDocumentsData);
+        }
+
+        return caseDocumentList;
+    }
+
+    private void setD81Document(Map<String, Object> caseData, List<CaseDocument> caseDocumentList) {
+        Object d81Question = caseData.get("d81Question");
+        if (d81Question != null) {
+            if (d81Question.equals("Yes")) {
+                CaseDocument caseDocument = convertToCaseDocument(caseData.get("d81Joint"));
+                if (caseDocument != null) {
+                    caseDocumentList.add(caseDocument);
+                }
+            } else {
+                CaseDocument caseAppDocument = convertToCaseDocument(caseData.get("d81Applicant"));
+                if (caseAppDocument != null) {
+                    caseDocumentList.add(caseAppDocument);
+                }
+                CaseDocument caseRespDocument = convertToCaseDocument(caseData.get("d81Respondent"));
+                if (caseRespDocument != null) {
+                    caseDocumentList.add(caseRespDocument);
+                }
+            }
+        }
+    }
+
+    private CaseDocument convertToCaseDocument(Object object) {
+        if (object == null) {
+            return null;
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper.convertValue(object, CaseDocument.class);
     }
 }

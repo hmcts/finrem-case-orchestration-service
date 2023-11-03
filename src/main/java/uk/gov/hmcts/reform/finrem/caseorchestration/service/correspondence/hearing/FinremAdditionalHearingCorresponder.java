@@ -1,50 +1,44 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
+@Slf4j
 public class FinremAdditionalHearingCorresponder extends FinremHearingCorresponder {
-
-    private final DocumentHelper documentHelper;
 
     @Autowired
     public FinremAdditionalHearingCorresponder(BulkPrintService bulkPrintService,
                                                NotificationService notificationService,
                                                DocumentHelper documentHelper) {
-        super(bulkPrintService, notificationService);
-        this.documentHelper = documentHelper;
+        super(bulkPrintService, notificationService, documentHelper);
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
-        List<BulkPrintDocument> documents = new ArrayList<>();
+    public List<CaseDocument> getCaseDocuments(FinremCaseDetails caseDetails) {
 
-        if (caseDetails.getData().isContestedApplication()) {
-            FinremCaseDataContested data = (FinremCaseDataContested) caseDetails.getData();
-            List<AdditionalHearingDocumentCollection> additionalHearingDocuments = data.getAdditionalHearingDocuments();
+        List<CaseDocument> documents = new ArrayList<>();
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = caseDetails.getData().getAdditionalHearingDocuments();
 
-            if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
-                AdditionalHearingDocumentCollection additionalHearingDocumentCollection =
-                    additionalHearingDocuments.get(additionalHearingDocuments.size() - 1);
-                BulkPrintDocument additionalDoc
-                    = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocumentCollection.getValue().getDocument());
-                documents.add(additionalDoc);
-            }
+        if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
+            AdditionalHearingDocumentCollection additionalHearingDocumentCollection =
+                additionalHearingDocuments.get(additionalHearingDocuments.size() - 1);
+            documents.add(additionalHearingDocumentCollection.getValue().getDocument());
+        }
 
-            if (data.getAdditionalListOfHearingDocuments() != null) {
-                BulkPrintDocument additionalUploadedDoc
-                    = documentHelper.getBulkPrintDocumentFromCaseDocument(data.getAdditionalListOfHearingDocuments());
-                documents.add(additionalUploadedDoc);
-            }
+        CaseDocument additionalListOfHearingDocuments = caseDetails.getData().getAdditionalListOfHearingDocuments();
+        if (additionalListOfHearingDocuments != null) {
+            documents.add(additionalListOfHearingDocuments);
         }
         return documents;
     }

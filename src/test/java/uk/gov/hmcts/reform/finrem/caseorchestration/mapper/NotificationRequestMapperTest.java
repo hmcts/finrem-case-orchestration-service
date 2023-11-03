@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
@@ -213,9 +214,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         callbackRequest.getCaseDetails().getData().put("intervener1SolName", TEST_RESP_SOLICITOR_NAME);
         callbackRequest.getCaseDetails().getData().put("intervener1SolicitorReference", TEST_RESP_SOLICITOR_REFERENCE);
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey("intervener1SolEmail")
-            .solicitorNameKey("intervener1SolName")
-            .solicitorReferenceKey("intervener1SolicitorReference").build();
+            .solicitorEmailKey(TEST_RESP_SOLICITOR_EMAIL)
+            .solicitorNameKey(TEST_RESP_SOLICITOR_NAME)
+            .solicitorReferenceKey(TEST_RESP_SOLICITOR_REFERENCE).build();
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
             callbackRequest.getCaseDetails(), dataKeysWrapper);
 
@@ -386,9 +387,10 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourneyForHearingFinremCaseData() throws Exception {
-        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = buildFinremCallbackRequest(CONSENTED_HEARING_JSON);
+    public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourneyForHearingFinremCaseData() {
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest = buildHearingFinremCallbackRequest(CONSENTED_HEARING_JSON);
         FinremCaseDataConsented caseData = callbackRequest.getCaseDetails().getData();
+        caseData.setCcdCaseType(CaseType.CONSENTED);
 
         List<ConsentedHearingDataWrapper> hearings = caseData.getListForHearings();
         List<ConsentedHearingDataElement> elements = hearings.stream().map(ConsentedHearingDataWrapper::getValue).toList();

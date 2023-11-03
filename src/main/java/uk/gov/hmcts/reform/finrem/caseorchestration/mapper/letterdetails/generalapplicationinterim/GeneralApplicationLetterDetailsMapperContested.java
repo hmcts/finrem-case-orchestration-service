@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataCont
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralApplicationLetterDetails;
 
@@ -26,7 +26,7 @@ public class GeneralApplicationLetterDetailsMapperContested extends ContestedAbs
                                                                 CourtListWrapper courtList) {
         FinremCaseDataContested caseData = caseDetails.getData();
         final GeneralApplicationWrapper generalApplication = caseData.getGeneralApplicationWrapper();
-        final FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
+        final CourtDetailsTemplateFields courtDetails = courtDetailsMapper.getCourtDetails(courtList);
         final String hearingVenue = courtDetailsMapper.getCourtDetails(caseData.getRegionWrapper()
             .getGeneralApplicationCourtList()).getCourtContactDetailsAsOneLineAddressString();
 

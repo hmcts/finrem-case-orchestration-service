@@ -73,6 +73,11 @@ public class IntervenerCorresponder extends FinremSingleLetterOrEmailAllPartiesC
         }
     }
 
+    @Override
+    protected boolean shouldSendIntervenerLetter(IntervenerWrapper intervenerWrapper) {
+        return intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty();
+    }
+
     protected void sendIntervenerCorrespondence(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails, String auth) {
         if (shouldSendIntervenerSolicitorEmail(intervenerWrapper)) {
             log.info("Sending email correspondence to {} for case: {}", intervenerWrapper.getIntervenerType(), caseDetails.getId());

@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralApplicationLetterDetails;
 
@@ -77,7 +77,7 @@ public class GeneralApplicationLetterDetailsMapperTest extends ContestedAbstract
             .build();
     }
 
-    private FrcCourtDetails getCourtDetails() {
+    private CourtDetailsTemplateFields getCourtDetails() {
         GeneralApplicationCourtListWrapper courtListWrapper = new GeneralApplicationCourtListWrapper();
         courtListWrapper.setGeneralApplicationDirectionsCfcCourtList(CfcCourt.KINGSTON_UPON_THAMES_COUNTY_COURT_AND_FAMILY_COURT);
         return new CourtDetailsMapper(new ObjectMapper()).getCourtDetails(courtListWrapper);

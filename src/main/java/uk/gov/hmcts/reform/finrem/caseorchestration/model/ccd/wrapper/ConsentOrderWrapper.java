@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentNatureOfApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsCollection;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OtherDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionProvider;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -73,4 +75,16 @@ public class ConsentOrderWrapper {
     @JsonProperty("Contested_ConsentedApprovedOrders")
     private List<ConsentOrderCollection> contestedConsentedApprovedOrders;
     private List<UploadConsentOrderCollection> uploadConsentOrder;
+    private List<ConsentInContestedApprovedOrderCollection> appConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> respConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> intv1ConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> intv2ConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> intv3ConsentApprovedOrders;
+    private List<ConsentInContestedApprovedOrderCollection> intv4ConsentApprovedOrders;
+    private List<UnapprovedOrderCollection> appRefusedOrderCollection;
+    private List<UnapprovedOrderCollection> respRefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv1RefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv2RefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv3RefusedOrderCollection;
+    private List<UnapprovedOrderCollection> intv4RefusedOrderCollection;
 }

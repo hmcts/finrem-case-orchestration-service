@@ -21,8 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthEastFrc
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthWestFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultRegionWrapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -190,7 +190,7 @@ public class CaseHearingFunctionsTest {
     @Test
     public void shouldPopulateLeylandCourtDetailsFinrem() {
 
-        DefaultRegionWrapper regionWrapper = DefaultRegionWrapper.builder().regionList(Region.NORTHWEST)
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.NORTHWEST)
             .northWestFrcList(RegionNorthWestFrc.LANCASHIRE)
             .courtListWrapper(
                 DefaultCourtListWrapper.builder().lancashireCourtList(LancashireCourt.LEYLAND_COURT)
@@ -222,7 +222,7 @@ public class CaseHearingFunctionsTest {
     @Test
     public void shouldPopulateCambridgeCourtDetailsFinrem() {
 
-        DefaultRegionWrapper regionWrapper = DefaultRegionWrapper.builder().regionList(Region.SOUTHEAST)
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.SOUTHEAST)
             .southEastFrcList(RegionSouthEastFrc.BEDFORDSHIRE)
             .courtListWrapper(
                 DefaultCourtListWrapper.builder().bedfordshireCourtList(BedfordshireCourt.CAMBRIDGE)
@@ -254,7 +254,7 @@ public class CaseHearingFunctionsTest {
 
     @Test
     public void shouldPopulateReadingCourtDetailsFinrem() {
-        DefaultRegionWrapper regionWrapper = DefaultRegionWrapper.builder().regionList(Region.SOUTHEAST)
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.SOUTHEAST)
             .southEastFrcList(RegionSouthEastFrc.THAMES_VALLEY)
             .courtListWrapper(
                 DefaultCourtListWrapper.builder().thamesValleyCourtList(ThamesValleyCourt.READING)
@@ -287,7 +287,7 @@ public class CaseHearingFunctionsTest {
     @Test
     public void shouldPopulateKentCourtDetailsFinrem() {
 
-        DefaultRegionWrapper regionWrapper = DefaultRegionWrapper.builder().regionList(Region.SOUTHEAST)
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.SOUTHEAST)
             .southEastFrcList(RegionSouthEastFrc.KENT)
             .courtListWrapper(
                 DefaultCourtListWrapper.builder().kentSurreyCourtList(KentSurreyCourt.KENT_DARTFORD_COURTS)
@@ -319,7 +319,7 @@ public class CaseHearingFunctionsTest {
 
     @Test
     public void shouldPopulateDurhamCourtDetailsFinrem() {
-        DefaultRegionWrapper regionWrapper = DefaultRegionWrapper.builder().regionList(Region.NORTHEAST)
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.NORTHEAST)
             .northEastFrcList(RegionNorthEastFrc.CLEVELAND)
             .courtListWrapper(
                 DefaultCourtListWrapper.builder().cleavelandCourtList(ClevelandCourt.FR_CLEVELAND_HC_LIST_2)
@@ -353,7 +353,7 @@ public class CaseHearingFunctionsTest {
     @Test
     public void shouldPopulateBournemouthCourtDetailsFinrem() {
 
-        DefaultRegionWrapper regionWrapper = DefaultRegionWrapper.builder().regionList(Region.SOUTHWEST)
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.SOUTHWEST)
             .southWestFrcList(RegionSouthWestFrc.DORSET)
             .courtListWrapper(
                 DefaultCourtListWrapper.builder().dorsetCourtList(DorsetCourt.BOURNEMOUTH)
@@ -371,7 +371,7 @@ public class CaseHearingFunctionsTest {
 
     @Test
     public void shouldPopulateTorquayCourtDetailsFinrem() {
-        DefaultRegionWrapper regionWrapper = DefaultRegionWrapper.builder().regionList(Region.SOUTHWEST)
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.SOUTHWEST)
             .southWestFrcList(RegionSouthWestFrc.DEVON)
             .courtListWrapper(
                 DefaultCourtListWrapper.builder().devonCourtList(DevonCourt.TORQUAY)
@@ -419,7 +419,7 @@ public class CaseHearingFunctionsTest {
 
     @Test
     public void shouldPopulateSalisburyCourtDetailsFinrem() {
-        DefaultRegionWrapper regionWrapper = DefaultRegionWrapper.builder().regionList(Region.SOUTHWEST)
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.SOUTHWEST)
             .southWestFrcList(RegionSouthWestFrc.BRISTOL)
             .courtListWrapper(
                 DefaultCourtListWrapper.builder().bristolCourtList(BristolCourt.SALISBURY_LAW_COURTS)
@@ -452,7 +452,7 @@ public class CaseHearingFunctionsTest {
 
     @Test
     public void shouldPopulatePrestatynCourtDetailsFinrem() {
-        DefaultRegionWrapper regionWrapper = DefaultRegionWrapper.builder().regionList(Region.WALES)
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.WALES)
             .walesFrcList(RegionWalesFrc.NORTH_WALES)
             .courtListWrapper(
                 DefaultCourtListWrapper.builder().northWalesCourtList(NorthWalesCourt.PRESTATYN)
@@ -498,7 +498,7 @@ public class CaseHearingFunctionsTest {
     @Test
     public void shouldPopulateHighCourtDetailsFinrem() {
 
-        DefaultRegionWrapper regionWrapper = DefaultRegionWrapper.builder().regionList(Region.HIGHCOURT)
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.HIGHCOURT)
             .highCourtFrcList(RegionHighCourtFrc.HIGHCOURT)
             .courtListWrapper(
                 DefaultCourtListWrapper.builder().highCourtList(HighCourt.HIGHCOURT_COURT)
@@ -547,7 +547,7 @@ public class CaseHearingFunctionsTest {
         assertThat("Returns empty map", stringObjectMap.isEmpty());
     }
 
-    private FinremCaseData getFinremCaseData(DefaultRegionWrapper regionWrapper) {
+    private FinremCaseData getFinremCaseData(AllocatedRegionWrapper regionWrapper) {
         FinremCaseDataContested caseData = new FinremCaseDataContested();
         caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(TEST_SOLICITOR_EMAIL);
         caseData.getContactDetailsWrapper().setApplicantSolicitorName(TEST_SOLICITOR_NAME);
@@ -557,7 +557,7 @@ public class CaseHearingFunctionsTest {
         caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
         caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
-        caseData.getRegionWrapper().setDefaultRegionWrapper(regionWrapper);
+        caseData.getRegionWrapper().setAllocatedRegionWrapper(regionWrapper);
         caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
         return caseData;
     }

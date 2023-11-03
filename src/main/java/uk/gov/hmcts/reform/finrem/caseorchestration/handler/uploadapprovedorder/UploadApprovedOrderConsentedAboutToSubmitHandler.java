@@ -8,22 +8,27 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 @Slf4j
 @Service
 public class UploadApprovedOrderConsentedAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataConsented> {
 
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    private final GenericDocumentService service;
 
 
     public UploadApprovedOrderConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                            ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService) {
+                                                            ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
+                                                            GenericDocumentService service) {
         super(finremCaseDetailsMapper);
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
+        this.service =  service;
     }
 
     @Override
@@ -34,16 +39,18 @@ public class UploadApprovedOrderConsentedAboutToSubmitHandler extends FinremCall
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> handle(FinremCallbackRequest<FinremCaseDataConsented> callbackRequest,
-                                                                                       String userAuthorisation) {
-        log.info("Handling Upload Approved Order Consented application about to submit callback for case id: {}",
-            callbackRequest.getCaseDetails().getId());
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
+        log.info("Handling Upload Approved Order Consented application about to submit callback for case id: {}", caseId);
         FinremCaseDetails<FinremCaseDataConsented> finremCaseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to set nature of application for consented case with Case ID: {}",
-            finremCaseDetails.getId());
         FinremCaseDataConsented caseData = finremCaseDetails.getData();
 
-        caseData.setLatestConsentOrder(caseData.getUploadApprovedConsentOrder());
+        CaseDocument approvedConsentOrder = caseData.getConsentOrderWrapper().getUploadApprovedConsentOrder();
+        CaseDocument approvedConsentOrderPdf = service.convertDocumentIfNotPdfAlready(approvedConsentOrder, userAuthorisation, caseId);
+        caseData.getConsentOrderWrapper().setUploadApprovedConsentOrder(approvedConsentOrderPdf);
+
+        caseData.setLatestConsentOrder(caseData.getConsentOrderWrapper().getUploadApprovedConsentOrder());
         consentOrderApprovedDocumentService
             .addGeneratedApprovedConsentOrderDocumentsToCase(userAuthorisation, finremCaseDetails);
 

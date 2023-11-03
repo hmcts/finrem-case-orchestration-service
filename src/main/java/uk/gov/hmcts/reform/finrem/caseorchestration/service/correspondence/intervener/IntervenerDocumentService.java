@@ -206,7 +206,7 @@ public class IntervenerDocumentService {
 
         return IntervenerAddedLetterDetails.builder()
             .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData()
-                .getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
+                .getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()))
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
@@ -223,7 +223,7 @@ public class IntervenerDocumentService {
 
         return IntervenerRemovedLetterDetails.builder()
             .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData()
-                .getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
+                .getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()))
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
@@ -240,7 +240,7 @@ public class IntervenerDocumentService {
 
         return IntervenerAddedSolicitorLetterDetails.builder()
             .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData()
-                .getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
+                .getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()))
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
@@ -259,7 +259,7 @@ public class IntervenerDocumentService {
 
         return IntervenerRemovedSolicitorLetterDetails.builder()
             .courtDetails(courtDetailsMapper.getCourtDetails(caseDetails.getData()
-                .getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()))
+                .getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()))
             .addressee(caseDetails.getData().getCurrentAddressee())
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())

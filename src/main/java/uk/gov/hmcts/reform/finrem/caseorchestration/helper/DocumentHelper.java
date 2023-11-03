@@ -14,12 +14,17 @@ import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderOtherDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderOtherDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -35,10 +40,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationOrderType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContestedContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -74,18 +84,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
@@ -97,12 +102,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
@@ -122,10 +122,18 @@ public class DocumentHelper {
     public static final String VARIATION = "variation";
     public static final String CONSENT = "consent";
 
+
+    public enum PaperNotificationRecipient {
+        APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR,
+        INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR
+    }
+
+
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
     private final GenericDocumentService service;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final LetterAddresseeGeneratorMapper letterAddresseeGenerator;
 
     public static CtscContactDetails buildCtscContactDetails() {
         return CtscContactDetails.builder()
@@ -173,6 +181,52 @@ public class DocumentHelper {
             .toList();
     }
 
+    public List<CaseDocument> getPensionDocumentsData(FinremCaseData caseData) {
+        return ofNullable(caseData.getPensionCollection())
+            .orElse(emptyList())
+            .stream()
+            .map(PensionTypeCollection::getTypedCaseDocument)
+            .map(PensionType::getPensionDocument)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+
+    /**
+     * Return List Object for given Case with the given indentation used.
+     * <p>Please use @{@link #getVariationOrderDocumentsData(Map)}</p>
+     * @param caseData instance of Map
+     * @return List Object
+     */
+    public List<CaseDocument> getVariationOrderDocumentsData(Map<String, Object> caseData) {
+        return ofNullable(caseData.get("otherVariationCollection"))
+            .map(this::convertToVariationOrderDataList)
+            .orElse(emptyList())
+            .stream()
+            .map(VariationOrderCollection::getTypeOfDocument)
+            .map(VariationOrderType::getUploadedDocument)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+
+    /**
+     * Return List Object for given Case with the given indentation used.
+     * <p>Please use @{@link #getConsentOrderOtherDocumentsData(Map)}</p>
+     * @param caseData instance of Map
+     * @return List Object
+     */
+    public List<CaseDocument> getConsentOrderOtherDocumentsData(Map<String, Object> caseData) {
+        return ofNullable(caseData.get("otherCollection"))
+            .map(this::convertToOtherDataList)
+            .orElse(emptyList())
+            .stream()
+            .map(ConsentOrderOtherDocumentCollection::getTypeOfDocument)
+            .map(ConsentOrderOtherDocumentType::getUploadedDocument)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
     /**
      * Return List Object for given Case with the given indentation used.
      * <p>Please use @{@link #getFormADocumentsData(FinremCaseData)}</p>
@@ -182,6 +236,7 @@ public class DocumentHelper {
      * @deprecated Use {@link Map caseData}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public List<CaseDocument> getFormADocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(FORM_A_COLLECTION))
             .map(this::convertToPaymentDocumentCollectionList)
@@ -225,13 +280,32 @@ public class DocumentHelper {
             nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()));
     }
 
+    public boolean hasAnotherHearing(FinremCaseData caseData) {
+        List<DirectionDetailCollection> directionDetailsCollection
+            = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
+        Optional<DirectionDetailCollection> detailCollection
+            = directionDetailsCollection.stream().filter(e -> e.getValue().getIsAnotherHearingYN().isYes()).findAny();
+        return detailCollection.isPresent();
+    }
+
     public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
         if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             log.warn("Latest general order not found for printing for case");
             return null;
         }
-
         return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
+    }
+
+    public CaseDocument getLatestGeneralOrder(FinremCaseData caseData) {
+        if (isNull(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
+            log.warn("Latest general order not found for printing for case");
+            return null;
+        }
+        return convertToCaseDocument(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument());
+    }
+
+    public CaseDocument convertToCaseDocumentIfObjNotNull(Object object) {
+        return object != null ? objectMapper.convertValue(object, CaseDocument.class) : null;
     }
 
     public CaseDocument convertToCaseDocument(Object object) {
@@ -252,6 +326,15 @@ public class DocumentHelper {
         });
     }
 
+    private List<VariationOrderCollection> convertToVariationOrderDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    private List<ConsentOrderOtherDocumentCollection> convertToOtherDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
 
     private List<PaymentDocumentCollection> convertToPaymentDocumentCollectionList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
@@ -340,17 +423,18 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-
-    private String getAddresee(PaperNotificationRecipient recipient) {
-        return recipient == APPLICANT ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS;
-    }
-
-    private String getRespondentLastNameCcdFieldName(boolean isConsentedApplication) {
-        return isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME;
-    }
-
-    private String getRespondentFirstMiddleNameCcdFieldName(boolean isConsentedApplication) {
-        return isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
+    public Optional<CaseDocument> getLatestAdditionalHearingDocument(FinremCaseData caseData) {
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments  =  caseData.getAdditionalHearingDocuments();
+        Optional<AdditionalHearingDocumentCollection> documentCollection
+            = ofNullable(additionalHearingDocuments)
+            .orElse(emptyList())
+            .stream()
+            .reduce((first, second) -> second);
+        if (documentCollection.isPresent()) {
+            return documentCollection
+                .map(documentCollectionCopy -> documentCollectionCopy.getValue().getDocument());
+        }
+        return Optional.empty();
     }
 
     /**
@@ -363,66 +447,22 @@ public class DocumentHelper {
      * @deprecated Use {@link FinremCaseDetails caseDetails, PaperNotificationRecipient recipient}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     public CaseDetails prepareLetterTemplateData(CaseDetails caseDetails, PaperNotificationRecipient recipient) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
         CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
-        Map<String, Object> caseData = caseDetailsCopy.getData();
 
         boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
-        String reference = "";
-        String addresseeName;
-        Map<String, Object> addressToSendTo;
-
-        if (recipient == APPLICANT && caseDataService.isApplicantRepresentedByASolicitor(caseData)) {
-            log.info("Applicant is represented by a solicitor caseId {}", caseDetails.getId());
-            reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
-            addresseeName = nullToEmpty((caseData.get(isConsentedApplication ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME)));
-            addressToSendTo = (Map<String, Object>) caseData.get(isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS);
-        } else if (recipient == RESPONDENT && caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
-            log.info("Respondent is represented by a solicitor caseId {}", caseDetails.getId());
-            reference = nullToEmpty((caseData.get(RESP_SOLICITOR_REFERENCE)));
-            addresseeName = nullToEmpty((caseData.get(RESP_SOLICITOR_NAME)));
-            addressToSendTo = (Map<String, Object>) caseData.get(RESP_SOLICITOR_ADDRESS);
-        } else {
-            log.info("{} is not represented by a solicitor for caseId {}", recipient, caseDetails.getId());
-            addresseeName = recipient == APPLICANT
-                ? caseDataService.buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME)
-                : caseDataService.buildFullName(caseData, getRespondentFirstMiddleNameCcdFieldName(isConsentedApplication),
-                getRespondentLastNameCcdFieldName(isConsentedApplication));
-            addressToSendTo = (Map) caseData.get(getAddresee(recipient));
-        }
-
-        return prepareLetterTemplateData(caseDetailsCopy, reference, addresseeName, addressToSendTo, isConsentedApplication);
+        AddresseeDetails addresseeDetails = letterAddresseeGenerator.generate(caseDetailsCopy, recipient);
+        return prepareLetterTemplateData(caseDetailsCopy, nullToEmpty(addresseeDetails.getReference()), addresseeDetails.getAddresseeName(),
+            addresseeDetails.getAddressToSendTo(), isConsentedApplication);
     }
 
     public CaseDetails prepareLetterTemplateData(FinremCaseDetails caseDetails, PaperNotificationRecipient recipient) {
-        FinremCaseData caseData = caseDetails.getData();
-        Long caseId = caseDetails.getId();
 
-        String reference = "";
-        String addresseeName;
-        Address addressToSendTo;
-
-        if (recipient == APPLICANT && caseData.isApplicantRepresentedByASolicitor()) {
-            log.info("Applicant is represented by a solicitor on case {}", caseId);
-            reference = nullToEmpty((caseData.getContactDetailsWrapper().getSolicitorReference()));
-            addresseeName = nullToEmpty(caseData.getAppSolicitorName());
-            addressToSendTo = caseData.getAppSolicitorAddress();
-        } else if (recipient == RESPONDENT && caseData.isRespondentRepresentedByASolicitor()) {
-            log.info("Respondent is represented by a solicitor on case {}", caseId);
-            reference = nullToEmpty((caseData.getContactDetailsWrapper().getRespondentSolicitorReference()));
-            addresseeName = nullToEmpty((caseData.getRespondentSolicitorName()));
-            addressToSendTo = caseData.getContactDetailsWrapper().getRespondentSolicitorAddress();
-        } else {
-            log.info("{} is not represented by a solicitor on case {}", recipient, caseId);
-            addresseeName = recipient == APPLICANT
-                ? caseDetails.getData().getFullApplicantName()
-                : caseDetails.getData().getRespondentFullName();
-            addressToSendTo = recipient == APPLICANT ? caseData.getContactDetailsWrapper().getApplicantAddress() :
-                caseData.getContactDetailsWrapper().getRespondentAddress();
-        }
-
-        return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
+        AddresseeDetails addresseeDetails = letterAddresseeGenerator.generate(caseDetails, recipient);
+        return prepareLetterTemplateData(caseDetails, nullToEmpty(addresseeDetails.getReference()), addresseeDetails.getAddresseeName(),
+            addresseeDetails.getFinremAddressToSendTo());
     }
 
 
@@ -440,6 +480,7 @@ public class DocumentHelper {
      * Address addressToSendTo}
      */
     @Deprecated(since = "15-june-2023")
+    @SuppressWarnings("java:S1133")
     private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName,
                                                   Map<String, Object> addressToSendTo,
                                                   boolean isConsentedApplication) {
@@ -465,8 +506,9 @@ public class DocumentHelper {
             caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
             caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         } else {
-            log.info("Failed to prepare template data as not all required address details were present");
-            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
+            log.info("Failed to prepare template data as not all required address details were present for caseId {}", ccdNumber);
+            throw new IllegalArgumentException("DocumentHelper CaseDetails Mandatory data missing from address when "
+                + "trying to generate document for caseId " + ccdNumber);
         }
 
         return caseDetailsCopy;
@@ -498,7 +540,8 @@ public class DocumentHelper {
             caseData.put("courtDetails", buildFrcCourtDetails(finremCaseDetails.getData()));
         } else {
             log.info("Failed to prepare template data as not all required address details were present on case {}", caseId);
-            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
+            throw new IllegalArgumentException("DocumentHelper FinremCaseDetails Mandatory data missing from address"
+                + " when trying to generate document for caseId " + caseId);
         }
 
         return caseDetails;
@@ -621,6 +664,25 @@ public class DocumentHelper {
         });
     }
 
+    public List<CaseDocument> getHearingDocumentsAsPdfDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
+        FinremCaseData data = caseDetails.getData();
+        List<CaseDocument> documents = new ArrayList<>();
+        List<DocumentCollection> pdfDocuments = new ArrayList<>();
+        List<DocumentCollection> documentCollections
+            = Optional.ofNullable(data.getHearingOrderOtherDocuments()).orElse(new ArrayList<>());
+        if (!documentCollections.isEmpty()) {
+            documentCollections.forEach(doc -> {
+                CaseDocument caseDocument = doc.getValue();
+                CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken,
+                    String.valueOf(caseDetails.getId()));
+                pdfDocuments.add(DocumentCollection.builder().value(pdfDocument).build());
+                documents.add(pdfDocument);
+            });
+            data.setHearingOrderOtherDocuments(pdfDocuments);
+        }
+        return documents;
+    }
+
     public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
                                                                                   String documentName) {
         List<CaseDocument> documents = new ArrayList<>();
@@ -707,9 +769,17 @@ public class DocumentHelper {
             });
     }
 
-    public enum PaperNotificationRecipient {
-        APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR,
-        INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR
+    public static PaperNotificationRecipient getIntervenerPaperNotificationRecipient(IntervenerWrapper intervenerWrapper) {
+        if (IntervenerType.INTERVENER_ONE.equals(intervenerWrapper.getIntervenerType())) {
+            return INTERVENER_ONE;
+        } else if (IntervenerType.INTERVENER_TWO.equals(intervenerWrapper.getIntervenerType())) {
+            return INTERVENER_TWO;
+        } else if (IntervenerType.INTERVENER_THREE.equals(intervenerWrapper.getIntervenerType())) {
+            return INTERVENER_THREE;
+        } else if (IntervenerType.INTERVENER_FOUR.equals(intervenerWrapper.getIntervenerType())) {
+            return INTERVENER_FOUR;
+        }
+        return null;
     }
 
     public CaseDocument nullCheckAndConvertToCaseDocument(Object object) {
@@ -724,7 +794,7 @@ public class DocumentHelper {
     }
 
     public boolean isHighCourtSelected(FinremCaseData caseData) {
-        Region region = caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList();
+        Region region = caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList();
         return Region.HIGHCOURT.equals(region);
     }
 

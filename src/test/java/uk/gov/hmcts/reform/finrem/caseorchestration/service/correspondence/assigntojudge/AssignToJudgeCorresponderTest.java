@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
@@ -41,6 +43,8 @@ public class AssignToJudgeCorresponderTest {
     @Mock
     AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
+    ObjectMapper objectMapper;
+
     private static final String AUTHORISATION_TOKEN = "authToken";
 
     private CaseDetails caseDetails;
@@ -48,6 +52,7 @@ public class AssignToJudgeCorresponderTest {
 
     @Before
     public void setUp() throws Exception {
+        objectMapper = new ObjectMapper();
         assignToJudgeCorresponder = new AssignToJudgeCorresponder(notificationService, bulkPrintService, finremCaseDetailsMapper,
             assignedToJudgeDocumentService);
         caseDetails = CaseDetails.builder().build();
@@ -57,6 +62,9 @@ public class AssignToJudgeCorresponderTest {
             caseDocument);
         when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(
+            caseDocument);
+        when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE)).thenReturn(
             caseDocument);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
             .data(FinremCaseDataContested.builder().build()).build());
@@ -78,6 +86,26 @@ public class AssignToJudgeCorresponderTest {
         assertEquals(caseDocument, result);
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+    }
+
+    @Test
+    public void shouldGetDocumentToPrintForIntervenerOne() {
+        testIntervenerGetDocumentToPrint(DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
+    }
+
+    @Test
+    public void shouldGetDocumentToPrintForIntervenerTwo() {
+        testIntervenerGetDocumentToPrint(DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO);
+    }
+
+    @Test
+    public void shouldGetDocumentToPrintForIntervenerThree() {
+        testIntervenerGetDocumentToPrint(DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE);
+    }
+
+    @Test
+    public void shouldGetDocumentToPrintForIntervenerFour() {
+        testIntervenerGetDocumentToPrint(DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR);
     }
 
     @Test
@@ -185,17 +213,45 @@ public class AssignToJudgeCorresponderTest {
     }
 
     @Test
-    public void shouldSendLetterToApplicantAndRespondentSolicitor() {
+    public void shouldSendLetterToApplicantAndRespondentAndIntervenerSolicitor() {
+
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .intervenerOneWrapper(IntervenerOneWrapper.builder()
+                    .intervenerName("Intervener1 name")
+                    .build())
+                .build())
+            .build());
+
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
+
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
 
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTHORISATION_TOKEN);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTHORISATION_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, IntervenerConstant.INTERVENER_ONE, AUTHORISATION_TOKEN);
+
     }
+
+
+    private void testIntervenerGetDocumentToPrint(DocumentHelper.PaperNotificationRecipient intervener) {
+        when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
+            intervener)).thenReturn(
+            caseDocument);
+        CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTHORISATION_TOKEN,
+            intervener);
+        assertEquals(caseDocument, result);
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
+            intervener);
+    }
+
 }

@@ -13,9 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.AdditionalHearingCorresponder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,6 +50,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
@@ -77,8 +78,6 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     BulkPrintService bulkPrintService;
     @MockBean
     NotificationService notificationService;
-    @MockBean
-    AdditionalHearingCorresponder additionalHearingCorresponder;
 
     @Before
     public void setUp() {
@@ -240,6 +239,15 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void getHearingOrderAdditionalDocuments() {
+        Map<String, Object> caseData = baseCaseData();
+        caseData.put(HEARING_UPLOADED_DOCUMENT, Collections.EMPTY_LIST);
+        List<HearingOrderAdditionalDocCollectionData> hearingOrderAdditionalDocuments
+            = additionalHearingDocumentService.getHearingOrderAdditionalDocuments(caseData);
+        assertTrue(hearingOrderAdditionalDocuments.isEmpty());
+    }
+
+    @Test
     public void createAndStoreAdditionalHearingDocuments_caseworkerUploadsOrder() throws JsonProcessingException {
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(
             CaseDocument.builder().documentBinaryUrl("docBin")
@@ -328,11 +336,15 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .data(caseData)
             .build();
 
+        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(expectedDocument);
+
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, caseDetails);
+
         assertTrue(caseDetails.getData().containsKey(LATEST_DRAFT_HEARING_ORDER));
         CaseDocument actualDocument = mapper.convertValue(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER),
             CaseDocument.class);
         assertEquals(expectedDocument, actualDocument);
+        verify(genericDocumentService).stampDocument(any(), any(), any(), any());
     }
 
 

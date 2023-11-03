@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,10 +13,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +33,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,12 +43,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT_PACK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
 
 public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
@@ -67,12 +80,14 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     private UploadApprovedOrderService uploadApprovedOrderService;
 
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
 
     private DraftDirectionOrder draftDirectionOrder;
 
     @Before
     public void setUp() {
         caseDetails = buildCaseDetails();
+        caseDetailsBefore = buildCaseDetailsBefore();
         caseDetails.getData().put(CONTESTED_ORDER_APPROVED_JUDGE_TYPE, JUDGE_TYPE);
         caseDetails.getData().put(CONTESTED_ORDER_APPROVED_JUDGE_NAME, JUDGE_NAME);
         caseDetails.getData().put(CONTESTED_ORDER_APPROVED_DATE, APPROVED_DATE);
@@ -99,13 +114,102 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         assertFalse(caseData.containsKey(CONTESTED_ORDER_APPROVED_JUDGE_NAME));
         assertFalse(caseData.containsKey(CONTESTED_ORDER_APPROVED_DATE));
         assertFalse(caseData.containsKey(HEARING_NOTICE_DOCUMENT_PACK));
+
+        assertTrue(getHearingOrderDocuments(caseData).isEmpty());
+        assertTrue(getHearingOrderAdditionalDocuments(caseData).isEmpty());
+
+        verify(additionalHearingDocumentService).getApprovedHearingOrderCollection(caseDetails);
+        verify(additionalHearingDocumentService).getHearingOrderAdditionalDocuments(caseDetails.getData());
+    }
+
+    @Test
+    public void givenAboutToStart_whenPrepareFieldsForApprovedLetter_thenRemoveFieldsAndHearingOrderCollections() {
+        Map<String, Object> caseData = new HashMap<>();
+        HearingOrderCollectionData collectionData =  HearingOrderCollectionData.builder()
+            .hearingOrderDocuments(HearingOrderDocument.builder().uploadDraftDocument(caseDocument()).build()).build();
+        List<HearingOrderCollectionData> list = new ArrayList<>();
+        list.add(collectionData);
+        caseData.put(HEARING_ORDER_COLLECTION, list);
+
+        HearingOrderAdditionalDocCollectionData collectionAdditionalData =  HearingOrderAdditionalDocCollectionData.builder()
+            .hearingOrderAdditionalDocuments(HearingOrderAdditionalDocument.builder().additionalDocuments(caseDocument())
+                .additionalDocumentType("other").build()).build();
+        List<HearingOrderAdditionalDocCollectionData> list1 = new ArrayList<>();
+        list1.add(collectionAdditionalData);
+        caseData.put(HEARING_UPLOADED_DOCUMENT, list1);
+
+        CaseDetails details = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONTESTED.getCcdType()).data(caseData).build();
+
+        when(hearingOrderService.draftDirectionOrderCollectionTail(details, AUTH_TOKEN))
+            .thenReturn(Optional.of(draftDirectionOrder));
+        when(additionalHearingDocumentService.getApprovedHearingOrderCollection(details)).thenReturn(list);
+        when(additionalHearingDocumentService.getHearingOrderAdditionalDocuments(details.getData())).thenReturn(list1);
+
+
+        Map<String, Object> responseData = uploadApprovedOrderService.prepareFieldsForOrderApprovedCoverLetter(details);
+
+        assertFalse(responseData.containsKey(CONTESTED_ORDER_APPROVED_JUDGE_TYPE));
+        assertFalse(responseData.containsKey(CONTESTED_ORDER_APPROVED_JUDGE_NAME));
+        assertFalse(responseData.containsKey(CONTESTED_ORDER_APPROVED_DATE));
+        assertFalse(responseData.containsKey(HEARING_NOTICE_DOCUMENT_PACK));
+
+        assertTrue(getHearingOrderDocuments(responseData).isEmpty());
+        assertTrue(getHearingOrderAdditionalDocuments(responseData).isEmpty());
+
+        verify(additionalHearingDocumentService).getApprovedHearingOrderCollection(details);
+        verify(additionalHearingDocumentService).getHearingOrderAdditionalDocuments(details.getData());
+    }
+
+
+    private  List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
+        return new ObjectMapper().convertValue(caseData.get(HEARING_ORDER_COLLECTION),
+            new TypeReference<>() {
+            });
+    }
+
+    private  List<HearingOrderAdditionalDocCollectionData> getHearingOrderAdditionalDocuments(Map<String, Object> caseData) {
+        return new ObjectMapper().convertValue(caseData.get(HEARING_UPLOADED_DOCUMENT),
+            new TypeReference<>() {
+            });
+    }
+
+    @Test
+    public void givenNoExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnCollectionWithExistingOrder() throws JsonProcessingException {
+
+        Map<String, Object> caseData = new HashMap<>();
+        HearingOrderCollectionData collectionData =  HearingOrderCollectionData.builder()
+            .hearingOrderDocuments(HearingOrderDocument.builder().uploadDraftDocument(caseDocument()).build()).build();
+        List<HearingOrderCollectionData> list = new ArrayList<>();
+        list.add(collectionData);
+        caseData.put(HEARING_ORDER_COLLECTION, list);
+
+        HearingOrderAdditionalDocCollectionData collectionAdditionalData =  HearingOrderAdditionalDocCollectionData.builder()
+            .hearingOrderAdditionalDocuments(HearingOrderAdditionalDocument.builder().additionalDocuments(caseDocument())
+                .additionalDocumentType("other").build()).build();
+        List<HearingOrderAdditionalDocCollectionData> list1 = new ArrayList<>();
+        list1.add(collectionAdditionalData);
+        caseData.put(HEARING_UPLOADED_DOCUMENT, list1);
+        setHearingDirectionDetailsCollection(YES_VALUE);
+        CaseDetails details = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONTESTED.getCcdType()).data(caseData).build();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONTESTED.getCcdType()).data(caseData).build();
+        when(additionalHearingDocumentService.getApprovedHearingOrderCollection(caseDetailsBefore)).thenReturn(list);
+        when(additionalHearingDocumentService.getHearingOrderAdditionalDocuments(caseDetailsBefore.getData())).thenReturn(list1);
+        when(additionalHearingDocumentService.getApprovedHearingOrderCollection(details)).thenReturn(list);
+        when(additionalHearingDocumentService.getHearingOrderAdditionalDocuments(details.getData())).thenReturn(list1);
+
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response
+            = uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(details, caseDetailsBefore, AUTH_TOKEN);
+
+        Map<String, Object> data = response.getData();
+        assertEquals(2, getHearingOrderDocuments(data).size());
+        assertEquals(2, getHearingOrderAdditionalDocuments(data).size());
     }
 
     @Test
     public void givenNoExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnValidatedResponse() throws JsonProcessingException {
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
         setHearingDirectionDetailsCollection(YES_VALUE);
-        uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
+        uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
@@ -121,7 +225,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     public void givenNoExceptions_whenHandleAboutToSubmitAndNoNextHearing_thenDoNotGenerateDocumentPack() {
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
         setHearingDirectionDetailsCollection(NO_VALUE);
-        uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
+        uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
@@ -131,6 +235,8 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
             .appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
         verify(approvedOrderNoticeOfHearingService, never())
             .createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
+        verify(additionalHearingDocumentService).getHearingOrderAdditionalDocuments(anyMap());
+        verify(additionalHearingDocumentService).getApprovedHearingOrderCollection(any());
     }
 
     @Test
@@ -140,7 +246,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderService
-            .handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
+            .handleUploadApprovedOrderAboutToSubmit(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         assertThat(response.getErrors(), hasSize(1));
         assertEquals(COURT_DETAILS_PARSE_EXCEPTION_MESSAGE, response.getErrors().get(0));

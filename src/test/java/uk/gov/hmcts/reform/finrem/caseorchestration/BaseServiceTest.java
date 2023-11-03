@@ -97,6 +97,11 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected String formattedNowDate = DateTimeFormatter.ofPattern(CCDConfigConstant.LETTER_DATE_FORMAT).format(LocalDate.now());
 
+    protected CaseDetails buildCaseDetailsBefore() {
+        Map<String, Object> caseData = new HashMap<>();
+        return CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
+    }
+
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         List<String> natureOfApplication = List.of("Lump Sum Order",
@@ -108,7 +113,7 @@ public abstract class BaseServiceTest extends BaseTest {
             "A settlement or a transfer of property",
             "Property Adjustment Order");
         caseData.put("natureOfApplication2", natureOfApplication);
-        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
+        return CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
     }
 
     protected FinremCaseDetails buildFinremCaseDetails() {
@@ -267,9 +272,10 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
         caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.setCcdCaseType(CaseType.CONSENTED);
-        caseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
-        caseData.getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
-        caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
+        caseData.getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.MIDLANDS);
+        caseData.getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
+        caseData.getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()
             .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
         caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
         return FinremCallbackRequest.<FinremCaseDataConsented>builder()
@@ -354,9 +360,9 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
         caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
-        caseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
-        caseData.getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
-        caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+        caseData.getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.MIDLANDS);
+        caseData.getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
+        caseData.getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()
             .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
         caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
         return caseData;

@@ -8,18 +8,19 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
@@ -27,7 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @SuperBuilder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@NoArgsConstructor
 @AllArgsConstructor
 public abstract class IntervenerWrapper implements IntervenerDetails {
 
@@ -39,6 +39,11 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     private String intervenerPhone;
     private YesOrNo intervenerRepresented;
+
+    @JsonIgnore
+    private Boolean intervenerCorrespondenceEnabled;
+
+
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate intervenerDateAdded;
@@ -55,6 +60,10 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     private OrganisationPolicy intervenerOrganisation;
 
+    protected IntervenerWrapper() {
+        intervenerCorrespondenceEnabled = Boolean.FALSE;
+    }
+
     public abstract String getIntervenerLabel();
 
     public abstract IntervenerType getIntervenerType();
@@ -70,6 +79,10 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     public abstract String getUpdateIntervenerValue();
 
     public abstract CaseRole getIntervenerSolicitorCaseRole();
+
+    public abstract List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData);
+
+    public abstract String getIntervenerHearingNoticesCollectionName();
 
     public abstract DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient();
 

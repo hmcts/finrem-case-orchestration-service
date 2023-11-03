@@ -108,7 +108,7 @@ public class AddresseeGeneratorHelper {
 
     private static String formatAddressForLetterPrinting(Map<String, Object> address) {
         if (address != null) {
-            return Stream.of("AddressLine1", "AddressLine2", "County", "PostTown", "PostCode")
+            return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")
                 .map(address::get)
                 .filter(Objects::nonNull)
                 .map(Object::toString)

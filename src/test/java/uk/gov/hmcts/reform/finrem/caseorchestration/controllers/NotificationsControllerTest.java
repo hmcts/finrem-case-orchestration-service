@@ -14,6 +14,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.ApplicantLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerFourLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerOneLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerThreeLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerTwoLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.RespondentLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
@@ -87,7 +94,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
     ContestedIntermHearingCorresponder.class,
     ContestedDraftOrderCorresponder.class,
     FinremCaseDetailsMapper.class,
-    DocumentHelper.class})
+    DocumentHelper.class,
+    LetterAddresseeGeneratorMapper.class,
+    ApplicantLetterAddresseeGenerator.class,
+    RespondentLetterAddresseeGenerator.class,
+    IntervenerOneLetterAddresseeGenerator.class,
+    IntervenerTwoLetterAddresseeGenerator.class,
+    IntervenerThreeLetterAddresseeGenerator.class,
+    IntervenerFourLetterAddresseeGenerator.class
+})
 public class NotificationsControllerTest extends BaseControllerTest {
 
     @Autowired
@@ -138,7 +153,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
@@ -149,7 +164,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSendHwfSuccessfulConfirmationEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
@@ -160,7 +175,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
@@ -198,7 +213,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendConsentOrderNotApprovedEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
 
         notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
@@ -208,7 +223,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSendConsentOrderNotApprovedEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
         notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
@@ -219,7 +234,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendConsentOrderAvailableEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
 
         notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
@@ -229,7 +244,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSendConsentOrderAvailableEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
 
@@ -241,7 +256,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendContestedHwfSuccessfulConfirmationEmail() {
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
@@ -250,7 +265,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSendContestedHwfSuccessfulEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
@@ -279,7 +294,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSendPrepareForHearingOrderSentEmailWhenRespondentIsRegisteredAndAgreedToEmails() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
         notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
 
@@ -288,7 +303,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSendPrepareForHearingOrderSentEmailWhenRespondentAgreedButNotRegistered() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
         notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
@@ -299,7 +314,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
 
@@ -320,7 +335,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendContestOrderNotApprovedEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
 
         notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrder());
@@ -330,7 +345,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSendContestOrderNotApprovedEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
 
         notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrder());
@@ -371,7 +386,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenConsentedCase_whenShouldSendRespondentNotification_thenShouldNotTriggerContestedRespondentEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
@@ -381,7 +396,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenConsentedCase_whenSendConsentOrderNotApproved_thenShouldTriggerConsentedRespondentEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
@@ -443,7 +458,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendContestedGeneralApplicationReferToJudgeEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
 
         notificationsController.sendGeneralApplicationReferToJudgeEmail(buildCallbackRequest());
 
@@ -473,7 +488,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendContestedGeneralApplicationOutcomeEmail() throws IOException {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
         notificationsController.sendGeneralApplicationOutcomeEmail(buildCallbackRequest());
@@ -514,7 +529,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendTransferToLocalCourtEmailConsented() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         notificationsController.sendTransferCourtsEmail(buildCallbackRequest());
 

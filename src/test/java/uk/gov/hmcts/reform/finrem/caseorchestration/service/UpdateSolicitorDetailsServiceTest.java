@@ -73,7 +73,7 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
             .contactInformation(Collections.singletonList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)

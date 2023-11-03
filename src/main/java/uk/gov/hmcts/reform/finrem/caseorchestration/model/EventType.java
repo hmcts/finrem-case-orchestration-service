@@ -22,8 +22,10 @@ public enum EventType {
     AMEND_CONTESTED_APP_DETAILS("FR_amendApplication"),
     AMEND_CONTESTED_PAPER_APP_DETAILS("FR_amendPaperApplication"),
     AMEND_CONSENT_ORDER("FR_amendedConsentOrder"),
+    SEND_CONSENT_IN_CONTESTED_ORDER("FR_consentSendOrder"),
     RESPOND_TO_ORDER("FR_respondToOrder"),
     AMEND_CASE("FR_amendCase"),
+    AMEND_CASE_CRON("FR_amendCaseCron"),
     APPROVE_ORDER("FR_approveApplication"),
     REJECT_ORDER("FR_orderRefusal"),
     CONSENT_ORDER_NOT_APPROVED("FR_consentOrderNotApproved"),
@@ -62,6 +64,12 @@ public enum EventType {
     CREATE_GENERAL_LETTER_JUDGE("FR_generalLetter_judge"),
     CREATE_GENERAL_EMAIL("FR_generalEmail"),
     SHARE_SELECTED_DOCUMENTS("shareSelectedDocuments"),
+    CLEAR_APPLICANT_POLICY("clearApplicantPolicy"),
+    CLEAR_RESPONDENT_POLICY("clearRespondentPolicy"),
+    SOLICITOR_CW_DRAFT_ORDER("FR_solicitorDraftDirectionOrder"),
+    JUDGE_DRAFT_ORDER("FR_judgeDraftDirectionOrder"),
+    DIRECTION_UPLOAD_ORDER("FR_directionOrder"),
+    CONSENT_ORDER("FR_consentOrder"),
 
     @JsonEnumDefaultValue
     NONE("");

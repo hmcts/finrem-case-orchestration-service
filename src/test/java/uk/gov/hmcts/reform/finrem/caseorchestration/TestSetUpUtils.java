@@ -34,13 +34,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
 import java.io.InputStream;
@@ -53,7 +51,6 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.argThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -388,7 +385,7 @@ public class TestSetUpUtils {
 
     private static void populateCourtDetails(FinremCaseData caseData) {
         caseData.setRegionWrapper(RegionWrapper.builder()
-            .defaultRegionWrapper(DefaultRegionWrapper.builder()
+            .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
                 .regionList(Region.MIDLANDS)
                 .midlandsFrcList(RegionMidlandsFrc.NOTTINGHAM)
                 .courtListWrapper(DefaultCourtListWrapper.builder()
@@ -409,14 +406,6 @@ public class TestSetUpUtils {
     public static FinremCaseDetails finremCaseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
         CaseDetails caseDetails = caseDetailsFromResource(resourcePath, mapper);
         return new FinremCaseDetailsMapper(mapper).mapToFinremCaseDetails(caseDetails);
-    }
-
-    public static CaseDetails caseDetailsBeforeFromResource(String resourcePath, ObjectMapper mapper) {
-        try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetailsBefore();
-        } catch (Exception exception) {
-            throw new IllegalStateException(exception.getMessage(), exception);
-        }
     }
 
     private static void populateRespondentNameAndAddressConsented(Map<String, Object> caseData) {
@@ -483,13 +472,6 @@ public class TestSetUpUtils {
         caseData.getContactDetailsWrapper().setContestedRespondentRepresented(null);
     }
 
-    public static DocumentGenerationRequest matchDocumentGenerationRequestTemplateAndFilename(String template, String filename) {
-        return argThat(
-            documentGenerationRequest -> documentGenerationRequest != null
-                && template.equals(documentGenerationRequest.getTemplate())
-                && filename.equals(documentGenerationRequest.getFileName()));
-    }
-
     public static List<BulkPrintDocument> bulkPrintDocumentList() {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(BulkPrintDocument.builder()
@@ -528,32 +510,6 @@ public class TestSetUpUtils {
             .documentFilename(FILE_NAME)
             .documentUrl(DOC_URL)
             .documentBinaryUrl(BINARY_URL)
-            .build();
-    }
-
-    public static ClientDocument newDocumentClientDocument() {
-        ClientDocument caseDocument =
-            new ClientDocument();
-        caseDocument.setUrl(DOC_URL);
-        caseDocument.setFileName(FILE_NAME);
-        caseDocument.setBinaryUrl(BINARY_URL);
-
-        return caseDocument;
-    }
-
-    public static CaseDocument wordDoc() {
-        return CaseDocument.builder()
-            .documentFilename("doc.docx")
-            .documentUrl(DOC_URL)
-            .documentBinaryUrl(BINARY_URL)
-            .build();
-    }
-
-    public static ClientDocument docClientWordDocument() {
-        return ClientDocument.builder()
-            .url(DOC_URL)
-            .fileName("doc.docx")
-            .binaryUrl(BINARY_URL)
             .build();
     }
 }

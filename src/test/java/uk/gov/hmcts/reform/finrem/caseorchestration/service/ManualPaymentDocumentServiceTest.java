@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 import java.util.Map;
 
@@ -68,9 +68,9 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
         Addressee addressee = (Addressee) caseData.get(ADDRESSEE);
         assertThat(addressee.getName(), is("Applicant Solicitor Firm"));
-        assertThat(addressee.getFormattedAddress(), is("67 Pears Road\nNear Roundabout\nMiddlesex\nHounslow\nTW3 1SS"));
+        assertThat(addressee.getFormattedAddress(), is("67 Pears Road\nNear Roundabout\nOpposite Tesco\nMiddlesex\nHounslow\nTW3 1SS"));
 
-        FrcCourtDetails frcCourtDetails = convertToCourtDetails(caseData.get("courtDetails"));
+        CourtDetailsTemplateFields frcCourtDetails = convertToCourtDetails(caseData.get("courtDetails"));
         assertThat(frcCourtDetails, is(notNullValue()));
         assertThat(frcCourtDetails.getCourtName(), is("Port Talbot Justice Centre"));
         assertThat(frcCourtDetails.getCourtAddress(), is("Harbourside Road, Port Talbot, SA13 1SB"));
@@ -97,7 +97,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         assertThat(addressee.getName(), is("Applicant Name"));
         assertThat(addressee.getFormattedAddress(), is("Buckingham Palace\nLondon\nSW1A 1AA"));
 
-        FrcCourtDetails frcCourtDetails = convertToCourtDetails(caseData.get("courtDetails"));
+        CourtDetailsTemplateFields frcCourtDetails = convertToCourtDetails(caseData.get("courtDetails"));
         assertThat(frcCourtDetails, is(notNullValue()));
         assertThat(frcCourtDetails.getCourtName(), is("Horsham County Court And Family Court"));
         assertThat(frcCourtDetails.getCourtAddress(), is("The Law Courts, Hurst Road, Horsham, RH12 2ET"));
@@ -105,7 +105,20 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         assertThat(frcCourtDetails.getEmail(), is("sussexfamily@Justice.gov.uk"));
     }
 
-    private FrcCourtDetails convertToCourtDetails(Object object) {
+    private FinremCaseDetails contestedPaperFinremCaseDetails() throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/paper-case.json")) {
+            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private FinremCaseDetails contestedPaperCaseDetailsWithoutSolicitors() throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(
+            "/fixtures/contested/paper-case-no-solicitors.json")) {
+            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private CourtDetailsTemplateFields convertToCourtDetails(Object object) {
         return mapper.convertValue(object, new TypeReference<>() {
         });
     }

@@ -133,6 +133,24 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         verify(applicantDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
     }
 
+    @Test
+    void givenContestedCase_whenInvokedSharedServiceAsApplicantSolicitorShouldNotSeeDuplicateRolesAndNonAcceptedRoles() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()),
+            AUTH_TOKEN)).thenReturn(getCaseAssignedUserRolesResource("[APPSOLICITOR]"));
+        when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRoles());
+        when(applicantDocumentsService.applicantSourceDocumentList(caseDetails)).thenReturn(getDynamicList(data));
+        when(applicantDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(getCaseRoles2(data));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
+        assertEquals(4, handle.getData().getSolicitorRoleList().getListItems().size());
+
+        verify(applicantDocumentsService).applicantSourceDocumentList(any());
+        verify(applicantDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
+    }
 
     @Test
     void givenContestedCase_whenInvokedSharedServiceAsRespondentSolicitor_thenHandlerCanHandle() {
@@ -342,6 +360,37 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         return allCaseRole;
     }
 
+    private List<CaseAssignmentUserRole> getAllCaseRoles() {
+        List<CaseAssignmentUserRole> allCaseRole = new ArrayList<>();
+        CaseAssignmentUserRole userRole0 = CaseAssignmentUserRole.builder()
+            .caseDataId("123").userId("user-123").caseRole("[APPSOLICITOR]").build();
+        allCaseRole.add(userRole0);
+        CaseAssignmentUserRole userRole1 = CaseAssignmentUserRole.builder()
+            .caseDataId("123").userId("user-123").caseRole("[INTVRSOLICITOR1]").build();
+        allCaseRole.add(userRole1);
+        CaseAssignmentUserRole userRole7 = CaseAssignmentUserRole.builder()
+            .caseDataId("123").userId("user-123").caseRole("[INTVRSOLICITOR1]").build();
+        allCaseRole.add(userRole7);
+        CaseAssignmentUserRole userRole2 = CaseAssignmentUserRole.builder()
+            .caseDataId("123").userId("user-123").caseRole("[INTVRSOLICITOR2]").build();
+        allCaseRole.add(userRole2);
+        CaseAssignmentUserRole userRole3 = CaseAssignmentUserRole.builder()
+            .caseDataId("123").userId("user-123").caseRole("[INTVRSOLICITOR3]").build();
+        allCaseRole.add(userRole3);
+        CaseAssignmentUserRole userRole4 = CaseAssignmentUserRole.builder()
+            .caseDataId("123").userId("user-123").caseRole("[RESPSOLICITOR]").build();
+        allCaseRole.add(userRole4);
+        CaseAssignmentUserRole userRole5 = CaseAssignmentUserRole.builder()
+            .caseDataId("123").userId("user-123").caseRole("[RESPSOLICITOR]").build();
+        allCaseRole.add(userRole5);
+        CaseAssignmentUserRole userRole6 = CaseAssignmentUserRole.builder()
+            .caseDataId("123").userId("user-123").caseRole("[CREATOR]").build();
+        allCaseRole.add(userRole6);
+        CaseAssignmentUserRole userRole8 = CaseAssignmentUserRole.builder()
+            .caseDataId("123").userId("user-123").caseRole("[CASEWORKER]").build();
+        allCaseRole.add(userRole8);
+        return allCaseRole;
+    }
 
     private static DynamicMultiSelectListElement getSelectedDoc(List<UploadCaseDocumentCollection> coll,
                                                                 CaseDocument doc,
@@ -402,6 +451,17 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         dynamicListElements.add(getDynamicMultiSelectListElement("[INTVRSOLICITOR2]", "[INTVRSOLICITOR2]"));
         dynamicListElements.add(getDynamicMultiSelectListElement("[INTVRSOLICITOR3]", "[INTVRSOLICITOR3]"));
 
+
+        return getRoleList(dynamicListElements, data.getSolicitorRoleList());
+    }
+
+    private DynamicMultiSelectList getCaseRoles2(FinremCaseData data) {
+
+        List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(getDynamicMultiSelectListElement("[INTVRSOLICITOR1]", "[INTVRSOLICITOR1]"));
+        dynamicListElements.add(getDynamicMultiSelectListElement("[INTVRSOLICITOR2]", "[INTVRSOLICITOR2]"));
+        dynamicListElements.add(getDynamicMultiSelectListElement("[INTVRSOLICITOR3]", "[INTVRSOLICITOR3]"));
+        dynamicListElements.add(getDynamicMultiSelectListElement("[RESPSOLICITOR]", "[RESPSOLICITOR]"));
 
         return getRoleList(dynamicListElements, data.getSolicitorRoleList());
     }

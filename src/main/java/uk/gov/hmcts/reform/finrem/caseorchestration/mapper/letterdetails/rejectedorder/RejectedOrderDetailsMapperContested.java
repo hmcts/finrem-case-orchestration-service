@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.RejectedOrderDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.TranslatedOrderRefusalDocument;
@@ -44,7 +44,7 @@ public class RejectedOrderDetailsMapperContested extends ContestedAbstractLetter
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getData();
-        FrcCourtDetails courtDetails = getFrcCourtDetails(caseData, courtList);
+        CourtDetailsTemplateFields courtDetails = getFrcCourtDetails(caseData, courtList);
         return RejectedOrderDetails.builder()
             .applicantName(caseData.getFullApplicantName())
             .respondentName(caseData.getRespondentFullName())
@@ -58,13 +58,13 @@ public class RejectedOrderDetailsMapperContested extends ContestedAbstractLetter
             .build();
     }
 
-    private FrcCourtDetails getFrcCourtDetails(FinremCaseData caseData, CourtListWrapper courtList) {
+    private CourtDetailsTemplateFields getFrcCourtDetails(FinremCaseData caseData, CourtListWrapper courtList) {
         return caseData.isConsentedApplication()
             ? getConsentedFrcCourtDetails()
             : courtDetailsMapper.getCourtDetails(courtList);
     }
 
-    private String getCourtName(FinremCaseData caseData, FrcCourtDetails courtDetails) {
+    private String getCourtName(FinremCaseData caseData, CourtDetailsTemplateFields courtDetails) {
         return caseData.isContestedApplication()
             ? CONTESTED_COURT_NAME + courtDetails.getCourtName()
             : CONSENTED_COURT_NAME;
@@ -106,8 +106,8 @@ public class RejectedOrderDetailsMapperContested extends ContestedAbstractLetter
             .orElse("");
     }
 
-    private FrcCourtDetails getConsentedFrcCourtDetails() {
-        return FrcCourtDetails.builder()
+    private CourtDetailsTemplateFields getConsentedFrcCourtDetails() {
+        return CourtDetailsTemplateFields.builder()
             .courtName(OrchestrationConstants.CTSC_COURT_NAME)
             .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
             .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)

@@ -154,7 +154,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         Addressee addressee = (Addressee) caseDetails.getData().get("addressee");
         assertThat(addressee.getName(), is("James Joyce"));
-        assertThat(addressee.getFormattedAddress(), is("50 Applicant Street\nSecond Address Line\nLondon\nLondon\nSW1"));
+        assertThat(addressee.getFormattedAddress(), is("50 Applicant Street\nSecond Address Line\nThird Address Line\nLondon\nLondon\nSW1"));
 
         CtscContactDetails ctscContactDetails = (CtscContactDetails) caseDetails.getData().get("ctscContactDetails");
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
@@ -199,7 +199,8 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         Addressee addressee = (Addressee) caseDetails.getData().get("addressee");
         assertThat(addressee.getName(), is("Saul Goodman"));
-        assertThat(addressee.getFormattedAddress(), is("123 Applicant Solicitor Street\nSecond Address Line\nLondon\nLondon\nSE1"));
+        assertThat(addressee.getFormattedAddress(), is("123 Applicant Solicitor Street\nSecond Address Line"
+            + "\nThird Address Line\nLondon\nLondon\nSE1"));
 
         CtscContactDetails ctscContactDetails = (CtscContactDetails) caseDetails.getData().get("ctscContactDetails");
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
@@ -228,7 +229,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         Addressee addressee = (Addressee) caseDetails.getData().get("addressee");
         assertThat(addressee.getName(), is("Jane Doe"));
-        assertThat(addressee.getFormattedAddress(), is("50 Respondent Street\nContested\nLondon\nLondon\nSW1"));
+        assertThat(addressee.getFormattedAddress(), is("50 Respondent Street\nContested\nThird Address Line\nLondon\nLondon\nSW1"));
 
         CtscContactDetails ctscContactDetails = (CtscContactDetails) caseDetails.getData().get("ctscContactDetails");
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
@@ -273,7 +274,8 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         Addressee addressee = (Addressee) caseDetails.getData().get("addressee");
         assertThat(addressee.getName(), is("Saul Goodman"));
-        assertThat(addressee.getFormattedAddress(), is("123 Respondent Solicitor Street\nSecond Address Line\nLondon\nLondon\nSE1"));
+        assertThat(addressee.getFormattedAddress(), is("123 Respondent Solicitor Street\nSecond Address Line"
+            + "\nThird Address Line\nLondon\nLondon\nSE1"));
 
         CtscContactDetails ctscContactDetails = (CtscContactDetails) caseDetails.getData().get("ctscContactDetails");
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));

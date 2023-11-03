@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -16,6 +15,7 @@ import java.util.List;
 
 @Component
 @Slf4j
+@SuppressWarnings({"java:S110","java:S1068","java:S2387"})
 public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearingCorresponder {
 
     private final DocumentHelper documentHelper;
@@ -24,19 +24,15 @@ public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearin
     public FinremApprovedOrderNoticeOfHearingCorresponder(BulkPrintService bulkPrintService,
                                                           NotificationService notificationService,
                                                           DocumentHelper documentHelper) {
-        super(bulkPrintService, notificationService);
+        super(bulkPrintService, notificationService, documentHelper);
         this.documentHelper = documentHelper;
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
-        List<CaseDocument> hearingNoticePack = null;
-        if (caseDetails.getData().isContestedApplication()) {
-            hearingNoticePack = ((FinremCaseDataContested) caseDetails.getData())
-                .getHearingNoticeDocumentPack().stream()
-                .map(DocumentCollection::getValue)
-                .toList();
-        }
-        return documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
+    public List<CaseDocument> getCaseDocuments(
+        FinremCaseDetails<FinremCaseDataContested> caseDetails) {
+        return caseDetails.getData().getHearingNoticeDocumentPack().stream()
+            .map(DocumentCollection::getValue)
+            .toList();
     }
 }

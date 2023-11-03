@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -36,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
@@ -90,8 +92,12 @@ public class RemoveApplicantDetailsController extends BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        removeApplicantDetails(caseData);
+        removeApplicantSolicitorDetails(caseData);
+        log.info("DEBUGGING NOC - removeApplicantDetails entered and applicant name is still present {} for Case ID: {}",
+            ObjectUtils.nullSafeConciseToString(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), caseDetails.getId());
         removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
+        log.info("DEBUGGING NOC - removeRespondentDetails entered and applicant name is still present {} for Case ID: {}",
+            ObjectUtils.nullSafeConciseToString(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), caseDetails.getId());
 
         String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);
         String respondentConfidentialAddress = Objects.toString(caseData.get(RESPONDENT_CONFIDENTIAL_ADDRESS), null);
@@ -99,6 +105,8 @@ public class RemoveApplicantDetailsController extends BaseController {
             || respondentConfidentialAddress != null && respondentConfidentialAddress.equalsIgnoreCase(YES_VALUE)) {
             CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
             caseData.put(MINI_FORM_A, document);
+            log.info("DEBUGGING NOC - generateContestedMiniFormA entered and applicant name is still present {} for Case ID: {}",
+                ObjectUtils.nullSafeConciseToString(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), caseDetails.getId());
         }
 
         if (featureToggleService.isCaseworkerNoCEnabled()
@@ -109,12 +117,13 @@ public class RemoveApplicantDetailsController extends BaseController {
                 authorisationToken,
                 originalCaseDetails));
         }
-
         persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
+        log.info("DEBUGGING NOC - persistOrgPolicies entered and applicant name is still present {}  for Case ID: {}",
+            ObjectUtils.nullSafeConciseToString(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), caseDetails.getId());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private void removeApplicantDetails(Map<String, Object> caseData) {
+    private void removeApplicantSolicitorDetails(Map<String, Object> caseData) {
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
         if (applicantRepresented.equals(NO_VALUE)) {
             caseData.remove("applicantSolicitorName");

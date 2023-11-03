@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.ContestedAbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralApplicationInterimHearingNoticeDetails;
 
@@ -38,7 +38,7 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends Con
 
 
     private GeneralApplicationInterimHearingNoticeDetails getExpectedGeneralApplicationInterimHearingNoticeDetails() {
-        FrcCourtDetails courtDetails = getCourtDetails(CfcCourt.KINGSTON_UPON_THAMES_COUNTY_COURT_AND_FAMILY_COURT);
+        CourtDetailsTemplateFields courtDetails = getCourtDetails(CfcCourt.KINGSTON_UPON_THAMES_COUNTY_COURT_AND_FAMILY_COURT);
         return GeneralApplicationInterimHearingNoticeDetails.builder()
             .letterDate(String.valueOf(LocalDate.now()))
             .interimTimeEstimate("30 minutes")
@@ -56,7 +56,7 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends Con
     }
 
     private GeneralApplicationInterimHearingNoticeDetails getExpectedDetailsFromCollectionItem() {
-        FrcCourtDetails courtDetails = getCourtDetails(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT);
+        CourtDetailsTemplateFields courtDetails = getCourtDetails(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT);
         return GeneralApplicationInterimHearingNoticeDetails.builder()
             .letterDate(String.valueOf(LocalDate.now()))
             .interimHearingType("First Directions Appointment (FDA)")
@@ -73,7 +73,7 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends Con
             .build();
     }
 
-    private FrcCourtDetails getCourtDetails(CfcCourt court) {
+    private CourtDetailsTemplateFields getCourtDetails(CfcCourt court) {
         InterimCourtListWrapper courtListWrapper = new InterimCourtListWrapper();
         courtListWrapper.setInterimCfcCourtList(court);
         return new CourtDetailsMapper(new ObjectMapper()).getCourtDetails(courtListWrapper);
