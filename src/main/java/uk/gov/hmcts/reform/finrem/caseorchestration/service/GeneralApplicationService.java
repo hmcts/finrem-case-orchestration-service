@@ -158,7 +158,7 @@ public class GeneralApplicationService {
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
 
-        generalApplicationsCategoriser.categorize(caseData);
+        generalApplicationsCategoriser.categorise(caseData);
 
         generalApplicationsCategoriser.uncategoriseDuplicatedCollections(caseData);
 

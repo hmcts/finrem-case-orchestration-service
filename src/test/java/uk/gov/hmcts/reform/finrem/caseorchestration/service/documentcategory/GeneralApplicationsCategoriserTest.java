@@ -43,7 +43,7 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     @Test
     public void testCategorizeDocuments() {
         FinremCaseData finremCaseData = buildFinremCaseData();
-        generalApplicationsCategoriser.categorize(finremCaseData);
+        generalApplicationsCategoriser.categorise(finremCaseData);
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(0).getValue()
             .getGeneralApplicationDocument().getCategoryId().equals(
                 DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_1.getDocumentCategoryId()

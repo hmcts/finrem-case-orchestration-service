@@ -31,7 +31,7 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
     }
 
     @Override
-    protected void categorizeDocuments(FinremCaseData finremCaseData) {
+    protected void categoriseDocuments(FinremCaseData finremCaseData) {
         AtomicInteger generalApplicationCounter = new AtomicInteger();
         if (finremCaseData.getGeneralApplicationWrapper().getGeneralApplications() != null) {
             finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
