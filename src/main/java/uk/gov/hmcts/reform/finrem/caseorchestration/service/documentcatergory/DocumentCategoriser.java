@@ -11,11 +11,12 @@ public abstract class DocumentCategoriser {
         this.featureToggleService = featureToggleService;
     }
 
-    public void categorize(FinremCaseData finremCaseData) {
+
+    public void categorise(FinremCaseData finremCaseData) {
         if (featureToggleService.isCaseFileViewEnabled()) {
-            categorizeDocuments(finremCaseData);
+            categoriseDocuments(finremCaseData);
         }
     }
 
-    protected abstract void categorizeDocuments(FinremCaseData finremCaseData);
+    protected abstract void categoriseDocuments(FinremCaseData finremCaseData);
 }
