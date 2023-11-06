@@ -38,7 +38,16 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
         if (finremCaseData.getGeneralApplicationWrapper().getGeneralApplications() != null) {
             finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
                 ga -> {
+                    generalApplicationCounter.getAndIncrement();
+                    DocumentCategory categoryToApply;
 
+                    if (generalApplicationCounter.get() > 10) {
+                        categoryToApply = (DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_OVERFLOW);
+                    } else {
+                        categoryToApply = (gaNumberToCategory.get(generalApplicationCounter.get()));
+                    }
+
+                    setCategoryToAllGADocs(ga, categoryToApply);
 
                 });
         }
@@ -73,7 +82,7 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
     private void removeDocumentCategory(List<GeneralApplicationsCollection> collectionToRemoveCategoryFrom) {
         collectionToRemoveCategoryFrom.forEach(
             ga -> {
-
+                setCategoryToAllGADocs(ga, DocumentCategory.DUPLICATED_GENERAL_ORDERS);
             }
         );
     }
@@ -86,18 +95,20 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
 
         if (generalApplicationDocument != null) {
             generalApplicationDocument.setCategoryId(
-                DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId()
+                categoryToApply.getDocumentCategoryId()
             );
         }
 
         if (generalApplicationDraftOrder != null) {
             generalApplicationDraftOrder.setCategoryId(
-                DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
+                categoryToApply.getDocumentCategoryId()
+            );
         }
 
         if (generalApplicationDirectionsDocument != null) {
             generalApplicationDirectionsDocument.setCategoryId(
-                DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
+                categoryToApply.getDocumentCategoryId()
+            );
         }
 
         List<GeneralApplicationSupportingDocumentData> generalApplicationSupportDocument = ga.getValue().getGaSupportDocuments();
@@ -106,7 +117,7 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
                 CaseDocument supportDocument = gaSupportDocument.getValue().getSupportDocument();
                 if (supportDocument != null) {
                     supportDocument.setCategoryId(
-                        DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId()
+                        categoryToApply.getDocumentCategoryId()
                     );
                 }
             }
