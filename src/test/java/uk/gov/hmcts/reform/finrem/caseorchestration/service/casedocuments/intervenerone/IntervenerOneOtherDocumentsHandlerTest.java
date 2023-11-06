@@ -67,7 +67,7 @@ public class IntervenerOneOtherDocumentsHandlerTest extends BaseManageDocumentsH
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1)
+            is(DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B)
         );
 
         assertThat(

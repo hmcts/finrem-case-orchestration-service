@@ -22,6 +22,9 @@ public class IntervenerFourOtherDocumentsHandler extends OtherDocumentsHandler {
             case OTHER -> {
                 return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MISCELLANEOUS_OR_OTHER;
             }
+            case FORM_B -> {
+                return DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B;
+            }
             default -> {
                 return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4;
             }

@@ -67,7 +67,7 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
-            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+            is(DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B)
         );
 
         assertThat(
