@@ -112,15 +112,17 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
         }
 
         List<GeneralApplicationSupportingDocumentData> generalApplicationSupportDocument = ga.getValue().getGaSupportDocuments();
-        generalApplicationSupportDocument.forEach(
-            gaSupportDocument -> {
-                CaseDocument supportDocument = gaSupportDocument.getValue().getSupportDocument();
-                if (supportDocument != null) {
-                    supportDocument.setCategoryId(
-                        categoryToApply.getDocumentCategoryId()
-                    );
+        if (generalApplicationSupportDocument != null) {
+            generalApplicationSupportDocument.forEach(
+                gaSupportDocument -> {
+                    CaseDocument supportDocument = gaSupportDocument.getValue().getSupportDocument();
+                    if (supportDocument != null) {
+                        supportDocument.setCategoryId(
+                            categoryToApply.getDocumentCategoryId()
+                        );
+                    }
                 }
-            }
-        );
+            );
+        }
     }
 }
