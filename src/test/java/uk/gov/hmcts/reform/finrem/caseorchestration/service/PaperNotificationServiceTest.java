@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.s
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,8 +40,8 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+        when(caseDataService.isPaperApplication(anyMap())).thenReturn(true);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
 
         paperNotificationService.printAssignToJudgeNotification(buildCaseDetails(), AUTH_TOKEN);

@@ -59,6 +59,7 @@ public class PartyService {
             dynamicListElements.add(respMultiSelectListElement);
             defaultDynamicListElements.add(respMultiSelectListElement);
         }
+
         return getRoleList(intervenerCaseRoleList(caseData, dynamicListElements), defaultDynamicListElements);
     }
 

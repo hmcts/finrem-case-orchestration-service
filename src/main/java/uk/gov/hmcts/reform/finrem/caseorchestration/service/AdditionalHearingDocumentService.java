@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditi
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
 
 import java.time.LocalDate;
@@ -205,7 +205,7 @@ public class AdditionalHearingDocumentService {
                                            Object hearingType, Object hearingDate, Object hearingTime, Object hearingLength) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        FrcCourtDetails selectedFRCDetails = FrcCourtDetails.builder()
+        CourtDetailsTemplateFields selectedFRCDetails = CourtDetailsTemplateFields.builder()
             .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
             .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
             .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))

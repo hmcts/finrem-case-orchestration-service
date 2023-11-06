@@ -6,6 +6,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CaseEventsApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -57,6 +58,7 @@ public class CcdService {
             getCaseDataContent(startEventResponse.getCaseDetails().getData(), startEventResponse));
     }
 
+    @Retryable
     public void executeCcdEventOnCase(CaseDetails caseDetails, String authorisation, String caseId, String caseTypeId,
                                       String eventType, String summary, String description) {
 

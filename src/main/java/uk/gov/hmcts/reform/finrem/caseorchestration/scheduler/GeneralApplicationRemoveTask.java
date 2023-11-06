@@ -42,9 +42,9 @@ public class GeneralApplicationRemoveTask implements Runnable {
 
     @Override
     public void run() {
-        log.info("Scheduled task GeneralOrderRemoveTask isEnabled {}", isGeneralApplicationRemoveTaskEnabled);
+        log.info("Scheduled task GeneralApplicationRemoveTask isEnabled {}", isGeneralApplicationRemoveTaskEnabled);
         if (isGeneralApplicationRemoveTaskEnabled) {
-            log.info("Scheduled task GeneralOrderRemoveTask started to run for selected cases");
+            log.info("Scheduled task GeneralApplicationRemoveTask started to run for selected cases");
             List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList("generalApplicationRemoveCaseReferenceList.csv");
             int count = 0;
             int batchCount = 1;
@@ -52,9 +52,9 @@ public class GeneralApplicationRemoveTask implements Runnable {
                 count++;
                 try {
                     RequestContextHolder.setRequestAttributes(new CustomRequestScopeAttr());
-                    if (count == bulkPrintBatchSize) {
-                        log.info("Batch {} limit reached {}, pausing for {} minutes", batchCount, bulkPrintBatchSize, bulkPrintWaitTime);
-                        TimeUnit.MINUTES.sleep(bulkPrintWaitTime);
+                    if (count == 1) {
+                        log.info("Batch {} limit reached {}, pausing for {} seconds", batchCount, bulkPrintBatchSize, bulkPrintWaitTime);
+                        TimeUnit.SECONDS.sleep(bulkPrintWaitTime);
                         count = 0;
                         batchCount++;
                     }
@@ -72,14 +72,14 @@ public class GeneralApplicationRemoveTask implements Runnable {
                         ccdService.executeCcdEventOnCase(caseDetails, systemUserService.getSysUserToken(),
                             caseDetails.getId().toString(),
                             CaseType.CONTESTED.getCcdType(),
-                            EventType.AMEND_CASE.getCcdType(),
+                            EventType.AMEND_CASE_CRON.getCcdType(),
                             "Remove duplicate General application DFR-2388",
                             "Remove duplicate General application DFR-2388");
                         log.info("Updated general applications for Case ID: {}", caseDetails.getId());
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
-                    log.error("Error processing caseRef {} ", caseReference.getCaseReference());
+                    log.error("Error processing caseRef {} and error is {}", caseReference.getCaseReference(), e);
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }
@@ -87,6 +87,4 @@ public class GeneralApplicationRemoveTask implements Runnable {
             }
         }
     }
-
-
 }

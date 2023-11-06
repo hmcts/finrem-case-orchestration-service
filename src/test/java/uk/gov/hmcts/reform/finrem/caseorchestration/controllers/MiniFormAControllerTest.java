@@ -77,7 +77,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     public void generateMiniFormA() throws Exception {
         doRequestSetUpConsented();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
@@ -121,7 +121,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     public void generateMiniFormAWhenConsentedInContested() throws Exception {
         doRequestSetUpContested();
         whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(caseDocument());
-        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(true);
+        when(caseDataService.isConsentedInContestedCase(any(CaseDetails.class))).thenReturn(true);
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
@@ -137,7 +137,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     public void generateMiniFormAWhenConsentedInContestedExpectContestedFieldToBePopulated() throws Exception {
         doRequestSetUpContested();
         whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(caseDocument());
-        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(false);
+        when(caseDataService.isConsentedInContestedCase(any(CaseDetails.class))).thenReturn(false);
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
