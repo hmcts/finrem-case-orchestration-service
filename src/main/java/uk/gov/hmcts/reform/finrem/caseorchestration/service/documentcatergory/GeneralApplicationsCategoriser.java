@@ -47,7 +47,7 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
                         categoryToApply = (gaNumberToCategory.get(generalApplicationCounter.get()));
                     }
 
-                    setCategoryToAllGADocs(ga, categoryToApply);
+                    setCategoryToAllGaDocs(ga, categoryToApply);
 
                 });
         }
@@ -82,12 +82,12 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
     private void removeDocumentCategory(List<GeneralApplicationsCollection> collectionToRemoveCategoryFrom) {
         collectionToRemoveCategoryFrom.forEach(
             ga -> {
-                setCategoryToAllGADocs(ga, DocumentCategory.DUPLICATED_GENERAL_ORDERS);
+                setCategoryToAllGaDocs(ga, DocumentCategory.DUPLICATED_GENERAL_ORDERS);
             }
         );
     }
 
-    private void setCategoryToAllGADocs(GeneralApplicationsCollection ga, DocumentCategory categoryToApply) {
+    private void setCategoryToAllGaDocs(GeneralApplicationsCollection ga, DocumentCategory categoryToApply) {
         GeneralApplicationItems generalApplicationItems = ga.getValue();
         CaseDocument generalApplicationDocument = generalApplicationItems.getGeneralApplicationDocument();
         CaseDocument generalApplicationDraftOrder = generalApplicationItems.getGeneralApplicationDraftOrder();
