@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -68,6 +69,19 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
                             categoryToApply.getDocumentCategoryId()
                         );
                     }
+
+                    List<GeneralApplicationSupportingDocumentData> generalApplicationSupportDocument = ga.getValue().getGaSupportDocuments();
+                    generalApplicationSupportDocument.forEach(
+                        gaSupportDocument -> {
+                            CaseDocument supportDocument = gaSupportDocument.getValue().getSupportDocument();
+                            if (supportDocument != null) {
+                                supportDocument.setCategoryId(
+                                    categoryToApply.getDocumentCategoryId()
+                                );
+                            }
+                        }
+                    );
+
                 });
         }
     }
@@ -121,6 +135,18 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
                     generalApplicationDirectionsDocument.setCategoryId(
                         DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
                 }
+
+                List<GeneralApplicationSupportingDocumentData> generalApplicationSupportDocument = ga.getValue().getGaSupportDocuments();
+                generalApplicationSupportDocument.forEach(
+                    gaSupportDocument -> {
+                        CaseDocument supportDocument = gaSupportDocument.getValue().getSupportDocument();
+                        if (supportDocument != null) {
+                            supportDocument.setCategoryId(
+                                DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId()
+                            );
+                        }
+                    }
+                );
             }
         );
     }
