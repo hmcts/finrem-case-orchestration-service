@@ -8,9 +8,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildDetailsCollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -56,8 +62,8 @@ class AmendCaseContestedAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> callbackResponse
             = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertEquals(callbackResponse.getData().getScheduleOneWrapper().getTypeOfApplication().getValue(),
-            Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getValue());
+        assertEquals(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getValue(),
+            callbackResponse.getData().getScheduleOneWrapper().getTypeOfApplication().getValue());
     }
 
     @Test
@@ -69,9 +75,25 @@ class AmendCaseContestedAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> callbackResponse
             = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertEquals(callbackResponse.getData().getScheduleOneWrapper().getTypeOfApplication().getValue(),
-            Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getValue());
+        assertEquals(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getValue(),
+            callbackResponse.getData().getScheduleOneWrapper().getTypeOfApplication().getValue());
     }
+
+    @Test
+    void givenContestedCase_whenTypeOfApplicationFieldIsMissingForSchedule1App_thenDoNotUpdate() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData data = finremCallbackRequest.getCaseDetails().getData();
+        List<ChildDetailsCollectionElement> childrenCollection = new ArrayList<>();
+        childrenCollection.add(ChildDetailsCollectionElement.builder()
+            .childDetails(ChildDetails.builder().childrenLiveInEnglandOrWales(YesOrNo.YES).build()).build());
+        data.getScheduleOneWrapper().setChildrenCollection(childrenCollection);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> callbackResponse
+            = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getValue(),
+            callbackResponse.getData().getScheduleOneWrapper().getTypeOfApplication().getValue());
+    }
+
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 
 @Slf4j
 @Service
@@ -31,8 +32,12 @@ public class AmendCaseContestedAboutToSubmitHandler extends FinremCallbackHandle
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = caseDetails.getData();
         if (finremCaseData.getScheduleOneWrapper().getTypeOfApplication() == null) {
-            finremCaseData.getScheduleOneWrapper()
-                .setTypeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS);
+            ScheduleOneWrapper scheduleOneWrapper = finremCaseData.getScheduleOneWrapper();
+            boolean typeCheck = scheduleOneWrapper.getChildrenCollection() != null
+                && !scheduleOneWrapper.getChildrenCollection().isEmpty();
+            scheduleOneWrapper.setTypeOfApplication(typeCheck
+                ? Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989
+                    : Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS);
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
