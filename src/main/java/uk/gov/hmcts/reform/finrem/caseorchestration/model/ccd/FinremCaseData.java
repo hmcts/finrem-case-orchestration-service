@@ -26,12 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListW
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 
@@ -127,7 +121,11 @@ public abstract class FinremCaseData {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate divorceDecreeAbsoluteDate;
-
+    private String authorisationName;
+    private String authorisation2b;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate authorisation3;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -189,6 +187,14 @@ public abstract class FinremCaseData {
             && isRespondentRepresentedByASolicitor()
             && Objects.nonNull(getContactDetailsWrapper().getRespondentSolicitorEmail())
             && isRespondentSolicitorAgreeToReceiveEmails();
+    }
+
+    @JsonIgnore
+    public CaseFlagsWrapper getCaseFlagsWrapper() {
+        if (caseFlagsWrapper == null) {
+            this.caseFlagsWrapper = new CaseFlagsWrapper();
+        }
+        return caseFlagsWrapper;
     }
 
     @JsonIgnore

@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -23,7 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
-public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackHandler implements GeneralApplicationHandler {
+public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackHandler<FinremCaseDataContested>
+    implements GeneralApplicationHandler {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationService service;
@@ -43,13 +45,13 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
-        FinremCallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
         String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
         log.info("Received on start request to reject general application for Case ID: {}", caseId);
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
 
         helper.populateGeneralApplicationSender(caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
@@ -63,7 +65,7 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
                 .toList();
 
             if (dynamicListElements.isEmpty()) {
-                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData)
                     .errors(List.of("There is no general application available to reject.")).build();
             }
 
@@ -73,10 +75,10 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
         }
 
         caseData.getGeneralApplicationWrapper().setGeneralApplicationRejectReason(null);
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
     }
 
-    private void setNonCollectionGeneralApplication(FinremCaseData caseData,
+    private void setNonCollectionGeneralApplication(FinremCaseDataContested caseData,
                                                     AtomicInteger index,
                                                     String userAuthorisation,
                                                     String caseId) {

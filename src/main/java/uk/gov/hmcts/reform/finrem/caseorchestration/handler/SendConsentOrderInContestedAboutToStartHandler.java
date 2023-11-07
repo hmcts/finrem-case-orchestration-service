@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
@@ -16,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class SendConsentOrderInContestedAboutToStartHandler extends FinremCallbackHandler {
+public class SendConsentOrderInContestedAboutToStartHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final PartyService partyService;
 
@@ -34,19 +35,21 @@ public class SendConsentOrderInContestedAboutToStartHandler extends FinremCallba
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
+        String userAuthorisation) {
+
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested {} about to start callback for case id: {}",
             callbackRequest.getEventType(), caseDetails.getId());
-        FinremCaseData finremCaseData = caseDetails.getData();
+        FinremCaseDataContested finremCaseData = caseDetails.getData();
 
         DynamicMultiSelectList roleList = partyService.getAllActivePartyList(caseDetails);
         roleList.setValue(List.of(roleList.getListItems().get(0), roleList.getListItems().get(1)));
         finremCaseData.setPartiesOnCase(roleList);
 
         finremCaseData.setAdditionalCicDocuments(null);
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(finremCaseData).build();
     }
 

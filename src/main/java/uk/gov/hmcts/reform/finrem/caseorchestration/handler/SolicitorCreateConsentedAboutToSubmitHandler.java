@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
@@ -17,7 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 @Slf4j
 @Service
-public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallbackHandler {
+public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataConsented> {
 
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
@@ -41,12 +42,13 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> handle(
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest, String userAuthorisation) {
+
+        FinremCaseDetails<FinremCaseDataConsented> caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested event {} about to start callback for case id: {}",
             EventType.SOLICITOR_CREATE, caseDetails.getId());
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataConsented caseData = caseDetails.getData();
 
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.setLatestConsentOrder(caseDocument);
@@ -55,7 +57,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
         if (!idamService.isUserRoleAdmin(userAuthorisation)) {
             caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataConsented>builder()
             .data(caseData).build();
     }
 }

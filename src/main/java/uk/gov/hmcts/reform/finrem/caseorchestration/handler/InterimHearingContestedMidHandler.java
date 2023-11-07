@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
@@ -18,7 +19,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class InterimHearingContestedMidHandler extends FinremCallbackHandler {
+public class InterimHearingContestedMidHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final BulkPrintDocumentService service;
 
@@ -36,13 +37,14 @@ public class InterimHearingContestedMidHandler extends FinremCallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
+
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {} mid callback for case id: {}",
             EventType.INTERIM_HEARING, caseId);
-        FinremCaseData finremCaseData = caseDetails.getData();
+        FinremCaseDataContested finremCaseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
         List<InterimHearingCollection> interimHearings = finremCaseData.getInterimWrapper().getInterimHearings();
@@ -56,7 +58,7 @@ public class InterimHearingContestedMidHandler extends FinremCallbackHandler {
             });
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(finremCaseData).errors(errors).build();
     }
 }

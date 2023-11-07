@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -51,9 +52,13 @@ public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEma
 
     @Override
     public List<CaseDocument> getCaseDocuments(FinremCaseDetails caseDetails) {
-        List<OrderSentToPartiesCollection> sentToPartiesCollection = caseDetails.getData().getOrdersSentToPartiesCollection();
-        List<CaseDocument> caseDocuments = new ArrayList<>();
-        sentToPartiesCollection.forEach(sendOrderObj -> caseDocuments.add(sendOrderObj.getValue().getCaseDocument()));
-        return caseDocuments;
+        if(caseDetails.getData().isContestedApplication()) {
+            List<OrderSentToPartiesCollection> sentToPartiesCollection =
+                ((FinremCaseDataContested) caseDetails.getData()).getOrdersSentToPartiesCollection();
+            List<CaseDocument> caseDocuments = new ArrayList<>();
+            sentToPartiesCollection.forEach(sendOrderObj -> caseDocuments.add(sendOrderObj.getValue().getCaseDocument()));
+            return caseDocuments;
+        }
+        return new ArrayList<>();
     }
 }

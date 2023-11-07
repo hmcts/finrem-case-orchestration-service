@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -66,8 +67,8 @@ public class CreateGeneralLetterAboutToStartHandler extends FinremCallbackHandle
             wrapper.setGeneralLetterCollection(existingWrapper.getGeneralLetterCollection());
             wrapper.setGeneralLetterCreatedBy(idamService.getIdamFullName(userAuthorisation));
         }
-        if (caseDetails.isContestedApplication()) {
-            List<IntervenerWrapper> intvrWrappers = caseData.getInterveners();
+        if (caseDetails.getData().isContestedApplication()) {
+            List<IntervenerWrapper> intvrWrappers =((FinremCaseDataContested) caseData).getInterveners();
             if (intvrWrappers != null && !intvrWrappers.isEmpty()) {
                 intvrWrappers.forEach(intvrWrapper -> buildDynamicIntervenerList(dynamicListElements, intvrWrapper));
             }

@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
@@ -18,7 +20,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class HearingConsentMidHandler extends FinremCallbackHandler {
+public class HearingConsentMidHandler extends FinremCallbackHandler<FinremCaseDataConsented> {
 
     private final BulkPrintDocumentService service;
 
@@ -36,13 +38,13 @@ public class HearingConsentMidHandler extends FinremCallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> handle(
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest, String userAuthorisation) {
+        FinremCaseDetails<FinremCaseDataConsented> caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {} mid callback for case id: {}", EventType.LIST_FOR_HEARING_CONSENTED, caseId);
 
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataConsented caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
         List<ConsentedHearingDataWrapper> listForHearings = caseData.getListForHearings();
@@ -56,7 +58,7 @@ public class HearingConsentMidHandler extends FinremCallbackHandler {
                 }
             });
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataConsented>builder()
             .data(caseData).errors(errors).build();
     }
 }

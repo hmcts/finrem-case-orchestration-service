@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -21,7 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Slf4j
 @Service
-public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCallbackHandler {
+public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationService service;
@@ -41,15 +42,15 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
-        FinremCallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
         String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
         log.info("Received on start request to {} for Case ID: {}",
             EventType.GENERAL_APPLICATION_REFER_TO_JUDGE,
             caseId);
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         helper.populateGeneralApplicationSender(caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
@@ -60,15 +61,15 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
 
         } else {
             if (dynamicList == null) {
-                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData)
                     .errors(List.of("There is no general application available to refer.")).build();
             }
             setGeneralApplicationList(caseData, existingList, dynamicList);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
     }
 
-    private void setGeneralApplicationList(FinremCaseData caseData,
+    private void setGeneralApplicationList(FinremCaseDataContested caseData,
                                            List<GeneralApplicationCollectionData> existingList,
                                            DynamicList dynamicList) {
         final String valueCode = dynamicList.getValueCode();
@@ -84,7 +85,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
             ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
     }
 
-    private void migrateExistingApplication(FinremCaseData caseData, String userAuthorisation, String caseId) {
+    private void migrateExistingApplication(FinremCaseDataContested caseData, String userAuthorisation, String caseId) {
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         GeneralApplicationCollectionData data =

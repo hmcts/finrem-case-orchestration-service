@@ -9,12 +9,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 @Slf4j
 @Service
-public class GeneralApplicationAboutToSubmitHandler extends FinremCallbackHandler {
+public class GeneralApplicationAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationService service;
@@ -34,17 +35,17 @@ public class GeneralApplicationAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         log.info("About to Submit callback event type {} for case id: {}",
             EventType.GENERAL_APPLICATION, caseDetails.getId());
 
-        FinremCaseData caseData = service.updateGeneralApplications(callbackRequest, userAuthorisation);
+        FinremCaseDataContested caseData = service.updateGeneralApplications(callbackRequest, userAuthorisation);
 
         helper.deleteNonCollectionGeneralApplication(caseData);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
     }
 
 

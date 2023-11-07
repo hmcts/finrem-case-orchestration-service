@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -21,8 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Slf4j
 @Service
-public class RejectGeneralApplicationAboutToSubmitHandler
-    extends FinremCallbackHandler {
+public class RejectGeneralApplicationAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationService generalApplicationService;
@@ -42,18 +42,18 @@ public class RejectGeneralApplicationAboutToSubmitHandler
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
-        FinremCallbackRequest callbackRequest,
-        String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
+
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         log.info("Received on submit request to reject general application for Case ID: {}", caseDetails.getId());
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
 
         DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationList());
         if (dynamicList == null) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData)
                 .errors(List.of("There is no general application available to reject.")).build();
         }
 
@@ -72,6 +72,7 @@ public class RejectGeneralApplicationAboutToSubmitHandler
         String previousState = Objects.toString(caseDetails.getData().getGeneralApplicationWrapper()
             .getGeneralApplicationPreState(), caseDetails.getState().getStateId());
         log.info("Previous state : {} for caseId {}", previousState, caseDetails.getId());
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).state(previousState).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
+            .data(caseData).state(previousState).build();
     }
 }

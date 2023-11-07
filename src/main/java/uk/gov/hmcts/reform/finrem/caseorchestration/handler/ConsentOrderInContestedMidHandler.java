@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OtherDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
@@ -21,7 +22,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler {
+public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final BulkPrintDocumentService service;
 
@@ -39,13 +40,14 @@ public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
+
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {} mid callback for case id: {}",
                 EventType.CONSENT_ORDER, caseId);
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
 
         List<CaseDocument> caseDocumentList = new ArrayList<>();
         CaseDocument consentOrder = caseData.getConsentOrder();
@@ -85,6 +87,6 @@ public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler {
         caseDocumentList.forEach(doc -> service.validateEncryptionOnUploadedDocument(doc,
                 caseId, errors, userAuthorisation));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).errors(errors).build();
     }
 }

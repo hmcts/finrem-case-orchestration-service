@@ -74,7 +74,8 @@ public class GeneralApplicationService {
     private final GeneralApplicationHelper helper;
     private final BulkPrintDocumentService service;
 
-    public FinremCaseData updateGeneralApplications(FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
+    public FinremCaseDataContested updateGeneralApplications(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
 
         FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails<FinremCaseDataContested> caseDetailsBefore = callbackRequest.getCaseDetailsBefore();

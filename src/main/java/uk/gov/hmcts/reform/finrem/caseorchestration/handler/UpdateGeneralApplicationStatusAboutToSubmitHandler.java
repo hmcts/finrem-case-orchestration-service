@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -20,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Slf4j
 @Service
-public class UpdateGeneralApplicationStatusAboutToSubmitHandler extends FinremCallbackHandler {
+public class UpdateGeneralApplicationStatusAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final GeneralApplicationService service;
     private final GeneralApplicationHelper helper;
@@ -40,15 +41,17 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandler extends FinremCa
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("About to Submit callback event type {} for case id: {}", EventType.UPDATE_CONTESTED_GENERAL_APPLICATION, caseDetails.getId());
+        log.info("About to Submit callback event type {} for case id: {}",
+            EventType.UPDATE_CONTESTED_GENERAL_APPLICATION, caseDetails.getId());
 
-        FinremCaseData caseData
+        FinremCaseDataContested caseData
             = service.updateGeneralApplications(callbackRequest, userAuthorisation);
 
-        List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
+        List<GeneralApplicationCollectionData> generalApplicationList =
+            helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         helper.populateGeneralApplicationDataSender(caseData, generalApplicationList);
         if (!generalApplicationList.isEmpty()) {
             List<GeneralApplicationCollectionData> list = generalApplicationList.stream().map(this::updateStatus).toList();
@@ -58,7 +61,7 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandler extends FinremCa
 
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
     }
 
     private GeneralApplicationCollectionData updateStatus(GeneralApplicationCollectionData item) {

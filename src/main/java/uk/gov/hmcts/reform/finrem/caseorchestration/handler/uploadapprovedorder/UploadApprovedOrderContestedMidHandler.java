@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class UploadApprovedOrderContestedMidHandler extends FinremCallbackHandler {
+public class UploadApprovedOrderContestedMidHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final BulkPrintDocumentService service;
 
@@ -38,14 +39,14 @@ public class UploadApprovedOrderContestedMidHandler extends FinremCallbackHandle
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
                                                                               String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {} mid callback for case id: {}",
             EventType.UPLOAD_APPROVED_ORDER, caseId);
 
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
@@ -63,7 +64,7 @@ public class UploadApprovedOrderContestedMidHandler extends FinremCallbackHandle
                     caseId, errors, userAuthorisation)
             );
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(caseData).errors(errors).build();
     }
 }

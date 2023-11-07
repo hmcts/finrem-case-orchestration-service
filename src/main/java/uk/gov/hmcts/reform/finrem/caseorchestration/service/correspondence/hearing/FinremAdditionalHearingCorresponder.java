@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -27,19 +28,25 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
     @Override
     public List<CaseDocument> getCaseDocuments(FinremCaseDetails caseDetails) {
 
-        List<CaseDocument> documents = new ArrayList<>();
-        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = caseDetails.getData().getAdditionalHearingDocuments();
+        if (caseDetails.getData().isContestedApplication()) {
+            List<CaseDocument> documents = new ArrayList<>();
+            List<AdditionalHearingDocumentCollection> additionalHearingDocuments =
+                ((FinremCaseDataContested) caseDetails.getData()).getAdditionalHearingDocuments();
 
-        if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
-            AdditionalHearingDocumentCollection additionalHearingDocumentCollection =
-                additionalHearingDocuments.get(additionalHearingDocuments.size() - 1);
-            documents.add(additionalHearingDocumentCollection.getValue().getDocument());
+            if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
+                AdditionalHearingDocumentCollection additionalHearingDocumentCollection =
+                    additionalHearingDocuments.get(additionalHearingDocuments.size() - 1);
+                documents.add(additionalHearingDocumentCollection.getValue().getDocument());
+            }
+
+            CaseDocument additionalListOfHearingDocuments =
+                ((FinremCaseDataContested) caseDetails.getData()).getAdditionalListOfHearingDocuments();
+            if (additionalListOfHearingDocuments != null) {
+                documents.add(additionalListOfHearingDocuments);
+            }
+            return documents;
         }
 
-        CaseDocument additionalListOfHearingDocuments = caseDetails.getData().getAdditionalListOfHearingDocuments();
-        if (additionalListOfHearingDocuments != null) {
-            documents.add(additionalListOfHearingDocuments);
-        }
-        return documents;
+        return new ArrayList<>();
     }
 }

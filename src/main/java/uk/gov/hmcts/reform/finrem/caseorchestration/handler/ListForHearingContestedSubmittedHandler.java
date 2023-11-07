@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
@@ -15,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Selec
 
 @Slf4j
 @Service
-public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandler {
+public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
@@ -39,13 +40,13 @@ public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandl
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         log.info("Handling contested event {} submit callback for case id: {}",
             EventType.LIST_FOR_HEARING, caseDetails.getId());
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseDetails<FinremCaseDataContested> caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails.getData());
 
@@ -60,7 +61,7 @@ public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandl
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse
-            .<FinremCaseData>builder()
+            .<FinremCaseDataContested>builder()
             .data(caseDetails.getData())
             .build();
     }

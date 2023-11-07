@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
@@ -28,7 +29,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final GeneralOrderService generalOrderService;
     private final GenericDocumentService genericDocumentService;
@@ -56,15 +57,16 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
+
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {}, callback {} callback for case id: {}",
             EventType.SEND_ORDER, CallbackType.ABOUT_TO_SUBMIT, caseId);
 
         try {
-            FinremCaseData caseData = caseDetails.getData();
+            FinremCaseDataContested caseData = caseDetails.getData();
             List<String> parties = generalOrderService.getParties(caseDetails);
             log.info("selected parties {} on case {}", parties, caseId);
 
@@ -98,11 +100,11 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setAdditionalDocument(null);
             setConsolidateView(caseDetails, parties);
         } catch (RuntimeException e) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(caseDetails.getData()).build();
     }
 
@@ -129,13 +131,13 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     }
 
-    private List<CaseDocument> createHearingDocumentPack(FinremCaseDetails caseDetails,
+    private List<CaseDocument> createHearingDocumentPack(FinremCaseDetails<FinremCaseDataContested> caseDetails,
                                                          List<CaseDocument> hearingOrders,
                                                          String authorisationToken) {
 
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Creating hearing document pack for caseId {}", caseId);
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
 
         List<CaseDocument> orders = new ArrayList<>(hearingOrders);
         orders.add(caseData.getOrderApprovedCoverLetter());
@@ -173,10 +175,11 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
 
-    private void stampAndAddToCollection(FinremCaseDetails caseDetails, CaseDocument latestHearingOrder,
+    private void stampAndAddToCollection(FinremCaseDetails<FinremCaseDataContested> caseDetails,
+                                         CaseDocument latestHearingOrder,
                                          String authToken) {
         String caseId = String.valueOf(caseDetails.getId());
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
 
         StampType stampType = documentHelper.getStampType(caseData);
         CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, caseId);

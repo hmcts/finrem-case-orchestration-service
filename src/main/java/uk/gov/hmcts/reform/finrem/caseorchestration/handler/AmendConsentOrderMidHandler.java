@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
@@ -19,7 +20,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
+public class AmendConsentOrderMidHandler extends FinremCallbackHandler<FinremCaseDataConsented> {
 
     private final BulkPrintDocumentService service;
     private final ConsentedApplicationHelper helper;
@@ -40,13 +41,14 @@ public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataConsented> handle(
+        FinremCallbackRequest<FinremCaseDataConsented> callbackRequest, String userAuthorisation) {
+
+        FinremCaseDetails<FinremCaseDataConsented> caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {} mid callback for case id: {}",
             EventType.AMEND_CONSENT_ORDER, caseId);
-        FinremCaseData finremCaseData = caseDetails.getData();
+        FinremCaseDataConsented finremCaseData = caseDetails.getData();
         helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
 
         List<String> errors = new ArrayList<>();
@@ -60,7 +62,7 @@ public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
             });
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataConsented>builder()
             .data(finremCaseData).errors(errors).build();
     }
 }

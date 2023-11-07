@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
@@ -39,18 +41,23 @@ public class FinremConsentInContestedSendOrderCorresponder extends FinremMultiLe
     public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails,
                                                        String authToken,
                                                        DocumentHelper.PaperNotificationRecipient recipient) {
-        List<OrderSentToPartiesCollection> sentToPartiesCollection = caseDetails.getData().getOrdersSentToPartiesCollection();
-        List<CaseDocument> consentOrderDocuments = new ArrayList<>();
-        sentToPartiesCollection.forEach(doc -> consentOrderDocuments.add(doc.getValue().getCaseDocument()));
-        ConsentOrderWrapper wrapper = caseDetails.getData().getConsentOrderWrapper();
-        if (consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, authToken)) {
-            consentOrderApprovedDocumentService.addApprovedConsentCoverLetter(caseDetails, consentOrderDocuments, authToken, recipient);
-        } else {
-            consentOrderNotApprovedDocumentService.addNotApprovedConsentCoverLetter(caseDetails, consentOrderDocuments, authToken, recipient);
+        if (caseDetails.getData().isContestedApplication()) {
+            FinremCaseDataContested caseData = (FinremCaseDataContested) caseDetails.getData();
+            List<OrderSentToPartiesCollection> sentToPartiesCollection = caseData.getOrdersSentToPartiesCollection();
+            List<CaseDocument> consentOrderDocuments = new ArrayList<>();
+            sentToPartiesCollection.forEach(doc -> consentOrderDocuments.add(doc.getValue().getCaseDocument()));
+            ConsentOrderWrapper wrapper = caseData.getConsentOrderWrapper();
+            if (consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, authToken)) {
+                consentOrderApprovedDocumentService.addApprovedConsentCoverLetter(caseDetails, consentOrderDocuments, authToken, recipient);
+            } else {
+                consentOrderNotApprovedDocumentService.addNotApprovedConsentCoverLetter(caseDetails, consentOrderDocuments, authToken, recipient);
+            }
+            List<BulkPrintDocument> bulkPrintDocumentList = new ArrayList<>();
+            consentOrderDocuments.forEach(caseDocument -> bulkPrintDocumentList.add(BulkPrintDocument.builder()
+                .fileName(caseDocument.getDocumentFilename()).binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build()));
+            return bulkPrintDocumentList;
         }
-        List<BulkPrintDocument> bulkPrintDocumentList = new ArrayList<>();
-        consentOrderDocuments.forEach(caseDocument -> bulkPrintDocumentList.add(BulkPrintDocument.builder()
-            .fileName(caseDocument.getDocumentFilename()).binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build()));
-        return bulkPrintDocumentList;
+
+        return new ArrayList<>();
     }
 }

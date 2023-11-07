@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
@@ -17,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ContestedListForHearingMidHandler extends FinremCallbackHandler {
+public class ContestedListForHearingMidHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final BulkPrintDocumentService service;
 
@@ -35,20 +36,20 @@ public class ContestedListForHearingMidHandler extends FinremCallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(FinremCallbackRequest<FinremCaseDataContested> callbackRequest,
                                                                               String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {} mid callback for case id: {}",
             EventType.LIST_FOR_HEARING, caseId);
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
         if (caseData.getAdditionalHearingDocumentsOption().isYes()) {
             CaseDocument additionalListOfHearingDocument = caseData.getAdditionalListOfHearingDocuments();
             service.validateEncryptionOnUploadedDocument(additionalListOfHearingDocument,
                 caseId, errors, userAuthorisation);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(caseData).errors(errors).build();
     }
 }

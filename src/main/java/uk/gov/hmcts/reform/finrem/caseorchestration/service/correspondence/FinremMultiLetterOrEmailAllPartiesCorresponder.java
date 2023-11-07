@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNotice;
@@ -55,30 +54,32 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
     }
 
     public void sendIntervenerCorrespondence(String authorisationToken,
-                                             FinremCaseDetails<FinremCaseDataContested> caseDetails) {
-        FinremCaseDataContested caseData = caseDetails.getData();
-        List<IntervenerWrapper> interveners = caseData.getInterveners();
-        interveners.forEach(intervenerWrapper -> {
-            log.info("Intervener type {}, communication enabled {}, caseId {}", intervenerWrapper.getIntervenerType(),
-                intervenerWrapper.getIntervenerCorrespondenceEnabled(), caseDetails.getId());
-            if (intervenerWrapper.getIntervenerCorrespondenceEnabled() == null
-                || Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
-                List<CaseDocument> caseDocuments = returnAndAddCaseDocumentsToIntervenerHearingNotices(caseDetails, intervenerWrapper);
-                if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
-                    log.info("Sending email correspondence to {} for case: {}",
-                        intervenerWrapper.getIntervenerType().getTypeValue(),
-                        caseDetails.getId());
-                    this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
-                } else if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
-                    log.info("Sending letter correspondence to {} for case: {}",
-                        intervenerWrapper.getIntervenerType().getTypeValue(),
-                        caseDetails.getId());
-                    List<BulkPrintDocument> documentsToPrint = documentHelper.getCaseDocumentsAsBulkPrintDocuments(caseDocuments);
-                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, documentsToPrint);
-                }
+                                             FinremCaseDetails caseDetails) {
+        if (caseDetails.getData().isContestedApplication()) {
+            FinremCaseDataContested caseData = (FinremCaseDataContested) caseDetails.getData();
+            List<IntervenerWrapper> interveners = caseData.getInterveners();
+            interveners.forEach(intervenerWrapper -> {
+                log.info("Intervener type {}, communication enabled {}, caseId {}", intervenerWrapper.getIntervenerType(),
+                    intervenerWrapper.getIntervenerCorrespondenceEnabled(), caseDetails.getId());
+                if (intervenerWrapper.getIntervenerCorrespondenceEnabled() == null
+                    || Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
+                    List<CaseDocument> caseDocuments = returnAndAddCaseDocumentsToIntervenerHearingNotices(caseDetails, intervenerWrapper);
+                    if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
+                        log.info("Sending email correspondence to {} for case: {}",
+                            intervenerWrapper.getIntervenerType().getTypeValue(),
+                            caseDetails.getId());
+                        this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
+                    } else if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
+                        log.info("Sending letter correspondence to {} for case: {}",
+                            intervenerWrapper.getIntervenerType().getTypeValue(),
+                            caseDetails.getId());
+                        List<BulkPrintDocument> documentsToPrint = documentHelper.getCaseDocumentsAsBulkPrintDocuments(caseDocuments);
+                        bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, documentsToPrint);
+                    }
 
-            }
-        });
+                }
+            });
+        }
     }
 
     protected boolean shouldSendApplicantSolicitorEmail(FinremCaseDetails caseDetails) {

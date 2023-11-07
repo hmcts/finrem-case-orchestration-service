@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -46,22 +47,24 @@ public abstract class FinremMultiLetterOnlyAllPartiesCorresponder extends MultiL
 
     public void sendIntervenerCorrespondence(String authorisationToken, FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
-        List<IntervenerWrapper> interveners = caseData.getInterveners();
-        interveners.forEach(intervenerWrapper -> {
-            log.info("Intervener type {}, communication enabled {}, caseId {}", intervenerWrapper.getIntervenerType(),
-                intervenerWrapper.getIntervenerCorrespondenceEnabled(), caseDetails.getId());
-            if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
-                && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled()
-                && !shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)
-                && intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty())) {
-                log.info("Sending letter correspondence to {} for case: {}",
-                    intervenerWrapper.getIntervenerType().getTypeValue(),
-                    caseDetails.getId());
-                bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
-                    getDocumentsToPrint(caseDetails, authorisationToken,
-                        getIntervenerPaperNotificationRecipient(capitalize(intervenerWrapper.getIntervenerType().getTypeValue()))));
-            }
-        });
+        if(caseData.isContestedApplication()) {
+            List<IntervenerWrapper> interveners = ((FinremCaseDataContested) caseData).getInterveners();
+            interveners.forEach(intervenerWrapper -> {
+                log.info("Intervener type {}, communication enabled {}, caseId {}", intervenerWrapper.getIntervenerType(),
+                    intervenerWrapper.getIntervenerCorrespondenceEnabled(), caseDetails.getId());
+                if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
+                    && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled()
+                    && !shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)
+                    && intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty())) {
+                    log.info("Sending letter correspondence to {} for case: {}",
+                        intervenerWrapper.getIntervenerType().getTypeValue(),
+                        caseDetails.getId());
+                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
+                        getDocumentsToPrint(caseDetails, authorisationToken,
+                            getIntervenerPaperNotificationRecipient(capitalize(intervenerWrapper.getIntervenerType().getTypeValue()))));
+                }
+            });
+        }
     }
 
     protected DocumentHelper.PaperNotificationRecipient getIntervenerPaperNotificationRecipient(String recipient) {

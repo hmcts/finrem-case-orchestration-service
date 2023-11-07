@@ -47,8 +47,6 @@ public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
         Optional.ofNullable(caseData.getAdditionalListOfHearingDocuments())
             .ifPresent(caseDocuments::add);
 
-        Optional.ofNullable(caseData.getMiniFormA())
-            .ifPresent(miniFormA -> caseDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(miniFormA)));
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
         caseDocuments.addAll(formACaseDocuments);

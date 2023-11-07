@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -23,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Slf4j
 @Service
-public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbackHandler {
+public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationService service;
@@ -43,13 +44,13 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
-        FinremCallbackRequest callbackRequest,
-        String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
+
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         final String caseId = caseDetails.getId().toString();
         log.info("Received on start request to outcome decision general application for Case ID: {}", caseId);
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         if (existingList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
@@ -80,12 +81,12 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
             caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeOther(null);
             caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeList(null);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder().data(caseData).build();
     }
 
-    private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation)  {
+    private void migrateExistingApplication(FinremCaseDetails<FinremCaseDataContested> caseDetails, String userAuthorisation)  {
         String caseId = caseDetails.getId().toString();
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseDataContested caseData = caseDetails.getData();
         GeneralApplicationCollectionData data =
             helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
         List<GeneralApplicationCollectionData> existingGeneralApplication =
@@ -108,7 +109,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
         caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeList(null);
     }
 
-    private GeneralApplicationCollectionData setStatusForElement(FinremCaseData caseData,
+    private GeneralApplicationCollectionData setStatusForElement(FinremCaseDataContested caseData,
                                                                  GeneralApplicationCollectionData data,
                                                                  String code,
                                                                  String status) {
@@ -118,7 +119,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
         return data;
     }
 
-    private GeneralApplicationCollectionData updateStatus(FinremCaseData caseData,
+    private GeneralApplicationCollectionData updateStatus(FinremCaseDataContested caseData,
                                                           GeneralApplicationCollectionData data,
                                                           String status) {
         GeneralApplicationItems items = data.getGeneralApplicationItems();

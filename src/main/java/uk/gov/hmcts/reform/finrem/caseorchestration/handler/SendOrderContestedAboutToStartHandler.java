@@ -8,13 +8,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDataContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 @Slf4j
 @Service
-public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler {
+public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler<FinremCaseDataContested> {
 
     private final GeneralOrderService generalOrderService;
     private final PartyService partyService;
@@ -35,18 +36,18 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseDataContested> handle(
+        FinremCallbackRequest<FinremCaseDataContested> callbackRequest, String userAuthorisation) {
+        FinremCaseDetails<FinremCaseDataContested> caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested {} about to start callback for case id: {}",
             callbackRequest.getEventType(), caseDetails.getId());
-        FinremCaseData finremCaseData = caseDetails.getData();
+        FinremCaseDataContested finremCaseData = caseDetails.getData();
 
         generalOrderService.setOrderList(caseDetails);
 
         finremCaseData.setPartiesOnCase(partyService.getAllActivePartyList(caseDetails));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseDataContested>builder()
             .data(finremCaseData).build();
     }
 }
