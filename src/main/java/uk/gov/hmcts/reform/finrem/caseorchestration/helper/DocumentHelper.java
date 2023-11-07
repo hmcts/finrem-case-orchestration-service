@@ -184,6 +184,16 @@ public class DocumentHelper {
             .toList();
     }
 
+    public List<CaseDocument> getPensionDocumentsData(FinremCaseData caseData) {
+        return ofNullable(caseData.getPensionCollection())
+            .orElse(emptyList())
+            .stream()
+            .map(PensionTypeCollection::getTypedCaseDocument)
+            .map(PensionType::getPensionDocument)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
 
     /**
      * Return List Object for given Case with the given indentation used.

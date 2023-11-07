@@ -139,6 +139,14 @@ public class DocumentHelperTest {
 
 
     @Test
+    public void shouldGetPensionDocumentsFinrem() throws Exception {
+        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
+        List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(pensionDocuments.size(), is(2));
+    }
+
+    @Test
     public void shouldGetVariationOrderDocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getVariationOrderDocumentsData(
