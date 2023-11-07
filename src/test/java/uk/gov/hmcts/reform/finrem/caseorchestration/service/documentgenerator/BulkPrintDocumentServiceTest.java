@@ -131,7 +131,7 @@ class BulkPrintDocumentServiceTest {
         List<String> errors = new ArrayList<>();
 
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-        assertEquals("Uploaded document abc.pdf is empty for caseId 1234", errors.get(0));
+        assertEquals("Uploaded document abc.pdf is empty.", errors.get(0));
     }
 
     private byte[] loadResource(String testPdf) throws IOException {

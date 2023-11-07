@@ -70,7 +70,8 @@ public class BulkPrintDocumentService {
                     log.error(exc.getMessage());
                 }
             } else {
-                String errorMessage = "Uploaded document " + documentFilename + " is empty for caseId " + caseId;
+                String errorMessage = "Uploaded document " + documentFilename + " is empty.";
+                log.error("Uploaded document {} for caseId {} is empty", documentFilename, caseId);
                 errors.add(errorMessage);
             }
         }
