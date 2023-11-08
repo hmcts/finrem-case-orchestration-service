@@ -1,20 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.io.File;
@@ -24,12 +18,9 @@ import java.util.Objects;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,32 +29,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 
 @WebMvcTest(HearingDocumentController.class)
 public class HearingDocumentControllerTest extends BaseControllerTest {
 
     private static final String DIRECTION_ORDER_URL = "/case-orchestration/contested-upload-direction-order";
-    private static final String VALIDATE_AND_GEN_DOC_URL = "/case-orchestration/documents/hearing";
-    private static final String ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY = "Issue Date, fast track decision or hearingDate is empty";
 
-    @MockBean
-    private HearingDocumentService hearingDocumentService;
     @MockBean
     private AdditionalHearingDocumentService additionalHearingDocumentService;
     @MockBean
     private ValidateHearingService validateHearingService;
-    @MockBean
-    private CaseDataService caseDataService;
-    @MockBean
-    private GenerateCoverSheetService coverSheetService;
-    @MockBean
-    private NotificationService notificationService;
-
 
     @Before
     public void setUp() {
@@ -84,120 +59,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void generateHearingDocumentHttpError400() throws Exception {
-        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-                .content("kwuilebge")
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void generateHearingDocumentFormC() throws Exception {
-        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-            .thenReturn(ImmutableMap.of("formC", caseDocument()));
-
-        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
-            .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
-            .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
-
-        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(CaseDetails.class), any());
-    }
-
-    @Test
-    public void generateHearingDocumentPaperApplication() throws Exception {
-        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
-            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json")).toURI()));
-
-        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-            .thenReturn(ImmutableMap.of("formC", caseDocument()));
-
-        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
-            .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
-            .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
-    }
-
-    @Test
-    public void generateMiniFormAHttpError500() throws Exception {
-        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-            .thenThrow(feignError());
-
-        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isInternalServerError());
-    }
-
-    @Test
-    public void generateAdditionalHearingDocumentSuccess() throws Exception {
-        doValidCaseDataSetUpForAdditionalHearing();
-
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(caseDataService.isApplicantAddressConfidential(anyMap())).thenReturn(false);
-        when(caseDataService.isRespondentAddressConfidential(anyMap())).thenReturn(false);
-        when(coverSheetService.generateApplicantCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
-        when(coverSheetService.generateRespondentCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
-
-        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.bulkPrintCoverSheetApp.document_url", is(DOC_URL)))
-            .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes.document_url", is(DOC_URL)));
-
-        verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
-        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
-
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
-        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
-        verify(coverSheetService).generateApplicantCoverSheet(any(CaseDetails.class), any());
-        verify(coverSheetService).generateRespondentCoverSheet(any(CaseDetails.class), any());
-    }
-
-    @Test
-    public void generateAdditionalHearingDocumentAndConfidentialCoversheet() throws Exception {
-        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
-            .getResource("/fixtures/bulkprint/bulk-print-additional-hearing-confidential.json")).toURI()));
-
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(caseDataService.isApplicantAddressConfidential(anyMap())).thenReturn(true);
-        when(caseDataService.isRespondentAddressConfidential(anyMap())).thenReturn(true);
-        when(coverSheetService.generateApplicantCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
-        when(coverSheetService.generateRespondentCoverSheet(any(CaseDetails.class), any())).thenReturn(caseDocument());
-
-        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.bulkPrintCoverSheetAppConfidential.document_url", is(DOC_URL)))
-            .andExpect(jsonPath("$.data.bulkPrintCoverSheetResConfidential.document_url", is(DOC_URL)));
-
-
-        verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
-        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
-
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
-        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
-        verify(coverSheetService).generateApplicantCoverSheet(any(CaseDetails.class), any());
-        verify(coverSheetService).generateRespondentCoverSheet(any(CaseDetails.class), any());
-    }
-
-    @Test
     public void generateHearingDocumentDirectionOrder_isAnotherHearingTrue() throws Exception {
         mvc.perform(post(DIRECTION_ORDER_URL)
                 .content(requestContent.toString())
@@ -213,11 +74,11 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(any(), any());
 
         mvc.perform(post(DIRECTION_ORDER_URL)
-                        .content(requestContent.toString())
-                        .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors[0]", is(new CourtDetailsParseException().getMessage())));
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors[0]", is(new CourtDetailsParseException().getMessage())));
     }
 
     @Test
