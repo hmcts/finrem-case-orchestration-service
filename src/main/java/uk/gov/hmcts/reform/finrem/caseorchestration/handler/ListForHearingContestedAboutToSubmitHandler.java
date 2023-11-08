@@ -84,7 +84,7 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
         }
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         if (hearingDocumentService.alreadyHadFirstHearing(finremCaseDetails)) {
-            if (caseDataService.isContestedFinremCaseDetailsApplication(finremCaseDetails)) {
+            if (caseDataService.isContestedApplication(finremCaseDetails)) {
                 try {
                     additionalHearingDocumentService.createAdditionalHearingDocuments(userAuthorisation, caseDetails);
                 } catch (JsonProcessingException e) {
