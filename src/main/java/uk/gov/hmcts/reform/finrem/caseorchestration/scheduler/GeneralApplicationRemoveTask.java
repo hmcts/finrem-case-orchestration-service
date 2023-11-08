@@ -57,7 +57,7 @@ public class GeneralApplicationRemoveTask extends BaseTask {
     }
 
     @Override
-    protected void updateCaseData(FinremCaseData finremCaseData) {
+    protected void executeTask(FinremCaseData finremCaseData) {
         generalApplicationHelper.checkAndRemoveDuplicateGeneralApplications(finremCaseData);
     }
 }
