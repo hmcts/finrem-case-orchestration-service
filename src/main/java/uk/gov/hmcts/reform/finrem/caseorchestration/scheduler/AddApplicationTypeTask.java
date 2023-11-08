@@ -54,7 +54,7 @@ public class AddApplicationTypeTask extends BaseTask {
     }
 
     @Override
-    protected void updateCaseData(FinremCaseData finremCaseData) {
+    protected void executeTask(FinremCaseData finremCaseData) {
         if (finremCaseData.getScheduleOneWrapper().getTypeOfApplication() == null) {
             ScheduleOneWrapper scheduleOneWrapper = finremCaseData.getScheduleOneWrapper();
             boolean typeCheck = scheduleOneWrapper.getChildrenCollection() != null

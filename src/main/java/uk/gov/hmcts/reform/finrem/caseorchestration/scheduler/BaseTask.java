@@ -47,7 +47,7 @@ public abstract class BaseTask implements Runnable {
     public void run() {
         log.info("Scheduled task {} isEnabled {}", getTaskName(), isTaskEnabled());
         if (isTaskEnabled()) {
-            log.info("Scheduled task ApplicationTypeAddTask started to run for selected cases");
+            log.info("Scheduled task {} started to run for selected cases", getTaskName());
             List<CaseReference> caseReferences = getCaseReferences();
             int count = 0;
             int batchCount = 1;
@@ -74,7 +74,7 @@ public abstract class BaseTask implements Runnable {
                         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
                         FinremCaseData finremCaseData = finremCaseDetails.getData();
                         log.info("Updating application type for Case ID: {}", caseDetails.getId());
-                        updateCaseData(finremCaseData);
+                        executeTask(finremCaseData);
                         CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
                         startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
                         ccdService.submitEventForCaseWorker(startEventResponse, systemUserService.getSysUserToken(),
@@ -111,5 +111,5 @@ public abstract class BaseTask implements Runnable {
 
     protected abstract String getSummary();
 
-    protected abstract void updateCaseData(FinremCaseData finremCaseData);
+    protected abstract void executeTask(FinremCaseData finremCaseData);
 }
