@@ -21,15 +21,18 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrderDocumentCategoriser;
 
 import javax.validation.constraints.NotNull;
 
@@ -63,6 +66,8 @@ public class HearingDocumentController extends BaseController {
     private final GenerateCoverSheetService coverSheetService;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final DraftOrderDocumentCategoriser draftOrderDocumentCategoriser;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -166,10 +171,13 @@ public class HearingDocumentController extends BaseController {
             log.error(e.getMessage());
             errors.add(e.getMessage());
         }
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        draftOrderDocumentCategoriser.categorise(finremCaseDetails.getData());
+        CaseDetails mappedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
         return ResponseEntity.ok(GenericAboutToStartOrSubmitCallbackResponse
             .<Map<String, Object>>builder()
-            .data(caseData)
+            .data(mappedCaseDetails.getData())
             .errors(errors)
             .build());
     }
