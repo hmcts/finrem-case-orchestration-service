@@ -10,7 +10,7 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum RegionHighCourtFrc {
-    HIGHCOURT("FR_highCourtList_1");
+    HIGHCOURT("highcourt");
 
     private final String value;
 
