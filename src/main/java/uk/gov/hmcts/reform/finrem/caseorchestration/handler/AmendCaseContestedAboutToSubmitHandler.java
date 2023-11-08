@@ -9,14 +9,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AmendCaseService;
 
 @Slf4j
 @Service
 public class AmendCaseContestedAboutToSubmitHandler extends FinremCallbackHandler {
-    public AmendCaseContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
+    private final AmendCaseService amendCaseService;
+    public AmendCaseContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
+                                                  AmendCaseService amendCaseService) {
         super(mapper);
+        this.amendCaseService = amendCaseService;
     }
 
     @Override
@@ -31,14 +33,8 @@ public class AmendCaseContestedAboutToSubmitHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = caseDetails.getData();
-        if (finremCaseData.getScheduleOneWrapper().getTypeOfApplication() == null) {
-            ScheduleOneWrapper scheduleOneWrapper = finremCaseData.getScheduleOneWrapper();
-            boolean typeCheck = scheduleOneWrapper.getChildrenCollection() != null
-                && !scheduleOneWrapper.getChildrenCollection().isEmpty();
-            scheduleOneWrapper.setTypeOfApplication(typeCheck
-                ? Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989
-                    : Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS);
-        }
+        amendCaseService.addApplicationType(finremCaseData);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
+
 }

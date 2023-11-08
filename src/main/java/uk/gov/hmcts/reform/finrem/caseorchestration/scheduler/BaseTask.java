@@ -47,7 +47,7 @@ public abstract class BaseTask implements Runnable {
     public void run() {
         log.info("Scheduled task {} isEnabled {}", getTaskName(), isTaskEnabled());
         if (isTaskEnabled()) {
-            log.info("Scheduled task ApplicationTypeAddTask started to run for selected cases");
+            log.info("Scheduled task {}} started to run for selected cases", getTaskName());
             List<CaseReference> caseReferences = getCaseReferences();
             int count = 0;
             int batchCount = 1;
@@ -73,7 +73,7 @@ public abstract class BaseTask implements Runnable {
                         CaseDetails caseDetails = startEventResponse.getCaseDetails();
                         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
                         FinremCaseData finremCaseData = finremCaseDetails.getData();
-                        log.info("Updating application type for Case ID: {}", caseDetails.getId());
+                        log.info("Updating {} for Case ID: {}", getTaskName(), caseDetails.getId());
                         updateCaseData(finremCaseData);
                         CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
                         startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
@@ -83,7 +83,7 @@ public abstract class BaseTask implements Runnable {
                             EventType.AMEND_CASE_CRON.getCcdType(),
                             getSummary(),
                             getSummary());
-                        log.info("Updated application type for Case ID: {}", caseDetails.getId());
+                        log.info("Updated {} for Case ID: {}", getTaskName(), caseDetails.getId());
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
