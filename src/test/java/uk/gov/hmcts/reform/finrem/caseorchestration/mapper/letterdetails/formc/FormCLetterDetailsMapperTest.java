@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.FormCLetterDetails;
 
@@ -81,7 +81,7 @@ public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
             .build();
     }
 
-    private FrcCourtDetails getCourtDetails() {
+    private CourtDetailsTemplateFields getCourtDetails() {
         DefaultCourtListWrapper courtListWrapper = new DefaultCourtListWrapper();
         courtListWrapper.setBristolCourtList(BristolCourt.BRISTOL_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
         return new CourtDetailsMapper(new ObjectMapper()).getCourtDetails(courtListWrapper);

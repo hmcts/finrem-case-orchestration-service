@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ApprovedOrderNoticeOfHearingCorresponder;
 
 import java.time.LocalDate;
@@ -118,7 +118,7 @@ public class ApprovedOrderNoticeOfHearingService {
     @SuppressWarnings("java:S3740")
     private Map getNoticeOfHearingLetterDetails(CaseDetails caseDetails,
                                                 AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection) {
-        FrcCourtDetails selectedFRCDetails = getFrcCourtDetails(additionalHearingDirectionsCollection);
+        CourtDetailsTemplateFields selectedFRCDetails = getFrcCourtDetails(additionalHearingDirectionsCollection);
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(CASE_DATA, addValuesToPlaceHoldersMap(caseDetails, additionalHearingDirectionsCollection, selectedFRCDetails));
         caseDataMap.put("id", caseDetails.getId());
@@ -127,9 +127,9 @@ public class ApprovedOrderNoticeOfHearingService {
         return caseDetailsMap;
     }
 
-    private FrcCourtDetails getFrcCourtDetails(AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection) {
+    private CourtDetailsTemplateFields getFrcCourtDetails(AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection) {
         Map<String, Object> courtDetails = getCourtDetails(additionalHearingDirectionsCollection);
-        return FrcCourtDetails.builder()
+        return CourtDetailsTemplateFields.builder()
             .courtName(nullToEmpty(courtDetails.get(COURT_DETAILS_NAME_KEY)))
             .courtAddress(nullToEmpty(courtDetails.get(COURT_DETAILS_ADDRESS_KEY)))
             .phoneNumber(nullToEmpty(courtDetails.get(COURT_DETAILS_PHONE_KEY)))
@@ -139,7 +139,7 @@ public class ApprovedOrderNoticeOfHearingService {
 
     private Map<String, Object> addValuesToPlaceHoldersMap(CaseDetails caseDetails,
                                                            AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection,
-                                                           FrcCourtDetails selectedFRCDetails) {
+                                                           CourtDetailsTemplateFields selectedFRCDetails) {
         Map<String, Object> placeholdersMap = new HashMap<>();
         placeholdersMap.put("HearingType", additionalHearingDirectionsCollection.getTypeOfHearing());
         placeholdersMap.put("HearingVenue", getFrcCourtDetailsAsOneLineAddressString(getCourtDetails(additionalHearingDirectionsCollection)));

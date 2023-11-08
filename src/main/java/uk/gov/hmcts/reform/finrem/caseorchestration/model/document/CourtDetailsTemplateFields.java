@@ -18,10 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-public class FrcCourtDetails {
+public class CourtDetailsTemplateFields {
     @JsonProperty("courtName")
     private String courtName;
-
     @JsonProperty("courtAddress")
     private String courtAddress;
 
@@ -33,6 +32,21 @@ public class FrcCourtDetails {
 
     @JsonProperty("openingHours")
     private String openingHours;
+
+    @JsonProperty("hearingCourtName")
+    private String hearingCourtName;
+
+    @JsonProperty("hearingCourtAddress")
+    private String hearingCourtAddress;
+
+    @JsonProperty("hearingCourtPhoneNumber")
+    private String hearingCourtPhoneNumber;
+
+    @JsonProperty("hearingCourtEmail")
+    private String hearingCourtEmail;
+
+    @JsonProperty("hearingCourtOpeningHours")
+    private String hearingCourtOpeningHours;
 
     @JsonIgnore
     public String getCourtContactDetailsAsOneLineAddressString() {

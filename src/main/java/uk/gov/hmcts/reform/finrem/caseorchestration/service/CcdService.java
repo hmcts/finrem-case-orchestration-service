@@ -6,6 +6,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CaseEventsApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -29,11 +30,12 @@ public class CcdService {
     private final CaseEventsApi caseEventsApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamAuthService idamAuthService;
+    private static final String LOGGER =  "Executing eventType {} on caseId {}";
 
     public void executeCcdEventOnCase(String authorisation, String caseId, String caseTypeId,
                                       String eventType) {
 
-        log.info("Executing eventType {} on caseId {}", eventType, caseId);
+        log.info(LOGGER, eventType, caseId);
 
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
 
@@ -57,10 +59,11 @@ public class CcdService {
             getCaseDataContent(startEventResponse.getCaseDetails().getData(), startEventResponse));
     }
 
+    @Retryable
     public void executeCcdEventOnCase(CaseDetails caseDetails, String authorisation, String caseId, String caseTypeId,
                                       String eventType, String summary, String description) {
 
-        log.info("Executing eventType {} on caseId {}", eventType, caseId);
+        log.info(LOGGER, eventType, caseId);
 
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
 
@@ -113,7 +116,7 @@ public class CcdService {
         Long caseId = caseDetails.getId();
         String caseTypeId = caseDetails.getCaseTypeId();
 
-        log.info("Executing eventType {} on caseId {}", eventType, caseId);
+        log.info(LOGGER, eventType, caseId);
 
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
 

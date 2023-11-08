@@ -5,14 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class GeneralApplicationOrderDetails implements DocumentTemplateDetails {
-    private FrcCourtDetails courtDetails;
+    private CourtDetailsTemplateFields courtDetails;
     @JsonProperty("applicantName")
     private String applicantName;
     @JsonProperty("respondentName")
