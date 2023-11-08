@@ -8,12 +8,15 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrderDocumentCategoriser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +40,10 @@ public class HearingOrderService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
+    private final DraftOrderDocumentCategoriser draftOrderDocumentCategoriser;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public void convertToPdfAndStampAndStoreLatestDraftHearingOrder(CaseDetails caseDetails, String authorisationToken) {
+    public CaseDetails convertToPdfAndStampAndStoreLatestDraftHearingOrder(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
         Optional<DraftDirectionOrder> judgeApprovedHearingOrder = getJudgeApprovedHearingOrder(caseDetails, authorisationToken);
@@ -56,6 +61,9 @@ public class HearingOrderService {
         } else {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        draftOrderDocumentCategoriser.categorise(finremCaseDetails.getData());
+        return finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
     }
 
     public boolean latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails caseDetails, String authorisationToken) {

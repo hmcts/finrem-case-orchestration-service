@@ -7,12 +7,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -45,6 +48,9 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void whenStoreHearingOrder_expectedServicesAreInvoked() {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        when(hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), any())).thenReturn(caseDetails);
+
         hearingOrderController.storeHearingOrder(AUTH_TOKEN, buildCallbackRequest());
 
         verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
@@ -76,6 +82,11 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void givenLatestDraftDirectionOrderOverridesSolicitorCollection_whenStoringApprovedOrder_thenItIsAppendedToJudgesAmendedOrders() {
+        Map<String, Object> mappedCaseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().data(mappedCaseData).build();
+
+        when(hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), any())).thenReturn(caseDetails);
+
         when(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(any(), any())).thenReturn(true);
 
         hearingOrderController.storeApprovedHearingOrder(AUTH_TOKEN, buildCallbackRequest());
@@ -87,6 +98,11 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void givenLatestDraftDirectionOrderDoesntOverrideSolicitorCollection_whenStoringApprovedOrder_thenItIsNotAppendedToJudgesAmendedOrders() {
+        Map<String, Object> mappedCaseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().data(mappedCaseData).build();
+
+        when(hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), any())).thenReturn(caseDetails);
+
         when(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(any(), any())).thenReturn(false);
 
         hearingOrderController.storeApprovedHearingOrder(AUTH_TOKEN, buildCallbackRequest());

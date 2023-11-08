@@ -82,9 +82,9 @@ public class HearingOrderController extends BaseController {
 
         validateCaseData(callback);
 
-        Map<String, Object> caseData = caseDetails.getData();
-        hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, authorisationToken);
-        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
+        CaseDetails mappedCaseDetails = hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, authorisationToken);
+        Map<String, Object> caseData = mappedCaseDetails.getData();
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(mappedCaseDetails, authorisationToken);
         caseDataService.moveCollection(caseData, DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -130,14 +130,13 @@ public class HearingOrderController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         validateCaseData(callback);
 
-        Map<String, Object> caseData = caseDetails.getData();
-
-        hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, authorisationToken);
-        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
+        CaseDetails mappedCaseDetails = hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, authorisationToken);
+        Map<String, Object> caseData = mappedCaseDetails.getData();
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(mappedCaseDetails, authorisationToken);
         caseDataService.moveCollection(caseData, DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
 
-        if (hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails, authorisationToken)) {
-            hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
+        if (hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(mappedCaseDetails, authorisationToken)) {
+            hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(mappedCaseDetails);
         }
 
         caseData.remove(LATEST_DRAFT_DIRECTION_ORDER);
