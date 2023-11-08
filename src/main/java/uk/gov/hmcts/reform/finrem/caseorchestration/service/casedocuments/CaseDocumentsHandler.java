@@ -24,7 +24,6 @@ public class CaseDocumentsHandler extends PartyDocumentsHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        //TODO Check how these are to be assigned
         return DocumentCategory.CASE_DOCUMENTS;
     }
 }

@@ -25,6 +25,6 @@ public class RespondentCorrespondenceHandler extends CorrespondenceHandler {
         if (Objects.requireNonNull(caseDocumentType) == CaseDocumentType.OFFERS) {
             return DocumentCategory.RESPONDENT_DOCUMENTS_OPEN_OFFERS;
         }
-        return DocumentCategory.CORRESPONDENCE;
+        return DocumentCategory.CORRESPONDENCE_RESPONDENT;
     }
 }

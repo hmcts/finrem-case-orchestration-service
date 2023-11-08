@@ -22,8 +22,11 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
             case OTHER -> {
                 return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER;
             }
-            case FORM_B -> {
-                return DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B;
+            case PENSION_PLAN -> {
+                return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_PENSION_PLAN;
+            }
+            case FORM_B, FORM_F, CARE_PLAN -> {
+                return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER;
             }
             default -> {
                 return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3;

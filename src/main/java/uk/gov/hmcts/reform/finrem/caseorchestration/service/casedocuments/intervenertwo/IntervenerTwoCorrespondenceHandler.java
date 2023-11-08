@@ -25,6 +25,6 @@ public class IntervenerTwoCorrespondenceHandler extends CorrespondenceHandler {
         if (Objects.requireNonNull(caseDocumentType) == CaseDocumentType.OFFERS) {
             return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_OPEN_OFFERS;
         }
-        return DocumentCategory.CORRESPONDENCE;
+        return DocumentCategory.CORRESPONDENCE_INTERVENER_2;
     }
 }
