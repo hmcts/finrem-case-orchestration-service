@@ -33,6 +33,7 @@ public class BulkPrintDocumentService {
         return documents;
     }
 
+    @SuppressWarnings("java:S3776")
     public void validateEncryptionOnUploadedDocument(CaseDocument caseDocument,
                                                      String caseId,
                                                      List<String> errors,
@@ -52,20 +53,26 @@ public class BulkPrintDocumentService {
                 pdfBytes = service.download(caseDocument.getDocumentBinaryUrl(), auth);
             }
 
-            try (PDDocument doc = PDDocument.load(pdfBytes)) {
-                if (doc.isEncrypted()) {
-                    errors.add("Uploaded document '" + documentFilename + "' contains some kind of encryption. "
-                        + "Please remove encryption before uploading or upload another document.");
+            if (pdfBytes != null) {
+                try (PDDocument doc = PDDocument.load(pdfBytes)) {
+                    if (doc.isEncrypted()) {
+                        errors.add("Uploaded document '" + documentFilename + "' contains some kind of encryption. "
+                            + "Please remove encryption before uploading or upload another document.");
+                    }
+                } catch (InvalidPasswordException ipe) {
+                    String errorMessage = "Uploaded document '" + documentFilename + "' is password protected."
+                        + " Please remove password and try uploading again.";
+                    errors.add(errorMessage);
+                    log.error(ipe.getMessage());
+                } catch (IOException exc) {
+                    String errorMessage = "Failed to parse the documents for " + documentFilename;
+                    errors.add(errorMessage + "; " + exc.getMessage());
+                    log.error(exc.getMessage());
                 }
-            } catch (InvalidPasswordException ipe) {
-                String errorMessage = "Uploaded document '" + documentFilename + "' is password protected."
-                    + " Please remove password and try uploading again.";
+            } else {
+                String errorMessage = "Uploaded document " + documentFilename + " is empty.";
+                log.error("Uploaded document {} for caseId {} is empty", documentFilename, caseId);
                 errors.add(errorMessage);
-                log.error(ipe.getMessage());
-            } catch (IOException exc) {
-                String errorMessage = "Failed to parse the documents for " + documentFilename;
-                errors.add(errorMessage + "; " + exc.getMessage());
-                log.error(exc.getMessage());
             }
         }
     }
