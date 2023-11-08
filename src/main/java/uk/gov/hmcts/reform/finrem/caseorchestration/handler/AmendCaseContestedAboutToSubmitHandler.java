@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AmendCaseService;
 @Slf4j
 @Service
 public class AmendCaseContestedAboutToSubmitHandler extends FinremCallbackHandler {
+
     private final AmendCaseService amendCaseService;
+
     public AmendCaseContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                   AmendCaseService amendCaseService) {
         super(mapper);
@@ -34,6 +36,7 @@ public class AmendCaseContestedAboutToSubmitHandler extends FinremCallbackHandle
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = caseDetails.getData();
         amendCaseService.addApplicationType(finremCaseData);
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
 
