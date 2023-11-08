@@ -162,7 +162,7 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
                 "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
         when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
         when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), anyString())).thenReturn(document);
-        when(caseDataService.isContestedFinremCaseDetailsApplication(any(FinremCaseDetails.class))).thenReturn(true);
+        when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(true);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData().getBulkPrintCoverSheetRes(), equalTo(caseDocument()));
         assertThat(response.getData().getBulkPrintCoverSheetApp(), equalTo(caseDocument()));
@@ -252,7 +252,7 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
                 "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
         when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
         when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), anyString())).thenReturn(document);
-        when(caseDataService.isContestedFinremCaseDetailsApplication(any(FinremCaseDetails.class))).thenReturn(true);
+        when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(true);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData().getBulkPrintCoverSheetResConfidential(), equalTo(caseDocument()));
