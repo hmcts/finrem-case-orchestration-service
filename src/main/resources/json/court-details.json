@@ -808,5 +808,11 @@
     "courtAddress": "High Court Family Division, Queens Building, Royal Courts of Justice, Strand, London, WC2A 2LL",
     "phoneNumber": "020 7947 7551",
     "email": "rcj.familyhighcourt@justice.gov.uk"
+  },
+  "FR_londonList_1": {
+    "courtName": "Central Family Court",
+    "courtAddress": "Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP",
+    "phoneNumber": "0207 421 8594",
+    "email": "cfc.fru@justice.gov.uk"
   }
 }

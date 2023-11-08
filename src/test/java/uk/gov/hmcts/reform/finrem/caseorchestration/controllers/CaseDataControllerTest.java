@@ -10,8 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
@@ -61,7 +61,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private FeatureToggleService featureToggleService;
     @MockBean
     private CaseDataService caseDataService;
-    @MockBean private CaseFlagsService caseFlagsService;
 
     protected CaseDetails caseDetails;
 
@@ -198,6 +197,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(CaseRole.APP_SOLICITOR.getCcdCode())))
+            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole", is(CaseRole.RESP_SOLICITOR.getCcdCode())))
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.fastTrackDecision", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
@@ -255,7 +256,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullySetOrgPolicy() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
@@ -270,7 +271,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     public void shouldNotSetOrgPolicyIfInvalidCaseType() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
-        when(caseDataService.isContestedApplication(any())).thenReturn(false);
+        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(false);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
@@ -324,7 +325,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullySetDefaultValue() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/default-values")

@@ -307,14 +307,14 @@ public class GeneralApplicationHelperTest {
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         helper.buildDynamicIntervenerList(dynamicListElements, caseData);
-        assertEquals(dynamicListElements.get(3).getLabel(), INTERVENER1);
-        assertEquals(dynamicListElements.get(4).getLabel(), INTERVENER2);
-        assertEquals(dynamicListElements.get(5).getLabel(), INTERVENER3);
-        assertEquals(dynamicListElements.get(6).getLabel(), INTERVENER4);
-        assertEquals(dynamicListElements.get(3).getCode(), INTERVENER1);
-        assertEquals(dynamicListElements.get(4).getCode(), INTERVENER2);
-        assertEquals(dynamicListElements.get(5).getCode(), INTERVENER3);
-        assertEquals(dynamicListElements.get(dynamicListElements.size() - 1).getCode(), INTERVENER4);
+        assertEquals(INTERVENER1, dynamicListElements.get(3).getLabel());
+        assertEquals(INTERVENER2, dynamicListElements.get(4).getLabel());
+        assertEquals(INTERVENER3, dynamicListElements.get(5).getLabel());
+        assertEquals(INTERVENER4, dynamicListElements.get(6).getLabel());
+        assertEquals(INTERVENER1, dynamicListElements.get(3).getCode());
+        assertEquals(INTERVENER2, dynamicListElements.get(4).getCode());
+        assertEquals(INTERVENER3, dynamicListElements.get(5).getCode());
+        assertEquals(INTERVENER4, dynamicListElements.get(dynamicListElements.size() - 1).getCode());
     }
 
     @Test
@@ -333,6 +333,8 @@ public class GeneralApplicationHelperTest {
         helper.checkAndRemoveDuplicateGeneralApplications(caseDetails.getData());
 
         assertEquals(2, caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplications().size());
+        assertEquals("2023-10-04", caseDetails.getData().getGeneralApplicationWrapper()
+            .getGeneralApplications().get(0).getValue().getGeneralApplicationCreatedDate().toString());
     }
 
     private void assertData(List<GeneralApplicationItems> resultingList) {

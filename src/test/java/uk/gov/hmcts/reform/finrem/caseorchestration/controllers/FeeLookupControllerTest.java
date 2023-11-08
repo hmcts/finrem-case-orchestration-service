@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -53,7 +54,7 @@ public class FeeLookupControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmptyCaseDataSetUp();
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
 
         mvc.perform(post(FEE_LOOKUP_URL)
                 .content(requestContent.toString())
@@ -66,7 +67,7 @@ public class FeeLookupControllerTest extends BaseControllerTest {
     @Test
     public void shouldDoConsentedFeeLookup() throws Exception {
         doFeeLookupSetUp(CONSENTED);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         mvc.perform(post(FEE_LOOKUP_URL)
                 .content(requestContent.toString())
@@ -85,7 +86,7 @@ public class FeeLookupControllerTest extends BaseControllerTest {
     @Test
     public void shouldDoContestedFeeLookup() throws Exception {
         doFeeLookupSetUp(CONTESTED);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
 
         mvc.perform(post(FEE_LOOKUP_URL)
                 .content(requestContent.toString())

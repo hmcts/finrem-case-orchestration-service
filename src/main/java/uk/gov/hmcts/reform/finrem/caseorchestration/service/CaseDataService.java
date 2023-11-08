@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
@@ -43,8 +42,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_PHONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
@@ -208,8 +205,26 @@ public class CaseDataService {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(PAPER_APPLICATION)));
     }
 
+    public boolean isPaperApplication(FinremCaseData caseData) {
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.getPaperApplication()));
+    }
+
+    /**
+     * Please upgrade your code.
+     * This method will be removed in future versions.
+     * <p>Use @link isConsentedInContestedCase(FinremCaseDetails caseDetails) instead </p>
+     *
+     * @return boolean to be return
+     * @deprecated deprecated since 05-Sep-2023
+     */
+    @Deprecated(since = "15-Feb-2023")
+    @SuppressWarnings("java:S1133")
     public boolean isConsentedInContestedCase(CaseDetails caseDetails) {
         return isContestedApplication(caseDetails) && caseDetails.getData().get(CONSENT_D81_QUESTION) != null;
+    }
+
+    public boolean isConsentedInContestedCase(FinremCaseDetails caseDetails) {
+        return isContestedApplication(caseDetails) && caseDetails.getData().getConsentOrderWrapper().getConsentD81Question() != null;
     }
 
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
@@ -232,11 +247,25 @@ public class CaseDataService {
         return CaseType.CONSENTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 
+    public boolean isConsentedApplication(FinremCaseDetails caseDetails) {
+        return CaseType.CONSENTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType()));
+    }
+
+    /**
+     * Please upgrade your code.
+     * This method will be removed in future versions.
+     * <p>Use @link isContestedApplication(FinremCaseDetails caseDetails) instead </p>
+     *
+     * @return boolean to be return
+     * @deprecated deprecated since 05-Sep-2023
+     */
+    @Deprecated(since = "05-Sep-2023")
+    @SuppressWarnings("java:S1133")
     public boolean isContestedApplication(CaseDetails caseDetails) {
         return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 
-    public boolean isContestedFinremCaseDetailsApplication(FinremCaseDetails caseDetails) {
+    public boolean isContestedApplication(FinremCaseDetails caseDetails) {
         return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType().getCcdType()));
     }
 
@@ -244,17 +273,18 @@ public class CaseDataService {
         return isContestedApplication(caseDetails) && isPaperApplication(caseDetails.getData());
     }
 
-    public boolean isOrderApprovedCollectionPresent(Map<String, Object> caseData) {
+    public boolean isOrderApprovedCollectionPresent(FinremCaseData caseData) {
         return isConsentedApprovedOrderCollectionPresent(caseData)
             || isContestedApprovedOrderCollectionPresent(caseData);
     }
 
-    private boolean isConsentedApprovedOrderCollectionPresent(Map<String, Object> caseData) {
-        return caseData.get(APPROVED_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(APPROVED_ORDER_COLLECTION)).isEmpty();
+    private boolean isConsentedApprovedOrderCollectionPresent(FinremCaseData caseData) {
+        return caseData.getApprovedOrderCollection() != null && !caseData.getApprovedOrderCollection().isEmpty();
     }
 
-    private boolean isContestedApprovedOrderCollectionPresent(Map<String, Object> caseData) {
-        return caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty();
+    private boolean isContestedApprovedOrderCollectionPresent(FinremCaseData caseData) {
+        return caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders() != null
+            && !caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders().isEmpty();
     }
 
     /**
@@ -272,7 +302,8 @@ public class CaseDataService {
     }
 
     public boolean isApplicantAddressConfidential(FinremCaseData caseData) {
-        return caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent().isYes();
+        return caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent() != null
+            && caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent().isYes();
     }
 
     /**
@@ -290,16 +321,17 @@ public class CaseDataService {
     }
 
     public boolean isRespondentAddressConfidential(FinremCaseData caseData) {
-        return caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant().isYes();
+        return caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant() != null
+            && caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant().isYes();
     }
 
     private boolean isAddressConfidential(Map<String, Object> caseData, String address) {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(address)));
     }
 
-    public boolean isContestedOrderNotApprovedCollectionPresent(Map<String, Object> caseData) {
-        return caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION) != null
-            && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION)).isEmpty();
+    public boolean isContestedOrderNotApprovedCollectionPresent(FinremCaseData caseData) {
+        return caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders() != null
+            && !caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders().isEmpty();
     }
 
     @SuppressWarnings("java:S112")
