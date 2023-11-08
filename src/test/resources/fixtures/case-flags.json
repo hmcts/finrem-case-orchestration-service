@@ -95,7 +95,7 @@
       "partyName": "Case",
       "roleOnCase": "Case"
     },
-    "highCourtFRCList": "FR_highCourtList_1",
+    "highCourtFRCList": "highcourt",
     "manchesterCourtList": null,
     "variationOrderDocument": {
       "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2364dbd7-35dc-4fac-aafc-184de35b179e",

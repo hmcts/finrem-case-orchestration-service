@@ -669,7 +669,7 @@ public class ContestedCourtHelperTest {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setHighCourtFrcList(RegionHighCourtFrc.HIGHCOURT);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is("FR_highCourtList_1"));
+        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(HIGHCOURT));
     }
 
 
