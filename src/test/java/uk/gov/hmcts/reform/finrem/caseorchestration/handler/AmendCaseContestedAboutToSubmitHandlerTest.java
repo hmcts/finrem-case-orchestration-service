@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildDetails;
@@ -14,19 +14,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AmendCaseService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 class AmendCaseContestedAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
+
+    @Mock
+    private AmendCaseService amendCaseService;
 
     @InjectMocks
     private AmendCaseContestedAboutToSubmitHandler handler;
@@ -59,11 +63,10 @@ class AmendCaseContestedAboutToSubmitHandlerTest {
     @Test
     void givenContestedCase_whenTypeOfApplicationFieldMissing_thenDefaultsToMatrimoninalType() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> callbackResponse
-            = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertEquals(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getValue(),
-            callbackResponse.getData().getScheduleOneWrapper().getTypeOfApplication().getValue());
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        verify(amendCaseService).addApplicationType(finremCallbackRequest.getCaseDetails().getData());
     }
 
     @Test
@@ -72,11 +75,10 @@ class AmendCaseContestedAboutToSubmitHandlerTest {
         FinremCaseData data = finremCallbackRequest.getCaseDetails().getData();
         data.getScheduleOneWrapper()
             .setTypeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> callbackResponse
-            = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertEquals(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getValue(),
-            callbackResponse.getData().getScheduleOneWrapper().getTypeOfApplication().getValue());
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        verify(amendCaseService).addApplicationType(finremCallbackRequest.getCaseDetails().getData());
     }
 
     @Test
@@ -87,11 +89,11 @@ class AmendCaseContestedAboutToSubmitHandlerTest {
         childrenCollection.add(ChildDetailsCollectionElement.builder()
             .childDetails(ChildDetails.builder().childrenLiveInEnglandOrWales(YesOrNo.YES).build()).build());
         data.getScheduleOneWrapper().setChildrenCollection(childrenCollection);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> callbackResponse
-            = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertEquals(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getValue(),
-            callbackResponse.getData().getScheduleOneWrapper().getTypeOfApplication().getValue());
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+
+        verify(amendCaseService).addApplicationType(finremCallbackRequest.getCaseDetails().getData());
     }
 
 
