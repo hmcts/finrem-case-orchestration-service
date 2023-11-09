@@ -67,27 +67,22 @@ public class IntervenerOneOtherDocumentsHandlerTest extends BaseManageDocumentsH
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1)
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1)
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1)
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1)
-        );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_H),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_PENSION_PLAN)
         );
     }
 }

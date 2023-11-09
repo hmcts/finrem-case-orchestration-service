@@ -25,6 +25,9 @@ public class RespondentOtherDocumentsHandler extends OtherDocumentsHandler {
             case PENSION_PLAN -> {
                 return DocumentCategory.RESPONDENT_DOCUMENTS_PENSION_PLAN;
             }
+            case FORM_B, FORM_F, CARE_PLAN -> {
+                return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER;
+            }
             default -> {
                 return DocumentCategory.RESPONDENT_DOCUMENTS;
             }
