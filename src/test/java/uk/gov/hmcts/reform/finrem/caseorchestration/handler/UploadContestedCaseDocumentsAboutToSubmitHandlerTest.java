@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
@@ -62,6 +63,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     protected UploadedDocumentService uploadedDocumentHelper;
     @Mock
     private CaseAssignedRoleService caseAssignedRoleService;
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     private ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
     private RespondentChronologiesStatementHandler respondentChronologiesStatementHandler;
@@ -83,23 +86,21 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     private FinremCaseData caseData;
     private final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
 
-
-
     @Before
     public void setup() {
         caseDetails = buildCaseDetails();
         caseDetailsBefore = buildCaseDetails();
         caseData = caseDetails.getData();
 
-        applicantChronologiesStatementHandler = new ApplicantChronologiesStatementHandler();
-        respondentChronologiesStatementHandler = new RespondentChronologiesStatementHandler();
-        intervenerOneChronologiesStatementHandler = new IntervenerOneChronologiesStatementHandler();
-        intervenerTwoChronologiesStatementHandler = new IntervenerTwoChronologiesStatementHandler();
-        intervenerThreeChronologiesStatementHandler = new IntervenerThreeChronologiesStatementHandler();
-        intervenerFourChronologiesStatementHandler = new IntervenerFourChronologiesStatementHandler();
-        intervenerOneFdrHandler = new IntervenerOneFdrHandler();
-        caseDocumentHandler = new CaseDocumentsHandler();
-        fdrDocumentsHandler = new FdrDocumentsHandler();
+        applicantChronologiesStatementHandler = new ApplicantChronologiesStatementHandler(featureToggleService);
+        respondentChronologiesStatementHandler = new RespondentChronologiesStatementHandler(featureToggleService);
+        intervenerOneChronologiesStatementHandler = new IntervenerOneChronologiesStatementHandler(featureToggleService);
+        intervenerTwoChronologiesStatementHandler = new IntervenerTwoChronologiesStatementHandler(featureToggleService);
+        intervenerThreeChronologiesStatementHandler = new IntervenerThreeChronologiesStatementHandler(featureToggleService);
+        intervenerFourChronologiesStatementHandler = new IntervenerFourChronologiesStatementHandler(featureToggleService);
+        intervenerOneFdrHandler = new IntervenerOneFdrHandler(featureToggleService);
+        caseDocumentHandler = new CaseDocumentsHandler(featureToggleService);
+        fdrDocumentsHandler = new FdrDocumentsHandler(featureToggleService);
 
 
         List<DocumentHandler> documentHandlers =
@@ -129,6 +130,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_CASE_FILES),
             is(false));
     }
+
 
     @Test
     public void givenAnNonConfidentialUploadCaseFile_WhenFdr_thenFdrCollectionsSet() {
@@ -222,7 +224,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
-
 
     @Test
     public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol2AndScreenPartyIsNull_thenIntervSol2CollectionsSet() {
@@ -424,6 +425,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(response.getErrors().iterator().next(),
             is(UploadContestedCaseDocumentsAboutToSubmitHandler.NO_DOCUMENT_ERROR));
     }
+
 
     private FinremCallbackRequest buildCallbackRequest() {
         FinremCaseData data = FinremCaseData.builder().build();

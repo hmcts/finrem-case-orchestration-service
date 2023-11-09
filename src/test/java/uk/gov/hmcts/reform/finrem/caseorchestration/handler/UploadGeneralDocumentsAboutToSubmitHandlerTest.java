@@ -81,7 +81,7 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
     @Test
     public void givenValidCaseData_whenHandleUploadGeneralDocument_thenSortCollectionByDate() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension", "/binaryUrl");
+        CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension", "/binaryUrl", "");
 
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         GeneralUploadedDocumentData oldDoc = createGeneralUploadDocumentItem(

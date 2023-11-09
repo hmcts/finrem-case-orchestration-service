@@ -1,17 +1,36 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.OtherDocumentsHandler;
 
 @Service
 public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
 
-    @Autowired
-    public ApplicantOtherDocumentsHandler() {
+    public ApplicantOtherDocumentsHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.APP_OTHER_COLLECTION,
-            CaseDocumentParty.APPLICANT);
+            CaseDocumentParty.APPLICANT, featureToggleService);
+    }
+
+    @Override
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+        switch (caseDocumentType) {
+            case OTHER -> {
+                return DocumentCategory.APPLICANT_DOCUMENTS_MISCELLANEOUS_OR_OTHER;
+            }
+            case PENSION_PLAN -> {
+                return DocumentCategory.APPLICANT_DOCUMENTS_PENSION_PLAN;
+            }
+            case FORM_B, FORM_F, CARE_PLAN -> {
+                return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER;
+            }
+            default -> {
+                return DocumentCategory.APPLICANT_DOCUMENTS;
+            }
+        }
     }
 }

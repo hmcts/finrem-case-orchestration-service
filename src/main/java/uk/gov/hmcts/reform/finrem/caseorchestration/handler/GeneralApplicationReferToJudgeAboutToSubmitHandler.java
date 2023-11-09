@@ -88,7 +88,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         GeneralApplicationCollectionData data =
-            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
+            helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
         if (data != null) {
             data.getGeneralApplicationItems().setGeneralApplicationStatus(REFERRED.getId());
             existingGeneralApplication.add(data);
