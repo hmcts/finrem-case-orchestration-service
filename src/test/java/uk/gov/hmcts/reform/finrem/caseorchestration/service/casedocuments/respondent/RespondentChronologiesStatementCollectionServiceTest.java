@@ -62,7 +62,7 @@ public class RespondentChronologiesStatementCollectionServiceTest extends BaseMa
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_OF_ISSUES),
-            is(DocumentCategory.RESPONDENT_DOCUMENTS_CONCISE_STATEMENT_OF_ISSUES)
+            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CONCISE_STATEMENT_OF_ISSUES)
         );
 
         assertThat(

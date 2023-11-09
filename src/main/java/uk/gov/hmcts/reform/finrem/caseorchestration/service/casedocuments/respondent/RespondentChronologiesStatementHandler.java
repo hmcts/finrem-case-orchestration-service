@@ -23,7 +23,7 @@ public class RespondentChronologiesStatementHandler extends ChronologiesStatemen
                 return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CHRONOLOGY;
             }
             case STATEMENT_OF_ISSUES -> {
-                return DocumentCategory.RESPONDENT_DOCUMENTS_CONCISE_STATEMENT_OF_ISSUES;
+                return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CONCISE_STATEMENT_OF_ISSUES;
             }
             case FORM_G -> {
                 return DocumentCategory.RESPONDENT_DOCUMENTS_FORM_G;
