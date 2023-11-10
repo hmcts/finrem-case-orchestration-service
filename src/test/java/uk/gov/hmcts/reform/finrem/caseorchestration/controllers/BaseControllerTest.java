@@ -11,10 +11,15 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.task.ScheduledTaskRunner;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,10 +38,12 @@ public abstract class BaseControllerTest extends BaseTest {
 
     protected MockMvc mvc;
     protected JsonNode requestContent;
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Before
     public void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
+        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
     }
 
     protected void doEmptyCaseDataSetUp() {
@@ -108,6 +115,18 @@ public abstract class BaseControllerTest extends BaseTest {
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, "YES");
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build();
+    }
+
+    protected FinremCallbackRequest buildFinremCallbackRequest(String testJson) throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
+
+            CallbackRequest callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
+            return FinremCallbackRequest.builder()
+                .caseDetails(finremCaseDetails)
+                .eventType(EventType.getEventType(callbackRequest.getEventId()))
+                .build();
+        }
     }
 
     protected CaseDocument getCaseDocument() {

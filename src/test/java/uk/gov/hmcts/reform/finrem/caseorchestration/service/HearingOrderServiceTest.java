@@ -1,15 +1,26 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrderDocumentCategoriser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,10 +45,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
+@ExtendWith(MockitoExtension.class)
 public class HearingOrderServiceTest extends BaseServiceTest {
 
     private static final String DRAFT_DIRECTION_ORDER_BIN_URL = "anyDraftDirectionOrderBinaryUrl";
     private static final String FILENAME_ENDING_WITH_DOCX = "filename_ending_with.docx";
+
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @MockBean
+    private DraftOrderDocumentCategoriser draftOrderDocumentCategoriser;
 
     @Autowired
     HearingOrderService hearingOrderService;
@@ -50,12 +68,26 @@ public class HearingOrderServiceTest extends BaseServiceTest {
         when(genericDocumentService.stampDocument(any(), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any()))
             .thenReturn(caseDocument());
 
+        Map<String, Object> mappedCaseData = prepareCaseData(makeDraftDirectionOrderCollectionWithOneElement());
+        CaseDetails mappedCaseDetails = CaseDetails.builder().state(State.PREPARE_FOR_HEARING.getStateId())
+            .caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).data(mappedCaseData).build();
+
+        FinremCaseData finremCaseData = prepareCaseDataFinrem();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().state(State.PREPARE_FOR_HEARING)
+            .caseType(CaseType.CONTESTED).id(123L).data(finremCaseData).build();
+
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any())).thenReturn(finremCaseDetails);
+        when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(mappedCaseDetails);
+
         Map<String, Object> caseData = prepareCaseData(makeDraftDirectionOrderCollectionWithOneElement());
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().state(State.PREPARE_FOR_HEARING.getStateId())
+            .caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).data(caseData).build();
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
 
         verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any());
+
+        verify(draftOrderDocumentCategoriser).categorise(any(FinremCaseData.class));
 
         CaseDocument latestDraftHearingOrder = (CaseDocument) caseData.get(LATEST_DRAFT_HEARING_ORDER);
         assertThat(latestDraftHearingOrder, is(notNullValue()));
@@ -136,5 +168,18 @@ public class HearingOrderServiceTest extends BaseServiceTest {
         caseData.put(DRAFT_DIRECTION_ORDER_COLLECTION, draftDirectionOrders);
         caseData.put(HEARING_ORDER_COLLECTION, null);
         return convertCaseDataToStringRepresentation(caseData);
+    }
+
+    private FinremCaseData prepareCaseDataFinrem() {
+        DraftDirectionOrder draftDirectionOrder = DraftDirectionOrder.builder().uploadDraftDocument(CaseDocument.builder()
+            .documentBinaryUrl(DRAFT_DIRECTION_ORDER_BIN_URL)
+            .documentFilename(FILENAME_ENDING_WITH_DOCX).build()).build();
+
+        List<DraftDirectionOrderCollection> draftDirectionOrderCollection = List.of(DraftDirectionOrderCollection.builder()
+            .value(draftDirectionOrder).build());
+        DraftDirectionWrapper wrapper = DraftDirectionWrapper.builder().draftDirectionOrderCollection(draftDirectionOrderCollection).build();
+        FinremCaseData caseData = FinremCaseData.builder().draftDirectionWrapper(wrapper).build();
+
+        return caseData;
     }
 }
