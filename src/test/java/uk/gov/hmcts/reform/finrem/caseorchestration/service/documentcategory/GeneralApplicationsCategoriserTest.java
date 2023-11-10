@@ -125,6 +125,19 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             );
     }
 
+    @Test
+    public void testUncategoriseDuplicatedCollections() {
+        FinremCaseData finremCaseData = buildFinremCaseDataNullCollections();
+        generalApplicationsCategoriser.uncategoriseDuplicatedCollections(finremCaseData);
+        assert finremCaseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() == null;
+        assert finremCaseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications() == null;
+        assert finremCaseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications() == null;
+        assert finremCaseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications() == null;
+        assert finremCaseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications() == null;
+        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders() == null;
+
+    }
+
     public DynamicRadioList buildDynamicIntervenerList() {
 
         List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
@@ -142,6 +155,21 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .code(code)
             .label(label)
             .build();
+    }
+
+    protected FinremCaseData buildFinremCaseDataNullCollections() {
+        return FinremCaseData.builder()
+            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                .generalApplicationCreatedBy("Claire Mumford").generalApplicationPreState("applicationIssued")
+                .generalApplications(null)
+                .appRespGeneralApplications(null)
+                .intervener1GeneralApplications(null)
+                .intervener2GeneralApplications(null)
+                .intervener3GeneralApplications(null)
+                .intervener4GeneralApplications(null)
+                .generalApplicationIntvrOrders(null)
+                .build()).build();
+
     }
 
     protected FinremCaseData buildFinremCaseData() {
@@ -166,6 +194,7 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
                 .intervener2GeneralApplications(generalApplicationsCollection)
                 .intervener3GeneralApplications(generalApplicationsCollection)
                 .intervener4GeneralApplications(generalApplicationsCollection)
+                .generalApplicationIntvrOrders(generalApplicationsCollection)
                 .build()).build();
 
     }
