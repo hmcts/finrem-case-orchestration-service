@@ -64,8 +64,13 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
                 DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_1.getDocumentCategoryId()
             );
 
+        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(1).getValue()
+            .getGeneralApplicationDraftOrder().getCategoryId().equals(
+                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_2.getDocumentCategoryId()
+            );
+
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(2).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
+            .getGeneralApplicationDirectionsDocument().getCategoryId().equals(
                 DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_3.getDocumentCategoryId()
             );
 
@@ -140,9 +145,12 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     }
 
     protected FinremCaseData buildFinremCaseData() {
-        GeneralApplicationsCollection firstGeneralApplications = buildGeneralApplicationsCollection(true);
-        GeneralApplicationsCollection secondGeneralApplications = buildGeneralApplicationsCollection(false);
-        GeneralApplicationsCollection thirdGeneralApplications = buildGeneralApplicationsCollection(true);
+        GeneralApplicationsCollection firstGeneralApplications = buildGeneralApplicationsCollection(
+            true, false, false);
+        GeneralApplicationsCollection secondGeneralApplications = buildGeneralApplicationsCollection(
+            false, false, false);
+        GeneralApplicationsCollection thirdGeneralApplications = buildGeneralApplicationsCollection(
+            true, false, false);
 
         List<GeneralApplicationsCollection> generalApplicationsCollection = new ArrayList<>();
         generalApplicationsCollection.add(firstGeneralApplications);
@@ -163,17 +171,28 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     }
 
     protected FinremCaseData buildFinremCaseData11Applications() {
-        GeneralApplicationsCollection firstGeneralApplications = buildGeneralApplicationsCollection(true);
-        GeneralApplicationsCollection secondGeneralApplications = buildGeneralApplicationsCollection(false);
-        GeneralApplicationsCollection thirdGeneralApplications = buildGeneralApplicationsCollection(true);
-        GeneralApplicationsCollection fourthGeneralApplications = buildGeneralApplicationsCollection(true);
-        GeneralApplicationsCollection fifthGeneralApplications = buildGeneralApplicationsCollection(true);
-        GeneralApplicationsCollection sixthGeneralApplications = buildGeneralApplicationsCollection(false);
-        GeneralApplicationsCollection seventhGeneralApplications = buildGeneralApplicationsCollection(false);
-        GeneralApplicationsCollection eighthGeneralApplications = buildGeneralApplicationsCollection(false);
-        GeneralApplicationsCollection ninthGeneralApplications = buildGeneralApplicationsCollection(true);
-        GeneralApplicationsCollection tenthGeneralApplications = buildGeneralApplicationsCollection(true);
-        GeneralApplicationsCollection eleventhGeneralApplications = buildGeneralApplicationsCollection(true);
+        GeneralApplicationsCollection firstGeneralApplications = buildGeneralApplicationsCollection(
+            true, false, false);
+        GeneralApplicationsCollection secondGeneralApplications = buildGeneralApplicationsCollection(
+            false, true, false);
+        GeneralApplicationsCollection thirdGeneralApplications = buildGeneralApplicationsCollection(
+            false, false, true);
+        GeneralApplicationsCollection fourthGeneralApplications = buildGeneralApplicationsCollection(
+            true, false, false);
+        GeneralApplicationsCollection fifthGeneralApplications = buildGeneralApplicationsCollection(
+            true, false, false);
+        GeneralApplicationsCollection sixthGeneralApplications = buildGeneralApplicationsCollection(
+            false, false, false);
+        GeneralApplicationsCollection seventhGeneralApplications = buildGeneralApplicationsCollection(
+            false, false, false);
+        GeneralApplicationsCollection eighthGeneralApplications = buildGeneralApplicationsCollection(
+            false, false, false);
+        GeneralApplicationsCollection ninthGeneralApplications = buildGeneralApplicationsCollection(
+            true, false, false);
+        GeneralApplicationsCollection tenthGeneralApplications = buildGeneralApplicationsCollection(
+            true, false, false);
+        GeneralApplicationsCollection eleventhGeneralApplications = buildGeneralApplicationsCollection(
+            true, false, false);
 
         List<GeneralApplicationsCollection> generalApplicationsCollection = new ArrayList<>();
         generalApplicationsCollection.add(firstGeneralApplications);
@@ -198,11 +217,21 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
 
     }
 
-    private GeneralApplicationsCollection buildGeneralApplicationsCollection(Boolean isGeneralApplicationDocumentPresent) {
+    private GeneralApplicationsCollection buildGeneralApplicationsCollection(
+        Boolean isGeneralApplicationDocumentPresent,
+        Boolean isGeneralApplicationDraftOrderPresent,
+        Boolean isGeneralApplicationDirectionsPresent) {
+
         GeneralApplicationItems generalApplicationItems = buildGeneralApplicationItems();
+
         if (isGeneralApplicationDocumentPresent) {
             generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDocument();
+        } else if (isGeneralApplicationDraftOrderPresent) {
+            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDarftOrder();
+        } else if (isGeneralApplicationDirectionsPresent) {
+            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDirections();
         }
+
 
         return GeneralApplicationsCollection.builder()
             .value(generalApplicationItems)
@@ -228,6 +257,28 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
                 LocalDate.of(2022, 8, 2))
             .generalApplicationDocument(buildGeneralApplicationDocument())
+            .build();
+    }
+
+    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDarftOrder() {
+        return GeneralApplicationItems.builder()
+            .generalApplicationSender(buildDynamicIntervenerList())
+            .generalApplicationCreatedBy("Claire Mumford")
+            .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+            .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
+                LocalDate.of(2022, 8, 2))
+            .generalApplicationDraftOrder(buildGeneralApplicationDocument())
+            .build();
+    }
+
+    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDirections() {
+        return GeneralApplicationItems.builder()
+            .generalApplicationSender(buildDynamicIntervenerList())
+            .generalApplicationCreatedBy("Claire Mumford")
+            .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+            .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
+                LocalDate.of(2022, 8, 2))
+            .generalApplicationDirectionsDocument(buildGeneralApplicationDocument())
             .build();
     }
 
