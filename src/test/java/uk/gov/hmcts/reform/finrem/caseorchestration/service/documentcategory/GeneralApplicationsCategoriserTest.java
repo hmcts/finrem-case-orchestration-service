@@ -232,8 +232,8 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     }
 
     private CaseDocument buildGeneralApplicationDocument() {
-        String doc_name = RandomStringUtils.random(10, true, false);
-        return CaseDocument.builder().documentFilename(doc_name + ".pdf")
+        String docName = RandomStringUtils.random(10, true, false);
+        return CaseDocument.builder().documentFilename(docName + ".pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
     }
