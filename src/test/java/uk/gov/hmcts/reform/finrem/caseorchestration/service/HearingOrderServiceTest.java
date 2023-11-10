@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrderDocumentCategoriser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +33,6 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -108,12 +106,14 @@ public class HearingOrderServiceTest extends BaseServiceTest {
         assertThat(hearingOrderCollection, hasSize(2));
         assertThat(hearingOrderCollection.get(0).getValue().getUploadDraftDocument().getDocumentBinaryUrl(), is(BINARY_URL));
 
-        hearingOrderCollection.forEach(order -> assertThat(order.getValue().getUploadDraftDocument().getCategoryId(),is(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId())));
+        hearingOrderCollection.forEach(order -> assertThat(order.getValue().getUploadDraftDocument().getCategoryId(),
+            is(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId())));
 
         List<CollectionElement<DirectionOrder>> finalOrderCollection = convertToListOfDirectionOrder(
             hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN).getData()
             .get(FINAL_ORDER_COLLECTION));
-        finalOrderCollection.forEach(order -> assertThat(order.getValue().getUploadDraftDocument().getCategoryId(),is(DocumentCategory.APPROVED_ORDERS_CASE.getDocumentCategoryId())));
+        finalOrderCollection.forEach(order -> assertThat(order.getValue().getUploadDraftDocument().getCategoryId(),
+            is(DocumentCategory.APPROVED_ORDERS_CASE.getDocumentCategoryId())));
     }
 
     @Test(expected = InvalidCaseDataException.class)
