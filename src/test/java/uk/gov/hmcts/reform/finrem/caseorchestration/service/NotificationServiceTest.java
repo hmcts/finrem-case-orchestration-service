@@ -574,17 +574,6 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendContestedGeneralApplicationOutcomeNotificationEmailWhenSendToFRCToggleTrue() throws IOException {
-        when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
-
-        callbackRequest = getContestedCallbackRequest();
-        notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_APPLICATION_OUTCOME);
-    }
-
-    @Test
     public void sendContestedConsentGeneralOrderNotificationEmailApplicantSolicitor() {
         notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(callbackRequest.getCaseDetails());
 

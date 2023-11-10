@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,6 +58,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
@@ -706,40 +708,6 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendContestedGeneralApplicationOutcomeNotificationEmailWhenSendToFRCToggleTrue() throws IOException {
-        when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
-
-        callbackRequest = getContestedNewCallbackRequest();
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail")
-                .value(NOTTINGHAM_FRC_EMAIL))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_APPLICATION_OUTCOME));
-    }
-
-    @Test
-    public void sendContestedGeneralApplicationOutcomeNotificationEmailToTestAccountWhenSendToFRCToggleFalse() throws IOException {
-        when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
-
-        callbackRequest = getContestedNewCallbackRequest();
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail")
-                .value("fr_applicant_solicitor1@mailinator.com"))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_APPLICATION_OUTCOME));
-    }
-
-    @Test
     public void sendContestedConsentGeneralOrderNotificationEmailApplicantSolicitor() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_GENERAL_ORDER))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -1116,7 +1084,6 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendUpdateFrcInformationEmailToCourt() throws JsonProcessingException {
-        when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
 
         newCallbackRequest = getContestedNewCallbackRequest();
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_UPDATE_FRC_INFO_COURT))
