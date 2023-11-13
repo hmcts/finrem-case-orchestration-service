@@ -193,7 +193,9 @@ public class AdditionalHearingDocumentService {
                     if (!finalOrderCollection.isEmpty()) {
                         caseData.getFinalOrderCollection().add(documentHelper.prepareFinalOrder(stampedDocs));
                     } else {
-                        caseData.setFinalOrderCollection(List.of(documentHelper.prepareFinalOrder(stampedDocs)));
+                        List<DirectionOrderCollection> orderList = new ArrayList<>();
+                        orderList.add(documentHelper.prepareFinalOrder(stampedDocs));
+                        caseData.setFinalOrderCollection(orderList);
                     }
                     return getDirectionOrderCollection(stampedDocs, orderDateTime);
                 }

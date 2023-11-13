@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -43,7 +44,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -498,6 +501,122 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         verify(bulkPrintService, timeout(100).times(1))
             .printApplicantDocuments(any(CaseDetails.class), any(), any());
     }
+
+    @Test
+    public void givenCase_whenGetApprovedHearingOrdersCalledButNoHearingOrderAvailalle_thenReturnEmptyList() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+
+        List<DirectionOrderCollection> approvedHearingOrders
+            = additionalHearingDocumentService.getApprovedHearingOrders(caseDetails, AUTH_TOKEN);
+
+        assertTrue(approvedHearingOrders.isEmpty());
+        verify(orderDateService).addCreatedDateInUploadedOrder(any(),any());
+    }
+
+
+    @Test
+    public void givenCase_whenGetApprovedHearingOrdersCalledHearingOrderAvailalle_thenReturnEmptyList() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+
+
+        DirectionOrder directionOrder = DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument()).build();
+        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(directionOrder).build();
+        List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>();
+        uploadHearingOrder.add(orderCollection);
+
+        FinremCaseData data = caseDetails.getData();
+        data.setUploadHearingOrder(uploadHearingOrder);
+
+
+        DirectionOrder directionOrder1 = DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument()).orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
+        DirectionOrderCollection orderCollection1 = DirectionOrderCollection.builder().value(directionOrder1).build();
+        List<DirectionOrderCollection> mockOrder = new ArrayList<>();
+        mockOrder.add(orderCollection1);
+
+        when(orderDateService.addCreatedDateInUploadedOrder(uploadHearingOrder, AUTH_TOKEN)).thenReturn(mockOrder);
+
+        List<DirectionOrderCollection> approvedHearingOrders
+            = additionalHearingDocumentService.getApprovedHearingOrders(caseDetails, AUTH_TOKEN);
+
+        assertEquals(1, approvedHearingOrders.size());
+        assertEquals(YesOrNo.YES, approvedHearingOrders.get(0).getValue().getIsOrderStamped());
+        verify(orderDateService).addCreatedDateInUploadedOrder(any(),any());
+    }
+
+    @Test
+    public void givenCase_whenAddToFinalOrderCollection_thenReturnUpdatedList() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+
+
+        DirectionOrder directionOrder = DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument()).orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
+        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(directionOrder).build();
+        List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>();
+        uploadHearingOrder.add(orderCollection);
+
+        FinremCaseData data = caseDetails.getData();
+        data.setUploadHearingOrder(uploadHearingOrder);
+
+
+        DirectionOrder directionOrder1 = DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument()).orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
+        DirectionOrderCollection orderCollection1 = DirectionOrderCollection.builder().value(directionOrder1).build();
+        List<DirectionOrderCollection> mockOrder = new ArrayList<>();
+        mockOrder.add(orderCollection1);
+
+        when(orderDateService.addCreatedDateInFinalOrder(uploadHearingOrder, AUTH_TOKEN)).thenReturn(mockOrder);
+        DocumentHelper mockHelper = mock(DocumentHelper.class);
+        when(mockHelper.checkIfOrderAlreadyInFinalOrderCollection(anyList(), any())).thenReturn(false);
+
+        additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, AUTH_TOKEN);
+
+        assertEquals(1, data.getFinalOrderCollection().size());
+        assertEquals(YesOrNo.YES, data.getFinalOrderCollection().get(0).getValue().getIsOrderStamped());
+        verify(orderDateService).addCreatedDateInFinalOrder(any(),any());
+    }
+
+
+    @Test
+    public void givenCase_whenAddToFinalOrderCollectionCalledButOrderAlreadyInCollection_thenReturnOriginalList() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+
+
+        DirectionOrder directionOrder = DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument()).orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
+        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(directionOrder).build();
+        List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>();
+        uploadHearingOrder.add(orderCollection);
+
+        FinremCaseData data = caseDetails.getData();
+        data.setUploadHearingOrder(uploadHearingOrder);
+        data.setFinalOrderCollection(uploadHearingOrder);
+
+
+        DirectionOrder directionOrder1 = DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument()).orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
+        DirectionOrderCollection orderCollection1 = DirectionOrderCollection.builder().value(directionOrder1).build();
+        List<DirectionOrderCollection> mockOrder = new ArrayList<>();
+        mockOrder.add(orderCollection1);
+
+        when(orderDateService.addCreatedDateInFinalOrder(uploadHearingOrder, AUTH_TOKEN)).thenReturn(mockOrder);
+        DocumentHelper mockHelper = mock(DocumentHelper.class);
+        when(mockHelper.checkIfOrderAlreadyInFinalOrderCollection(anyList(), any())).thenReturn(true);
+
+        additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, AUTH_TOKEN);
+
+        assertEquals(1, data.getFinalOrderCollection().size());
+        assertEquals(YesOrNo.YES, data.getFinalOrderCollection().get(0).getValue().getIsOrderStamped());
+        verify(orderDateService).addCreatedDateInFinalOrder(any(),any());
+    }
+
 
     @Test
     public void sortDirectionDetailsCollection() {
