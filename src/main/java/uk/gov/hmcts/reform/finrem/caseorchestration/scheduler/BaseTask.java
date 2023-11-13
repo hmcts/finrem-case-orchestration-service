@@ -44,6 +44,7 @@ public abstract class BaseTask implements Runnable {
     }
 
     @Override
+    @SuppressWarnings("java:S2142")
     public void run() {
         log.info("Scheduled task {} isEnabled {}", getTaskName(), isTaskEnabled());
         if (isTaskEnabled()) {
@@ -87,7 +88,8 @@ public abstract class BaseTask implements Runnable {
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
-                    log.error("Error processing caseRef {} and error is {}", caseReference.getCaseReference(), e);
+                    log.error("Error processing caseRef {} and error is {}",
+                        caseReference.getCaseReference(), e.getMessage(), e);
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }
@@ -97,8 +99,7 @@ public abstract class BaseTask implements Runnable {
     }
 
     private List<CaseReference> getCaseReferences() {
-        List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(getCaseListFileName());
-        return caseReferences;
+        return csvLoader.loadCaseReferenceList(getCaseListFileName());
     }
 
     protected abstract String getCaseListFileName();
