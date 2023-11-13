@@ -127,6 +127,25 @@ public class OrderDateServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void addCreatedDateInUploadedOrderWhenCollectionIsNotEmptyAndStampedIsNoThenSetDate() {
+        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
+        DirectionOrderCollection orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.NO)
+                .build()).build();
+        orderCollections.add(orderCollection);
+
+        List<DirectionOrderCollection> directionOrderCollections
+            = orderDateService.addCreatedDateInUploadedOrder(orderCollections, TOKEN);
+
+        DirectionOrder value = directionOrderCollections.get(0).getValue();
+        LocalDateTime dateTime = LocalDateTime.of(2023, 5, 21, 10, 10, 10);
+        assertEquals(dateTime, value.getOrderDateTime());
+        assertEquals(YesOrNo.NO, value.getIsOrderStamped());
+        verify(emService).audit(anyList(), any());
+    }
+
+    @Test
     public void addCreatedDateInUploadedOrderWhenCollectionIsEmptyThenDoNotCallEvidenceService() {
         List<DirectionOrderCollection> orderCollections = new ArrayList<>();
 
