@@ -299,7 +299,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
         when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
-        when(mockCaseDataService.buildFullRespondentName(any())).thenReturn("Jane Smith");
+        when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
         when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(
             ChangedRepresentative.builder()
                 .name("Test respondent Solicitor")
@@ -384,8 +384,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     private void setUpHelper() {
 
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
-        when(mockCaseDataService.buildFullApplicantName(any())).thenReturn("John Smith");
-        when(mockCaseDataService.buildFullRespondentName(any())).thenReturn("Jane Smith");
+        when(mockCaseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("John Smith");
+        when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
         when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
         when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
