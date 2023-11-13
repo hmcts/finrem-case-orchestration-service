@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 
 import java.io.InputStream;
 import java.util.List;
@@ -54,6 +55,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     private IdamService idamService;
     private AssignCaseAccessService accessService;
+    private GeneralApplicationsCategoriser generalApplicationsCategoriser;
 
     @Mock
     private BulkPrintDocumentService bulkPrintDocumentService;
@@ -67,7 +69,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
         gaService = new GeneralApplicationService(documentHelper, objectMapper, idamService, service, accessService, helper,
-            bulkPrintDocumentService);
+            bulkPrintDocumentService, generalApplicationsCategoriser);
         startHandler = new GeneralApplicationReferToJudgeAboutToStartHandler(finremCaseDetailsMapper, helper, gaService);
         submitHandler = new GeneralApplicationReferToJudgeAboutToSubmitHandler(finremCaseDetailsMapper, helper, gaService);
     }

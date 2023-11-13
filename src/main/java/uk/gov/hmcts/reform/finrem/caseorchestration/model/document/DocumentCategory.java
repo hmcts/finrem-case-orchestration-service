@@ -265,6 +265,18 @@ public enum DocumentCategory {
     JUDGMENT_OR_TRANSCRIPT("judgmentOrTranscript"),
     CASE_DOCUMENTS("caseDocuments"),
     SHARED("shared"),
+    APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_1("applicationsGeneralApplicationsapp1"),
+    APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_2("applicationsGeneralApplicationsapp2"),
+    APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_3("applicationsGeneralApplicationsapp3"),
+    APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_4("applicationsGeneralApplicationsapp4"),
+    APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_5("applicationsGeneralApplicationsapp5"),
+    APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_6("applicationsGeneralApplicationsapp6"),
+    APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_7("applicationsGeneralApplicationsapp7"),
+    APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_8("applicationsGeneralApplicationsapp8"),
+    APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_9("applicationsGeneralApplicationsapp9"),
+    APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_10("applicationsGeneralApplicationsapp10"),
+    DUPLICATED_GENERAL_ORDERS("duplicatedGeneralOrders"),
+    APPLICATIONS_GENERAL_APPLICATIONS_OVERFLOW("applicationsGeneralApplicationsOverflow"),
     UNCATEGORISED(null);
 
     private final String documentCategoryId;
