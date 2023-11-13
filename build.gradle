@@ -40,7 +40,7 @@ def versions = [
         amClient             : '1.7.3',
         sendLetterClient     : '3.0.23',
         elasticSearch        : '7.17.14',
-        jacksonDatabind      : '2.13.2',
+        jacksonDatabind      : '2.15.3',
         retry                : '1.3.4'
 ]
 
