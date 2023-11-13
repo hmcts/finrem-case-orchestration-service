@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -193,12 +194,12 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
                 finalOrderCollection.add(prepareFinalOrderList(stampedDocs));
                 log.info("If Existing final order collection = {}", finalOrderCollection);
-            } else {
-                finalOrderCollection.add(prepareFinalOrderList(latestHearingOrder));
-                log.info("Else Existing final order collection = {}", finalOrderCollection);
             }
             caseData.setFinalOrderCollection(finalOrderCollection);
             log.info("Finished stamping final order for caseId {}", caseId);
+        } else {
+            caseData.setFinalOrderCollection(finalOrderCollection);
+            log.info("Finished stamping else final order for caseId {}", caseId);
         }
     }
 
@@ -225,7 +226,10 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private DirectionOrderCollection prepareFinalOrderList(CaseDocument document) {
         return DirectionOrderCollection.builder()
-            .value(DirectionOrder.builder().uploadDraftDocument(document).build())
+            .value(DirectionOrder.builder().uploadDraftDocument(document)
+                .orderDateTime(LocalDateTime.now())
+                .isOrderStamped(YesOrNo.YES)
+                .build())
             .build();
     }
 }

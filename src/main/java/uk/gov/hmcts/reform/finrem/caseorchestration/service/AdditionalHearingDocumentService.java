@@ -17,15 +17,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
@@ -46,16 +43,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
@@ -98,29 +92,57 @@ public class AdditionalHearingDocumentService {
         finremAdditionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
-    public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken, CaseDetails caseDetails) {
-        List<HearingOrderCollectionData> hearingOrderCollectionData = getApprovedHearingOrderCollection(caseDetails);
+    public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken,
+                                                                          FinremCaseDetails caseDetails) {
         String caseId = String.valueOf(caseDetails.getId());
-        hearingOrderCollectionData.forEach(hearingOrder ->
-            convertHearingOrderCollectionDocumentsToPdf(hearingOrder, authorisationToken, caseId));
+        log.info("dealing upload approve order for caseId {}", caseId);
+        FinremCaseData caseData = caseDetails.getData();
+        StampType stampType = documentHelper.getStampType(caseData);
+        List<DirectionOrderCollection> uploadHearingOrder = toPdf(caseData.getUploadHearingOrder(), stampType, caseId, authorisationToken);
 
-        List<HearingOrderCollectionData> hearingOrderStampedCollection = new ArrayList<>();
-        Map<String, Object> caseData = caseDetails.getData();
-        hearingOrderCollectionData.forEach(hearingOrder -> {
-            StampType stampType = documentHelper.getStampType(caseData);
-            CaseDocument stampedDocs = genericDocumentService.stampDocument(hearingOrder.getHearingOrderDocuments().getUploadDraftDocument(),
-                authorisationToken, stampType, caseId);
-            hearingOrderStampedCollection.add(buildHearingOrderDataObject(stampedDocs));
-        });
-
-        if (hearingOrderCollectionHasEntries(hearingOrderStampedCollection)) {
-            populateLatestDraftHearingOrderWithLatestEntry(caseDetails, hearingOrderStampedCollection);
+        if (!uploadHearingOrder.isEmpty()) {
+            caseData.setUploadHearingOrder(uploadHearingOrder);
+            DirectionOrderCollection orderCollection = uploadHearingOrder.get(uploadHearingOrder.size() - 1);
+            caseData.setLatestDraftHearingOrder(orderCollection.getValue().getUploadDraftDocument());
         }
     }
 
-    private static HearingOrderCollectionData buildHearingOrderDataObject(CaseDocument stampedDocs) {
-        return HearingOrderCollectionData.builder()
-            .hearingOrderDocuments(HearingOrderDocument.builder().uploadDraftDocument(stampedDocs).build()).build();
+    private List<DirectionOrderCollection> toPdf(List<DirectionOrderCollection> uploadHearingOrder,
+                                                 StampType stampType,
+                                                 String caseId,
+                                                 String authorisationToken) {
+        List<DirectionOrderCollection> orderList = new ArrayList<>();
+        if (uploadHearingOrder != null && !uploadHearingOrder.isEmpty()) {
+            uploadHearingOrder.forEach(order -> stampOrder(order, stampType, caseId, orderList, authorisationToken));
+        }
+        return orderList;
+    }
+
+    private void stampOrder(DirectionOrderCollection order,
+                                StampType stampType,
+                                   String caseId,
+                                   List<DirectionOrderCollection> orderList,
+                                   String authorisationToken) {
+        CaseDocument pdfOrder = genericDocumentService.convertDocumentIfNotPdfAlready(order.getValue()
+            .getUploadDraftDocument(), authorisationToken, caseId);
+
+        CaseDocument stampedDocs = genericDocumentService.stampDocument(pdfOrder,
+            authorisationToken, stampType, caseId);
+
+        DirectionOrder directionOrder = DirectionOrder.builder()
+            .uploadDraftDocument(stampedDocs)
+            .isOrderStamped(YesOrNo.YES)
+            .orderDateTime(LocalDateTime.now())
+            .build();
+        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(directionOrder).build();
+        orderList.add(orderCollection);
+    }
+
+
+    public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails,
+                                                                                          String authorisationToken) {
+        List<DirectionOrderCollection> uploadHearingOrder = caseDetails.getData().getUploadHearingOrder();
+        return dateService.addCreatedDateInUploadedOrder(uploadHearingOrder, authorisationToken);
     }
 
     public List<HearingOrderCollectionData> getApprovedHearingOrderCollection(CaseDetails caseDetail) {
@@ -133,19 +155,6 @@ public class AdditionalHearingDocumentService {
             });
     }
 
-    private boolean hearingOrderCollectionHasEntries(List<HearingOrderCollectionData> hearingOrderCollectionData) {
-        return hearingOrderCollectionData != null
-            && !hearingOrderCollectionData.isEmpty()
-            && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments() != null;
-    }
-
-    private void populateLatestDraftHearingOrderWithLatestEntry(CaseDetails caseDetails,
-                                                                List<HearingOrderCollectionData> hearingOrderCollectionData) {
-        caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-        caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
-            hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
-                .getHearingOrderDocuments().getUploadDraftDocument());
-    }
 
     public void sortDirectionDetailsCollection(FinremCaseData caseData) {
         List<DirectionDetailCollection> directionDetailsCollection
@@ -229,62 +238,6 @@ public class AdditionalHearingDocumentService {
         }
     }
 
-    public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)
-        throws CourtDetailsParseException, JsonProcessingException {
-
-        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseDetails.getData());
-
-        if (hearingOrderCollectionData != null
-            && !hearingOrderCollectionData.isEmpty()
-            && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments() != null) {
-            String caseId = caseDetails.getId().toString();
-            hearingOrderCollectionData.forEach(element ->
-                convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken, caseId));
-            caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-            caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
-                hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
-                    .getHearingOrderDocuments().getUploadDraftDocument());
-        }
-
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = documentHelper
-            .convertToDirectionDetailsCollectionData(caseDetails
-                .getData()
-                .get(DIRECTION_DETAILS_COLLECTION_CT));
-
-        //check that the list contains one or more values for the court hearing information
-        if (!directionDetailsCollectionList.isEmpty()) {
-            DirectionDetailsCollection latestDirectionDetailsCollectionItem =
-                directionDetailsCollectionList.get(directionDetailsCollectionList.size() - 1).getDirectionDetailsCollection();
-
-            //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
-            if (NO_VALUE.equalsIgnoreCase(nullToEmpty(latestDirectionDetailsCollectionItem.getIsAnotherHearingYN()))) {
-                log.info(ADDITIONAL_MESSAGE, caseDetails.getId());
-                return;
-            }
-
-            //Otherwise, proceed to extract data from collection
-            //Generate and store new additional hearing document using latestDirectionDetailsCollectionItem
-            Map<String, Object> courtData = latestDirectionDetailsCollectionItem.getLocalCourt();
-            Map<String, Object> courtDetailsMap;
-
-            courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(
-                courtData.get(CaseHearingFunctions.getSelectedCourtComplexType(courtData)));
-
-            CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-            prepareHearingCaseDetails(caseDetailsCopy, courtDetails,
-                latestDirectionDetailsCollectionItem.getTypeOfHearing(),
-                latestDirectionDetailsCollectionItem.getDateOfHearing(),
-                latestDirectionDetailsCollectionItem.getHearingTime(),
-                latestDirectionDetailsCollectionItem.getTimeEstimate());
-
-            CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
-            addAdditionalHearingDocumentToCaseData(caseDetails, document);
-        } else {
-            log.info(ADDITIONAL_MESSAGE, caseDetails.getId());
-        }
-    }
 
     private CaseDocument generateAdditionalHearingDocument(CaseDetails caseDetailsCopy, String authorisationToken) {
         log.info("Generating Additional Hearing Document for Case ID: {}", caseDetailsCopy.getId());
@@ -388,12 +341,6 @@ public class AdditionalHearingDocumentService {
         }
     }
 
-    private void convertHearingOrderCollectionDocumentsToPdf(HearingOrderCollectionData element,
-                                                             String authorisationToken, String caseId) {
-        CaseDocument pdfApprovedOrder = convertToPdf(element.getHearingOrderDocuments().getUploadDraftDocument(),
-            authorisationToken, caseId);
-        element.getHearingOrderDocuments().setUploadDraftDocument(pdfApprovedOrder);
-    }
 
     public CaseDocument convertToPdf(CaseDocument document, String authorisationToken, String caseId) {
         return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
@@ -403,5 +350,22 @@ public class AdditionalHearingDocumentService {
         CaseDocument caseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(uploadDraftDocument, authorisationToken, caseId);
         StampType stampType = documentHelper.getStampType(caseData);
         return genericDocumentService.stampDocument(caseDocument, authorisationToken, stampType, caseId);
+    }
+
+    public void addToFinalOrderCollection(FinremCaseDetails caseDetails, String authorisationToken) {
+        FinremCaseData caseData = caseDetails.getData();
+        List<DirectionOrderCollection> finalOrderCollection
+            = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authorisationToken);
+
+        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
+        if (!uploadHearingOrders.isEmpty()) {
+            uploadHearingOrders.forEach(order -> {
+                CaseDocument approveOrder = order.getValue().getUploadDraftDocument();
+                if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, approveOrder)) {
+                    finalOrderCollection.add(order);
+                }
+            });
+        }
+        caseData.setFinalOrderCollection(finalOrderCollection);
     }
 }

@@ -8,7 +8,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -48,6 +50,9 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
     @Captor
     private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
+    @MockBean
+    private FinremCaseDetailsMapper mapper;
+
     @Test
     public void whenContestedApprovedOrderLetterGenerated_thenTemplateVarsPopulatedAndDocumentCreatedAndStoredInCaseDetails() {
         CaseDocument expectedCaseDocument = caseDocument();
@@ -63,6 +68,26 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
         verifyTemplateVariablesArePopulated();
         assertThat(caseDetails.getData().get(CONTESTED_ORDER_APPROVED_COVER_LETTER), is(expectedCaseDocument));
     }
+
+    @Test
+    public void whenContestedApprovedOrderLetterGenerated_thenTemplateVarsPopulatedAndDocumentCreatedAndStoredInFinremCaseDetails() {
+        CaseDocument expectedCaseDocument = caseDocument();
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(expectedCaseDocument);
+
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDetails();
+        CaseDetails caseDetails = testCaseDetails();
+        when(mapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
+
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
+
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails)),
+            eq(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()));
+
+        verifyTemplateVariablesArePopulated();
+        assertThat(caseDetails.getData().get(CONTESTED_ORDER_APPROVED_COVER_LETTER), is(expectedCaseDocument));
+    }
+
 
     private CaseDetails testCaseDetails() {
         CaseDetails caseDetails = defaultContestedCaseDetails();

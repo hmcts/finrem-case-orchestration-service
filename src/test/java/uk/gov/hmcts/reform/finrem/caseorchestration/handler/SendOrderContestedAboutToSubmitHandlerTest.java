@@ -378,7 +378,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(12, caseData.getPartiesOnCase().getValue().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().size());
-        assertEquals(2, caseData.getFinalOrderCollection().size());
+        assertEquals(1, caseData.getFinalOrderCollection().size());
 
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper, never()).getStampType(caseData);

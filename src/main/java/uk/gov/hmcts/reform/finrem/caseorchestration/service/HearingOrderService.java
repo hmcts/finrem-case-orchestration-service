@@ -12,6 +12,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 
@@ -66,6 +69,28 @@ public class HearingOrderService {
             .map(this::convertToDraftDirectionOrder);
 
         return latestDraftDirectionOrder.isPresent() && !latestDraftDirectionOrder.get().equals(draftDirectionOrderCollectionTail);
+    }
+
+
+    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+
+        List<DraftDirectionOrderCollection> judgesAmendedDirectionOrders
+            = Optional.ofNullable(caseData.getDraftDirectionWrapper().getJudgesAmendedOrderCollection()).orElse(new ArrayList<>());
+
+        Optional<DraftDirectionOrder> latestDraftDirectionOrder
+            = Optional.ofNullable(caseData.getDraftDirectionWrapper().getLatestDraftDirectionOrder());
+
+        if (latestDraftDirectionOrder.isPresent()) {
+            DraftDirectionOrder draftDirectionOrder = latestDraftDirectionOrder.get();
+            DraftDirectionOrder directionOrder = DraftDirectionOrder.builder()
+                .uploadDraftDocument(draftDirectionOrder.getUploadDraftDocument())
+                .purposeOfDocument(draftDirectionOrder.getPurposeOfDocument())
+                .build();
+            DraftDirectionOrderCollection directionOrderCollection = DraftDirectionOrderCollection.builder().value(directionOrder).build();
+            judgesAmendedDirectionOrders.add(directionOrderCollection);
+            caseData.getDraftDirectionWrapper().setJudgesAmendedOrderCollection(judgesAmendedDirectionOrders);
+        }
     }
 
     public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(CaseDetails caseDetails) {
