@@ -139,7 +139,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
         List<AdditionalHearingDocumentCollection> additionalHearingDocuments = data.getAdditionalHearingDocuments();
         assertEquals("Not null", caseDocument(), additionalHearingDocuments.get(0).getValue().getDocument());
-
+        assertEquals("size of Notice Pack",1, data.getHearingNoticeDocumentPack().size());
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
             eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(),
@@ -160,6 +160,67 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             Matchers.hasEntry("HearingVenue",
                 "Bromley County Court And Family Court, Bromley County Court, College Road, Bromley, BR1 3PX")
             ));
+    }
+
+    @Test
+    public void givenHearingRequired_whenSubmitNoticeOfHearingWithDraftHearing_thenHearingNoticeIsPrintedForContestedCase() {
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+            .thenReturn(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+
+        data.getContactDetailsWrapper().setApplicantFmName("Poor");
+        data.getContactDetailsWrapper().setApplicantLname("Poor");
+        data.getContactDetailsWrapper().setAppRespondentFmName("Poor2");
+        data.getContactDetailsWrapper().setAppRespondentFmName("Poor2");
+
+        HearingDirectionDetail detail = HearingDirectionDetail.builder()
+            .dateOfHearing(LocalDate.of(2023, 1, 1))
+            .hearingTime("1200")
+            .isAnotherHearingYN(YesOrNo.YES)
+            .typeOfHearing(HearingTypeDirection.FH)
+            .timeEstimate("24hours")
+            .localCourt(Court.builder()
+                .region(Region.LONDON)
+                .londonList(RegionLondonFrc.LONDON)
+                .courtListWrapper(DefaultCourtListWrapper.builder()
+                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                    .build()).build())
+            .build();
+
+        HearingDirectionDetailsCollection directionDetailsCollection = HearingDirectionDetailsCollection.builder().value(detail).build();
+        List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollection = new ArrayList<>();
+        hearingDirectionDetailsCollection.add(directionDetailsCollection);
+        data.setHearingDirectionDetailsCollection(hearingDirectionDetailsCollection);
+        data.setLatestDraftHearingOrder(caseDocument());
+
+        approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
+
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = data.getAdditionalHearingDocuments();
+        assertEquals("Not null", caseDocument(), additionalHearingDocuments.get(0).getValue().getDocument());
+        assertEquals("size of Notice Pack",2, data.getHearingNoticeDocumentPack().size());
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            eq(AUTH_TOKEN),
+            placeholdersMapCaptor.capture(),
+            eq(documentConfiguration.getAdditionalHearingTemplate()),
+            eq(documentConfiguration.getAdditionalHearingFileName()), eq("123"));
+
+        Map<String, Object> caseDetailsMap = convertToMap(placeholdersMapCaptor.getValue().get(CASE_DETAILS));
+        Map<String, Object> data2 = convertToMap(caseDetailsMap.get(CASE_DATA));
+        assertThat(data2, allOf(
+            Matchers.<String, Object>hasEntry("CCDCaseNumber", 123L),
+            Matchers.hasEntry("CourtAddress", "Bromley County Court, College Road, Bromley, BR1 3PX"),
+            Matchers.hasEntry("CourtPhone", "0208 290 9620"),
+            Matchers.hasEntry("CourtEmail", "family.bromley.countycourt@justice.gov.uk"),
+            Matchers.hasEntry("ApplicantName", "Poor Poor"),
+            Matchers.hasEntry("AdditionalHearingDated", formattedNowDate),
+            Matchers.hasEntry("HearingTime", "1200"),
+            Matchers.hasEntry("RespondentName", "Poor2"),
+            Matchers.hasEntry("HearingVenue",
+                "Bromley County Court And Family Court, Bromley County Court, College Road, Bromley, BR1 3PX")
+        ));
     }
 
     private Map<String, Object> convertToMap(Object object) {
