@@ -70,6 +70,7 @@ public enum EventType {
     JUDGE_DRAFT_ORDER("FR_judgeDraftDirectionOrder"),
     DIRECTION_UPLOAD_ORDER("FR_directionOrder"),
     CONSENT_ORDER("FR_consentOrder"),
+    ASSIGN_DOCUMENT_CATEGORIES("FR_assignDocumentCategories"),
 
     @JsonEnumDefaultValue
     NONE("");

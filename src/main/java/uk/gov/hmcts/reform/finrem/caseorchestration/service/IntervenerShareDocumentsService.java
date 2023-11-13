@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.ShareSelectedDocumentService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,6 +72,8 @@ public class IntervenerShareDocumentsService implements SharedService {
     public static final String OTHER = "Other";
     public static final String QUESTIONNAIRES_ANSWERS = "QUESTIONNAIRES_ANSWERS";
     public static final String STATEMENTS_EXHIBITS = "STATEMENTS_EXHIBITS";
+
+    private final ShareSelectedDocumentService shareSelectedDocumentService;
 
     public DynamicMultiSelectList intervenerSourceDocumentList(FinremCaseDetails caseDetails, String role) {
 
@@ -468,7 +471,7 @@ public class IntervenerShareDocumentsService implements SharedService {
             List<DynamicMultiSelectListElement> roleList = solicitorRoleList.getValue();
             roleList.forEach(role -> {
                 List<DynamicMultiSelectListElement> documentList = sourceDocumentList.getValue();
-                copySharedDocumentsInSharedCollection(caseData, role.getCode(), documentList);
+                shareSelectedDocumentService.copySharedDocumentsToSharedCollection(caseData, role.getCode(), documentList);
             });
         }
     }

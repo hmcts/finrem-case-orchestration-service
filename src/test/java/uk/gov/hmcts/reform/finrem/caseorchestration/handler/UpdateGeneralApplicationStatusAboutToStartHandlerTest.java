@@ -137,7 +137,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
         when(service.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(document);
         GeneralApplicationCollectionData migratedData =
-            helper.migrateExistingGeneralApplication(data, AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString());
+            helper.mapExistingGeneralApplicationToData(data, AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString());
         migratedData.getGeneralApplicationItems().setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId());
         collection.add(migratedData);
         generalApplicationService.updateGeneralApplicationCollectionData(collection, data);
@@ -161,7 +161,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
         when(service.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(document);
         GeneralApplicationCollectionData migratedData =
-            helper.migrateExistingGeneralApplication(data, AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString());
+            helper.mapExistingGeneralApplicationToData(data, AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString());
         migratedData.getGeneralApplicationItems().setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId());
         collection.add(migratedData);
         generalApplicationService.updateGeneralApplicationCollectionData(collection, data);

@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
 
@@ -14,8 +15,8 @@ public abstract class PartyDocumentsHandler extends DocumentHandler {
     private final CaseDocumentParty party;
 
     protected PartyDocumentsHandler(CaseDocumentCollectionType caseDocumentCollectionType,
-                                 CaseDocumentParty party) {
-        super(caseDocumentCollectionType);
+                                    CaseDocumentParty party, FeatureToggleService featureToggleService) {
+        super(caseDocumentCollectionType, featureToggleService);
         this.party = party;
     }
 

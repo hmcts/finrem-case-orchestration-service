@@ -166,6 +166,7 @@ public class GeneralApplicationService {
         List<GeneralApplicationCollectionData> processableListForRoleType =
             interimGeneralApplicationListForRoleType.stream().filter(
                 f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).toList();
+
         List<GeneralApplicationCollectionData> generalApplicationCollectionDataListForRoleType =
             processableListForRoleType.stream().map(items -> setUserAndDate(caseDetails, items, userAuthorisation))
                 .toList();
@@ -295,12 +296,12 @@ public class GeneralApplicationService {
         generalApplicationItems.setGeneralApplicationCreatedBy(idamService.getIdamFullName(userAuthorisation));
         generalApplicationItems.setGeneralApplicationCreatedDate(LocalDate.now());
         CaseDocument caseDocument =
-            covertToPdf(generalApplicationItems.getGeneralApplicationDocument(), userAuthorisation, caseId);
+            convertToPdf(generalApplicationItems.getGeneralApplicationDocument(), userAuthorisation, caseId);
         generalApplicationItems.setGeneralApplicationDocument(caseDocument);
         generalApplicationItems.setGeneralApplicationStatus(GeneralApplicationStatus.CREATED.getId());
         if (generalApplicationItems.getGeneralApplicationDraftOrder() != null) {
             CaseDocument draftDocument =
-                covertToPdf(generalApplicationItems.getGeneralApplicationDraftOrder(), userAuthorisation, caseId);
+                convertToPdf(generalApplicationItems.getGeneralApplicationDraftOrder(), userAuthorisation, caseId);
             generalApplicationItems.setGeneralApplicationDraftOrder(draftDocument);
         }
 
@@ -330,12 +331,12 @@ public class GeneralApplicationService {
             GeneralApplicationSupportingDocumentData.builder();
         builder.id(UUID.randomUUID().toString());
         builder.value(GeneralApplicationSuportingDocumentItems.builder()
-            .supportDocument(covertToPdf(sdItems.getSupportDocument(), userAuthorisation, caseId))
+            .supportDocument(convertToPdf(sdItems.getSupportDocument(), userAuthorisation, caseId))
             .build());
         return builder.build();
     }
 
-    private CaseDocument covertToPdf(CaseDocument caseDocument, String userAuthorisation, String caseId) {
+    private CaseDocument convertToPdf(CaseDocument caseDocument, String userAuthorisation, String caseId) {
         return genericDocumentService.convertDocumentIfNotPdfAlready(
             documentHelper.convertToCaseDocument(caseDocument), userAuthorisation, caseId);
     }
