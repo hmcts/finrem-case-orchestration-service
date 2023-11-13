@@ -8,8 +8,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.time.LocalDate;
@@ -36,6 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
 
@@ -73,8 +77,8 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
     public void whenContestedApprovedOrderLetterGenerated_thenTemplateVarsPopulatedAndDocumentCreatedAndStoredInFinremCaseDetails() {
         CaseDocument expectedCaseDocument = caseDocument();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(expectedCaseDocument);
-
-        FinremCaseDetails finremCaseDetails = buildFinremCaseDetails();
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetails = testCaseDetails();
         when(mapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
 
@@ -85,9 +89,19 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
             eq(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()));
 
         verifyTemplateVariablesArePopulated();
-        assertThat(caseDetails.getData().get(CONTESTED_ORDER_APPROVED_COVER_LETTER), is(expectedCaseDocument));
+        assertThat(finremCaseDetails.getData().getOrderApprovedCoverLetter(), is(expectedCaseDocument));
     }
 
+    protected FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.SEND_ORDER)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .build();
+    }
 
     private CaseDetails testCaseDetails() {
         CaseDetails caseDetails = defaultContestedCaseDetails();
