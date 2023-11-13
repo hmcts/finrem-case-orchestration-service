@@ -1,15 +1,20 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,6 +105,38 @@ public class HearingOrderServiceTest extends BaseServiceTest {
         assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(
             CaseDetails.builder().id(123L)
                 .data(caseData).build(), AUTH_TOKEN), is(true));
+    }
+
+    @Test
+    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrdersV2() {
+        FinremCallbackRequest callbackRequest = getContestedNewCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = caseDetails.getData();
+        DraftDirectionOrder other
+            = DraftDirectionOrder.builder().uploadDraftDocument(caseDocument()).purposeOfDocument("Other").build();
+        finremCaseData.getDraftDirectionWrapper().setLatestDraftDirectionOrder(other);
+
+
+        hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
+
+        List<DraftDirectionOrderCollection> judgesAmendedOrderCollection
+            = finremCaseData.getDraftDirectionWrapper().getJudgesAmendedOrderCollection();
+        DraftDirectionOrder directionOrder = judgesAmendedOrderCollection.get(0).getValue();
+        Assert.assertEquals(caseDocument(), directionOrder.getUploadDraftDocument());
+        Assert.assertEquals("Other", directionOrder.getPurposeOfDocument());
+    }
+
+    @Test
+    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrdersV2WhenNoDraft() {
+        FinremCallbackRequest callbackRequest = getContestedNewCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = caseDetails.getData();
+
+        hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
+
+        List<DraftDirectionOrderCollection> judgesAmendedOrderCollection
+            = finremCaseData.getDraftDirectionWrapper().getJudgesAmendedOrderCollection();
+        Assert.assertNull(judgesAmendedOrderCollection);
     }
 
     @Test
