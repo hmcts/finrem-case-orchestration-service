@@ -29,7 +29,7 @@ def versions = [
         serenity             : '3.2.5',
         serviceTokenGenerator: '4.1.2',
         springDoc            : '1.7.0',
-        wiremock             : '2.33.2',
+        wiremock             : '3.0.1',
         apacheLogging        : '2.21.1',
         idamClient           : '2.1.1',
         jjwt                 : '0.12.3',
