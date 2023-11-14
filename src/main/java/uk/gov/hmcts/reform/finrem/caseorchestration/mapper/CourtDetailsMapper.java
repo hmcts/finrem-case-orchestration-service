@@ -85,9 +85,9 @@ public class CourtDetailsMapper {
         });
     }
 
-    public AllocatedRegionWrapper getCaseDetailsWithOnlyLatestAllocatedCourt(AllocatedRegionWrapper regionWrapperBefore,
-                                                                             AllocatedRegionWrapper regionWrapperActual,
-                                                                             Boolean isConsentedApplication) {
+    public AllocatedRegionWrapper getLatestAllocatedCourt(AllocatedRegionWrapper regionWrapperBefore,
+                                                          AllocatedRegionWrapper regionWrapperActual,
+                                                          Boolean isConsentedApplication) {
 
         AllocatedRegionWrapper regionWrapperProcessed =
             AllocatedRegionWrapper.builder().regionList(regionWrapperActual.getRegionList()).build();

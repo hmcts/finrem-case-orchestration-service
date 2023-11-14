@@ -60,6 +60,6 @@ public class GiveAllocationDirectionAboutToSubmitHandlerTest {
 
         handler.handle(callbackRequest, "AUTH");
 
-        verify(courtDetailsMapper).getCaseDetailsWithOnlyLatestAllocatedCourt(any(), any(), any());
+        verify(courtDetailsMapper).getLatestAllocatedCourt(any(), any(), any());
     }
 }

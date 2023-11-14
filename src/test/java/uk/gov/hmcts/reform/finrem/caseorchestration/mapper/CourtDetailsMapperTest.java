@@ -99,7 +99,7 @@ public class CourtDetailsMapperTest {
             .build();
 
         AllocatedRegionWrapper allocatedRegionWrapperReturn =
-            courtDetailsMapper.getCaseDetailsWithOnlyLatestAllocatedCourt(allocatedRegionWrapperBefore, allocatedRegionWrapper, null);
+            courtDetailsMapper.getLatestAllocatedCourt(allocatedRegionWrapperBefore, allocatedRegionWrapper, null);
 
         assertThat(allocatedRegionWrapperReturn.getRegionList(),
             is(equalTo(Region.MIDLANDS)));
@@ -128,7 +128,7 @@ public class CourtDetailsMapperTest {
             .build();
 
         AllocatedRegionWrapper allocatedRegionWrapperReturn =
-            courtDetailsMapper.getCaseDetailsWithOnlyLatestAllocatedCourt(
+            courtDetailsMapper.getLatestAllocatedCourt(
                 allocatedRegionWrapperBefore, allocatedRegionWrapper, true);
 
         assertThat(allocatedRegionWrapperReturn.getRegionList(),

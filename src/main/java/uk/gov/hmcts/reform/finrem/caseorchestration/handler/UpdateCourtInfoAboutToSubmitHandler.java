@@ -43,7 +43,7 @@ public class UpdateCourtInfoAboutToSubmitHandler extends FinremCallbackHandler {
 
         caseData.getRegionWrapper()
             .setAllocatedRegionWrapper(
-                courtDetailsMapper.getCaseDetailsWithOnlyLatestAllocatedCourt(
+                courtDetailsMapper.getLatestAllocatedCourt(
                     callbackRequest.getCaseDetailsBefore().getData().getRegionWrapper().getAllocatedRegionWrapper(),
                     caseData.getRegionWrapper().getAllocatedRegionWrapper(),
                     false));
