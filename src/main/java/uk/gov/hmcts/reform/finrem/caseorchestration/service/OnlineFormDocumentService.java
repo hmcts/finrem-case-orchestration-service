@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifor
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication;
 
 import java.util.Map;
 import java.util.Objects;
@@ -69,7 +70,7 @@ public class OnlineFormDocumentService {
     public CaseDocument generateMiniFormA(String authorisationToken, CaseDetails caseDetails) {
 
         log.info("Generating Consented Mini Form A for Case ID : {}", caseDetails.getId());
-        CaseDetails  caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getMiniFormTemplate(caseDetails),
             documentConfiguration.getMiniFormFileName());
@@ -132,7 +133,9 @@ public class OnlineFormDocumentService {
         log.info("Generating Draft Contested Mini Form A for Case ID : {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         String contestedDraftMiniFormTemplate;
-        if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {
+        if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication()) ||
+            caseData.getScheduleOneWrapper().getTypeOfApplication().equals(
+                TypeOfApplication.MATRIMONIAL_CIVILPARTNERSHIP)) {
             contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplate();
         } else {
             contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplateSchedule();
