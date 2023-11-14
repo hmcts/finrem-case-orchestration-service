@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrgPolicyService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 @Slf4j
 @Service
@@ -24,19 +24,19 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     private final OnlineFormDocumentService service;
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
-    private final OrgPolicyService policyService;
+    private final UpdateRepresentationWorkflowService representationWorkflowService;
 
     @Autowired
     public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnlineFormDocumentService service,
                                                         CaseFlagsService caseFlagsService,
                                                         IdamService idamService,
-                                                        OrgPolicyService policyService) {
+                                                        UpdateRepresentationWorkflowService representationWorkflowService) {
         super(finremCaseDetailsMapper);
         this.service = service;
         this.caseFlagsService = caseFlagsService;
         this.idamService = idamService;
-        this.policyService = policyService;
+        this.representationWorkflowService = representationWorkflowService;
     }
 
 
@@ -64,7 +64,9 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, caseDetails);
         caseData.setMiniFormA(document);
 
-        policyService.setDefaultOrgIfNotSetAlready(caseData, caseDetails.getId());
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        representationWorkflowService.persistDefaultOrganisationPolicy(caseData);
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseData).build();
     }
 }

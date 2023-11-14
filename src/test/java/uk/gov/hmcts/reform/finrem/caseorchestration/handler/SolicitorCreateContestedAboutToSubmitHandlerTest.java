@@ -1,14 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -21,21 +22,24 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrgPolicyService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
-@ExtendWith(MockitoExtension.class)
-class SolicitorCreateContestedAboutToSubmitHandlerTest {
+@RunWith(MockitoJUnitRunner.class)
+public class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     private SolicitorCreateContestedAboutToSubmitHandler handler;
@@ -49,54 +53,71 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     @Mock
     IdamService idamService;
 
-    @BeforeEach
-    void setup() {
+    @Mock
+    UpdateRepresentationWorkflowService representationWorkflowService;
+
+    @Before
+    public void setup() {
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
             caseFlagsService,
             idamService,
-            new OrgPolicyService());
+            representationWorkflowService);
     }
 
     @Test
-    void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
-        assertFalse(handler.canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SOLICITOR_CREATE));
+    public void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
+            is(false));
     }
 
     @Test
-    void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
-        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE));
+    public void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
+            is(true));
     }
 
     @Test
-    void givenContestedCase_whenHandledAndUserIsAdminAndCaseFileViewEnabled_thenReturnExpectedResponseCaseData() {
+    public void givenContestedCase_whenHandledAndUserIsAdminAndCaseFileViewEnabled_thenReturnExpectedResponseCaseData() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         finremCallbackRequest.getCaseDetails().getData().getUploadAdditionalDocument().forEach(ad ->
             ad.getValue().getAdditionalDocuments().setCategoryId(
                 DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B.getDocumentCategoryId()));
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
+            .thenReturn(finremCallbackRequest.getCaseDetails());
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(true);
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(anyString(),
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
 
-        FinremCaseData responseCaseData = handler.handle(finremCallbackRequest, AUTH_TOKEN).getData();
+        FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedAdminResponseCaseData(responseCaseData);
+
+        verify(representationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
 
     @Test
-    void givenContestedCase_whenHandledAndUserIsNotAdminAndCaseFileViewDisabled_thenReturnExpectedResponseCaseData() {
+    public void givenContestedCase_whenHandledAndUserIsNotAdminAndCaseFileViewDisabled_thenReturnExpectedResponseCaseData() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
+            .thenReturn(finremCallbackRequest.getCaseDetails());
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(false);
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(anyString(),
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
 
-        FinremCaseData responseCaseData = handler.handle(finremCallbackRequest, AUTH_TOKEN).getData();
+        FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedNonAdminResponseCaseData(responseCaseData);
+
+        verify(representationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
 
-    void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
+    private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
         assertEquals(YesOrNo.NO, responseCaseData.getCivilPartnership());
         assertEquals(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS,
             responseCaseData.getScheduleOneWrapper().getTypeOfApplication());
@@ -106,10 +127,6 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         assertEquals(DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B.getDocumentCategoryId(),
             responseCaseData.getUploadAdditionalDocument().get(0).getValue().getAdditionalDocuments().getCategoryId()
         );
-        assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(),
-            responseCaseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
-        assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(),
-            responseCaseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
     }
 
     private void expectedNonAdminResponseCaseData(FinremCaseData responseCaseData) {
@@ -121,12 +138,13 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         assertEquals(caseDocument(), responseCaseData.getMiniFormA());
         assertNull(responseCaseData.getUploadAdditionalDocument().get(0)
             .getValue().getAdditionalDocuments().getCategoryId());
-        assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(),
-            responseCaseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
-        assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(),
-            responseCaseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
     }
 
+    private CallbackRequest buildCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
+        return CallbackRequest.builder().eventId(EventType.UPLOAD_APPROVED_ORDER.getCcdType()).caseDetails(caseDetails).build();
+    }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
         ScheduleOneWrapper wrapper = ScheduleOneWrapper.builder().typeOfApplication(
