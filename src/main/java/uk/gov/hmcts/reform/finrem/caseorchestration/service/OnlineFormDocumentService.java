@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifor
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 
 import java.util.Map;
 import java.util.Objects;
@@ -135,7 +135,7 @@ public class OnlineFormDocumentService {
         String contestedDraftMiniFormTemplate;
         if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication()) ||
             caseData.getScheduleOneWrapper().getTypeOfApplication().equals(
-                TypeOfApplication.MATRIMONIAL_CIVILPARTNERSHIP)) {
+                Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS)) {
             contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplate();
         } else {
             contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplateSchedule();
