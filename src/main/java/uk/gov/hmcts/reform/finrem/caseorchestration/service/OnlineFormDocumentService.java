@@ -133,8 +133,8 @@ public class OnlineFormDocumentService {
         log.info("Generating Draft Contested Mini Form A for Case ID : {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         String contestedDraftMiniFormTemplate;
-        if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication()) ||
-            caseData.getScheduleOneWrapper().getTypeOfApplication().equals(
+        if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())
+            || caseData.getScheduleOneWrapper().getTypeOfApplication().equals(
                 Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS)) {
             contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplate();
         } else {
