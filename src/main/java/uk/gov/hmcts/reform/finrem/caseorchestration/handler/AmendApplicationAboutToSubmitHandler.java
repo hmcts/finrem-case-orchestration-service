@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -26,11 +27,15 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
 
     private final ConsentOrderService consentOrderService;
 
+    private CourtDetailsMapper courtDetailsMapper;
+
     @Autowired
     public AmendApplicationAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                ConsentOrderService consentOrderService) {
+                                                ConsentOrderService consentOrderService,
+                                                CourtDetailsMapper courtDetailsMapper) {
         super(mapper);
         this.consentOrderService = consentOrderService;
+        this.courtDetailsMapper = courtDetailsMapper;
     }
 
     @Override
@@ -55,6 +60,13 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         updateD81Details(caseData);
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(callbackRequest);
+
+        caseData.getRegionWrapper()
+            .setAllocatedRegionWrapper(
+                courtDetailsMapper.getCaseDetailsWithOnlyLatestAllocatedCourt(
+                    callbackRequest.getCaseDetailsBefore().getData().getRegionWrapper().getAllocatedRegionWrapper(),
+                    caseData.getRegionWrapper().getAllocatedRegionWrapper(),
+                    true));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

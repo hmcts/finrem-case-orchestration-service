@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -49,11 +50,19 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     @Mock
     private ConsentOrderService consentOrderService;
 
+    @Mock
+    private CourtDetailsMapper courtDetailsMapper;
+
+    private ObjectMapper objectMapper;
+
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
     @Before
     public void setUp() {
-        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
+        objectMapper = new ObjectMapper();
+        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
         handler = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
-            consentOrderService);
+            consentOrderService, courtDetailsMapper);
         lenient().when(consentOrderService.getLatestConsentOrderData(isA(CallbackRequest.class)))
             .thenReturn(newDocument(DOC_URL, BINARY_URL, FILE_NAME));
     }
