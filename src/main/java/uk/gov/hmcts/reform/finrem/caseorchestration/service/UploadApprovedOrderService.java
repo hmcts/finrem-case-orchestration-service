@@ -43,17 +43,16 @@ public class UploadApprovedOrderService {
             noticeService.createAndStoreHearingNoticeDocumentPack(caseDetails, authorisationToken);
         }
 
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         List<DirectionOrderCollection> hearingOrderCollectionBefore
             = documentService.getApprovedHearingOrders(caseDetailsBefore, authorisationToken);
 
         FinremCaseData caseData = caseDetails.getData();
-        if (!hearingOrderCollectionBefore.isEmpty()) {
-            List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
-            hearingOrderCollectionBefore.addAll(uploadHearingOrders);
-            caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
-            documentService.addToFinalOrderCollection(caseDetails, authorisationToken);
-        }
+        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
+        hearingOrderCollectionBefore.addAll(uploadHearingOrders);
+        caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
+        documentService.addToFinalOrderCollection(caseDetails, authorisationToken);
+
 
         List<UploadAdditionalDocumentCollection> uploadAdditionalDocumentBefore
             = caseDetailsBefore.getData().getUploadAdditionalDocument();

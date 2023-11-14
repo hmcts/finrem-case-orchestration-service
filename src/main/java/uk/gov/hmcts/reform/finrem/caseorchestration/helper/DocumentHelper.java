@@ -99,14 +99,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
@@ -683,21 +681,6 @@ public class DocumentHelper {
         return documents;
     }
 
-    public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
-                                                                                  String documentName) {
-        List<CaseDocument> documents = new ArrayList<>();
-
-        List<Map<String, Object>> documentList = ofNullable(data.get(collectionName))
-            .map(i -> (List<Map<String, Object>>) i)
-            .orElse(new ArrayList<>());
-
-        for (Map<String, Object> document : documentList) {
-            Map<String, Object> value = (Map<String, Object>) document.get(VALUE);
-            getDocumentLinkAsCaseDocument(value, documentName).ifPresent(documents::add);
-        }
-        return documents;
-    }
-
     public Optional<CaseDocument> getDocumentLinkAsCaseDocument(Map<String, Object> data, String documentName) {
         Map<String, Object> documentLink = documentName != null
             ? (Map<String, Object>) data.get(documentName)
@@ -746,10 +729,11 @@ public class DocumentHelper {
         });
     }
 
-    public List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
+    public List<DirectionOrderCollection> getFinalOrderCollection(Map<String, Object> caseData) {
         return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {
         });
     }
+
 
     public List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
         return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
@@ -761,12 +745,6 @@ public class DocumentHelper {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
             .fileName(caseDocument.getDocumentFilename())
             .build();
-    }
-
-    public List<CaseDocument> getHearingNoticeDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(HEARING_NOTICES_COLLECTION),
-            new TypeReference<>() {
-            });
     }
 
     public static PaperNotificationRecipient getIntervenerPaperNotificationRecipient(IntervenerWrapper intervenerWrapper) {

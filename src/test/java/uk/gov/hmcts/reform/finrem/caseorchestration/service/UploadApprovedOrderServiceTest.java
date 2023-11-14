@@ -65,13 +65,14 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
         FinremCaseDetails finremCaseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData finremCaseDataBefore = finremCaseDetailsBefore.getData();
+
         finremCaseDataBefore.setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
         finremCaseDataBefore.setOrderApprovedJudgeName(JUDGE_NAME);
         finremCaseDataBefore.setOrderApprovedDate(LocalDate.of(2023,11,11));
 
         finremCaseData.setUploadHearingOrder(getHearingOrderCollection());
         finremCaseData.setFinalOrderCollection(getHearingOrderCollection());
-        finremCaseDataBefore.setUploadHearingOrder(getHearingOrderCollection());
+
         finremCaseDataBefore.setFinalOrderCollection(getHearingOrderCollection());
         UploadAdditionalDocument additionalDocument = UploadAdditionalDocument.builder().additionalDocuments(caseDocument())
             .additionalDocumentType(AdditionalDocumentType.OTHER).build();
@@ -89,14 +90,14 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
 
         when(additionalHearingDocumentService
-            .getApprovedHearingOrders(finremCaseDetails, AUTH_TOKEN)).thenReturn(getHearingOrderCollection());
+            .getApprovedHearingOrders(finremCaseDetailsBefore, AUTH_TOKEN)).thenReturn(new ArrayList<>());
 
 
         List<String> errors = new ArrayList<>();
 
         uploadApprovedOrderService.processApprovedOrders(callbackRequest, errors, AUTH_TOKEN);
 
-        assertEquals(2, finremCaseData.getUploadHearingOrder().size());
+        assertEquals(1, finremCaseData.getUploadHearingOrder().size());
         assertEquals(2, finremCaseData.getUploadAdditionalDocument().size());
         assertEquals(1, finremCaseData.getFinalOrderCollection().size());
 
@@ -104,7 +105,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
             .createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, finremCaseDetails);
         verify(hearingOrderService).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(finremCaseDetails);
         verify(approvedOrderNoticeOfHearingService).createAndStoreHearingNoticeDocumentPack(finremCaseDetails, AUTH_TOKEN);
-        verify(additionalHearingDocumentService).getApprovedHearingOrders(finremCaseDetails, AUTH_TOKEN);
+        verify(additionalHearingDocumentService).getApprovedHearingOrders(finremCaseDetailsBefore, AUTH_TOKEN);
         verify(additionalHearingDocumentService).addToFinalOrderCollection(finremCaseDetails, AUTH_TOKEN);
     }
 
