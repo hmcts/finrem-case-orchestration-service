@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrgPolicyService;
 
 @Slf4j
 @Service
@@ -23,16 +24,19 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     private final OnlineFormDocumentService service;
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
+    private final OrgPolicyService policyService;
 
     @Autowired
     public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnlineFormDocumentService service,
                                                         CaseFlagsService caseFlagsService,
-                                                        IdamService idamService) {
+                                                        IdamService idamService,
+                                                        OrgPolicyService policyService) {
         super(finremCaseDetailsMapper);
         this.service = service;
         this.caseFlagsService = caseFlagsService;
         this.idamService = idamService;
+        this.policyService = policyService;
     }
 
 
@@ -54,12 +58,13 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         FinremCaseData caseData = caseDetails.getData();
 
         if (!idamService.isUserRoleAdmin(authorisationToken)) {
-            log.info("other users.");
+            log.info("other users for caseId {}", caseDetails.getId());
             caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         }
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, caseDetails);
         caseData.setMiniFormA(document);
 
+        policyService.setDefaultOrgIfNotSetAlready(caseData, caseDetails.getId());
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 }
