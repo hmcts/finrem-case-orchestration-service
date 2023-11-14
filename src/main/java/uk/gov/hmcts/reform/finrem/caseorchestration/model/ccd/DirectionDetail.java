@@ -11,7 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -26,7 +25,7 @@ public class DirectionDetail {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfHearing;
     private String hearingTime;
-    private Map<String, Object> localCourt;
+    private Court localCourt;
     private NottinghamCourt nottinghamList;
     private CfcCourt cfcList;
     private HearingTypeDirection typeOfHearing;

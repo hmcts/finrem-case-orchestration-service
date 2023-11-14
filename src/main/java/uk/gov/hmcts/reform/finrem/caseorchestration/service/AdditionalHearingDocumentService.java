@@ -220,7 +220,7 @@ public class AdditionalHearingDocumentService {
                 return;
             }
 
-            Map<String, Object> localCourt = directionDetail.getLocalCourt();
+            Map<String, Object> localCourt = convertToMap(directionDetail.getLocalCourt());
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
 
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(
@@ -240,6 +240,10 @@ public class AdditionalHearingDocumentService {
         }
     }
 
+    public Map<String, Object> convertToMap(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
 
     private CaseDocument generateAdditionalHearingDocument(CaseDetails caseDetailsCopy, String authorisationToken) {
         log.info("Generating Additional Hearing Document for Case ID: {}", caseDetailsCopy.getId());

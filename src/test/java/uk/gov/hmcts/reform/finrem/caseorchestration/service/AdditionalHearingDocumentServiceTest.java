@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
@@ -25,8 +26,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditi
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthEastFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -66,11 +71,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION_CT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
@@ -172,8 +172,6 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
-        Map<String, Object> localCourtMap = Map.of(REGION_CT, SOUTHEAST,
-            SOUTHEAST_FRC_LIST_CT, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_9");
 
         DirectionDetail directionDetail = DirectionDetail.builder()
             .isAnotherHearingYN(YesOrNo.YES)
@@ -181,7 +179,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .hearingTime("12")
             .timeEstimate("12")
             .dateOfHearing(LocalDate.of(2020, 1, 1))
-            .localCourt(localCourtMap).build();
+            .localCourt(getTestCourt()).build();
         DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
         directionDetailsCollection.add(detailCollection);
         data.setDirectionDetailsCollection(directionDetailsCollection);
@@ -230,16 +228,13 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
-        Map<String, Object> localCourtMap = Map.of(REGION_CT, SOUTHEAST,
-            SOUTHEAST_FRC_LIST_CT, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_9");
-
         DirectionDetail directionDetail = DirectionDetail.builder()
             .isAnotherHearingYN(YesOrNo.YES)
             .typeOfHearing(HearingTypeDirection.FH)
             .hearingTime("12")
             .timeEstimate("12")
             .dateOfHearing(LocalDate.of(2020, 1, 1))
-            .localCourt(localCourtMap).build();
+            .localCourt(getTestCourt()).build();
         DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
         directionDetailsCollection.add(detailCollection);
         data.setDirectionDetailsCollection(directionDetailsCollection);
@@ -289,8 +284,6 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
-        Map<String, Object> localCourtMap = Map.of(REGION_CT, SOUTHEAST,
-            SOUTHEAST_FRC_LIST_CT, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_9");
 
         DirectionDetail directionDetail = DirectionDetail.builder()
             .isAnotherHearingYN(YesOrNo.YES)
@@ -298,7 +291,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .hearingTime("12")
             .timeEstimate("12")
             .dateOfHearing(LocalDate.of(2020, 1, 1))
-            .localCourt(localCourtMap).build();
+            .localCourt(getTestCourt()).build();
         DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
         directionDetailsCollection.add(detailCollection);
         data.setDirectionDetailsCollection(directionDetailsCollection);
@@ -348,8 +341,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
-        Map<String, Object> localCourtMap = Map.of(REGION_CT, SOUTHEAST,
-            SOUTHEAST_FRC_LIST_CT, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_9");
+
 
         DirectionDetail directionDetail = DirectionDetail.builder()
             .isAnotherHearingYN(YesOrNo.NO)
@@ -357,7 +349,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .hearingTime("12")
             .timeEstimate("12")
             .dateOfHearing(LocalDate.of(2020, 1, 1))
-            .localCourt(localCourtMap).build();
+            .localCourt(getTestCourt()).build();
         DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
         directionDetailsCollection.add(detailCollection);
         data.setDirectionDetailsCollection(directionDetailsCollection);
@@ -402,6 +394,15 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
     }
 
+    private Court getTestCourt() {
+        return Court.builder()
+            .region(Region.SOUTHEAST)
+            .southEastList(RegionSouthEastFrc.KENT)
+            .courtListWrapper(DefaultCourtListWrapper.builder()
+                .kentSurreyCourtList(KentSurreyCourt.FR_kent_surreyList_9)
+                .build())
+            .build();
+    }
 
     private Map<String, Object> baseCaseData() {
         Map<String, Object> caseData = new HashMap<>();
