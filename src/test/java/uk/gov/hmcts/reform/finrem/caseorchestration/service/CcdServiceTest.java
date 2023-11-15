@@ -87,7 +87,7 @@ public class CcdServiceTest {
             .thenReturn(any());
         when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
 
-        ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, new FinremCaseData());
+        ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, finremCaseData);
 
         verify(caseEventsApi).findEventDetailsForCase(any(), any(), any(), any(), any(), any());
     }
