@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.CustomRequestScopeAtt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -64,20 +63,19 @@ public abstract class BaseTask implements Runnable {
 
                     log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
                     SearchResult searchResult =
-                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), getCaseType(), systemUserService.getSysUserToken());
+                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), getCaseType(), getSystemUserToken());
                     log.info("SearchResult count {}", searchResult.getTotal());
                     if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
-                        StartEventResponse startEventResponse = ccdService.startEventForCaseWorker(systemUserService.getSysUserToken(),
+                        StartEventResponse startEventResponse = ccdService.startEventForCaseWorker(getSystemUserToken(),
                             caseReference.getCaseReference(), getCaseType().getCcdType(), EventType.AMEND_CASE_CRON.getCcdType());
 
                         CaseDetails caseDetails = startEventResponse.getCaseDetails();
                         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-                        FinremCaseData finremCaseData = finremCaseDetails.getData();
                         log.info("Updating application type for Case ID: {}", caseDetails.getId());
-                        executeTask(finremCaseData);
+                        executeTask(finremCaseDetails);
                         CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
                         startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
-                        ccdService.submitEventForCaseWorker(startEventResponse, systemUserService.getSysUserToken(),
+                        ccdService.submitEventForCaseWorker(startEventResponse, getSystemUserToken(),
                             caseDetails.getId().toString(),
                             getCaseType().getCcdType(),
                             EventType.AMEND_CASE_CRON.getCcdType(),
@@ -96,6 +94,10 @@ public abstract class BaseTask implements Runnable {
         }
     }
 
+    protected String getSystemUserToken() {
+        return systemUserService.getSysUserToken();
+    }
+
     private List<CaseReference> getCaseReferences() {
         List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(getCaseListFileName());
         return caseReferences;
@@ -111,5 +113,5 @@ public abstract class BaseTask implements Runnable {
 
     protected abstract String getSummary();
 
-    protected abstract void executeTask(FinremCaseData finremCaseData);
+    protected abstract void executeTask(FinremCaseDetails finremCaseDetails);
 }
