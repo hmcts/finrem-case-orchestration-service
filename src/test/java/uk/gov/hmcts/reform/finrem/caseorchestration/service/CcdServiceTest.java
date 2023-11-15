@@ -81,6 +81,8 @@ public class CcdServiceTest {
 
     @Test
     public void givenFinremCaseData_WhenExecuteGetEvents_ThenCcdApiCalled() {
+        FinremCaseData finremCaseData = new FinremCaseData();
+        finremCaseData.setCcdCaseType(CONTESTED);
         when(caseEventsApi.findEventDetailsForCase(any(), any(), any(), any(), any(), any()))
             .thenReturn(any());
         when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
