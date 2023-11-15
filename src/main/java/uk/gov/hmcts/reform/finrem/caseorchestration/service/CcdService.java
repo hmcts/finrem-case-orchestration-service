@@ -131,10 +131,9 @@ public class CcdService {
             caseId.toString());
     }
 
-    public List<CaseEventDetail> getCcdEventDetailsOnCase(String authorisation, FinremCaseData finremCaseData,
-                                                          String caseTypeId) {
+    public List<CaseEventDetail> getCcdEventDetailsOnCase(String authorisation, FinremCaseData finremCaseData) {
         String caseId = finremCaseData.getCcdCaseId();
-
+        String caseTypeId = finremCaseData.getCcdCaseType().getCcdType();
         log.info(LOGGER, caseTypeId, caseId);
 
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
