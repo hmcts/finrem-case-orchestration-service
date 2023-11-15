@@ -27,8 +27,8 @@ public abstract class DocumentSharer {
                                                       String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> documentCollectionToShare = getDocumentCollection(caseData, collName);
 
-        log.info("Sharing documents for case role {} and collection name {} and collection id {}",
-            caseRole, collName, collId);
+        log.info("Sharing documents for case {} and case role {} and collection name {} and collection id {}",
+            caseData.getCcdCaseId(), caseRole, collName, collId);
         if (caseRole.equals(CaseRole.RESP_SOLICITOR.getCcdCode()) || caseRole.equals(CaseRole.RESP_BARRISTER.getCcdCode())) {
             setRespondentSharedCollection(caseData, getAndAddToExistingSharedCollection(collId, documentCollectionToShare,
                 getRespondentSharedCollection(caseData)));

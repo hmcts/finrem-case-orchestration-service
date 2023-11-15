@@ -190,17 +190,33 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateContestedDraftMiniFormASchedule() {
+    public void generateContestedDraftMiniFormAFinremFormAMatrimonial() {
+        FinremCaseDetails caseDetails = emptyCaseDetails();
+        caseDetails.getData().getScheduleOneWrapper().setTypeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS);
+        Map<String, Object> documentMap = new HashMap<>();
+        documentMap.put("document_url", "http://test.url");
+        when(contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(documentMap);
+        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(
+            AUTH_TOKEN, caseDetails));
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), anyMap(),
+            eq(documentConfiguration.getContestedDraftMiniFormTemplate()),
+            eq(documentConfiguration.getContestedDraftMiniFormFileName()), anyString());
+
+    }
+
+    @Test
+    public void generateContestedDraftMiniFormASchedule1() {
         CaseDetails caseDetails = caseDetails();
         caseDetails.getData().put(TYPE_OF_APPLICATION, SCHEDULE_ONE);
         Map<String, Object> documentMap = new HashMap<>();
         documentMap.put("document_url", "http://test.url");
         when(contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(documentMap);
         assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(
-                AUTH_TOKEN, caseDetails));
+            AUTH_TOKEN, caseDetails));
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
             eq(documentConfiguration.getContestedDraftMiniFormTemplateSchedule()), eq(documentConfiguration.getContestedDraftMiniFormFileName()));
     }
+
 
     @Test
     public void generateContestedDraftMiniFormAScheduleFinRemCaseDetails() {
@@ -209,7 +225,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         documentMap.put("document_url", "http://test.url");
         when(contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(documentMap);
         assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(
-                AUTH_TOKEN, caseDetails));
+            AUTH_TOKEN, caseDetails));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), anyMap(),
             anyString(), anyString(), anyString());
     }
@@ -227,7 +243,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         Long caseId = 1234L;
         ScheduleOneWrapper wrapper = ScheduleOneWrapper.builder().typeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build();
         return FinremCaseDetails.builder().id(caseId).data(
-                FinremCaseData.builder().scheduleOneWrapper(wrapper).miniFormA(caseDocument()).build()).build();
+            FinremCaseData.builder().scheduleOneWrapper(wrapper).miniFormA(caseDocument()).build()).build();
     }
 
     private CaseDetails consentedInContestedCaseDetails(String payload) throws Exception {
