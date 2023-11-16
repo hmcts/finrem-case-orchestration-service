@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ApprovedOrderNoticeOfHearingCorresponder;
 
 import java.time.LocalDate;
@@ -60,6 +61,7 @@ public class ApprovedOrderNoticeOfHearingService {
         List<CaseDocument> hearingNoticePack = new ArrayList<>();
 
         CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
+        noticeOfHearingDocument.setCategoryId(DocumentCategory.SYSTEM_DUPLICATES.getDocumentCategoryId());
         hearingNoticePack.add(noticeOfHearingDocument);
         List<CaseDocument> hearingNoticeDocuments = addHearingNoticeToHearingDocumentCollection(noticeOfHearingDocument, caseDetails);
         hearingNoticeDocuments.forEach(document ->
@@ -165,7 +167,11 @@ public class ApprovedOrderNoticeOfHearingService {
                                                                            CaseDetails caseDetails) {
         List<CaseDocument> hearingNoticeDocuments = Optional.ofNullable(documentHelper.getHearingNoticeDocuments(caseDetails.getData()))
             .orElse(new ArrayList<>());
-        hearingNoticeDocuments.add(noticeOfHearingDocument);
+
+        hearingNoticeDocuments.add(CaseDocument.builder().documentUrl(noticeOfHearingDocument.getDocumentUrl())
+            .documentBinaryUrl(noticeOfHearingDocument.getDocumentBinaryUrl())
+            .documentFilename(noticeOfHearingDocument.getDocumentFilename())
+            .build());
 
         return hearingNoticeDocuments;
     }
