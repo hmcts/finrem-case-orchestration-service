@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
@@ -73,7 +74,8 @@ public class CourtListUpdateTask extends BaseTask {
     }
 
     @Override
-    protected void executeTask(FinremCaseData finremCaseData) {
+    protected void executeTask(FinremCaseDetails finremCaseDetails) {
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
         List<CaseEventDetail> caseEventDetails = ccdService.getCcdEventDetailsOnCase(systemUserService.getSysUserToken(),
             finremCaseData);
 
