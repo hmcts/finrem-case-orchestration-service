@@ -276,6 +276,7 @@ public enum DocumentCategory {
     APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_9("applicationsGeneralApplicationsapp9"),
     APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_10("applicationsGeneralApplicationsapp10"),
     DUPLICATED_GENERAL_ORDERS("duplicatedGeneralOrders"),
+    SYSTEM_DUPLICATES("systemDuplicates"),
     APPLICATIONS_GENERAL_APPLICATIONS_OVERFLOW("applicationsGeneralApplicationsOverflow"),
     UNCATEGORISED(null);
 
