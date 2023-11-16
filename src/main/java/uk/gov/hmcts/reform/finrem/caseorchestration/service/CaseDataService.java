@@ -300,7 +300,7 @@ public class CaseDataService {
      * This method will be removed in future versions.
      * <p>Use @link isApplicantAddressConfidential(FinremCaseData caseData) instead </p>
      *
-     * @return boolean to be return
+     * @return boolean to be returned
      * @deprecated deprecated since 05-Sep-2023
      */
     @Deprecated(since = "05-september-2023")
@@ -319,7 +319,7 @@ public class CaseDataService {
      * This method will be removed in future versions.
      * <p>Use @link isRespondentAddressConfidential(FinremCaseData caseData) instead </p>
      *
-     * @return boolean to be return
+     * @return boolean to be returned
      * @deprecated deprecated since 05-Sep-2023
      */
     @Deprecated(since = "05-september-2023")
