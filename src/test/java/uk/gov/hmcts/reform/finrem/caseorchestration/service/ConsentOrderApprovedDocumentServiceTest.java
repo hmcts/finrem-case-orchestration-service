@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantRepresentedPaper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -93,15 +90,10 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     private static final String CONSENT_ORDER_APPROVED_COVER_LETTER_URL = "consentOrderApprovedCoverLetterUrl";
 
-    @Captor
-    private ArgumentCaptor<String> templateArgumentCaptor;
-
     @Autowired
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     @Autowired
     private ObjectMapper mapper;
-    @MockBean
-    private BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
     @MockBean
     private DocumentHelper documentHelper;
     @MockBean
@@ -323,8 +315,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(pdfStampingServiceMock.stampDocument(
             document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
             .thenReturn(document());
-        when(pdfStampingServiceMock.stampDocument(
-            document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId)).thenReturn(document());
 
         when(documentHelper.deepCopy(any(), any())).thenReturn(pensionDocumentData());
 
@@ -343,9 +333,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() throws Exception {
         when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
             .thenReturn(document());
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, caseId))
-            .thenReturn(document());
-
         CaseDetails caseDetails = defaultConsentedCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(CONSENT_ORDER, caseDocument());
@@ -362,16 +349,13 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(pdfStampingServiceMock.stampDocument(
             any(Document.class), eq(AUTH_TOKEN), eq(false), eq(StampType.FAMILY_COURT_STAMP), eq(caseId)))
             .thenReturn(document());
-        when(pdfStampingServiceMock.stampDocument(
-            any(Document.class), eq(AUTH_TOKEN), eq(true), eq(StampType.FAMILY_COURT_STAMP), eq(caseId)))
-            .thenReturn(document());
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         FinremCaseDetails finremCaseDetails = finremCaseDetails();
         consentOrderApprovedDocumentService
            .addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);
 
-        assertThat(finremCaseDetails.getData().getApprovedOrderCollection(), hasSize(1));
+        assertThat(finremCaseDetails.getData().getApprovedOrderCollection(), hasSize(3));
     }
 
     @Test
