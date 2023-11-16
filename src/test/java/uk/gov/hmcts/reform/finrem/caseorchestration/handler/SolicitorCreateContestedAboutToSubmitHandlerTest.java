@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
@@ -51,13 +53,17 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     @Mock
     IdamService idamService;
 
+    @Mock
+    UpdateRepresentationWorkflowService representationWorkflowService;
+
     @Before
     public void setup() {
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
             caseFlagsService,
-            idamService);
+            idamService,
+            representationWorkflowService);
     }
 
     @Test
@@ -90,6 +96,8 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedAdminResponseCaseData(responseCaseData);
+
+        verify(representationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
 
     @Test
@@ -105,6 +113,8 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedNonAdminResponseCaseData(responseCaseData);
+
+        verify(representationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
