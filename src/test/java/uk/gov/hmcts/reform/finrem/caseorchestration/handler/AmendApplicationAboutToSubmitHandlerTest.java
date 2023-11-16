@@ -49,14 +49,9 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     @Mock
     private ConsentOrderService consentOrderService;
 
-    private ObjectMapper objectMapper;
-
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
-
     @Before
     public void setUp() {
-        objectMapper = new ObjectMapper();
-        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
+        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         handler = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
             consentOrderService);
         lenient().when(consentOrderService.getLatestConsentOrderData(isA(CallbackRequest.class)))
