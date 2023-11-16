@@ -412,7 +412,7 @@ dependencies {
         exclude group: "org.yaml", module: "snakeyaml"
     }
 
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.33'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '2.2'
 
     implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
 
