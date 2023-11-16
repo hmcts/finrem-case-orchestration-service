@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
@@ -57,7 +57,7 @@ public class GeneralApplicationRemoveTask extends BaseTask {
     }
 
     @Override
-    protected void executeTask(FinremCaseData finremCaseData) {
-        generalApplicationHelper.checkAndRemoveDuplicateGeneralApplications(finremCaseData);
+    protected void executeTask(FinremCaseDetails finremCaseDetails) {
+        generalApplicationHelper.checkAndRemoveDuplicateGeneralApplications(finremCaseDetails.getData());
     }
 }
