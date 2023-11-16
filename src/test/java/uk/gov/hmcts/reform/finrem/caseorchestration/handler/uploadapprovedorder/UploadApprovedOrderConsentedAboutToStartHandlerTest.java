@@ -18,6 +18,7 @@ import java.time.LocalDate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,8 +53,16 @@ public class UploadApprovedOrderConsentedAboutToStartHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             uploadApprovedOrderConsentedAboutToStartHandler.handle(callbackRequest, "auth");
+        FinremCaseData caseData = response.getData();
+        assertThat(caseData.getOrderDirectionJudgeName(), is("judge"));
+        assertThat(caseData.getOrderDirectionDate(), is(LocalDate.now()));
 
-        assertThat(response.getData().getOrderDirectionJudgeName(), is("judge"));
-        assertThat(response.getData().getOrderDirectionDate(), is(LocalDate.now()));
+        assertNull(caseData.getOrderDirectionAbsolute());
+        assertNull(caseData.getServePensionProvider());
+        assertNull(caseData.getServePensionProviderResponsibility());
+        assertNull(caseData.getServePensionProviderOther());
+        assertNull(caseData.getOrderDirectionJudge());
+        assertNull(caseData.getOrderDirectionAddComments());
+        assertNull(caseData.getConsentOrderWrapper().getUploadApprovedConsentOrder());
     }
 }

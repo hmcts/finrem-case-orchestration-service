@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -345,32 +344,34 @@ public class ConsentOrderApprovedDocumentService {
         StampType stampType = documentHelper.getStampType(finremCaseDetails.getData());
         CaseDocument approvedConsentOrderLetter =
             generateApprovedConsentOrderLetter(generateDocumentPayload, userAuthorisation);
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
         CaseDocument consentOrderAnnexStamped =
-            genericDocumentService.annexStampDocument(finremCaseDetails.getData().getLatestConsentOrder(),
+            genericDocumentService.annexStampDocument(finremCaseData.getLatestConsentOrder(),
                 userAuthorisation, stampType, caseId);
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
             .consentOrder(consentOrderAnnexStamped).build();
 
-        List<PensionTypeCollection> consentPensionCollection =
-            finremCaseDetails.getData().getConsentPensionCollection();
+        List<PensionTypeCollection> pensionCollection = finremCaseData.getPensionCollection();
 
-        if (!CollectionUtils.isEmpty(consentPensionCollection)) {
+        if (!CollectionUtils.isEmpty(pensionCollection)) {
             log.info("Pension Documents not empty for case - "
                     + "stamping Pension Documents and adding to approvedOrder for case {}",
                 caseId);
-            List<PensionTypeCollection> stampedPensionDocs = stampPensionDocuments(consentPensionCollection,
+            List<PensionTypeCollection> stampedPensionDocs = stampPensionDocuments(pensionCollection,
                 userAuthorisation, stampType, caseId);
             log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseId);
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
 
-        List<ConsentOrderCollection> approvedOrders = singletonList(ConsentOrderCollection.<ApprovedOrder>builder()
-            .approvedOrder(approvedOrder).build());
+        List<ConsentOrderCollection> approvedOrders
+            = Optional.ofNullable(finremCaseData.getApprovedOrderCollection()).orElse(new ArrayList<>());
         log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseId);
-
-        finremCaseDetails.getData().setApprovedOrderCollection(approvedOrders);
+        ConsentOrderCollection consentOrderCollection
+            = ConsentOrderCollection.builder().approvedOrder(approvedOrder).build();
+        approvedOrders.add(consentOrderCollection);
+        finremCaseData.setApprovedOrderCollection(approvedOrders);
 
         log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseId);
     }
