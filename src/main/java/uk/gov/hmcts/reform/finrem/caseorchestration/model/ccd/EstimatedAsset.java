@@ -9,11 +9,11 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum EstimatedAsset {
 
-    UNABLE_TO_QUANTIFY("estimatedAssetsChecklist_1"),
-    UNDER_ONE_MILLION("estimatedAssetsChecklist_2"),
-    ONE_TO_FIVE_MILLION("estimatedAssetsChecklist_3"),
-    FIVE_TO_TEN_MILLION("estimatedAssetsChecklist_4"),
-    OVER_TEN_MILLION("estimatedAssetsChecklist_5");
+    UNABLE_TO_QUANTIFY("estimatedAssetsChecklist_1"), //Unable to quantify
+    UNDER_ONE_MILLION("estimatedAssetsChecklist_2"), //Under £1 million
+    ONE_TO_SEVEN_POINT_FIVE_MILLION("estimatedAssetsChecklist_3"), //£1 - £7.5 million
+    SEVEN_POINT_FIVE_TO_FIFTEEN_MILLION("estimatedAssetsChecklist_4"), //£7.5 - £15 million
+    OVER_FIFTEEN_MILLION("estimatedAssetsChecklist_5"); //Over £15 million
     private final String id;
 
     @JsonValue

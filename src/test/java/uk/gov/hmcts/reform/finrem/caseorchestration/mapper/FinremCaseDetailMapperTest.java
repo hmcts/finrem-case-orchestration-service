@@ -391,7 +391,7 @@ class FinremCaseDetailMapperTest {
         assertEquals(Complexity.TRUE_YES, caseData.getAddToComplexityListOfCourts());
         assertTrue(caseData.getEstimatedAssetsChecklist().containsAll(List.of(
             EstimatedAsset.UNABLE_TO_QUANTIFY,
-            EstimatedAsset.ONE_TO_FIVE_MILLION
+            EstimatedAsset.ONE_TO_SEVEN_POINT_FIVE_MILLION
         )));
         assertTrue(caseData.getPotentialAllegationChecklist().containsAll(List.of(
             PotentialAllegation.POTENTIAL_ALLEGATION_CHECKLIST_4,
