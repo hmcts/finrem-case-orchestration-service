@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.functional.payments;
 
 import net.serenitybdd.junit.runners.SerenityRunner;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +10,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
-@Ignore
 @RunWith(SerenityRunner.class)
 public class PaymentServiceTests extends IntegrationTestBase {
 
