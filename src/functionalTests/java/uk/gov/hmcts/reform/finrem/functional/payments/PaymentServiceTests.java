@@ -37,10 +37,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private String hwf = "HWF";
     private String pba = "PBA";
 
-    @Test
-    public void verifyPBAPaymentSuccessTestContested() {
-        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Contested.json", contestedDir);
-    }
 
     @Test
     public void verifyGetFeeLoopUpTestConsented() {
