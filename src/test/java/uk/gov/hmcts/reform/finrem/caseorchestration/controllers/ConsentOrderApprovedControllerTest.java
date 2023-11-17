@@ -8,7 +8,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
@@ -18,7 +20,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasKey;
@@ -64,6 +68,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     private DocumentHelper documentHelper;
     @MockBean
     private ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
+    @MockBean
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public String consentOrderApprovedEndpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -127,7 +133,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+        when(documentHelper.getPensionDocumentsData(any(Map.class))).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -149,7 +155,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+        when(documentHelper.getPensionDocumentsData(any(Map.class))).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -218,7 +224,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+        when(documentHelper.getPensionDocumentsData(any(Map.class))).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -234,6 +240,11 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @Test
     public void consentInContestedConsentOrderApprovedShouldProcessDocuments() throws Exception {
+        when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(CaseDetails.builder().data(new HashMap<>()).build());
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any())).thenReturn(FinremCaseDetails.builder().data(
+            FinremCaseData.builder().build()).build());
+        when(consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(any(), any())).thenReturn(
+            CaseDetails.builder().data(new HashMap<>()).build());
         doValidCaseDataSetUp();
 
         mvc.perform(post(contestedConsentOrderApprovedEndpoint())
@@ -250,6 +261,11 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @Test
     public void consentInContestedConsentOrderApprovedShouldProcessPensionDocs() throws Exception {
+        when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(CaseDetails.builder().data(new HashMap<>()).build());
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any())).thenReturn(FinremCaseDetails.builder().data(
+            FinremCaseData.builder().build()).build());
+        when(consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(any(), any())).thenReturn(
+            CaseDetails.builder().data(new HashMap<>()).build());
         doValidConsentInContestWithPensionData();
 
         mvc.perform(post(contestedConsentOrderApprovedEndpoint())

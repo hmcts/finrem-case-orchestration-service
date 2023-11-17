@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -148,8 +149,8 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    public GeneralApplicationCollectionData migrateExistingGeneralApplication(FinremCaseData caseData,
-                                                                              String userAuthorisation, String caseId) {
+    public GeneralApplicationCollectionData mapExistingGeneralApplicationToData(FinremCaseData caseData,
+                                                                                String userAuthorisation, String caseId) {
         if (caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             String collectionId = UUID.randomUUID().toString();
             caseData.getGeneralApplicationWrapper().setGeneralApplicationTracking(collectionId);
@@ -342,6 +343,9 @@ public class GeneralApplicationHelper {
                 new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(),ga.getValue().getGeneralApplicationCreatedDate()),
             toList())).entrySet().stream().map(entry -> findBestGeneralApplicationInDuplicate(entry.getValue()))
             .collect(toList());
+
+        Collections.sort(uniqueGeneralApplicationList, (o1, o2) -> o2.getValue().getGeneralApplicationCreatedDate()
+            .compareTo(o1.getValue().getGeneralApplicationCreatedDate()));
 
         log.info("After removing duplicate General application count: {} for Case ID: ", uniqueGeneralApplicationList.size(),
             caseData.getCcdCaseId());
