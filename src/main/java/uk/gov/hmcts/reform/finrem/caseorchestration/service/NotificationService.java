@@ -545,8 +545,14 @@ public class NotificationService {
 
     public void sendPrepareForHearingEmailIntervener(FinremCaseDetails caseDetails,
                                                      SolicitorCaseDataKeysWrapper dataKeysWrapper) {
-        sendPrepareForHearingEmail(finremNotificationRequestMapper
-            .getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
+        NotificationRequest notificationRequestForIntervenerSolicitor = finremNotificationRequestMapper
+            .getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper);
+        log.info("Received request for notification email for 'Prepare for hearing'. Case ID : {}",
+            notificationRequestForIntervenerSolicitor.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequestForIntervenerSolicitor,
+            FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
+
+
     }
 
     private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
