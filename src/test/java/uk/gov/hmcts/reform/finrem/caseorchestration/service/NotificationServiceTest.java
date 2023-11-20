@@ -302,7 +302,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
             dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
     }
 
 
