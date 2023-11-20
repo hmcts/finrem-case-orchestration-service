@@ -59,6 +59,7 @@ public class EmailService {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
             templateVars);
+        log.info("Sending confirmation email on Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
     }
 
