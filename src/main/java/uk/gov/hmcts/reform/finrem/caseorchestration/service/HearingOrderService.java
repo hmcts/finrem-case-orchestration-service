@@ -11,10 +11,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +41,7 @@ public class HearingOrderService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
+    private final OrderDateService orderDateService;
 
     public void convertToPdfAndStampAndStoreLatestDraftHearingOrder(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -51,7 +56,7 @@ public class HearingOrderService {
             CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument,
                 authorisationToken, documentHelper.getStampType(caseDetails.getData()), caseId);
             updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
-            updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder);
+            updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder, authorisationToken);
             appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder);
         } else {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
@@ -66,6 +71,28 @@ public class HearingOrderService {
             .map(this::convertToDraftDirectionOrder);
 
         return latestDraftDirectionOrder.isPresent() && !latestDraftDirectionOrder.get().equals(draftDirectionOrderCollectionTail);
+    }
+
+
+    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+
+        List<DraftDirectionOrderCollection> judgesAmendedDirectionOrders
+            = Optional.ofNullable(caseData.getDraftDirectionWrapper().getJudgesAmendedOrderCollection()).orElse(new ArrayList<>());
+
+        Optional<DraftDirectionOrder> latestDraftDirectionOrder
+            = Optional.ofNullable(caseData.getDraftDirectionWrapper().getLatestDraftDirectionOrder());
+
+        if (latestDraftDirectionOrder.isPresent()) {
+            DraftDirectionOrder draftDirectionOrder = latestDraftDirectionOrder.get();
+            DraftDirectionOrder directionOrder = DraftDirectionOrder.builder()
+                .uploadDraftDocument(draftDirectionOrder.getUploadDraftDocument())
+                .purposeOfDocument(draftDirectionOrder.getPurposeOfDocument())
+                .build();
+            DraftDirectionOrderCollection directionOrderCollection = DraftDirectionOrderCollection.builder().value(directionOrder).build();
+            judgesAmendedDirectionOrders.add(directionOrderCollection);
+            caseData.getDraftDirectionWrapper().setJudgesAmendedOrderCollection(judgesAmendedDirectionOrders);
+        }
     }
 
     public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(CaseDetails caseDetails) {
@@ -139,17 +166,22 @@ public class HearingOrderService {
         caseData.put(LATEST_DRAFT_HEARING_ORDER, stampedHearingOrder);
     }
 
-    public void updateCaseDataForLatestHearingOrderCollection(Map<String, Object> caseData, CaseDocument stampedHearingOrder) {
-        List<HearingOrderCollectionData> finalOrderCollection = Optional.ofNullable(documentHelper.getFinalOrderDocuments(caseData))
-            .orElse(new ArrayList<>());
-
-        finalOrderCollection.add(HearingOrderCollectionData.builder()
-            .hearingOrderDocuments(HearingOrderDocument.builder()
-                .uploadDraftDocument(stampedHearingOrder)
-                .build())
-            .build());
-
-        caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+    public void updateCaseDataForLatestHearingOrderCollection(Map<String, Object> caseData,
+                                                              CaseDocument stampedHearingOrder,
+                                                              String authorisationToken) {
+        List<DirectionOrderCollection> finalOrderCollection = documentHelper.getFinalOrderCollection(caseData);
+        List<DirectionOrderCollection> finalDatedCollection = orderDateService.addCreatedDateInFinalOrder(finalOrderCollection, authorisationToken);
+        if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalDatedCollection, stampedHearingOrder)) {
+            DirectionOrderCollection latestOrder = DirectionOrderCollection.builder()
+                .value(DirectionOrder.builder()
+                    .uploadDraftDocument(stampedHearingOrder)
+                    .orderDateTime(LocalDateTime.now())
+                    .isOrderStamped(YesOrNo.YES)
+                    .build())
+                .build();
+            finalDatedCollection.add(latestOrder);
+        }
+        caseData.put(FINAL_ORDER_COLLECTION, finalDatedCollection);
     }
 
     private DraftDirectionOrder convertToDraftDirectionOrder(Object value) {
