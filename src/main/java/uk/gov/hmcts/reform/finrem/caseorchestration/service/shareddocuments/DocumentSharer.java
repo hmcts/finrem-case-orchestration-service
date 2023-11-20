@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 public abstract class DocumentSharer {
 
     private final FeatureToggleService featureToggleService;
@@ -25,6 +27,8 @@ public abstract class DocumentSharer {
                                                       String collId, String collName, String caseRole) {
         List<UploadCaseDocumentCollection> documentCollectionToShare = getDocumentCollection(caseData, collName);
 
+        log.info("Sharing documents for case {} and case role {} and collection name {} and collection id {}",
+            caseData.getCcdCaseId(), caseRole, collName, collId);
         if (caseRole.equals(CaseRole.RESP_SOLICITOR.getCcdCode()) || caseRole.equals(CaseRole.RESP_BARRISTER.getCcdCode())) {
             setRespondentSharedCollection(caseData, getAndAddToExistingSharedCollection(collId, documentCollectionToShare,
                 getRespondentSharedCollection(caseData)));
@@ -72,11 +76,13 @@ public abstract class DocumentSharer {
         List<UploadCaseDocumentCollection> list =
             Optional.ofNullable(sharedCollection)
                 .orElse(new ArrayList<>());
-        documentCollectionToShare.forEach(sd -> {
-            if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
-                list.add(copyUploadCaseDocumentCollection(sd));
-            }
-        });
+        if (documentCollectionToShare != null) {
+            documentCollectionToShare.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    list.add(copyUploadCaseDocumentCollection(sd));
+                }
+            });
+        }
         return list;
     }
 
