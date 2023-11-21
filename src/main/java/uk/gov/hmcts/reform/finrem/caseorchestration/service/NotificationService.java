@@ -538,7 +538,7 @@ public class NotificationService {
         NotificationRequest notificationRequest =
             notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
             dataKeysWrapper);
-        log.info("Received request for notification email for 'Prepare for hearing'. Case ID : {}",
+        log.info("Received request to send notification email to intervener for 'List for hearing'. Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
     }
@@ -547,7 +547,7 @@ public class NotificationService {
                                                      SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         NotificationRequest notificationRequestForIntervenerSolicitor = finremNotificationRequestMapper
             .getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper);
-        log.info("Received request for notification email for 'Prepare for hearing'. Case ID : {}",
+        log.info("Received request to send notification email to intervener for 'List for hearing'. Case ID : {}",
             notificationRequestForIntervenerSolicitor.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequestForIntervenerSolicitor,
             FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
