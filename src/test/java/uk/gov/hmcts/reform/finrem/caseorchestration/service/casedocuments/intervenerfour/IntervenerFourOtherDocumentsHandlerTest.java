@@ -1,27 +1,32 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerfour;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
+
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
     IntervenerFourOtherDocumentsHandler handler;
 
-    @Test
-    public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
+
+    @Override
+    public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_B,
@@ -32,17 +37,52 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
             CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
+    }
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+    @Override
+    public DocumentHandler getDocumentHandler() {
+        return handler;
+    }
 
-        handler.replaceManagedDocumentsInCollectionType(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
-
-        assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_OTHER_COLLECTION),
+    @Override
+    public void assertExpectedCollectionType() {
+        assertThat(getDocumentCollection(),
             hasSize(5));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
+    }
+
+    @Override
+    protected List<UploadCaseDocumentCollection> getDocumentCollection() {
+        return caseData.getUploadCaseDocumentWrapper()
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_OTHER_COLLECTION);
+    }
+
+    @Override
+    public void assertCorrectCategoryAssignedFromDocumentType() {
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MISCELLANEOUS_OR_OTHER)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_PENSION_PLAN)
+        );
     }
 }

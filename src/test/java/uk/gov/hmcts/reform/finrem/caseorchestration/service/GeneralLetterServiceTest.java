@@ -104,8 +104,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(APPLICANT).label(APP_LABEL).build();
         DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        when(caseDataService.buildFullApplicantName(any())).thenReturn("Tom Geme");
-        when(caseDataService.buildFullRespondentName(any())).thenReturn("Moj Resp");
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("Tom Geme");
+        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Moj Resp");
 
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
@@ -130,8 +130,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(data.get("applicantFullName"), is("Tom Geme"));
         assertThat(data.get("respondentFullName"), is("Moj Resp"));
         assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
-        verify(caseDataService).buildFullApplicantName(any());
-        verify(caseDataService).buildFullRespondentName(any());
+        verify(caseDataService).buildFullApplicantName((CaseDetails) any());
+        verify(caseDataService).buildFullRespondentName((CaseDetails) any());
     }
 
 
@@ -142,8 +142,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(RESPONDENT).label(RESP_LABEL).build();
         DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        when(caseDataService.buildFullApplicantName(any())).thenReturn("Poor Guy");
-        when(caseDataService.buildFullRespondentName(any())).thenReturn("Moj Resp");
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Moj Resp");
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
@@ -167,8 +167,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(data.get("applicantFullName"), is("Poor Guy"));
         assertThat(data.get("respondentFullName"), is("Moj Resp"));
         assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
-        verify(caseDataService).buildFullApplicantName(any());
-        verify(caseDataService).buildFullRespondentName(any());
+        verify(caseDataService).buildFullApplicantName((CaseDetails) any());
+        verify(caseDataService).buildFullRespondentName((CaseDetails) any());
     }
 
     @Test
@@ -178,8 +178,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(RESPONDENT_SOLICITOR).label(RESP_SOLICITOR_LABEL).build();
         DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        when(caseDataService.buildFullApplicantName(any())).thenReturn("Poor Guy");
-        when(caseDataService.buildFullRespondentName(any())).thenReturn("test Korivi");
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("test Korivi");
 
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
@@ -214,8 +214,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
 
-        when(caseDataService.buildFullApplicantName(any())).thenReturn("Poor Guy");
-        when(caseDataService.buildFullRespondentName(any())).thenReturn("Moj Resp");
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Moj Resp");
 
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 

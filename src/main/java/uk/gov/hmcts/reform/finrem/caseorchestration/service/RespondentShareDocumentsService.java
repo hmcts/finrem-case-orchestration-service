@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,117 +39,67 @@ public class RespondentShareDocumentsService implements SharedService {
         List<UploadCaseDocumentCollection> otherCollection
             = caseData.getUploadCaseDocumentWrapper().getRespOtherCollection();
 
-        if (ObjectUtils.isNotEmpty(otherCollection)) {
-            otherCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
-                log.info("otherCollection:: filename {} caseId {}", filename, caseId);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_OTHER_COLLECTION.getCcdKey(),
-                    RESP_OTHER_COLLECTION.getCcdKey() + " -> " + filename));
-            });
-        }
+        buildDynamicListElements(otherCollection, "otherCollection:: filename {} caseId {}", caseId, dynamicListElements, RESP_OTHER_COLLECTION);
 
         List<UploadCaseDocumentCollection> chronologiesCollection
             = caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection();
-        if (ObjectUtils.isNotEmpty(chronologiesCollection)) {
-            chronologiesCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
-                log.info("chronologiesCollection:: filename {} caseId {}", filename, caseId);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey(),
-                    RESP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey() + " -> " + filename));
-            });
-        }
+        buildDynamicListElements(chronologiesCollection, "chronologiesCollection:: filename {} caseId {}", caseId, dynamicListElements,
+            RESP_CHRONOLOGIES_STATEMENTS_COLLECTION);
 
         List<UploadCaseDocumentCollection> statementsExhibitsCollection
             = caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection();
-        if (ObjectUtils.isNotEmpty(statementsExhibitsCollection)) {
-            statementsExhibitsCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
-                log.info("statementsExhibitsCollection:: filename {} caseId {}", filename, caseId);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey(),
-                    RESP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey() + " -> " + filename));
-            });
-        }
+        buildDynamicListElements(statementsExhibitsCollection, "statementsExhibitsCollection:: filename {} caseId {}", caseId, dynamicListElements,
+            RESP_STATEMENTS_EXHIBITS_COLLECTION);
 
         List<UploadCaseDocumentCollection> hearingBundlesCollection
             = caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection();
-        if (ObjectUtils.isNotEmpty(hearingBundlesCollection)) {
-            hearingBundlesCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
-                log.info("hearingBundlesCollection:: filename {} caseId {}", filename, caseId);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_HEARING_BUNDLES_COLLECTION.getCcdKey(),
-                    RESP_HEARING_BUNDLES_COLLECTION.getCcdKey() + " -> " + filename));
-            });
-        }
+        buildDynamicListElements(hearingBundlesCollection, "hearingBundlesCollection:: filename {} caseId {}", caseId, dynamicListElements,
+            RESP_HEARING_BUNDLES_COLLECTION);
 
 
         List<UploadCaseDocumentCollection> formEExhibitsCollection
             = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection();
-        if (ObjectUtils.isNotEmpty(formEExhibitsCollection)) {
-            formEExhibitsCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
-                log.info("formEExhibitsCollection:: filename {} caseId {}", filename, caseId);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_FORM_E_EXHIBITS_COLLECTION.getCcdKey(),
-                    RESP_FORM_E_EXHIBITS_COLLECTION.getCcdKey() + " -> " + filename));
-            });
-        }
+        buildDynamicListElements(formEExhibitsCollection, "formEExhibitsCollection:: filename {} caseId {}", caseId, dynamicListElements,
+            RESP_FORM_E_EXHIBITS_COLLECTION);
 
         List<UploadCaseDocumentCollection> qaCollection
             = caseData.getUploadCaseDocumentWrapper().getRespQaCollection();
-        if (ObjectUtils.isNotEmpty(qaCollection)) {
-            qaCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
-                log.info("qaCollection:: filename {} caseId {}", filename, caseId);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey(),
-                    RESP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey() + " -> " + filename));
-            });
-        }
+        buildDynamicListElements(qaCollection, "qaCollection:: filename {} caseId {}", caseId, dynamicListElements,
+            RESP_QUESTIONNAIRES_ANSWERS_COLLECTION);
 
         List<UploadCaseDocumentCollection> caseSummariesCollection
             = caseData.getUploadCaseDocumentWrapper().getRespCaseSummariesCollection();
-        if (ObjectUtils.isNotEmpty(caseSummariesCollection)) {
-            caseSummariesCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
-                log.info("caseSummariesCollection:: filename {} caseId {}", filename, caseId);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_CASE_SUMMARIES_COLLECTION.getCcdKey(),
-                    RESP_CASE_SUMMARIES_COLLECTION.getCcdKey() + " -> " + filename));
-            });
-        }
+        buildDynamicListElements(caseSummariesCollection, "caseSummariesCollection:: filename {} caseId {}", caseId, dynamicListElements,
+            RESP_CASE_SUMMARIES_COLLECTION);
 
         List<UploadCaseDocumentCollection> formsHCollection
             = caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection();
-        if (ObjectUtils.isNotEmpty(formsHCollection)) {
-            formsHCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
-                log.info("formsHCollection:: filename {} caseId {}", filename, caseId);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_FORM_H_COLLECTION.getCcdKey(),
-                    RESP_FORM_H_COLLECTION.getCcdKey() + " -> " + filename));
-            });
-        }
+        buildDynamicListElements(formsHCollection, "formsHCollection:: filename {} caseId {}", caseId, dynamicListElements, RESP_FORM_H_COLLECTION);
 
 
         List<UploadCaseDocumentCollection> expertEvidenceCollection
             = caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollection();
-        if (ObjectUtils.isNotEmpty(expertEvidenceCollection)) {
-            expertEvidenceCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
-                log.info("expertEvidenceCollection:: filename {} caseId {}", filename, caseId);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESP_EXPERT_EVIDENCE_COLLECTION.getCcdKey(),
-                    RESP_EXPERT_EVIDENCE_COLLECTION.getCcdKey() + " -> " + filename));
-            });
-        }
+        buildDynamicListElements(expertEvidenceCollection, "expertEvidenceCollection:: filename {} caseId {}", caseId, dynamicListElements,
+            RESP_EXPERT_EVIDENCE_COLLECTION);
 
 
         List<UploadCaseDocumentCollection> correspondenceDocsCollection
             = caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceDocsColl();
-        if (ObjectUtils.isNotEmpty(correspondenceDocsCollection)) {
-            correspondenceDocsCollection.forEach(doc -> {
-                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
-                log.info("correspondenceDocsCollection:: filename {} caseId {}", filename, caseId);
-                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + RESPONDENT_CORRESPONDENCE_COLLECTION.getCcdKey(),
-                    RESPONDENT_CORRESPONDENCE_COLLECTION.getCcdKey() + " -> " + filename));
-            });
-        }
+        buildDynamicListElements(correspondenceDocsCollection, "correspondenceDocsCollection:: filename {} caseId {}", caseId, dynamicListElements,
+            RESPONDENT_CORRESPONDENCE_COLLECTION);
 
         return getSelectedDocumentList(dynamicListElements, caseData.getSourceDocumentList());
+    }
+
+    private void buildDynamicListElements(List<UploadCaseDocumentCollection> otherCollection, String format, String caseId,
+                                          List<DynamicMultiSelectListElement> dynamicListElements, CaseDocumentCollectionType respOtherCollection) {
+        if (ObjectUtils.isNotEmpty(otherCollection)) {
+            otherCollection.forEach(doc -> {
+                final String filename = doc.getUploadCaseDocument().getCaseDocuments().getDocumentFilename();
+                log.info(format, filename, caseId);
+                dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + respOtherCollection.getCcdKey(),
+                    respOtherCollection.getCcdKey() + " -> " + filename));
+            });
+        }
     }
 }

@@ -149,8 +149,8 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    public GeneralApplicationCollectionData migrateExistingGeneralApplication(FinremCaseData caseData,
-                                                                              String userAuthorisation, String caseId) {
+    public GeneralApplicationCollectionData mapExistingGeneralApplicationToData(FinremCaseData caseData,
+                                                                                String userAuthorisation, String caseId) {
         if (caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             String collectionId = UUID.randomUUID().toString();
             caseData.getGeneralApplicationWrapper().setGeneralApplicationTracking(collectionId);

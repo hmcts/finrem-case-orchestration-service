@@ -110,11 +110,12 @@ public class ConsentOrderApprovedController extends BaseController {
 
         consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData,
                 authToken, caseDetails.getId().toString());
-        consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
+        CaseDetails mappedCaseDetails =
+            consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData)
+                .data(mappedCaseDetails.getData())
                 .errors(List.of())
                 .warnings(List.of())
                 .build());
