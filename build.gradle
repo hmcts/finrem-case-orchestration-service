@@ -351,7 +351,7 @@ dependencyManagement {
             entry 'tomcat-embed-websocket'
         }
         //VE-2022-31692, CVE-2022-31690 CVE-2023-20862
-        dependencySet(group: 'org.springframework.security', version: '6.1.4') {
+        dependencySet(group: 'org.springframework.security', version: '6.2.0') {
             entry 'spring-security-crypto'
         }
         //CVE-2023-20861
