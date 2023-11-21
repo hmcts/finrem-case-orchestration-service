@@ -97,7 +97,7 @@ public class GeneralApplicationHelperTest {
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
-        assertNull(helper.migrateExistingGeneralApplication(data, AUTH_TOKEN, anyString()));
+        assertNull(helper.mapExistingGeneralApplicationToData(data, AUTH_TOKEN, anyString()));
     }
 
     @Test
@@ -307,14 +307,14 @@ public class GeneralApplicationHelperTest {
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         helper.buildDynamicIntervenerList(dynamicListElements, caseData);
-        assertEquals(dynamicListElements.get(3).getLabel(), INTERVENER1);
-        assertEquals(dynamicListElements.get(4).getLabel(), INTERVENER2);
-        assertEquals(dynamicListElements.get(5).getLabel(), INTERVENER3);
-        assertEquals(dynamicListElements.get(6).getLabel(), INTERVENER4);
-        assertEquals(dynamicListElements.get(3).getCode(), INTERVENER1);
-        assertEquals(dynamicListElements.get(4).getCode(), INTERVENER2);
-        assertEquals(dynamicListElements.get(5).getCode(), INTERVENER3);
-        assertEquals(dynamicListElements.get(dynamicListElements.size() - 1).getCode(), INTERVENER4);
+        assertEquals(INTERVENER1, dynamicListElements.get(3).getLabel());
+        assertEquals(INTERVENER2, dynamicListElements.get(4).getLabel());
+        assertEquals(INTERVENER3, dynamicListElements.get(5).getLabel());
+        assertEquals(INTERVENER4, dynamicListElements.get(6).getLabel());
+        assertEquals(INTERVENER1, dynamicListElements.get(3).getCode());
+        assertEquals(INTERVENER2, dynamicListElements.get(4).getCode());
+        assertEquals(INTERVENER3, dynamicListElements.get(5).getCode());
+        assertEquals(INTERVENER4, dynamicListElements.get(dynamicListElements.size() - 1).getCode());
     }
 
     @Test

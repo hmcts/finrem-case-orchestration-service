@@ -87,7 +87,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
         String caseId = String.valueOf(caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         GeneralApplicationCollectionData data =
-            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
+            helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         if (data != null) {

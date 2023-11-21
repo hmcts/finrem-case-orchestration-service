@@ -8,10 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ApprovedOrderNoticeOfHearingCorresponder;
 
@@ -22,18 +26,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT_PACK;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
@@ -46,28 +44,49 @@ public class ApprovedOrderNoticeOfHearingService {
 
     static final String CASE_DETAILS = "caseDetails";
     static final String CASE_DATA = "case_data";
-
-    private final DocumentHelper documentHelper;
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final ObjectMapper objectMapper;
-    private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ApprovedOrderNoticeOfHearingCorresponder approvedOrderNoticeOfHearingCorresponder;
-    private final CaseDataService caseDataService;
 
-    public void createAndStoreHearingNoticeDocumentPack(CaseDetails caseDetails,
+
+    public void createAndStoreHearingNoticeDocumentPack(FinremCaseDetails caseDetails,
                                                         String authToken) {
-        List<CaseDocument> hearingNoticePack = new ArrayList<>();
 
+        List<DocumentCollection> hearingNoticePack = new ArrayList<>();
         CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
-        hearingNoticePack.add(noticeOfHearingDocument);
-        List<CaseDocument> hearingNoticeDocuments = addHearingNoticeToHearingDocumentCollection(noticeOfHearingDocument, caseDetails);
-        hearingNoticeDocuments.forEach(document ->
-            additionalHearingDocumentService.addAdditionalHearingDocumentToCaseData(caseDetails, document));
+        hearingNoticePack.add(getDocumentCollectionObj(noticeOfHearingDocument));
 
-        Optional.ofNullable(documentHelper.convertToCaseDocument(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER)))
-            .ifPresent(hearingNoticePack::add);
-        caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, convertHearingNoticeDocumentPackToCcdCollection(hearingNoticePack));
+        FinremCaseData caseData = caseDetails.getData();
+        List<DocumentCollection> documentCollections = Optional.ofNullable(caseData.getHearingNoticesDocumentCollection()).orElse(new ArrayList<>());
+        documentCollections.add(DocumentCollection.builder().value(noticeOfHearingDocument).build());
+
+        documentCollections.forEach(docColl -> addAdditionalHearingDocument(caseData, docColl.getValue()));
+
+        Optional<CaseDocument> latestDraftHearingOrder = Optional.ofNullable(caseData.getLatestDraftHearingOrder());
+        if (latestDraftHearingOrder.isPresent()) {
+            hearingNoticePack.add(getDocumentCollectionObj(caseData.getLatestDraftHearingOrder()));
+        }
+
+        caseData.setHearingNoticeDocumentPack(hearingNoticePack);
+    }
+
+
+    private DocumentCollection getDocumentCollectionObj(CaseDocument caseDocument) {
+        return DocumentCollection.builder().value(caseDocument).build();
+    }
+
+    private void addAdditionalHearingDocument(FinremCaseData caseData, CaseDocument documentToAdd) {
+
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments
+            = Optional.ofNullable(caseData.getAdditionalHearingDocuments()).orElse(new ArrayList<>());
+
+        AdditionalHearingDocumentCollection hearingDocumentCollection
+            = AdditionalHearingDocumentCollection.builder()
+            .value(AdditionalHearingDocument.builder().document(documentToAdd).build()).build();
+        additionalHearingDocuments.add(hearingDocumentCollection);
+
+        caseData.setAdditionalHearingDocuments(additionalHearingDocuments);
     }
 
     public void printHearingNoticePackAndSendToApplicantAndRespondent(CaseDetails caseDetails,
@@ -75,60 +94,41 @@ public class ApprovedOrderNoticeOfHearingService {
         approvedOrderNoticeOfHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
+    private CaseDocument prepareHearingRequiredNoticeDocumentComplexType(FinremCaseDetails caseDetails, String authorisationToken) {
+        FinremCaseData data = caseDetails.getData();
+        Optional<List<HearingDirectionDetailsCollection>> hearingDirectionDetailsCollection
+            = Optional.ofNullable(data.getHearingDirectionDetailsCollection());
 
-    private CaseDocument prepareHearingRequiredNoticeDocumentComplexType(CaseDetails caseDetails, String authorisationToken) {
-        Optional<AdditionalHearingDirectionsCollection> latestAdditionalHearingDirections =
-            getLatestAdditionalHearingDirections(caseDetails);
-
-        if (latestAdditionalHearingDirections.isEmpty()) {
-            throw new IllegalStateException("Invalid Case Data");
+        if (hearingDirectionDetailsCollection.isEmpty()) {
+            throw new IllegalStateException("Invalid Case Data - hearing direction is empty for caseId " + caseDetails.getId());
         }
-        Map<String, Object> mapOfLetterDetails = getNoticeOfHearingLetterDetails(caseDetails,
-            latestAdditionalHearingDirections.get());
+        List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollections = hearingDirectionDetailsCollection.get();
+        HearingDirectionDetailsCollection directionDetailsCollection
+            = hearingDirectionDetailsCollections.get(hearingDirectionDetailsCollections.size() - 1);
+        HearingDirectionDetail directionDetail = directionDetailsCollection.getValue();
+
+        Map<String, Object> mapOfLetterDetails = getNoticeOfHearingLetterDetails(caseDetails, directionDetail);
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, mapOfLetterDetails,
             documentConfiguration.getAdditionalHearingTemplate(),
             documentConfiguration.getAdditionalHearingFileName(), caseDetails.getId().toString());
+
     }
 
-    @SuppressWarnings("java:S3740")
-    private Map<String, Object> getCourtDetails(AdditionalHearingDirectionsCollection latestAdditionalHearingDirection) {
 
-        try {
-            Map listOfCourtDetails = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map hearingCourtMap = latestAdditionalHearingDirection.getLocalCourt();
-            String selectedCourtKey = getSelectedCourtComplexType(hearingCourtMap);
-            return (Map<String, Object>) listOfCourtDetails.get(hearingCourtMap.get(selectedCourtKey));
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private Optional<AdditionalHearingDirectionsCollection> getLatestAdditionalHearingDirections(CaseDetails caseDetails) {
-        List<Element<AdditionalHearingDirectionsCollection>> additionalHearingDetailsCollection =
-            objectMapper.convertValue(caseDetails.getData().get(HEARING_DIRECTION_DETAILS_COLLECTION),
-                new TypeReference<>() {
-                });
-
-        return additionalHearingDetailsCollection != null && !additionalHearingDetailsCollection.isEmpty()
-            ? Optional.of(additionalHearingDetailsCollection.get(additionalHearingDetailsCollection.size() - 1).getValue())
-            : Optional.empty();
-    }
-
-    @SuppressWarnings("java:S3740")
-    private Map getNoticeOfHearingLetterDetails(CaseDetails caseDetails,
-                                                AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection) {
-        CourtDetailsTemplateFields selectedFRCDetails = getFrcCourtDetails(additionalHearingDirectionsCollection);
+    private Map<String, Object> getNoticeOfHearingLetterDetails(FinremCaseDetails caseDetails,
+                                                                HearingDirectionDetail directionDetail) {
+        CourtDetailsTemplateFields selectedFRCDetails = getFrcCourtDetails(directionDetail);
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(CASE_DATA, addValuesToPlaceHoldersMap(caseDetails, additionalHearingDirectionsCollection, selectedFRCDetails));
+        caseDataMap.put(CASE_DATA, addValuesToPlaceHoldersMap(caseDetails, directionDetail, selectedFRCDetails));
         caseDataMap.put("id", caseDetails.getId());
-        HashMap caseDetailsMap = new HashMap<String, Object>();
+        HashMap<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put(CASE_DETAILS, caseDataMap);
         return caseDetailsMap;
     }
 
-    private CourtDetailsTemplateFields getFrcCourtDetails(AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection) {
-        Map<String, Object> courtDetails = getCourtDetails(additionalHearingDirectionsCollection);
+    private CourtDetailsTemplateFields getFrcCourtDetails(HearingDirectionDetail directionDetail) {
+        Map<String, Object> courtDetails = getCourtDetails(directionDetail);
         return CourtDetailsTemplateFields.builder()
             .courtName(nullToEmpty(courtDetails.get(COURT_DETAILS_NAME_KEY)))
             .courtAddress(nullToEmpty(courtDetails.get(COURT_DETAILS_ADDRESS_KEY)))
@@ -137,15 +137,32 @@ public class ApprovedOrderNoticeOfHearingService {
             .build();
     }
 
-    private Map<String, Object> addValuesToPlaceHoldersMap(CaseDetails caseDetails,
-                                                           AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection,
+    private Map<String, Object> getCourtDetails(HearingDirectionDetail directionDetail) {
+
+        try {
+            Map<String, Object> listOfCourtDetails = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> hearingCourtMap = convertToMap(directionDetail.getLocalCourt());
+            String selectedCourtKey = getSelectedCourtComplexType(hearingCourtMap);
+            return (Map<String, Object>) listOfCourtDetails.get(hearingCourtMap.get(selectedCourtKey));
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public Map<String, Object> convertToMap(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    private Map<String, Object> addValuesToPlaceHoldersMap(FinremCaseDetails caseDetails,
+                                                           HearingDirectionDetail directionDetail,
                                                            CourtDetailsTemplateFields selectedFRCDetails) {
         Map<String, Object> placeholdersMap = new HashMap<>();
-        placeholdersMap.put("HearingType", additionalHearingDirectionsCollection.getTypeOfHearing());
-        placeholdersMap.put("HearingVenue", getFrcCourtDetailsAsOneLineAddressString(getCourtDetails(additionalHearingDirectionsCollection)));
-        placeholdersMap.put("HearingDate", additionalHearingDirectionsCollection.getDateOfHearing());
-        placeholdersMap.put("HearingTime", additionalHearingDirectionsCollection.getHearingTime());
-        placeholdersMap.put("HearingLength", additionalHearingDirectionsCollection.getTimeEstimate());
+        placeholdersMap.put("HearingType", directionDetail.getTypeOfHearing());
+        placeholdersMap.put("HearingVenue", getFrcCourtDetailsAsOneLineAddressString(getCourtDetails(directionDetail)));
+        placeholdersMap.put("HearingDate", directionDetail.getDateOfHearing());
+        placeholdersMap.put("HearingTime", directionDetail.getHearingTime());
+        placeholdersMap.put("HearingLength", directionDetail.getTimeEstimate());
         placeholdersMap.put("AdditionalHearingDated", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
 
         placeholdersMap.put("CourtName", selectedFRCDetails.getCourtName());
@@ -154,26 +171,10 @@ public class ApprovedOrderNoticeOfHearingService {
         placeholdersMap.put("CourtEmail", selectedFRCDetails.getEmail());
 
         placeholdersMap.put("CCDCaseNumber", caseDetails.getId());
-        placeholdersMap.put("DivorceCaseNumber", nullToEmpty(caseDetails.getData().get(DIVORCE_CASE_NUMBER)));
-        placeholdersMap.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
-        placeholdersMap.put("RespondentName", caseDataService.buildFullRespondentName(caseDetails));
+        placeholdersMap.put("DivorceCaseNumber", nullToEmpty(caseDetails.getData().getDivorceCaseNumber()));
+        placeholdersMap.put("ApplicantName", caseDetails.getData().getFullApplicantName());
+        placeholdersMap.put("RespondentName", caseDetails.getData().getRespondentFullName());
 
         return placeholdersMap;
     }
-
-    private List<CaseDocument> addHearingNoticeToHearingDocumentCollection(CaseDocument noticeOfHearingDocument,
-                                                                           CaseDetails caseDetails) {
-        List<CaseDocument> hearingNoticeDocuments = Optional.ofNullable(documentHelper.getHearingNoticeDocuments(caseDetails.getData()))
-            .orElse(new ArrayList<>());
-        hearingNoticeDocuments.add(noticeOfHearingDocument);
-
-        return hearingNoticeDocuments;
-    }
-
-    private List<Element<CaseDocument>> convertHearingNoticeDocumentPackToCcdCollection(List<CaseDocument> hearingNoticePack) {
-        return hearingNoticePack.stream()
-            .map(document -> element(UUID.randomUUID(), document))
-            .toList();
-    }
-
 }

@@ -1,31 +1,19 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT_PACK;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
 
 @Service
 @RequiredArgsConstructor
@@ -33,83 +21,61 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class UploadApprovedOrderService {
 
     private final HearingOrderService hearingOrderService;
-    private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-    private final AdditionalHearingDocumentService additionalHearingDocumentService;
-    private final ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
+    private final ContestedOrderApprovedLetterService letterService;
+    private final AdditionalHearingDocumentService documentService;
+    private final ApprovedOrderNoticeOfHearingService noticeService;
 
-    public Map<String, Object> prepareFieldsForOrderApprovedCoverLetter(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.remove(CONTESTED_ORDER_APPROVED_JUDGE_TYPE);
-        caseData.remove(CONTESTED_ORDER_APPROVED_JUDGE_NAME);
-        caseData.remove(CONTESTED_ORDER_APPROVED_DATE);
-        caseData.remove(HEARING_NOTICE_DOCUMENT_PACK);
-        List<HearingOrderCollectionData> hearingOrderCollection
-            = additionalHearingDocumentService.getApprovedHearingOrderCollection(caseDetails);
-        if (hearingOrderCollection != null && !hearingOrderCollection.isEmpty()) {
-            hearingOrderCollection.clear();
-        }
-        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollection);
 
-        List<HearingOrderAdditionalDocCollectionData> hearingOrderAdditionalDocuments
-            = additionalHearingDocumentService.getHearingOrderAdditionalDocuments(caseDetails.getData());
-        if (hearingOrderAdditionalDocuments != null && !hearingOrderAdditionalDocuments.isEmpty()) {
-            hearingOrderAdditionalDocuments.clear();
-        }
-        caseData.put(HEARING_UPLOADED_DOCUMENT, hearingOrderAdditionalDocuments);
-        return caseData;
-    }
-
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handleUploadApprovedOrderAboutToSubmit(CaseDetails caseDetails,
-                                                                                                                   CaseDetails caseDetailsBefore,
-                                                                                                                   String authorisationToken) {
-        List<String> errors = new ArrayList<>();
-        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
-
+    public void processApprovedOrders(FinremCallbackRequest callbackRequest,
+                                      List<String> errors,
+                                      String authorisationToken) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        letterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
         try {
-            additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
+            documentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
         } catch (CourtDetailsParseException e) {
             log.error(e.getMessage());
             errors.add(e.getMessage());
-            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).errors(errors).build();
         }
 
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
         if (isAnotherHearingToBeListed(caseDetails)) {
-            approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, authorisationToken);
+            noticeService.createAndStoreHearingNoticeDocumentPack(caseDetails, authorisationToken);
         }
 
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        List<DirectionOrderCollection> hearingOrderCollectionBefore
+            = documentService.getApprovedHearingOrders(caseDetailsBefore, authorisationToken);
 
-        List<HearingOrderCollectionData> hearingOrderCollectionBefore
-            = additionalHearingDocumentService.getApprovedHearingOrderCollection(caseDetailsBefore);
-        if (hearingOrderCollectionBefore != null && !hearingOrderCollectionBefore.isEmpty()) {
-            hearingOrderCollectionBefore.addAll(additionalHearingDocumentService.getApprovedHearingOrderCollection(caseDetails));
-            caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionBefore);
-        }
+        FinremCaseData caseData = caseDetails.getData();
+        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
+        hearingOrderCollectionBefore.addAll(uploadHearingOrders);
+        caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
+        documentService.addToFinalOrderCollection(caseDetails, authorisationToken);
 
-        List<HearingOrderAdditionalDocCollectionData> orderAdditionalDocumentsBefore
-            = additionalHearingDocumentService.getHearingOrderAdditionalDocuments(caseDetailsBefore.getData());
-        if (orderAdditionalDocumentsBefore != null && !orderAdditionalDocumentsBefore.isEmpty()) {
-            orderAdditionalDocumentsBefore.addAll(additionalHearingDocumentService.getHearingOrderAdditionalDocuments(caseDetails.getData()));
-            caseDetails.getData().put(HEARING_UPLOADED_DOCUMENT, orderAdditionalDocumentsBefore);
+
+        List<UploadAdditionalDocumentCollection> uploadAdditionalDocumentBefore
+            = caseDetailsBefore.getData().getUploadAdditionalDocument();
+
+        if (uploadAdditionalDocumentBefore != null && !uploadAdditionalDocumentBefore.isEmpty()) {
+            List<UploadAdditionalDocumentCollection> uploadAdditionalDocument = caseData.getUploadAdditionalDocument();
+            if (uploadAdditionalDocument != null && !uploadAdditionalDocument.isEmpty()) {
+                uploadAdditionalDocumentBefore.addAll(uploadAdditionalDocument);
+                caseData.setUploadAdditionalDocument(uploadAdditionalDocumentBefore);
+            }
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }
 
-    private boolean isAnotherHearingToBeListed(CaseDetails caseDetails) {
-        Optional<AdditionalHearingDirectionsCollection> latestHearingDirections =
-            getLatestAdditionalHearingDirections(caseDetails);
-        return latestHearingDirections.isPresent()
-            && YES_VALUE.equals(latestHearingDirections.get().getIsAnotherHearingYN());
-    }
-
-    private Optional<AdditionalHearingDirectionsCollection> getLatestAdditionalHearingDirections(CaseDetails caseDetails) {
-        List<Element<AdditionalHearingDirectionsCollection>> additionalHearingDetailsCollection =
-            new ObjectMapper().convertValue(caseDetails.getData().get(HEARING_DIRECTION_DETAILS_COLLECTION),
-                new TypeReference<>() {
-                });
-
-        return additionalHearingDetailsCollection != null && !additionalHearingDetailsCollection.isEmpty()
-            ? Optional.of(additionalHearingDetailsCollection.get(additionalHearingDetailsCollection.size() - 1).getValue())
-            : Optional.empty();
+    private boolean isAnotherHearingToBeListed(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        Optional<List<HearingDirectionDetailsCollection>> latestHearingDirections = Optional.ofNullable(data.getHearingDirectionDetailsCollection());
+        if (latestHearingDirections.isPresent()) {
+            List<HearingDirectionDetailsCollection> directionDetailsCollections = latestHearingDirections.get();
+            if (!directionDetailsCollections.isEmpty()) {
+                HearingDirectionDetailsCollection hearingCollection = directionDetailsCollections.get(directionDetailsCollections.size() - 1);
+                return YesOrNo.YES.equals(hearingCollection.getValue().getIsAnotherHearingYN());
+            }
+        }
+        return false;
     }
 }

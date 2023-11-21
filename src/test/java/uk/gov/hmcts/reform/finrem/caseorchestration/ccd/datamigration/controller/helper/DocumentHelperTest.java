@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -49,6 +51,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -851,6 +854,34 @@ public class DocumentHelperTest {
     public void whenNoLatestGeneralOrder_thenReturnNull() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         assertNull(documentHelper.getLatestGeneralOrder(caseDetails.getData()));
+    }
+
+    @Test
+    public void checkIfOrderAlreadyInFinalOrderCollection() {
+        List<DirectionOrderCollection> list = new ArrayList<>();
+
+        assertFalse(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+
+        DirectionOrderCollection orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build()).build();
+        list.add(orderCollection);
+
+        assertTrue(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+
+        list = new ArrayList<>();
+        CaseDocument caseDocument = caseDocument("url", "name.pdf", "binary");
+        orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(caseDocument).build()).build();
+        list.add(orderCollection);
+
+        assertFalse(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+    }
+
+    @Test
+    public void prepareFinalOrder() {
+        DirectionOrderCollection orderCollection = documentHelper.prepareFinalOrder(caseDocument());
+        assertEquals(YesOrNo.YES, orderCollection.getValue().getIsOrderStamped());
+        assertNotNull(orderCollection.getValue().getOrderDateTime());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

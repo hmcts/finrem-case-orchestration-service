@@ -83,7 +83,7 @@ public class UploadConfidentialDocumentsHandlerTest {
     @Test
     public void givenUploadConfidentialDocument_When_IsValid_ThenExecuteHandler() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension", "/binaryUrl");
+        CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension", "/binaryUrl", "");
 
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         ConfidentialUploadedDocumentData oldDoc = createConfidentialUploadDocumentItem(

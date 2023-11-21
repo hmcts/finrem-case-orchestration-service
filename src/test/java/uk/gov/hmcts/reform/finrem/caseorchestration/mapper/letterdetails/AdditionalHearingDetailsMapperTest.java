@@ -14,6 +14,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 
 public class AdditionalHearingDetailsMapperTest extends AbstractLetterDetailsMapperTest {
 
@@ -25,6 +26,7 @@ public class AdditionalHearingDetailsMapperTest extends AbstractLetterDetailsMap
     @Before
     public void setUp() {
         CaseDetails cd = buildCaseDetailsFromJson(BULK_PRINT_ADDITIONAL_HEARING_JSON);
+        cd.getData().put(HEARING_DATE, "2021-01-01");
         caseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(cd);
     }
 

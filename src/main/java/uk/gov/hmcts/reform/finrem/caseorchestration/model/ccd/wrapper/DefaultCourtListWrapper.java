@@ -29,6 +29,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NwYorkshireCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SwanseaCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -178,4 +181,68 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
     }
 
 
+    public void setCourt(String courtId, Boolean isConsented) {
+        if (Arrays.stream(NottinghamCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.nottinghamCourtList = NottinghamCourt.getNottinghamCourt(courtId);
+        } else if (Arrays.stream(CfcCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.cfcCourtList = CfcCourt.getCfcCourt(courtId);
+        } else if (Arrays.stream(BirminghamCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.birminghamCourtList = BirminghamCourt.getBirminghamCourt(courtId);
+        } else if (Arrays.stream(LiverpoolCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.liverpoolCourtList = LiverpoolCourt.getLiverpoolCourt(courtId);
+        } else if (Arrays.stream(ManchesterCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.manchesterCourtList = ManchesterCourt.getManchesterCourt(courtId);
+        } else if (Arrays.stream(LancashireCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.lancashireCourtList = LancashireCourt.getLancashireCourt(courtId);
+        } else if (Arrays.stream(ClevelandCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            if (Optional.ofNullable(isConsented).orElse(false)) {
+                this.clevelandCourtList = ClevelandCourt.getCleavelandCourt(courtId);
+            } else {
+                this.cleavelandCourtList = ClevelandCourt.getCleavelandCourt(courtId);
+            }
+        } else if (Arrays.stream(NwYorkshireCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.nwYorkshireCourtList = NwYorkshireCourt.getNwYorkshireCourt(courtId);
+        } else if (Arrays.stream(HumberCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.humberCourtList = HumberCourt.getHumberCourt(courtId);
+        } else if (Arrays.stream(KentSurreyCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.kentSurreyCourtList = KentSurreyCourt.getKentSurreyCourt(courtId);
+        } else if (Arrays.stream(BedfordshireCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.bedfordshireCourtList = BedfordshireCourt.getBedfordshireCourt(courtId);
+        } else if (Arrays.stream(ThamesValleyCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.thamesValleyCourtList = ThamesValleyCourt.getThamesValleyCourt(courtId);
+        } else if (Arrays.stream(DevonCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.devonCourtList = DevonCourt.getDevonCourt(courtId);
+        } else if (Arrays.stream(DorsetCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.dorsetCourtList = DorsetCourt.getDorsetCourt(courtId);
+        } else if (Arrays.stream(BristolCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.bristolCourtList = BristolCourt.getBristolCourt(courtId);
+        } else if (Arrays.stream(NewportCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.newportCourtList = NewportCourt.getNewportCourt(courtId);
+        } else if (Arrays.stream(SwanseaCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.swanseaCourtList = SwanseaCourt.getSwanseaCourt(courtId);
+        } else if (Arrays.stream(NorthWalesCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.northWalesCourtList = NorthWalesCourt.getNorthWalesCourt(courtId);
+        } else if (Arrays.stream(HighCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.highCourtList = HighCourt.getHighCourt(courtId);
+        }
+    }
 }

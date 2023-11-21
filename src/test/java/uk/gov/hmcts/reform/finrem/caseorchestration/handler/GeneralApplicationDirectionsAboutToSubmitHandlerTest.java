@@ -153,7 +153,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
         when(service.getBulkPrintDocument(details, AUTH_TOKEN)).thenReturn(caseDocument);
 
-        when(helper.migrateExistingGeneralApplication(callbackRequest.getCaseDetails().getData(),
+        when(helper.mapExistingGeneralApplicationToData(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             GeneralApplicationCollectionData.builder()
                 .id(collectionId)

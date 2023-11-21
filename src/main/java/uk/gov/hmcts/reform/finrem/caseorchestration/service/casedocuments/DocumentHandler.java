@@ -3,10 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -17,8 +21,14 @@ public abstract class DocumentHandler {
 
     protected final CaseDocumentCollectionType collectionType;
 
+    private final FeatureToggleService featureToggleService;
+
     protected abstract List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections);
+
+    protected abstract DocumentCategory getDocumentCategoryFromDocumentType(
+        CaseDocumentType caseDocumentType
+    );
 
     public void replaceManagedDocumentsInCollectionType(FinremCallbackRequest callbackRequest,
                                                         List<UploadCaseDocumentCollection> screenCollection) {
@@ -41,6 +51,8 @@ public abstract class DocumentHandler {
         List<UploadCaseDocumentCollection> uploadedCollectionForType =
             getAlteredCollectionForType(screenCollection);
 
+        applyDocumentCategory(uploadedCollectionForType);
+
         originalCollectionForType.addAll(uploadedCollectionForType);
 
         originalCollectionForType.sort(Comparator.comparing(
@@ -50,5 +62,24 @@ public abstract class DocumentHandler {
         log.info("Adding items: {}, to {} Collection", uploadedCollectionForType,
             collectionType);
         screenCollection.removeAll(uploadedCollectionForType);
+    }
+
+    private void applyDocumentCategory(List<UploadCaseDocumentCollection> uploadedCollectionForType) {
+        if (featureToggleService.isCaseFileViewEnabled()) {
+            for (UploadCaseDocumentCollection uploadCaseDocumentCollection : uploadedCollectionForType) {
+                CaseDocument caseDocument = uploadCaseDocumentCollection.getUploadCaseDocument()
+                    .getCaseDocuments();
+                if (caseDocument.getCategoryId() == null) {
+                    caseDocument.setCategoryId(getDocumentCategoryFromDocumentType(
+                            uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType()
+                        ).getDocumentCategoryId()
+                    );
+                }
+            }
+        }
+    }
+
+    public void assignDocumentCategoryToUploadDocumentsCollection(FinremCaseData caseData) {
+        applyDocumentCategory(caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType));
     }
 }
