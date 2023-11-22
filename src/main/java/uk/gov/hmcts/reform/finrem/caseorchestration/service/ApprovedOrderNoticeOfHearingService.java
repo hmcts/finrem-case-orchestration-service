@@ -56,6 +56,7 @@ public class ApprovedOrderNoticeOfHearingService {
 
         List<DocumentCollection> hearingNoticePack = new ArrayList<>();
         CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
+        // New builder has to be used to create new object in memory so that the duplicated category can be assigned to only 1 CaseDocument object
         hearingNoticePack.add(getDocumentCollectionObj(
             CaseDocument.builder()
                 .documentUrl(noticeOfHearingDocument.getDocumentUrl())
