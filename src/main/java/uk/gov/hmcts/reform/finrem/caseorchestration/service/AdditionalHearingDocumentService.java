@@ -230,7 +230,7 @@ public class AdditionalHearingDocumentService {
             CaseDetails caseDetailsCopy = documentHelper.deepCopy(mapToCaseDetails, CaseDetails.class);
             prepareHearingCaseDetails(caseDetailsCopy, courtDetails,
                 directionDetail.getTypeOfHearing(),
-                directionDetail.getDateOfHearing(),
+                directionDetail.getDateOfHearing().toString(),
                 directionDetail.getHearingTime(),
                 directionDetail.getTimeEstimate());
 
