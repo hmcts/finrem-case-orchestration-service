@@ -59,36 +59,34 @@ public class ApprovedOrderNoticeOfHearingService {
         CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
         hearingNoticePack.add(getDocumentCollectionObj(noticeOfHearingDocument));
 
-
         FinremCaseData caseData = caseDetails.getData();
         List<DocumentCollection> documentCollections = Optional.ofNullable(caseData.getHearingNoticesDocumentCollection()).orElse(new ArrayList<>());
 
-        // CaseDocument builder has been used as the document is duplicated and when assigning categories due to Java's pass by reference all versions
-        // of the document are updated. This is a workaround to ensure that each document is handled separately.
         documentCollections.add(DocumentCollection.builder().value(
-            CaseDocument.builder()
-                .documentUrl(noticeOfHearingDocument.getDocumentUrl())
-                .documentFilename(noticeOfHearingDocument.getDocumentFilename())
-                .documentBinaryUrl(noticeOfHearingDocument.getDocumentBinaryUrl())
-                .build()
+            buildCaseDocumentWithExistingDocBreakingReferences(noticeOfHearingDocument)
         ).build());
 
         documentCollections.forEach(docColl -> addAdditionalHearingDocument(caseData, docColl.getValue()));
 
         Optional<CaseDocument> latestDraftHearingOrder = Optional.ofNullable(caseData.getLatestDraftHearingOrder());
-        // Same as above
-        latestDraftHearingOrder.ifPresent(caseDocument -> hearingNoticePack.add(getDocumentCollectionObj(
-                CaseDocument.builder()
-                        .documentUrl(caseDocument.getDocumentUrl())
-                        .documentFilename(caseDocument.getDocumentFilename())
-                        .documentBinaryUrl(caseDocument.getDocumentBinaryUrl())
-                        .build()
+        latestDraftHearingOrder.ifPresent(latestDraftHearingOrderDocument -> hearingNoticePack.add(getDocumentCollectionObj(
+            buildCaseDocumentWithExistingDocBreakingReferences(latestDraftHearingOrderDocument)
         )));
 
         caseData.setHearingNoticeDocumentPack(hearingNoticePack);
 
         HearingNoticesCategoriser hearingNoticesCategoriser = new HearingNoticesCategoriser(featureToggleService);
         hearingNoticesCategoriser.categorise(caseData);
+    }
+
+    private static CaseDocument buildCaseDocumentWithExistingDocBreakingReferences(CaseDocument caseDocument) {
+        // CaseDocument builder has been used as the document is duplicated and when assigning categories due to Java's pass by reference all versions
+        // of the document are updated. This is a workaround to ensure that each document is handled separately.
+        return CaseDocument.builder()
+            .documentUrl(caseDocument.getDocumentUrl())
+            .documentFilename(caseDocument.getDocumentFilename())
+            .documentBinaryUrl(caseDocument.getDocumentBinaryUrl())
+            .build();
     }
 
 
