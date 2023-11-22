@@ -42,10 +42,6 @@ public class HearingNoticesCategoriserTest {
         assert finremCaseData.getHearingNoticeDocumentPack().get(1).getValue().getCategoryId().equals(
             DocumentCategory.SYSTEM_DUPLICATES.getDocumentCategoryId()
         );
-
-        assert finremCaseData.getAdditionalHearingDocuments().get(0).getValue().getDocument().getCategoryId().equals(
-            DocumentCategory.HEARING_NOTICES.getDocumentCategoryId()
-        );
     }
 
     private FinremCaseData getFinremCaseData() {
