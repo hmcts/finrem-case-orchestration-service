@@ -56,16 +56,15 @@ public class ApprovedOrderNoticeOfHearingService {
 
         List<DocumentCollection> hearingNoticePack = new ArrayList<>();
         CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
-        DocumentCollection noticeOfHearingDocumentCollection = getDocumentCollectionObj(
+
+        hearingNoticePack.add(getDocumentCollectionObj(
             CaseDocument.builder()
                 .documentUrl(noticeOfHearingDocument.getDocumentUrl())
                 .documentFilename(noticeOfHearingDocument.getDocumentFilename())
                 .documentBinaryUrl(noticeOfHearingDocument.getDocumentBinaryUrl())
                 .categoryId(DocumentCategory.SYSTEM_DUPLICATES.getDocumentCategoryId())
                 .build()
-        );
-
-        hearingNoticePack.add(noticeOfHearingDocumentCollection);
+        ));
 
         FinremCaseData caseData = caseDetails.getData();
         List<DocumentCollection> documentCollections = Optional.ofNullable(caseData.getHearingNoticesDocumentCollection()).orElse(new ArrayList<>());
