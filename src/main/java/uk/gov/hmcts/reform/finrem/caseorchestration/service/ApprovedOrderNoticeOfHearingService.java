@@ -56,7 +56,6 @@ public class ApprovedOrderNoticeOfHearingService {
 
         List<DocumentCollection> hearingNoticePack = new ArrayList<>();
         CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
-
         hearingNoticePack.add(getDocumentCollectionObj(
             CaseDocument.builder()
                 .documentUrl(noticeOfHearingDocument.getDocumentUrl())
