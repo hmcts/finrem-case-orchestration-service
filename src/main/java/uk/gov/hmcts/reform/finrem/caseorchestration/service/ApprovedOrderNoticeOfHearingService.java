@@ -17,8 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ApprovedOrderNoticeOfHearingCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.HearingNoticesCategoriser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -49,6 +49,7 @@ public class ApprovedOrderNoticeOfHearingService {
     private final DocumentConfiguration documentConfiguration;
     private final ObjectMapper objectMapper;
     private final ApprovedOrderNoticeOfHearingCorresponder approvedOrderNoticeOfHearingCorresponder;
+    private final FeatureToggleService featureToggleService;
 
 
     public void createAndStoreHearingNoticeDocumentPack(FinremCaseDetails caseDetails,
@@ -56,34 +57,38 @@ public class ApprovedOrderNoticeOfHearingService {
 
         List<DocumentCollection> hearingNoticePack = new ArrayList<>();
         CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
-
-        if (noticeOfHearingDocument.getDocumentFilename().equals("AdditionalHearingDocument.pdf")) {
-            // New builder has to be used to create new object in memory so that the duplicated category can be assigned to only 1 CaseDocument object
-            hearingNoticePack.add(getDocumentCollectionObj(
-                CaseDocument.builder()
-                    .documentUrl(noticeOfHearingDocument.getDocumentUrl())
-                    .documentFilename(noticeOfHearingDocument.getDocumentFilename())
-                    .documentBinaryUrl(noticeOfHearingDocument.getDocumentBinaryUrl())
-                    .categoryId(DocumentCategory.SYSTEM_DUPLICATES.getDocumentCategoryId())
-                    .build()
-            ));
-        } else {
-            hearingNoticePack.add(getDocumentCollectionObj(noticeOfHearingDocument));
-        }
+        hearingNoticePack.add(getDocumentCollectionObj(noticeOfHearingDocument));
 
 
         FinremCaseData caseData = caseDetails.getData();
         List<DocumentCollection> documentCollections = Optional.ofNullable(caseData.getHearingNoticesDocumentCollection()).orElse(new ArrayList<>());
-        documentCollections.add(DocumentCollection.builder().value(noticeOfHearingDocument).build());
+
+        // CaseDocument builder has been used as the document is duplicated and when assigning categories due to Java's pass by reference all versions
+        // of the document are updated. This is a workaround to ensure that each document is handled separately.
+        documentCollections.add(DocumentCollection.builder().value(
+            CaseDocument.builder()
+                .documentUrl(noticeOfHearingDocument.getDocumentUrl())
+                .documentFilename(noticeOfHearingDocument.getDocumentFilename())
+                .documentBinaryUrl(noticeOfHearingDocument.getDocumentBinaryUrl())
+                .build()
+        ).build());
 
         documentCollections.forEach(docColl -> addAdditionalHearingDocument(caseData, docColl.getValue()));
 
         Optional<CaseDocument> latestDraftHearingOrder = Optional.ofNullable(caseData.getLatestDraftHearingOrder());
-        if (latestDraftHearingOrder.isPresent()) {
-            hearingNoticePack.add(getDocumentCollectionObj(caseData.getLatestDraftHearingOrder()));
-        }
+        // Same as above
+        latestDraftHearingOrder.ifPresent(caseDocument -> hearingNoticePack.add(getDocumentCollectionObj(
+                CaseDocument.builder()
+                        .documentUrl(caseDocument.getDocumentUrl())
+                        .documentFilename(caseDocument.getDocumentFilename())
+                        .documentBinaryUrl(caseDocument.getDocumentBinaryUrl())
+                        .build()
+        )));
 
         caseData.setHearingNoticeDocumentPack(hearingNoticePack);
+
+        HearingNoticesCategoriser hearingNoticesCategoriser = new HearingNoticesCategoriser(featureToggleService);
+        hearingNoticesCategoriser.categorise(caseData);
     }
 
 
