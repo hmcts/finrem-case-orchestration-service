@@ -8,8 +8,6 @@
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "paperApplication": "Yes",
-      "divorcePetitionIssuedDate": "2010-01-01",
-      "hearingDate": "2021-01-01",
       "divorceStageReached": "Petition Issued",
       "timeEstimate": "30 minutes",
       "applicantFMName": "Test",
@@ -139,7 +137,6 @@
         "document_filename": "dummy.pdf",
         "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6d8ba153-dceb-4216-b3c3-b9f13c0fc972/binary"
       },
-      "issueDate": "2020-09-28",
       "mediatorRegistrationNumber": "0987654321",
       "appEvidenceCollection": [
         {
@@ -157,7 +154,6 @@
         }
       ],
       "regionList": "midlands",
-      "dateOfMarriage": "2000-01-01",
       "divorceCaseNumber": "AB01D23456",
       "respondentEmail": null,
       "estimatedAssetsChecklist": [

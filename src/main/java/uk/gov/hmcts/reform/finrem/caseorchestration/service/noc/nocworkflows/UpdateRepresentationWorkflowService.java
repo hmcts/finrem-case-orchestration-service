@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -107,12 +110,28 @@ public class UpdateRepresentationWorkflowService {
         return addedIsEmpty && removedIsEmpty;
     }
 
-    private void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
+    public void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
         if (noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)) {
             persistDefaultApplicantOrganisationPolicy(caseDetails);
         }
         if (noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)) {
             persistDefaultRespondentOrganisationPolicy(caseDetails);
+        }
+    }
+
+    public void persistDefaultOrganisationPolicy(FinremCaseData caseData) {
+        String ccdCaseId = caseData.getCcdCaseId();
+        OrganisationPolicy appPolicy = caseData.getApplicantOrganisationPolicy();
+        log.info("Applicant existing org policy {} for caseId {}", appPolicy, ccdCaseId);
+        if (appPolicy == null) {
+            OrganisationPolicy organisationPolicy = getOrganisationPolicy(CaseRole.APP_SOLICITOR);
+            caseData.setApplicantOrganisationPolicy(organisationPolicy);
+        }
+        OrganisationPolicy respPolicy = caseData.getRespondentOrganisationPolicy();
+        log.info("Respondent existing org policy {} for caseId {}", respPolicy, ccdCaseId);
+        if (respPolicy == null) {
+            OrganisationPolicy organisationPolicy = getOrganisationPolicy(CaseRole.RESP_SOLICITOR);
+            caseData.setRespondentOrganisationPolicy(organisationPolicy);
         }
     }
 
@@ -130,5 +149,14 @@ public class UpdateRepresentationWorkflowService {
                 .orgPolicyReference(null)
                 .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
                 .build());
+    }
+
+    private OrganisationPolicy getOrganisationPolicy(CaseRole role) {
+        return OrganisationPolicy
+            .builder()
+            .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
+            .orgPolicyReference(null)
+            .orgPolicyCaseAssignedRole(role.getCcdCode())
+            .build();
     }
 }
