@@ -81,7 +81,7 @@ public class AdditionalHearingDocumentService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
         prepareHearingCaseDetails(caseDetailsCopy, courtDetails, caseData.get(HEARING_TYPE),
-            caseData.get(HEARING_DATE).toString(),
+            caseData.get(HEARING_DATE),
             caseData.get(HEARING_TIME), caseData.get(TIME_ESTIMATE));
         caseDetailsCopy.getData().put("AnyOtherDirections", caseData.get(HEARING_ADDITIONAL_INFO));
 
