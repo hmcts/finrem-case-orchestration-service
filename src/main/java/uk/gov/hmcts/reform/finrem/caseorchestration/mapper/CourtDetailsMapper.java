@@ -5,17 +5,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CourtList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
@@ -77,6 +81,63 @@ public class CourtDetailsMapper {
             return CourtDetailsTemplateFields.builder().courtName("").courtAddress("").phoneNumber("").email("").build();
         }
 
-        return objectMapper.convertValue(selectedCourtDetailsObject, new TypeReference<>() {});
+        return objectMapper.convertValue(selectedCourtDetailsObject, new TypeReference<>() {
+        });
+    }
+
+    public AllocatedRegionWrapper getLatestAllocatedCourt(AllocatedRegionWrapper regionWrapperBefore,
+                                                          AllocatedRegionWrapper regionWrapperActual,
+                                                          Boolean isConsentedApplication) {
+
+        AllocatedRegionWrapper regionWrapperProcessed =
+            AllocatedRegionWrapper.builder().regionList(regionWrapperActual.getRegionList()).build();
+        switch (regionWrapperActual.getRegionList()) {
+            case WALES -> regionWrapperProcessed.setWalesFrcList(regionWrapperActual.getWalesFrcList());
+            case LONDON -> regionWrapperProcessed.setLondonFrcList(regionWrapperActual.getLondonFrcList());
+            case MIDLANDS -> regionWrapperProcessed.setMidlandsFrcList(regionWrapperActual.getMidlandsFrcList());
+            case HIGHCOURT -> regionWrapperProcessed.setHighCourtFrcList(regionWrapperActual.getHighCourtFrcList());
+            case NORTHEAST -> regionWrapperProcessed.setNorthEastFrcList(regionWrapperActual.getNorthEastFrcList());
+            case NORTHWEST -> regionWrapperProcessed.setNorthWestFrcList(regionWrapperActual.getNorthWestFrcList());
+            case SOUTHEAST -> regionWrapperProcessed.setSouthEastFrcList(regionWrapperActual.getSouthEastFrcList());
+            case SOUTHWEST -> regionWrapperProcessed.setSouthWestFrcList(regionWrapperActual.getSouthWestFrcList());
+            default -> throw new IllegalStateException("There must be exactly one region selected in case data");
+        }
+
+        List<Field> initialisedCourtFieldActual = getInitialisedCourtField(regionWrapperActual.getDefaultCourtListWrapper());
+        List<String> actualCourtList =
+            initialisedCourtFieldActual
+                .stream().map(field -> {
+                    try {
+                        return ((CourtList) field.get(regionWrapperActual.getDefaultCourtListWrapper()))
+                            .getSelectedCourtId();
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toList());
+
+        List<Field> initialisedCourtFieldBefore =
+            getInitialisedCourtField(regionWrapperBefore.getDefaultCourtListWrapper());
+        List<String> beforeCourtList =
+            initialisedCourtFieldBefore
+                .stream().map(field -> {
+                    try {
+                        return ((CourtList) field.get(regionWrapperBefore.getDefaultCourtListWrapper()))
+                            .getSelectedCourtId();
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toList());
+
+        List<String> newlyAddedCourtList = new ArrayList<>(CollectionUtils.removeAll(actualCourtList, beforeCourtList));
+
+        if (newlyAddedCourtList.size() == 0) {
+            return regionWrapperActual;
+        } else {
+            regionWrapperProcessed.getDefaultCourtListWrapper()
+                .setCourt(newlyAddedCourtList.get(0), isConsentedApplication);
+        }
+
+
+        return regionWrapperProcessed;
     }
 }

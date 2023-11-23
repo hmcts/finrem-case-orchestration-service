@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -28,6 +29,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,10 +53,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication.SCHEDULE_ONE;
 
 public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @Mock
+    private ContestedMiniFormADetailsMapper contestedMiniFormADetailsMapper;
 
     @MockBean
     private GenericDocumentService genericDocumentService;
@@ -65,8 +74,6 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     private DocumentConfiguration documentConfiguration;
     @Autowired
     private OnlineFormDocumentService onlineFormDocumentService;
-    @Autowired
-    private OptionIdToValueTranslator translator;
 
     @Captor
     private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
@@ -93,7 +100,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
         FinremCaseDetails finremCaseDetails = emptyCaseDetails();
         finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder()
-            .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
+            .typeOfApplication(SCHEDULE_1_CHILDREN_ACT_1989).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN,
             emptyCaseDetails()));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
@@ -126,7 +133,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
         FinremCaseDetails finremCaseDetails = emptyCaseDetails();
         finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder()
-            .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
+            .typeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, finremCaseDetails));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
             AUTH_TOKEN,
@@ -171,31 +178,72 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateContestedDraftMiniFormA() {
-        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(caseData()).build()));
-
-        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getContestedDraftMiniFormTemplate()), eq(documentConfiguration.getContestedDraftMiniFormFileName()));
+    public void generateContestedDraftMiniFormAEmptyFinRemCaseDetails() {
+        FinremCaseDetails caseDetails = emptyCaseDetails();
+        Map<String, Object> documentMap = new HashMap<>();
+        documentMap.put("document_url", "http://test.url");
+        when(contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(documentMap);
+        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(
+            AUTH_TOKEN, caseDetails));
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), anyMap(),
+            anyString(), anyString(), anyString());
     }
 
     @Test
-    public void generateContestedDraftMiniFormASchedule() {
-        Map<String, Object> data = caseData();
-        data.put(TYPE_OF_APPLICATION, "Under paragraph 1 or 2 of schedule 1 children act 1989");
-        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(data).build()));
+    public void generateContestedDraftMiniFormAFinremFormAMatrimonial() {
+        FinremCaseDetails caseDetails = emptyCaseDetails();
+        caseDetails.getData().getScheduleOneWrapper().setTypeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS);
+        Map<String, Object> documentMap = new HashMap<>();
+        documentMap.put("document_url", "http://test.url");
+        when(contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(documentMap);
+        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(
+            AUTH_TOKEN, caseDetails));
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), anyMap(),
+            eq(documentConfiguration.getContestedDraftMiniFormTemplate()),
+            eq(documentConfiguration.getContestedDraftMiniFormFileName()), anyString());
 
+    }
+
+    @Test
+    public void generateContestedDraftMiniFormASchedule1() {
+        CaseDetails caseDetails = caseDetails();
+        caseDetails.getData().put(TYPE_OF_APPLICATION, SCHEDULE_ONE);
+        Map<String, Object> documentMap = new HashMap<>();
+        documentMap.put("document_url", "http://test.url");
+        when(contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(documentMap);
+        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(
+            AUTH_TOKEN, caseDetails));
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
             eq(documentConfiguration.getContestedDraftMiniFormTemplateSchedule()), eq(documentConfiguration.getContestedDraftMiniFormFileName()));
     }
 
-    private Map<String, Object> caseData() {
+
+    @Test
+    public void generateContestedDraftMiniFormAScheduleFinRemCaseDetails() {
+        FinremCaseDetails caseDetails = finremCaseDetails();
         Map<String, Object> documentMap = new HashMap<>();
         documentMap.put("document_url", "http://test.url");
+        when(contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(documentMap);
+        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(
+            AUTH_TOKEN, caseDetails));
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), anyMap(),
+            anyString(), anyString(), anyString());
+    }
 
+    private CaseDetails caseDetails() {
+        Map<String, Object> documentMap = new HashMap<>();
+        documentMap.put("document_url", "http://test.url");
         Map<String, Object> data = new HashMap<>();
         data.put(MINI_FORM_A, documentMap);
         data.put(TYPE_OF_APPLICATION, "In connection to matrimonial and civil partnership proceedings");
-        return data;
+        return CaseDetails.builder().id(1234L).data(data).build();
+    }
+
+    private FinremCaseDetails finremCaseDetails() {
+        Long caseId = 1234L;
+        ScheduleOneWrapper wrapper = ScheduleOneWrapper.builder().typeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build();
+        return FinremCaseDetails.builder().id(caseId).data(
+            FinremCaseData.builder().scheduleOneWrapper(wrapper).miniFormA(caseDocument()).build()).build();
     }
 
     private CaseDetails consentedInContestedCaseDetails(String payload) throws Exception {

@@ -122,6 +122,18 @@ class BulkPrintDocumentServiceTest {
             + "Please remove password and try uploading again.", errors.get(0));
     }
 
+    @Test
+    void validateEmptyUploadedFileThenDisplayMessage() throws IOException {
+        byte[] bytes = null;
+        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+
+        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(bytes);
+        List<String> errors = new ArrayList<>();
+
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+        assertEquals("Uploaded document abc.pdf is empty.", errors.get(0));
+    }
+
     private byte[] loadResource(String testPdf) throws IOException {
 
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testPdf)) {

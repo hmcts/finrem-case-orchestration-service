@@ -15,15 +15,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConso
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerFourDocumentHandler;
@@ -74,6 +78,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private OrderDateService dateService;
 
     @BeforeEach
     public void setUpTest() {
@@ -84,7 +90,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService),
                 new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService),
                 new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService)));
+                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService)),
+            dateService);
     }
 
     @Test
@@ -245,14 +252,14 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(generalOrderService).isSelectedOrderMatches(any(), any());
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
-
+        verify(dateService).addCreatedDateInFinalOrder(any(), any());
 
         response
             = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
-        assertEquals(2, caseData.getFinalOrderCollection().size());
+        assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(2, caseData.getOrderWrapper().getIntv1OrderCollections().size());
         List<ApprovedOrderConsolidateCollection> intv1OrderCollections = caseData.getOrderWrapper().getIntv1OrderCollections();
@@ -282,7 +289,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(generalOrderService, times(2)).isSelectedOrderMatches(any(), any());
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
         verify(documentHelper, times(2)).getStampType(caseData);
-
+        verify(dateService, times(2)).addCreatedDateInFinalOrder(any(), any());
     }
 
     @Test
@@ -291,6 +298,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
+        List<DirectionOrderCollection> orderList = new ArrayList<>();
+        DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument("docurl","abc.pdf", "binaryurl"))
+            .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
+        orderList.add(order);
+        data.setUploadHearingOrder(orderList);
 
         DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiSelectListElement.builder()
@@ -304,7 +317,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.setOrdersToShare(selectedDocs);
-
+        when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
+        when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
@@ -318,10 +332,56 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(12, caseData.getPartiesOnCase().getValue().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().size());
-        assertEquals(1, caseData.getFinalOrderCollection().size());
+        assertEquals(2, caseData.getFinalOrderCollection().size());
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
+
+    }
+
+    @Test
+    void givenContestedCase_whenAlreadyStampedOrderThen_handleAndDoNotStampAgain() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setPartiesOnCase(getParties());
+        List<DirectionOrderCollection> orderList = new ArrayList<>();
+        CaseDocument caseDocument = caseDocument("docurl", "abc.pdf", "binaryurl");
+        DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument)
+            .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
+        orderList.add(order);
+        data.setUploadHearingOrder(orderList);
+        data.setFinalOrderCollection(orderList);
+
+        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .build();
+
+        data.setOrdersToShare(selectedDocs);
+        when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
+        when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
+        when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
+            = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+        assertEquals(12, caseData.getPartiesOnCase().getValue().size());
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().size());
+        assertEquals(1, caseData.getFinalOrderCollection().size());
+
+        verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
+        verify(documentHelper, never()).getStampType(caseData);
 
     }
 

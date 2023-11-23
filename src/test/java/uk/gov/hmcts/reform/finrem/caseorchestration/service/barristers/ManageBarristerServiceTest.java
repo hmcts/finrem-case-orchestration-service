@@ -336,7 +336,7 @@ class ManageBarristerServiceTest {
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_TWO, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
-        when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn(CLIENT_NAME);
         when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails.getId().toString(), AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
@@ -365,7 +365,7 @@ class ManageBarristerServiceTest {
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, SYS_USER_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_TWO, SYS_USER_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(CASEWORKER_NAME);
-        when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn(CLIENT_NAME);
         when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
         when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails.getId().toString(), AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
@@ -440,7 +440,7 @@ class ManageBarristerServiceTest {
         when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildRemovedBarristerChange());
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
-        when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn(CLIENT_NAME);
         when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails.getId().toString(), AUTH_TOKEN))
             .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
