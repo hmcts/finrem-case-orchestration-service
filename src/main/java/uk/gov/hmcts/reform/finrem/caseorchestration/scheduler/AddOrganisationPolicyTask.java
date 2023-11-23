@@ -48,7 +48,7 @@ public class AddOrganisationPolicyTask extends BaseTask {
 
     @Override
     protected CaseType getCaseType() {
-        return CaseType.CONTESTED;
+        return CaseType.CONSENTED;
     }
 
     @Override
