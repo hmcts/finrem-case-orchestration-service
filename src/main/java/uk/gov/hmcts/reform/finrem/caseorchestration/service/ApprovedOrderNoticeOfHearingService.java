@@ -81,7 +81,7 @@ public class ApprovedOrderNoticeOfHearingService {
 
     private static CaseDocument buildCaseDocumentWithExistingDocBreakingReferences(CaseDocument caseDocument) {
         // CaseDocument builder has been used as the document is duplicated and when assigning categories due to Java's pass by reference all versions
-        // of the document are updated. This is a workaround to ensure that each document is handled separately.
+        // of the document are updated. This is a workaround to ensure that each document is categorised separately.
         return CaseDocument.builder()
             .documentUrl(caseDocument.getDocumentUrl())
             .documentFilename(caseDocument.getDocumentFilename())
