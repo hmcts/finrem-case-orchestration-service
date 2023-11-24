@@ -78,6 +78,8 @@ public enum EventType {
 
     UPDATE_COURT_INFO("FR_updateCourtInfo"),
 
+    MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
+
     @JsonEnumDefaultValue
     NONE("");
 

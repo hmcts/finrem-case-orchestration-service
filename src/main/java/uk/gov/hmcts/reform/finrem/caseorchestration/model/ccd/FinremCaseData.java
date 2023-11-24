@@ -372,7 +372,7 @@ public class FinremCaseData {
     private ScannedDocumentTypeOption scannedDocsTypeOfDocument;
     private List<ScannedDocumentCollection> applicantScanDocuments;
     private List<ScannedDocumentCollection> respondentScanDocuments;
-
+    private List<UploadCaseDocumentCollection> manageScannedDocumentCollection;
     @JsonProperty("appBarristerCollection")
     private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")
