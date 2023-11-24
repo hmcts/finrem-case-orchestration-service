@@ -71,7 +71,7 @@ public abstract class BaseTask implements Runnable {
 
                         CaseDetails caseDetails = startEventResponse.getCaseDetails();
                         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-                        log.info("Updating application type for Case ID: {}", caseDetails.getId());
+                        log.info("Updating {} for Case ID: {}", getTaskName(), caseDetails.getId());
                         executeTask(finremCaseDetails);
                         CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
                         startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
@@ -85,7 +85,7 @@ public abstract class BaseTask implements Runnable {
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
-                    log.error("Error processing caseRef {} and error is {}", caseReference.getCaseReference(), e);
+                    log.error("Error processing caseRef {} and error is ", caseReference.getCaseReference(), e);
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }

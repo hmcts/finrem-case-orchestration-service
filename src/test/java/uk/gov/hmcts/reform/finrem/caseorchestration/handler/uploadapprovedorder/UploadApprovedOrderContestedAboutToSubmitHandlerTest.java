@@ -7,72 +7,45 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
 
-import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UploadApprovedOrderContestedAboutToSubmitHandlerTest extends UploadApprovedOrderBaseHandlerTestSetup {
 
     @InjectMocks
-    UploadApprovedOrderContestedAboutToSubmitHandler uploadApprovedOrderContestedAboutToSubmitHandler;
+    UploadApprovedOrderContestedAboutToSubmitHandler handler;
 
     @Mock
-    UploadApprovedOrderService uploadApprovedOrderService;
+    UploadApprovedOrderService service;
 
     @Test
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrder_thenCanHandle() {
-        assertThat(uploadApprovedOrderContestedAboutToSubmitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER),
-            is(true));
+        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER));
     }
 
     @Test
     public void givenContestedCase_whenSubmittedUploadApprovedOrder_thenCannotHandle() {
-        assertThat(uploadApprovedOrderContestedAboutToSubmitHandler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_APPROVED_ORDER));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE));
     }
 
     @Test
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrderAndNoErrors_thenHandle() {
-        when(uploadApprovedOrderService
-            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN))
-            .thenReturn(GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build());
-
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderContestedAboutToSubmitHandler
-            .handle(callbackRequest, AUTH_TOKEN);
-
-        assertTrue(response.getData().containsKey(SUCCESS_KEY));
-        verify(uploadApprovedOrderService, times(1))
-            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN);
-    }
-
-    @Test
-    public void givenContestedCase_whenAboutToSubmitUploadApprovedOrderAndErrors_thenHandle() {
-        when(uploadApprovedOrderService
-            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN))
-            .thenReturn(GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().errors(List.of("ERROR")).build());
-
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderContestedAboutToSubmitHandler
-            .handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors(), hasSize(1));
-        assertEquals("ERROR", response.getErrors().get(0));
-        verify(uploadApprovedOrderService, times(1))
-            .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN);
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(EventType.UPLOAD_APPROVED_ORDER);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertTrue(response.getErrors().isEmpty());
+        verify(service).processApprovedOrders(finremCallbackRequest, new ArrayList<>(), AUTH_TOKEN);
     }
 }

@@ -72,6 +72,12 @@ public enum EventType {
     CONSENT_ORDER("FR_consentOrder"),
     ASSIGN_DOCUMENT_CATEGORIES("FR_assignDocumentCategories"),
 
+    GIVE_ALLOCATION_DIRECTIONS("FR_giveAllocationDirections"),
+
+    UPDATE_FRC_INFORMATION("FR_updateFRCInformation"),
+
+    UPDATE_COURT_INFO("FR_updateCourtInfo"),
+
     @JsonEnumDefaultValue
     NONE("");
 
