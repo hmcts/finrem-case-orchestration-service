@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.validation;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.validation;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
