@@ -77,19 +77,18 @@ public class CourtListUpdateTask extends BaseTask {
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         List<CaseEventDetail> caseEventDetails = ccdService.getCcdEventDetailsOnCase(systemUserService.getSysUserToken(),
-            finremCaseData);
+            finremCaseDetails);
 
         Collections.sort(caseEventDetails, (o1, o2) -> o2.getCreatedDate()
             .compareTo(o1.getCreatedDate()));
 
 
         if (CollectionUtils.isNotEmpty(caseEventDetails)) {
-
-            int caseEventDetailsIndex = IntStream.range(0, caseEventDetails.size())
-                .filter(index -> (EventType.UPDATE_FRC_INFORMATION.getCcdType().equals(caseEventDetails.get(index).getEventName())
-                                || EventType.AMEND_CONTESTED_APP_DETAILS.getCcdType().equals(caseEventDetails.get(index).getEventName())
-                                || EventType.GIVE_ALLOCATION_DIRECTIONS.getCcdType().equals(caseEventDetails.get(index).getEventName())))
-                .findFirst().getAsInt();
+            int caseEventDetailsIndex = IntStream.range(0, caseEventDetails.size() - 1)
+                .filter(index -> (EventType.UPDATE_FRC_INFORMATION.getCcdType().equals(caseEventDetails.get(index).getId())
+                                || EventType.AMEND_CONTESTED_APP_DETAILS.getCcdType().equals(caseEventDetails.get(index).getId())
+                                || EventType.GIVE_ALLOCATION_DIRECTIONS.getCcdType().equals(caseEventDetails.get(index).getId())))
+                .findFirst().orElse(0);
 
 
             Map<String, Object> caseDetailsBefore = caseEventDetails.get(caseEventDetailsIndex + 1).getData();
