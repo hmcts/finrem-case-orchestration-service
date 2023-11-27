@@ -242,16 +242,32 @@ sonarqube {
 pitest {
     targetClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.*'])
     excludedClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.health.*',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.mapper.*',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.client.*',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.ccd.*',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.error.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.model.*',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.event.bulkscan.*',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.scheduler.*',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.utils.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService'])
     excludedTestClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet.FinremCaseDataTest',
-                             'uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelperTest'])
-    threads.set(4)
+                             'uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelperTest',
+                             'uk.gov.hmcts.reform.finrem.caseorchestration.health.*',
+                             'uk.gov.hmcts.reform.finrem.caseorchestration.mapper.*',
+                             'uk.gov.hmcts.reform.finrem.caseorchestration.ccd.*',
+                             'uk.gov.hmcts.reform.finrem.caseorchestration.error.*',
+                             'uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.*',
+                             'uk.gov.hmcts.reform.finrem.caseorchestration.model.*',
+                             'uk.gov.hmcts.reform.finrem.caseorchestration.util.*',
+                             'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',])
+    threads.set(15)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
-    mutationThreshold.set(50)
+    mutationThreshold.set(60)
 }
 
 bootJar {
