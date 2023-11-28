@@ -133,7 +133,7 @@ public class CcdService {
 
     public List<CaseEventDetail> getCcdEventDetailsOnCase(String authorisation, FinremCaseDetails caseDetails) {
         Long caseId = caseDetails.getId();
-        String caseTypeId = caseDetails.getData().getCcdCaseType().getCcdType();
+        String caseTypeId = caseDetails.getCaseType().getCcdType();
         log.info(LOGGER, caseTypeId, caseId);
 
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
