@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CreateGeneralLetterDocumentCategoriser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -67,6 +68,7 @@ public class GeneralLetterService {
     private final DocumentHelper documentHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final CaseDataService caseDataService;
+    private final CreateGeneralLetterDocumentCategoriser createGeneralLetterDocumentCategoriser;
 
     public void previewGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
@@ -75,17 +77,20 @@ public class GeneralLetterService {
     }
 
     public void createGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
-        log.info("Generating General letter for Case ID: {}", caseDetails.getId());
+        Long caseId = caseDetails.getId();
+        FinremCaseData caseData = caseDetails.getData();
+        log.info("Generating General letter for Case ID: {}", caseId);
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
-        CaseDocument generalLetterUploadedDocument = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterUploadedDocument();
+        CaseDocument generalLetterUploadedDocument = caseData.getGeneralLetterWrapper().getGeneralLetterUploadedDocument();
         if (generalLetterUploadedDocument != null) {
             CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalLetterUploadedDocument,
-                authorisationToken, caseDetails.getId().toString());
-            caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterUploadedDocument(pdfDocument);
+                authorisationToken, caseId.toString());
+            caseData.getGeneralLetterWrapper().setGeneralLetterUploadedDocument(pdfDocument);
         }
         addGeneralLetterToCaseData(caseDetails, document,
-            caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterUploadedDocument());
+            caseData.getGeneralLetterWrapper().getGeneralLetterUploadedDocument());
         printLatestGeneralLetter(caseDetails, authorisationToken);
+        createGeneralLetterDocumentCategoriser.categorise(caseData);
     }
 
     private CaseDocument generateGeneralLetterDocument(FinremCaseDetails caseDetails, String authorisationToken) {
