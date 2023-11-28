@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SwanseaCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationCourtListWrapper;
@@ -80,7 +82,7 @@ public class CourtDetailsMapperTest {
     }
 
     @Test
-    public void givenCaseDataWithDifferentRegions_whenGetCaseDetailsWithOnlyLatestAllocatedCourt_thenCaseDataWithOnlyOneRegion() {
+    public void givenCaseDataWithDifferentRegions_whenGetCaseDetailsWithOnlyLatestAllocatedCourt_thenCaseDataWithOnlyOneCourt() {
 
 
         AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder().regionList(Region.MIDLANDS)
@@ -138,5 +140,128 @@ public class CourtDetailsMapperTest {
         assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList(),
             is(equalTo(CfcCourt.BRENTFORD_COUNTY_AND_FAMILY_COURT)));
 
+    }
+
+    @Test
+    public void givenCaseDataWithThreeCourtLists_whenGetCaseDetailsWithOnlyLatestAllocatedCourt_thenCaseDataWithOnlyOneCourt() {
+
+
+        AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder().regionList(Region.MIDLANDS)
+            .midlandsFrcList(RegionMidlandsFrc.BIRMINGHAM)
+            .londonFrcList(RegionLondonFrc.LONDON)
+            .walesFrcList(RegionWalesFrc.SWANSEA)
+            .courtListWrapper(
+                DefaultCourtListWrapper.builder()
+                    .birminghamCourtList(BirminghamCourt.WORCESTER_COMBINED_COURT)
+                    .cfcCourtList(CfcCourt.BRENTFORD_COUNTY_AND_FAMILY_COURT)
+                    .swanseaCourtList(SwanseaCourt.FR_swanseaList_1)
+                    .build())
+            .build();
+        AllocatedRegionWrapper allocatedRegionWrapperBefore = AllocatedRegionWrapper.builder().regionList(Region.LONDON)
+            .londonFrcList(RegionLondonFrc.LONDON)
+            .walesFrcList(RegionWalesFrc.SWANSEA)
+            .courtListWrapper(
+                DefaultCourtListWrapper.builder()
+                    .cfcCourtList(CfcCourt.BRENTFORD_COUNTY_AND_FAMILY_COURT)
+                    .swanseaCourtList(SwanseaCourt.FR_swanseaList_1)
+                    .build())
+            .build();
+
+        AllocatedRegionWrapper allocatedRegionWrapperReturn =
+            courtDetailsMapper.getLatestAllocatedCourt(allocatedRegionWrapperBefore, allocatedRegionWrapper,
+                null);
+
+        assertThat(allocatedRegionWrapperReturn.getRegionList(),
+            is(equalTo(Region.MIDLANDS)));
+        assertThat(allocatedRegionWrapperReturn.getMidlandsFrcList(),
+            is(equalTo(RegionMidlandsFrc.BIRMINGHAM)));
+        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getBirminghamCourtList(),
+            is(equalTo(BirminghamCourt.WORCESTER_COMBINED_COURT)));
+        assertThat(allocatedRegionWrapperReturn.getLondonFrcList(),
+            is(nullValue()));
+        assertThat(allocatedRegionWrapperReturn.getWalesFrcList(),
+            is(nullValue()));
+        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList(),
+            is(nullValue()));
+        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList(),
+            is(nullValue()));
+    }
+
+    @Test
+    public void givenCaseDataWithDifferentCourtsOnSameFrc_whenGetCaseDetailsWithOnlyLatestAllocatedCourt_thenCaseDataWithOnlyOneLatestCourt() {
+
+
+        AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder().regionList(Region.LONDON)
+            .londonFrcList(RegionLondonFrc.LONDON)
+            .walesFrcList(RegionWalesFrc.SWANSEA)
+            .courtListWrapper(
+                DefaultCourtListWrapper.builder()
+                    .cfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)
+                    .swanseaCourtList(SwanseaCourt.FR_swanseaList_1)
+                    .build())
+            .build();
+        AllocatedRegionWrapper allocatedRegionWrapperBefore = AllocatedRegionWrapper.builder().regionList(Region.LONDON)
+            .londonFrcList(RegionLondonFrc.LONDON)
+            .walesFrcList(RegionWalesFrc.SWANSEA)
+            .courtListWrapper(
+                DefaultCourtListWrapper.builder()
+                    .cfcCourtList(CfcCourt.BRENTFORD_COUNTY_AND_FAMILY_COURT)
+                    .swanseaCourtList(SwanseaCourt.FR_swanseaList_1)
+                    .build())
+            .build();
+
+        AllocatedRegionWrapper allocatedRegionWrapperReturn =
+            courtDetailsMapper.getLatestAllocatedCourt(allocatedRegionWrapperBefore, allocatedRegionWrapper,
+                null);
+
+        assertThat(allocatedRegionWrapperReturn.getRegionList(),
+            is(equalTo(Region.LONDON)));
+        assertThat(allocatedRegionWrapperReturn.getLondonFrcList(),
+            is(equalTo(RegionLondonFrc.LONDON)));
+        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList(),
+            is(equalTo(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)));
+        assertThat(allocatedRegionWrapperReturn.getWalesFrcList(),
+            is(nullValue()));
+        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList(),
+            is(nullValue()));
+    }
+
+    @Test
+    public void givenCaseDataWithSameTwoCourts_whenGetCaseDetailsWithOnlyLatestAllocatedCourt_thenCaseDataWithOnlyOneLatestCourt() {
+
+
+        AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder().regionList(Region.LONDON)
+            .londonFrcList(RegionLondonFrc.LONDON)
+            .walesFrcList(RegionWalesFrc.SWANSEA)
+            .courtListWrapper(
+                DefaultCourtListWrapper.builder()
+                    .cfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)
+                    .swanseaCourtList(SwanseaCourt.FR_swanseaList_1)
+                    .build())
+            .build();
+        AllocatedRegionWrapper allocatedRegionWrapperBefore = AllocatedRegionWrapper.builder().regionList(Region.LONDON)
+            .londonFrcList(RegionLondonFrc.LONDON)
+            .walesFrcList(RegionWalesFrc.SWANSEA)
+            .courtListWrapper(
+                DefaultCourtListWrapper.builder()
+                    .cfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)
+                    .swanseaCourtList(SwanseaCourt.FR_swanseaList_1)
+                    .build())
+            .build();
+
+        AllocatedRegionWrapper allocatedRegionWrapperReturn =
+            courtDetailsMapper.getLatestAllocatedCourt(allocatedRegionWrapperBefore, allocatedRegionWrapper,
+                null);
+
+        assertThat(allocatedRegionWrapperReturn.getRegionList(),
+            is(equalTo(Region.LONDON)));
+        assertThat(allocatedRegionWrapperReturn.getLondonFrcList(),
+            is(equalTo(RegionLondonFrc.LONDON)));
+        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList(),
+            is(equalTo(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)));
+        assertThat(allocatedRegionWrapperReturn.getWalesFrcList(),
+            is(nullValue()));
+        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList(),
+            is(nullValue()));
     }
 }
