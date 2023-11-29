@@ -90,7 +90,9 @@ public class GeneralLetterService {
         addGeneralLetterToCaseData(caseDetails, document,
             caseData.getGeneralLetterWrapper().getGeneralLetterUploadedDocument());
         printLatestGeneralLetter(caseDetails, authorisationToken);
-        createGeneralLetterDocumentCategoriser.categorise(caseData);
+        if (caseData.isContestedApplication()) {
+            createGeneralLetterDocumentCategoriser.categorise(caseData);
+        }
     }
 
     private CaseDocument generateGeneralLetterDocument(FinremCaseDetails caseDetails, String authorisationToken) {

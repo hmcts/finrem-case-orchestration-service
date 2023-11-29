@@ -29,8 +29,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.CORRESPONDENCE_INTERVENER_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.CORRESPONDENCE_INTERVENER_3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.CORRESPONDENCE_INTERVENER_4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.CORRESPONDENCE_OTHER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.CORRESPONDENCE_RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService.CORRESPONDENCE;
 
 @Component
 @Slf4j
@@ -46,11 +46,9 @@ public class CreateGeneralLetterDocumentCategoriser extends DocumentCategoriser 
         log.info("Categorising general letter documents based on the recipient role for case with Case ID: {}",
             finremCaseData.getCcdCaseId());
         GeneralLetterWrapper wrapper = finremCaseData.getGeneralLetterWrapper();
-        List<GeneralLetterCollection> generalLetters =
-            wrapper.getGeneralLetterCollection();
+        List<GeneralLetterCollection> generalLetters = wrapper.getGeneralLetterCollection();
         CaseDocument previewDocument = wrapper.getGeneralLetterPreview();
-        if (previewDocument != null
-            && previewDocument.getCategoryId() == null) {
+        if (previewDocument != null && previewDocument.getCategoryId() == null) {
             previewDocument.setCategoryId(
                 ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId());
         }
@@ -63,9 +61,6 @@ public class CreateGeneralLetterDocumentCategoriser extends DocumentCategoriser 
                 }
             }
         }
-        //TODO: Refactor added code, check if generalLetterPreview field should go into transitional,
-        // should the category id for generalLetterPreview be set in the orchestrator since it can't be set in the
-        // definitions case file common file, check the folder if other is the recipient
     }
 
     private String getGeneratedLetterCategoryId(String roleCode) {
@@ -89,7 +84,7 @@ public class CreateGeneralLetterDocumentCategoriser extends DocumentCategoriser 
                 return CORRESPONDENCE_INTERVENER_4.getDocumentCategoryId();
             }
             default -> {
-                return CORRESPONDENCE;
+                return CORRESPONDENCE_OTHER.getDocumentCategoryId();
             }
         }
     }
