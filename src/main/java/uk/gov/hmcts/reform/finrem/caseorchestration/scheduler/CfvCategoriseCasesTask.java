@@ -1,37 +1,38 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
+
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DocumentCategoryAssigner;
 
 @Component
-@Slf4j
 @RequiredArgsConstructor
-public class GeneralApplicationRemoveTask implements Task {
+@Slf4j
+public class CfvCategoriseCasesTask implements Task {
 
-    private final GeneralApplicationHelper generalApplicationHelper;
 
-    @Value("${cron.generalApplicationRemove.enabled:false}")
-    private boolean isGeneralApplicationRemoveTaskEnabled;
-
+    private final DocumentCategoryAssigner documentCategoryAssigner;
+    @Value("${cron.cfvCategoriseCasesTask.enabled:false}")
+    private boolean isCfvCategoriseCasesTaskEnabled;
 
     @Override
     public String getCaseListFileName() {
-        return "generalApplicationRemoveCaseReferenceList.csv";
+        return null;
     }
 
     @Override
     public String getTaskName() {
-        return "GeneralApplicationRemoveTask";
+        return "CfvCategoriseCasesTask";
     }
 
     @Override
     public boolean isTaskEnabled() {
-        return isGeneralApplicationRemoveTaskEnabled;
+        return isCfvCategoriseCasesTaskEnabled;
     }
 
     @Override
@@ -41,11 +42,15 @@ public class GeneralApplicationRemoveTask implements Task {
 
     @Override
     public String getSummary() {
-        return "Remove duplicate General application DFR-2388";
+        return "Categorise documents for cases DFR-2368";
     }
 
     @Override
     public void executeTask(FinremCaseDetails finremCaseDetails, String authToken) {
-        generalApplicationHelper.checkAndRemoveDuplicateGeneralApplications(finremCaseDetails.getData());
+
+        log.info("CfvCategoriseCasesTask started for case id {}", finremCaseDetails.getId());
+        documentCategoryAssigner.assignDocumentCategories(finremCaseDetails.getData());
+        log.info("CfvCategoriseCasesTask completed for case id {}", finremCaseDetails.getId());
+
     }
 }
