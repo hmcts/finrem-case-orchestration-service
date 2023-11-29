@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 
+import java.util.ArrayList;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -98,7 +100,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).updateIntervenerDetails(oneWrapper, finremCallbackRequest);
+        verify(service).updateIntervenerDetails(oneWrapper, new ArrayList<>(), finremCallbackRequest);
     }
 
     @Test
@@ -123,7 +125,8 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).removeIntervenerDetails(oneWrapper, finremCaseData, finremCallbackRequest.getCaseDetails().getId());
+        verify(service).removeIntervenerDetails(oneWrapper, new ArrayList<>(),
+            finremCaseData, finremCallbackRequest.getCaseDetails().getId());
     }
 
     @Test
@@ -148,7 +151,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).updateIntervenerDetails(twoWrapper, finremCallbackRequest);
+        verify(service).updateIntervenerDetails(twoWrapper, new ArrayList<>(), finremCallbackRequest);
     }
 
     @Test
@@ -173,7 +176,8 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).removeIntervenerDetails(twoWrapper, finremCaseData, finremCallbackRequest.getCaseDetails().getId());
+        verify(service).removeIntervenerDetails(twoWrapper, new ArrayList<>(),
+            finremCaseData, finremCallbackRequest.getCaseDetails().getId());
     }
 
 
@@ -197,7 +201,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).updateIntervenerDetails(threeWrapper, finremCallbackRequest);
+        verify(service).updateIntervenerDetails(threeWrapper, new ArrayList<>(), finremCallbackRequest);
     }
 
     @Test
@@ -221,7 +225,8 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).removeIntervenerDetails(threeWrapper, finremCaseData, finremCallbackRequest.getCaseDetails().getId());
+        verify(service).removeIntervenerDetails(threeWrapper, new ArrayList<>(),
+            finremCaseData, finremCallbackRequest.getCaseDetails().getId());
     }
 
     @Test
@@ -245,7 +250,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).updateIntervenerDetails(fourWrapper, finremCallbackRequest);
+        verify(service).updateIntervenerDetails(fourWrapper, new ArrayList<>(), finremCallbackRequest);
     }
 
     @Test
@@ -271,7 +276,8 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).removeIntervenerDetails(fourWrapper, finremCaseData, finremCallbackRequest.getCaseDetails().getId());
+        verify(service).removeIntervenerDetails(fourWrapper, new ArrayList<>(),
+            finremCaseData, finremCallbackRequest.getCaseDetails().getId());
     }
 
     @Test
