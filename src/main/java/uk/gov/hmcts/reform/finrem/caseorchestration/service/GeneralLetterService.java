@@ -79,16 +79,17 @@ public class GeneralLetterService {
     public void createGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         Long caseId = caseDetails.getId();
         FinremCaseData caseData = caseDetails.getData();
+        GeneralLetterWrapper wrapper = caseData.getGeneralLetterWrapper();
         log.info("Generating General letter for Case ID: {}", caseId);
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
-        CaseDocument generalLetterUploadedDocument = caseData.getGeneralLetterWrapper().getGeneralLetterUploadedDocument();
+        CaseDocument generalLetterUploadedDocument = wrapper.getGeneralLetterUploadedDocument();
         if (generalLetterUploadedDocument != null) {
             CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalLetterUploadedDocument,
                 authorisationToken, caseId.toString());
-            caseData.getGeneralLetterWrapper().setGeneralLetterUploadedDocument(pdfDocument);
+            wrapper.setGeneralLetterUploadedDocument(pdfDocument);
         }
         addGeneralLetterToCaseData(caseDetails, document,
-            caseData.getGeneralLetterWrapper().getGeneralLetterUploadedDocument());
+            wrapper.getGeneralLetterUploadedDocument());
         printLatestGeneralLetter(caseDetails, authorisationToken);
         if (caseData.isContestedApplication()) {
             createGeneralLetterDocumentCategoriser.categorise(caseData);

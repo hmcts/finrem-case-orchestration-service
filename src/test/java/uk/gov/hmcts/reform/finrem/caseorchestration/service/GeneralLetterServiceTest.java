@@ -131,22 +131,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "Greater London\n"
             + "London\n"
             + "SE12 9SE"));
-        verifyLitigantName(data);
+        verifyLitigantNames(data);
         assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
         verify(caseDataService).buildFullApplicantName((CaseDetails) any());
         verify(caseDataService).buildFullRespondentName((CaseDetails) any());
-    }
-
-    private static void verifyLitigantName(Map<String, Object> data) {
-        assertThat(data.get("applicantFullName"), is("Poor Guy"));
-        assertThat(data.get("respondentFullName"), is("Moj Resp"));
-    }
-
-    private DynamicRadioList getDynamicRadioList(String code, String label, boolean addIntervenerListElements) {
-        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(code).label(label).build();
-        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(
-            getDynamicRadioListItems(addIntervenerListElements)).value(chosenOption).build();
-        return addresseeList;
     }
 
     @Test
@@ -171,7 +159,13 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
         assertThat(data.get("ccdCaseNumber"), is(1234567890L));
-        verifyLitigantName(data);
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Respondent Street\n"
+            + "Second Address Line\n"
+            + "Third Address Line\n"
+            + "Greater London\n"
+            + "London\n"
+            + "SE12 9SE"));
+        verifyLitigantNames(data);
         assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
         verify(caseDataService).buildFullApplicantName((CaseDetails) any());
         verify(caseDataService).buildFullRespondentName((CaseDetails) any());
@@ -206,7 +200,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "Greater London\n"
             + "London\n"
             + "SE12 9SE"));
-        verifyLitigantName(data);
+        verifyLitigantNames(data);
         assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
     }
 
@@ -241,7 +235,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "Greater London\n"
             + "London\n"
             + "SW1V 4FG"));
-        verifyLitigantName(data);
+        verifyLitigantNames(data);
     }
 
     @Test
@@ -253,19 +247,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER1, INTV1_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_1.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_1.getDocumentCategoryId());
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        verifyAddress(data);
-        verifyIntervenerName(data, "intvr1");
+        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_1, "intvr1");
     }
 
     @Test
@@ -277,19 +259,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER1_SOLICITOR, INTV1_SOLICITOR_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_1.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_1.getDocumentCategoryId());
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        verifyAddress(data);
-        verifyIntervenerName(data, "intvr1sol");
+        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_1, "intvr1sol");
     }
 
     @Test
@@ -301,19 +271,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER2_SOLICITOR, INTV2_SOLICITOR_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_2.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_2.getDocumentCategoryId());
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        verifyAddress(data);
-        verifyIntervenerName(data, "intvr2sol");
+        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_2, "intvr2sol");
     }
 
     @Test
@@ -325,19 +283,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER2, INTV2_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_2.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_2.getDocumentCategoryId());
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        verifyAddress(data);
-        verifyIntervenerName(data, "intvr2");
+        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_2, "intvr2");
     }
 
     @Test
@@ -349,19 +295,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER3_SOLICITOR, INTV3_SOLICITOR_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_3.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_3.getDocumentCategoryId());
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        verifyAddress(data);
-        verifyIntervenerName(data, "intvr3sol");
+        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_3, "intvr3sol");
     }
 
     @Test
@@ -373,19 +307,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER3, INTV3_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_3.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_3.getDocumentCategoryId());
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        verifyAddress(data);
-        verifyIntervenerName(data, "intvr3");
+        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_3, "intvr3");
     }
 
     @Test
@@ -397,17 +319,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER4_SOLICITOR, INTV4_SOLICITOR_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_4.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_4.getDocumentCategoryId());
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        verifyAddress(data);
-        verifyIntervenerName(data, "intvr4sol");
+        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_4, "intvr4sol");
     }
 
     @Test
@@ -419,29 +331,19 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER4, INTV4_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_4, "intvr4");
+    }
 
+    private void verifyIntervenerData(FinremCaseDetails caseDetails, DocumentCategory category, String intervenerName) {
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
         assertThat(generalLetterData, hasSize(2));
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_4.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_INTERVENER_4.getDocumentCategoryId());
+        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), category.getDocumentCategoryId());
+        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), category.getDocumentCategoryId());
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         verifyAddress(data);
-        verifyIntervenerName(data, "intvr4");
-    }
-
-    private void verifyAddress(Map<String, Object> data) {
-        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Regent Street\n"
-            + "Second Line\n"
-            + "Third Line\n"
-            + "Greater London\n"
-            + "London\n"
-            + "W1B 5RL"));
-    }
-
-    private void verifyIntervenerName(Map<String, Object> data, String recipient) {
-        assertThat(((Addressee) data.get(ADDRESSEE)).getName(), is(recipient));
+        verifyIntervenerName(data, intervenerName);
     }
 
     @Test
@@ -533,6 +435,19 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             .postTown("London").postCode("W1B 5RL").build();
     }
 
+    private void verifyAddress(Map<String, Object> data) {
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Regent Street\n"
+            + "Second Line\n"
+            + "Third Line\n"
+            + "Greater London\n"
+            + "London\n"
+            + "W1B 5RL"));
+    }
+
+    private void verifyIntervenerName(Map<String, Object> data, String recipient) {
+        assertThat(((Addressee) data.get(ADDRESSEE)).getName(), is(recipient));
+    }
+
     private void addIntervenerOneWrapper(FinremCaseData caseData) {
         IntervenerOneWrapper intervenerWrapper = IntervenerOneWrapper.builder().intervenerSolName("intvr1sol")
             .intervenerName("intvr1").intervenerAddress(getAddress()).build();
@@ -562,5 +477,16 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(result.getDocumentUrl(), is(DOC_URL));
         assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
         assertThat(result.getCategoryId(), is(category));
+    }
+
+    private void verifyLitigantNames(Map<String, Object> data) {
+        assertThat(data.get("applicantFullName"), is("Poor Guy"));
+        assertThat(data.get("respondentFullName"), is("Moj Resp"));
+    }
+
+    private DynamicRadioList getDynamicRadioList(String code, String label, boolean addIntervenerListElements) {
+        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(code).label(label).build();
+        return DynamicRadioList.builder().listItems(
+            getDynamicRadioListItems(addIntervenerListElements)).value(chosenOption).build();
     }
 }
