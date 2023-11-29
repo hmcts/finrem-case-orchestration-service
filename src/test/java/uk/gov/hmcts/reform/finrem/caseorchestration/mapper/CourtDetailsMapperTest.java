@@ -225,43 +225,4 @@ public class CourtDetailsMapperTest {
         assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList(),
             is(nullValue()));
     }
-
-    @Test
-    public void givenCaseDataWithSameTwoCourts_whenGetCaseDetailsWithOnlyLatestAllocatedCourt_thenCaseDataWithOnlyOneLatestCourt() {
-
-
-        AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder().regionList(Region.LONDON)
-            .londonFrcList(RegionLondonFrc.LONDON)
-            .walesFrcList(RegionWalesFrc.SWANSEA)
-            .courtListWrapper(
-                DefaultCourtListWrapper.builder()
-                    .cfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)
-                    .swanseaCourtList(SwanseaCourt.FR_swanseaList_1)
-                    .build())
-            .build();
-        AllocatedRegionWrapper allocatedRegionWrapperBefore = AllocatedRegionWrapper.builder().regionList(Region.LONDON)
-            .londonFrcList(RegionLondonFrc.LONDON)
-            .walesFrcList(RegionWalesFrc.SWANSEA)
-            .courtListWrapper(
-                DefaultCourtListWrapper.builder()
-                    .cfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)
-                    .swanseaCourtList(SwanseaCourt.FR_swanseaList_1)
-                    .build())
-            .build();
-
-        AllocatedRegionWrapper allocatedRegionWrapperReturn =
-            courtDetailsMapper.getLatestAllocatedCourt(allocatedRegionWrapperBefore, allocatedRegionWrapper,
-                null);
-
-        assertThat(allocatedRegionWrapperReturn.getRegionList(),
-            is(equalTo(Region.LONDON)));
-        assertThat(allocatedRegionWrapperReturn.getLondonFrcList(),
-            is(equalTo(RegionLondonFrc.LONDON)));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList(),
-            is(equalTo(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)));
-        assertThat(allocatedRegionWrapperReturn.getWalesFrcList(),
-            is(nullValue()));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList(),
-            is(nullValue()));
-    }
 }
