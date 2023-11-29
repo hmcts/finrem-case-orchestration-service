@@ -64,7 +64,7 @@ public class CreateGeneralLetterDocumentCategoriser extends DocumentCategoriser 
     }
 
     private String getGeneratedLetterCategoryId(String roleCode) {
-        switch(roleCode) {
+        switch (roleCode) {
             case APPLICANT, APPLICANT_SOLICITOR -> {
                 return CORRESPONDENCE_APPLICANT.getDocumentCategoryId();
             }

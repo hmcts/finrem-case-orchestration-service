@@ -220,8 +220,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
         assertThat(generalLetterData, hasSize(2));
 
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
+        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
+            DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
+        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(),
+            DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
 
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
@@ -347,7 +349,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenNoPreviousGeneralLettersGenerated_generateGeneralLetter(){
+    public void givenNoPreviousGeneralLettersGenerated_generateGeneralLetter() {
         FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter-empty-collection.json");
         DynamicRadioList addresseeList = getDynamicRadioList(APPLICANT_SOLICITOR, APP_SOLICITOR_LABEL, false);
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
@@ -404,7 +406,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         caseData.setCcdCaseType(CaseType.CONTESTED);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), DocumentCategory.CORRESPONDENCE_OTHER.getDocumentCategoryId());
+        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
+            DocumentCategory.CORRESPONDENCE_OTHER.getDocumentCategoryId());
         verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), any());
     }
 
