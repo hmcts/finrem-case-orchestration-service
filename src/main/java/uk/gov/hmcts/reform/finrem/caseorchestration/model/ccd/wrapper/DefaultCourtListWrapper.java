@@ -185,6 +185,9 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
         if (Arrays.stream(NottinghamCourt.values())
             .anyMatch(court -> court.getId().equals(courtId))) {
             this.nottinghamCourtList = NottinghamCourt.getNottinghamCourt(courtId);
+        } else if (Arrays.stream(LondonCourt.values())
+            .anyMatch(court -> court.getId().equals(courtId))) {
+            this.londonCourtList = LondonCourt.getLondonCourt(courtId);
         } else if (Arrays.stream(CfcCourt.values())
             .anyMatch(court -> court.getId().equals(courtId))) {
             this.cfcCourtList = CfcCourt.getCfcCourt(courtId);
