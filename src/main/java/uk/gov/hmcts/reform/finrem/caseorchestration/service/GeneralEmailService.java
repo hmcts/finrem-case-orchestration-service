@@ -32,19 +32,30 @@ public class GeneralEmailService {
             .generalEmailBody(generalEmailWrapper.getGeneralEmailBody())
             .generalEmailCreatedBy(generalEmailWrapper.getGeneralEmailCreatedBy())
             .generalEmailRecipient(generalEmailWrapper.getGeneralEmailRecipient())
-            .generalEmailUploadedDocument(createNewCaseDocumentObject(generalEmailWrapper.getGeneralEmailUploadedDocument()))
+            .generalEmailUploadedDocument(createNewCaseDocumentObject(generalEmailWrapper))
             .build()).build();
         generalEmailCollection.add(collection);
 
         caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailCollection(generalEmailCollection);
     }
 
-    private CaseDocument createNewCaseDocumentObject(CaseDocument document) {
-        return CaseDocument.builder()
-            .documentBinaryUrl(document.getDocumentBinaryUrl())
-            .documentFilename(document.getDocumentFilename())
-            .documentUrl(document.getDocumentUrl())
-            .categoryId(document.getCategoryId())
-            .build();
+    private CaseDocument createNewCaseDocumentObject(GeneralEmailWrapper wrapper) {
+        CaseDocument documentToReturn = CaseDocument.builder().build();
+        CaseDocument latestUploadedDocument = wrapper.getGeneralEmailUploadedDocument();
+        if (latestUploadedDocument != null) {
+            String binaryUrl = latestUploadedDocument.getDocumentBinaryUrl();
+            if (binaryUrl != null) {
+                documentToReturn.setDocumentBinaryUrl(binaryUrl);
+            }
+            String fileName = latestUploadedDocument.getDocumentFilename();
+            if (fileName != null) {
+                documentToReturn.setDocumentFilename(fileName);
+            }
+            String url = latestUploadedDocument.getDocumentUrl();
+            if (url != null) {
+                documentToReturn.setDocumentUrl(url);
+            }
+        }
+        return documentToReturn;
     }
 }
