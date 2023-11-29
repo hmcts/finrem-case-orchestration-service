@@ -1,51 +1,32 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceKeyValue;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceKeyValueCsvLoader;
 
 @Component
 @Slf4j
-public class CourtListUpdateTask extends BaseTask {
+public class CourtListUpdateTask extends SpecializedBaseTask {
 
     @Value("${cron.courtListUpdate.enabled:false}")
     private boolean isCourtListUpdateTaskEnabled;
 
-    private final CourtDetailsMapper courtDetailsMapper;
-    private final CcdService ccdService;
-
-    private final SystemUserService systemUserService;
-
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-
     @Autowired
-    protected CourtListUpdateTask(CaseReferenceCsvLoader csvLoader,
+    protected CourtListUpdateTask(CaseReferenceKeyValueCsvLoader csvLoader,
                                   CcdService ccdService,
                                   SystemUserService systemUserService,
                                   FinremCaseDetailsMapper finremCaseDetailsMapper,
                                   CourtDetailsMapper courtDetailsMapper) {
         super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
-        this.courtDetailsMapper = courtDetailsMapper;
-        this.ccdService = ccdService;
-        this.systemUserService = systemUserService;
-        this.finremCaseDetailsMapper = finremCaseDetailsMapper;
     }
 
     @Override
@@ -74,33 +55,16 @@ public class CourtListUpdateTask extends BaseTask {
     }
 
     @Override
-    protected void executeTask(FinremCaseDetails finremCaseDetails) {
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
-        List<CaseEventDetail> caseEventDetails = ccdService.getCcdEventDetailsOnCase(systemUserService.getSysUserToken(),
-            finremCaseData);
+    protected void executeTask(CaseDetails caseDetails, CaseReferenceKeyValue caseReferenceKeyValue) {
+        String frcValue = (String) caseDetails.getData().get(caseReferenceKeyValue.getPreviousFRCKey());
+        String courtValue = (String) caseDetails.getData().get(caseReferenceKeyValue.getPreviousCourtListKey());
 
-        Collections.sort(caseEventDetails, (o1, o2) -> o2.getCreatedDate()
-            .compareTo(o1.getCreatedDate()));
-
-
-        if (CollectionUtils.isNotEmpty(caseEventDetails)) {
-
-            int caseEventDetailsIndex = IntStream.range(0, caseEventDetails.size())
-                .filter(index -> (EventType.UPDATE_FRC_INFORMATION.getCcdType().equals(caseEventDetails.get(index).getEventName())
-                                || EventType.AMEND_CONTESTED_APP_DETAILS.getCcdType().equals(caseEventDetails.get(index).getEventName())
-                                || EventType.GIVE_ALLOCATION_DIRECTIONS.getCcdType().equals(caseEventDetails.get(index).getEventName())))
-                .findFirst().getAsInt();
-
-
-            Map<String, Object> caseDetailsBefore = caseEventDetails.get(caseEventDetailsIndex + 1).getData();
-            FinremCaseData finremCaseDataBefore = finremCaseDetailsMapper
-                .mapToFinremCaseData(caseDetailsBefore, getCaseType().getCcdType());
-            finremCaseData.getRegionWrapper()
-                .setAllocatedRegionWrapper(
-                    courtDetailsMapper.getLatestAllocatedCourt(
-                        finremCaseDataBefore.getRegionWrapper().getAllocatedRegionWrapper(),
-                        finremCaseData.getRegionWrapper().getAllocatedRegionWrapper(),
-                        false));
+        if (frcValue != null && courtValue != null) {
+            caseDetails.getData().put(caseReferenceKeyValue.getPreviousFRCKey(), null);
+            caseDetails.getData().put(caseReferenceKeyValue.getPreviousCourtListKey(), null);
         }
+
     }
+
+
 }
