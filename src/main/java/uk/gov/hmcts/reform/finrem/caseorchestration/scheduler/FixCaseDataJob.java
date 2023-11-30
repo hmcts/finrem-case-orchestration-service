@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,14 +24,13 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FixCaseDataJob implements Runnable {
 
     private final CaseReferenceCsvLoader csvLoader;
     private final CcdService ccdService;
     private final SystemUserService systemUserService;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-
     private final List<Task> tasks;
 
     @Value("${cron.batchsize:500}")
