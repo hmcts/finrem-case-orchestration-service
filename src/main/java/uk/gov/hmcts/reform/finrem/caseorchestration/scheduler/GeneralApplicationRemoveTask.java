@@ -1,51 +1,63 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
-public class GeneralApplicationRemoveTask implements Task {
+public class GeneralApplicationRemoveTask extends BaseTask {
 
     private final GeneralApplicationHelper generalApplicationHelper;
 
     @Value("${cron.generalApplicationRemove.enabled:false}")
     private boolean isGeneralApplicationRemoveTaskEnabled;
 
+    @Autowired
+    protected GeneralApplicationRemoveTask(CaseReferenceCsvLoader csvLoader,
+                                           CcdService ccdService,
+                                           SystemUserService systemUserService,
+                                           FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                           GeneralApplicationHelper generalApplicationHelper) {
+        super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
+        this.generalApplicationHelper = generalApplicationHelper;
+    }
 
     @Override
-    public String getCaseListFileName() {
+    protected String getCaseListFileName() {
         return "generalApplicationRemoveCaseReferenceList.csv";
     }
 
     @Override
-    public String getTaskName() {
+    protected String getTaskName() {
         return "GeneralApplicationRemoveTask";
     }
 
     @Override
-    public boolean isTaskEnabled() {
+    protected boolean isTaskEnabled() {
         return isGeneralApplicationRemoveTaskEnabled;
     }
 
     @Override
-    public CaseType getCaseType() {
+    protected CaseType getCaseType() {
         return CaseType.CONTESTED;
     }
 
     @Override
-    public String getSummary() {
+    protected String getSummary() {
         return "Remove duplicate General application DFR-2388";
     }
 
     @Override
-    public void executeTask(FinremCaseDetails finremCaseDetails, String authToken) {
+    protected void executeTask(FinremCaseDetails finremCaseDetails) {
         generalApplicationHelper.checkAndRemoveDuplicateGeneralApplications(finremCaseDetails.getData());
     }
 }

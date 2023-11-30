@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,45 +14,52 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
-public class RegenerateDraftOnlineFormATask implements Task {
+public class RegenerateDraftOnlineFormATask extends BaseTask {
 
 
     private final OnlineFormDocumentService onlineFormDocumentService;
 
     @Value("${cron.regenerateMiniFormA.enabled:false}")
     private boolean isRegenerateMiniFormATaskEnabled;
-    
+
+    @Autowired
+    protected RegenerateDraftOnlineFormATask(CaseReferenceCsvLoader csvLoader,
+                                             CcdService ccdService,
+                                             SystemUserService systemUserService,
+                                             FinremCaseDetailsMapper finremCaseDetailsMapper, OnlineFormDocumentService onlineFormDocumentService) {
+        super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
+        this.onlineFormDocumentService = onlineFormDocumentService;
+    }
 
     @Override
-    public String getCaseListFileName() {
+    protected String getCaseListFileName() {
         return "regenerateDraftFormA.csv";
     }
 
     @Override
-    public String getTaskName() {
+    protected String getTaskName() {
         return "RegenerateDraftOnlineFormATask";
     }
 
     @Override
-    public boolean isTaskEnabled() {
+    protected boolean isTaskEnabled() {
         return isRegenerateMiniFormATaskEnabled;
     }
 
     @Override
-    public CaseType getCaseType() {
+    protected CaseType getCaseType() {
         return CaseType.CONTESTED;
     }
 
     @Override
-    public String getSummary() {
+    protected String getSummary() {
         return "Regenerate miniform a -  DFR-2523";
     }
 
     @Override
-    public void executeTask(FinremCaseDetails finremCaseDetails, String authToken) {
+    protected void executeTask(FinremCaseDetails finremCaseDetails) {
 
         log.info("RegenerateDraftOnlineFormATask started for case id {}", finremCaseDetails.getId());
-        finremCaseDetails.getData().setMiniFormA(onlineFormDocumentService.generateDraftContestedMiniFormA(authToken, finremCaseDetails));
+        finremCaseDetails.getData().setMiniFormA(onlineFormDocumentService.generateDraftContestedMiniFormA(getSystemUserToken(), finremCaseDetails));
     }
 }
