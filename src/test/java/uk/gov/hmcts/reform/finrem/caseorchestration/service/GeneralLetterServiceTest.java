@@ -353,11 +353,13 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter-empty-collection.json");
         DynamicRadioList addresseeList = getDynamicRadioList(APPLICANT_SOLICITOR, APP_SOLICITOR_LABEL, false);
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterUploadedDocument(caseDocument());
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
 
         assertThat(generalLetterData, hasSize(1));
         verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), null);
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument(), AUTH_TOKEN, String.valueOf(caseDetails.getId()));
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
