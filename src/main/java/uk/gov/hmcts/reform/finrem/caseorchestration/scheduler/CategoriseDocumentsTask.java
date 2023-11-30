@@ -30,7 +30,7 @@ public class CategoriseDocumentsTask extends BaseTask {
 
     @Override
     protected String getCaseListFileName() {
-        return "null";
+        return "documentCategoriesCaseListReferenceList.csv";
     }
 
     @Override
