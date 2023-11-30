@@ -165,8 +165,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
         items.setGeneralApplicationDirectionsDocument(caseDocument);
-        items.setGeneralApplicationOutcomeOther(Objects.toString(
-            caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         String caseId = caseDetails.getId().toString();
