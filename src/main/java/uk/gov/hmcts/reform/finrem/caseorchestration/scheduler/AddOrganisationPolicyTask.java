@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 @Component
@@ -17,6 +18,7 @@ public class AddOrganisationPolicyTask implements Task {
     private boolean isAddOrganisationPolicyTaskEnabled;
 
     private final UpdateRepresentationWorkflowService service;
+
 
 
     @Override
