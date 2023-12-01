@@ -8,58 +8,56 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
 @Component
 @Slf4j
-public class RegenerateDraftOnlineFormATask extends BaseTask {
+public class AddOrganisationPolicyTask extends BaseTask {
 
+    @Value("${cron.addOrganisationPolicy.enabled:false}")
+    private boolean isAddOrganisationPolicyTaskEnabled;
 
-    private final OnlineFormDocumentService onlineFormDocumentService;
-
-    @Value("${cron.regenerateMiniFormA.enabled:false}")
-    private boolean isRegenerateMiniFormATaskEnabled;
+    private final UpdateRepresentationWorkflowService service;
 
     @Autowired
-    protected RegenerateDraftOnlineFormATask(CaseReferenceCsvLoader csvLoader,
-                                             CcdService ccdService,
-                                             SystemUserService systemUserService,
-                                             FinremCaseDetailsMapper finremCaseDetailsMapper, OnlineFormDocumentService onlineFormDocumentService) {
+    protected AddOrganisationPolicyTask(CaseReferenceCsvLoader csvLoader,
+                                        CcdService ccdService,
+                                        SystemUserService systemUserService,
+                                        FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                        UpdateRepresentationWorkflowService service) {
         super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
-        this.onlineFormDocumentService = onlineFormDocumentService;
+        this.service = service;
     }
 
     @Override
     protected String getCaseListFileName() {
-        return "regenerateDraftFormA.csv";
+        return "organisationPolicyAddCaseReferenceList.csv";
     }
 
     @Override
     protected String getTaskName() {
-        return "RegenerateDraftOnlineFormATask";
+        return "AddOrganisationPolicyTask";
     }
 
     @Override
     protected boolean isTaskEnabled() {
-        return isRegenerateMiniFormATaskEnabled;
+        return isAddOrganisationPolicyTaskEnabled;
     }
 
     @Override
     protected CaseType getCaseType() {
-        return CaseType.CONTESTED;
+        return CaseType.CONSENTED;
     }
 
     @Override
     protected String getSummary() {
-        return "Regenerate miniform a -  DFR-2523";
+        return "Added default Org Policy DFR-2492";
     }
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
-
-        log.info("RegenerateDraftOnlineFormATask started for case id {}", finremCaseDetails.getId());
-        finremCaseDetails.getData().setMiniFormA(onlineFormDocumentService.generateDraftContestedMiniFormA(getSystemUserToken(), finremCaseDetails));
+        service.persistDefaultOrganisationPolicy(finremCaseDetails.getData());
     }
 }

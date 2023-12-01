@@ -191,7 +191,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
@@ -242,7 +241,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetails())).thenReturn(details);
         when(helper.getApplicationItems(finremCallbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, finremCallbackRequest.getCaseDetails().getId().toString())).thenReturn(
             finremCallbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
@@ -291,7 +289,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
@@ -340,7 +337,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()

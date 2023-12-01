@@ -12,38 +12,50 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT_PACK;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
@@ -92,57 +104,127 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
     @Test
     public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrintedForContestedCase() {
-        when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
-        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+            .thenReturn(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
 
-        caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
-        caseDetails.setCaseTypeId(CaseType.CONTESTED.getCcdType());
+
+        data.getContactDetailsWrapper().setApplicantFmName("Poor");
+        data.getContactDetailsWrapper().setApplicantLname("Poor");
+        data.getContactDetailsWrapper().setAppRespondentFmName("Poor2");
+        data.getContactDetailsWrapper().setAppRespondentFmName("Poor2");
+
+        HearingDirectionDetail detail = HearingDirectionDetail.builder()
+            .dateOfHearing(LocalDate.of(2023, 1, 1))
+            .hearingTime("1200")
+            .isAnotherHearingYN(YesOrNo.YES)
+            .typeOfHearing(HearingTypeDirection.FH)
+            .timeEstimate("24hours")
+            .localCourt(Court.builder()
+                .region(Region.LONDON)
+                .londonList(RegionLondonFrc.LONDON)
+                .courtListWrapper(DefaultCourtListWrapper.builder()
+                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                    .build()).build())
+            .build();
+
+        HearingDirectionDetailsCollection directionDetailsCollection = HearingDirectionDetailsCollection.builder().value(detail).build();
+        List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollection = new ArrayList<>();
+        hearingDirectionDetailsCollection.add(directionDetailsCollection);
+        data.setHearingDirectionDetailsCollection(hearingDirectionDetailsCollection);
+
         approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
 
-        assertCaseDataHasHearingNoticesCollection();
-        assertDocumentServiceInteraction();
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = data.getAdditionalHearingDocuments();
+        assertEquals("Not null", caseDocument(), additionalHearingDocuments.get(0).getValue().getDocument());
+        assertEquals("size of Notice Pack",1, data.getHearingNoticeDocumentPack().size());
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            eq(AUTH_TOKEN),
+            placeholdersMapCaptor.capture(),
+            eq(documentConfiguration.getAdditionalHearingTemplate()),
+            eq(documentConfiguration.getAdditionalHearingFileName()), eq("123"));
 
-        Map<String, Object> caseDetailsMap = (Map) placeholdersMapCaptor.getValue().get(CASE_DETAILS);
-        Map<String, Object> data = (Map) caseDetailsMap.get(CASE_DATA);
-        assertCaseData(data);
+        Map<String, Object> caseDetailsMap = convertToMap(placeholdersMapCaptor.getValue().get(CASE_DETAILS));
+        Map<String, Object> data2 = convertToMap(caseDetailsMap.get(CASE_DATA));
+        assertThat(data2, allOf(
+            Matchers.<String, Object>hasEntry("CCDCaseNumber", 123L),
+            Matchers.hasEntry("CourtAddress", "Bromley County Court, College Road, Bromley, BR1 3PX"),
+            Matchers.hasEntry("CourtPhone", "0208 290 9620"),
+            Matchers.hasEntry("CourtEmail", "family.bromley.countycourt@justice.gov.uk"),
+            Matchers.hasEntry("ApplicantName", "Poor Poor"),
+            Matchers.hasEntry("AdditionalHearingDated", formattedNowDate),
+            Matchers.hasEntry("HearingTime", "1200"),
+            Matchers.hasEntry("RespondentName", "Poor2"),
+            Matchers.hasEntry("HearingVenue",
+                "Bromley County Court And Family Court, Bromley County Court, College Road, Bromley, BR1 3PX")
+            ));
     }
 
     @Test
-    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrintedForConsentedCase() {
-        when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
-        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+    public void givenHearingRequired_whenSubmitNoticeOfHearingWithDraftHearing_thenHearingNoticeIsPrintedForContestedCase() {
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+            .thenReturn(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
 
-        caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
-        caseDetails.setCaseTypeId(CaseType.CONSENTED.getCcdType());
+
+        data.getContactDetailsWrapper().setApplicantFmName("Poor");
+        data.getContactDetailsWrapper().setApplicantLname("Poor");
+        data.getContactDetailsWrapper().setAppRespondentFmName("Poor2");
+        data.getContactDetailsWrapper().setAppRespondentFmName("Poor2");
+
+        HearingDirectionDetail detail = HearingDirectionDetail.builder()
+            .dateOfHearing(LocalDate.of(2023, 1, 1))
+            .hearingTime("1200")
+            .isAnotherHearingYN(YesOrNo.YES)
+            .typeOfHearing(HearingTypeDirection.FH)
+            .timeEstimate("24hours")
+            .localCourt(Court.builder()
+                .region(Region.LONDON)
+                .londonList(RegionLondonFrc.LONDON)
+                .courtListWrapper(DefaultCourtListWrapper.builder()
+                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                    .build()).build())
+            .build();
+
+        HearingDirectionDetailsCollection directionDetailsCollection = HearingDirectionDetailsCollection.builder().value(detail).build();
+        List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollection = new ArrayList<>();
+        hearingDirectionDetailsCollection.add(directionDetailsCollection);
+        data.setHearingDirectionDetailsCollection(hearingDirectionDetailsCollection);
+        data.setLatestDraftHearingOrder(caseDocument());
+
         approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
 
-        assertCaseDataHasHearingNoticesCollection();
-        assertDocumentServiceInteraction();
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = data.getAdditionalHearingDocuments();
+        assertEquals("Not null", caseDocument(), additionalHearingDocuments.get(0).getValue().getDocument());
+        assertEquals("size of Notice Pack",2, data.getHearingNoticeDocumentPack().size());
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            eq(AUTH_TOKEN),
+            placeholdersMapCaptor.capture(),
+            eq(documentConfiguration.getAdditionalHearingTemplate()),
+            eq(documentConfiguration.getAdditionalHearingFileName()), eq("123"));
 
-        Map<String, Object> caseDetailsMap = (Map) placeholdersMapCaptor.getValue().get(CASE_DETAILS);
-        Map<String, Object> data = (Map) caseDetailsMap.get(CASE_DATA);
-        assertCaseData(data);
+        Map<String, Object> caseDetailsMap = convertToMap(placeholdersMapCaptor.getValue().get(CASE_DETAILS));
+        Map<String, Object> data2 = convertToMap(caseDetailsMap.get(CASE_DATA));
+        assertThat(data2, allOf(
+            Matchers.<String, Object>hasEntry("CCDCaseNumber", 123L),
+            Matchers.hasEntry("CourtAddress", "Bromley County Court, College Road, Bromley, BR1 3PX"),
+            Matchers.hasEntry("CourtPhone", "0208 290 9620"),
+            Matchers.hasEntry("CourtEmail", "family.bromley.countycourt@justice.gov.uk"),
+            Matchers.hasEntry("ApplicantName", "Poor Poor"),
+            Matchers.hasEntry("AdditionalHearingDated", formattedNowDate),
+            Matchers.hasEntry("HearingTime", "1200"),
+            Matchers.hasEntry("RespondentName", "Poor2"),
+            Matchers.hasEntry("HearingVenue",
+                "Bromley County Court And Family Court, Bromley County Court, College Road, Bromley, BR1 3PX")
+        ));
     }
 
-    @Test
-    public void givenDraftHearingOrderIsUploaded_whenSubmitNoticeOfHearing_thenOrderIsPrinted() {
-        when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
-        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
-
-        caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
-        caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, CaseDocument.builder().documentBinaryUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL).build());
-        approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
-
-        assertCaseDataHasHearingNoticesCollection();
-
-        assertDocumentServiceInteraction();
-
-        Map<String, Object> caseDetailsMap = (Map) placeholdersMapCaptor.getValue().get(CASE_DETAILS);
-        Map<String, Object> data = (Map) caseDetailsMap.get(CASE_DATA);
-
-        assertCaseData(data);
+    private Map<String, Object> convertToMap(Object object) {
+        return objectMapper.convertValue(object,  new TypeReference<>() {});
     }
 
     @Test
@@ -185,14 +267,6 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         assertNotificationServiceInteraction();
     }
 
-    private void assertDocumentServiceInteraction() {
-        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(
-            eq(AUTH_TOKEN),
-            placeholdersMapCaptor.capture(),
-            eq(documentConfiguration.getAdditionalHearingTemplate()),
-            eq(documentConfiguration.getAdditionalHearingFileName()), eq(caseId));
-    }
-
     private void assertBulkPrintServiceInteraction() {
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
@@ -204,31 +278,6 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         verify(notificationService, times(1)).sendPrepareForHearingEmailRespondent(caseDetails);
     }
 
-    private void assertCaseDataHasHearingNoticesCollection() {
-        assertThat(caseDetails.getData(), hasKey(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
-        List<Element<AdditionalHearingDocument>> additionalHearingDocuments = objectMapper.convertValue(
-            caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), new TypeReference<>() {
-            });
-        assertThat(additionalHearingDocuments.size(), is(1));
-        assertThat(additionalHearingDocuments.get(0).getValue().getDocument().getDocumentBinaryUrl(),
-            is(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
-    }
-
-    private void assertCaseData(Map<String, Object> data) {
-        assertThat(data, allOf(
-            Matchers.<String, Object>hasEntry("CCDCaseNumber", 123123123L),
-            Matchers.hasEntry("CourtName", "Hastings County Court And Family Court Hearing Centre"),
-            Matchers.hasEntry("CourtAddress", "The Law Courts, Bohemia Road, Hastings, TN34 1QX"),
-            Matchers.hasEntry("CourtPhone", "0300 1235577"),
-            Matchers.hasEntry("CourtEmail", "hastingsfamily@justice.gov.uk"),
-            Matchers.hasEntry("ApplicantName", "Poor Guy"),
-            Matchers.hasEntry("AdditionalHearingDated", formattedNowDate),
-            Matchers.<String, Object>hasEntry("HearingTime", "1pm"),
-            Matchers.<String, Object>hasEntry("RespondentName", "test Korivi"),
-            Matchers.<String, Object>hasEntry("HearingVenue",
-                "Hastings County Court And Family Court Hearing Centre, The Law Courts, Bohemia Road, Hastings, TN34 1QX")));
-    }
-
     private List<Element<CaseDocument>> buildHearingNoticePack() {
         return List.of(element(UUID.randomUUID(), CaseDocument.builder()
                 .documentBinaryUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
@@ -236,5 +285,16 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             element(UUID.randomUUID(), CaseDocument.builder()
                 .documentBinaryUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL)
                 .build()));
+    }
+
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.DIRECTION_UPLOAD_ORDER)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).state(State.APPLICATION_ISSUED).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).state(State.APPLICATION_ISSUED).build())
+            .build();
     }
 }
