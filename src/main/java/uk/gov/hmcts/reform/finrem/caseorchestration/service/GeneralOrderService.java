@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
@@ -24,6 +25,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContes
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderConsentDocumentCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderDocumentCategoriser;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -62,6 +65,9 @@ public class GeneralOrderService {
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
     private final PartyService partyService;
+    private final GeneralOrderDocumentCategoriser generalOrderDocumentCategoriser;
+    private final GeneralOrderConsentDocumentCategoriser generalOrderConsentDocumentCategoriser;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
@@ -199,7 +205,12 @@ public class GeneralOrderService {
             caseData.put(GENERAL_ORDER_COLLECTION_CONTESTED, generalOrderList);
         }
 
-        return caseData;
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        generalOrderConsentDocumentCategoriser.categorise(finremCaseDetails.getData());
+        generalOrderDocumentCategoriser.categorise(finremCaseDetails.getData());
+        CaseDetails mappedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
+        return mappedCaseDetails.getData();
     }
 
     private List<GeneralOrderConsentedData> convertToGeneralOrderConsentedList(Object object) {
