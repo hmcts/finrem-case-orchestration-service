@@ -23,20 +23,21 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     private ConsentOrderService consentOrderService;
 
     private CallbackRequest callbackRequest;
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream(PATH + fileName)) {
-            callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            callbackRequest = new ObjectMapper().readValue(resourceAsStream, CallbackRequest.class);
+            callbackRequest.setCaseDetailsBefore(callbackRequest.getCaseDetails());
         }
     }
 
     @Test
     public void checkIfDocumentIsEncrypted() throws Exception {
         setUpCaseDetails("draft-consent-order.json");
-        List<CaseDocument> caseDocuments = consentOrderService.checkIfD81DocumentContainsEncryption(callbackRequest.getCaseDetails().getData());
-        assertEquals(5, caseDocuments.size());
+        List<CaseDocument> caseDocuments = consentOrderService.checkIfD81DocumentContainsEncryption(callbackRequest.getCaseDetails().getData(),
+            callbackRequest.getCaseDetailsBefore().getData());
+        assertEquals(3, caseDocuments.size());
     }
 
     @Test
