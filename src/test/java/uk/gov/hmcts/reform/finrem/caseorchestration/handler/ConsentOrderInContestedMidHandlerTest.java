@@ -144,4 +144,59 @@ class ConsentOrderInContestedMidHandlerTest  extends BaseHandlerTestSetup {
         verify(service, times(5))
             .validateEncryptionOnUploadedDocument(any(CaseDocument.class), anyString(), anyList(), anyString());
     }
+
+    @Test
+    void givenContestedCase_whenConentorderCreated_thenCheckIfAnyFileContainsEncryptionOnlyNewlyUpdatedDoc2() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.CONSENT_ORDER);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+
+        caseData.setConsentOrder(caseDocument);
+
+        ConsentOrderWrapper consentOrderWrapper = new ConsentOrderWrapper();
+        consentOrderWrapper.setConsentD81Joint(caseDocument);
+        consentOrderWrapper.setConsentD81Applicant(caseDocument);
+        consentOrderWrapper.setConsentD81Respondent(caseDocument);
+        List<OtherDocumentCollection> otherCollection = new ArrayList<>();
+        OtherDocumentCollection documentCollection = OtherDocumentCollection.builder()
+            .value(OtherDocument.builder().uploadedDocument(caseDocument).build()).build();
+
+        otherCollection.add(documentCollection);
+        consentOrderWrapper.setConsentOtherCollection(otherCollection);
+
+        caseData.setConsentOrderWrapper(consentOrderWrapper);
+
+        caseData.setConsentVariationOrderDocument(caseDocument);
+        FinremCaseData before = finremCallbackRequest.getCaseDetailsBefore().getData();
+        before.setConsentOrderWrapper(consentOrderWrapper);
+        before.setConsentVariationOrderDocument(caseDocument);
+
+        List<PensionTypeCollection> consentPensionCollection = new ArrayList<>();
+
+        PensionTypeCollection typeCollection = PensionTypeCollection.builder()
+            .typedCaseDocument(PensionType.builder().typeOfDocument(PensionDocumentType.FORM_P1)
+                .pensionDocument(caseDocument).build()).build();
+        consentPensionCollection.add(typeCollection);
+        before.setConsentPensionCollection(consentPensionCollection);
+
+        List<PensionTypeCollection> consentPensionCollection2 = new ArrayList<>();
+
+        PensionTypeCollection typeCollection2 = PensionTypeCollection.builder()
+            .typedCaseDocument(PensionType.builder().typeOfDocument(PensionDocumentType.FORM_P1)
+                .pensionDocument(caseDocument).build()).build();
+        consentPensionCollection2.add(typeCollection2);
+        PensionTypeCollection typeCollection3 = PensionTypeCollection.builder()
+            .typedCaseDocument(PensionType.builder().typeOfDocument(PensionDocumentType.FORM_PPF1)
+                .pensionDocument(caseDocument).build()).build();
+        consentPensionCollection2.add(typeCollection3);
+        caseData.setConsentPensionCollection(consentPensionCollection2);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
+            = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertTrue(response.getErrors().isEmpty());
+        verify(service, times(6))
+            .validateEncryptionOnUploadedDocument(any(CaseDocument.class), anyString(), anyList(), anyString());
+    }
 }
