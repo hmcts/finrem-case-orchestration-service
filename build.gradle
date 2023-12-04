@@ -392,8 +392,12 @@ dependencyManagement {
             entry 'bouncy_castle_for_java'
             entry 'legion-of-the-bouncy-castle'
             entry 'legion-of-the-bouncy-castle-java-crytography-api'
-            entry'the_bouncy_castle_crypto_package_for_java'
+            entry 'the_bouncy_castle_crypto_package_for_java'
         }
+        dependencySet(group: 'org.springframework.security', version: '1.1.1') {
+            entry 'spring-security-rsa'
+        }
+
     }
 }
 
