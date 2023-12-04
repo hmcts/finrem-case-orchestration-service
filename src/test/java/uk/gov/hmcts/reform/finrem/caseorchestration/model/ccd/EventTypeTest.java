@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.GeneralApplicationHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.hearingbundles.HearingDatePopulatedValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener.IntervenerHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import java.io.File;
@@ -24,7 +25,8 @@ import static org.junit.Assert.assertTrue;
 public class EventTypeTest {
 
     private final List<Class> handlerClassesToIgnore = Arrays.asList(FinremCallbackHandler.class, FinremCallbackRequest.class,
-        GeneralApplicationHandler.class, CallbackHandler.class, IntervenerHandler.class, AssignApplicantSolicitorHandler.class);
+        GeneralApplicationHandler.class, CallbackHandler.class, IntervenerHandler.class, AssignApplicantSolicitorHandler.class,
+        HearingDatePopulatedValidator.class);
 
     @Test
     public void givenEventHandler_whenMoreThanOneEventMatches_thenThrowError() throws ClassNotFoundException {
@@ -99,7 +101,7 @@ public class EventTypeTest {
         List<Class> classes = new ArrayList<>();
         for (String content : directoryContents) {
             if (content.endsWith(".java")) {
-                Class<?> className = Class.forName("uk.gov.hmcts.reform.finrem.caseorchestration.handler."
+                Class<?> className = Class.forName("uk.gov.hmcts.reform.finrxem.caseorchestration.handler."
                     + content.replace(".java", ""));
                 classes.add(className);
             } else {
