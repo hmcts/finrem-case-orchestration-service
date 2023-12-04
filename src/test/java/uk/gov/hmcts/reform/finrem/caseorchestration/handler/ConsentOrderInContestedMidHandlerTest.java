@@ -17,6 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OtherDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OtherDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
@@ -121,9 +124,18 @@ class ConsentOrderInContestedMidHandlerTest  extends BaseHandlerTestSetup {
         caseData.setConsentOrderWrapper(consentOrderWrapper);
 
         caseData.setConsentVariationOrderDocument(caseDocument);
+        FinremCaseData before = finremCallbackRequest.getCaseDetailsBefore().getData();
+        before.setConsentOrderWrapper(consentOrderWrapper);
+        before.setConsentVariationOrderDocument(caseDocument);
 
-        finremCallbackRequest.getCaseDetailsBefore().getData().setConsentOrderWrapper(consentOrderWrapper);
-        finremCallbackRequest.getCaseDetailsBefore().getData().setConsentVariationOrderDocument(caseDocument);
+        List<PensionTypeCollection> consentPensionCollection = new ArrayList<>();
+
+        PensionTypeCollection typeCollection = PensionTypeCollection.builder()
+            .typedCaseDocument(PensionType.builder().typeOfDocument(PensionDocumentType.FORM_P1)
+                .pensionDocument(caseDocument).build()).build();
+        consentPensionCollection.add(typeCollection);
+        before.setConsentPensionCollection(consentPensionCollection);
+        caseData.setConsentPensionCollection(consentPensionCollection);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
             = handler.handle(finremCallbackRequest, AUTH_TOKEN);
