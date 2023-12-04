@@ -15,8 +15,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -29,12 +34,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 
 @ExtendWith(MockitoExtension.class)
@@ -99,20 +106,46 @@ public class RejectedConsentOrderAboutToSubmitHandlerTest {
     public void given_case_when_order_not_approved_then_reject_order() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         CallbackRequest callbackRequest = doValidCaseDataSetUp();
-        FinremCallbackRequest finremCallbackRequest = doValidFinremCaseDataSetUp();
-        CaseDetails mappedCaseDetails = callbackRequest.getCaseDetails();
-        List<ContestedConsentOrderData> notApprovedConsentOrderData = getNotApprovedConsentOrderData(mappedCaseDetails.getData());
-        notApprovedConsentOrderData.forEach(data -> data.getConsentOrder().getConsentOrder().setCategoryId(
-            DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId()));
-        mappedCaseDetails.getData().put("consentedNotApprovedOrders", notApprovedConsentOrderData);
+        CaseDetails mappedCaseDetails = prepareMappedCaseDetails(callbackRequest);
+        FinremCallbackRequest finremCallbackRequest = prepareMappedFinremCaseDetails();
 
+        when(refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, mappedCaseDetails)).thenReturn(mappedCaseDetails.getData());
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails())).thenReturn(finremCallbackRequest.getCaseDetails());
         when(finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetails())).thenReturn(callbackRequest.getCaseDetails());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         getNotApprovedConsentOrderData(response.getData()).forEach(data -> Assertions.assertEquals(
-            DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId(), data.getConsentOrder().getConsentOrder().getCategoryId()));
+            DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId(),
+            data.getConsentOrder().getConsentOrder().getCategoryId()));
         verify(refusalOrderDocumentService).generateConsentOrderNotApproved(any(), any());
+    }
+
+    private FinremCallbackRequest prepareMappedFinremCaseDetails() {
+        FinremCallbackRequest finremCallbackRequest = doValidFinremCaseDataSetUp();
+        FinremCaseDetails finremMappedCaseDetails = finremCallbackRequest.getCaseDetails();
+        finremMappedCaseDetails.getData().getConsentOrderWrapper().setConsentedNotApprovedOrders(generateFinremNotApprovedConsentOrderData());
+        return finremCallbackRequest;
+    }
+
+    private CaseDetails prepareMappedCaseDetails(CallbackRequest callbackRequest) {
+        CaseDetails mappedCaseDetails = callbackRequest.getCaseDetails();
+        List<ContestedConsentOrderData> notApprovedConsentOrderData = generateNotApprovedConsentOrderData();
+        mappedCaseDetails.getData().put("consentedNotApprovedOrders", notApprovedConsentOrderData);
+        return mappedCaseDetails;
+    }
+
+    private static List<ConsentOrderCollection> generateFinremNotApprovedConsentOrderData() {
+        CaseDocument document = caseDocument();
+        document.setCategoryId(DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId());
+        return List.of(ConsentOrderCollection.builder().approvedOrder(
+            ApprovedOrder.builder().consentOrder(document).build()).build());
+    }
+
+    private List<ContestedConsentOrderData> generateNotApprovedConsentOrderData() {
+        CaseDocument caseDocument = caseDocument();
+        caseDocument.setCategoryId(DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId());
+        ContestedConsentOrder consentOrder = new ContestedConsentOrder(caseDocument);
+        return List.of(new ContestedConsentOrderData(UUID.randomUUID().toString(), consentOrder));
     }
 
     private List<ContestedConsentOrderData> getNotApprovedConsentOrderData(Map<String, Object> caseData) {
