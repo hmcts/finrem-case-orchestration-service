@@ -135,10 +135,8 @@ public class RejectedConsentOrderAboutToSubmitHandlerTest {
     }
 
     private static List<ConsentOrderCollection> generateFinremNotApprovedConsentOrderData() {
-        CaseDocument document = caseDocument();
-        document.setCategoryId(DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId());
         return List.of(ConsentOrderCollection.builder().approvedOrder(
-            ApprovedOrder.builder().consentOrder(document).build()).build());
+            ApprovedOrder.builder().consentOrder(caseDocument()).build()).build());
     }
 
     private List<ContestedConsentOrderData> generateNotApprovedConsentOrderData() {
