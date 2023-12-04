@@ -8,4 +8,8 @@
         <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
         <cve>CVE-2023-35116</cve>
     </suppress>
+    <suppress until="2024-01-31">
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov-jdk15on@.*$</packageUrl>
+        <cve>CVE-2023-33202</cve>
+    </suppress>
 </suppressions>
