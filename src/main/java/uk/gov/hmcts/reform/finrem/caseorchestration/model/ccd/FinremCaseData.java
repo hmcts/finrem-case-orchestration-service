@@ -287,6 +287,7 @@ public class FinremCaseData {
     @JsonProperty("reasonForFRCLocation")
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
+    private List<HearingUploadBundleCollection> fdrHearingBundleCollections;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
     private DynamicMultiSelectList ordersToShare;
     private DynamicMultiSelectList partiesOnCase;

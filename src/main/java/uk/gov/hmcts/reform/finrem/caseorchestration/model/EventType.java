@@ -78,6 +78,8 @@ public enum EventType {
 
     UPDATE_COURT_INFO("FR_updateCourtInfo"),
 
+    MANAGE_HEARING_BUNDLES("FR_manageHearingBundles"),
+
     @JsonEnumDefaultValue
     NONE("");
 
