@@ -22,15 +22,25 @@ public class GeneralOrderDocumentCategoriser extends DocumentCategoriser {
 
     @Override
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
-        log.info("Categorising general order documents for case with Case ID: {}", finremCaseData.getCcdCaseId());
         List<ContestedGeneralOrderCollection> generalOrders =
             finremCaseData.getGeneralOrderWrapper().getGeneralOrders();
-        if (generalOrders != null && !generalOrders.isEmpty()) {
-            for (ContestedGeneralOrderCollection generalOrder : generalOrders) {
+        log.info("Categorising general order documents for case with Case ID: {}", finremCaseData.getCcdCaseId());
+        categoriseGeneralOrders(generalOrders, DocumentCategory.APPROVED_ORDERS);
+
+        List<ContestedGeneralOrderCollection> generalOrdersConsent =
+            finremCaseData.getGeneralOrderWrapper().getGeneralOrdersConsent();
+        log.info("Categorising general order consent documents for case with Case ID: {}", finremCaseData.getCcdCaseId());
+        categoriseGeneralOrders(generalOrdersConsent, DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION);
+    }
+
+    private static void categoriseGeneralOrders(List<ContestedGeneralOrderCollection> generalOrdersConsent,
+                                                DocumentCategory approvedOrdersConsentApplication) {
+        if (generalOrdersConsent != null && !generalOrdersConsent.isEmpty()) {
+            for (ContestedGeneralOrderCollection generalOrder : generalOrdersConsent) {
                 CaseDocument generalOrderDocument = generalOrder.getValue().getAdditionalDocument();
                 if (generalOrderDocument != null && generalOrderDocument.getCategoryId() == null) {
                     generalOrderDocument.setCategoryId(
-                        DocumentCategory.APPROVED_ORDERS.getDocumentCategoryId());
+                        approvedOrdersConsentApplication.getDocumentCategoryId());
                 }
             }
         }

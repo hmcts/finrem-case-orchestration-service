@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContes
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderConsentDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderDocumentCategoriser;
 
 import java.time.LocalDateTime;
@@ -66,7 +65,6 @@ public class GeneralOrderService {
     private final CaseDataService caseDataService;
     private final PartyService partyService;
     private final GeneralOrderDocumentCategoriser generalOrderDocumentCategoriser;
-    private final GeneralOrderConsentDocumentCategoriser generalOrderConsentDocumentCategoriser;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
@@ -206,7 +204,6 @@ public class GeneralOrderService {
         }
 
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        generalOrderConsentDocumentCategoriser.categorise(finremCaseDetails.getData());
         generalOrderDocumentCategoriser.categorise(finremCaseDetails.getData());
         CaseDetails mappedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
