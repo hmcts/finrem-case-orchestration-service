@@ -4,5 +4,5 @@
     "local>hmcts/.github:renovate-config",
     "local>hmcts/.github//renovate/automerge-minor"
   ],
-  "schedule": ["after 7am and before 9am every weekday"]
+  "automergeSchedule": ["after 7am and before 9am every weekday"]
 }
