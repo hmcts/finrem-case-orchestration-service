@@ -101,7 +101,7 @@ public class EventTypeTest {
         List<Class> classes = new ArrayList<>();
         for (String content : directoryContents) {
             if (content.endsWith(".java")) {
-                Class<?> className = Class.forName("uk.gov.hmcts.reform.finrxem.caseorchestration.handler."
+                Class<?> className = Class.forName("uk.gov.hmcts.reform.finrem.caseorchestration.handler."
                     + content.replace(".java", ""));
                 classes.add(className);
             } else {
