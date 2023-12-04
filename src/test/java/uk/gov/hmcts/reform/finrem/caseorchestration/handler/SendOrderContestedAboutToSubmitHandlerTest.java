@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerFourDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerOneDocumentHandler;
@@ -80,6 +81,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private NotificationService notificationService;
     @Mock
     private OrderDateService dateService;
+    @Mock
+    private SendOrdersCategoriser sendOrdersCategoriser;
 
     @BeforeEach
     public void setUpTest() {
@@ -91,7 +94,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService),
                 new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService),
                 new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService)),
-            dateService);
+            dateService, sendOrdersCategoriser);
     }
 
     @Test

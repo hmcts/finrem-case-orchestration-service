@@ -277,6 +277,14 @@ public enum DocumentCategory {
     APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_10("applicationsGeneralApplicationsapp10"),
     DUPLICATED_GENERAL_ORDERS("duplicatedGeneralOrders"),
     APPLICATIONS_GENERAL_APPLICATIONS_OVERFLOW("applicationsGeneralApplicationsOverflow"),
+
+    APPROVED_ORDERS_SEND_ORDERS_APPLICANT("approvedOrdersApplicant"),
+    APPROVED_ORDERS_SEND_ORDERS_RESPONDENT("approvedOrdersRespondent"),
+    APPROVED_ORDERS_SEND_ORDERS_INTERVENER_1("approvedOrdersIntervener1"),
+    APPROVED_ORDERS_SEND_ORDERS_INTERVENER_2("approvedOrdersIntervener2"),
+    APPROVED_ORDERS_SEND_ORDERS_INTERVENER_3("approvedOrdersIntervener3"),
+    APPROVED_ORDERS_SEND_ORDERS_INTERVENER_4("approvedOrdersIntervener4"),
+
     UNCATEGORISED(null);
 
     private final String documentCategoryId;
