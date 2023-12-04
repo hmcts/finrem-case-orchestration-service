@@ -32,7 +32,6 @@ public class InterimHearingContestedAboutToStartHandlerTest extends BaseHandlerT
 
     private InterimHearingContestedAboutToStartHandler interimHearingContestedAboutToStartHandler;
 
-    private ObjectMapper objectMapper;
     private InterimHearingHelper interimHearingHelper;
 
     @Mock
@@ -49,7 +48,7 @@ public class InterimHearingContestedAboutToStartHandlerTest extends BaseHandlerT
 
     @Before
     public void setup() {
-        objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
         interimHearingHelper = new InterimHearingHelper(objectMapper);
         InterimHearingItemMapper interimHearingItemMapper = new InterimHearingItemMapper(interimHearingHelper);
         interimHearingContestedAboutToStartHandler =
@@ -138,5 +137,4 @@ public class InterimHearingContestedAboutToStartHandlerTest extends BaseHandlerT
         assertThat(interimHearingList, is(Collections.emptyList()));
         assertThat(trackingList, is(Collections.emptyList()));
     }
-
 }

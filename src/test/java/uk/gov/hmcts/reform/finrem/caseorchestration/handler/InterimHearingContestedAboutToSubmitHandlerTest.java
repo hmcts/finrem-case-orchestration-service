@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingService;
 
@@ -118,6 +119,9 @@ public class InterimHearingContestedAboutToSubmitHandlerTest extends BaseHandler
 
         assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2040-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
+
+        List<InterimHearingCollectionItemData> interimHearingTrackingList = interimHearingHelper.getInterimHearingTrackingList(caseData);
+        assertEquals(1, interimHearingTrackingList.size());
 
         verify(interimHearingService).submitInterimHearing(any(), any(), any());
         verifyNonCollectionData(caseData);
