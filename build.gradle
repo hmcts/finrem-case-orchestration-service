@@ -484,6 +484,7 @@ dependencies {
     functionalImplementation("net.serenity-bdd:serenity-core:3.2.5") {
         exclude group: "commons-net", module: "commons-net"
         exclude group: "org.apache.commons", module: "commons-compress"
+        exclude group: "org.bouncycastle", module: "bcprov-jdk15on"
     }
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
