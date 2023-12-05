@@ -278,12 +278,12 @@ public enum DocumentCategory {
     DUPLICATED_GENERAL_ORDERS("duplicatedGeneralOrders"),
     APPLICATIONS_GENERAL_APPLICATIONS_OVERFLOW("applicationsGeneralApplicationsOverflow"),
 
-    APPROVED_ORDERS_SEND_ORDERS_APPLICANT("approvedOrdersApplicant"),
-    APPROVED_ORDERS_SEND_ORDERS_RESPONDENT("approvedOrdersRespondent"),
-    APPROVED_ORDERS_SEND_ORDERS_INTERVENER_1("approvedOrdersIntervener1"),
-    APPROVED_ORDERS_SEND_ORDERS_INTERVENER_2("approvedOrdersIntervener2"),
-    APPROVED_ORDERS_SEND_ORDERS_INTERVENER_3("approvedOrdersIntervener3"),
-    APPROVED_ORDERS_SEND_ORDERS_INTERVENER_4("approvedOrdersIntervener4"),
+    APPLICANT_DOCUMENTS_SEND_ORDERS("applicantDocumentsSendOrders"),
+    RESPONDENT_DOCUMENTS_SEND_ORDERS("respondentDocumentsSendOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS("intervenerDocumentsIntervener1SendOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS("intervenerDocumentsIntervener2SendOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS("intervenerDocumentsIntervener3SendOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS("intervenerDocumentsIntervener4SendOrders"),
 
     UNCATEGORISED(null);
 

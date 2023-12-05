@@ -38,17 +38,17 @@ class SendOrdersCategoriserTest extends BaseHandlerTestSetup {
         FinremCaseData finremCaseData = buildFinremCaseData();
         sendOrdersCategoriser.categorise(finremCaseData);
         OrderWrapper orderWrapper = finremCaseData.getOrderWrapper();
-        assertEquals(DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_APPLICANT.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId(),
             orderWrapper.getAppOrderCollection().get(0).getValue().getCaseDocument().getCategoryId());
-        assertEquals(DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_RESPONDENT.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId(),
             orderWrapper.getRespOrderCollection().get(0).getValue().getCaseDocument().getCategoryId());
-        assertEquals(DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_INTERVENER_1.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS.getDocumentCategoryId(),
             orderWrapper.getIntv1OrderCollection().get(0).getValue().getCaseDocument().getCategoryId());
-        assertEquals(DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_INTERVENER_2.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS.getDocumentCategoryId(),
             orderWrapper.getIntv2OrderCollection().get(0).getValue().getCaseDocument().getCategoryId());
-        assertEquals(DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_INTERVENER_3.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS.getDocumentCategoryId(),
             orderWrapper.getIntv3OrderCollection().get(0).getValue().getCaseDocument().getCategoryId());
-        assertEquals(DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_INTERVENER_4.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS.getDocumentCategoryId(),
             orderWrapper.getIntv4OrderCollection().get(0).getValue().getCaseDocument().getCategoryId());
     }
 

@@ -21,27 +21,27 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
 
         if (finremCaseData.getOrderWrapper().getAppOrderCollection() != null) {
             finremCaseData.getOrderWrapper().getAppOrderCollection().forEach(
-                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_APPLICANT));
+                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS));
         }
         if (finremCaseData.getOrderWrapper().getRespOrderCollection() != null) {
             finremCaseData.getOrderWrapper().getRespOrderCollection().forEach(
-                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_RESPONDENT));
+                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS));
         }
         if (finremCaseData.getOrderWrapper().getIntv1OrderCollection() != null) {
             finremCaseData.getOrderWrapper().getIntv1OrderCollection().forEach(
-                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_INTERVENER_1));
+                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS));
         }
         if (finremCaseData.getOrderWrapper().getIntv2OrderCollection() != null) {
             finremCaseData.getOrderWrapper().getIntv2OrderCollection().forEach(
-                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_INTERVENER_2));
+                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS));
         }
         if (finremCaseData.getOrderWrapper().getIntv3OrderCollection() != null) {
             finremCaseData.getOrderWrapper().getIntv3OrderCollection().forEach(
-                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_INTERVENER_3));
+                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS));
         }
         if (finremCaseData.getOrderWrapper().getIntv4OrderCollection() != null) {
             finremCaseData.getOrderWrapper().getIntv4OrderCollection().forEach(
-                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.APPROVED_ORDERS_SEND_ORDERS_INTERVENER_4));
+                ao -> setCategoryToAllOrdersDocs(ao, DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS));
         }
     }
 
