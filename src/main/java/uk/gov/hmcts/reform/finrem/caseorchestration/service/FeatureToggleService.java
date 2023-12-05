@@ -18,13 +18,14 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASEWORKER_NOTICE_OF_CHANGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASE_FILE_VIEW_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.INTERVENER_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SOLICITOR_NOTICE_OF_CHANGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.USE_USER_TOKEN;
+
 
 /**
  * To add a feature toggle flag:
@@ -62,10 +63,6 @@ public class FeatureToggleService {
         return isFeatureEnabled(PAYMENT_REQUEST_USING_CASE_TYPE);
     }
 
-    public boolean isUseUserTokenEnabled() {
-        return isFeatureEnabled(USE_USER_TOKEN);
-    }
-
     public boolean isSolicitorNoticeOfChangeEnabled() {
         return isFeatureEnabled(SOLICITOR_NOTICE_OF_CHANGE);
     }
@@ -93,6 +90,10 @@ public class FeatureToggleService {
 
     public boolean isIntervenerEnabled() {
         return isFeatureEnabled(INTERVENER_ENABLED);
+    }
+
+    public boolean isCaseFileViewEnabled() {
+        return isFeatureEnabled(CASE_FILE_VIEW_ENABLED);
     }
 
     /**

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 
@@ -199,7 +200,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     public void paymentSuccessfulWithCaseType_Consented() throws Exception {
         setupCaseData();
         when(featureToggleService.isPBAUsingCaseTypeEnabled()).thenReturn(true);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         setUpPbaPaymentForCaseType("{"
             + " \"reference\": \"RC-1545-2396-5857-4110\","
@@ -227,7 +228,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     public void paymentSuccessfulWithCaseType_Contested() throws Exception {
         setupCaseData();
         when(featureToggleService.isPBAUsingCaseTypeEnabled()).thenReturn(true);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
 
         setUpPbaPaymentForCaseType("{"
             + " \"reference\": \"RC-1545-2396-5857-4110\","

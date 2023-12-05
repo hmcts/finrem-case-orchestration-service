@@ -504,7 +504,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .thenReturn(getUpdatedContactData(fixture));
         when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData(fixture));
-        when(caseDataService.isConsentedApplication(any())).thenReturn(isConsented);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(isConsented);
     }
 
     private void setUpMockContextReplacing(UserDetails newSolicitor,
@@ -521,7 +521,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .thenReturn(getUpdatedContactData("AppSolReplacing"));
         when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData("AppSolReplacing"));
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
     }
 
     private Map<String, Object> prepareSolAddressData(OrganisationsResponse organisationData) {
@@ -582,28 +582,6 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                     .added(added)
                     .removed(null)
                     .by(testRespSolicitor.getFullName())
-                    .via(NOTICE_OF_CHANGE)
-                    .build()))).build();
-    }
-
-    private RepresentationUpdateHistory getChangeOfRepsIntervener1() {
-        ChangedRepresentative added = ChangedRepresentative.builder()
-            .name(testIntvr1Solicitor.getFullName())
-            .email(testIntvr1Solicitor.getEmail())
-            .organisation(applicantOrg)
-            .build();
-        LocalDateTime date = LocalDateTime.of(LocalDate.of(2020, 6, 1),
-            LocalTime.of(15, 0));
-
-        return RepresentationUpdateHistory.builder().representationUpdateHistory(
-            List.of(element(UUID.randomUUID(),
-                RepresentationUpdate.builder()
-                    .party("applicant")
-                    .clientName("Jane Smith")
-                    .date(date)
-                    .added(added)
-                    .removed(null)
-                    .by(testIntvr1Solicitor.getFullName())
                     .via(NOTICE_OF_CHANGE)
                     .build()))).build();
     }

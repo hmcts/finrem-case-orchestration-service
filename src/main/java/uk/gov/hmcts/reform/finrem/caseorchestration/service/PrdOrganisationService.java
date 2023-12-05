@@ -53,7 +53,7 @@ public class PrdOrganisationService {
             log.info("User with email {} not found", maskEmail(email));
             return Optional.empty();
         } catch (FeignException exception) {
-            throw new RuntimeException(maskEmail(getStackTrace(exception), email));
+            throw new RuntimeException(email != null ? maskEmail(getStackTrace(exception), email) : "Email is not valid or null");
         }
     }
 }

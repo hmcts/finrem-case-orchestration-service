@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 @Data
 @Builder
@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 @NoArgsConstructor
 public class FormGLetterDetails implements DocumentTemplateDetails {
     private String divorceCaseNumber;
-    private FrcCourtDetails courtDetails;
+    private CourtDetailsTemplateFields courtDetails;
     @JsonProperty("applicantFMName")
     private String applicantFmName;
     private String applicantLName;

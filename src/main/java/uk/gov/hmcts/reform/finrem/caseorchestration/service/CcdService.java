@@ -6,6 +6,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CaseEventsApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 
 import java.util.List;
@@ -29,11 +31,34 @@ public class CcdService {
     private final CaseEventsApi caseEventsApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamAuthService idamAuthService;
+    private static final String LOGGER =  "Executing eventType {} on caseId {}";
 
     public void executeCcdEventOnCase(String authorisation, String caseId, String caseTypeId,
                                       String eventType) {
 
-        log.info("Executing eventType {} on caseId {}", eventType, caseId);
+        StartEventResponse startEventResponse = startEventForCaseWorker(authorisation, caseId, caseTypeId, eventType);
+
+        submitEventForCaseWorker(startEventResponse, authorisation, caseId, caseTypeId, eventType, "", "");
+    }
+
+    @Retryable
+    public void executeCcdEventOnCase(CaseDetails caseDetails, String authorisation, String caseId, String caseTypeId,
+                                      String eventType, String summary, String description) {
+
+        log.info(LOGGER, eventType, caseId);
+
+        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
+
+        StartEventResponse startEventResponse = startEventForCaseWorker(authorisation, caseId, caseTypeId, eventType);
+
+        startEventResponse.getCaseDetails().setData(caseDetails.getData());
+
+        submitEventForCaseWorker(startEventResponse, authorisation, caseId, caseTypeId, eventType, summary, description);
+    }
+
+    public StartEventResponse startEventForCaseWorker(String authorisation, String caseId, String caseTypeId,
+                                               String eventType) {
+        log.info(LOGGER, eventType, caseId);
 
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
 
@@ -45,6 +70,14 @@ public class CcdService {
                 caseTypeId,
                 caseId,
                 eventType);
+        return startEventResponse;
+    }
+
+    public void submitEventForCaseWorker(StartEventResponse startEventResponse, String authorisation, String caseId, String caseTypeId,
+                                         String eventType, String summary, String description) {
+        log.info(LOGGER, eventType, caseId);
+
+        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
 
         coreCaseDataApi.submitEventForCaseWorker(
             idamToken.getIdamOauth2Token(),
@@ -54,7 +87,7 @@ public class CcdService {
             caseTypeId,
             caseId,
             true,
-            getCaseDataContent(startEventResponse.getCaseDetails().getData(), startEventResponse));
+            getCaseDataContent(startEventResponse.getCaseDetails().getData(), summary, description, startEventResponse));
     }
 
     private CaseDataContent getCaseDataContent(Object caseData,
@@ -68,15 +101,42 @@ public class CcdService {
             .build();
     }
 
+    private CaseDataContent getCaseDataContent(Object caseData, String summary, String description,
+                                               StartEventResponse startEventResponse) {
+        return CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                .id(startEventResponse.getEventId())
+                .summary(summary)
+                .description(description)
+                .build())
+            .data(caseData)
+            .build();
+    }
+
     public List<CaseEventDetail> getCcdEventDetailsOnCase(String authorisation, CaseDetails caseDetails,
                                       String eventType) {
         Long caseId = caseDetails.getId();
         String caseTypeId = caseDetails.getCaseTypeId();
 
-        log.info("Executing eventType {} on caseId {}", eventType, caseId);
+        log.info(LOGGER, eventType, caseId);
 
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
 
+        return caseEventsApi.findEventDetailsForCase(idamToken.getIdamOauth2Token(),
+            idamToken.getServiceAuthorization(),
+            idamToken.getUserId(),
+            JURISDICTION,
+            caseTypeId,
+            caseId.toString());
+    }
+
+    public List<CaseEventDetail> getCcdEventDetailsOnCase(String authorisation, FinremCaseDetails caseDetails) {
+        Long caseId = caseDetails.getId();
+        String caseTypeId = caseDetails.getCaseType().getCcdType();
+        log.info(LOGGER, caseTypeId, caseId);
+
+        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
         return caseEventsApi.findEventDetailsForCase(idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(),
             idamToken.getUserId(),

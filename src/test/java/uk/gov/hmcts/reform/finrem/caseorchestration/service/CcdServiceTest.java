@@ -55,12 +55,40 @@ public class CcdServiceTest {
     }
 
     @Test
+    public void givenCallback_WhenExecuteEventWithData_ThenCcdApiCalled() {
+        CaseDetails caseDetails = buildCaseDetails();
+        when(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
+            .thenReturn(StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
+        FinremCaseDetails finremCaseDetails = buildCallbackRequest().getCaseDetails();
+        ccdService.executeCcdEventOnCase(caseDetails, AUTH_TOKEN, caseDetails.getId().toString(),
+            finremCaseDetails.getCaseType().getCcdType(), EventType.AMEND_CASE.getCcdType(), "Test", "Test");
+
+        verify(coreCaseDataApi).startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any());
+        verify(coreCaseDataApi).submitEventForCaseWorker(any(), any(), any(), any(), any(), any(), anyBoolean(), any());
+    }
+
+    @Test
     public void givenCallback_WhenExecuteGetEvents_ThenCcdApiCalled() {
         when(caseEventsApi.findEventDetailsForCase(any(), any(), any(), any(), any(), any()))
             .thenReturn(any());
         when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
 
         ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, buildCaseDetails(), EventType.CLOSE.getCcdType());
+
+        verify(caseEventsApi).findEventDetailsForCase(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void givenFinremCaseData_WhenExecuteGetEvents_ThenCcdApiCalled() {
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .data(new FinremCaseData()).build();
+
+        when(caseEventsApi.findEventDetailsForCase(any(), any(), any(), any(), any(), any()))
+            .thenReturn(any());
+        when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
+
+        ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, finremCaseDetails);
 
         verify(caseEventsApi).findEventDetailsForCase(any(), any(), any(), any(), any(), any());
     }

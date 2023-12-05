@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -49,6 +51,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -134,6 +137,14 @@ public class DocumentHelperTest {
         assertThat(pensionDocuments.size(), is(2));
     }
 
+
+    @Test
+    public void shouldGetPensionDocumentsFinrem() throws Exception {
+        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
+        List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(pensionDocuments.size(), is(2));
+    }
 
     @Test
     public void shouldGetVariationOrderDocuments() throws Exception {
@@ -701,7 +712,7 @@ public class DocumentHelperTest {
     @Test
     public void shouldReturnTrueWhenCourtIsHighCourtInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
-        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.HIGHCOURT);
+        preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         boolean isHighCourt = documentHelper.isHighCourtSelected(preparedCaseDetails.getData());
         assertTrue(isHighCourt);
     }
@@ -725,7 +736,7 @@ public class DocumentHelperTest {
     @Test
     public void shouldReturnHighCourtStampWhenCourtIsHighCourtInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
-        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.HIGHCOURT);
+        preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
         assertEquals(StampType.HIGH_COURT_STAMP, actualStampType);
     }
@@ -733,7 +744,7 @@ public class DocumentHelperTest {
     @Test
     public void shouldReturnFamilyCourtStampWhenCourtIsLondonInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
-        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.LONDON);
+        preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.LONDON);
         StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
         assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
     }
@@ -812,31 +823,65 @@ public class DocumentHelperTest {
     }
 
     @Test
-    public void getIntervenerOnePaperNotificationRecipient() {
+    public void whenIntervenerOneOnCase_thenGetIntervenerOnePaperNotificationRecipient() {
         IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder().build();
         DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerOneWrapper);
         assertThat(recipient, is(INTERVENER_ONE));
     }
 
     @Test
-    public void getIntervenerTwoPaperNotificationRecipient() {
+    public void whenIntervenerTwoOnCase_thenGetIntervenerTwoPaperNotificationRecipient() {
         IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder().build();
         DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerTwoWrapper);
         assertThat(recipient, is(INTERVENER_TWO));
     }
 
     @Test
-    public void getIntervenerThreePaperNotificationRecipient() {
+    public void whenIntervenerThreeOnCase_thenGetIntervenerThreePaperNotificationRecipient() {
         IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder().build();
         DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerThreeWrapper);
         assertThat(recipient, is(INTERVENER_THREE));
     }
 
     @Test
-    public void getIntervenerFourPaperNotificationRecipient() {
+    public void whenIntervenerFourOnCase_thenGetIntervenerFourPaperNotificationRecipient() {
         IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder().build();
         DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerFourWrapper);
         assertThat(recipient, is(INTERVENER_FOUR));
+    }
+
+    @Test
+    public void whenNoLatestGeneralOrder_thenReturnNull() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        assertNull(documentHelper.getLatestGeneralOrder(caseDetails.getData()));
+    }
+
+    @Test
+    public void checkIfOrderAlreadyInFinalOrderCollection() {
+        List<DirectionOrderCollection> list = new ArrayList<>();
+
+        assertFalse(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+
+        DirectionOrderCollection orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build()).build();
+        list.add(orderCollection);
+
+        assertTrue(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+
+        list = new ArrayList<>();
+        CaseDocument caseDocument = caseDocument("url", "name.pdf", "binary");
+        orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(caseDocument).build()).build();
+        list.add(orderCollection);
+
+        assertFalse(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+    }
+
+    @Test
+    public void prepareFinalOrder() {
+        DirectionOrderCollection orderCollection = documentHelper.prepareFinalOrder(caseDocument());
+        assertEquals(YesOrNo.YES, orderCollection.getValue().getIsOrderStamped());
+        assertNotNull(orderCollection.getValue().getOrderDateTime());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

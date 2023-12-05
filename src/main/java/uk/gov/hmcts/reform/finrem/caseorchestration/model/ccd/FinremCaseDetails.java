@@ -11,8 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.ccd.client.model.Classification;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimRegionWrapper;
 
@@ -109,7 +109,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
 
     @JsonIgnore
     public String getSelectedCourt() {
-        DefaultRegionWrapper regionWrapper = data.getRegionWrapper().getDefaultRegionWrapper();
+        AllocatedRegionWrapper regionWrapper = data.getRegionWrapper().getAllocatedRegionWrapper();
         CourtListWrapper courtList = regionWrapper.getDefaultCourtListWrapper();
         return Map.of(
             Region.MIDLANDS, getMidlandsCourt(regionWrapper.getMidlandsFrcList(), courtList),

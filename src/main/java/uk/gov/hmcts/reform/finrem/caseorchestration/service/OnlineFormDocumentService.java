@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifor
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 
 import java.util.Map;
 import java.util.Objects;
@@ -69,7 +70,7 @@ public class OnlineFormDocumentService {
     public CaseDocument generateMiniFormA(String authorisationToken, CaseDetails caseDetails) {
 
         log.info("Generating Consented Mini Form A for Case ID : {}", caseDetails.getId());
-        CaseDetails  caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getMiniFormTemplate(caseDetails),
             documentConfiguration.getMiniFormFileName());
@@ -126,6 +127,28 @@ public class OnlineFormDocumentService {
 
         Optional.ofNullable(miniFormData(caseDetails)).ifPresent(data -> deleteOldMiniFormA(data, authorisationToken));
         return caseDocument;
+    }
+
+    public CaseDocument generateDraftContestedMiniFormA(String authorisationToken, FinremCaseDetails caseDetails) {
+        log.info("Generating Draft Contested Mini Form A for Case ID : {}", caseDetails.getId());
+        FinremCaseData caseData = caseDetails.getData();
+        String contestedDraftMiniFormTemplate;
+        if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())
+            || caseData.getScheduleOneWrapper().getTypeOfApplication().equals(
+                Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS)) {
+            contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplate();
+        } else {
+            contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplateSchedule();
+        }
+        log.info("Generating Draft Contested Mini Form A for Case ID : {} using template {}", caseDetails.getId(), contestedDraftMiniFormTemplate);
+        Map<String, Object> contestedDraftMiniFormPlaceholdersMap = contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(
+            caseDetails, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(
+            authorisationToken,
+            contestedDraftMiniFormPlaceholdersMap,
+            contestedDraftMiniFormTemplate,
+            documentConfiguration.getContestedDraftMiniFormFileName(),
+            caseDetails.getId().toString());
     }
 
     private CaseDetails translateOptions(CaseDetails caseDetails) {

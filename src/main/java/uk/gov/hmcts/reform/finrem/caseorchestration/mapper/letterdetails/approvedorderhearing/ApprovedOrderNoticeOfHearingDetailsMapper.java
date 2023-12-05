@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDe
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ApprovedOrderNoticeOfHearingDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
@@ -32,7 +32,7 @@ public class ApprovedOrderNoticeOfHearingDetailsMapper extends AbstractLetterDet
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getData();
         HearingDirectionDetail hearingDirectionDetail = getHearingDirectionDetail(caseDetails);
-        FrcCourtDetails selectedFRCDetails = courtDetailsMapper
+        CourtDetailsTemplateFields selectedFRCDetails = courtDetailsMapper
             .getCourtDetails(hearingDirectionDetail.getLocalCourt().getDefaultCourtListWrapper());
 
         return ApprovedOrderNoticeOfHearingDetails.builder()

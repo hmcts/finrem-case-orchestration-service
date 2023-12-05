@@ -15,12 +15,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConso
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerFourDocumentHandler;
@@ -65,18 +72,26 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private DocumentHelper documentHelper;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
+    private CaseDataService caseDataService;
+    @Mock
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @Mock
+    private NotificationService notificationService;
+    @Mock
+    private OrderDateService dateService;
 
     @BeforeEach
     public void setUpTest() {
         sendOrderContestedAboutToSubmitHandler = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper, generalOrderService,
             genericDocumentService, documentHelper, List.of(
-                new SendOrderApplicantDocumentHandler(),
-                new SendOrderRespondentDocumentHandler(),
-                new SendOrderIntervenerOneDocumentHandler(),
-                new SendOrderIntervenerTwoDocumentHandler(),
-                new SendOrderIntervenerThreeDocumentHandler(),
-                new SendOrderIntervenerFourDocumentHandler())
-        );
+                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
+                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
+                new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService),
+                new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService),
+                new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService),
+                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService)),
+            dateService);
     }
 
     @Test
@@ -173,9 +188,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
         assertNull(caseData.getPartiesOnCase().getValue());
         assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertNull(caseData.getIntv1OrderCollection());
-        assertNull(caseData.getAppOrderCollection());
-        assertNull(caseData.getRespOrderCollection());
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertNull(caseData.getOrderWrapper().getAppOrderCollection());
+        assertNull(caseData.getOrderWrapper().getRespOrderCollection());
         assertNull(caseData.getAdditionalDocument());
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
@@ -225,46 +240,46 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
         assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertNull(caseData.getIntv1OrderCollection());
-        assertEquals(1, caseData.getIntv1OrderCollections().size());
-        assertNull(caseData.getAppOrderCollection());
-        assertEquals(1, caseData.getAppOrderCollections().size());
-        assertNull(caseData.getRespOrderCollection());
-        assertEquals(1, caseData.getRespOrderCollections().size());
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().size());
+        assertNull(caseData.getOrderWrapper().getAppOrderCollection());
+        assertEquals(1, caseData.getOrderWrapper().getAppOrderCollections().size());
+        assertNull(caseData.getOrderWrapper().getRespOrderCollection());
+        assertEquals(1, caseData.getOrderWrapper().getRespOrderCollections().size());
         assertEquals(4, caseData.getOrdersSentToPartiesCollection().size());
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(generalOrderService).isSelectedOrderMatches(any(), any());
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
-
+        verify(dateService).addCreatedDateInFinalOrder(any(), any());
 
         response
             = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
-        assertEquals(2, caseData.getFinalOrderCollection().size());
-        assertNull(caseData.getIntv1OrderCollection());
-        assertEquals(2, caseData.getIntv1OrderCollections().size());
-        List<ApprovedOrderConsolidateCollection> intv1OrderCollections = caseData.getIntv1OrderCollections();
+        assertEquals(1, caseData.getFinalOrderCollection().size());
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertEquals(2, caseData.getOrderWrapper().getIntv1OrderCollections().size());
+        List<ApprovedOrderConsolidateCollection> intv1OrderCollections = caseData.getOrderWrapper().getIntv1OrderCollections();
         LocalDateTime orderReceivedAt1 = intv1OrderCollections.get(0).getValue().getOrderReceivedAt();
         LocalDateTime orderReceivedAt2 = intv1OrderCollections.get(1).getValue().getOrderReceivedAt();
 
         assertTrue(orderReceivedAt1.isAfter(orderReceivedAt2));
 
-        assertNull(caseData.getAppOrderCollection());
-        assertEquals(2, caseData.getAppOrderCollections().size());
-        List<ApprovedOrderConsolidateCollection> appOrderCollections = caseData.getAppOrderCollections();
+        assertNull(caseData.getOrderWrapper().getAppOrderCollection());
+        assertEquals(2, caseData.getOrderWrapper().getAppOrderCollections().size());
+        List<ApprovedOrderConsolidateCollection> appOrderCollections = caseData.getOrderWrapper().getAppOrderCollections();
         LocalDateTime orderReceivedAt1a = appOrderCollections.get(0).getValue().getOrderReceivedAt();
         LocalDateTime orderReceivedAt2a = appOrderCollections.get(1).getValue().getOrderReceivedAt();
 
         assertTrue(orderReceivedAt1a.isAfter(orderReceivedAt2a));
 
-        assertNull(caseData.getRespOrderCollection());
+        assertNull(caseData.getOrderWrapper().getRespOrderCollection());
 
-        assertEquals(2, caseData.getRespOrderCollections().size());
-        List<ApprovedOrderConsolidateCollection> respOrderCollections = caseData.getRespOrderCollections();
+        assertEquals(2, caseData.getOrderWrapper().getRespOrderCollections().size());
+        List<ApprovedOrderConsolidateCollection> respOrderCollections = caseData.getOrderWrapper().getRespOrderCollections();
         LocalDateTime orderReceivedAtR1 = respOrderCollections.get(0).getValue().getOrderReceivedAt();
         LocalDateTime orderReceivedAtR2 = respOrderCollections.get(1).getValue().getOrderReceivedAt();
 
@@ -274,7 +289,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(generalOrderService, times(2)).isSelectedOrderMatches(any(), any());
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
         verify(documentHelper, times(2)).getStampType(caseData);
-
+        verify(dateService, times(2)).addCreatedDateInFinalOrder(any(), any());
     }
 
     @Test
@@ -283,6 +298,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
+        List<DirectionOrderCollection> orderList = new ArrayList<>();
+        DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument("docurl","abc.pdf", "binaryurl"))
+            .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
+        orderList.add(order);
+        data.setUploadHearingOrder(orderList);
 
         DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiSelectListElement.builder()
@@ -296,7 +317,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.setOrdersToShare(selectedDocs);
-
+        when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
+        when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
@@ -308,12 +330,58 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size());
-        assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertNull(caseData.getIntv1OrderCollection());
-        assertEquals(1, caseData.getIntv1OrderCollections().size());
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().size());
+        assertEquals(2, caseData.getFinalOrderCollection().size());
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
+
+    }
+
+    @Test
+    void givenContestedCase_whenAlreadyStampedOrderThen_handleAndDoNotStampAgain() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setPartiesOnCase(getParties());
+        List<DirectionOrderCollection> orderList = new ArrayList<>();
+        CaseDocument caseDocument = caseDocument("docurl", "abc.pdf", "binaryurl");
+        DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument)
+            .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
+        orderList.add(order);
+        data.setUploadHearingOrder(orderList);
+        data.setFinalOrderCollection(orderList);
+
+        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .build();
+
+        data.setOrdersToShare(selectedDocs);
+        when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
+        when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
+        when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
+            = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+        assertEquals(12, caseData.getPartiesOnCase().getValue().size());
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().size());
+        assertEquals(1, caseData.getFinalOrderCollection().size());
+
+        verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
+        verify(documentHelper, never()).getStampType(caseData);
 
     }
 
@@ -321,7 +389,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         List<DynamicMultiSelectListElement> list = new ArrayList<>();
         partyList().forEach(role -> list.add(getElementList(role)));
-
         return DynamicMultiSelectList.builder()
             .value(list)
             .listItems(list)

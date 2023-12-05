@@ -19,12 +19,14 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -32,6 +34,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -68,7 +76,23 @@ public class DraftOnlineDocumentController {
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
 
+        setDefaultOrgIfNotSetAlready(caseData);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private void setDefaultOrgIfNotSetAlready(Map<String, Object> caseData) {
+        caseData.computeIfAbsent(ORGANISATION_POLICY_APPLICANT, k -> buildOrganisationPolicy(CaseRole.APP_SOLICITOR.getCcdCode()));
+        caseData.computeIfAbsent(ORGANISATION_POLICY_RESPONDENT, k -> buildOrganisationPolicy(CaseRole.RESP_SOLICITOR.getCcdCode()));
+    }
+
+    private Map<String, Object> buildOrganisationPolicy(String caseAssignedRole) {
+        Map<String, Object> policy = new HashMap<>();
+        policy.put(ORGANISATION_POLICY_ROLE, caseAssignedRole);
+        policy.put(ORGANISATION_POLICY_REF, null);
+        Map<String, Object> org = new HashMap<>();
+        org.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
+        policy.put(ORGANISATION_POLICY_ORGANISATION, org);
+        return policy;
     }
 }

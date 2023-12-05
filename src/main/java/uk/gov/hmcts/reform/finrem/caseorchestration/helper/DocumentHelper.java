@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderOtherD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -53,12 +55,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,14 +99,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
@@ -171,6 +174,16 @@ public class DocumentHelper {
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(PENSION_DOCS_COLLECTION))
             .map(this::convertToPensionCollectionDataList)
+            .orElse(emptyList())
+            .stream()
+            .map(PensionTypeCollection::getTypedCaseDocument)
+            .map(PensionType::getPensionDocument)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+    public List<CaseDocument> getPensionDocumentsData(FinremCaseData caseData) {
+        return ofNullable(caseData.getPensionCollection())
             .orElse(emptyList())
             .stream()
             .map(PensionTypeCollection::getTypedCaseDocument)
@@ -281,6 +294,14 @@ public class DocumentHelper {
             return null;
         }
         return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
+    }
+
+    public CaseDocument getLatestGeneralOrder(FinremCaseData caseData) {
+        if (isNull(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
+            log.warn("Latest general order not found for printing for case");
+            return null;
+        }
+        return convertToCaseDocument(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument());
     }
 
     public CaseDocument convertToCaseDocumentIfObjNotNull(Object object) {
@@ -416,7 +437,6 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
      * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, PaperNotificationRecipient)}</p>
@@ -486,7 +506,8 @@ public class DocumentHelper {
             caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         } else {
             log.info("Failed to prepare template data as not all required address details were present for caseId {}", ccdNumber);
-            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document for caseId " + ccdNumber);
+            throw new IllegalArgumentException("DocumentHelper CaseDetails Mandatory data missing from address when "
+                + "trying to generate document for caseId " + ccdNumber);
         }
 
         return caseDetailsCopy;
@@ -518,7 +539,8 @@ public class DocumentHelper {
             caseData.put("courtDetails", buildFrcCourtDetails(finremCaseDetails.getData()));
         } else {
             log.info("Failed to prepare template data as not all required address details were present on case {}", caseId);
-            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
+            throw new IllegalArgumentException("DocumentHelper FinremCaseDetails Mandatory data missing from address"
+                + " when trying to generate document for caseId " + caseId);
         }
 
         return caseDetails;
@@ -659,22 +681,6 @@ public class DocumentHelper {
         return documents;
     }
 
-
-    public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
-                                                                                  String documentName) {
-        List<CaseDocument> documents = new ArrayList<>();
-
-        List<Map<String, Object>> documentList = ofNullable(data.get(collectionName))
-            .map(i -> (List<Map<String, Object>>) i)
-            .orElse(new ArrayList<>());
-
-        for (Map<String, Object> document : documentList) {
-            Map<String, Object> value = (Map<String, Object>) document.get(VALUE);
-            getDocumentLinkAsCaseDocument(value, documentName).ifPresent(documents::add);
-        }
-        return documents;
-    }
-
     public Optional<CaseDocument> getDocumentLinkAsCaseDocument(Map<String, Object> data, String documentName) {
         Map<String, Object> documentLink = documentName != null
             ? (Map<String, Object>) data.get(documentName)
@@ -723,10 +729,11 @@ public class DocumentHelper {
         });
     }
 
-    public List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
+    public List<DirectionOrderCollection> getFinalOrderCollection(Map<String, Object> caseData) {
         return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {
         });
     }
+
 
     public List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
         return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
@@ -738,12 +745,6 @@ public class DocumentHelper {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
             .fileName(caseDocument.getDocumentFilename())
             .build();
-    }
-
-    public List<CaseDocument> getHearingNoticeDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(HEARING_NOTICES_COLLECTION),
-            new TypeReference<>() {
-            });
     }
 
     public static PaperNotificationRecipient getIntervenerPaperNotificationRecipient(IntervenerWrapper intervenerWrapper) {
@@ -771,7 +772,7 @@ public class DocumentHelper {
     }
 
     public boolean isHighCourtSelected(FinremCaseData caseData) {
-        Region region = caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList();
+        Region region = caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList();
         return Region.HIGHCOURT.equals(region);
     }
 
@@ -781,5 +782,24 @@ public class DocumentHelper {
 
     public StampType getStampType(FinremCaseData caseData) {
         return isHighCourtSelected(caseData) ? StampType.HIGH_COURT_STAMP : StampType.FAMILY_COURT_STAMP;
+    }
+
+    public boolean checkIfOrderAlreadyInFinalOrderCollection(List<DirectionOrderCollection> finalOrderCollection, CaseDocument caseDocument) {
+        if (!finalOrderCollection.isEmpty()) {
+            Set<String> filenames = new HashSet<>();
+            finalOrderCollection.forEach(obj -> filenames.add(obj.getValue().getUploadDraftDocument().getDocumentFilename()));
+            return filenames.contains(caseDocument.getDocumentFilename());
+        }
+        return false;
+    }
+
+    public DirectionOrderCollection prepareFinalOrder(CaseDocument document) {
+        return DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(document)
+                .isOrderStamped(YesOrNo.YES)
+                .orderDateTime(LocalDateTime.now())
+                .build())
+            .build();
     }
 }

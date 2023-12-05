@@ -110,7 +110,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
         verify(consentOrderApprovedDocumentService).generateApprovedConsentOrderLetter(any(), any());
         verify(genericDocumentService).annexStampDocument(any(), any(), any(), any());
-        verify(documentHelper, times(2)).getPensionDocumentsData(any());
+        verify(documentHelper, times(2)).getPensionDocumentsData(any(Map.class));
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
     }
 
@@ -129,7 +129,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
     @Test
     void given_case_when_NotPaperApplication_then_shouldNotTriggerConsentOrderApprovedNotificationLetter() {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
-        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+        when(documentHelper.getPensionDocumentsData(any(Map.class))).thenReturn(singletonList(caseDocument()));
 
         CallbackRequest callbackRequest =
             doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);

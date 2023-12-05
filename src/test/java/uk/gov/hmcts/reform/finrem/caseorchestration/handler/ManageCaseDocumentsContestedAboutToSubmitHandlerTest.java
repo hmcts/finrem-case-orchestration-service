@@ -81,15 +81,15 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         caseData = caseDetails.getData();
 
         RespondentChronologiesStatementHandler respondentChronologiesStatementCollectionService =
-            new RespondentChronologiesStatementHandler();
+            new RespondentChronologiesStatementHandler(featureToggleService);
         ApplicantOtherDocumentsHandler applicantOtherDocumentsCollectionService =
-            new ApplicantOtherDocumentsHandler();
+            new ApplicantOtherDocumentsHandler(featureToggleService);
         FdrDocumentsHandler fdrDocumentsCollectionService =
-            new FdrDocumentsHandler();
+            new FdrDocumentsHandler(featureToggleService);
         RespondentQuestionnairesAnswersHandler respondentQuestionnairesAnswersCollectionService =
-            new RespondentQuestionnairesAnswersHandler();
+            new RespondentQuestionnairesAnswersHandler(featureToggleService);
         ApplicantChronologiesStatementHandler applicantChronologiesStatementCollectionService =
-            new ApplicantChronologiesStatementHandler();
+            new ApplicantChronologiesStatementHandler(featureToggleService);
 
         List<DocumentHandler> documentHandlers =
             Stream.of(respondentChronologiesStatementCollectionService, applicantOtherDocumentsCollectionService,

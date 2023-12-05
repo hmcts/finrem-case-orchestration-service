@@ -27,6 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildHearingCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
 @Service
@@ -51,7 +52,7 @@ public class HearingDocumentService {
 
     public Map<String, CaseDocument> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        caseDetailsCopy = addCourtFields(caseDetailsCopy);
+        caseDetailsCopy = addHearingCourtFields(caseDetailsCopy);
 
         return Optional.of(Pair.of(caseDetailsCopy, authorisationToken))
             .filter(pair -> pair.getLeft().getData().get(FAST_TRACK_DECISION) != null)
@@ -104,6 +105,12 @@ public class HearingDocumentService {
         return isFastTrackApplication.apply(pair.getLeft().getData());
     }
 
+    CaseDetails addHearingCourtFields(CaseDetails caseDetails) {
+        Map<String, Object> data = caseDetails.getData();
+        data.put("courtDetails", buildHearingCourtDetails(data));
+        return caseDetails;
+    }
+
     @SuppressWarnings("java:S1874")
     CaseDetails addCourtFields(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
@@ -136,8 +143,8 @@ public class HearingDocumentService {
      * both non-fast track and fast track cases. Fast track cases will have
      * additionally form G populated.</p>
      */
-    public boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
-        return caseDetails.getData().containsKey(FORM_C);
+    public boolean alreadyHadFirstHearing(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getFormC() != null;
     }
 
     public List<String> sendListForHearingCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
@@ -161,9 +168,6 @@ public class HearingDocumentService {
             this.sendInitialHearingCorrespondence(finremCaseDetails, authorisationToken);
             log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
         }
-        CaseDetails caseDetailsCopy = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-        caseDetails.getData().putAll(caseDetailsCopy.getData());
-        log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
         return errors;
     }
 

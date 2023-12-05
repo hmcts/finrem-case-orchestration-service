@@ -16,11 +16,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
@@ -115,6 +116,7 @@ public class FinremCaseData {
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
     private CaseDocument additionalDocument;
+    private List<DocumentCollection> additionalCicDocuments;
     private String orderDirectionOpt2;
     private YesOrNo orderDirectionAbsolute;
     private YesOrNo servePensionProvider;
@@ -150,10 +152,10 @@ public class FinremCaseData {
     private CaseDocument approvedConsentOrderLetter;
     private CaseDocument bulkPrintCoverSheetApp;
     private CaseDocument bulkPrintCoverSheetRes;
-    private CaseDocument bulkPrintCoverSheetIntervener1;
-    private CaseDocument bulkPrintCoverSheetIntervener2;
-    private CaseDocument bulkPrintCoverSheetIntervener3;
-    private CaseDocument bulkPrintCoverSheetIntervener4;
+    private CaseDocument bulkPrintCoverSheetIntv1;
+    private CaseDocument bulkPrintCoverSheetIntv2;
+    private CaseDocument bulkPrintCoverSheetIntv3;
+    private CaseDocument bulkPrintCoverSheetIntv4;
     private String bulkPrintLetterIdRes;
     private String bulkPrintLetterIdApp;
     private List<ConsentOrderCollection> approvedOrderCollection;
@@ -256,19 +258,6 @@ public class FinremCaseData {
 
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;
-    private List<ApprovedOrderConsolidateCollection> appOrderCollections;
-    private List<ApprovedOrderConsolidateCollection> respOrderCollections;
-    private List<ApprovedOrderConsolidateCollection> intv1OrderCollections;
-    private List<ApprovedOrderConsolidateCollection> intv2OrderCollections;
-    private List<ApprovedOrderConsolidateCollection> intv3OrderCollections;
-    private List<ApprovedOrderConsolidateCollection> intv4OrderCollections;
-    private List<ApprovedOrderCollection> appOrderCollection;
-    private List<ApprovedOrderCollection> respOrderCollection;
-    private List<ApprovedOrderCollection> intv1OrderCollection;
-    private List<ApprovedOrderCollection> intv2OrderCollection;
-    private List<ApprovedOrderCollection> intv3OrderCollection;
-    private List<ApprovedOrderCollection> intv4OrderCollection;
-
     private List<IntervenerHearingNoticeCollection> intv1HearingNoticesCollection;
     private List<IntervenerHearingNoticeCollection> intv2HearingNoticesCollection;
     private List<IntervenerHearingNoticeCollection> intv3HearingNoticesCollection;
@@ -373,6 +362,9 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ConsentOrderWrapper consentOrderWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private OrderWrapper orderWrapper;
     private YesOrNo additionalHearingDocumentsOption;
     private CaseDocument additionalListOfHearingDocuments;
 
@@ -619,6 +611,15 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public OrderWrapper getOrderWrapper() {
+        if (orderWrapper == null) {
+            this.orderWrapper = new OrderWrapper();
+        }
+
+        return orderWrapper;
+    }
+
+    @JsonIgnore
     public String nullToEmpty(Object o) {
         return Objects.toString(o, "");
     }
@@ -778,18 +779,19 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
-    public String getSelectedCourt() {
-        DefaultRegionWrapper regionWrapper = getRegionWrapper().getDefaultRegionWrapper();
-        CourtListWrapper courtList = regionWrapper.getDefaultCourtListWrapper();
-        return Map.of(Region.MIDLANDS, getMidlandsCourt(regionWrapper.getMidlandsFrcList(), courtList), Region.LONDON,
-                getCourtListIdOrDefault(regionWrapper.getDefaultCourtListWrapper().getCfcCourtList()).getSelectedCourtId(), Region.NORTHEAST,
-                getNorthEastCourt(regionWrapper.getNorthEastFrcList(), courtList), Region.NORTHWEST,
-                getNorthWestCourt(regionWrapper.getNorthWestFrcList(), courtList), Region.SOUTHWEST,
-                getSouthWestCourt(regionWrapper.getSouthWestFrcList(), courtList), Region.SOUTHEAST,
-                getSouthEastCourt(regionWrapper.getSouthEastFrcList(), courtList), Region.WALES,
-                getWalesCourt(regionWrapper.getWalesFrcList(), courtList), Region.HIGHCOURT, getHighCourt(regionWrapper.getHighCourtFrcList(),
+    public String getSelectedAllocatedCourt() {
+        AllocatedRegionWrapper allocatedRegionWrapper = getRegionWrapper().getAllocatedRegionWrapper();
+        CourtListWrapper courtList = allocatedRegionWrapper.getDefaultCourtListWrapper();
+        return Map.of(Region.MIDLANDS, getMidlandsCourt(allocatedRegionWrapper.getMidlandsFrcList(), courtList), Region.LONDON,
+                getCourtListIdOrDefault(allocatedRegionWrapper.getDefaultCourtListWrapper().getCfcCourtList()).getSelectedCourtId(), Region.NORTHEAST,
+                getNorthEastCourt(allocatedRegionWrapper.getNorthEastFrcList(), courtList), Region.NORTHWEST,
+                getNorthWestCourt(allocatedRegionWrapper.getNorthWestFrcList(), courtList), Region.SOUTHWEST,
+                getSouthWestCourt(allocatedRegionWrapper.getSouthWestFrcList(), courtList), Region.SOUTHEAST,
+                getSouthEastCourt(allocatedRegionWrapper.getSouthEastFrcList(), courtList), Region.WALES,
+                getWalesCourt(allocatedRegionWrapper.getWalesFrcList(), courtList), Region.HIGHCOURT,
+                getHighCourt(allocatedRegionWrapper.getHighCourtFrcList(),
                     courtList))
-            .get(regionWrapper.getRegionList());
+            .get(allocatedRegionWrapper.getRegionList());
     }
 
 

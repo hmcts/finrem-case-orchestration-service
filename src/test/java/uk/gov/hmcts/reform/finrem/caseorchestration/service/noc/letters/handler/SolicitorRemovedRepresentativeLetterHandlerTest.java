@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
@@ -33,7 +34,7 @@ public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandl
 
     @Before
     public void setUpTest() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(Boolean.FALSE);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(Boolean.FALSE);
     }
 
     @Test

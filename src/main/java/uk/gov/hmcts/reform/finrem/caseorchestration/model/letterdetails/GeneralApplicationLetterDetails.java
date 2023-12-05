@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 @Data
 @Builder
@@ -16,7 +16,7 @@ public class GeneralApplicationLetterDetails implements DocumentTemplateDetails 
     private String ccdCaseNumber;
     private String divorceCaseNumber;
     @JsonProperty("courtDetails")
-    private FrcCourtDetails courtDetails;
+    private CourtDetailsTemplateFields courtDetails;
     @JsonProperty("applicantName")
     private String applicantName;
     @JsonProperty("respondentName")

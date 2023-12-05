@@ -237,7 +237,7 @@ public class NotificationRequestMapper {
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
 
         if (caseDataService.isConsentedApplication(caseDetails)) {
-            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedHearingFrc(interimHearingData));
+            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedFrc(interimHearingData));
         }
 
         if (caseDataService.isContestedApplication(caseDetails)) {
@@ -253,7 +253,7 @@ public class NotificationRequestMapper {
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
 
         if (caseDetails.isConsentedApplication()) {
-            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedHearingFrc(interimHearingData));
+            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedFrc(interimHearingData));
         }
 
         if (caseDetails.isContestedApplication()) {
