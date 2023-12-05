@@ -20,8 +20,11 @@ public class EventTypeTest {
 
     @Test
     public void givenEventHandler_whenMoreThanOneEventMatches_thenThrowError() {
+
         List<String> errors = new ArrayList<>();
-        var handlerClasses = getHandlerClasses();
+        List<Class<?>> handlerClasses = InterfaceImplementingClasses.findClassesImplementingInterface(CallbackHandler.class,
+            "uk.gov.hmcts.reform.finrem.caseorchestration.handler");
+
         for (EventType event : EventType.values()) {
             for (CaseType caseType : CaseType.values()) {
                 for (CallbackType callbackType : CallbackType.values()) {
@@ -84,14 +87,6 @@ public class EventTypeTest {
         });
     }
 
-    private List<Class<?>> getHandlerClasses() {
-        InterfaceImplementingClasses interfaceImplementingClasses = new InterfaceImplementingClasses();
-        List<Class<?>> classesImplementingInterface = interfaceImplementingClasses.findClassesImplementingInterface(CallbackHandler.class,
-            "uk.gov.hmcts.reform.finrem.caseorchestration.handler");
-        return classesImplementingInterface;
-
-
-    }
 
     private boolean invokeCanHandleMethod(Class className,
                                           CallbackType callbackType,
