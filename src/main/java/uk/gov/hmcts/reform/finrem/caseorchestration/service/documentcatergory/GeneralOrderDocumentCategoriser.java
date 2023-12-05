@@ -25,7 +25,7 @@ public class GeneralOrderDocumentCategoriser extends DocumentCategoriser {
         List<ContestedGeneralOrderCollection> generalOrders =
             finremCaseData.getGeneralOrderWrapper().getGeneralOrders();
         log.info("Categorising general order documents for case with Case ID: {}", finremCaseData.getCcdCaseId());
-        categoriseGeneralOrders(generalOrders, DocumentCategory.APPROVED_ORDERS);
+        categoriseGeneralOrders(generalOrders, DocumentCategory.APPROVED_ORDERS_CASE);
 
         List<ContestedGeneralOrderCollection> generalOrdersConsent =
             finremCaseData.getGeneralOrderWrapper().getGeneralOrdersConsent();
@@ -33,14 +33,14 @@ public class GeneralOrderDocumentCategoriser extends DocumentCategoriser {
         categoriseGeneralOrders(generalOrdersConsent, DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION);
     }
 
-    private static void categoriseGeneralOrders(List<ContestedGeneralOrderCollection> generalOrdersConsent,
-                                                DocumentCategory approvedOrdersConsentApplication) {
-        if (generalOrdersConsent != null && !generalOrdersConsent.isEmpty()) {
-            for (ContestedGeneralOrderCollection generalOrder : generalOrdersConsent) {
+    private static void categoriseGeneralOrders(List<ContestedGeneralOrderCollection> generalOrderList,
+                                                DocumentCategory documentCategory) {
+        if (generalOrderList != null && !generalOrderList.isEmpty()) {
+            for (ContestedGeneralOrderCollection generalOrder : generalOrderList) {
                 CaseDocument generalOrderDocument = generalOrder.getValue().getAdditionalDocument();
                 if (generalOrderDocument != null && generalOrderDocument.getCategoryId() == null) {
                     generalOrderDocument.setCategoryId(
-                        approvedOrdersConsentApplication.getDocumentCategoryId());
+                        documentCategory.getDocumentCategoryId());
                 }
             }
         }
