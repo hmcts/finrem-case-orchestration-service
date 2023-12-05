@@ -3,18 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.AssignApplicantSolicitorHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.GeneralApplicationHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.hearingbundles.HearingDatePopulatedValidator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener.IntervenerHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import java.io.File;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,12 +17,9 @@ import static org.junit.Assert.assertTrue;
 @Slf4j
 public class EventTypeTest {
 
-    private final List<Class> handlerClassesToIgnore = Arrays.asList(FinremCallbackHandler.class, FinremCallbackRequest.class,
-        GeneralApplicationHandler.class, CallbackHandler.class, IntervenerHandler.class, AssignApplicantSolicitorHandler.class,
-        HearingDatePopulatedValidator.class);
 
     @Test
-    public void givenEventHandler_whenMoreThanOneEventMatches_thenThrowError() throws ClassNotFoundException {
+    public void givenEventHandler_whenMoreThanOneEventMatches_thenThrowError() {
         List<String> errors = new ArrayList<>();
         var handlerClasses = getHandlerClasses();
         for (EventType event : EventType.values()) {
@@ -81,10 +71,10 @@ public class EventTypeTest {
     }
 
     private void findMatchingClasses(EventType event, CaseType caseType, CallbackType callbackType,
-                                     List<Class> handlerClasses, List<Class> matchingClasses) {
+                                     List<Class<?>> handlerClasses, List<Class> matchingClasses) {
         handlerClasses.forEach(clazz -> {
             try {
-                if (!handlerClassesToIgnore.contains(clazz) && invokeCanHandleMethod(clazz, callbackType, caseType, event)) {
+                if (invokeCanHandleMethod(clazz, callbackType, caseType, event)) {
                     matchingClasses.add(clazz);
                 }
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException
@@ -94,28 +84,13 @@ public class EventTypeTest {
         });
     }
 
-    private List<Class> getHandlerClasses() throws ClassNotFoundException {
-        File directoryPath = Paths.get("./src/main/java/uk/gov/hmcts/reform/finrem/caseorchestration/handler")
-            .toAbsolutePath().toFile();
-        String[] directoryContents = directoryPath.list();
-        List<Class> classes = new ArrayList<>();
-        for (String content : directoryContents) {
-            if (content.endsWith(".java")) {
-                Class<?> className = Class.forName("uk.gov.hmcts.reform.finrem.caseorchestration.handler."
-                    + content.replace(".java", ""));
-                classes.add(className);
-            } else {
-                File subdirectoryPath = new File(directoryPath.getPath() + "/" + content);
-                String[] subdirectoryContents = subdirectoryPath.list();
-                for (String handlerFile : subdirectoryContents) {
-                    Class<?> className = Class.forName(
-                        "uk.gov.hmcts.reform.finrem.caseorchestration.handler."
-                        + content + "." + handlerFile.replace(".java", ""));
-                    classes.add(className);
-                }
-            }
-        }
-        return classes;
+    private List<Class<?>> getHandlerClasses() {
+        InterfaceImplementingClasses interfaceImplementingClasses = new InterfaceImplementingClasses();
+        List<Class<?>> classesImplementingInterface = interfaceImplementingClasses.findClassesImplementingInterface(CallbackHandler.class,
+            "uk.gov.hmcts.reform.finrem.caseorchestration.handler");
+        return classesImplementingInterface;
+
+
     }
 
     private boolean invokeCanHandleMethod(Class className,
