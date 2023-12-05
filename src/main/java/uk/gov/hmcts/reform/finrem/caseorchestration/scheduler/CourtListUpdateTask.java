@@ -46,7 +46,7 @@ public class CourtListUpdateTask extends SpecializedBaseTask {
 
     @Override
     protected CaseType getCaseType() {
-        return CaseType.CONSENTED;
+        return CaseType.CONTESTED;
     }
 
     @Override
