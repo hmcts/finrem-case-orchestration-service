@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -231,10 +232,11 @@ public class DocumentHelperTest {
         List<AdditionalHearingDocumentCollection> additionalHearingDocuments = new ArrayList<>();
         AdditionalHearingDocumentCollection doc1
             = AdditionalHearingDocumentCollection.builder().value(AdditionalHearingDocument
-            .builder().document(caseDocument()).build()).build();
+            .builder().document(caseDocument()).additionalHearingDocumentDate(LocalDateTime.now()).build()).build();
         AdditionalHearingDocumentCollection doc2
             = AdditionalHearingDocumentCollection.builder().value(AdditionalHearingDocument
-            .builder().document(caseDocument("url","abc.pdf","binaryURL")).build()).build();
+            .builder().document(caseDocument("url","abc.pdf","binaryURL"))
+            .additionalHearingDocumentDate(LocalDateTime.now()).build()).build();
 
         additionalHearingDocuments.add(doc1);
         additionalHearingDocuments.add(doc2);

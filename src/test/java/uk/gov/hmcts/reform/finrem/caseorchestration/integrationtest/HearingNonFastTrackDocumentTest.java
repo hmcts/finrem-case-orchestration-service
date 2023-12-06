@@ -316,7 +316,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         caseData.put("bulkPrintCoverSheetRes", caseDocument());
         caseData.put("additionalListOfHearingDocuments", caseDocument());
         List<AdditionalHearingDocumentCollection> collection = List.of(AdditionalHearingDocumentCollection.builder()
-            .value(AdditionalHearingDocument.builder().document(caseDocument()).build()).build());
+            .value(AdditionalHearingDocument.builder().document(caseDocument())
+                .additionalHearingDocumentDate(LocalDateTime.now()).build()).build());
         caseData.put("additionalHearingDocuments", collection);
 
         return objectMapper.writeValueAsString(

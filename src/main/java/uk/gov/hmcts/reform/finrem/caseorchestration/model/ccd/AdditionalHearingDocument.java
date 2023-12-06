@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 @Getter
@@ -15,4 +18,6 @@ import lombok.NoArgsConstructor;
 public class AdditionalHearingDocument {
     @JsonProperty("additionalHearingDocument")
     private CaseDocument document;
+    @JsonProperty("additionalHearingDocumentDate")
+    private LocalDateTime additionalHearingDocumentDate;
 }
