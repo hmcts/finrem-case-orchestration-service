@@ -8,8 +8,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslatorService;
 
-import java.io.IOException;
-
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -63,15 +61,5 @@ public class RejectionOrderTest extends AbstractDocumentTest {
             .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentLink.document_binary_url", is(BINARY_URL)))
             .andExpect(jsonPath("$.errors", hasSize(0)))
             .andExpect(jsonPath("$.warnings", hasSize(0)));
-    }
-
-    private CaseDetails copyOf(CaseDetails caseDetails) {
-        try {
-            CaseDetails deepCopy = objectMapper
-                .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
-            return orderRefusalTranslatorService.translateOrderRefusals(deepCopy);
-        } catch (IOException e) {
-            throw new IllegalStateException();
-        }
     }
 }

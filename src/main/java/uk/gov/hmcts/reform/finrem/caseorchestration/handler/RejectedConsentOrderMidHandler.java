@@ -47,9 +47,16 @@ public class RejectedConsentOrderMidHandler extends FinremCallbackHandler {
             EventType.REJECT_ORDER, caseDetails.getId());
 
         FinremCaseData caseData = service.previewConsentOrderNotApproved(userAuthorisation, caseDetails);
-
+        clearContestedFields(caseData);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData)
             .build();
+    }
+
+    private void clearContestedFields(FinremCaseData caseData) {
+        caseData.setIntervenerOneWrapper(null);
+        caseData.setIntervenerTwoWrapper(null);
+        caseData.setIntervenerThreeWrapper(null);
+        caseData.setIntervenerFourWrapper(null);
     }
 }

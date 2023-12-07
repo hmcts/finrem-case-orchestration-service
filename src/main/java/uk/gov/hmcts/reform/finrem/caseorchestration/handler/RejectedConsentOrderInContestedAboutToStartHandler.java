@@ -14,13 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocument
 
 @Slf4j
 @Service
-public class RejectedConsentOrderAboutToSartHandler extends FinremCallbackHandler {
+public class RejectedConsentOrderInContestedAboutToStartHandler extends FinremCallbackHandler {
 
     private final RefusalOrderDocumentService service;
 
     @Autowired
-    public RejectedConsentOrderAboutToSartHandler(FinremCaseDetailsMapper mapper,
-                                                  RefusalOrderDocumentService service) {
+    public RejectedConsentOrderInContestedAboutToStartHandler(FinremCaseDetailsMapper mapper,
+                                                              RefusalOrderDocumentService service) {
         super(mapper);
         this.service = service;
     }
@@ -30,8 +30,8 @@ public class RejectedConsentOrderAboutToSartHandler extends FinremCallbackHandle
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
                              final EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
-            && CaseType.CONSENTED.equals(caseType)
-            && EventType.REJECT_ORDER.equals(eventType);
+            && CaseType.CONTESTED.equals(caseType)
+            && EventType.CONSENT_ORDER_NOT_APPROVED.equals(eventType);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class RejectedConsentOrderAboutToSartHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for '{}' event '{}' for Case ID: {}",CallbackType.ABOUT_TO_START,
-            EventType.REJECT_ORDER, caseDetails.getId());
+            EventType.CONSENT_ORDER_NOT_APPROVED, caseDetails.getId());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(service.setDefaults(caseDetails.getData(), userAuthorisation))
