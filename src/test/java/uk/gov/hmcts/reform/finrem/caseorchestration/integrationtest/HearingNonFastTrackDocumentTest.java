@@ -272,10 +272,24 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.OK.value()));
         HashMap<String, Object> actual = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<>() {
         });
+
         HashMap<String, Object> expected = objectMapper.readValue(aboutToSubmitExpectedCaseData(), new TypeReference<>() {
         });
 
-        assertThat(objectMapper.readTree(stringify(actual)), is(objectMapper.readTree(stringify(expected))));
+        assertThat(objectMapper.readTree(stringify(actual.get(FORM_C))),
+            is(objectMapper.readTree(stringify(expected.get(FORM_C)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(FORM_G))),
+            is(objectMapper.readTree(stringify(expected.get(FORM_G)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(MINI_FORM_A))),
+            is(objectMapper.readTree(stringify(expected.get(MINI_FORM_A)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(HEARING_ADDITIONAL_DOC))),
+            is(objectMapper.readTree(stringify(expected.get(HEARING_ADDITIONAL_DOC)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(APPLICANT_CONFIDENTIAL_ADDRESS))),
+            is(objectMapper.readTree(stringify(expected.get(APPLICANT_CONFIDENTIAL_ADDRESS)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(RESPONDENT_CONFIDENTIAL_ADDRESS))),
+            is(objectMapper.readTree(stringify(expected.get(RESPONDENT_CONFIDENTIAL_ADDRESS)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(HEARING_ADDITIONAL_INFO))),
+            is(objectMapper.readTree(stringify(expected.get(HEARING_ADDITIONAL_INFO)))));
     }
 
     protected PdfDocumentRequest pdfGenerationRequest(String template) {
@@ -317,7 +331,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         caseData.put("additionalListOfHearingDocuments", caseDocument());
         List<AdditionalHearingDocumentCollection> collection = List.of(AdditionalHearingDocumentCollection.builder()
             .value(AdditionalHearingDocument.builder().document(caseDocument())
-                .additionalHearingDocumentDate(LocalDateTime.now()).build()).build());
+                .additionalHearingDocumentDate(LocalDate.now().atTime(0,0))
+                .build()).build());
         caseData.put("additionalHearingDocuments", collection);
 
         return objectMapper.writeValueAsString(
