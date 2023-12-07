@@ -40,7 +40,7 @@ public class SolicitorAndCaseWorkerDraftOrderMidHandler extends FinremCallbackHa
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for case id: {}",
+        log.info("Invoking contested event {} mid callback for Case ID: {}",
             EventType.SOLICITOR_CW_DRAFT_ORDER, caseId);
         FinremCaseData caseData = caseDetails.getData();
 

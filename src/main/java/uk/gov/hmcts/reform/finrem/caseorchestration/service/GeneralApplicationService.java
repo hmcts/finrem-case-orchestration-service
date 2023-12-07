@@ -109,7 +109,7 @@ public class GeneralApplicationService {
         caseData.getGeneralApplicationWrapper().setGeneralApplicationPreState(caseDetailsBefore.getState().getStateId());
 
         String caseId = caseDetails.getId().toString();
-        log.info("Processing general application for case id {}", caseId);
+        log.info("Processing general application for Case ID: {}", caseId);
 
         interimGeneralApplicationListForRoleType =
             getGeneralApplicationCollectionData(caseDetails, loggedInUserCaseRole, interimGeneralApplicationListForRoleType, caseData,
@@ -279,7 +279,7 @@ public class GeneralApplicationService {
                         .value(dynamicListElement).listItems(List.of(dynamicListElement)).build());
                 });
             }
-            default -> log.info("The current user is a caseworker on case {}", caseDetails.getId());
+            default -> log.info("The current user is a caseworker on Case ID: {}", caseDetails.getId());
         }
         return interimGeneralApplicationListForRoleType;
     }
@@ -299,7 +299,7 @@ public class GeneralApplicationService {
                                                             GeneralApplicationCollectionData items,
                                                             String userAuthorisation) {
         String caseId = caseDetails.getId().toString();
-        log.info("Setting user and date for new application {}", caseId);
+        log.info("Setting user and date for new application on Case ID: {}", caseId);
         GeneralApplicationItems generalApplicationItems = items.getGeneralApplicationItems();
         generalApplicationItems.setGeneralApplicationCreatedBy(idamService.getIdamFullName(userAuthorisation));
         generalApplicationItems.setGeneralApplicationCreatedDate(LocalDate.now());
@@ -410,7 +410,7 @@ public class GeneralApplicationService {
 
     public void updateGeneralApplicationCollectionData(List<GeneralApplicationCollectionData> generalApplications,
                                                        FinremCaseData caseData) {
-        log.info("entering updateGeneralApplicationCollection Data for case Id {}", caseData.getCcdCaseId());
+        log.info("entering updateGeneralApplicationCollection Data for Case ID: {}", caseData.getCcdCaseId());
         helper.populateGeneralApplicationDataSender(caseData, generalApplications);
         logGeneralApplications(generalApplications);
 
@@ -444,7 +444,7 @@ public class GeneralApplicationService {
         String caseId = String.valueOf(caseDetails.getId());
 
         if ((generalApplications == null || generalApplications.isEmpty())) {
-            log.info("Please complete the general application for case Id {}", caseDetails.getId());
+            log.info("Please complete the general application for Case ID: {}", caseDetails.getId());
             errors.add("Please complete the General Application. No information has been entered for this application.");
         } else {
             generalApplications.forEach(ga -> {
@@ -462,7 +462,7 @@ public class GeneralApplicationService {
 
         if (generalApplicationsBefore != null && generalApplications != null
             && (generalApplicationsBefore.size() == generalApplications.size())) {
-            log.info("Please complete the general application for case Id {}", caseDetails.getId());
+            log.info("Please complete the general application for Case ID: {}", caseDetails.getId());
             errors.add("Any changes to an existing General Applications will not be saved. "
                 + "Please add a new General Application in order to progress.");
         }
@@ -544,12 +544,12 @@ public class GeneralApplicationService {
     private static void logGeneralApplications(List<GeneralApplicationCollectionData> generalApplications) {
         generalApplications.forEach(ga -> {
             if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null) {
-                log.info("general application received from is {} on case id 1688466084529064 with status {}",
+                log.info("general application received from is {} on Case ID: 1688466084529064 with status {}",
                     ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom(),
                     ga.getGeneralApplicationItems().getGeneralApplicationStatus());
             }
             if (ga.getGeneralApplicationItems().getGeneralApplicationSender() != null) {
-                log.info("general application sender is {} on case id 1688466084529064 with status {}",
+                log.info("general application sender is {} on Case ID: 1688466084529064 with status {}",
                     ga.getGeneralApplicationItems().getGeneralApplicationSender(),
                     ga.getGeneralApplicationItems().getGeneralApplicationStatus());
             }

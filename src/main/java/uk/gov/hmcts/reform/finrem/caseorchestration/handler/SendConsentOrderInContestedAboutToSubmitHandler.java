@@ -62,13 +62,13 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {}, callback {} for case id {}",
+        log.info("Invoking contested event {}, callback {} for Case ID: {}",
             callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
 
         try {
             FinremCaseData caseData = caseDetails.getData();
             List<String> parties = generalOrderService.getParties(caseDetails);
-            log.info("Selected parties {} on case id {}", parties, caseId);
+            log.info("Selected parties {} on Case ID: {}", parties, caseId);
 
             List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
 

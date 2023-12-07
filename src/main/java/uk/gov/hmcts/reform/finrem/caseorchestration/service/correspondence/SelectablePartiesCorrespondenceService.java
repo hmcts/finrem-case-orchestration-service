@@ -23,7 +23,7 @@ public class SelectablePartiesCorrespondenceService {
     public void setPartiesToReceiveCorrespondence(FinremCaseData data) {
         List<String> selectedParties = data.getSelectedParties();
         if (selectedParties != null && !selectedParties.isEmpty()) {
-            log.info("Setting parties to receive correspondence {} on case {}", selectedParties, data.getCcdCaseId());
+            log.info("Setting parties to receive correspondence {} on Case ID: {}", selectedParties, data.getCcdCaseId());
             data.setApplicantCorrespondenceEnabled(
                 isCorrespondenceShareableWithParties(selectedParties,
                     List.of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode())));

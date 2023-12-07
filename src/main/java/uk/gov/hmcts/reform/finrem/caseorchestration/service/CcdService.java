@@ -31,7 +31,7 @@ public class CcdService {
     private final CaseEventsApi caseEventsApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamAuthService idamAuthService;
-    private static final String LOGGER =  "Executing eventType {} on caseId {}";
+    private static final String LOGGER =  "Executing eventType {} on Case ID: {}";
 
     public void executeCcdEventOnCase(String authorisation, String caseId, String caseTypeId,
                                       String eventType) {

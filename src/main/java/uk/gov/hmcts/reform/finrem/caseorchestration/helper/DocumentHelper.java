@@ -505,7 +505,7 @@ public class DocumentHelper {
             caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
             caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         } else {
-            log.info("Failed to prepare template data as not all required address details were present for caseId {}", ccdNumber);
+            log.info("Failed to prepare template data as not all required address details were present for Case ID: {}", ccdNumber);
             throw new IllegalArgumentException("DocumentHelper CaseDetails Mandatory data missing from address when "
                 + "trying to generate document for caseId " + ccdNumber);
         }
@@ -538,9 +538,9 @@ public class DocumentHelper {
             caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
             caseData.put("courtDetails", buildFrcCourtDetails(finremCaseDetails.getData()));
         } else {
-            log.info("Failed to prepare template data as not all required address details were present on case {}", caseId);
+            log.info("Failed to prepare template data as not all required address details were present on Case ID: {}", caseId);
             throw new IllegalArgumentException("DocumentHelper FinremCaseDetails Mandatory data missing from address"
-                + " when trying to generate document for caseId " + caseId);
+                + " when trying to generate document for Case ID: " + caseId);
         }
 
         return caseDetails;
@@ -557,11 +557,11 @@ public class DocumentHelper {
         boolean isIntervenerRepresented = checkIfIntervenerRepresentedBySolicitor(caseData.getCurrentIntervenerChangeDetails());
 
         if (isIntervenerPresent(recipient) && !isIntervenerRepresented) {
-            log.info("Intervener One is not represented by a solicitor on case {}", caseId);
+            log.info("Intervener One is not represented by a solicitor on Case ID: {}", caseId);
             addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
             addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
         } else {
-            log.info("{} is not represented by a digital solicitor on case {}", recipient, caseId);
+            log.info("{} is not represented by a digital solicitor on Case ID: {}", recipient, caseId);
             ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
             addresseeName = recipient == APPLICANT
                 ? caseDetails.getData().getFullApplicantName()
