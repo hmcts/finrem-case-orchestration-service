@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_OTHER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
@@ -165,8 +164,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
         items.setGeneralApplicationDirectionsDocument(caseDocument);
-        items.setGeneralApplicationOutcomeOther(Objects.toString(
-            caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         String caseId = String.valueOf(caseDetails.getId());

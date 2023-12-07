@@ -29,7 +29,7 @@ public class Court implements CourtListWrapper {
     private RegionSouthWestFrc southWestList;
     private RegionWalesFrc walesList;
 
-    private RegionHighCourtFrc highCourtList;
+    private RegionHighCourtFrc hcCourtList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     DefaultCourtListWrapper courtListWrapper;
