@@ -1,275 +1,197 @@
 {
-  "token": "test_token",
-  "event_id": "FR_orderRefusal",
-  "case_details": {
-    "id": "12345678",
-    "jurisdiction": "divorce",
-    "state": "referredToJudge",
-    "case_type_id": "FinancialRemedyMVP2",
-    "case_data": {
-      "latestConsentOrder": {
-        "document_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f",
-        "document_filename": "sample.pdf",
-        "document_binary_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f/binary"
+  "token" : "token_test",
+  "event_id" : "FR_orderRefusal",
+  "case_details" : {
+    "id" : "123",
+    "jurisdiction" : "DIVORCE",
+    "state" : "caseAdded",
+    "case_type_id" : "FinancialRemedyMVP2",
+    "case_data" : {
+      "divorceCaseNumber" : "DD12D12345",
+      "divorceStageReached" : "Decree Nisi",
+      "divorceUploadEvidence1" : {
+        "document_url" : "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
+        "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url" : "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
       },
-      "PBANumber": "PBA123456",
-      "d81Question": "No",
-      "PBAreference": "ABCD",
-      "consentOrder": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+      "authorisationName" : "test",
+      "authorisationFirm" : "test",
+      "authorisation2b" : "test",
+      "authorisation3" : "2010-01-01",
+      "consentOrder" : {
+        "document_url" : "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+        "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url" : "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
       },
-      "d81Joint": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+      "consentOrderText" : {
+        "document_url" : "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
+        "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url" : "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
       },
-      "d81Applicant": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+      "d81Question" : "No",
+      "d81Applicant" : {
+        "document_url" : "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
+        "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url" : "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
       },
-      "d81Respondent": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+      "d81Respondent" : {
+        "document_url" : "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
+        "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url" : "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
       },
-      "authorisation3": "2010-01-01",
-      "applicantFMName": "Poor",
-      "applicantLName": "Guy",
-      "applicantAddress": {
-        "County": "essex",
-        "Country": "UK",
-        "PostCode": "b1 1ab",
-        "PostTown": "london",
-        "AddressLine1": "line1",
-        "AddressLine2": "line2",
-        "AddressLine3": "line3"
-      },
-      "applicantRepresented": "No",
-      "authorisation2b": "test",
-      "otherCollection": [
+      "pensionCollection" : [
         {
-          "id": "1",
-          "value": {
-            "typeOfDocument": "pdf",
-            "uploadedDocument": {
-              "document_url": "http://file1",
-              "document_filename": "file1",
-              "document_binary_url": "http://file1.binary"
+          "id" : "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
+          "value" : {
+            "typeOfDocument" : "Form P2",
+            "uploadedDocument" : {
+              "document_url" : "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589",
+              "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url" : "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589/binary"
             }
           }
         }
       ],
-      "respondentEmail": "test@test.com",
-      "respondentPhone": "9963472494",
-      "appRespondentRep": "No",
-      "consentOrderText": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
-      },
-      "authorisationFirm": "test",
-      "authorisationName": "test",
-      "divorceCaseNumber": "DD12D12345",
-      "pensionCollection": [
+      "helpWithFeesQuestion" : "No",
+      "orderRefusalCollection" : [
         {
-          "id": "1",
-          "value": {
-            "typeOfDocument": "pdf",
-            "uploadedDocument": {
-              "document_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f",
-              "document_filename": "sample.pdf",
-              "document_binary_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f/binary"
+          "value" : {
+            "orderRefusalAfterText" : "testAfterText",
+            "orderRefusal" : [
+              "Insufficient information provided – A",
+              "Insufficient information provided – B",
+              "Transferred to Applicant’s home Court",
+              "Transferred to Applicant's home Court",
+              "Other (please specify)"
+            ],
+            "orderRefusalOther" : "test1",
+            "orderRefusalDocs" : {
+              "document_url" : "http://doc1",
+              "document_filename" : "doc1",
+              "document_binary_url" : "http://doc1.binary"
+            },
+            "orderRefusalJudgeName" : "test3",
+            "orderRefusalDate" : "2003-02-01",
+            "orderRefusalAddComments" : "comment1",
+            "orderRefusalJudge" : "District Judge"
+          }
+        }
+      ],
+      "orderRefusalCollectionNew" : {
+        "orderRefusalAfterText" : "testAfterText",
+        "orderRefusal" : [
+          "Insufficient information provided – A",
+          "Insufficient information provided – B",
+          "Transferred to Applicant home Court - A",
+          "Transferred to Applicant home Court - B",
+          "Other (please specify)"
+        ],
+        "orderRefusalOther" : "test1",
+        "orderRefusalDocs" : {
+          "document_url" : "http://doc1",
+          "document_filename" : "doc1",
+          "document_binary_url" : "http://doc1.binary"
+        },
+        "orderRefusalJudgeName" : "test3",
+        "orderRefusalDate" : "2003-02-01",
+        "orderRefusalAddComments" : "comment1",
+        "orderRefusalJudge" : "District Judge"
+      },
+      "uploadOrder" : [
+        {
+          "value" : {
+            "DocumentType" : "generalOrder",
+            "DocumentLink" : {
+              "document_url" : "http://doc1",
+              "document_filename" : "doc1",
+              "document_binary_url" : "http://doc1.binary"
+            },
+            "DocumentEmailContent" : "email-content",
+            "DocumentDateAdded" : "2010-01-02",
+            "DocumentComment" : "doc-comment",
+            "DocumentFileName" : "file1"
+          },
+          "id" : "1"
+        }
+      ],
+      "applicantRepresented" : "Yes",
+      "solicitorReference" : "LL01",
+      "respondentAddress" : {
+        "AddressLine1" : "252 Marvels Lane",
+        "AddressLine2" : "AddressGlobalUK",
+        "AddressLine3" : "London",
+        "County" : "Essex",
+        "Country" : "United Kingdom",
+        "PostTown" : "London",
+        "PostCode" : "SE12 9SE"
+      },
+      "respondentPhone" : "9963472494",
+      "solicitorName" : "Solictor",
+      "solicitorFirm" : "Mr",
+      "solicitorAddress" : {
+        "AddressLine1" : "House no: 6-354-2, Gandhi Street",
+        "AddressLine2" : "Srikalahasti, Chittor District",
+        "AddressLine3" : "test",
+        "County" : "test",
+        "Country" : "United Kingdom",
+        "PostTown" : "SRIKALAHASTI",
+        "PostCode" : "b1 1ab"
+      },
+      "solicitorPhone" : "9963472494",
+      "solicitorEmail" : "test@admin.com",
+      "solicitorAgreeToReceiveEmails" : "Yes",
+      "appRespondentLName" : "Korivi",
+      "applicantFMName" : "Poor",
+      "applicantLName" : "Guy",
+      "appRespondentFMName" : "test",
+      "appRespondentRep" : "No",
+      "natureOfApplication2" : [
+        "Lump Sum Order",
+        "Periodical Payment Order",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "A settlement or a transfer of property",
+        "Property Adjustment Order"
+      ],
+      "natureOfApplication3a" : "test",
+      "natureOfApplication3b" : "test",
+      "orderForChildrenQuestion1" : "Yes",
+      "natureOfApplication5" : "No",
+      "natureOfApplication6" : [
+        "Step Child or Step Children",
+        "disability expenses",
+        "In addition to child support",
+        "training",
+        "When not habitually resident"
+      ],
+      "natureOfApplication7" : "test",
+      "otherCollection" : [
+        {
+          "value" : {
+            "typeOfDocument" : "ScheduleOfAssets",
+            "uploadedDocument" : {
+              "document_url" : "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
+              "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url" : "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
             }
           }
         }
       ],
-      "respondentAddress": {
-        "County": "essex",
-        "Country": "UK",
-        "PostCode": "b1 1ab",
-        "PostTown": "london",
-        "AddressLine1": "line1",
-        "AddressLine2": "line2",
-        "AddressLine3": "line3"
+      "PBANumber" : "PBA123456",
+      "PBAreference" : "ABCD",
+      "ApplicantName" : "Poor Guy",
+      "RefusalOrderHeader" : "Sitting in the Family Court",
+      "RespondentName" : "test Korivi",
+      "CourtName" : "SITTING in private",
+      "courtDetails" : {
+        "courtName" : "Family Court at the Courts and Tribunal Service Centre",
+        "courtAddress" : "PO Box 12746, Harlow, CM20 9QZ",
+        "phoneNumber" : "0300 303 0642",
+        "email" : "contactFinancialRemedy@justice.gov.uk"
       },
-      "appRespondentLName": "smith",
-      "appRespondentFMName": "john",
-      "divorceStageReached": "Decree Nisi",
-      "helpWithFeesQuestion": "No",
-      "natureOfApplication2": [
-        "item1",
-        "item2"
-      ],
-      "natureOfApplication5": "No",
-      "natureOfApplication6": [
-        "item1",
-        "item2"
-      ],
-      "natureOfApplication7": "test",
-      "natureOfApplication3a": "test",
-      "natureOfApplication3b": "test",
-      "divorceUploadEvidence1": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
-      },
-      "divorceDecreeNisiDate": "2010-01-01",
-      "divorceUploadEvidence2": {
-        "document_url": "http://file2",
-        "document_filename": "file2",
-        "document_binary_url": "http://file2.binary"
-      },
-      "divorceDecreeAbsoluteDate": "2010-01-01",
-      "orderForChildrenQuestion1": "Yes",
-      "orderDirection": "test",
-      "orderDirectionOpt1": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
-      },
-      "approvedConsentOrderLetter": {
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d9e63738-f2ff-4cca-adbe-e2a983cdbd8b/binary",
-        "document_filename": "ApprovedConsentOrderLetter.pdf",
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d9e63738-f2ff-4cca-adbe-e2a983cdbd8b"
-      },
-      "orderDirectionAbsolute": "test",
-      "orderDirectionJudge": "test",
-      "orderDirectionJudgeName": "test",
-      "orderDirectionDate": "2010-01-01",
-      "dueDate": "2010-01-01",
-      "issueDate": "2010-01-01",
-      "orderDirectionAddComments": "test",
-      "orderDirectionOpt2": "test",
-      "assignedToJudgeReason": "test",
-      "assignedToJudge": "judge1",
-      "referToJudgeDate": "2010-01-01",
-      "referToJudgeText": "test",
-      "referToJudgeDateFromAwaitingResponse": "2010-01-01",
-      "referToJudgeTextFromAwaitingResponse": "test",
-      "referToJudgeDateFromOrderMade": "2010-01-01",
-      "referToJudgeTextFromOrderMade": "test",
-      "referToJudgeDateFromConsOrdApproved": "2010-01-01",
-      "referToJudgeTextFromConsOrdApproved": "test",
-      "referToJudgeDateFromConsOrdMade": "2010-01-01",
-      "referToJudgeTextFromConsOrdMade": "test",
-      "referToJudgeDateFromClose": "2010-01-01",
-      "referToJudgeTextFromClose": "test",
-      "referToJudgeDateFromRespondToOrder": "2010-01-01",
-      "referToJudgeTextFromRespondToOrder": "test",
-      "orderRefusalCollection": [
-        {
-          "id": "1",
-          "value": {
-            "orderRefusal": [
-              "Other"
-            ],
-            "orderRefusalDate": "2003-02-01",
-            "orderRefusalDocs": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "orderRefusalJudge": "District Judge",
-            "orderRefusalOther": "test1",
-            "otherHearingDetails": "test2",
-            "orderRefusalJudgeName": "test3",
-            "orderRefusalNotEnough": [
-              "reason1"
-            ],
-            "estimateLengthOfHearing": "10",
-            "orderRefusalAddComments": "comment1",
-            "orderRefusalNotEnoughOther": "test",
-            "whenShouldHearingTakePlace": "today",
-            "whereShouldHearingTakePlace": "EZ801"
-          }
-        }
-      ],
-      "uploadConsentOrderDocuments": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "pdf",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "DocumentEmailContent": "email-content",
-            "DocumentDateAdded": "2010-01-02",
-            "DocumentComment": "doc-comment",
-            "DocumentFileName": "file1"
-          }
-        }
-      ],
-      "uploadOrder": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "pdf",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "DocumentEmailContent": "email-content",
-            "DocumentDateAdded": "2010-01-02",
-            "DocumentComment": "doc-comment",
-            "DocumentFileName": "file1"
-          }
-        }
-      ],
-      "uploadDocuments": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "pdf",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "DocumentEmailContent": "email-content",
-            "DocumentDateAdded": "2010-01-02",
-            "DocumentComment": "doc-comment",
-            "DocumentFileName": "file1"
-          }
-        }
-      ],
-      "generalOrderCollection": [
-        {
-          "id": "1",
-          "value": {
-            "generalOrder_order": "order1",
-            "generalOrder_documentUpload": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "generalOrder_judgeList": "district judge",
-            "generalOrder_judgeName": "judge1",
-            "generalOrder_dateOfOrder": "2010-01-02",
-            "generalOrder_comments": "comment1"
-          }
-        }
-      ],
-      "respondToOrderDocuments": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "AmendedConsentOrder",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1/binary"
-            },
-            "DocumentDateAdded": "2010-01-02",
-            "DocumentFileName": "file1"
-          }
-        }
-      ]
+      "orderType" : "consent"
     }
   }
 }
