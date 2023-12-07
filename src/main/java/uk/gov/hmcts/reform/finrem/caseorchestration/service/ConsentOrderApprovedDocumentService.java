@@ -402,7 +402,7 @@ public class ConsentOrderApprovedDocumentService {
         if (refusedOrders != null && !refusedOrders.isEmpty()) {
             latestRefusedConsentOrder = refusedOrders.get(refusedOrders.size() - 1).getApprovedOrder().getConsentOrder();
         } else {
-            return true;
+            return approvedOrders != null && !approvedOrders.isEmpty();
         }
         if (approvedOrders != null && !approvedOrders.isEmpty()) {
             latestApprovedConsentOrder = approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder().getConsentOrder();
