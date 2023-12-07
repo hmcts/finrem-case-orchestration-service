@@ -31,7 +31,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     public static final String INTERVENER_3 = "Intervener 3 ";
     public static final String INTERVENER_4 = "Intervener 4 ";
     private final List<DocumentHandler> documentHandlers;
-    private final UploadedDocumentService uploadedDocumentHelper;
+    private final UploadedDocumentService uploadedDocumentService;
 
     private final EvidenceManagementDeleteService evidenceManagementDeleteService;
     private final FeatureToggleService featureToggleService;
@@ -40,12 +40,12 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     @Autowired
     public ManageCaseDocumentsContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                             List<DocumentHandler> documentHandlers,
-                                                            UploadedDocumentService uploadedDocumentHelper,
+                                                            UploadedDocumentService uploadedDocumentService,
                                                             EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                             FeatureToggleService featureToggleService) {
         super(mapper);
         this.documentHandlers = documentHandlers;
-        this.uploadedDocumentHelper = uploadedDocumentHelper;
+        this.uploadedDocumentService = uploadedDocumentService;
         this.evidenceManagementDeleteService = evidenceManagementDeleteService;
         this.featureToggleService = featureToggleService;
     }
@@ -67,9 +67,10 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
+        uploadedDocumentService.addDefaultsToToNewAdministrativeDocuments(managedCollections);
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, managedCollections));
-        uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
+        uploadedDocumentService.addUploadDateToNewDocuments(caseData, caseDataBefore);
 
         Optional.ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);
 
@@ -79,6 +80,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
     }
+
 
     private void getValidatedResponse(FinremCaseData caseData, List<String> warnings) {
         List<UploadCaseDocumentCollection> manageCaseDocumentCollection = caseData.getManageCaseDocumentCollection();
@@ -125,4 +127,5 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     private String getDocumentUrl(UploadCaseDocumentCollection documentCollection) {
         return documentCollection.getUploadCaseDocument().getCaseDocuments().getDocumentUrl();
     }
+
 }

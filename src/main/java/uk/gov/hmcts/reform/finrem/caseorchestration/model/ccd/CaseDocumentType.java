@@ -46,7 +46,6 @@ public enum CaseDocumentType {
     PENSION_REPORT("Pension report"),
     PRE_HEARING_DRAFT_ORDER("Pre hearing draft order"),
     TRANSCRIPT("Transcript"),
-    VALUATION_REPORTS("Valuation Reports"),
     WITHOUT_PREJUDICE_OFFERS("Without Prejudice offers"),
     WITNESS_SUMMONS("Witness Summons");
 

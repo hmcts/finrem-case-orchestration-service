@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone;
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.OtherDocumentsHandler;
@@ -17,20 +16,32 @@ public class IntervenerOneOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        switch (caseDocumentType) {
-            case OTHER -> {
-                return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_MISCELLANEOUS_OR_OTHER;
-            }
-            case PENSION_PLAN -> {
-                return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_PENSION_PLAN;
-            }
-            case FORM_B, FORM_F, CARE_PLAN -> {
-                return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER;
-            }
-            default -> {
-                return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1;
-            }
-        }
+    protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_MISCELLANEOUS_OR_OTHER;
+    }
+
+    @Override
+    protected DocumentCategory getPensionPlanDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_PENSION_PLAN;
+    }
+
+    @Override
+    protected DocumentCategory getCertificatesOfServiceDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_CERTIFICATES_OF_SERVICE;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategory() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1;
+    }
+
+    @Override
+    protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_1_WITHOUT_PREJUDICE_OFFERS;
+    }
+
+    @Override
+    protected DocumentCategory getDefaultPartyCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1;
     }
 }

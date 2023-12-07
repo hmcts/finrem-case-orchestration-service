@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -10,13 +10,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 
 import java.util.List;
 
-@Service
+@Component
 public class ConfidentialDocumentsHandler extends DocumentHandler {
 
     public ConfidentialDocumentsHandler(FeatureToggleService featureToggleService) {
         super(CaseDocumentCollectionType.CONFIDENTIAL_DOCS_COLLECTION, featureToggleService);
     }
 
+    @Override
     protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 

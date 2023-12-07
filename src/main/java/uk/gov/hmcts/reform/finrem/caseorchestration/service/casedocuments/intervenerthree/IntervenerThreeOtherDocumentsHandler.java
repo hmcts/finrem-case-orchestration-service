@@ -17,7 +17,7 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
             case OTHER -> {
                 return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER;
@@ -32,5 +32,35 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
                 return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3;
             }
         }
+    }
+
+    @Override
+    protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER;
+    }
+
+    @Override
+    protected DocumentCategory getPensionPlanDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_PENSION_PLAN;
+    }
+
+    @Override
+    protected DocumentCategory getCertificatesOfServiceDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_CERTIFICATES_OF_SERVICE;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategory() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3;
+    }
+
+    @Override
+    protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_WITHOUT_PREJUDICE_OFFERS;
+    }
+
+    @Override
+    protected DocumentCategory getDefaultPartyCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3;
     }
 }
