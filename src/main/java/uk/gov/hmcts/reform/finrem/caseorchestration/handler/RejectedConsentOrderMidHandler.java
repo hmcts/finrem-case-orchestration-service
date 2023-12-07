@@ -49,9 +49,11 @@ public class RejectedConsentOrderMidHandler extends FinremCallbackHandler {
     }
 
     private void clearContestedFields(FinremCaseData caseData) {
-        caseData.setIntervenerOneWrapper(null);
-        caseData.setIntervenerTwoWrapper(null);
-        caseData.setIntervenerThreeWrapper(null);
-        caseData.setIntervenerFourWrapper(null);
+        if (caseData != null) {
+            caseData.setIntervenerOneWrapper(null);
+            caseData.setIntervenerTwoWrapper(null);
+            caseData.setIntervenerThreeWrapper(null);
+            caseData.setIntervenerFourWrapper(null);
+        }
     }
 }
