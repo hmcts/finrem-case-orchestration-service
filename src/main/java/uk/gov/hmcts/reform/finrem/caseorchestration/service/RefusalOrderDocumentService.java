@@ -71,8 +71,8 @@ public class RefusalOrderDocumentService {
             ApprovedOrder approvedOrder = ApprovedOrder.builder().consentOrder(refusalOrder).build();
             ConsentOrderCollection consentOrderCollection = ConsentOrderCollection
                 .builder()
-                .approvedOrder(approvedOrder).
-                build();
+                .approvedOrder(approvedOrder)
+                .build();
             consentedNotApprovedOrders.add(consentOrderCollection);
             finremCaseData.getConsentOrderWrapper().setConsentedNotApprovedOrders(consentedNotApprovedOrders);
         }
@@ -93,8 +93,8 @@ public class RefusalOrderDocumentService {
         OrderRefusalHolder orderRefusalCollectionNew = caseData.getOrderRefusalCollectionNew();
         List<OrderRefusalCollection> refusalCollections
             = Optional.ofNullable(caseData.getOrderRefusalCollection()).orElse(new ArrayList<>());
-        OrderRefusalCollection refusalCollection = OrderRefusalCollection.builder().
-            value(orderRefusalCollectionNew)
+        OrderRefusalCollection refusalCollection = OrderRefusalCollection.builder()
+            .value(orderRefusalCollectionNew)
             .build();
         refusalCollections.add(refusalCollection);
         caseData.setOrderRefusalCollection(refusalCollections);
