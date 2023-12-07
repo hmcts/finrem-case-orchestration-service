@@ -342,7 +342,7 @@ public class GeneralApplicationHelper {
         List<GeneralApplicationsCollection> uniqueGeneralApplicationList = generalApplicationList.stream().collect(Collectors.groupingBy(ga ->
                 new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(),ga.getValue().getGeneralApplicationCreatedDate()),
             toList())).entrySet().stream().map(entry -> findBestGeneralApplicationInDuplicate(entry.getValue()))
-            .toList();
+            .collect(toList());
 
         Collections.sort(uniqueGeneralApplicationList, (o1, o2) -> o2.getValue().getGeneralApplicationCreatedDate()
             .compareTo(o1.getValue().getGeneralApplicationCreatedDate()));
