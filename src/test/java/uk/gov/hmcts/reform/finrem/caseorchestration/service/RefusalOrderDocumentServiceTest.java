@@ -55,6 +55,9 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     @MockBean
     private GenericDocumentService genericDocumentService;
 
+    @MockBean
+    private IdamService idamService;
+
     @Captor
     private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
 
@@ -212,6 +215,23 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertConsentedCaseDataExtraFields();
         assertCaseDocument(caseData.getOrderRefusalPreviewDocument());
     }
+
+
+    @Test
+    public void setDefaults() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.REJECT_ORDER, CaseType.CONSENTED);
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = caseDetails.getData();
+
+        when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("moj moj");
+
+        FinremCaseData caseData = refusalOrderDocumentService.setDefaults(finremCaseData, AUTH_TOKEN);
+        OrderRefusalHolder orderRefusal = caseData.getOrderRefusalCollectionNew();
+        assertEquals("moj moj", orderRefusal.getOrderRefusalJudgeName());
+        assertEquals(LocalDate.now(), orderRefusal.getOrderRefusalDate());
+
+    }
+
 
     private void assertCaseDataExtraFields() {
         verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
