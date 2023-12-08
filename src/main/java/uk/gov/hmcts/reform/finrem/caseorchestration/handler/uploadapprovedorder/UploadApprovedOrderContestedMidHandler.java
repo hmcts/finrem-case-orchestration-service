@@ -42,7 +42,7 @@ public class UploadApprovedOrderContestedMidHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for case id: {}",
+        log.info("Invoking contested event {} mid callback for Case ID: {}",
             EventType.UPLOAD_APPROVED_ORDER, caseId);
 
         FinremCaseData caseData = caseDetails.getData();

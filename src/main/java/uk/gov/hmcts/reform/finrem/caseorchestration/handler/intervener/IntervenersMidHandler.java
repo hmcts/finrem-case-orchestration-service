@@ -40,7 +40,7 @@ public class IntervenersMidHandler extends FinremCallbackHandler implements Inte
                                                                               String userAuthorisation) {
 
         Long caseId = callbackRequest.getCaseDetails().getId();
-        log.info("Invoking contested {} about to mid callback for case id: {}",
+        log.info("Invoking contested {} about to mid callback for Case ID: {}",
             callbackRequest.getEventType(), caseId);
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
@@ -52,7 +52,7 @@ public class IntervenersMidHandler extends FinremCallbackHandler implements Inte
             case INTERVENER_TWO -> showIntervenerOption(caseDataBefore.getIntervenerTwoWrapper(), dynamicListElements);
             case INTERVENER_THREE -> showIntervenerOption(caseDataBefore.getIntervenerThreeWrapper(), dynamicListElements);
             case INTERVENER_FOUR -> showIntervenerOption(caseDataBefore.getIntervenerFourWrapper(), dynamicListElements);
-            default -> throw new IllegalArgumentException("Invalid intervener selected for caseId " + caseId);
+            default -> throw new IllegalArgumentException("Invalid intervener selected for Case ID: " + caseId);
         }
 
         caseData.setIntervenerOptionList(getDynamicRadioList(dynamicListElements));

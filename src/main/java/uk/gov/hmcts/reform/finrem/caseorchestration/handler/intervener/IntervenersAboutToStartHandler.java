@@ -37,7 +37,7 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Invoking contested {} about to start callback for case id: {}",
+        log.info("Invoking contested {} about to start callback for Case ID: {}",
             callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
