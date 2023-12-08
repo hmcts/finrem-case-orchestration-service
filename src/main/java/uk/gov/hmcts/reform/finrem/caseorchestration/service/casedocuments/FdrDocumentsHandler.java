@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
@@ -15,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import java.util.List;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(1)
 public class FdrDocumentsHandler extends DocumentHandler {
 
     public FdrDocumentsHandler(FeatureToggleService featureToggleService) {

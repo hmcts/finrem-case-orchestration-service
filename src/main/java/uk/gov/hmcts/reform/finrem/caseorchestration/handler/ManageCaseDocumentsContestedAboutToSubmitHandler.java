@@ -9,9 +9,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
@@ -30,6 +33,15 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     public static final String INTERVENER_2 = "Intervener 2 ";
     public static final String INTERVENER_3 = "Intervener 3 ";
     public static final String INTERVENER_4 = "Intervener 4 ";
+
+    private static List<CaseDocumentType> administrativeCaseDocumentTypes = List.of(
+        CaseDocumentType.ATTENDANCE_SHEETS,
+        CaseDocumentType.JUDICIAL_NOTES,
+        CaseDocumentType.JUDGMENT,
+        CaseDocumentType.WITNESS_SUMMONS,
+        CaseDocumentType.TRANSCRIPT
+    );
+
     private final List<DocumentHandler> documentHandlers;
     private final UploadedDocumentService uploadedDocumentService;
 
@@ -67,7 +79,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
-        uploadedDocumentService.addDefaultsToToNewAdministrativeDocuments(managedCollections);
+        addDefaultsToAdministrativeDocuments(managedCollections);
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, managedCollections));
         uploadedDocumentService.addUploadDateToNewDocuments(caseData, caseDataBefore);
@@ -127,5 +139,26 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     private String getDocumentUrl(UploadCaseDocumentCollection documentCollection) {
         return documentCollection.getUploadCaseDocument().getCaseDocuments().getDocumentUrl();
     }
+
+    private void addDefaultsToAdministrativeDocuments(List<UploadCaseDocumentCollection> managedCollections) {
+
+        managedCollections.stream().forEach(document -> setDefaultsForDocumentTypes(document));
+    }
+
+    private void setDefaultsForDocumentTypes(UploadCaseDocumentCollection document) {
+        UploadCaseDocument uploadCaseDocument = document.getUploadCaseDocument();
+        if (administrativeCaseDocumentTypes.contains(uploadCaseDocument.getCaseDocumentType())) {
+            uploadCaseDocument.setCaseDocumentParty(CaseDocumentParty.CASE);
+            uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
+            uploadCaseDocument.setCaseDocumentFdr(YesOrNo.NO);
+        } else if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(uploadCaseDocument.getCaseDocumentType())) {
+            uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
+            uploadCaseDocument.setCaseDocumentFdr(YesOrNo.YES);
+            uploadCaseDocument.setCaseDocumentParty(null);
+        }
+
+    }
+
+
 
 }

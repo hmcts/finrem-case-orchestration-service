@@ -36,10 +36,9 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
     @Override
     protected boolean canHandleDocument(UploadCaseDocument uploadCaseDocument) {
         CaseDocumentType caseDocumentType = uploadCaseDocument.getCaseDocumentType();
-        return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.NO) && (otherDocuments.contains(caseDocumentType)
-        );
+        return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.NO)
+            && (otherDocuments.contains(caseDocumentType));
     }
-
 
     @Override
     public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
