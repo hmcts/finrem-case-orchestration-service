@@ -253,7 +253,7 @@ public class InterimHearingService {
     @SuppressWarnings("java:S6204")
     public List<Map<String, Object>> convertInterimHearingCollectionDataToMap(List<InterimHearingData> interimHearingList) {
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
+            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
         return interimHearingItems.stream()
             .map(obj -> objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {
             })).toList();
@@ -307,6 +307,10 @@ public class InterimHearingService {
         caseData.put(INTERIM_HEARING_COLLECTION, sortedInterimHearingList);
 
         List<InterimHearingCollectionItemData> trackingList = interimHearingHelper.getInterimHearingTrackingList(caseData);
+        if (trackingList == null || trackingList.isEmpty()) {
+            trackingList = sortEarliestHearingFirst(caseDataBefore).stream()
+                .map(obj -> interimHearingHelper.getTrackingObject(obj.getId())).toList();
+        }
 
         List<String> dataToProcessList = compareCaseData(caseData, caseDataBefore);
 
