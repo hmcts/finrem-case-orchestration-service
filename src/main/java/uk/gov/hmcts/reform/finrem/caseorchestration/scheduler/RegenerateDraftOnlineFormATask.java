@@ -53,7 +53,7 @@ public class RegenerateDraftOnlineFormATask extends BaseTask {
 
     @Override
     protected String getSummary() {
-        return "Regenerate miniform a -  DFR-2523";
+        return "Regenerate miniform a -  DFR-2590";
     }
 
     @Override
