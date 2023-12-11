@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class HandlersWiringTest extends BaseTest {
 
     @Test
     public void givenOrder_whenInjected_thenByOrderValue() {
-        assertThat(handlers.get(0).collectionType, is(""));
+        assertThat(handlers.get(0).collectionType, is(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION));
 
     }
 }
