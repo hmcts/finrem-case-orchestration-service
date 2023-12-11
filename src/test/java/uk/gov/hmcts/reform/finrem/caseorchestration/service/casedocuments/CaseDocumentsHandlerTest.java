@@ -17,10 +17,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class CaseDocumentHandlerTest extends BaseManageDocumentsHandlerTest {
+public class CaseDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
-    CaseDocumentsHandler collectionService;
+    CaseDocumentsHandler caseDocumentsHandler;
 
 
     @Override
@@ -35,7 +35,7 @@ public class CaseDocumentHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @Override
     public DocumentHandler getDocumentHandler() {
-        return collectionService;
+        return caseDocumentsHandler;
     }
 
     @Override
@@ -55,8 +55,34 @@ public class CaseDocumentHandlerTest extends BaseManageDocumentsHandlerTest {
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT),
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT),
             is(DocumentCategory.CASE_DOCUMENTS)
         );
+
+        assertThat(
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS)
+        );
+
+        assertThat(
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.JUDICIAL_NOTES),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS)
+        );
+
+        assertThat(
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_SUMMONS),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS)
+        );
+
+        assertThat(
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.JUDGMENT),
+            is(DocumentCategory.JUDGMENT_OR_TRANSCRIPT)
+        );
+
+        assertThat(
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.TRANSCRIPT),
+            is(DocumentCategory.JUDGMENT_OR_TRANSCRIPT)
+        );
+
     }
 }

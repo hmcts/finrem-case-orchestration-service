@@ -84,5 +84,30 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
             is(DocumentCategory.RESPONDENT_DOCUMENTS_PENSION_PLAN)
         );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE),
+            is(DocumentCategory.RESPONDENT_DOCUMENTS_CERTIFICATES_OF_SERVICE)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
+            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT),
+            is(DocumentCategory.REPORTS_PENSION_REPORTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS),
+            is(DocumentCategory.RESPONDENT_DOCUMENTS)
+        );
     }
 }

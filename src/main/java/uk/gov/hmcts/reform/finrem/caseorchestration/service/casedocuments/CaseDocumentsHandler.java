@@ -24,6 +24,16 @@ public class CaseDocumentsHandler extends PartyDocumentsHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        return DocumentCategory.CASE_DOCUMENTS;
+        switch (caseDocumentType) {
+            case ATTENDANCE_SHEETS, JUDICIAL_NOTES, WITNESS_SUMMONS -> {
+                return DocumentCategory.ADMINISTRATIVE_DOCUMENTS;
+            }
+            case JUDGMENT, TRANSCRIPT -> {
+                return DocumentCategory.JUDGMENT_OR_TRANSCRIPT;
+            }
+            default -> {
+                return DocumentCategory.CASE_DOCUMENTS;
+            }
+        }
     }
 }
