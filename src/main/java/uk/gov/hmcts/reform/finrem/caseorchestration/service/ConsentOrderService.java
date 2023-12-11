@@ -7,14 +7,17 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_AMENDED_CONSENT_ORDER;
@@ -25,7 +28,35 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class ConsentOrderService {
 
+    private final ConsentedApplicationHelper helper;
+    private final BulkPrintDocumentService service;
     private final DocumentHelper documentHelper;
+
+    public List<String> performCheck(CallbackRequest callbackRequest, String userAuthorisation) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Optional<Long> caseIdObj = Optional.ofNullable(caseDetails.getId());
+
+        String caseId;
+        if (caseIdObj.isPresent()) {
+            caseId = String.valueOf(caseIdObj.get());
+        } else {
+            caseId = "Case not created yet.";
+        }
+        Map<String, Object> caseData = caseDetails.getData();
+
+        helper.setConsentVariationOrderLabelField(caseData);
+        List<String> errors = new ArrayList<>();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        Map<String, Object> beforeData = new HashMap<>();
+        if (caseDetailsBefore != null) {
+            beforeData = caseDetailsBefore.getData();
+        }
+        List<CaseDocument> caseDocuments = checkIfD81DocumentContainsEncryption(caseData, beforeData);
+        if (caseDocuments != null && !caseDocuments.isEmpty()) {
+            caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, caseId, errors, userAuthorisation));
+        }
+        return errors;
+    }
 
     public CaseDocument getLatestConsentOrderData(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
