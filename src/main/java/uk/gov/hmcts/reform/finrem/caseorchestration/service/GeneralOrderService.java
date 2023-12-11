@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,8 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -177,26 +176,31 @@ public class GeneralOrderService {
     private Map<String, Object> populateGeneralOrderCollectionContested(CaseDetails caseDetails) {
 
         Map<String, Object> caseData = caseDetails.getData();
-
-        GeneralOrderContested generalOrder =
-            new GeneralOrderContested(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_PREVIEW_DOCUMENT)),
-                getAddressToFormatted(caseData));
-
-        GeneralOrderContestedData contestedData = new GeneralOrderContestedData(UUID.randomUUID().toString(), generalOrder);
+        ContestedGeneralOrder order = ContestedGeneralOrder
+            .builder()
+            .dateOfOrder(objectToDate(caseData.get("generalOrderDate")))
+            .additionalDocument(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_PREVIEW_DOCUMENT)))
+            .generalOrderAddressTo(getAddressToFormatted(caseData))
+            .build();
+        ContestedGeneralOrderCollection generalOrderObj = ContestedGeneralOrderCollection
+            .builder()
+            .value(order)
+            .build();
 
         if (caseDataService.isConsentedInContestedCase(caseDetails)) {
-            List<GeneralOrderContestedData> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED))
+            List<ContestedGeneralOrderCollection> generalOrderList
+                = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED))
                 .map(this::convertToGeneralOrderContestedList)
                 .orElse(new ArrayList<>());
-            generalOrderList.add(contestedData);
+            generalOrderList.add(generalOrderObj);
 
             caseData.put(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED, generalOrderList);
 
         } else {
-            List<GeneralOrderContestedData> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONTESTED))
+            List<ContestedGeneralOrderCollection> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONTESTED))
                 .map(this::convertToGeneralOrderContestedList)
                 .orElse(new ArrayList<>());
-            generalOrderList.add(contestedData);
+            generalOrderList.add(generalOrderObj);
 
             caseData.put(GENERAL_ORDER_COLLECTION_CONTESTED, generalOrderList);
         }
@@ -204,13 +208,20 @@ public class GeneralOrderService {
         return caseData;
     }
 
+    private LocalDate objectToDate(Object object) {
+        if (object != null) {
+            return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, LocalDate.class);
+        }
+        return null;
+    }
+
     private List<GeneralOrderConsentedData> convertToGeneralOrderConsentedList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<GeneralOrderConsentedData>>() {
         });
     }
 
-    private List<GeneralOrderContestedData> convertToGeneralOrderContestedList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralOrderContestedData>>() {
+    private List<ContestedGeneralOrderCollection> convertToGeneralOrderContestedList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<List<ContestedGeneralOrderCollection>>() {
         });
     }
 
@@ -237,10 +248,9 @@ public class GeneralOrderService {
             generalOrders.forEach(generalOrder -> {
                 ContestedGeneralOrder order = generalOrder.getValue();
                 String filename = order.getAdditionalDocument().getDocumentFilename();
-                LocalDate orderCreated = order.getDateOfOrder();
                 String documentId = getDocumentId(order.getAdditionalDocument());
                 dynamicListElements.add(partyService.getDynamicMultiSelectListElement(documentId,
-                    "Orders tab" + filename + " - " + orderCreated));
+                    "Orders tab" + " - " + filename));
             });
         }
 
