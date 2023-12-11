@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +22,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SolicitorCreateConsentedMidHandler
+public class AmendApplicationConsentedMidHandler
     implements CallbackHandler<Map<String, Object>> {
 
     private final ConsentedApplicationHelper helper;
@@ -34,7 +33,7 @@ public class SolicitorCreateConsentedMidHandler
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.SOLICITOR_CREATE.equals(eventType);
+            && EventType.AMEND_APP_DETAILS.equals(eventType);
     }
 
     @Override
@@ -55,7 +54,9 @@ public class SolicitorCreateConsentedMidHandler
         helper.setConsentVariationOrderLabelField(caseData);
         List<String> errors = new ArrayList<>();
 
-        Map<String, Object> beforeData = new HashMap<>();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        Map<String, Object> beforeData = caseDetailsBefore.getData();
+
         List<CaseDocument> caseDocuments = consentOrderService.checkIfD81DocumentContainsEncryption(caseData, beforeData);
         if (caseDocuments != null && !caseDocuments.isEmpty()) {
             caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, caseId, errors, userAuthorisation));

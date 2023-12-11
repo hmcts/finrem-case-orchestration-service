@@ -72,35 +72,51 @@ public class ConsentOrderService {
         }
 
         setD81Document(caseData, caseDocumentList);
+        setPensionDocuments(caseData, beforeData, caseDocumentList);
+        setVariationOrderDocuments(caseData, beforeData, caseDocumentList);
 
-        List<CaseDocument> pensionDocumentsData = new ArrayList<>(documentHelper.getPensionDocumentsData(caseData));
-        if (!pensionDocumentsData.isEmpty()) {
-            List<CaseDocument> pensionDocumentsDataBefore = documentHelper.getPensionDocumentsData(beforeData);
-            if (pensionDocumentsDataBefore != null && !pensionDocumentsDataBefore.isEmpty()) {
-                pensionDocumentsData.removeAll(pensionDocumentsDataBefore);
-            }
-            caseDocumentList.addAll(pensionDocumentsData);
-        }
+        setOtherDocuments(caseData, beforeData, caseDocumentList);
+        return caseDocumentList;
+    }
 
-        List<CaseDocument> variationOrderDocumentsData = new ArrayList<>(documentHelper.getVariationOrderDocumentsData(caseData));
-        if (!variationOrderDocumentsData.isEmpty()) {
-            List<CaseDocument> variationOrderDocumentsDataBefore = documentHelper.getVariationOrderDocumentsData(beforeData);
-            if (variationOrderDocumentsDataBefore != null && !variationOrderDocumentsDataBefore.isEmpty()) {
-                variationOrderDocumentsData.removeAll(variationOrderDocumentsDataBefore);
-            }
-            caseDocumentList.addAll(variationOrderDocumentsData);
-        }
-
+    private void setOtherDocuments(Map<String, Object> caseData, Map<String, Object> beforeData, List<CaseDocument> caseDocumentList) {
         List<CaseDocument> otherDocumentsData = new ArrayList<>(documentHelper.getConsentOrderOtherDocumentsData(caseData));
         if (!otherDocumentsData.isEmpty()) {
-            List<CaseDocument> otherDocumentsDataBefore = documentHelper.getConsentOrderOtherDocumentsData(beforeData);
-            if (otherDocumentsDataBefore != null && !otherDocumentsDataBefore.isEmpty()) {
-                otherDocumentsData.removeAll(otherDocumentsDataBefore);
+            if (!beforeData.isEmpty()) {
+                List<CaseDocument> otherDocumentsDataBefore = documentHelper.getConsentOrderOtherDocumentsData(beforeData);
+                if (otherDocumentsDataBefore != null && !otherDocumentsDataBefore.isEmpty()) {
+                    otherDocumentsData.removeAll(otherDocumentsDataBefore);
+                }
             }
             caseDocumentList.addAll(otherDocumentsData);
         }
 
-        return caseDocumentList;
+    }
+
+    private void setVariationOrderDocuments(Map<String, Object> caseData, Map<String, Object> beforeData, List<CaseDocument> caseDocumentList) {
+        List<CaseDocument> variationOrderDocumentsData = new ArrayList<>(documentHelper.getVariationOrderDocumentsData(caseData));
+        if (!variationOrderDocumentsData.isEmpty()) {
+            if (!beforeData.isEmpty()) {
+                List<CaseDocument> variationOrderDocumentsDataBefore = documentHelper.getVariationOrderDocumentsData(beforeData);
+                if (variationOrderDocumentsDataBefore != null && !variationOrderDocumentsDataBefore.isEmpty()) {
+                    variationOrderDocumentsData.removeAll(variationOrderDocumentsDataBefore);
+                }
+            }
+            caseDocumentList.addAll(variationOrderDocumentsData);
+        }
+    }
+
+    private void setPensionDocuments(Map<String, Object> caseData, Map<String, Object> beforeData, List<CaseDocument> caseDocumentList) {
+        List<CaseDocument> pensionDocumentsData = new ArrayList<>(documentHelper.getPensionDocumentsData(caseData));
+        if (!pensionDocumentsData.isEmpty()) {
+            if (!beforeData.isEmpty()) {
+                List<CaseDocument> pensionDocumentsDataBefore = documentHelper.getPensionDocumentsData(beforeData);
+                if (pensionDocumentsDataBefore != null && !pensionDocumentsDataBefore.isEmpty()) {
+                    pensionDocumentsData.removeAll(pensionDocumentsDataBefore);
+                }
+            }
+            caseDocumentList.addAll(pensionDocumentsData);
+        }
     }
 
     private void setD81Document(Map<String, Object> caseData, List<CaseDocument> caseDocumentList) {
