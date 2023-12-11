@@ -53,6 +53,12 @@ public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
 
         List<AmendedConsentOrderCollection> amendedCollection = finremCaseData.getAmendedConsentOrderCollection();
         if (amendedCollection != null && !amendedCollection.isEmpty()) {
+            FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+            FinremCaseData finremCaseDataBefore = caseDetailsBefore.getData();
+            List<AmendedConsentOrderCollection> amendedCollectionBefore = finremCaseDataBefore.getAmendedConsentOrderCollection();
+            if (amendedCollectionBefore != null && !amendedCollectionBefore.isEmpty()) {
+                amendedCollection.removeAll(amendedCollectionBefore);
+            }
             amendedCollection.forEach(order -> {
                 CaseDocument document = order.getValue().getAmendedConsentOrder();
                 service.validateEncryptionOnUploadedDocument(document,

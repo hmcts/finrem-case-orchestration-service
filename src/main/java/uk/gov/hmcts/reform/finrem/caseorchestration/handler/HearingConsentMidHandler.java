@@ -48,6 +48,12 @@ public class HearingConsentMidHandler extends FinremCallbackHandler {
         List<ConsentedHearingDataWrapper> listForHearings = caseData.getListForHearings();
 
         if (listForHearings != null && !listForHearings.isEmpty()) {
+            FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+            FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+            List<ConsentedHearingDataWrapper> listForHearingsBefore = caseDataBefore.getListForHearings();
+            if (listForHearingsBefore != null && !listForHearingsBefore.isEmpty()) {
+                listForHearings.removeAll(listForHearingsBefore);
+            }
             listForHearings.forEach(hearing -> {
                 ConsentedHearingDataElement hearingValue = hearing.getValue();
                 if (hearingValue.getPromptForAnyDocument().equals("Yes")) {

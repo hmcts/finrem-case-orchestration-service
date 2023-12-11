@@ -447,7 +447,13 @@ public class GeneralApplicationService {
             log.info("Please complete the general application for Case ID: {}", caseDetails.getId());
             errors.add("Please complete the General Application. No information has been entered for this application.");
         } else {
-            generalApplications.forEach(ga -> {
+            log.info("General application size {} for caseId {}", generalApplications.size(), caseId);
+            List<GeneralApplicationsCollection> generalApplicationsTemp = new ArrayList<>(generalApplications);
+            if (generalApplicationsBefore != null && !generalApplicationsBefore.isEmpty()) {
+                List<GeneralApplicationsCollection> generalApplicationsBeforeTemp = new ArrayList<>(generalApplicationsBefore);
+                generalApplicationsTemp.removeAll(generalApplicationsBeforeTemp);
+            }
+            generalApplicationsTemp.forEach(ga -> {
                 service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDocument(),
                     caseId, errors, userAuthorisation);
                 service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDraftOrder(),

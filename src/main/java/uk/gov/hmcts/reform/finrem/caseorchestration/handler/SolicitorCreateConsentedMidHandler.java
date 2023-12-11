@@ -55,8 +55,13 @@ public class SolicitorCreateConsentedMidHandler
         helper.setConsentVariationOrderLabelField(caseData);
         List<String> errors = new ArrayList<>();
 
-        List<CaseDocument> caseDocuments = consentOrderService.checkIfD81DocumentContainsEncryption(caseData);
-        caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, caseId, errors, userAuthorisation));
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        Map<String, Object> beforeData = caseDetailsBefore.getData();
+
+        List<CaseDocument> caseDocuments = consentOrderService.checkIfD81DocumentContainsEncryption(caseData, beforeData);
+        if (caseDocuments != null && !caseDocuments.isEmpty()) {
+            caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, caseId, errors, userAuthorisation));
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
             .data(caseData).errors(errors).build();
