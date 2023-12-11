@@ -59,7 +59,7 @@ public class RegenerateDraftOnlineFormATask extends BaseTask {
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
 
-        log.info("RegenerateDraftOnlineFormATask started for case id {}", finremCaseDetails.getId());
-        finremCaseDetails.getData().setMiniFormA(onlineFormDocumentService.generateDraftContestedMiniFormA(getSystemUserToken(), finremCaseDetails));
+        log.info("RegenerateOnlineFormATask started for case id {}", finremCaseDetails.getId());
+        finremCaseDetails.getData().setMiniFormA(onlineFormDocumentService.generateContestedMiniForm(getSystemUserToken(), finremCaseDetails));
     }
 }
