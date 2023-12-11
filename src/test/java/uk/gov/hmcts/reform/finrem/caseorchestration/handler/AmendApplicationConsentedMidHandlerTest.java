@@ -20,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class SolicitorCreateConsentedMidHandlerTest {
+class AmendApplicationConsentedMidHandlerTest {
 
     @InjectMocks
-    private SolicitorCreateConsentedMidHandler handler;
+    private AmendApplicationConsentedMidHandler handler;
     static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
 
     @Mock
@@ -31,17 +31,18 @@ class SolicitorCreateConsentedMidHandlerTest {
 
     @Test
     void given_case_whenEvent_type_is_amendApp_thenCanHandle() {
-        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.SOLICITOR_CREATE));
+        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS));
     }
 
     @Test
     void given_case_when_wrong_callback_then_case_can_not_handle() {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.SOLICITOR_CREATE));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.AMEND_APP_DETAILS));
     }
 
     @Test
     void given_case_when_wrong_casetype_then_case_can_not_handle() {
-        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.SOLICITOR_CREATE));
     }
 
     @Test
@@ -49,7 +50,7 @@ class SolicitorCreateConsentedMidHandlerTest {
         assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.CLOSE));
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     void handle() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN);
@@ -59,9 +60,8 @@ class SolicitorCreateConsentedMidHandlerTest {
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
         caseDetails.setData(caseData);
         return CallbackRequest.builder().eventId(EventType.SOLICITOR_CREATE.getCcdType())
-            .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
+            .caseDetails(caseDetails).caseDetailsBefore(caseDetails).build();
     }
 }
