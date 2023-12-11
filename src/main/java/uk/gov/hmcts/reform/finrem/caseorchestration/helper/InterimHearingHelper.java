@@ -8,12 +8,14 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemIds;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ALL_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
@@ -60,5 +62,10 @@ public class InterimHearingHelper {
 
     public CaseDocument convertToCaseDocument(Object object) {
         return objectMapper.convertValue(object, CaseDocument.class);
+    }
+
+    public InterimHearingCollectionItemData getTrackingObject(String collectionId) {
+        return InterimHearingCollectionItemData.builder().id(UUID.randomUUID().toString())
+            .value(InterimHearingCollectionItemIds.builder().ihItemIds(collectionId).build()).build();
     }
 }

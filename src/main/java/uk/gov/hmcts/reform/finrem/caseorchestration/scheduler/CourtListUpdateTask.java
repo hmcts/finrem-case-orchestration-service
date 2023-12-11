@@ -60,6 +60,7 @@ public class CourtListUpdateTask extends SpecializedBaseTask {
         String courtValue = (String) caseDetails.getData().get(caseReferenceKeyValue.getPreviousCourtListKey());
 
         if (frcValue != null && courtValue != null) {
+            log.info("Setting null values court and frc for case {}", caseDetails.getId());
             caseDetails.getData().put(caseReferenceKeyValue.getPreviousFRCKey(), null);
             caseDetails.getData().put(caseReferenceKeyValue.getPreviousCourtListKey(), null);
         }
