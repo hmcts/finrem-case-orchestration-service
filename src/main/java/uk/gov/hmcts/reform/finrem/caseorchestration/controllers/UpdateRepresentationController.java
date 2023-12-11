@@ -54,7 +54,7 @@ public class UpdateRepresentationController extends BaseController {
         @RequestBody CallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
-        log.info("Received request to apply Notice of Change Decision and update representation for case {}",
+        log.info("Received request to apply Notice of Change Decision and update representation for Case ID: {}",
             caseDetails.getId());
 
         validateCaseData(ccdRequest);
@@ -75,7 +75,7 @@ public class UpdateRepresentationController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setNocDefaults(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest ccdRequest) {
-        log.info("Received request to set default values for Update Contact Details Event for case {}",
+        log.info("Received request to set default values for Update Contact Details Event for Case ID: {}",
             ccdRequest.getCaseDetails().getId());
 
         Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();

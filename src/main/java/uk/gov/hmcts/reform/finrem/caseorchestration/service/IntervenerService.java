@@ -36,7 +36,7 @@ public class IntervenerService {
         intervenerChangeDetails.setIntervenerDetails(intervenerWrapper);
 
         if (intervenerWrapper.getIntervenerRepresented().equals(YesOrNo.YES)) {
-            log.info("revoke case role for {} for case {}", intervenerWrapper.getIntervenerSolicitorCaseRole(), caseId);
+            log.info("Revoke case role for {} for Case ID: {}", intervenerWrapper.getIntervenerSolicitorCaseRole(), caseId);
             String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             String email = intervenerWrapper.getIntervenerSolEmail();
             remokeIntervenerRole(caseId, email, orgId,
@@ -59,13 +59,13 @@ public class IntervenerService {
 
         if (intervenerWrapper != null) {
             if (intervenerWrapper.getIntervenerDateAdded() == null) {
-                log.info("{} date intervener added to case {}", intervenerWrapper.getIntervenerType(), caseId);
+                log.info("{} date intervener added to Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
                 intervenerWrapper.setIntervenerDateAdded(LocalDate.now());
             }
 
             final String caseRole = intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode();
             if (intervenerWrapper.getIntervenerRepresented().equals(YesOrNo.YES)) {
-                log.info("Add {} case role for case {}", caseRole, caseId);
+                log.info("Add {} case role for Case ID: {}", caseRole, caseId);
                 String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
                 String email = intervenerWrapper.getIntervenerSolEmail();
                 checkIfIntervenerSolicitorDetailsChanged(intervenerWrapper, caseDetailsBefore, orgId, email, errors);
@@ -77,7 +77,7 @@ public class IntervenerService {
                     && beforeIntv.getIntervenerRepresented() != null
                     && beforeIntv.getIntervenerRepresented().equals(YesOrNo.YES)) {
 
-                    log.info("{} now not represented for case {}", intervenerWrapper.getIntervenerType(), caseId);
+                    log.info("{} now not represented for Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
                     remokeIntervenerRole(caseId, beforeIntv.getIntervenerSolEmail(),
                         beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID(),
                         intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors);
@@ -87,7 +87,7 @@ public class IntervenerService {
                     intervenerWrapper.setIntervenerSolicitorFirm(null);
                     intervenerWrapper.setIntervenerSolicitorReference(null);
                 }
-                log.info("{}} add default case role and organisation for case {}", intervenerWrapper.getIntervenerType(), caseId);
+                log.info("{}} add default case role and organisation for Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
                 setDefaultOrgForintervener(intervenerWrapper);
             }
         }
