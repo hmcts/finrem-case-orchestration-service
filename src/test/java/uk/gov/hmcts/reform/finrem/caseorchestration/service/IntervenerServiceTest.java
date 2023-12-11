@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -27,12 +26,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -83,12 +84,13 @@ public class IntervenerServiceTest extends BaseServiceTest {
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
             .builder().intervenerName("One name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
         finremCaseData.setIntervenerOneWrapper(oneWrapper);
-
-        service.removeIntervenerDetails(oneWrapper, finremCaseData, CASE_ID);
+        List<String> errors = new ArrayList<>();
+        service.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID);
 
         assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerName());
         assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerEmail());
         assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerPhone());
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -112,7 +114,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        service.removeIntervenerDetails(oneWrapper, finremCaseData, CASE_ID);
+        List<String> errors = new ArrayList<>();
+        service.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID);
 
         assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerName());
         assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerEmail());
@@ -121,6 +124,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
 
@@ -132,14 +136,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
         finremCaseData.setIntervenerTwoWrapper(twoWrapper);
-
-        service.removeIntervenerDetails(twoWrapper, finremCaseData, CASE_ID);
+        List<String> errors = new ArrayList<>();
+        service.removeIntervenerDetails(twoWrapper, errors, finremCaseData, CASE_ID);
 
         assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerName());
         assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerEmail());
         assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerSolicitorFirm());
         assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerSolicitorReference());
         verify(assignCaseAccessService, never()).removeCaseRoleToUser(any(), any(), any(), any());
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -163,7 +168,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        service.removeIntervenerDetails(twoWrapper, finremCaseData, CASE_ID);
+        List<String> errors = new ArrayList<>();
+        service.removeIntervenerDetails(twoWrapper, errors, finremCaseData, CASE_ID);
 
         assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerName());
         assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerEmail());
@@ -171,6 +177,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -182,12 +189,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
         finremCaseData.setIntervenerThreeWrapper(threeWrapper);
 
-        service.removeIntervenerDetails(threeWrapper, finremCaseData, CASE_ID);
+        List<String> errors = new ArrayList<>();
+        service.removeIntervenerDetails(threeWrapper, errors, finremCaseData, CASE_ID);
 
         assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerName());
         assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerEmail());
         assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerSolicitorFirm());
         assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerSolicitorReference());
+        assertTrue(errors.isEmpty());
 
     }
 
@@ -211,7 +220,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        service.removeIntervenerDetails(threeWrapper, finremCaseData, CASE_ID);
+        List<String> errors = new ArrayList<>();
+        service.removeIntervenerDetails(threeWrapper, errors, finremCaseData, CASE_ID);
 
         assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerName());
         assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerEmail());
@@ -219,6 +229,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -230,12 +241,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
         finremCaseData.setIntervenerFourWrapper(fourWrapper);
 
-        service.removeIntervenerDetails(fourWrapper, finremCaseData, CASE_ID);
+        List<String> errors = new ArrayList<>();
+        service.removeIntervenerDetails(fourWrapper, errors, finremCaseData, CASE_ID);
 
         assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerName());
         assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerEmail());
         assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerSolicitorFirm());
         assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerSolicitorReference());
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -258,7 +271,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        service.removeIntervenerDetails(fourWrapper, finremCaseData, CASE_ID);
+        List<String> errors = new ArrayList<>();
+        service.removeIntervenerDetails(fourWrapper, errors, finremCaseData, CASE_ID);
 
         assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerName());
         assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerEmail());
@@ -266,7 +280,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
-
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -294,12 +308,13 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-
-        service.updateIntervenerDetails(oneWrapper, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerOneWrapper().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -337,8 +352,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-
-        service.updateIntervenerDetails(oneWrapper1, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
         IntervenerOneWrapper intervenerOneWrapper = finremCaseData.getIntervenerOneWrapper();
 
@@ -352,6 +367,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -398,8 +414,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL_CHANGE, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-
-        service.updateIntervenerDetails(oneWrapper1, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
         IntervenerOneWrapper intervenerOneWrapper = finremCaseData.getIntervenerOneWrapper();
         assertNotNull(intervenerOneWrapper.getIntervenerDateAdded());
@@ -415,6 +431,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -463,7 +480,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(oneWrapper1, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
         IntervenerOneWrapper intervenerOneWrapper = finremCaseData.getIntervenerOneWrapper();
         assertNotNull(intervenerOneWrapper.getIntervenerDateAdded());
@@ -479,6 +497,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             INTVR_SOLICITOR_1.getCcdCode(), CHANGE_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
 
@@ -521,7 +540,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(oneWrapper1, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
         IntervenerOneWrapper intervenerOneWrapper = finremCaseData.getIntervenerOneWrapper();
         assertNotNull(intervenerOneWrapper.getIntervenerSolEmail());
@@ -532,6 +552,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -554,10 +575,12 @@ public class IntervenerServiceTest extends BaseServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        service.updateIntervenerDetails(oneWrapper, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerOneWrapper().getIntervenerDateAdded());
         assertNotNull(finremCaseData.getIntervenerOneWrapper().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -580,10 +603,12 @@ public class IntervenerServiceTest extends BaseServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        service.updateIntervenerDetails(wrapper, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerDateAdded());
         assertNotNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -611,11 +636,13 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        service.updateIntervenerDetails(wrapper, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -653,7 +680,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerTwoWrapper intervenerTwoWrapper = finremCaseData.getIntervenerTwoWrapper();
         assertNotNull(intervenerTwoWrapper.getIntervenerDateAdded());
@@ -666,6 +694,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -712,8 +741,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerTwoWrapper intervenerTwoWrapper = finremCaseData.getIntervenerTwoWrapper();
         assertNotNull(intervenerTwoWrapper.getIntervenerDateAdded());
@@ -729,6 +758,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             INTVR_SOLICITOR_2.getCcdCode(), CHANGE_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
 
@@ -776,7 +806,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL_CHANGE, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerTwoWrapper intervenerTwoWrapper = finremCaseData.getIntervenerTwoWrapper();
         assertNotNull(intervenerTwoWrapper.getIntervenerDateAdded());
@@ -792,6 +823,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -830,7 +862,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerTwoWrapper intervenerTwoWrapper = finremCaseData.getIntervenerTwoWrapper();
         assertNotNull(intervenerTwoWrapper.getIntervenerSolEmail());
@@ -841,6 +874,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
 
@@ -863,11 +897,12 @@ public class IntervenerServiceTest extends BaseServiceTest {
         finremCaseData.setIntervenersList(dynamicRadioList);
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         finremCaseData.getIntervenersList().setValue(option1);
-
-        service.updateIntervenerDetails(wrapper, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerDateAdded());
         assertNotNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -896,11 +931,13 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(wrapper, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -940,7 +977,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerThreeWrapper intervenerThreeWrapper = finremCaseData.getIntervenerThreeWrapper();
         assertNotNull(intervenerThreeWrapper.getIntervenerDateAdded());
@@ -953,6 +991,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -999,7 +1038,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL_CHANGE, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerThreeWrapper intervenerThreeWrapper = finremCaseData.getIntervenerThreeWrapper();
         assertNotNull(intervenerThreeWrapper.getIntervenerDateAdded());
@@ -1015,6 +1055,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -1062,7 +1103,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerThreeWrapper intervenerThreeWrapper = finremCaseData.getIntervenerThreeWrapper();
         assertNotNull(intervenerThreeWrapper.getIntervenerDateAdded());
@@ -1078,6 +1120,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             INTVR_SOLICITOR_3.getCcdCode(), CHANGE_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -1117,7 +1160,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerThreeWrapper intervenerThreeWrapper = finremCaseData.getIntervenerThreeWrapper();
         assertNotNull(intervenerThreeWrapper.getIntervenerSolEmail());
@@ -1128,6 +1172,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -1150,10 +1195,12 @@ public class IntervenerServiceTest extends BaseServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        service.updateIntervenerDetails(wrapper, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervenerDateAdded());
         assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -1182,11 +1229,13 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(wrapper, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -1225,7 +1274,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerFourWrapper intervenerFourWrapper = finremCaseData.getIntervenerFourWrapper();
         assertNotNull(intervenerFourWrapper.getIntervenerDateAdded());
@@ -1239,6 +1289,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -1276,8 +1327,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerFourWrapper intervenerFourWrapper = finremCaseData.getIntervenerFourWrapper();
         assertNotNull(intervenerFourWrapper.getIntervenerDateAdded());
@@ -1289,6 +1340,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -1335,7 +1387,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL_CHANGE, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerFourWrapper intervenerFourWrapper = finremCaseData.getIntervenerFourWrapper();
         assertNotNull(intervenerFourWrapper.getIntervenerDateAdded());
@@ -1351,6 +1404,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -1399,7 +1453,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
-        service.updateIntervenerDetails(current, finremCallbackRequest);
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerFourWrapper intervenerFourWrapper = finremCaseData.getIntervenerFourWrapper();
         assertNotNull(intervenerFourWrapper.getIntervenerDateAdded());
@@ -1415,6 +1470,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             INTVR_SOLICITOR_4.getCcdCode(), CHANGE_ORG_ID);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+        assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -1439,10 +1495,11 @@ public class IntervenerServiceTest extends BaseServiceTest {
         finremCaseData.getIntervenersList().setValue(option1);
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        Throwable exception = assertThrows(NoSuchUserException.class,
-            () -> service.updateIntervenerDetails(wrapper, finremCallbackRequest));
-        assertEquals("expecting exception to throw when user not found in am",
-            "Could not find the user with email " + INTERVENER_TEST_EMAIL, exception.getMessage());
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(wrapper, errors,  finremCallbackRequest);
+        String error = String.format("Could not find the user with email %s for caseId 123", INTERVENER_TEST_EMAIL);
+        assertEquals("expecting exception to throw when user not found in am", error, errors.get(0));
+        assertFalse(errors.isEmpty());
     }
 
     @Test
@@ -1564,7 +1621,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
     public void whenNoIntervenerSolicitorRemoved_ShouldReturnFalse() {
         FinremCaseData finremCaseData = FinremCaseData.builder().build();
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder().build();
-        Assert.assertFalse(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+        assertFalse(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

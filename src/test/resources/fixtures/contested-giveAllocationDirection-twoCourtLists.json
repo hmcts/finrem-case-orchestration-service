@@ -1,0 +1,254 @@
+{
+  "token": "Bearer eyJhbGciOiJIUzI1NiJ9",
+  "event_id": "FR_giveAllocationDirections",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "applicationIssued",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "isAdmin": "Yes",
+      "caseFlags": {
+        "details": [],
+        "partyName": "Case",
+        "roleOnCase": "Case"
+      },
+      "issueDate": "2023-11-16",
+      "miniFormA": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3bd00934-36f7-4375-b18e-8fd8bdf67280",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3bd00934-36f7-4375-b18e-8fd8bdf67280/binary"
+      },
+      "regionList": "midlands",
+      "birminghamCourtList": "FR_birmingham_hc_list_1",
+      "midlandsFRCList": "birmingham",
+      "cfcCourtList": "FR_s_CFCList_16",
+      "londonFRCList": "cfc",
+      "applicantFlags": {
+        "details": [],
+        "partyName": "asdfas dfasdfa",
+        "roleOnCase": "Applicant"
+      },
+      "applicantLName": "dfasdfa",
+      "dateOfMarriage": "1987-11-11",
+      "judgeAllocated": [
+        "FR_judgeAllocatedList_3"
+      ],
+      "netValueOfHome": "1",
+      "soleTraderName": "asdf",
+      "applicantFMName": "asdfas",
+      "caseAllocatedTo": "No",
+      "respondentFlags": {
+        "details": [],
+        "partyName": "asdfa asdf",
+        "roleOnCase": "Respondent"
+      },
+      "respondentLName": "asdf",
+      "applicantAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "S11 8SA",
+        "PostTown": "Sheffield",
+        "AddressLine1": "5 Rossington Road",
+        "AddressLine2": "",
+        "AddressLine3": ""
+      },
+      "civilPartnership": "No",
+      "copyOfPaperFormA": [
+        {
+          "id": "6f565574-4697-41fe-934c-e99f6b6e213c",
+          "value": {
+            "typeOfDocument": "Copy of paper form A",
+            "uploadedDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/03413320-c0bb-4571-a7bf-8078417ac556",
+              "document_filename": "air75_quick_guide copy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/03413320-c0bb-4571-a7bf-8078417ac556/binary"
+            }
+          }
+        }
+      ],
+      "respondentFMName": "asdfa",
+      "divorceCaseNumber": "1111111111111111",
+      "fastTrackDecision": "No",
+      "judgeTimeEstimate": "standardTime",
+      "respondentAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "S12 3AQ",
+        "PostTown": "Sheffield",
+        "AddressLine1": "15 Birley Moor Avenue",
+        "AddressLine2": "",
+        "AddressLine3": ""
+      },
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
+      "consentOrderFRCName": "Welshpool Civil and Family Court",
+      "divorceStageReached": "Petition Issued",
+      "applicantRepresented": "No",
+      "consentOrderFRCEmail": "FRCWrexham@justice.gov.uk",
+      "consentOrderFRCPhone": "01978 317400",
+      "promptForAnyDocument": "No",
+      "applicantAttendedMIAM": "Yes",
+      "divorceUploadPetition": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7f87da57-fb57-4307-bc9f-79ce9b2496d6",
+        "document_filename": "air75_quick_guide copy.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7f87da57-fb57-4307-bc9f-79ce9b2496d6/binary"
+      },
+      "isApplicantsHomeCourt": "No",
+      "respondentRepresented": "No",
+      "applicationAllocatedTo": "No",
+      "consentOrderFRCAddress": "Wrexham County Court, Bodhyfryd, Wrexham, LL12 7PB",
+      "estimatedAssetsChecklist": [
+        "estimatedAssetsChecklist_1"
+      ],
+      "nameOfCourtDivorceCentre": "asdfasdf",
+      "divorcePetitionIssuedDate": "1987-11-11",
+      "familyMediatorServiceName": "fasdfa",
+      "specialAssistanceRequired": "asdfasd",
+      "mediatorRegistrationNumber": "sdafd",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {},
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "addToComplexityListOfCourts": "trueDontKnow",
+      "promptForUrgentCaseQuestion": "No",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {},
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "applicantAddressConfidential": "No",
+      "natureOfApplicationChecklist": [
+        "Maintenance Pending Suit"
+      ],
+      "potentialAllegationChecklist": [
+        "notApplicable"
+      ],
+      "specificArrangementsRequired": "asdfasdf",
+      "respondentAddressConfidential": "No",
+      "additionalInformationAboutHearing": "test12345"
+    }
+  },
+  "case_details_before": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "applicationIssued",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "isAdmin": "Yes",
+      "caseFlags": {
+        "details": [],
+        "partyName": "Case",
+        "roleOnCase": "Case"
+      },
+      "issueDate": "2023-11-16",
+      "miniFormA": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3bd00934-36f7-4375-b18e-8fd8bdf67280",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3bd00934-36f7-4375-b18e-8fd8bdf67280/binary"
+      },
+      "regionList": "london",
+      "cfcCourtList": "FR_s_CFCList_16",
+      "londonFRCList": "cfc",
+      "applicantFlags": {
+        "details": [],
+        "partyName": "asdfas dfasdfa",
+        "roleOnCase": "Applicant"
+      },
+      "applicantLName": "dfasdfa",
+      "dateOfMarriage": "1987-11-11",
+      "judgeAllocated": [
+        "FR_judgeAllocatedList_3"
+      ],
+      "netValueOfHome": "1",
+      "soleTraderName": "asdf",
+      "applicantFMName": "asdfas",
+      "caseAllocatedTo": "No",
+      "respondentFlags": {
+        "details": [],
+        "partyName": "asdfa asdf",
+        "roleOnCase": "Respondent"
+      },
+      "respondentLName": "asdf",
+      "applicantAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "S11 8SA",
+        "PostTown": "Sheffield",
+        "AddressLine1": "5 Rossington Road",
+        "AddressLine2": "",
+        "AddressLine3": ""
+      },
+      "civilPartnership": "No",
+      "copyOfPaperFormA": [
+        {
+          "id": "6f565574-4697-41fe-934c-e99f6b6e213c",
+          "value": {
+            "typeOfDocument": "Copy of paper form A",
+            "uploadedDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/03413320-c0bb-4571-a7bf-8078417ac556",
+              "document_filename": "air75_quick_guide copy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/03413320-c0bb-4571-a7bf-8078417ac556/binary"
+            }
+          }
+        }
+      ],
+      "respondentFMName": "asdfa",
+      "divorceCaseNumber": "1111111111111111",
+      "fastTrackDecision": "No",
+      "judgeTimeEstimate": "standardTime",
+      "respondentAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "S12 3AQ",
+        "PostTown": "Sheffield",
+        "AddressLine1": "15 Birley Moor Avenue",
+        "AddressLine2": "",
+        "AddressLine3": ""
+      },
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
+      "consentOrderFRCName": "Welshpool Civil and Family Court",
+      "divorceStageReached": "Petition Issued",
+      "applicantRepresented": "No",
+      "consentOrderFRCEmail": "FRCWrexham@justice.gov.uk",
+      "consentOrderFRCPhone": "01978 317400",
+      "promptForAnyDocument": "No",
+      "applicantAttendedMIAM": "Yes",
+      "divorceUploadPetition": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7f87da57-fb57-4307-bc9f-79ce9b2496d6",
+        "document_filename": "air75_quick_guide copy.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7f87da57-fb57-4307-bc9f-79ce9b2496d6/binary"
+      },
+      "isApplicantsHomeCourt": "No",
+      "respondentRepresented": "No",
+      "applicationAllocatedTo": "No",
+      "consentOrderFRCAddress": "Wrexham County Court, Bodhyfryd, Wrexham, LL12 7PB",
+      "estimatedAssetsChecklist": [
+        "estimatedAssetsChecklist_1"
+      ],
+      "nameOfCourtDivorceCentre": "asdfasdf",
+      "divorcePetitionIssuedDate": "1987-11-11",
+      "familyMediatorServiceName": "fasdfa",
+      "specialAssistanceRequired": "asdfasd",
+      "mediatorRegistrationNumber": "sdafd",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {},
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "addToComplexityListOfCourts": "trueDontKnow",
+      "promptForUrgentCaseQuestion": "No",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {},
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "applicantAddressConfidential": "No",
+      "natureOfApplicationChecklist": [
+        "Maintenance Pending Suit"
+      ],
+      "potentialAllegationChecklist": [
+        "notApplicable"
+      ],
+      "specificArrangementsRequired": "asdfasdf",
+      "respondentAddressConfidential": "No",
+      "additionalInformationAboutHearing": "test12345"
+    }
+  }
+}

@@ -57,4 +57,17 @@ public class GeneralApplicationRegionWrapper {
         }
         return courtListWrapper;
     }
+
+    @JsonIgnore
+    public void clearRegions() {
+        this.generalApplicationDirectionsRegionList = null;
+        this.generalApplicationDirectionsMidlandsFrcList = null;
+        this.generalApplicationDirectionsLondonFrcList = null;
+        this.generalApplicationDirectionsNorthWestFrcList = null;
+        this.generalApplicationDirectionsNorthEastFrcList = null;
+        this.generalApplicationDirectionsSouthEastFrcList = null;
+        this.generalApplicationDirectionsSouthWestFrcList = null;
+        this.generalApplicationDirectionsWalesFrcList = null;
+        this.generalApplicationDirectionsHighCourtFrcList = null;
+    }
 }
