@@ -63,7 +63,7 @@ public class ConsentOrderService {
     }
 
 
-    public List<CaseDocument> checkIfD81DocumentContainsEncryption(Map<String, Object> caseData) {
+    public List<CaseDocument> checkIfD81DocumentContainsEncryption(Map<String, Object> caseData, Map<String, Object> beforeData) {
         List<CaseDocument> caseDocumentList = new ArrayList<>();
 
         CaseDocument consentOrderDocument = convertToCaseDocument(caseData.get("consentOrder"));
@@ -73,18 +73,30 @@ public class ConsentOrderService {
 
         setD81Document(caseData, caseDocumentList);
 
-        List<CaseDocument> pensionDocumentsData = documentHelper.getPensionDocumentsData(caseData);
-        if (pensionDocumentsData != null && !pensionDocumentsData.isEmpty()) {
+        List<CaseDocument> pensionDocumentsData = new ArrayList<>(documentHelper.getPensionDocumentsData(caseData));
+        if (!pensionDocumentsData.isEmpty()) {
+            List<CaseDocument> pensionDocumentsDataBefore = documentHelper.getPensionDocumentsData(beforeData);
+            if (pensionDocumentsDataBefore != null && !pensionDocumentsDataBefore.isEmpty()) {
+                pensionDocumentsData.removeAll(pensionDocumentsDataBefore);
+            }
             caseDocumentList.addAll(pensionDocumentsData);
         }
 
-        List<CaseDocument> variationOrderDocumentsData = documentHelper.getVariationOrderDocumentsData(caseData);
-        if (variationOrderDocumentsData != null && !variationOrderDocumentsData.isEmpty()) {
+        List<CaseDocument> variationOrderDocumentsData = new ArrayList<>(documentHelper.getVariationOrderDocumentsData(caseData));
+        if (!variationOrderDocumentsData.isEmpty()) {
+            List<CaseDocument> variationOrderDocumentsDataBefore = documentHelper.getVariationOrderDocumentsData(beforeData);
+            if (variationOrderDocumentsDataBefore != null && !variationOrderDocumentsDataBefore.isEmpty()) {
+                variationOrderDocumentsData.removeAll(variationOrderDocumentsDataBefore);
+            }
             caseDocumentList.addAll(variationOrderDocumentsData);
         }
 
-        List<CaseDocument> otherDocumentsData = documentHelper.getConsentOrderOtherDocumentsData(caseData);
-        if (otherDocumentsData != null && !otherDocumentsData.isEmpty()) {
+        List<CaseDocument> otherDocumentsData = new ArrayList<>(documentHelper.getConsentOrderOtherDocumentsData(caseData));
+        if (!otherDocumentsData.isEmpty()) {
+            List<CaseDocument> otherDocumentsDataBefore = documentHelper.getConsentOrderOtherDocumentsData(beforeData);
+            if (otherDocumentsDataBefore != null && !otherDocumentsDataBefore.isEmpty()) {
+                otherDocumentsData.removeAll(otherDocumentsDataBefore);
+            }
             caseDocumentList.addAll(otherDocumentsData);
         }
 

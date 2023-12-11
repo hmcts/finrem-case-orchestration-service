@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -63,15 +60,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private CaseDataService caseDataService;
 
     protected CaseDetails caseDetails;
-
-    private void setUpCaseDetails(String fileName) throws Exception {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream(PATH + fileName)) {
-            caseDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
-    }
+    private CallbackRequest request;
 
     @Test
     public void shouldSuccessfullyMoveCollection() throws Exception {
@@ -336,15 +325,22 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.civilPartnership", is(NO_VALUE)));
     }
 
+    public void createRequest(String payload) throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream(payload)) {
+            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            request.setCaseDetailsBefore(request.getCaseDetails());
+        }
+    }
+
     @Test
     public void shouldSuccessfullySetOrgPolicies() throws Exception {
-
-        loadRequestContentWith(PATH + "no-org-policies.json");
+        createRequest(PATH + "no-org-policies.json");
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
         when(featureToggleService.isSolicitorNoticeOfChangeEnabled()).thenReturn(true);
         mvc.perform(post("/case-orchestration/org-policies")
-                .content(requestContent.toString())
+                .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
@@ -358,12 +354,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSetOrgPolicies() throws Exception {
-        loadRequestContentWith(PATH + "no-orgs-is-represented.json");
+        createRequest(PATH + "no-orgs-is-represented.json");
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(featureToggleService.isSolicitorNoticeOfChangeEnabled()).thenReturn(true);
         mvc.perform(post("/case-orchestration/org-policies")
-                .content(requestContent.toString())
+                .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
@@ -374,12 +370,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSetChangeRequestFieldWhenFeatureToggleDisabled() throws Exception {
-        loadRequestContentWith(PATH + "no-orgs-is-represented.json");
+        createRequest(PATH + "no-orgs-is-represented.json");
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(featureToggleService.isSolicitorNoticeOfChangeEnabled()).thenReturn(false);
         mvc.perform(post("/case-orchestration/org-policies")
-                .content(requestContent.toString())
+                .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
