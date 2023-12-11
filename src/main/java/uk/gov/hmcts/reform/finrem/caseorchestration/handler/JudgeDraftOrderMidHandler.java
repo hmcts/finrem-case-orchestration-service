@@ -47,8 +47,19 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
         DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = draftDirectionWrapper.getDraftDirectionOrderCollection();
 
-        List<String> errors = new ArrayList<>();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData beforeCaseData = caseDetailsBefore.getData();
+        DraftDirectionWrapper draftDirectionWrapperBefore = beforeCaseData.getDraftDirectionWrapper();
 
+        if (draftDirectionWrapperBefore != null) {
+            List<DraftDirectionOrderCollection> draftDirectionOrderCollectionBefore
+                = draftDirectionWrapperBefore.getDraftDirectionOrderCollection();
+            if (draftDirectionOrderCollectionBefore != null && !draftDirectionOrderCollectionBefore.isEmpty()) {
+                draftDirectionOrderCollection.removeAll(draftDirectionOrderCollectionBefore);
+            }
+        }
+
+        List<String> errors = new ArrayList<>();
         draftDirectionOrderCollection.forEach(doc ->
             service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
                 caseId, errors, userAuthorisation)
