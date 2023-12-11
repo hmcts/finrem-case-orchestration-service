@@ -63,7 +63,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerDetails(caseData.getIntervenerTwoWrapper(), errors, caseData, caseId);
             case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerDetails(caseData.getIntervenerThreeWrapper(), errors, caseData, caseId);
             case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerDetails(caseData.getIntervenerFourWrapper(), errors, caseData, caseId);
-            default -> throw new IllegalArgumentException("Invalid option received for Case ID: " + caseId);
+            default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
