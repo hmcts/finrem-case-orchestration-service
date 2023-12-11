@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -13,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContes
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -229,27 +231,40 @@ public class GeneralOrderService {
         FinremCaseData data = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
-        if (ObjectUtils.isNotEmpty(data.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
-            CaseDocument orderLatestDocument = data.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
-            String orderLatestDocumentFilename = orderLatestDocument.getDocumentFilename();
-            dynamicListElements.add(partyService.getDynamicMultiSelectListElement(orderLatestDocumentFilename,
-                "Orders tab [Lastest general order]" + " - " + orderLatestDocumentFilename));
+        List<ContestedGeneralOrderCollection> generalOrders = data.getGeneralOrderWrapper().getGeneralOrders();
+
+        if (generalOrders != null && !generalOrders.isEmpty()) {
+            generalOrders.forEach(generalOrder -> {
+                ContestedGeneralOrder order = generalOrder.getValue();
+                String filename = order.getAdditionalDocument().getDocumentFilename();
+                LocalDate orderCreated = order.getDateOfOrder();
+                String documentId = getDocumentId(order.getAdditionalDocument());
+                dynamicListElements.add(partyService.getDynamicMultiSelectListElement(documentId,
+                    "Orders tab" + filename + " - " + orderCreated));
+            });
         }
 
         List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
         if (hearingOrderDocuments != null) {
             Collections.reverse(hearingOrderDocuments);
-            hearingOrderDocuments.forEach(obj -> dynamicListElements.add(partyService.getDynamicMultiSelectListElement(obj.getId(),
-                "Case documents tab [Approved Order]" + " - " + obj.getValue().getUploadDraftDocument().getDocumentFilename())));
+            hearingOrderDocuments.forEach(obj -> {
+                CaseDocument document = obj.getValue().getUploadDraftDocument();
+                dynamicListElements.add(partyService.getDynamicMultiSelectListElement(getDocumentId(document),
+                    "Case documents tab [Approved Order]" + " - " + document.getDocumentFilename()));
+            });
         }
-
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
         data.setOrdersToShare(dynamicOrderList);
     }
 
+    private String getDocumentId(CaseDocument caseDocument) {
+        String documentUrl = caseDocument.getDocumentUrl();
+        return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
+    }
+
     private DynamicMultiSelectList getDynamicOrderList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
-                                                           DynamicMultiSelectList selectedOrders) {
+                                                       DynamicMultiSelectList selectedOrders) {
         if (selectedOrders != null && selectedOrders.getValue() != null) {
             return DynamicMultiSelectList.builder()
                 .value(selectedOrders.getValue())
@@ -317,17 +332,17 @@ public class GeneralOrderService {
 
     private void addToList(DynamicMultiSelectListElement doc, DirectionOrderCollection obj,
                            List<CaseDocument> orders, Long caseId) {
-        if (obj.getId().equals(doc.getCode())) {
+        if (getDocumentId(obj.getValue().getUploadDraftDocument()).equals(doc.getCode())) {
             CaseDocument caseDocument = obj.getValue().getUploadDraftDocument();
             log.info("Adding document to orders {} for caseId {}", caseDocument, caseId);
             orders.add(caseDocument);
         }
     }
 
-    public boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, CaseDocument caseDocument) {
-        if (caseDocument != null) {
+    public boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, ContestedGeneralOrder order) {
+        if (order != null) {
             Optional<DynamicMultiSelectListElement> listElement = selectedDocs.getValue().stream()
-                .filter(e -> e.getCode().equals(caseDocument.getDocumentFilename())).findAny();
+                .filter(e -> e.getCode().equals(getDocumentId(order.getAdditionalDocument()))).findAny();
             return listElement.isPresent();
         }
         return false;

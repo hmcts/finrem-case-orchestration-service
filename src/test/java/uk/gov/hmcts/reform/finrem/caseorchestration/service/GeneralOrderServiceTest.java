@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -28,8 +30,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContes
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -253,7 +257,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        List<DirectionOrderCollection> hearingOrderDocuments =  List.of(
+        List<DirectionOrderCollection> hearingOrderDocuments = List.of(
             DirectionOrderCollection.builder()
                 .id(uuid.toString())
                 .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
@@ -271,14 +275,14 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        List<DirectionOrderCollection> hearingOrderDocuments =  List.of(
+        List<DirectionOrderCollection> hearingOrderDocuments = List.of(
             DirectionOrderCollection.builder()
                 .id(uuid.toString())
                 .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
                 .build());
 
         data.setUploadHearingOrder(hearingOrderDocuments);
-        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument("hmctsurl", "hmcts.pdf", "hmctsbinaryurl"));
+        data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(
             caseDocument("url", "moj.pdf", "binaryurl")));
@@ -292,7 +296,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         generalOrderService.setOrderList(caseDetails);
 
-        assertEquals("One document available to share with other parties", 2, data.getOrdersToShare().getListItems().size());
+        assertEquals("One document available to share with other parties", 2,
+            data.getOrdersToShare().getListItems().size());
     }
 
     @Test
@@ -327,12 +332,12 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         FinremCaseData data = caseDetails.getData();
 
         List<DynamicMultiSelectListElement> dynamicElementList =
-            List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()),getDynamicElementList(CaseRole.APP_BARRISTER.getCcdCode()),
-            getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()),getDynamicElementList(CaseRole.RESP_BARRISTER.getCcdCode()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),getDynamicElementList(CaseRole.INTVR_BARRISTER_1.getCcdCode()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),getDynamicElementList(CaseRole.INTVR_BARRISTER_2.getCcdCode()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),getDynamicElementList(CaseRole.INTVR_BARRISTER_3.getCcdCode()),
-            getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getCcdCode()),getDynamicElementList(CaseRole.INTVR_BARRISTER_4.getCcdCode()));
+            List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()), getDynamicElementList(CaseRole.APP_BARRISTER.getCcdCode()),
+                getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()), getDynamicElementList(CaseRole.RESP_BARRISTER.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getCcdCode()), getDynamicElementList(CaseRole.INTVR_BARRISTER_1.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getCcdCode()), getDynamicElementList(CaseRole.INTVR_BARRISTER_2.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getCcdCode()), getDynamicElementList(CaseRole.INTVR_BARRISTER_3.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getCcdCode()), getDynamicElementList(CaseRole.INTVR_BARRISTER_4.getCcdCode()));
 
         DynamicMultiSelectList parties = DynamicMultiSelectList.builder()
             .value(dynamicElementList)
@@ -356,17 +361,17 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        List<DirectionOrderCollection> hearingOrderDocuments =  List.of(
+        List<DirectionOrderCollection> hearingOrderDocuments = List.of(
             DirectionOrderCollection.builder()
                 .id(uuid.toString())
                 .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
                 .build());
 
         data.setUploadHearingOrder(hearingOrderDocuments);
-        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument("hmctsurl", "hmcts.pdf", "hmctsbinaryurl"));
+        data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(
-            caseDocument("url", "moj.pdf", "binaryurl")));
+            caseDocument()));
 
         DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
             .value(dynamicElementList)
@@ -383,7 +388,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     private DynamicMultiSelectListElement getDynamicElementList(CaseDocument caseDocument) {
         return DynamicMultiSelectListElement.builder()
-            .code(uuid.toString())
+            .code(getDocumentId(caseDocument))
             .label(caseDocument.getDocumentFilename())
             .build();
     }
@@ -501,7 +506,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     @Test
     public void isSelectedGeneralOrderMatchesReturnTrue() {
         DynamicMultiSelectListElement listElement
-            = DynamicMultiSelectListElement.builder().code(caseDocument().getDocumentFilename())
+            = DynamicMultiSelectListElement.builder().code(getDocumentId(caseDocument()))
             .label(caseDocument().getDocumentFilename()).build();
         List<DynamicMultiSelectListElement> dynamicElementList = List.of(listElement);
 
@@ -509,8 +514,16 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .value(dynamicElementList)
             .listItems(dynamicElementList)
             .build();
-        assertTrue(generalOrderService.isSelectedOrderMatches(selectList, caseDocument()));
+        ContestedGeneralOrder contestedGeneralOrder
+            = ContestedGeneralOrder.builder().additionalDocument(caseDocument()).build();
+        assertTrue(generalOrderService.isSelectedOrderMatches(selectList, contestedGeneralOrder));
     }
+
+    private String getDocumentId(CaseDocument caseDocument) {
+        String documentUrl = caseDocument.getDocumentUrl();
+        return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
+    }
+
 
     @Test
     public void isSelectedGeneralOrderNotMatchesReturnFalse() {
@@ -520,7 +533,11 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .value(dynamicElementList)
             .listItems(dynamicElementList)
             .build();
-        assertFalse(generalOrderService.isSelectedOrderMatches(selectList, caseDocument()));
+        ContestedGeneralOrder contestedGeneralOrder
+            = ContestedGeneralOrder.builder()
+            .additionalDocument(caseDocument("http://nxjsjsjksn/documenturl", "test.pdf",
+                "http://nxjsjsjksn/documenturl/binary")).build();
+        assertFalse(generalOrderService.isSelectedOrderMatches(selectList, contestedGeneralOrder));
     }
 
     @Test
@@ -600,4 +617,20 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
                 .build()))
             .build();
     }
+
+    private List<ContestedGeneralOrderCollection> getGeneralOrderCollection() {
+        ContestedGeneralOrder generalOrder = ContestedGeneralOrder
+            .builder()
+            .dateOfOrder(LocalDate.of(2002, 2, 5))
+            .judge("Moj")
+            .generalOrderText("general order")
+            .additionalDocument(caseDocument())
+            .build();
+
+        ContestedGeneralOrderCollection collection = ContestedGeneralOrderCollection.builder().value(generalOrder).build();
+        List<ContestedGeneralOrderCollection> collections = new ArrayList<>();
+        collections.add(collection);
+        return collections;
+    }
+
 }
