@@ -37,6 +37,7 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+
     }
 
     @Override
@@ -93,7 +94,17 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
-            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT)
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES1)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES2),
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES2)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES),
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_MORTGAGE_CAPACITIES)
         );
 
         assertThat(
@@ -110,5 +121,16 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS),
             is(DocumentCategory.APPLICANT_DOCUMENTS)
         );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS),
+            is(DocumentCategory.APPLICANT_DOCUMENTS_HOUSING_PARTICULARS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PRE_HEARING_DRAFT_ORDER),
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER)
+        );
+
     }
 }
