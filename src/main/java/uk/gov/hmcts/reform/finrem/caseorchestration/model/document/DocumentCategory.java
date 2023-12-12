@@ -194,6 +194,7 @@ public enum DocumentCategory {
     CORRESPONDENCE_INTERVENER_2("correspondenceIntervener2"),
     CORRESPONDENCE_INTERVENER_3("correspondenceIntervener3"),
     CORRESPONDENCE_INTERVENER_4("correspondenceIntervener4"),
+    CORRESPONDENCE_OTHER("correspondenceOther"),
     CONFIDENTIAL_DOCUMENTS("confidentialDocuments"),
     CONFIDENTIAL_DOCUMENTS_APPLICANT("confidentialDocumentsApplicant"),
     CONFIDENTIAL_DOCUMENTS_RESPONDENT("confidentialDocumentsRespondent"),
