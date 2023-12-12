@@ -421,11 +421,10 @@ public class GeneralApplicationServiceTest {
             caseDataBefore.getGeneralApplicationWrapper().getGeneralApplications().get(0), generalApplications));
         caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(ga -> ga.getValue()
             .setGeneralApplicationSender(buildDynamicList(INTERVENER1)));
-        String generalApplicationCollection = GENERAL_APPLICATION_COLLECTION;
 
         List<GeneralApplicationCollectionData> col =
             generalApplicationService.getInterimGeneralApplicationList(
-                generalApplicationCollection, caseData, caseDataBefore);
+                GENERAL_APPLICATION_COLLECTION, caseData, caseDataBefore);
         List<GeneralApplicationItems> itemsActual = new ArrayList<>();
 
         col.forEach(x -> itemsActual.add(x.getGeneralApplicationItems()));
