@@ -196,7 +196,7 @@ public class CaseDataController extends BaseController {
         }
         addOrganisationPoliciesIfPartiesNotRepresented(caseData);
         List<String> errors = new ArrayList<>();
-        Map<String, Object> caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+        Map<String, Object> caseDataBefore = new HashMap<>();
         List<CaseDocument> caseDocuments = consentOrderService.checkIfD81DocumentContainsEncryption(caseData, caseDataBefore);
         if (caseDocuments != null && !caseDocuments.isEmpty()) {
             caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, "na", errors, authToken));
