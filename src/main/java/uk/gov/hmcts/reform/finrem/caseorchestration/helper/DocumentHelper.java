@@ -172,7 +172,7 @@ public class DocumentHelper {
 
 
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
-        if (caseData == null) {
+        if (caseData == null || caseData.isEmpty()) {
             return new ArrayList<>();
         }
         return ofNullable(caseData.get(PENSION_DOCS_COLLECTION))
@@ -203,7 +203,7 @@ public class DocumentHelper {
      * @return List Object
      */
     public List<CaseDocument> getVariationOrderDocumentsData(Map<String, Object> caseData) {
-        if (caseData == null) {
+        if (caseData == null || caseData.isEmpty()) {
             return new ArrayList<>();
         }
         return ofNullable(caseData.get("otherVariationCollection"))
@@ -224,7 +224,7 @@ public class DocumentHelper {
      * @return List Object
      */
     public List<CaseDocument> getConsentOrderOtherDocumentsData(Map<String, Object> caseData) {
-        if (caseData == null) {
+        if (caseData == null || caseData.isEmpty()) {
             return new ArrayList<>();
         }
         return ofNullable(caseData.get("otherCollection"))
