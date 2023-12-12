@@ -92,7 +92,7 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
-            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2)
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_ES1)
         );
 
         assertThat(

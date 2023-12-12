@@ -93,7 +93,7 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
-            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4)
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_ES1)
         );
 
         assertThat(

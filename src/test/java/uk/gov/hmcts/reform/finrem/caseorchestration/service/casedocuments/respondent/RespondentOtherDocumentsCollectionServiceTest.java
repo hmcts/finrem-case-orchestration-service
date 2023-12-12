@@ -92,7 +92,7 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
-            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT)
+            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_ES1)
         );
 
         assertThat(
