@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -245,6 +246,7 @@ public class GeneralOrderService {
         List<ContestedGeneralOrderCollection> generalOrders = data.getGeneralOrderWrapper().getGeneralOrders();
 
         if (generalOrders != null && !generalOrders.isEmpty()) {
+            generalOrders.sort(Comparator.nullsLast(this::getCompareTo).reversed());
             generalOrders.forEach(generalOrder -> {
                 ContestedGeneralOrder order = generalOrder.getValue();
                 String filename = order.getAdditionalDocument().getDocumentFilename();
@@ -266,6 +268,12 @@ public class GeneralOrderService {
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
         data.setOrdersToShare(dynamicOrderList);
+    }
+
+    private int getCompareTo(ContestedGeneralOrderCollection e1, ContestedGeneralOrderCollection e2) {
+        LocalDate e1Date = e1.getValue().getDateOfOrder() != null ? e1.getValue().getDateOfOrder() : LocalDate.now();
+        LocalDate e2Date = e2.getValue().getDateOfOrder() != null ? e2.getValue().getDateOfOrder() : LocalDate.now();
+        return e1Date.compareTo(e2Date);
     }
 
     private String getDocumentId(CaseDocument caseDocument) {
