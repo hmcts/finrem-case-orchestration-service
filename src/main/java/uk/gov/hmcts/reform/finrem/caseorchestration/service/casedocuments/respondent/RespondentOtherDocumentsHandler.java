@@ -32,13 +32,33 @@ public class RespondentOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getHearingDocumentsCategory() {
-        return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT;
+    protected DocumentCategory getHearingDocumentsCategoryES1() {
+        return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_ES1;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryES2() {
+        return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_ES2;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_MORTGAGE_CAPACITIES;
     }
 
     @Override
     protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS;
+    }
+
+    @Override
+    protected DocumentCategory getHouseParticularsDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_HOUSING_PARTICULARS;
+    }
+
+    @Override
+    protected DocumentCategory getPreHearingDraftOrderDocumentCategory() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_PRE_HEARING_DRAFT_ORDER;
     }
 
     @Override

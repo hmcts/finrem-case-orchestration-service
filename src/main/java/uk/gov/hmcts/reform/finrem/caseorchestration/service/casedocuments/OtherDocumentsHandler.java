@@ -55,8 +55,14 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
             case CERTIFICATES_OF_SERVICE -> {
                 return getCertificatesOfServiceDocumentCategory();
             }
-            case ES1, ES2, MORTGAGE_CAPACITIES -> {
-                return getHearingDocumentsCategory();
+            case ES1 -> {
+                return getHearingDocumentsCategoryES1();
+            }
+            case ES2 -> {
+                return getHearingDocumentsCategoryES2();
+            }
+            case MORTGAGE_CAPACITIES -> {
+                return getHearingDocumentsCategoryMortgageCapacities();
             }
             case WITHOUT_PREJUDICE_OFFERS -> {
                 return getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory();
@@ -64,22 +70,37 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
             case PENSION_REPORT -> {
                 return DocumentCategory.REPORTS_PENSION_REPORTS;
             }
+            case HOUSING_PARTICULARS -> {
+                return getHouseParticularsDocumentCategory();
+            }
+            case PRE_HEARING_DRAFT_ORDER -> {
+                return getPreHearingDraftOrderDocumentCategory();
+            }
             default -> {
                 return getDefaultPartyCategory();
             }
         }
-    }
 
+    }
+    
     protected abstract DocumentCategory getMiscellaneousOrOtherDocumentCategory();
 
     protected abstract DocumentCategory getPensionPlanDocumentCategory();
 
     protected abstract DocumentCategory getCertificatesOfServiceDocumentCategory();
 
-    protected abstract DocumentCategory getHearingDocumentsCategory();
+    protected abstract DocumentCategory getHearingDocumentsCategoryES1();
+
+    protected abstract DocumentCategory getHearingDocumentsCategoryES2();
+
+    protected abstract DocumentCategory getHearingDocumentsCategoryMortgageCapacities();
 
     protected abstract DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory();
 
     protected abstract DocumentCategory getDefaultPartyCategory();
+
+    protected abstract DocumentCategory getHouseParticularsDocumentCategory();
+
+    protected abstract DocumentCategory getPreHearingDraftOrderDocumentCategory();
 
 }

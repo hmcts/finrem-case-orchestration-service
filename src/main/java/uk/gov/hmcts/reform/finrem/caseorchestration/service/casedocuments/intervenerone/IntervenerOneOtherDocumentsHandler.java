@@ -31,13 +31,33 @@ public class IntervenerOneOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getHearingDocumentsCategory() {
-        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1;
+    protected DocumentCategory getHearingDocumentsCategoryES1() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_ES1;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryES2() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_ES2;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_MORTGAGE_CAPACITIES;
     }
 
     @Override
     protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_1_WITHOUT_PREJUDICE_OFFERS;
+    }
+
+    @Override
+    protected DocumentCategory getHouseParticularsDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_HOUSING_PARTICULARS;
+    }
+
+    @Override
+    protected DocumentCategory getPreHearingDraftOrderDocumentCategory() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_PRE_HEARING_DRAFT_ORDER;
     }
 
     @Override

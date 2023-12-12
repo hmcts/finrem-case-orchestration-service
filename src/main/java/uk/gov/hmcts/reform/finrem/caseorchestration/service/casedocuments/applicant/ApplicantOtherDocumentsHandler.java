@@ -32,9 +32,20 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getHearingDocumentsCategory() {
-        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT;
+    protected DocumentCategory getHearingDocumentsCategoryES1() {
+        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES1;
     }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryES2() {
+        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES2;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_MORTGAGE_CAPACITIES;
+    }
+
 
     @Override
     protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
@@ -44,5 +55,15 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     @Override
     protected DocumentCategory getDefaultPartyCategory() {
         return DocumentCategory.APPLICANT_DOCUMENTS;
+    }
+
+    @Override
+    protected DocumentCategory getHouseParticularsDocumentCategory() {
+        return DocumentCategory.APPLICANT_DOCUMENTS_HOUSING_PARTICULARS;
+    }
+
+    @Override
+    protected DocumentCategory getPreHearingDraftOrderDocumentCategory() {
+        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
     }
 }
