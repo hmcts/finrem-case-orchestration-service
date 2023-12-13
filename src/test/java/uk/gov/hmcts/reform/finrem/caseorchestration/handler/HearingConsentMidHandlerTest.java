@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -23,12 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
 class HearingConsentMidHandlerTest extends BaseHandlerTestSetup {
@@ -50,34 +49,26 @@ class HearingConsentMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void canHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING_CONSENTED),
-            is(true));
+        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING_CONSENTED));
     }
 
     @Test
     void canNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING_CONSENTED),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING_CONSENTED));
     }
 
     @Test
     void canNotHandleWrongEventType() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE));
     }
 
     @Test
     void canNotHandleWrongCallbackType() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.LIST_FOR_HEARING_CONSENTED),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.LIST_FOR_HEARING_CONSENTED));
     }
 
     @Test
-    void givenContestedCase_whenListForHearingbutNoAdditionalUploaded_thenNoCheckPerformed() throws Exception {
+    void givenContestedCase_whenListForHearingbutNoAdditionalUploaded_thenNoCheckPerformed() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -99,11 +90,11 @@ class HearingConsentMidHandlerTest extends BaseHandlerTestSetup {
     }
 
     @Test
-    void givenContestedCase_whenListForHearingAdditionalUploadedButNonEncryptedFileShouldNotGetError() throws Exception {
+    void givenContestedCase_whenListForHearingAdditionalUploadedButNonEncryptedFileShouldNotGetError() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
-        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
         List<ConsentedHearingDataWrapper> listForHearings =
             Optional.ofNullable(caseData.getListForHearings()).orElse(new ArrayList<>());
 
@@ -121,5 +112,33 @@ class HearingConsentMidHandlerTest extends BaseHandlerTestSetup {
 
         assertTrue(response.getErrors().isEmpty());
         verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenListForHearingAdditionalUploadedButSameDocumentAlreadyExists_thenDoNotCheckDocumentValidity() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+        List<ConsentedHearingDataWrapper> listForHearings =
+            Optional.ofNullable(caseData.getListForHearings()).orElse(new ArrayList<>());
+
+        ConsentedHearingDataElement hearingDataElement = ConsentedHearingDataElement.builder()
+            .hearingType("ssss")
+            .promptForAnyDocument("Yes")
+            .uploadAdditionalDocument(caseDocument)
+            .build();
+        ConsentedHearingDataWrapper hearingDataWrapper = ConsentedHearingDataWrapper.builder().value(hearingDataElement).build();
+        listForHearings.add(hearingDataWrapper);
+        caseData.setListForHearings(listForHearings);
+
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        caseDataBefore.setListForHearings(listForHearings);
+
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertTrue(response.getErrors().isEmpty());
+        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 }
