@@ -96,12 +96,18 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
             finremCaseDetailsMapper,
             generalOrderService,
             genericDocumentService, consentOrderApprovedDocumentService, consentOrderNotApprovedDocumentService, List.of(
-                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
-                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
-                new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService))
+                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    caseDataService, documentHelper),
+                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    caseDataService, documentHelper),
+                new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper),
+                new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper),
+                new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper),
+                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper))
         );
     }
 
