@@ -53,7 +53,6 @@ public class ManageScannedDocsContestedAboutToStartHandler extends FinremCallbac
                     .fileName(doc.getValue().getFileName())
                     .scannedDate(doc.getValue().getScannedDate())
                     .caseDocuments(CaseDocument.builder()
-                        .documentFilename(doc.getValue().getFileName())
                         .documentUrl(doc.getValue().getUrl().getDocumentUrl())
                         .documentBinaryUrl(doc.getValue().getUrl().getDocumentBinaryUrl())
                         .documentFilename(doc.getValue().getUrl().getDocumentFilename())

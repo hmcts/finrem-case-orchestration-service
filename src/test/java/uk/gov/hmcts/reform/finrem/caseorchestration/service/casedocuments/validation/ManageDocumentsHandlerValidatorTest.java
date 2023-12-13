@@ -16,16 +16,17 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR_LABEL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE_LABEL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE_LABEL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO_LABEL;
 
 public class ManageDocumentsHandlerValidatorTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
     public static final String DOCUMENT_URL_TEST = "document/url/test";
     public static final String CHOOSE_A_DIFFERENT_PARTY = " not present on the case, do you want to continue?";
-    public static final String INTERVENER_1 = "Intervener 1 ";
-    public static final String INTERVENER_2 = "Intervener 2 ";
-    public static final String INTERVENER_3 = "Intervener 3 ";
-    public static final String INTERVENER_4 = "Intervener 4 ";
+
 
     ManageDocumentsHandlerValidator manageDocumentsHandlerValidator = new ManageDocumentsHandlerValidator();
     private final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
@@ -33,22 +34,22 @@ public class ManageDocumentsHandlerValidatorTest {
 
     @Test
     public void givenInCorrectInterverner1Selected_thenNoValidationError() {
-        testIntervernerNotValid(CaseDocumentParty.INTERVENER_ONE, INTERVENER_1);
+        testIntervernerNotValid(CaseDocumentParty.INTERVENER_ONE, INTERVENER_ONE_LABEL);
     }
 
     @Test
     public void givenInCorrectInterverner2Selected_thenNoValidationError() {
-        testIntervernerNotValid(CaseDocumentParty.INTERVENER_TWO, INTERVENER_2);
+        testIntervernerNotValid(CaseDocumentParty.INTERVENER_TWO, INTERVENER_TWO_LABEL);
     }
 
     @Test
     public void givenInCorrectInterverner3Selected_thenNoValidationError() {
-        testIntervernerNotValid(CaseDocumentParty.INTERVENER_THREE, INTERVENER_3);
+        testIntervernerNotValid(CaseDocumentParty.INTERVENER_THREE, INTERVENER_THREE_LABEL);
     }
 
     @Test
     public void givenInCorrectInterverner4Selected_thenNoValidationError() {
-        testIntervernerNotValid(CaseDocumentParty.INTERVENER_FOUR, INTERVENER_4);
+        testIntervernerNotValid(CaseDocumentParty.INTERVENER_FOUR, INTERVENER_FOUR_LABEL);
     }
 
     @Test

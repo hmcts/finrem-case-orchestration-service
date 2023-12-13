@@ -8,33 +8,34 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR_LABEL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE_LABEL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE_LABEL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO_LABEL;
+
 @Component
 public class ManageDocumentsHandlerValidator {
 
     public static final String CHOOSE_A_DIFFERENT_PARTY = " not present on the case, do you want to continue?";
-    public static final String INTERVENER_1 = "Intervener 1 ";
-    public static final String INTERVENER_2 = "Intervener 2 ";
-    public static final String INTERVENER_3 = "Intervener 3 ";
-    public static final String INTERVENER_4 = "Intervener 4 ";
 
     public void validateSelectedIntervenerParties(FinremCaseData caseData, List<UploadCaseDocumentCollection> manageCaseDocumentCollection,
                                                   List<String> warnings) {
 
         if (StringUtils.isBlank(caseData.getIntervenerOneWrapper().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageCaseDocumentCollection)) {
-            warnings.add(INTERVENER_1 + CHOOSE_A_DIFFERENT_PARTY);
+            warnings.add(INTERVENER_ONE_LABEL + CHOOSE_A_DIFFERENT_PARTY);
         }
         if (StringUtils.isBlank(caseData.getIntervenerTwoWrapper().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_TWO, manageCaseDocumentCollection)) {
-            warnings.add(INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY);
+            warnings.add(INTERVENER_TWO_LABEL + CHOOSE_A_DIFFERENT_PARTY);
         }
         if (StringUtils.isBlank(caseData.getIntervenerThreeWrapper().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_THREE, manageCaseDocumentCollection)) {
-            warnings.add(INTERVENER_3 + CHOOSE_A_DIFFERENT_PARTY);
+            warnings.add(INTERVENER_THREE_LABEL + CHOOSE_A_DIFFERENT_PARTY);
         }
         if (StringUtils.isBlank(caseData.getIntervenerFourWrapper().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_FOUR, manageCaseDocumentCollection)) {
-            warnings.add(INTERVENER_4 + CHOOSE_A_DIFFERENT_PARTY);
+            warnings.add(INTERVENER_FOUR_LABEL + CHOOSE_A_DIFFERENT_PARTY);
         }
     }
 
