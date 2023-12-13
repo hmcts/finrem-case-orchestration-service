@@ -172,9 +172,12 @@ public class DocumentHelper {
 
 
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
+        if (caseData == null || caseData.isEmpty()) {
+            return new ArrayList<>();
+        }
         return ofNullable(caseData.get(PENSION_DOCS_COLLECTION))
             .map(this::convertToPensionCollectionDataList)
-            .orElse(emptyList())
+            .orElse(List.of())
             .stream()
             .map(PensionTypeCollection::getTypedCaseDocument)
             .map(PensionType::getPensionDocument)
@@ -200,6 +203,9 @@ public class DocumentHelper {
      * @return List Object
      */
     public List<CaseDocument> getVariationOrderDocumentsData(Map<String, Object> caseData) {
+        if (caseData == null || caseData.isEmpty()) {
+            return new ArrayList<>();
+        }
         return ofNullable(caseData.get("otherVariationCollection"))
             .map(this::convertToVariationOrderDataList)
             .orElse(emptyList())
@@ -218,9 +224,12 @@ public class DocumentHelper {
      * @return List Object
      */
     public List<CaseDocument> getConsentOrderOtherDocumentsData(Map<String, Object> caseData) {
+        if (caseData == null || caseData.isEmpty()) {
+            return new ArrayList<>();
+        }
         return ofNullable(caseData.get("otherCollection"))
             .map(this::convertToOtherDataList)
-            .orElse(emptyList())
+            .orElse(List.of())
             .stream()
             .map(ConsentOrderOtherDocumentCollection::getTypeOfDocument)
             .map(ConsentOrderOtherDocumentType::getUploadedDocument)
@@ -240,7 +249,7 @@ public class DocumentHelper {
     public List<CaseDocument> getFormADocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(FORM_A_COLLECTION))
             .map(this::convertToPaymentDocumentCollectionList)
-            .orElse(emptyList())
+            .orElse(List.of())
             .stream()
             .map(PaymentDocumentCollection::getValue)
             .map(PaymentDocument::getUploadedDocument)
@@ -251,7 +260,7 @@ public class DocumentHelper {
     public List<CaseDocument> getFormADocumentsData(FinremCaseData caseData) {
         return ofNullable(caseData.getCopyOfPaperFormA())
             .map(this::convertToPaymentDocumentCollectionList)
-            .orElse(emptyList())
+            .orElse(List.of())
             .stream()
             .map(PaymentDocumentCollection::getValue)
             .map(PaymentDocument::getUploadedDocument)
@@ -262,7 +271,7 @@ public class DocumentHelper {
     public List<CaseDocument> getConsentedInContestedPensionDocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))
             .map(this::convertToPensionCollectionDataList)
-            .orElse(emptyList())
+            .orElse(List.of())
             .stream()
             .map(PensionTypeCollection::getTypedCaseDocument)
             .map(PensionType::getPensionDocument)

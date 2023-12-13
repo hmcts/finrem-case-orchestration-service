@@ -51,6 +51,8 @@ public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler {
         CaseDocument consentOrder = caseData.getConsentOrder();
         caseDocumentList.add(consentOrder);
 
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
         ConsentOrderWrapper consentOrderWrapper = caseData.getConsentOrderWrapper();
         if (!ObjectUtils.isEmpty(consentOrderWrapper)) {
             CaseDocument consentD81Joint = consentOrderWrapper.getConsentD81Joint();
@@ -65,16 +67,10 @@ public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler {
             if (consentD81Respondent != null) {
                 caseDocumentList.add(consentD81Respondent);
             }
-            List<OtherDocumentCollection> otherCollection = consentOrderWrapper.getConsentOtherCollection();
-            if (otherCollection != null && !otherCollection.isEmpty()) {
-                otherCollection.forEach(obj -> caseDocumentList.add(obj.getValue().getUploadedDocument()));
-            }
+            getOtherDocuments(caseId, caseDocumentList, caseDataBefore, consentOrderWrapper);
         }
 
-        List<PensionTypeCollection> consentPensionCollection = caseData.getConsentPensionCollection();
-        if (consentPensionCollection != null && !consentPensionCollection.isEmpty()) {
-            consentPensionCollection.forEach(obj -> caseDocumentList.add(obj.getTypedCaseDocument().getPensionDocument()));
-        }
+        getPensionDocuments(caseId, caseData, caseDocumentList, caseDataBefore);
 
         CaseDocument variationOrderDocument = caseData.getConsentVariationOrderDocument();
         if (variationOrderDocument != null) {
@@ -86,5 +82,40 @@ public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler {
                 caseId, errors, userAuthorisation));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+    }
+
+    private void getOtherDocuments(String caseId,
+                                   List<CaseDocument> caseDocumentList,
+                                   FinremCaseData caseDataBefore,
+                                   ConsentOrderWrapper consentOrderWrapper) {
+        List<OtherDocumentCollection> otherCollection = consentOrderWrapper.getConsentOtherCollection();
+        if (otherCollection != null && !otherCollection.isEmpty()) {
+            log.info("No. of current otherCollection {} for caseId {}", otherCollection.size(), caseId);
+            ConsentOrderWrapper consentOrderWrapperBefore = caseDataBefore.getConsentOrderWrapper();
+            if (consentOrderWrapperBefore != null) {
+                List<OtherDocumentCollection> otherCollectionBefore = consentOrderWrapperBefore.getConsentOtherCollection();
+                if (otherCollectionBefore != null && !otherCollectionBefore.isEmpty()) {
+                    log.info("No. of before otherCollectionBefore {} for caseId {}", otherCollectionBefore.size(), caseId);
+                    otherCollection.removeAll(otherCollectionBefore);
+                }
+            }
+            log.info("No. of otherCollection {} to check for caseId {}", otherCollection.size(), caseId);
+            otherCollection.forEach(obj -> caseDocumentList.add(obj.getValue().getUploadedDocument()));
+        }
+    }
+
+    private void getPensionDocuments(String caseId, FinremCaseData caseData,
+                                            List<CaseDocument> caseDocumentList, FinremCaseData caseDataBefore) {
+        List<PensionTypeCollection> consentPensionCollection = caseData.getConsentPensionCollection();
+        if (consentPensionCollection != null && !consentPensionCollection.isEmpty()) {
+            log.info("No. of current consentPensionCollection {} for caseId {}", consentPensionCollection.size(), caseId);
+            List<PensionTypeCollection> consentPensionsBefore = caseDataBefore.getConsentPensionCollection();
+            if (consentPensionsBefore != null && !consentPensionsBefore.isEmpty()) {
+                log.info("No. of before consentPensionsBefore {} for caseId {}", consentPensionsBefore.size(), caseId);
+                consentPensionCollection.removeAll(consentPensionsBefore);
+            }
+            log.info("No. of consentPensionCollection {} to check for caseId {}", consentPensionCollection.size(), caseId);
+            consentPensionCollection.forEach(obj -> caseDocumentList.add(obj.getTypedCaseDocument().getPensionDocument()));
+        }
     }
 }

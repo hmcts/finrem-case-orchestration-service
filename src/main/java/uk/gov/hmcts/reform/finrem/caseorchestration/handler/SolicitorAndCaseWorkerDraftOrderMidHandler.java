@@ -46,6 +46,15 @@ public class SolicitorAndCaseWorkerDraftOrderMidHandler extends FinremCallbackHa
 
         DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = draftDirectionWrapper.getDraftDirectionOrderCollection();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+        DraftDirectionWrapper draftDirectionWrapperBefore = caseDataBefore.getDraftDirectionWrapper();
+        if (draftDirectionWrapperBefore != null) {
+            List<DraftDirectionOrderCollection> draftDirectionsBefore = draftDirectionWrapperBefore.getDraftDirectionOrderCollection();
+            if (draftDirectionsBefore != null && !draftDirectionsBefore.isEmpty()) {
+                draftDirectionOrderCollection.removeAll(draftDirectionsBefore);
+            }
+        }
 
         List<String> errors = new ArrayList<>();
 
