@@ -25,7 +25,8 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
         CaseDocumentType.MORTGAGE_CAPACITIES,
         CaseDocumentType.PRE_HEARING_DRAFT_ORDER,
         CaseDocumentType.WITHOUT_PREJUDICE_OFFERS,
-        CaseDocumentType.PENSION_REPORT
+        CaseDocumentType.PENSION_REPORT,
+        CaseDocumentType.BILL_OF_COSTS
     );
 
     public OtherDocumentsHandler(CaseDocumentCollectionType caseDocumentCollectionType,
