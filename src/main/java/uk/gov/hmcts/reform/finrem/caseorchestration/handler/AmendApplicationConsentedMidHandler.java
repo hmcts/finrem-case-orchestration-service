@@ -16,15 +16,14 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SolicitorCreateConsentedMidHandler implements CallbackHandler<Map<String, Object>> {
-
+public class AmendApplicationConsentedMidHandler implements CallbackHandler<Map<String, Object>> {
     private final ConsentOrderService consentOrderService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.SOLICITOR_CREATE.equals(eventType);
+            && EventType.AMEND_APP_DETAILS.equals(eventType);
     }
 
     @Override
