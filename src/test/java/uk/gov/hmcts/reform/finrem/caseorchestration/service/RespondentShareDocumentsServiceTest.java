@@ -89,10 +89,11 @@ public class RespondentShareDocumentsServiceTest {
     @MockBean
     private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
+
     @BeforeEach
     void beforeEach() {
         service = new RespondentShareDocumentsService();
-        intervenerShareDocumentsService = new IntervenerShareDocumentsService(selectablePartiesCorrespondenceService);
+
         documentSharers = List.of(new ChronologiesDocumentSharer(featureToggleService),
             new CorrespondenceDocumentSharer(featureToggleService),
             new ExpertEvidenceDocumentSharer(featureToggleService),
@@ -103,8 +104,10 @@ public class RespondentShareDocumentsServiceTest {
             new QuestionnaireAnswersDocumentSharer(featureToggleService),
             new StatementExhibitsDocumentSharer(featureToggleService),
             new SummariesDocumentSharer(featureToggleService));
+
         ShareSelectedDocumentService shareSelectedDocumentService = new ShareSelectedDocumentService(documentSharers);
-        intervenerShareDocumentsService = new IntervenerShareDocumentsService(shareSelectedDocumentService);
+        intervenerShareDocumentsService = new IntervenerShareDocumentsService(selectablePartiesCorrespondenceService, shareSelectedDocumentService);
+
         uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
 

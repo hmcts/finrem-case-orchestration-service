@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -78,11 +79,14 @@ public class IntervenerShareDocumentsServiceTest {
     private FeatureToggleService featureToggleService;
     private List<DocumentSharer> documentSharers;
 
+    @MockBean
+    ShareSelectedDocumentService shareSelectedDocumentService;
+
 
     @BeforeEach
     void beforeEach() {
         selectablePartiesCorrespondenceService = new SelectablePartiesCorrespondenceService(new FinremCaseDetailsMapper(new ObjectMapper()));
-        intervenerShareDocumentsService = new IntervenerShareDocumentsService(selectablePartiesCorrespondenceService);
+
 
         documentSharers = List.of(new ChronologiesDocumentSharer(featureToggleService),
             new CorrespondenceDocumentSharer(featureToggleService),
@@ -95,7 +99,7 @@ public class IntervenerShareDocumentsServiceTest {
             new StatementExhibitsDocumentSharer(featureToggleService),
             new SummariesDocumentSharer(featureToggleService));
         ShareSelectedDocumentService shareSelectedDocumentService = new ShareSelectedDocumentService(documentSharers);
-        intervenerShareDocumentsService = new IntervenerShareDocumentsService(shareSelectedDocumentService);
+        intervenerShareDocumentsService = new IntervenerShareDocumentsService(selectablePartiesCorrespondenceService, shareSelectedDocumentService);
         uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
 

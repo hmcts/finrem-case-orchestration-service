@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
@@ -89,7 +90,7 @@ public class ApplicantShareDocumentsServiceTest {
     @BeforeEach
     void beforeEach() {
         service = new ApplicantShareDocumentsService();
-        intervenerShareDocumentsService = new IntervenerShareDocumentsService(selectablePartiesCorrespondenceService);
+
         uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
         documentSharers = List.of(new ChronologiesDocumentSharer(featureToggleService),
             new CorrespondenceDocumentSharer(featureToggleService),
@@ -102,7 +103,7 @@ public class ApplicantShareDocumentsServiceTest {
             new StatementExhibitsDocumentSharer(featureToggleService),
             new SummariesDocumentSharer(featureToggleService));
         ShareSelectedDocumentService shareSelectedDocumentService = new ShareSelectedDocumentService(documentSharers);
-        intervenerShareDocumentsService = new IntervenerShareDocumentsService(shareSelectedDocumentService);
+        intervenerShareDocumentsService = new IntervenerShareDocumentsService(selectablePartiesCorrespondenceService, shareSelectedDocumentService);
 
     }
 
