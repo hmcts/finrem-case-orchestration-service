@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemIds;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
@@ -78,7 +77,7 @@ public class InterimHearingContestedAboutToStartHandler
             interimHearingItemMapper.loadBulkPrintDocuments(caseData);
         } else {
             List<InterimHearingCollectionItemData> list = interimHearingList.stream()
-                .map(obj -> getTrackingObject(obj.getId())).toList();
+                .map(obj -> interimHearingHelper.getTrackingObject(obj.getId())).toList();
             log.info("INTERIM_HEARING_TRACKING ELSE {}", list);
             caseData.put(INTERIM_HEARING_TRACKING, list);
         }
@@ -88,12 +87,7 @@ public class InterimHearingContestedAboutToStartHandler
     private List<InterimHearingCollectionItemData> setTrackingForBulkPrintAndNotification(Map<String, Object> caseData,
                                                                                           String collectionId) {
         List<InterimHearingCollectionItemData> list = interimHearingHelper.getInterimHearingTrackingList(caseData);
-        list.add(getTrackingObject(collectionId));
+        list.add(interimHearingHelper.getTrackingObject(collectionId));
         return list;
-    }
-
-    private InterimHearingCollectionItemData getTrackingObject(String collectionId) {
-        return InterimHearingCollectionItemData.builder().id(UUID.randomUUID().toString())
-            .value(InterimHearingCollectionItemIds.builder().ihItemIds(collectionId).build()).build();
     }
 }

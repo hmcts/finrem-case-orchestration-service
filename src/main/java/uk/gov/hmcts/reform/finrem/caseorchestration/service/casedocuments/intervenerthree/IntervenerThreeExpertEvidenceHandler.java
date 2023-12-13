@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ExpertEvidenceHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_THREE;
@@ -11,7 +12,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 public class IntervenerThreeExpertEvidenceHandler extends ExpertEvidenceHandler {
 
     @Autowired
-    public IntervenerThreeExpertEvidenceHandler() {
-        super(INTERVENER_THREE_EXPERT_EVIDENCE_COLLECTION, INTERVENER_THREE);
+    public IntervenerThreeExpertEvidenceHandler(FeatureToggleService featureToggleService) {
+        super(INTERVENER_THREE_EXPERT_EVIDENCE_COLLECTION, INTERVENER_THREE, featureToggleService);
     }
 }

@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -11,26 +14,119 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
+
 public abstract class BaseManageDocumentsHandlerTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
-    protected final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
+    protected List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
     protected FinremCaseDetails caseDetails;
     protected FinremCaseDetails caseDetailsBefore;
     protected FinremCaseData caseData;
+    protected DocumentHandler handler;
+
+    @Mock
+    protected FeatureToggleService featureToggleService;
 
     @Before
     public void setUp() {
         caseDetails = buildCaseDetails();
         caseDetailsBefore = buildCaseDetails();
         caseData = caseDetails.getData();
+        setUpscreenUploadDocumentList();
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        handler = getDocumentHandler();
     }
+
+    public abstract void setUpscreenUploadDocumentList();
+
+    public abstract DocumentHandler getDocumentHandler();
+
+    public abstract void assertExpectedCollectionType();
+
+    protected abstract List<UploadCaseDocumentCollection> getDocumentCollection();
+
+
+    @Test
+    public abstract void assertCorrectCategoryAssignedFromDocumentType();
+
+
+    private void assertDocumentCategoryIdAppliedForDocumentCollection() {
+        if (featureToggleService.isCaseFileViewEnabled()) {
+            for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
+                assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), not(nullValue()));
+            }
+        } else {
+            for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
+                assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), nullValue());
+            }
+        }
+    }
+
+    private void assertAssignDocumentCategoryForDocumentCollection() {
+        if (featureToggleService.isCaseFileViewEnabled()) {
+            for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
+                assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), not(nullValue()));
+            }
+        } else {
+            for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
+                assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), nullValue());
+            }
+        }
+    }
+
+    private void handleDocumentCollectionsCorrectly(Boolean cfvSwitch) {
+
+        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(cfvSwitch);
+
+        handler.replaceManagedDocumentsInCollectionType(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
+            screenUploadDocumentList);
+
+        assertExpectedCollectionType();
+        assertDocumentCategoryIdAppliedForDocumentCollection();
+    }
+
+
+    private void handleAssignDocumentCatergoryForUploadDocumentCollections(Boolean cfvSwitch) {
+
+        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(cfvSwitch);
+
+        handler.assignDocumentCategoryToUploadDocumentsCollection(caseData);
+
+        assertDocumentCategoryIdAppliedForDocumentCollection();
+    }
+
+    @Test
+    public void handleDocumentCollectionCorrectlyCvfOn() {
+        handleDocumentCollectionsCorrectly(true);
+    }
+
+    @Test
+    public void handleDocumentCollectionCorrectlyCfvOff() {
+        handleDocumentCollectionsCorrectly(false);
+    }
+
+    @Test
+    public void handleAssignDocumentCategoryForDocumentCollectionCorrectlyCvfOn() {
+        handleAssignDocumentCatergoryForUploadDocumentCollections(true);
+    }
+
+    @Test
+    public void handleAssignDocumentCategoryForDocumentCollectionCorrectlyCvfOff() {
+        handleAssignDocumentCatergoryForUploadDocumentCollections(false);
+    }
+
 
     protected UploadCaseDocumentCollection createContestedUploadDocumentItem(CaseDocumentType type,
                                                                              CaseDocumentParty party,

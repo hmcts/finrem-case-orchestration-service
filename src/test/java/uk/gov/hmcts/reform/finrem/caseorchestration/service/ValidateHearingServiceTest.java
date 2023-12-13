@@ -1,27 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_6_AND_10_WEEKS;
 
@@ -31,116 +22,107 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
         "Issue Date, fast track decision or hearingDate is empty";
 
     private ValidateHearingService service = new ValidateHearingService();
+    private FinremCaseDetails caseDetails;
+    private FinremCaseData caseData;
+
+    @Before
+    public void setup() {
+        caseDetails = getCaseDetails();
+        caseData = caseDetails.getData();
+    }
 
     @Test
     public void issueDateEmpty() {
-        List<ImmutablePair<String, Object>> pairs =
-            asList(pairOf(FAST_TRACK_DECISION, YES_VALUE), pairOf(HEARING_DATE, new Date()));
-
-        List<String> errors = doTestErrors(pairs);
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        caseData.setIssueDate(null);
+        caseData.setHearingDate(LocalDate.now().plusWeeks(7));
+        List<String> errors = doTestErrors();
         assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
     }
 
     @Test
     public void fastTrackDecisionEmpty() {
-        List<ImmutablePair<String, Object>> pairs =
-            asList(pairOf(ISSUE_DATE, new Date()), pairOf(HEARING_DATE, new Date()));
-
-        List<String> errors = doTestErrors(pairs);
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setHearingDate(LocalDate.now().plusWeeks(7));
+        caseData.setFastTrackDecisionReason(null);
+        List<String> errors = doTestErrors();
         assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
     }
 
     @Test
     public void hearingDateEmpty() {
-        List<ImmutablePair<String, Object>> pairs =
-            asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION, YES_VALUE));
-
-        List<String> errors = doTestErrors(pairs);
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        caseData.setHearingDate(null);
+        List<String> errors = doTestErrors();
         assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
     }
 
     @Test
     public void noErrors() {
-        List<ImmutablePair<String, Object>> pairs =
-            asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION, YES_VALUE),
-                pairOf(HEARING_DATE, new Date()));
-
-        List<String> errors = doTestErrors(pairs);
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        caseData.setHearingDate(LocalDate.now().plusWeeks(7));
+        List<String> errors = doTestErrors();
         assertThat(errors, hasSize(0));
     }
 
     @Test
     public void fastTrackHearingDatesWarningWithJudiciaryOutcome() {
-        List<ImmutablePair<String, Object>> pairs =
-            asList(pairOf(ISSUE_DATE, LocalDate.now()),
-                pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)),
-                pairOf(CASE_ALLOCATED_TO, YES_VALUE));
-
-        List<String> errors = doTestWarnings(pairs);
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(null);
+        caseData.setHearingDate(LocalDate.now().plusWeeks(3));
+        caseData.setCaseAllocatedTo(YesOrNo.YES);
+        List<String> errors = doTestWarnings();
         assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
     }
 
     @Test
     public void fastTrackHearingDatesWarningWithoutJudiciaryOutcome() {
-        List<ImmutablePair<String, Object>> pairs =
-            asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION, YES_VALUE),
-                pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
-
-        List<String> errors = doTestWarnings(pairs);
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        caseData.setHearingDate(LocalDate.now().plusWeeks(3));
+        List<String> errors = doTestWarnings();
         assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
     }
 
     @Test
     public void fastTrackHearingDatesNoWarning() {
-        List<ImmutablePair<String, Object>> pairs =
-            asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION, YES_VALUE),
-                pairOf(HEARING_DATE, LocalDate.now().plusWeeks(7)));
-
-        List<String> errors = doTestWarnings(pairs);
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        caseData.setHearingDate(LocalDate.now().plusWeeks(7));
+        List<String> errors = doTestWarnings();
         assertThat(errors, hasSize(0));
     }
 
     @Test
     public void nonFastTrackHearingDatesWarning() {
-        List<ImmutablePair<String, Object>> pairs =
-            asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION, NO_VALUE),
-                pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
-
-        List<String> errors = doTestWarnings(pairs);
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        caseData.setHearingDate(LocalDate.now().plusWeeks(3));
+        List<String> errors = doTestWarnings();
         assertThat(errors, hasItem(DATE_BETWEEN_12_AND_16_WEEKS));
     }
 
     @Test
     public void nonFastTrackHearingDatesNoWarning() {
-        List<ImmutablePair<String, Object>> pairs =
-            asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION, NO_VALUE),
-                pairOf(HEARING_DATE, LocalDate.now().plusWeeks(13)));
-
-        List<String> errors = doTestWarnings(pairs);
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        caseData.setHearingDate(LocalDate.now().plusWeeks(13));
+        List<String> errors = doTestWarnings();
         assertThat(errors, hasSize(0));
     }
 
-    private ImmutablePair<String, Object> pairOf(String left, Object right) {
-        return ImmutablePair.of(left, right);
-    }
-
-    private List<String> doTestWarnings(List<ImmutablePair<String, Object>> pairs) {
-        ImmutableMap<String, Object> caseData = pairs.stream()
-            .collect(collectingAndThen(
-                toMap(ImmutablePair::getLeft, ImmutablePair::getRight), ImmutableMap::copyOf)
-            );
-
-        CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+    private List<String> doTestWarnings() {
         return service.validateHearingWarnings(caseDetails);
     }
 
-    private List<String> doTestErrors(List<ImmutablePair<String, Object>> pairs) {
-        ImmutableMap<String, Object> caseData = pairs.stream()
-            .collect(collectingAndThen(
-                toMap(ImmutablePair::getLeft, ImmutablePair::getRight), ImmutableMap::copyOf)
-            );
-
-        CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+    private List<String> doTestErrors() {
         return service.validateHearingErrors(caseDetails);
+    }
+
+    private FinremCaseDetails getCaseDetails() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        return FinremCaseDetails.builder().id(123L).data(caseData).build();
     }
 }

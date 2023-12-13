@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.ShareSelectedDocumentService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,6 +78,8 @@ public class IntervenerShareDocumentsService implements SharedService {
         "Both the applicant and respondent solicitors will be able to access selected shared documents";
 
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+
+    private final ShareSelectedDocumentService shareSelectedDocumentService;
 
     public DynamicMultiSelectList intervenerSourceDocumentList(FinremCaseDetails caseDetails, String role) {
 
@@ -474,7 +477,7 @@ public class IntervenerShareDocumentsService implements SharedService {
             List<DynamicMultiSelectListElement> roleList = solicitorRoleList.getValue();
             roleList.forEach(role -> {
                 List<DynamicMultiSelectListElement> documentList = sourceDocumentList.getValue();
-                copySharedDocumentsInSharedCollection(caseData, role.getCode(), documentList);
+                shareSelectedDocumentService.copySharedDocumentsToSharedCollection(caseData, role.getCode(), documentList);
             });
         }
     }

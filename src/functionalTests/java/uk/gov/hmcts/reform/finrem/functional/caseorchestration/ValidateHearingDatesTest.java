@@ -20,37 +20,28 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
     @Value("${cos.document.hearing.api}")
     private String validateHearing;
 
-    private String contestedDir = "/json/contested/";
-    private String consentedDir = "/json/consented/";
+    @Value("${cos.hearing.notification.api}")
+    private String validateHearingSubmitted;
+
+    private final String contestedDir = "/json/contested/";
+    private final String consentedDir = "/json/consented/";
 
     @Test
     public void verifyShouldReturnBadRequestWhenCaseDataIsMissingInRequest() {
-        Response response = utils.getResponse(validateHearing, "empty-casedata1.json",consentedDir);
+        Response response = utils.getResponse(validateHearingSubmitted, "empty-casedata1.json",consentedDir);
 
         assertThat(response.getStatusCode(), is(HttpStatus.SC_BAD_REQUEST));
         assertThat(response.body().asString(), startsWith("Some server side exception occurred. Please check logs for details"));
     }
 
     @Test
-    public void verifyShouldThrowErrorWhenIssueDateAndHearingDateAreEmpty() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "pba-validate1.json",consentedDir).jsonPath().get("errors[0]"),
-            is("Issue Date, fast track decision or hearingDate is empty"));
-    }
-
-    @Test
-    public void verifyShouldThrowWarningsWhenNotFastTrackDecision() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "validate-hearing-without-fastTrackDecision1.json",
-            contestedDir).jsonPath().get("warnings[0]"), is("Date of the hearing must be between 12 and 16 weeks."));
-    }
-
-    @Test
-    public void verifyshouldThrowWarningsWhenFastTrackDecision() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "validate-hearing-with-fastTrackDecision1.json",
-            contestedDir).jsonPath().get("warnings[0]"), is("Date of the Fast Track hearing must be between 6 and 10 weeks."));
-    }
-
-    @Test
     public void verifyShouldSuccessfullyValidate() {
+        assertThat(getResponseAndAssertSuccessStatusCode(validateHearingSubmitted, "validate-hearing-successfully1.json", contestedDir)
+            .jsonPath().getList("warnings"), is(empty()));
+    }
+
+    @Test
+    public void verifyShouldSuccessfullyValidateAboutToSubmit() {
         assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "validate-hearing-successfully1.json", contestedDir)
             .jsonPath().getList("warnings"), is(empty()));
     }

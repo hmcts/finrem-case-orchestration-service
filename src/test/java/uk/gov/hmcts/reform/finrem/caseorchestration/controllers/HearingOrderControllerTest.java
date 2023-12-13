@@ -7,6 +7,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
@@ -82,7 +83,7 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
         verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
         verify(caseDataService).moveCollection(any(), eq(DRAFT_DIRECTION_DETAILS_COLLECTION), eq(DRAFT_DIRECTION_DETAILS_COLLECTION_RO));
-        verify(hearingOrderService).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(any());
+        verify(hearingOrderService).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(any(CaseDetails.class));
     }
 
     @Test
@@ -91,6 +92,6 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
         hearingOrderController.storeApprovedHearingOrder(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(hearingOrderService, never()).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(any());
+        verify(hearingOrderService, never()).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(any(CaseDetails.class));
     }
 }

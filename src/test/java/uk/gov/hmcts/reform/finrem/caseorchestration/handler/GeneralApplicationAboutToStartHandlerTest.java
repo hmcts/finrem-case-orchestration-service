@@ -182,7 +182,7 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTestSe
             .build();
     }
 
-    protected FinremCallbackRequest buildCallbackRequest() {
+    protected  FinremCallbackRequest buildCallbackRequest() {
         GeneralApplicationItems generalApplicationItems =
             GeneralApplicationItems.builder().generalApplicationSender(
                 buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")

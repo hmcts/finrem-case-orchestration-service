@@ -80,6 +80,20 @@ public class CcdServiceTest {
     }
 
     @Test
+    public void givenFinremCaseData_WhenExecuteGetEvents_ThenCcdApiCalled() {
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .data(new FinremCaseData()).build();
+
+        when(caseEventsApi.findEventDetailsForCase(any(), any(), any(), any(), any(), any()))
+            .thenReturn(any());
+        when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
+
+        ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, finremCaseDetails);
+
+        verify(caseEventsApi).findEventDetailsForCase(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
     public void shouldReturnCaseDetailsByCaseId() {
         CaseDetails caseDetails = buildCaseDetails();
         when(coreCaseDataApi.searchCases(any(), any(), any(), any())).thenReturn(SearchResult.builder()

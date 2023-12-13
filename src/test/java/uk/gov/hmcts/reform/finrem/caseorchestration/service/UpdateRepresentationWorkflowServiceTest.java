@@ -10,11 +10,15 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -24,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateRepresentationWorkflowServiceTest {
@@ -196,4 +202,58 @@ public class UpdateRepresentationWorkflowServiceTest {
         defaultChangeDetails.getData().put(CHANGE_ORGANISATION_REQUEST, defaultChangeRequest);
     }
 
+    @Test
+    public void givenContestedCase_whenBothPartyUnRepresented_thenAddDefaultRole() {
+        FinremCaseDetails finremCaseDetails = getFinremCaseDataDetails();
+        FinremCaseData data = finremCaseDetails.getData();
+        updateRepresentationWorkflowService.persistDefaultOrganisationPolicy(data);
+
+        assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(),
+            data.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+        assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(),
+            data.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+    }
+
+    @Test
+    public void givenContestedCase_whenRespondentUnRepresented_thenAddDefaultRole() {
+        FinremCaseDetails finremCaseDetails = getFinremCaseDataDetails();
+        FinremCaseData data = finremCaseDetails.getData();
+        data.setApplicantOrganisationPolicy(getOrganisationPolicy(CaseRole.APP_SOLICITOR));
+        updateRepresentationWorkflowService.persistDefaultOrganisationPolicy(data);
+        assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(),
+            data.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+        assertEquals("XX9191910", data.getApplicantOrganisationPolicy().getOrgPolicyReference());
+        assertNull(data.getRespondentOrganisationPolicy().getOrgPolicyReference());
+        assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(),
+            data.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+    }
+
+    @Test
+    public void givenContestedCase_whenApplicantUnRepresented_thenAddDefaultRole() {
+        FinremCaseDetails finremCaseDetails = getFinremCaseDataDetails();
+        FinremCaseData data = finremCaseDetails.getData();
+        data.setRespondentOrganisationPolicy(getOrganisationPolicy(CaseRole.RESP_SOLICITOR));
+        updateRepresentationWorkflowService.persistDefaultOrganisationPolicy(data);
+        assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(),
+            data.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+        assertNull(data.getApplicantOrganisationPolicy().getOrgPolicyReference());
+        assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(),
+            data.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+        assertEquals("XX9191910", data.getRespondentOrganisationPolicy().getOrgPolicyReference());
+    }
+
+    private OrganisationPolicy getOrganisationPolicy(CaseRole role) {
+        return OrganisationPolicy
+            .builder()
+            .organisation(Organisation.builder().organisationID("abc")
+                .organisationName("abc limited").build())
+            .orgPolicyReference("XX9191910")
+            .orgPolicyCaseAssignedRole(role.getCcdCode())
+            .build();
+    }
+
+    private FinremCaseDetails getFinremCaseDataDetails() {
+        return FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .data(new FinremCaseData()).build();
+    }
 }

@@ -53,7 +53,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandler extends FinremCal
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(
             caseData, GENERAL_APPLICATION_COLLECTION);
         GeneralApplicationCollectionData data =
-            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
+            helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
 
         if (data != null) {
             data.getGeneralApplicationItems().setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId());

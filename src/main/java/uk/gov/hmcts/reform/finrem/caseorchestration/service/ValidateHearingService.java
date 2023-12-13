@@ -1,19 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
 @Service
 public class ValidateHearingService {
@@ -29,32 +21,25 @@ public class ValidateHearingService {
         return !(date.isBefore(min) || date.isAfter(max));
     }
 
-    public List<String> validateHearingErrors(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
-        String hearingDate = Objects.toString(caseData.get(HEARING_DATE), "");
-        String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION), "");
-
-        return Stream.of(issueDate, hearingDate, fastTrackDecision).anyMatch(StringUtils::isBlank)
+    public List<String> validateHearingErrors(FinremCaseDetails finremCaseDetails) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+        return caseData.getIssueDate() == null || caseData.getHearingDate() == null || caseData.getFastTrackDecision() == null
             ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
     }
 
-    public List<String> validateHearingWarnings(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
-        String hearingDate = Objects.toString(caseData.get(HEARING_DATE), "");
+    public List<String> validateHearingWarnings(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        LocalDate issueDate = caseData.getIssueDate();
+        LocalDate hearingDate = caseData.getHearingDate();
 
-        LocalDate issueLocalDate = LocalDate.parse(issueDate);
-        LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
-
-        boolean fastTrackApplication = isFastTrackApplication.apply(caseData);
+        boolean fastTrackApplication = caseData.isFastTrackApplication();
         if (fastTrackApplication) {
-            if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
-                hearingLocalDate)) {
+            if (!isDateInBetweenIncludingEndPoints(issueDate.plusWeeks(6), issueDate.plusWeeks(10),
+                    hearingDate)) {
                 return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
-        } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16),
-            hearingLocalDate)) {
+        } else if (!isDateInBetweenIncludingEndPoints(issueDate.plusWeeks(12), issueDate.plusWeeks(16),
+                hearingDate)) {
             return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
         return List.of();

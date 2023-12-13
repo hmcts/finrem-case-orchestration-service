@@ -44,31 +44,33 @@ class ListForHearingContestedSubmittedHandlerTest {
     private ListForHearingContestedSubmittedHandler handler;
 
     @Test
-    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-            is(true));
+    void givenACcdCallbackContestedCase_WhenASubmittedEvent_thenCanHandle() {
+        assertThat(handler.canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                is(true));
     }
 
     @Test
-    void givenACcdCallbackConsentedCase_WhenCaseTypeIsConsented_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
-            is(false));
+    void givenACcdCallbackConsentedCase_WhenCaseTypeIsConsented_thenCanNotHandle() {
+        assertThat(handler.canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
+                is(false));
     }
 
     @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
-            is(false));
+    void givenACcdCallbackConsentedCase_WhenEventIsClose_thenCanNotHandle() {
+        assertThat(handler.canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CLOSE),
+                is(false));
     }
 
     @Test
-    void givenACcdCallbackConsentedCase_WhenEventIsClose_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
+    void givenACcdCallbackContestedCase_WhenAAboutToSubmitEvent_thenCanNotHandle() {
+        assertThat(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                is(false));
+    }
+
+    @Test
+    void givenACcdCallbackContestedCase_WhenAAboutToStartEvent_thenCanNotHandle() {
+        assertThat(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                is(false));
     }
 
     @Test
@@ -110,7 +112,7 @@ class ListForHearingContestedSubmittedHandlerTest {
     private FinremCallbackRequest buildCallbackRequest() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L)
             .data(FinremCaseData.builder().partiesOnCase(getParties()).build()).build();
-        return FinremCallbackRequest.builder().eventType(EventType.SEND_ORDER)
+        return FinremCallbackRequest.builder().eventType(EventType.LIST_FOR_HEARING)
             .caseDetails(caseDetails).build();
     }
 
