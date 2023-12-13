@@ -81,13 +81,14 @@ public class CcdServiceTest {
 
     @Test
     public void givenFinremCaseData_WhenExecuteGetEvents_ThenCcdApiCalled() {
-        FinremCaseData finremCaseData = new FinremCaseData();
-        finremCaseData.setCcdCaseType(CONTESTED);
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .data(new FinremCaseData()).build();
+
         when(caseEventsApi.findEventDetailsForCase(any(), any(), any(), any(), any(), any()))
             .thenReturn(any());
         when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
 
-        ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, finremCaseData);
+        ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, finremCaseDetails);
 
         verify(caseEventsApi).findEventDetailsForCase(any(), any(), any(), any(), any(), any());
     }

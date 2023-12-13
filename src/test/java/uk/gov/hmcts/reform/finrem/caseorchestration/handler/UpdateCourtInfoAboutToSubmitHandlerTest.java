@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 
@@ -60,6 +61,6 @@ public class UpdateCourtInfoAboutToSubmitHandlerTest {
 
         handler.handle(callbackRequest, "AUTH");
 
-        verify(courtDetailsMapper).getLatestAllocatedCourt(any(), any(), any());
+        verify(courtDetailsMapper).getLatestAllocatedCourt(any(), any(), eq(true));
     }
 }
