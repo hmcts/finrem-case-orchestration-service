@@ -33,7 +33,7 @@ public class IssueApplicationContestedAboutToStartHandler extends FinremCallback
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Handling contested {} about to start callback for case id: {}",
+        log.info("Handling contested {} about to start callback for Case ID: {}",
             callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
         service.defaultIssueDate(callbackRequest);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

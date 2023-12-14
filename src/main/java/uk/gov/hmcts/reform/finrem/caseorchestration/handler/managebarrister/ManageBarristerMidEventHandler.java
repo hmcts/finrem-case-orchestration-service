@@ -34,7 +34,7 @@ public class ManageBarristerMidEventHandler implements CallbackHandler<Map<Strin
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest, String userAuthorisation) {
-        log.info("In the manage barrister mid-event handler for case {}", callbackRequest.getCaseDetails().getId());
+        log.info("In the manage barrister mid-event handler for Case ID: {}", callbackRequest.getCaseDetails().getId());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         String authTokenToUse = manageBarristerService.getAuthTokenToUse(caseDetails, userAuthorisation);
