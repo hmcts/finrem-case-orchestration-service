@@ -37,64 +37,58 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
     private void categoryToAllPartiesOrders(OrderWrapper orderWrapper) {
 
         if (orderWrapper.getAppOrderCollections() != null) {
-            orderWrapper.getAppOrderCollections().forEach(
-                order -> IntStream.range(0, order.getValue().getApproveOrders().size()).forEach(idx -> {
-                    final String categoryToApply = (idx <= 9) ? DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS
-                        .getDocumentCategoryId() + (idx + 1) : DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS_OVERFLOW
-                        .getDocumentCategoryId();
-                    setCategoryToAllOrdersDocs(order.getValue().getApproveOrders().get(idx).getValue().getCaseDocument(),
-                        categoryToApply);
-                }));
+            IntStream.range(0, orderWrapper.getAppOrderCollections().size()).forEach(idx -> {
+                final String categoryToApply = (idx <= 9) ? DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS
+                    .getDocumentCategoryId() + (idx + 1) : DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS_OVERFLOW
+                    .getDocumentCategoryId();
+                orderWrapper.getAppOrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
+                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+            });
         }
         if (orderWrapper.getRespOrderCollections() != null) {
-            orderWrapper.getRespOrderCollections().forEach(
-                order -> IntStream.range(0, order.getValue().getApproveOrders().size()).forEach(idx -> {
-                    final String categoryToApply = (idx <= 9) ? DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS
-                        .getDocumentCategoryId() + (idx + 1) : DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS_OVERFLOW
-                        .getDocumentCategoryId();
-                    setCategoryToAllOrdersDocs(order.getValue().getApproveOrders().get(idx).getValue().getCaseDocument(),
-                        categoryToApply);
-                }));
+            IntStream.range(0, orderWrapper.getRespOrderCollections().size()).forEach(idx -> {
+                final String categoryToApply = (idx <= 9) ? DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS
+                    .getDocumentCategoryId() + (idx + 1) : DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS_OVERFLOW
+                    .getDocumentCategoryId();
+                orderWrapper.getRespOrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
+                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+            });
         }
         if (orderWrapper.getIntv1OrderCollections() != null) {
-            orderWrapper.getIntv1OrderCollections().forEach(
-                order -> IntStream.range(0, order.getValue().getApproveOrders().size()).forEach(idx -> {
-                    final String categoryToApply = (idx <= 9) ? DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS
-                        .getDocumentCategoryId() + (idx + 1) : DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS_OVERFLOW
-                        .getDocumentCategoryId();
-                    setCategoryToAllOrdersDocs(order.getValue().getApproveOrders().get(idx).getValue().getCaseDocument(),
-                        categoryToApply);
-                }));
+            IntStream.range(0, orderWrapper.getIntv1OrderCollections().size()).forEach(idx -> {
+                final String categoryToApply = (idx <= 9) ? DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS
+                    .getDocumentCategoryId() + (idx + 1) : DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS_OVERFLOW
+                    .getDocumentCategoryId();
+                orderWrapper.getIntv1OrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
+                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+            });
         }
         if (orderWrapper.getIntv2OrderCollections() != null) {
-            orderWrapper.getIntv2OrderCollections().forEach(
-                order -> IntStream.range(0, order.getValue().getApproveOrders().size()).forEach(idx -> {
-                    final String categoryToApply = (idx <= 9) ? DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS
-                        .getDocumentCategoryId() + (idx + 1) : DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS_OVERFLOW
-                        .getDocumentCategoryId();
-                    setCategoryToAllOrdersDocs(order.getValue().getApproveOrders().get(idx).getValue().getCaseDocument(),
-                        categoryToApply);
-                }));
+            IntStream.range(0, orderWrapper.getIntv2OrderCollections().size()).forEach(idx -> {
+                final String categoryToApply = (idx <= 9) ? DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS
+                    .getDocumentCategoryId() + (idx + 1) : DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS_OVERFLOW
+                    .getDocumentCategoryId();
+                orderWrapper.getIntv2OrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
+                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+            });
         }
         if (orderWrapper.getIntv3OrderCollections() != null) {
-            orderWrapper.getIntv3OrderCollections().forEach(
-                order -> IntStream.range(0, order.getValue().getApproveOrders().size()).forEach(idx -> {
-                    final String categoryToApply = (idx <= 9) ? DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS
-                        .getDocumentCategoryId() + (idx + 1) : DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS_OVERFLOW
-                        .getDocumentCategoryId();
-                    setCategoryToAllOrdersDocs(order.getValue().getApproveOrders().get(idx).getValue().getCaseDocument(),
-                        categoryToApply);
-                }));
+            IntStream.range(0, orderWrapper.getIntv3OrderCollections().size()).forEach(idx -> {
+                final String categoryToApply = (idx <= 9) ? DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS
+                    .getDocumentCategoryId() + (idx + 1) : DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS_OVERFLOW
+                    .getDocumentCategoryId();
+                orderWrapper.getIntv3OrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
+                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+            });
         }
         if (orderWrapper.getIntv4OrderCollections() != null) {
-            orderWrapper.getIntv4OrderCollections().forEach(
-                order -> IntStream.range(0, order.getValue().getApproveOrders().size()).forEach(idx -> {
-                    final String categoryToApply = (idx <= 9) ? DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS
-                        .getDocumentCategoryId() + (idx + 1) : DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS_OVERFLOW
-                        .getDocumentCategoryId();
-                    setCategoryToAllOrdersDocs(order.getValue().getApproveOrders().get(idx).getValue().getCaseDocument(),
-                        categoryToApply);
-                }));
+            IntStream.range(0, orderWrapper.getIntv4OrderCollections().size()).forEach(idx -> {
+                final String categoryToApply = (idx <= 9) ? DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS
+                    .getDocumentCategoryId() + (idx + 1) : DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS_OVERFLOW
+                    .getDocumentCategoryId();
+                orderWrapper.getIntv4OrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
+                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+            });
         }
     }
 
