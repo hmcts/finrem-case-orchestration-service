@@ -327,7 +327,7 @@ public class GeneralOrderService {
                            List<CaseDocument> orders, Long caseId) {
         if (obj.getId().equals(doc.getCode())) {
             CaseDocument caseDocument = obj.getValue().getUploadDraftDocument();
-            log.info("Adding document to orders {} for caseId {}", caseDocument, caseId);
+            log.info("Adding document to orders {} for Case ID: {}", caseDocument, caseId);
             orders.add(caseDocument);
         }
     }

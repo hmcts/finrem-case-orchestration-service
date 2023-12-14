@@ -60,7 +60,7 @@ public class HearingOrderController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to start event storing hearing order for case: {}", caseDetails.getId());
+        log.info("Received request to start event storing hearing order for Case ID: {}", caseDetails.getId());
 
         prepareFieldsForOrderApprovedCoverLetter(caseDetails, authorisationToken);
 
@@ -78,7 +78,7 @@ public class HearingOrderController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to store hearing order for case: {}", caseDetails.getId());
+        log.info("Received request to store hearing order for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 

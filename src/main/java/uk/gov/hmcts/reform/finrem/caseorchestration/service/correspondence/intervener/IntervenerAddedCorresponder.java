@@ -63,6 +63,6 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
 
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
-        log.info("Not sending email correspondence to Intervener for case: {}", caseDetails.getId());
+        log.info("Not sending email correspondence to Intervener for Case ID: {}", caseDetails.getId());
     }
 }

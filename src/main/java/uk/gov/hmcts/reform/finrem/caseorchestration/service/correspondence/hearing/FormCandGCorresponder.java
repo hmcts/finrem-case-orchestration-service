@@ -57,7 +57,7 @@ public class FormCandGCorresponder extends HearingCorresponder {
             return caseDocuments;
         }
 
-        log.info("Fetching Contested Paper Case bulk print document for caseId {}", caseId);
+        log.info("Fetching Contested Paper Case bulk print document for Case ID: {}", caseId);
 
         Optional.ofNullable(documentHelper.nullCheckAndConvertToCaseDocument(caseData.get(FORM_C))).ifPresent(caseDocuments::add);
         Optional.ofNullable(documentHelper.nullCheckAndConvertToCaseDocument(caseData.get(FORM_G))).ifPresent(caseDocuments::add);

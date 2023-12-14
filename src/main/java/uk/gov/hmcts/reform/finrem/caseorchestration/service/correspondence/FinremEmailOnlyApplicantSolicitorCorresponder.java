@@ -16,7 +16,7 @@ public abstract class FinremEmailOnlyApplicantSolicitorCorresponder extends Emai
     @Override
     public void sendCorrespondence(FinremCaseDetails caseDetails) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         }
     }

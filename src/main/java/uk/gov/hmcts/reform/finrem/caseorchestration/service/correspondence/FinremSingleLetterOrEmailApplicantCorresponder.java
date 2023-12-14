@@ -22,10 +22,10 @@ public abstract class FinremSingleLetterOrEmailApplicantCorresponder extends Sin
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
 
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         } else {
-            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending letter correspondence to applicant for Case ID: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authToken), caseDetails, APPLICANT, authToken);
         }
     }

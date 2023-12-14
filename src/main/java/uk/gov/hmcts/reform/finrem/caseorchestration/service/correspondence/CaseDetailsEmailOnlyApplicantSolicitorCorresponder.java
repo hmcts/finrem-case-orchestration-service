@@ -16,7 +16,7 @@ public abstract class CaseDetailsEmailOnlyApplicantSolicitorCorresponder extends
     @Override
     public void sendCorrespondence(CaseDetails caseDetails) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         }
     }
