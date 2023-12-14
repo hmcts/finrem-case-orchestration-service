@@ -40,7 +40,7 @@ public class IntervenersMidHandler extends FinremCallbackHandler implements Inte
                                                                               String userAuthorisation) {
 
         Long caseId = callbackRequest.getCaseDetails().getId();
-        log.info("Invoking contested {} about to mid callback for case id: {}",
+        log.info("Invoking contested {} about to mid callback for Case ID: {}",
             callbackRequest.getEventType(), caseId);
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();

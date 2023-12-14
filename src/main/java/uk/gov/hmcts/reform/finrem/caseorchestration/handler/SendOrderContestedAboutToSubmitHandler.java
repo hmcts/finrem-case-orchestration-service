@@ -70,37 +70,37 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {}, callback {} callback for case id: {}",
+        log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
             EventType.SEND_ORDER, CallbackType.ABOUT_TO_SUBMIT, caseId);
 
         try {
             FinremCaseData caseData = caseDetails.getData();
             List<String> parties = generalOrderService.getParties(caseDetails);
-            log.info("selected parties {} on case {}", parties, caseId);
+            log.info("Selected parties {} on Case ID: {}", parties, caseId);
 
             DynamicMultiSelectList selectedOrders = caseData.getOrdersToShare();
-            log.info("selected orders {} on case {}", selectedOrders, caseId);
+            log.info("Selected orders {} on Case ID: {} ", selectedOrders, caseId);
 
             List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
             CaseDocument document = caseData.getAdditionalDocument();
             if (document != null) {
-                log.info("additional uploaded document with send order {} for caseId {}", document, caseId);
+                log.info("Additional uploaded document with send order {} for Case ID: {}", document, caseId);
                 CaseDocument additionalUploadedOrderDoc = genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseId);
                 printOrderCollection.add(addToPrintOrderCollection(additionalUploadedOrderDoc));
                 caseData.setAdditionalDocument(additionalUploadedOrderDoc);
             }
 
-            log.info("Share and print general with for case {}", caseDetails.getId());
+            log.info("Share and print general with for Case ID: {}", caseDetails.getId());
             shareAndSendGeneralOrderWithSelectedParties(caseDetails, parties, selectedOrders, printOrderCollection);
 
 
-            log.info("Share and print hearing order for case {}", caseDetails.getId());
+            log.info("Share and print hearing order for Case ID: {}", caseDetails.getId());
             List<CaseDocument> hearingOrders = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
             if (hearingOrders != null && !hearingOrders.isEmpty()) {
                 shareAndSendHearingDocuments(caseDetails, hearingOrders, parties, printOrderCollection, userAuthorisation);
-                log.info("sending for stamp final order on case {}", caseDetails.getId());
+                log.info("Sending for stamp final order on Case ID: {}", caseDetails.getId());
                 hearingOrders.forEach(orderToStamp -> {
-                    log.info("StampFinalOrder {} for Case ID {}, ", orderToStamp, caseId);
+                    log.info("StampFinalOrder {} for Case ID: {}, ", orderToStamp, caseId);
                     stampAndAddToCollection(caseDetails, orderToStamp, userAuthorisation);
                 });
             }
@@ -121,7 +121,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void setConsolidateView(FinremCaseDetails caseDetails,
                                     List<String> partyList) {
         Long caseId = caseDetails.getId();
-        log.info("setting Documents for case {}:", caseId);
+        log.info("Setting Documents for Case ID: {}", caseId);
         sendOrderPartyDocumentList.forEach(
             handler -> handler.setUpOrderDocumentsOnPartiesTab(caseDetails, partyList));
     }
@@ -133,7 +133,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                               List<OrderSentToPartiesCollection> printOrderCollection,
                                               String userAuthorisation) {
         Long caseId = caseDetails.getId();
-        log.info("Share Hearing Documents for case {}:", caseId);
+        log.info("Share Hearing Documents for Case ID: {}", caseId);
         List<CaseDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, hearingOrders, userAuthorisation);
         hearingDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
         sendOrderPartyDocumentList.forEach(
