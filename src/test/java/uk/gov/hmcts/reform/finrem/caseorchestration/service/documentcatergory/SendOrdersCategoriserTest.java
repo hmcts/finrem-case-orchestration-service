@@ -43,42 +43,42 @@ class SendOrdersCategoriserTest extends BaseHandlerTestSetup {
         FinremCaseData finremCaseData = buildFinremCaseData();
         sendOrdersCategoriser.categorise(finremCaseData);
         OrderWrapper orderWrapper = finremCaseData.getOrderWrapper();
-        assertEquals(DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId() + 1,
             orderWrapper.getAppOrderCollections().get(0).getValue().getApproveOrders()
                 .get(0).getValue().getCaseDocument().getCategoryId());
-        assertEquals(DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId() + 1,
             orderWrapper.getRespOrderCollections().get(0).getValue().getApproveOrders()
                 .get(0).getValue().getCaseDocument().getCategoryId());
-        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS.getDocumentCategoryId() + 1,
             orderWrapper.getIntv1OrderCollections().get(0).getValue().getApproveOrders()
                 .get(0).getValue().getCaseDocument().getCategoryId());
-        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS.getDocumentCategoryId() + 1,
             orderWrapper.getIntv2OrderCollections().get(0).getValue().getApproveOrders()
                 .get(0).getValue().getCaseDocument().getCategoryId());
-        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS.getDocumentCategoryId() + 1,
             orderWrapper.getIntv3OrderCollections().get(0).getValue().getApproveOrders()
                 .get(0).getValue().getCaseDocument().getCategoryId());
-        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS.getDocumentCategoryId() + 1,
             orderWrapper.getIntv4OrderCollections().get(0).getValue().getApproveOrders()
                 .get(0).getValue().getCaseDocument().getCategoryId());
 
         ConsentOrderWrapper consentOrderWrapper = finremCaseData.getConsentOrderWrapper();
-        assertEquals(DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId() + 1,
             consentOrderWrapper.getAppConsentApprovedOrders().get(0).getApprovedOrder().getConsentOrder()
                 .getCategoryId());
-        assertEquals(DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId() + 1,
             consentOrderWrapper.getRespConsentApprovedOrders().get(0).getApprovedOrder().getConsentOrder()
                 .getCategoryId());
-        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS.getDocumentCategoryId() + 1,
             consentOrderWrapper.getIntv1ConsentApprovedOrders().get(0).getApprovedOrder().getConsentOrder()
                 .getCategoryId());
-        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS.getDocumentCategoryId() + 1,
             consentOrderWrapper.getIntv2ConsentApprovedOrders().get(0).getApprovedOrder().getConsentOrder()
                 .getCategoryId());
-        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS.getDocumentCategoryId() + 1,
             consentOrderWrapper.getIntv3ConsentApprovedOrders().get(0).getApprovedOrder().getConsentOrder()
                 .getCategoryId());
-        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS.getDocumentCategoryId() + 1,
             consentOrderWrapper.getIntv4ConsentApprovedOrders().get(0).getApprovedOrder().getConsentOrder()
                 .getCategoryId());
 
