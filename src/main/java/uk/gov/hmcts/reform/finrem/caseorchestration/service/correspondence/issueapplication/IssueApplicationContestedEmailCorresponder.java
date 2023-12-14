@@ -16,7 +16,7 @@ public class IssueApplicationContestedEmailCorresponder extends FinremEmailOnlyA
 
     @Override
     protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-        log.info("Sending Contested 'Application Issued' email notification to Applicant Solicitor for caseI {}", caseDetails.getId());
+        log.info("Sending Contested 'Application Issued' email notification to Applicant Solicitor for Case ID: {}", caseDetails.getId());
         notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(caseDetails);
     }
 }

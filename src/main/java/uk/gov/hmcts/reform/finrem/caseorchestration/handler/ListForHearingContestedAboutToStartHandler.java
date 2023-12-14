@@ -34,7 +34,7 @@ public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHa
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Handling contested event {} about to start callback for case id: {}",
+        log.info("Handling contested event {} about to start callback for Case ID: {}",
             EventType.LIST_FOR_HEARING, callbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();

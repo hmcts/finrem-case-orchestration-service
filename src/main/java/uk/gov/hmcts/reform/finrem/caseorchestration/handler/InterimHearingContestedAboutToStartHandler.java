@@ -47,8 +47,8 @@ public class InterimHearingContestedAboutToStartHandler
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
         CallbackRequest callbackRequest,
         String userAuthorisation) {
-        log.info("In Interim hearing about to start callback");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("In Interim hearing about to start callback for Case ID: {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
 
         loadInterimHearing(caseData);
