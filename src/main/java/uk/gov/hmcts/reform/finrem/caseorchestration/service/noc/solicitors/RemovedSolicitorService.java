@@ -49,7 +49,7 @@ public class RemovedSolicitorService {
 
     public ChangedRepresentative getRemovedSolicitorAsSolicitor(CaseDetails caseDetails,
                                                                 ChangeOrganisationRequest changeRequest) {
-        log.info("Remove solicitor for caseId {}", caseDetails.getId());
+        log.info("Remove solicitor for Case ID: {}", caseDetails.getId());
         final boolean isApplicant = changeRequest.getCaseRoleId() != null
             && changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
 

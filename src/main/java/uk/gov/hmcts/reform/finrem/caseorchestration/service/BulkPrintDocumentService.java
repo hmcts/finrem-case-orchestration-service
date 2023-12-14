@@ -23,12 +23,12 @@ public class BulkPrintDocumentService {
 
     public List<byte[]> downloadDocuments(BulkPrintRequest bulkPrintRequest, String auth) {
         String caseId = bulkPrintRequest.getCaseId();
-        log.info("Downloading document for bulk print for case id {}", caseId);
+        log.info("Downloading document for bulk print for Case ID: {}", caseId);
 
         List<byte[]> documents = bulkPrintRequest.getBulkPrintDocuments().stream()
             .map(bulkPrintDocument -> service.download(bulkPrintDocument.getBinaryFileUrl(), auth))
             .toList();
-        log.info("Download document count for bulk print {} for case id {} ", documents.size(),
+        log.info("Download document count for bulk print {} for Case ID: {} ", documents.size(),
             caseId);
         return documents;
     }
@@ -40,7 +40,7 @@ public class BulkPrintDocumentService {
                                                      String auth) {
         if (caseDocument != null) {
             String documentFilename = caseDocument.getDocumentFilename();
-            log.info("checking encryption for file {} for caseId {}", documentFilename, caseId);
+            log.info("checking encryption for file {} for Case ID: {}", documentFilename, caseId);
             byte[] pdfBytes;
             if (documentFilename.endsWith(".doc") || documentFilename.endsWith(".docx")) {
                 Document document = Document.builder().url(caseDocument.getDocumentUrl())
@@ -71,7 +71,7 @@ public class BulkPrintDocumentService {
                 }
             } else {
                 String errorMessage = "Uploaded document " + documentFilename + " is empty.";
-                log.error("Uploaded document {} for caseId {} is empty", documentFilename, caseId);
+                log.error("Uploaded document {} for Case ID: {} is empty", documentFilename, caseId);
                 errors.add(errorMessage);
             }
         }

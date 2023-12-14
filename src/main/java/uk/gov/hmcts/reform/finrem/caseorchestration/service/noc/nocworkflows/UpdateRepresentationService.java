@@ -69,13 +69,13 @@ public class UpdateRepresentationService {
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
                                                                String authToken) {
 
-        log.info("Updating representation for case ID {}", caseDetails.getId());
+        log.info("Updating representation for Case ID: {}", caseDetails.getId());
 
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
 
         if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseDetails.getData(), solicitorToAdd)) {
-            log.error("User has represented litigant as Barrister for case {}, REJECTING COR", caseDetails.getId());
+            log.error("User has represented litigant as Barrister for Case ID: {}, REJECTING COR", caseDetails.getId());
             changeRequest.setApprovalStatus(REJECTED);
             Map<String, Object> caseData = caseDetails.getData();
             caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
@@ -88,7 +88,7 @@ public class UpdateRepresentationService {
         final ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
 
-        log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
+        log.info("About to start updating solicitor details in the case data for Case ID: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
 
         return updateRepresentationUpdateHistory(caseDetails, addedSolicitor,

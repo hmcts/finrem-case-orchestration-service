@@ -40,7 +40,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for case id: {}",
+        log.info("Invoking contested event {} mid callback for Case ID: {}",
             EventType.DIRECTION_UPLOAD_ORDER, caseId);
         FinremCaseData caseData = caseDetails.getData();
 

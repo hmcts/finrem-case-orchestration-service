@@ -51,13 +51,13 @@ public class FeeLookupController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request for Fee lookup for Case ID {}", caseDetails.getId());
+        log.info("Received request for Fee lookup for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
 
         ApplicationType applicationType = caseDataService.isConsentedApplication(caseDetails) ? CONSENTED : CONTESTED;
         String typeOfApplication =  Objects.toString(callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION), null);
-        log.info("Received request for Fee lookup for Case ID {} typeOfApplication{}", caseDetails.getId(), typeOfApplication);
+        log.info("Received request for Fee lookup for Case ID: {} typeOfApplication{}", caseDetails.getId(), typeOfApplication);
 
         FeeResponse feeResponse = feeService.getApplicationFee(applicationType, typeOfApplication);
 

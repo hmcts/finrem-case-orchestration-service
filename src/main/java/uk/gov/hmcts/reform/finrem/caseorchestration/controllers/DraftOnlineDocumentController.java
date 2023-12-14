@@ -62,7 +62,7 @@ public class DraftOnlineDocumentController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
 
-        log.info("Received request to generate draft Contested Mini Form A for Case ID : {}",
+        log.info("Received request to generate draft Contested Mini Form A for Case ID: {}",
             callback.getCaseDetails().getId());
 
         CaseDetails caseDetails = callback.getCaseDetails();
