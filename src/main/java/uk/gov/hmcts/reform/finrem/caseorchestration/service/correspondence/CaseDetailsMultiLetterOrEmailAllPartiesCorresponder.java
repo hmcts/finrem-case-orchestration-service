@@ -30,10 +30,10 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
     @SuppressWarnings("java:S1874")
     protected void sendApplicantCorrespondence(String authorisationToken, CaseDetails caseDetails) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         } else {
-            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending letter correspondence to applicant for Case ID: {}", caseDetails.getId());
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
                 documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
         }
@@ -42,10 +42,10 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
     @SuppressWarnings("java:S1874")
     public void sendRespondentCorrespondence(String authorisationToken, CaseDetails caseDetails) {
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to respondent for Case ID: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
         } else {
-            log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
+            log.info("Sending letter correspondence to respondent for Case ID: {}", caseDetails.getId());
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
                 documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
         }
@@ -62,12 +62,12 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
                     || Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
                     List<CaseDocument> caseDocuments = returnAndAddCaseDocumentsToIntervenerHearingNotices(caseDetails, intervenerWrapper);
                     if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, finremCaseDetails)) {
-                        log.info("Sending email correspondence to {} for case: {}",
+                        log.info("Sending email correspondence to {} for Case ID: {}",
                             intervenerWrapper.getIntervenerType().getTypeValue(),
                             caseDetails.getId());
                         this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
                     } else if (intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty()) {
-                        log.info("Sending letter correspondence to {} for case: {}",
+                        log.info("Sending letter correspondence to {} for Case ID: {}",
                             intervenerWrapper.getIntervenerType().getTypeValue(),
                             caseDetails.getId());
                         bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,

@@ -35,7 +35,7 @@ public class IssueApplicationConsentedAboutToStartHandler extends FinremCallback
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
 
-        log.info("Handling consented {} about to start callback for case id: {}",
+        log.info("Handling consented {} about to start callback for Case ID: {}",
             callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
         service.defaultIssueDate(callbackRequest);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

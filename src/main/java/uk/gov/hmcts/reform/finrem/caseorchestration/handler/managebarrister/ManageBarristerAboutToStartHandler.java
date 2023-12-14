@@ -37,7 +37,7 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler<Map<S
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
-        log.info("In Manage barrister about to start callback for case {}", callbackRequest.getCaseDetails().getId());
+        log.info("In Manage barrister about to start callback for Case ID: {}", callbackRequest.getCaseDetails().getId());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
@@ -53,7 +53,7 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler<Map<S
                 caseRole.replace("[", "").replace("]",""));
         }
 
-        log.info("current user case role is {} for case {}", caseData.get(CASE_ROLE), caseDetails.getId());
+        log.info("current user case role is {} for Case ID: {}", caseData.get(CASE_ROLE), caseDetails.getId());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }

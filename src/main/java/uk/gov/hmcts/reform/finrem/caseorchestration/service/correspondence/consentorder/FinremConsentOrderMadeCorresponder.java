@@ -18,13 +18,13 @@ public class FinremConsentOrderMadeCorresponder extends FinremEmailOnlyAllSolici
 
     @Override
     protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-        log.info("Sending email notification to Applicant Solicitor for 'Consent Order Made' for case: {}", caseDetails.getId());
+        log.info("Sending email notification to Applicant Solicitor for 'Consent Order Made' for Case ID: {}", caseDetails.getId());
         notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(caseDetails);
     }
 
     @Override
     protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
-        log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made' for case: {}", caseDetails.getId());
+        log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made' for Case ID: {}", caseDetails.getId());
         notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(caseDetails);
     }
 }

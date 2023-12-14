@@ -22,20 +22,23 @@ public class ContestedConsentOrderNotApprovedCorresponder extends CaseDetailsEma
 
     @Override
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
-        log.info("Sending email notification to Applicant Solicitor for 'Contested Consent Order Not Approved' for case: {}", caseDetails.getId());
+        log.info("Sending email notification to Applicant Solicitor for 'Contested Consent Order Not Approved' for Case ID: {}",
+            caseDetails.getId());
         notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(caseDetails);
     }
 
     @Override
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
-        log.info("Sending email notification to Respondent Solicitor for 'Contested Consent Order Not Approved' for case: {}", caseDetails.getId());
+        log.info("Sending email notification to Respondent Solicitor for 'Contested Consent Order Not Approved' for Case ID: {}",
+            caseDetails.getId());
         notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(caseDetails);
 
     }
 
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
-        log.info("Sending email notification to Intervener Solicitor for 'Contested Consent Order Not Approved' for case: {}", caseDetails.getId());
+        log.info("Sending email notification to Intervener Solicitor for 'Contested Consent Order Not Approved' for Case ID: {}",
+            caseDetails.getId());
         notificationService.sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(caseDetails,
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
 

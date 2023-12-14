@@ -54,7 +54,7 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         Long caseId = callbackRequest.getCaseDetails().getId();
-        log.info("Invoking contested event {}, callback {} callback for case id: {}",
+        log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
             callbackRequest.getEventType(), CallbackType.SUBMITTED, caseId);
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
