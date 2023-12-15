@@ -39,7 +39,7 @@ public class ContestedListForHearingMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for case id: {}",
+        log.info("Invoking contested event {} mid callback for Case ID: {}",
             EventType.LIST_FOR_HEARING, caseId);
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();

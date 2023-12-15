@@ -18,13 +18,13 @@ public class FinremConsentOrderAvailableCorresponder extends FinremEmailOnlyAllS
 
     @Override
     protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-        log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
+        log.info("Case ID - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
         notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
     }
 
     @Override
     protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
-        log.info("case - {}: Sending email notification for to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
+        log.info("Case ID - {}: Sending email notification for to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
         notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
     }
 }

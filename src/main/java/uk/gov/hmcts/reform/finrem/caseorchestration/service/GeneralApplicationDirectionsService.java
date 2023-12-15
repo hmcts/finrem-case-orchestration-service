@@ -83,10 +83,10 @@ public class GeneralApplicationDirectionsService {
             .stream()
             .map(CaseEventDetail::getEventName).toList();
 
-        log.info("Previous event names : {} for caseId {}", eventDetailsOnCase, caseDetails.getId());
+        log.info("Previous event names : {} for Case ID: {}", eventDetailsOnCase, caseDetails.getId());
         String hearingOption = Objects.toString(finremCaseDetails.getData().getGeneralApplicationWrapper()
             .getGeneralApplicationDirectionsHearingRequired(), null);
-        log.info("Hearing option selected on direction : {} for caseId {}", hearingOption, caseDetails.getId());
+        log.info("Hearing option selected on direction : {} for Case ID: {}", hearingOption, caseDetails.getId());
 
         if ((!eventDetailsOnCase.isEmpty() && (eventDetailsOnCase.contains(LIST_FOR_HEARING)
             || eventDetailsOnCase.contains(LIST_FOR_INTERIM_HEARING)))
@@ -96,7 +96,7 @@ public class GeneralApplicationDirectionsService {
 
         String previousState = Objects.toString(finremCaseDetails.getData().getGeneralApplicationWrapper()
             .getGeneralApplicationPreState(), null);
-        log.info("Previous state : {} for caseId {}", previousState, caseDetails.getId());
+        log.info("Previous state : {} for Case ID: {}", previousState, caseDetails.getId());
         return previousState;
     }
 
@@ -208,14 +208,14 @@ public class GeneralApplicationDirectionsService {
     private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
                                                            List<BulkPrintDocument> documents) {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
-        log.info("The relevant party {} for caseId {}", ObjectUtils.nullSafeConciseToString(referDetail), caseDetails.getId());
+        log.info("The relevant party {} for Case ID: {}", ObjectUtils.nullSafeConciseToString(referDetail), caseDetails.getId());
         if (StringUtils.isNotEmpty(referDetail)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}",
+            log.info("Sending {} document(s) to applicant via bulk print for Case ID: {}, document(s) are {}",
                 documents.size(), caseDetails.getId(),
                 documents);
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to respondent via bulk print for Case {}, document(s) are {}",
+            log.info("Sending {} document(s) to respondent via bulk print for Case ID: {}, document(s) are {}",
                 documents.size(), caseDetails.getId(),
                 documents);
             sendIntervenerDocuments(caseDetails, authorisationToken, documents, referDetail);
@@ -243,7 +243,7 @@ public class GeneralApplicationDirectionsService {
                                               List<BulkPrintDocument> documents,
                                               IntervenerWrapper intervenerWrapper) {
         bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, documents);
-        log.info("Sending {} document(s) to {} via bulk print for Case {}, document(s) are {}",
+        log.info("Sending {} document(s) to {} via bulk print for Case ID: {}, document(s) are {}",
             intervenerWrapper.getIntervenerType(), documents.size(), caseDetails.getId(),
             documents);
     }

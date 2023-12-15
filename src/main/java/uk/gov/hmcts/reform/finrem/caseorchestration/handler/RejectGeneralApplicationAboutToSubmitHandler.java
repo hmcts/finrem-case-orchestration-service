@@ -71,7 +71,7 @@ public class RejectGeneralApplicationAboutToSubmitHandler
         }
         String previousState = Objects.toString(caseDetails.getData().getGeneralApplicationWrapper()
             .getGeneralApplicationPreState(), caseDetails.getState().getStateId());
-        log.info("Previous state : {} for caseId {}", previousState, caseDetails.getId());
+        log.info("Previous state : {} for Case ID: {}", previousState, caseDetails.getId());
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).state(previousState).build();
     }
 }

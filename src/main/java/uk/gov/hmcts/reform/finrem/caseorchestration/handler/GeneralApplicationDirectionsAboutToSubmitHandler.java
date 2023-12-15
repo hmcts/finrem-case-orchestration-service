@@ -88,7 +88,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
 
         String postState = service.getEventPostState(caseDetails, userAuthorisation);
 
-        log.info("Post state {} for caseId {}", postState, caseDetails.getId());
+        log.info("Post state {} for Case ID: {}", postState, caseDetails.getId());
         if (postState != null) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                 .errors(errors).state(postState).build();
@@ -102,8 +102,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Map existing general application to collection for case id {}", caseId);
+        String caseId = caseDetails.getId().toString();
+        log.info("Map existing general application to collection for Case ID: {}", caseId);
         GeneralApplicationCollectionData data = helper.mapExistingGeneralApplicationToData(
             caseData, userAuthorisation, caseId);
         if (data != null) {
@@ -184,7 +184,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             .build();
         bulkPrintDocuments.add(bpDoc);
 
-        log.info("items getGeneralApplicationDocument {}, for caseId {}",
+        log.info("items getGeneralApplicationDocument {}, for case ID: {}",
             items.getGeneralApplicationDocument(), caseId);
 
         if (items.getGeneralApplicationDocument() != null) {
@@ -194,7 +194,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
                 .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
                 .fileName(items.getGeneralApplicationDocument().getDocumentFilename())
                 .build();
-            log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for caseId {}",
+            log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for Case ID: {}",
                 items.getGeneralApplicationDocument(), genDoc, caseId);
             bulkPrintDocuments.add(genDoc);
         }

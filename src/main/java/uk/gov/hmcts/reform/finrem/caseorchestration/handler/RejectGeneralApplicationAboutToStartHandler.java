@@ -68,7 +68,7 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
             }
 
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
-            log.info("collection dynamicList {} for case id {}", dynamicList, caseId);
+            log.info("collection dynamicList {} for Case ID {}", dynamicList, caseId);
             caseData.getGeneralApplicationWrapper().setGeneralApplicationList(dynamicList);
         }
 

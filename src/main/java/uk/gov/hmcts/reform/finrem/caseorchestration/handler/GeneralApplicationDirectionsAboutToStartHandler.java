@@ -51,13 +51,13 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
                                                                               String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
-        String caseId = String.valueOf(finremCaseDetails.getId());
-        log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
+        String caseId = finremCaseDetails.getId().toString();
+        log.info("About to Start callback event type {} for Case ID: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
 
         FinremCaseData caseData = finremCaseDetails.getData();
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
-        log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
+        log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         service.resetGeneralApplicationDirectionsFields(caseData);
@@ -67,7 +67,7 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         List<GeneralApplicationCollectionData> outcomeList = helper.getOutcomeList(caseData);
         AtomicInteger index = new AtomicInteger(0);
         if (outcomeList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
-            log.info("setting direction list if existing ga not moved to collection for Case ID: {}", caseId);
+            log.info("Setting direction list if existing general application not moved to collection for Case ID: {}", caseId);
             setDirectionListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
         } else {
             if (outcomeList.isEmpty()) {

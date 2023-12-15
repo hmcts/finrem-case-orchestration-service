@@ -77,7 +77,7 @@ public class IntervenerShareDocumentsService implements SharedService {
 
     public DynamicMultiSelectList intervenerSourceDocumentList(FinremCaseDetails caseDetails, String role) {
 
-        log.info("Setting intervener {}, source document list for case {}", role, caseDetails.getId());
+        log.info("Setting intervener {}, source document list for Case ID:{}", role, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
