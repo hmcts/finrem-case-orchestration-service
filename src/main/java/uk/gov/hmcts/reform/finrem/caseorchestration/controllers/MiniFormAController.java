@@ -62,7 +62,7 @@ public class MiniFormAController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
 
-        log.info("Received request to generate Consented Mini Form A for Case ID : {}", callback.getCaseDetails().getId());
+        log.info("Received request to generate Consented Mini Form A for Case ID: {}", callback.getCaseDetails().getId());
 
         CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();

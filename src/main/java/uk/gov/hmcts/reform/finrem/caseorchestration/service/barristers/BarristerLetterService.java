@@ -42,7 +42,7 @@ public class BarristerLetterService {
                                     Barrister barrister,
                                     BarristerLetterTuple barristerLetterTuple,
                                     String authToken) {
-        log.info("About to start sending barrister access letter for case {}", caseDetails.getId());
+        log.info("About to start sending barrister access letter for Case ID: {}", caseDetails.getId());
         Optional<CaseDocument> barristerLetter = getBarristerLetter(caseDetails, barrister, barristerLetterTuple);
         barristerLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails,
             bulkPrintService.getRecipient(barristerLetterTuple.getRecipient().toString()), authToken));
@@ -63,7 +63,7 @@ public class BarristerLetterService {
             .generate(caseDetails, barristerLetterTuple.getRecipient(), barrister);
         Pair<String, String> documentData = getTemplateFilenamePair(barristerLetterTuple.getChangeType());
 
-        log.info("Sending {} letter for case {}", documentData.getRight(), caseDetails.getId());
+        log.info("Sending {} letter for Case ID: {}", documentData.getRight(), caseDetails.getId());
 
         return generateDocument(barristerLetterTuple.getAuthToken(), barristerLetterDetails,
             documentData.getLeft(), documentData.getRight(), caseDetails.getId().toString());

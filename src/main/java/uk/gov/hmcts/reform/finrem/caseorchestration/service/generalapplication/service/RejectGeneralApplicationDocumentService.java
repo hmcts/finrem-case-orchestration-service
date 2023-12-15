@@ -33,7 +33,7 @@ public class RejectGeneralApplicationDocumentService  {
     @SuppressWarnings("java:S3740")
     public CaseDocument generateGeneralApplicationRejectionLetter(CaseDetails caseDetails, String authToken,
                                                      DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating General Application Rejection Letter for {} for caseId {}", recipient, caseDetails.getId());
+        log.info("Generating General Application Rejection Letter for {} for Case ID: {}", recipient, caseDetails.getId());
         GeneralApplicationRejectionLetterDetails letterDetails = generalApplicationRejectionLetterGenerator
             .generate(caseDetails, recipient, null);
         Map letterDetailsMap = convertGeneralApplicationRejectionLetterDetailsToMap(letterDetails);

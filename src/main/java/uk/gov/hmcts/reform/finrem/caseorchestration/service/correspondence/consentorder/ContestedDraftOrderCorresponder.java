@@ -23,7 +23,7 @@ public class ContestedDraftOrderCorresponder extends CaseDetailsEmailOnlyAllSoli
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         if (notificationService.isApplicantSolicitorResponsibleToDraftOrder(caseDetails.getData())
             && notificationService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Draft Order' for case: {}", caseDetails.getId());
+            log.info("Sending email notification to Applicant Solicitor for 'Draft Order' for Case ID: {}", caseDetails.getId());
             notificationService.sendSolicitorToDraftOrderEmailApplicant(caseDetails);
         }
     }
@@ -32,13 +32,13 @@ public class ContestedDraftOrderCorresponder extends CaseDetailsEmailOnlyAllSoli
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         if (notificationService.isRespondentSolicitorResponsibleToDraftOrder(caseDetails.getData())
             && notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
-            log.info("Sending email notification to Respondent Solicitor for 'Draft Order' for case: {}", caseDetails.getId());
+            log.info("Sending email notification to Respondent Solicitor for 'Draft Order' for Case ID: {}", caseDetails.getId());
             notificationService.sendSolicitorToDraftOrderEmailRespondent(caseDetails);
         }
     }
 
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
-        log.info("Not sending email correspondence to Intervener for case: {}", caseDetails.getId());
+        log.info("Not sending email correspondence to Intervener for Case ID: {}", caseDetails.getId());
     }
 }

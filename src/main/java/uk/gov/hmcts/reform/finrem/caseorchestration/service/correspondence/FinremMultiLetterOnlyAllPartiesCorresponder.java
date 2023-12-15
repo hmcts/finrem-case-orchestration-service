@@ -28,7 +28,7 @@ public abstract class FinremMultiLetterOnlyAllPartiesCorresponder extends MultiL
 
     protected void sendApplicantCorrespondence(String authorisationToken, FinremCaseDetails caseDetails) {
         if (caseDetails.getData().isApplicantCorrespondenceEnabled() && !shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending letter correspondence to applicant for Case ID: {}", caseDetails.getId());
             bulkPrintService.printApplicantDocuments(caseDetails,
                 authorisationToken,
                 getDocumentsToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT));
@@ -37,7 +37,7 @@ public abstract class FinremMultiLetterOnlyAllPartiesCorresponder extends MultiL
 
     protected void sendRespondentCorrespondence(String authorisationToken, FinremCaseDetails caseDetails) {
         if (caseDetails.getData().isRespondentCorrespondenceEnabled() && !shouldSendRespondentSolicitorEmail(caseDetails)) {
-            log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
+            log.info("Sending letter correspondence to respondent for Case ID: {}", caseDetails.getId());
             bulkPrintService.printRespondentDocuments(caseDetails,
                 authorisationToken,
                 getDocumentsToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT));
@@ -48,13 +48,13 @@ public abstract class FinremMultiLetterOnlyAllPartiesCorresponder extends MultiL
         FinremCaseData caseData = caseDetails.getData();
         List<IntervenerWrapper> interveners = caseData.getInterveners();
         interveners.forEach(intervenerWrapper -> {
-            log.info("Intervener type {}, communication enabled {}, caseId {}", intervenerWrapper.getIntervenerType(),
+            log.info("Intervener type {}, communication enabled {}, Case ID: {}", intervenerWrapper.getIntervenerType(),
                 intervenerWrapper.getIntervenerCorrespondenceEnabled(), caseDetails.getId());
             if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
                 && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled()
                 && !shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)
                 && intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty())) {
-                log.info("Sending letter correspondence to {} for case: {}",
+                log.info("Sending letter correspondence to {} for Case ID: {}",
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
                 bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
