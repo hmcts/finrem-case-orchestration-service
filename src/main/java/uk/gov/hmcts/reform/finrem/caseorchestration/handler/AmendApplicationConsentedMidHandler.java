@@ -8,36 +8,32 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("java:S3740")
-public class PaperCaseCreateContestedSubmittedHandler implements CallbackHandler {
-
-
-    private final CreateCaseService createCaseService;
+public class AmendApplicationConsentedMidHandler implements CallbackHandler<Map<String, Object>> {
+    private final ConsentOrderService consentOrderService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.SUBMITTED.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && (EventType.NEW_PAPER_CASE.equals(eventType));
+        return CallbackType.MID_EVENT.equals(callbackType)
+            && CaseType.CONSENTED.equals(caseType)
+            && EventType.AMEND_APP_DETAILS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
-        log.info("Processing Submitted callback for event {} with Case ID: {}",
-            EventType.NEW_PAPER_CASE, callbackRequest.getCaseDetails().getId());
 
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        log.info("Invoking Solicitor Create mid event");
+        List<String> errors = consentOrderService.performCheck(callbackRequest, userAuthorisation);
 
-        createCaseService.setSupplementaryData(callbackRequest, userAuthorisation);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
+            .data(callbackRequest.getCaseDetails().getData()).errors(errors).build();
     }
 }

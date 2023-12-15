@@ -58,7 +58,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         FinremCaseData caseData = caseDetails.getData();
 
         if (!idamService.isUserRoleAdmin(authorisationToken)) {
-            log.info("other users for caseId {}", caseDetails.getId());
+            log.info("other users for Case ID: {}", caseDetails.getId());
             caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         }
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, caseDetails);

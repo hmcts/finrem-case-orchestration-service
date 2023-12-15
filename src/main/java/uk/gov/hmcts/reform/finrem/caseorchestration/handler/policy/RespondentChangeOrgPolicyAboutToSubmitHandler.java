@@ -37,12 +37,12 @@ public class RespondentChangeOrgPolicyAboutToSubmitHandler extends FinremCallbac
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Received callback {} request for event {} for given case id: {}", CallbackType.ABOUT_TO_SUBMIT,
+        log.info("Received callback {} request for event {} for given Case ID: {}", CallbackType.ABOUT_TO_SUBMIT,
             EventType.CLEAR_RESPONDENT_POLICY, caseId);
 
         FinremCaseData caseData = caseDetails.getData();
         OrganisationPolicy policy = caseData.getRespondentOrganisationPolicy();
-        log.info("Respondent org policy {} for caseId {}", policy, caseId);
+        log.info("Respondent org policy {} for Case ID: {}", policy, caseId);
 
         OrganisationPolicy organisationPolicy = OrganisationPolicy
             .builder()
@@ -52,7 +52,7 @@ public class RespondentChangeOrgPolicyAboutToSubmitHandler extends FinremCallbac
             .build();
         caseData.setRespondentOrganisationPolicy(organisationPolicy);
 
-        log.info("cleared respondent org policy {} for caseId {}", organisationPolicy, caseId);
+        log.info("cleared respondent org policy {} for Case ID: {}", organisationPolicy, caseId);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 }

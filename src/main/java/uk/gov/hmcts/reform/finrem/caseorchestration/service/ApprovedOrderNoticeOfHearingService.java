@@ -118,7 +118,7 @@ public class ApprovedOrderNoticeOfHearingService {
             = Optional.ofNullable(data.getHearingDirectionDetailsCollection());
 
         if (hearingDirectionDetailsCollection.isEmpty()) {
-            throw new IllegalStateException("Invalid Case Data - hearing direction is empty for caseId " + caseDetails.getId());
+            throw new IllegalStateException("Invalid Case Data - hearing direction is empty for Case iD: " + caseDetails.getId());
         }
         List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollections = hearingDirectionDetailsCollection.get();
         HearingDirectionDetailsCollection directionDetailsCollection

@@ -70,7 +70,7 @@ public class NoticeOfChangeService {
     public Map<String, Object> updateRepresentation(CaseDetails caseDetails,
                                                     String authorizationToken,
                                                     CaseDetails originalCaseDetails) {
-        log.info("About to start updating representation as caseworker for caseID {}", caseDetails.getId());
+        log.info("About to start updating representation as caseworker for Case ID: {}", caseDetails.getId());
 
         Map<String, Object> caseData = updateRepresentationUpdateHistory(caseDetails, authorizationToken, originalCaseDetails);
         final ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(caseDetails, originalCaseDetails);

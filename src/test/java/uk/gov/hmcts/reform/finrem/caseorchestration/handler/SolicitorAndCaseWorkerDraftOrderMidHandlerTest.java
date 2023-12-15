@@ -23,10 +23,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,30 +49,23 @@ class SolicitorAndCaseWorkerDraftOrderMidHandlerTest extends BaseHandlerTestSetu
 
     @Test
     void canHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.SOLICITOR_CW_DRAFT_ORDER),
-            is(true));
+        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.SOLICITOR_CW_DRAFT_ORDER));
     }
 
     @Test
     void canNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.SOLICITOR_CW_DRAFT_ORDER),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.SOLICITOR_CW_DRAFT_ORDER));
+
     }
 
     @Test
     void canNotHandleWrongEventType() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE));
     }
 
     @Test
     void canNotHandleWrongCallbackType() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.SOLICITOR_CW_DRAFT_ORDER),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.SOLICITOR_CW_DRAFT_ORDER));
     }
 
 
@@ -101,5 +94,35 @@ class SolicitorAndCaseWorkerDraftOrderMidHandlerTest extends BaseHandlerTestSetu
 
         assertTrue(response.getErrors().isEmpty());
         verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenDraftOrderUploadedButNonEncryptedFileButBeforeDataHasOrder_theShouldNotGetErrorAndNoCheckPerformed() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.SOLICITOR_CW_DRAFT_ORDER);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+
+        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+        DraftDirectionOrder directionOrder =
+            DraftDirectionOrder
+                .builder()
+                .purposeOfDocument("test")
+                .uploadDraftDocument(caseDocument)
+                .build();
+        DraftDirectionOrderCollection directionOrderCollection = DraftDirectionOrderCollection.builder().value(directionOrder).build();
+
+        List<DraftDirectionOrderCollection> draftDirectionOrderCollection = new ArrayList<>();
+        draftDirectionOrderCollection.add(directionOrderCollection);
+
+        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
+        draftDirectionWrapper.setDraftDirectionOrderCollection(draftDirectionOrderCollection);
+        finremCallbackRequest.getCaseDetailsBefore().getData().getDraftDirectionWrapper()
+            .setDraftDirectionOrderCollection(draftDirectionOrderCollection);;
+
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertTrue(response.getErrors().isEmpty());
+        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 }

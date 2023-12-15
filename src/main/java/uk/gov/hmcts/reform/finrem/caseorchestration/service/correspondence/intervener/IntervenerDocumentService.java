@@ -45,7 +45,7 @@ public class IntervenerDocumentService {
                                                                   DocumentHelper.PaperNotificationRecipient recipient) {
 
 
-        log.info("Generating Intervener Added Notification Letter {} from {} for bulk print for {}, case id: {}",
+        log.info("Generating Intervener Added Notification Letter {} from {} for bulk print for {}, Case ID: {}",
             documentConfiguration.getIntervenerAddedTemplate(),
             documentConfiguration.getIntervenerAddedFilename(),
             recipient, finremCaseDetails.getId());
@@ -61,7 +61,7 @@ public class IntervenerDocumentService {
                                                                     DocumentHelper.PaperNotificationRecipient recipient) {
 
 
-        log.info("Generating Intervener Removed Notification Letter {} from {} for bulk print for {}, case id: {}",
+        log.info("Generating Intervener Removed Notification Letter {} from {} for bulk print for {}, Case ID: {}",
             documentConfiguration.getIntervenerRemovedTemplate(),
             documentConfiguration.getIntervenerRemovedFilename(),
             recipient, finremCaseDetails.getId());
@@ -76,7 +76,7 @@ public class IntervenerDocumentService {
     public CaseDocument generateIntervenerSolicitorAddedLetter(FinremCaseDetails finremCaseDetails, String authToken,
                                                                DocumentHelper.PaperNotificationRecipient recipient) {
 
-        log.info("Generating Intervener Added Solicitor Notification Letter {} from {} for bulk print for {}, case id: {}",
+        log.info("Generating Intervener Added Solicitor Notification Letter {} from {} for bulk print for {}, Case ID: {}",
             documentConfiguration.getIntervenerAddedSolicitorTemplate(),
             documentConfiguration.getIntervenerAddedSolicitorFilename(),
             recipient, finremCaseDetails.getId());
@@ -91,7 +91,7 @@ public class IntervenerDocumentService {
     public CaseDocument generateIntervenerSolicitorRemovedLetter(FinremCaseDetails finremCaseDetails, String authToken,
                                                                  DocumentHelper.PaperNotificationRecipient recipient) {
 
-        log.info("Generating Intervener Removed Solicitor Notification Letter {} from {} for bulk print for {}, case id: {}",
+        log.info("Generating Intervener Removed Solicitor Notification Letter {} from {} for bulk print for {}, Case ID: {}",
             documentConfiguration.getIntervenerRemovedSolicitorTemplate(),
             documentConfiguration.getIntervenerRemovedSolicitorFilename(),
             recipient, finremCaseDetails.getId());
@@ -111,7 +111,7 @@ public class IntervenerDocumentService {
             documentConfiguration.getIntervenerAddedTemplate(),
             documentConfiguration.getIntervenerAddedFilename());
 
-        log.info("Generated Intervener Added Notification Letter: {} for case: {}",
+        log.info("Generated Intervener Added Notification Letter: {} for Case ID: {}",
             generatedIntervenerAddedNotificationLetter, intervenerAddedLetterDetails.getCaseNumber());
         return generatedIntervenerAddedNotificationLetter;
     }
@@ -123,7 +123,7 @@ public class IntervenerDocumentService {
             documentConfiguration.getIntervenerRemovedTemplate(),
             documentConfiguration.getIntervenerRemovedFilename());
 
-        log.info("Generated Intervener Removed Notification Letter: {} for case: {}",
+        log.info("Generated Intervener Removed Notification Letter: {} for Case ID: {}",
             generatedIntervenerRemovedNotificationLetter, intervenerRemovedLetterDetails.getCaseNumber());
         return generatedIntervenerRemovedNotificationLetter;
     }
@@ -135,7 +135,7 @@ public class IntervenerDocumentService {
             documentConfiguration.getIntervenerAddedSolicitorTemplate(),
             documentConfiguration.getIntervenerAddedSolicitorFilename());
 
-        log.info("Generated Intervener Added Solicitor Notification Letter: {} for case: {}",
+        log.info("Generated Intervener Added Solicitor Notification Letter: {} for Case ID: {}",
             generatedIntervenerAddedSolicitorNotificationLetter, intervenerAddedSolicitorLetterDetails.getCaseNumber());
         return generatedIntervenerAddedSolicitorNotificationLetter;
     }
@@ -147,7 +147,7 @@ public class IntervenerDocumentService {
             documentConfiguration.getIntervenerRemovedSolicitorTemplate(),
             documentConfiguration.getIntervenerRemovedSolicitorFilename());
 
-        log.info("Generated Intervener Removed Solicitor Notification Letter: {} for case: {}",
+        log.info("Generated Intervener Removed Solicitor Notification Letter: {} for Case ID: {}",
             generatedIntervenerRemovedSolicitorNotificationLetter, intervenerRemovedSolicitorLetterDetails.getCaseNumber());
         return generatedIntervenerRemovedSolicitorNotificationLetter;
     }
