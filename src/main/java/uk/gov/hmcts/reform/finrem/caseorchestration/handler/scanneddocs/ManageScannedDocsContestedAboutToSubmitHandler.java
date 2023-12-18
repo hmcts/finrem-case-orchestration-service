@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.scanneddocs;
 
+import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.validation.ManageDocumentsHandlerValidator;
 
@@ -60,6 +63,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, manageScannedDocumentCollection));
 
+        caseData.setEvidenceHandled(YesOrNo.YES);
         if (caseData.getEvidenceHandled() != null && caseData.getEvidenceHandled().isYes()) {
             Optional.ofNullable(caseData.getScannedDocuments()).ifPresent(List::clear);
         }
@@ -73,7 +77,14 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
             UploadCaseDocument uploadCaseDocument = uploadCaseDocumentCollection.getUploadCaseDocument();
             CaseDocument caseDocument = uploadCaseDocument.getCaseDocuments();
             uploadCaseDocument.setScannedFileName(caseDocument.getDocumentFilename());
-            caseDocument.setDocumentFilename(uploadCaseDocument.getFileName());
+            if (StringUtils.isEmpty(uploadCaseDocument.getFileName())) {
+                caseDocument.setDocumentFilename(caseDocument.getDocumentFilename());
+            } else if (StringUtils.isEmpty(Files.getFileExtension(uploadCaseDocument.getFileName()))) {
+                caseDocument.setDocumentFilename(uploadCaseDocument.getFileName()
+                    + Files.getFileExtension(caseDocument.getDocumentFilename()));
+            } else {
+                caseDocument.setDocumentFilename(uploadCaseDocument.getFileName());
+            }
         });
     }
 
