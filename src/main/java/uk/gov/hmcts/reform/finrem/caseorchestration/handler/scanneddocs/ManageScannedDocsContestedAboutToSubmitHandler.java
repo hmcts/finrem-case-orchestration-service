@@ -80,7 +80,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
             if (StringUtils.isEmpty(uploadCaseDocument.getFileName())) {
                 caseDocument.setDocumentFilename(caseDocument.getDocumentFilename());
             } else if (StringUtils.isEmpty(Files.getFileExtension(uploadCaseDocument.getFileName()))) {
-                caseDocument.setDocumentFilename(uploadCaseDocument.getFileName()
+                caseDocument.setDocumentFilename(uploadCaseDocument.getFileName() + "."
                     + Files.getFileExtension(caseDocument.getDocumentFilename()));
             } else {
                 caseDocument.setDocumentFilename(uploadCaseDocument.getFileName());
