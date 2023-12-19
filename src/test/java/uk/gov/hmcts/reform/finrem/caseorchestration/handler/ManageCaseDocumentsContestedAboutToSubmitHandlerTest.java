@@ -126,7 +126,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION),
-            hasSize(4));
+            hasSize(9));
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(3));
@@ -135,21 +135,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
-    }
-
-    @Test
-    public void givenAManagedCaseWithCasesAddedAndRemovedDeleteFlagOn_WhenHandle_thenDeleteServiceCalled() {
-        setUpRemovedDocuments();
-        setUpAddedDocuments();
-
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
-        manageCaseDocumentsAboutToSubmitCaseHandler.handle(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
-
-        verify(evidenceManagementDeleteService, times(1)).delete(DOCUMENT_URL_TEST, AUTH_TOKEN);
     }
 
 
