@@ -118,14 +118,14 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
     }
 
     private CaseDocumentParty getActiveUserCaseDocumentParty(String caseId, String userAuthorisation) {
-        String logMessage = "Logged in user role {} caseId {}";
+        String logMessage = "Logged in user role {} Case ID: {}";
         CaseAssignedUserRolesResource caseAssignedUserRole =
             caseAssignedRoleService.getCaseAssignedUserRole(caseId, userAuthorisation);
         if (caseAssignedUserRole != null) {
             List<CaseAssignedUserRole> caseAssignedUserRoleList = caseAssignedUserRole.getCaseAssignedUserRoles();
             if (!caseAssignedUserRoleList.isEmpty()) {
                 String loggedInUserCaseRole = caseAssignedUserRoleList.get(0).getCaseRole();
-                log.info("logged-in user role {} in case {}", loggedInUserCaseRole, caseId);
+                log.info("logged-in user role {} in Case ID: {}", loggedInUserCaseRole, caseId);
                 return getRole(logMessage, caseId, loggedInUserCaseRole);
             }
         }

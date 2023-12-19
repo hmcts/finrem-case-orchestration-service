@@ -23,10 +23,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -50,35 +50,27 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void canHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER),
-            is(true));
+        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER));
     }
 
     @Test
     void canNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.DIRECTION_UPLOAD_ORDER),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.DIRECTION_UPLOAD_ORDER));
     }
 
     @Test
     void canNotHandleWrongEventType() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE));
     }
 
     @Test
     void canNotHandleWrongCallbackType() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER));
     }
 
 
     @Test
-    void givenContestedCase_whenDirectionUploadOrderButNonEncryptedFileShouldNotGetError() throws Exception {
+    void givenContestedCase_whenDirectionUploadOrderButNonEncryptedFileShouldNotGetError() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -100,5 +92,33 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         assertTrue(response.getErrors().isEmpty());
         verify(service, times(2)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenExistingDirectionUploadOrderAndUploadedSame_thenShouldNotCheck() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+
+        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+
+        DirectionOrder order = DirectionOrder.builder().uploadDraftDocument(caseDocument).build();
+        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(order).build();
+        List<DirectionOrderCollection> uploadHearingOrders = new ArrayList<>();
+        uploadHearingOrders.add(orderCollection);
+        caseData.setUploadHearingOrder(uploadHearingOrders);
+        finremCallbackRequest.getCaseDetailsBefore().getData().setUploadHearingOrder(uploadHearingOrders);
+
+        DocumentCollection documentCollection = DocumentCollection.builder().value(caseDocument).build();
+        List<DocumentCollection> hearingOrderOtherDocuments = new ArrayList<>();
+        hearingOrderOtherDocuments.add(documentCollection);
+        caseData.setHearingOrderOtherDocuments(hearingOrderOtherDocuments);
+
+        finremCallbackRequest.getCaseDetailsBefore().getData().setHearingOrderOtherDocuments(hearingOrderOtherDocuments);;
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertTrue(response.getErrors().isEmpty());
+        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 }

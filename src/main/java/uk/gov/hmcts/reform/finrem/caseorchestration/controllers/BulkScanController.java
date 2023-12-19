@@ -99,7 +99,7 @@ public class BulkScanController {
         @Valid @RequestBody ExceptionRecord exceptionRecord
     ) {
         String exceptionRecordId = exceptionRecord.getId();
-        log.info("Transforming exception record to case. Id: {}", exceptionRecordId);
+        log.info("Transforming exception record to Case ID: {}", exceptionRecordId);
 
         authService.assertIsServiceAllowedToUpdate(s2sAuthToken);
 

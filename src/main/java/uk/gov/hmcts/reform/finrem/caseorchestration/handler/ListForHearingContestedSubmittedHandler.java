@@ -43,7 +43,7 @@ public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandl
                                                                               String userAuthorisation) {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Handling contested event {} submit callback for case id: {}",
+        log.info("Handling contested event {} submit callback for Case ID: {}",
             EventType.LIST_FOR_HEARING, caseDetails.getId());
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 

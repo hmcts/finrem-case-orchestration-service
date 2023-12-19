@@ -95,7 +95,7 @@ public class AssignCaseAccessService {
 
     public void addCaseRolesForUser(String caseId, String userId, Set<String> caseRoles, String userAuthToken) {
         final CaseUser caseUser = CaseUser.builder().userId(userId).caseRoles(caseRoles).build();
-        log.info("Grant case roles {} to user {} for case {}", caseRoles, userId, caseId);
+        log.info("Grant case roles {} to user {} for Case ID: {}", caseRoles, userId, caseId);
 
         caseDataApi.updateCaseRolesForUser(
             userAuthToken,
@@ -107,7 +107,7 @@ public class AssignCaseAccessService {
 
     public void removeCaseRoleToUser(Long caseId, String userId, String caseRole, String orgId) {
         removeCaseAccess(caseId, Set.of(userId), caseRole, orgId);
-        log.info("User {} removed {} from case {}", userId, caseRole, caseId);
+        log.info("User {} removed {} from Case ID: {}", userId, caseRole, caseId);
     }
 
     private void removeCaseAccess(Long caseId, Set<String> users, String caseRole, String orgId) {
@@ -136,7 +136,7 @@ public class AssignCaseAccessService {
 
     public void grantCaseRoleToUser(Long caseId, String userId, String caseRole, String orgId) {
         grantCaseAccess(caseId, Set.of(userId), caseRole, orgId);
-        log.info("User {} granted {} to case {}", userId, caseRole, caseId);
+        log.info("User {} granted {} to Case ID: {}", userId, caseRole, caseId);
     }
 
     private void grantCaseAccess(Long caseId, Set<String> users, String caseRole, String orgId) {
@@ -167,13 +167,13 @@ public class AssignCaseAccessService {
 
     public CaseAssignmentUserRolesResponse findAndRevokeCreatorRole(CaseDetails caseDetails) {
 
-        log.info("About to start revoking creator role for caseId {}", caseDetails.getId());
+        log.info("About to start revoking creator role for Case ID: {}", caseDetails.getId());
         List<CaseAssignmentUserRole> allRoles = getUserRoles(caseDetails.getId().toString())
             .getCaseAssignmentUserRoles();
         List<CaseAssignmentUserRole> creatorRoles = getCreatorRoles(allRoles);
 
         if (creatorRoles.isEmpty()) {
-            log.info("No creator role found for caseId {}", caseDetails.getId());
+            log.info("No creator role found for Case ID: {}", caseDetails.getId());
             return null;
         }
 
@@ -184,7 +184,7 @@ public class AssignCaseAccessService {
         Optional<CaseAssignmentUserRole> userToRemove = getUserToRemove(creatorRoles, allRoles);
 
         if (userToRemove.isEmpty()) {
-            log.info("Applicant solicitor did not create case with id {}", caseDetails.getId());
+            log.info("Applicant solicitor did not create case with ID {}", caseDetails.getId());
             return null;
         }
 
@@ -192,13 +192,13 @@ public class AssignCaseAccessService {
     }
 
     public boolean isCreatorRoleActiveOnCase(CaseDetails caseDetails) {
-        log.info("About to start searching for creator role for caseId {}", caseDetails.getId());
+        log.info("About to start searching for creator role for Case ID: {}", caseDetails.getId());
         List<CaseAssignmentUserRole> allRoles = getUserRoles(caseDetails.getId().toString())
             .getCaseAssignmentUserRoles();
         List<CaseAssignmentUserRole> creatorRoles = getCreatorRoles(allRoles);
 
         if (creatorRoles.isEmpty()) {
-            log.info("No creator role found for caseId {}", caseDetails.getId());
+            log.info("No creator role found for Case ID: {}", caseDetails.getId());
             return false;
         } else {
             return true;
@@ -274,18 +274,18 @@ public class AssignCaseAccessService {
     }
 
     public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
-        log.info("retrieve active user case role for caseId {}", caseId);
+        log.info("retrieve active user case role for Case ID: {}", caseId);
         String idamUserId = idamService.getIdamUserId(userAuthorisation);
 
         CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
         if (rolesResource != null) {
             List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
-            log.info("All roles {} for caseId {}", allRoles, caseId);
+            log.info("All roles {} for Case ID: {}", allRoles, caseId);
             List<CaseAssignmentUserRole> activeRole = allRoles.stream().filter(role -> role.getUserId().equals(idamUserId)).toList();
             if (!activeRole.isEmpty()) {
-                log.info("Active Role {} for caseId {}", activeRole, caseId);
+                log.info("Active Role {} for Case ID: {}", activeRole, caseId);
                 String caseRole = activeRole.get(0).getCaseRole();
-                log.info("case role found {} for caseId {}", caseRole, caseId);
+                log.info("case role found {} for Case ID: {}", caseRole, caseId);
                 return caseRole;
             }
         }
@@ -293,7 +293,7 @@ public class AssignCaseAccessService {
     }
 
     public String getActiveUser(String caseId, String userAuthorisation) {
-        String logMessage = "Logged in user role {} caseId {}";
+        String logMessage = "Logged in user role {} Case ID: {}";
         String activeUserCaseRole = getActiveUserCaseRole(caseId, userAuthorisation);
         if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
             log.info(logMessage, APPLICANT, caseId);
@@ -322,7 +322,7 @@ public class AssignCaseAccessService {
     }
 
     public List<CaseAssignmentUserRole> getAllCaseRole(final String caseId) {
-        log.info("retrieve all case role for caseId {}", caseId);
+        log.info("retrieve all case role for Case ID: {}", caseId);
         CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
         if (rolesResource != null) {
             return rolesResource.getCaseAssignmentUserRoles();

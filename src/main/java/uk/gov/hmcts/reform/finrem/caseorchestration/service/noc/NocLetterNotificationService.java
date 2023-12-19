@@ -16,7 +16,7 @@ public class NocLetterNotificationService {
     private final List<LetterHandler> letterHandlers;
 
     public void sendNoticeOfChangeLetters(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authToken) {
-        log.info("Call the noc letter handlers for case id {}", caseDetails.getId());
+        log.info("Call the noc letter handlers for Case ID: {}", caseDetails.getId());
         letterHandlers.stream().forEach(letterHandler -> letterHandler.handle(caseDetails, caseDetailsBefore, authToken));
     }
 }

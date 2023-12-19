@@ -172,9 +172,12 @@ public class DocumentHelper {
 
 
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
+        if (caseData == null || caseData.isEmpty()) {
+            return new ArrayList<>();
+        }
         return ofNullable(caseData.get(PENSION_DOCS_COLLECTION))
             .map(this::convertToPensionCollectionDataList)
-            .orElse(emptyList())
+            .orElse(List.of())
             .stream()
             .map(PensionTypeCollection::getTypedCaseDocument)
             .map(PensionType::getPensionDocument)
@@ -200,6 +203,9 @@ public class DocumentHelper {
      * @return List Object
      */
     public List<CaseDocument> getVariationOrderDocumentsData(Map<String, Object> caseData) {
+        if (caseData == null || caseData.isEmpty()) {
+            return new ArrayList<>();
+        }
         return ofNullable(caseData.get("otherVariationCollection"))
             .map(this::convertToVariationOrderDataList)
             .orElse(emptyList())
@@ -218,9 +224,12 @@ public class DocumentHelper {
      * @return List Object
      */
     public List<CaseDocument> getConsentOrderOtherDocumentsData(Map<String, Object> caseData) {
+        if (caseData == null || caseData.isEmpty()) {
+            return new ArrayList<>();
+        }
         return ofNullable(caseData.get("otherCollection"))
             .map(this::convertToOtherDataList)
-            .orElse(emptyList())
+            .orElse(List.of())
             .stream()
             .map(ConsentOrderOtherDocumentCollection::getTypeOfDocument)
             .map(ConsentOrderOtherDocumentType::getUploadedDocument)
@@ -240,7 +249,7 @@ public class DocumentHelper {
     public List<CaseDocument> getFormADocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(FORM_A_COLLECTION))
             .map(this::convertToPaymentDocumentCollectionList)
-            .orElse(emptyList())
+            .orElse(List.of())
             .stream()
             .map(PaymentDocumentCollection::getValue)
             .map(PaymentDocument::getUploadedDocument)
@@ -251,7 +260,7 @@ public class DocumentHelper {
     public List<CaseDocument> getFormADocumentsData(FinremCaseData caseData) {
         return ofNullable(caseData.getCopyOfPaperFormA())
             .map(this::convertToPaymentDocumentCollectionList)
-            .orElse(emptyList())
+            .orElse(List.of())
             .stream()
             .map(PaymentDocumentCollection::getValue)
             .map(PaymentDocument::getUploadedDocument)
@@ -262,7 +271,7 @@ public class DocumentHelper {
     public List<CaseDocument> getConsentedInContestedPensionDocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))
             .map(this::convertToPensionCollectionDataList)
-            .orElse(emptyList())
+            .orElse(List.of())
             .stream()
             .map(PensionTypeCollection::getTypedCaseDocument)
             .map(PensionType::getPensionDocument)
@@ -505,7 +514,7 @@ public class DocumentHelper {
             caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
             caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         } else {
-            log.info("Failed to prepare template data as not all required address details were present for caseId {}", ccdNumber);
+            log.info("Failed to prepare template data as not all required address details were present for Case ID: {}", ccdNumber);
             throw new IllegalArgumentException("DocumentHelper CaseDetails Mandatory data missing from address when "
                 + "trying to generate document for caseId " + ccdNumber);
         }
@@ -538,9 +547,9 @@ public class DocumentHelper {
             caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
             caseData.put("courtDetails", buildFrcCourtDetails(finremCaseDetails.getData()));
         } else {
-            log.info("Failed to prepare template data as not all required address details were present on case {}", caseId);
+            log.info("Failed to prepare template data as not all required address details were present on Case ID: {}", caseId);
             throw new IllegalArgumentException("DocumentHelper FinremCaseDetails Mandatory data missing from address"
-                + " when trying to generate document for caseId " + caseId);
+                + " when trying to generate document for Case ID: " + caseId);
         }
 
         return caseDetails;
@@ -557,11 +566,11 @@ public class DocumentHelper {
         boolean isIntervenerRepresented = checkIfIntervenerRepresentedBySolicitor(caseData.getCurrentIntervenerChangeDetails());
 
         if (isIntervenerPresent(recipient) && !isIntervenerRepresented) {
-            log.info("Intervener One is not represented by a solicitor on case {}", caseId);
+            log.info("Intervener One is not represented by a solicitor on Case ID: {}", caseId);
             addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
             addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
         } else {
-            log.info("{} is not represented by a digital solicitor on case {}", recipient, caseId);
+            log.info("{} is not represented by a digital solicitor on Case ID: {}", recipient, caseId);
             ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
             addresseeName = recipient == APPLICANT
                 ? caseDetails.getData().getFullApplicantName()

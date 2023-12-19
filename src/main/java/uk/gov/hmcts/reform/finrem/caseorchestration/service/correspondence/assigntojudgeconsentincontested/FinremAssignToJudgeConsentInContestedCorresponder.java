@@ -40,17 +40,17 @@ public class FinremAssignToJudgeConsentInContestedCorresponder extends FinremSin
 
     @Override
     protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-        log.info("Not sending email correspondence to applicant for case: {}", caseDetails.getId());
+        log.info("Not sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
     }
 
     @Override
     protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
-        log.info("Not sending email correspondence to Respondent for case: {}", caseDetails.getId());
+        log.info("Not sending email correspondence to Respondent for Case ID: {}", caseDetails.getId());
     }
 
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
-        log.info("Not sending email correspondence to Intervener for case: {}", caseDetails.getId());
+        log.info("Not sending email correspondence to Intervener for Case ID: {}", caseDetails.getId());
     }
 
 }
