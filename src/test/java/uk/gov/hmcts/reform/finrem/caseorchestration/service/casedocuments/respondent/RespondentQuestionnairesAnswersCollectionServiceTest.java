@@ -50,7 +50,7 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION),
-            hasSize(2));
+            hasSize(3));
     }
 
     @Override
