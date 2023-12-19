@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.validation.ManageDocumentsHandlerValidator;
 
@@ -63,10 +62,8 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, manageScannedDocumentCollection));
 
-        caseData.setEvidenceHandled(YesOrNo.YES);
-        if (caseData.getEvidenceHandled() != null && caseData.getEvidenceHandled().isYes()) {
-            Optional.ofNullable(caseData.getScannedDocuments()).ifPresent(List::clear);
-        }
+        Optional.ofNullable(caseData.getScannedDocuments()).ifPresent(List::clear);
+
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
 
