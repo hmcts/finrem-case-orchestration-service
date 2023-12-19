@@ -42,7 +42,7 @@ public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHa
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         Long caseId = caseDetails.getId();
-        log.info("Invoking contested {} about to submit callback for case id: {}",
+        log.info("Invoking contested {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseId);
 
         FinremCaseData caseData = caseDetails.getData();

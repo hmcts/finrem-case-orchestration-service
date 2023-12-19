@@ -32,60 +32,60 @@ public class RespondentShareDocumentsService implements SharedService {
 
     public DynamicMultiSelectList respondentSourceDocumentList(FinremCaseDetails caseDetails) {
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("setting respondent source document list for case {}", caseId);
+        log.info("setting respondent source document list for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
         List<UploadCaseDocumentCollection> otherCollection
             = caseData.getUploadCaseDocumentWrapper().getRespOtherCollection();
 
-        buildDynamicListElements(otherCollection, "otherCollection:: filename {} caseId {}", caseId, dynamicListElements, RESP_OTHER_COLLECTION);
+        buildDynamicListElements(otherCollection, "otherCollection:: filename {} Case ID: {}", caseId, dynamicListElements, RESP_OTHER_COLLECTION);
 
         List<UploadCaseDocumentCollection> chronologiesCollection
             = caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection();
-        buildDynamicListElements(chronologiesCollection, "chronologiesCollection:: filename {} caseId {}", caseId, dynamicListElements,
+        buildDynamicListElements(chronologiesCollection, "chronologiesCollection:: filename {} Case ID: {}", caseId, dynamicListElements,
             RESP_CHRONOLOGIES_STATEMENTS_COLLECTION);
 
         List<UploadCaseDocumentCollection> statementsExhibitsCollection
             = caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection();
-        buildDynamicListElements(statementsExhibitsCollection, "statementsExhibitsCollection:: filename {} caseId {}", caseId, dynamicListElements,
+        buildDynamicListElements(statementsExhibitsCollection, "statementsExhibitsCollection:: filename {} Case ID: {}", caseId, dynamicListElements,
             RESP_STATEMENTS_EXHIBITS_COLLECTION);
 
         List<UploadCaseDocumentCollection> hearingBundlesCollection
             = caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection();
-        buildDynamicListElements(hearingBundlesCollection, "hearingBundlesCollection:: filename {} caseId {}", caseId, dynamicListElements,
+        buildDynamicListElements(hearingBundlesCollection, "hearingBundlesCollection:: filename {} Case ID: {}", caseId, dynamicListElements,
             RESP_HEARING_BUNDLES_COLLECTION);
 
 
         List<UploadCaseDocumentCollection> formEExhibitsCollection
             = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection();
-        buildDynamicListElements(formEExhibitsCollection, "formEExhibitsCollection:: filename {} caseId {}", caseId, dynamicListElements,
+        buildDynamicListElements(formEExhibitsCollection, "formEExhibitsCollection:: filename {} Case ID: {}", caseId, dynamicListElements,
             RESP_FORM_E_EXHIBITS_COLLECTION);
 
         List<UploadCaseDocumentCollection> qaCollection
             = caseData.getUploadCaseDocumentWrapper().getRespQaCollection();
-        buildDynamicListElements(qaCollection, "qaCollection:: filename {} caseId {}", caseId, dynamicListElements,
+        buildDynamicListElements(qaCollection, "qaCollection:: filename {} Case ID: {}", caseId, dynamicListElements,
             RESP_QUESTIONNAIRES_ANSWERS_COLLECTION);
 
         List<UploadCaseDocumentCollection> caseSummariesCollection
             = caseData.getUploadCaseDocumentWrapper().getRespCaseSummariesCollection();
-        buildDynamicListElements(caseSummariesCollection, "caseSummariesCollection:: filename {} caseId {}", caseId, dynamicListElements,
+        buildDynamicListElements(caseSummariesCollection, "caseSummariesCollection:: filename {} Case ID: {}", caseId, dynamicListElements,
             RESP_CASE_SUMMARIES_COLLECTION);
 
         List<UploadCaseDocumentCollection> formsHCollection
             = caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection();
-        buildDynamicListElements(formsHCollection, "formsHCollection:: filename {} caseId {}", caseId, dynamicListElements, RESP_FORM_H_COLLECTION);
+        buildDynamicListElements(formsHCollection, "formsHCollection:: filename {} Case ID:{}", caseId, dynamicListElements, RESP_FORM_H_COLLECTION);
 
 
         List<UploadCaseDocumentCollection> expertEvidenceCollection
             = caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollection();
-        buildDynamicListElements(expertEvidenceCollection, "expertEvidenceCollection:: filename {} caseId {}", caseId, dynamicListElements,
+        buildDynamicListElements(expertEvidenceCollection, "expertEvidenceCollection:: filename {} Case ID: {}", caseId, dynamicListElements,
             RESP_EXPERT_EVIDENCE_COLLECTION);
 
 
         List<UploadCaseDocumentCollection> correspondenceDocsCollection
             = caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceDocsColl();
-        buildDynamicListElements(correspondenceDocsCollection, "correspondenceDocsCollection:: filename {} caseId {}", caseId, dynamicListElements,
+        buildDynamicListElements(correspondenceDocsCollection, "correspondenceDocsCollection:: filename {} Case ID: {}", caseId, dynamicListElements,
             RESPONDENT_CORRESPONDENCE_COLLECTION);
 
         return getSelectedDocumentList(dynamicListElements, caseData.getSourceDocumentList());
