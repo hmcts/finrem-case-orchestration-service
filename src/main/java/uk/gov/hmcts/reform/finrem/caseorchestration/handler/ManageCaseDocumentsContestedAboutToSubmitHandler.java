@@ -71,8 +71,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, managedCollections));
         uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
 
-        Optional.ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);
-
         if (featureToggleService.isSecureDocEnabled()) {
             deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
         }
