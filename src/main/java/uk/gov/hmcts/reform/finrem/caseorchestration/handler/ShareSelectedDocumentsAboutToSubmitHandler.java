@@ -19,7 +19,7 @@ public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHa
     public ShareSelectedDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                       IntervenerShareDocumentsService intervenerShareDocumentsService) {
         super(finremCaseDetailsMapper);
-        this.intervenerShareDocumentsService = intervenerShareDocumentsService;
+        this.intervenerShareDocumentsService =  intervenerShareDocumentsService;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHa
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         Long caseId = caseDetails.getId();
-        log.info("Invoking contested {} about to submit callback for case id: {}",
+        log.info("Invoking contested {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseId);
 
         FinremCaseData caseData = caseDetails.getData();

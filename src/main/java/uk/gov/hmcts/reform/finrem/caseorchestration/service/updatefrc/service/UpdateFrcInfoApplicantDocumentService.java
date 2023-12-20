@@ -33,7 +33,7 @@ public class UpdateFrcInfoApplicantDocumentService extends BaseUpdateFrcInfoDocu
         } else if (shouldPrintForApplicant(caseDetails)) {
             return Optional.of(generateLitigantUpdateFrcInfoLetter(caseDetails, authToken, APPLICANT));
         }
-        log.info("No frc info letter notification required for APPLICANT or APPLICANT SOLICITOR for caseID {}", caseDetails.getId());
+        log.info("No frc info letter notification required for APPLICANT or APPLICANT SOLICITOR for Case ID: {}", caseDetails.getId());
         return Optional.empty();
     }
 

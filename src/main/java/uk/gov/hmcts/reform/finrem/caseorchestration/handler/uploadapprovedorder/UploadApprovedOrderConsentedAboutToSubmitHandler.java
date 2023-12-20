@@ -42,7 +42,7 @@ public class UploadApprovedOrderConsentedAboutToSubmitHandler extends FinremCall
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
-        log.info("Handling Upload Approved Order Consented application about to submit callback for case id: {}", caseId);
+        log.info("Handling Upload Approved Order Consented application about to submit callback for Case ID: {}", caseId);
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = finremCaseDetails.getData();
 

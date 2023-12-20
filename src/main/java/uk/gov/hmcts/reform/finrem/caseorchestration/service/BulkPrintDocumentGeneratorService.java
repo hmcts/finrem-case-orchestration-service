@@ -28,7 +28,6 @@ public class BulkPrintDocumentGeneratorService {
     private static final String CASE_IDENTIFIER_KEY = "caseIdentifier";
 
     private static final String FILE_NAMES = "fileNames";
-    private static final String RECIPIENTS_PROD = "party";
     private static final String RECIPIENTS = "recipients";
 
     private final AuthTokenGenerator authTokenGenerator;
@@ -46,7 +45,7 @@ public class BulkPrintDocumentGeneratorService {
         String letterType = bulkPrintRequest.getLetterType();
         String caseId = bulkPrintRequest.getCaseId();
 
-        log.info("Sending {} for case {}", letterType, caseId);
+        log.info("Sending {} for Case ID: {}", letterType, caseId);
 
         final List<String> documents = listOfDocumentsAsByteArray.stream()
             .map(getEncoder()::encodeToString)
@@ -55,7 +54,7 @@ public class BulkPrintDocumentGeneratorService {
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
             new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, recipient, letterType, bulkPrintRequest)));
 
-        log.info("Letter service produced the following letter Id {} for party {} and  case {}", sendLetterResponse.letterId, recipient, caseId);
+        log.info("Letter service produced the following letter Id {} for party {} and  Case ID: {}", sendLetterResponse.letterId, recipient, caseId);
         return sendLetterResponse.letterId;
     }
 
@@ -68,13 +67,14 @@ public class BulkPrintDocumentGeneratorService {
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
         additionalData.put(FILE_NAMES, getFileNames(bulkPrintRequest));
 
-        log.info("isSendLetterDuplicateCheckEnabled {} for caseId {}", featureToggleService.isSendLetterDuplicateCheckEnabled(), caseId);
+        log.info("isSendLetterDuplicateCheckEnabled {}, recipient is {} for Case ID: {}",
+            featureToggleService.isSendLetterDuplicateCheckEnabled(), recipient, caseId);
         if (featureToggleService.isSendLetterDuplicateCheckEnabled()) {
-            additionalData.put(RECIPIENTS_PROD, new String[]{recipient});
+            additionalData.put(RECIPIENTS, new String[]{recipient});
         } else {
             additionalData.put(RECIPIENTS, new String[]{"%s:%d".formatted(recipient, System.nanoTime())});
         }
-        log.info("sending additional data {}  party is {} and caseId {}", additionalData, recipient, caseId);
+        log.info("sending additional data {}  party is {} and Case ID: {}", additionalData, recipient, caseId);
         return additionalData;
     }
 

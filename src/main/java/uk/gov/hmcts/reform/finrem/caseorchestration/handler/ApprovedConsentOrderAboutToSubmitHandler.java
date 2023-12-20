@@ -58,7 +58,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                                                                                    String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId =  String.valueOf(caseDetails.getId());
-        log.info("ConsentOrderApprovedAboutToSubmitHandle handle case Id {}", caseId);
+        log.info("ConsentOrderApprovedAboutToSubmitHandle handle Case ID {}", caseId);
 
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
         if (!isEmpty(latestConsentOrder)) {
@@ -66,7 +66,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
             caseDetails.getData().put(LATEST_CONSENT_ORDER, pdfConsentOrder);
             generateAndPrepareDocuments(userAuthorisation, caseDetails, pdfConsentOrder);
         } else {
-            log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for case: {}",
+            log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: {}",
                 caseId);
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
@@ -74,7 +74,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
     private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails, CaseDocument latestConsentOrder) {
         String caseId = caseDetails.getId().toString();
-        log.info("Generating and preparing documents for latest consent order, case {}", caseId);
+        log.info("Generating and preparing documents for latest consent order, Case ID: {}", caseId);
 
         Map<String, Object> caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
@@ -88,25 +88,25 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         ApprovedOrder approvedOrder = approvedOrderBuilder.build();
 
         if (Boolean.FALSE.equals(isPensionDocumentsEmpty(caseData))) {
-            log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
+            log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for Case ID: {}",
                 caseId);
 
             List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
                 documentHelper.getPensionDocuments(caseData), authToken, stampType, caseId);
-            log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
+            log.info("Generated StampedPensionDocs = {} for Case ID: {}", stampedPensionDocs, caseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
 
         List<CollectionElement<ApprovedOrder>> approvedOrders = singletonList(CollectionElement.<ApprovedOrder>builder()
             .value(approvedOrder).build());
-        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseId);
+        log.info("Generated ApprovedOrders = {} for Case ID {}", approvedOrders, caseId);
 
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseId);
+        log.info("Successfully generated documents for 'Consent Order Approved' for Case ID {}", caseId);
 
         if (Boolean.TRUE.equals(isPensionDocumentsEmpty(caseData))) {
-            log.info("Case {} has no pension documents, updating status to {} and sending for bulk print",
+            log.info("Case ID: {} has no pension documents, updating status to {} and sending for bulk print",
                 caseId,
                 CONSENT_ORDER_MADE);
             try {
@@ -116,7 +116,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                 consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
             } catch (JsonProcessingException e) {
-                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseId, e.getMessage());
+                log.error("Case ID: {} Error encountered trying to update status and send for bulk print: {}", caseId, e.getMessage());
             }
         }
     }

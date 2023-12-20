@@ -40,12 +40,21 @@ public class SolicitorAndCaseWorkerDraftOrderMidHandler extends FinremCallbackHa
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for case id: {}",
+        log.info("Invoking contested event {} mid callback for Case ID: {}",
             EventType.SOLICITOR_CW_DRAFT_ORDER, caseId);
         FinremCaseData caseData = caseDetails.getData();
 
         DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = draftDirectionWrapper.getDraftDirectionOrderCollection();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+        DraftDirectionWrapper draftDirectionWrapperBefore = caseDataBefore.getDraftDirectionWrapper();
+        if (draftDirectionWrapperBefore != null) {
+            List<DraftDirectionOrderCollection> draftDirectionsBefore = draftDirectionWrapperBefore.getDraftDirectionOrderCollection();
+            if (draftDirectionsBefore != null && !draftDirectionsBefore.isEmpty()) {
+                draftDirectionOrderCollection.removeAll(draftDirectionsBefore);
+            }
+        }
 
         List<String> errors = new ArrayList<>();
 

@@ -44,7 +44,7 @@ public class ConsentOrderNotApprovedDocumentService {
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public List<BulkPrintDocument> prepareApplicantLetterPack(FinremCaseDetails caseDetails, String authorisationToken) {
-        log.info("Generating consent order not approved documents for applicant, case ID {}", caseDetails.getId());
+        log.info("Generating consent order not approved documents for applicant, Case ID: {}", caseDetails.getId());
 
         List<BulkPrintDocument> documents = new ArrayList<>();
 
@@ -136,6 +136,16 @@ public class ConsentOrderNotApprovedDocumentService {
         return latestGeneralOrder;
     }
 
+    public boolean getFirstOrderModifiedAfterSecondOrder(CaseDocument firstOrder,
+                                                         CaseDocument secondOrder,
+                                                         String userAuthorisation) {
+        if (firstOrder != null && secondOrder != null) {
+            return documentOrderingService.isDocumentModifiedLater(firstOrder, secondOrder, userAuthorisation);
+        } else {
+            return firstOrder != null;
+        }
+    }
+
     public void addNotApprovedConsentCoverLetter(FinremCaseDetails caseDetails,
                                                  List<CaseDocument> consentOrderDocumentPack,
                                                  String authToken,
@@ -147,7 +157,7 @@ public class ConsentOrderNotApprovedDocumentService {
             .generateDocument(authToken, bulkPrintCaseDetails,
                 documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(),
                 generalOrderNotificationFileName);
-        log.info("Generating approved consent order cover letter {} from {} for role {} on case {}", generalOrderNotificationFileName,
+        log.info("Generating approved consent order cover letter {} from {} for role {} on Case ID: {}", generalOrderNotificationFileName,
             documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(), recipient, caseId);
         consentOrderDocumentPack.add(approvedCoverLetter);
     }
