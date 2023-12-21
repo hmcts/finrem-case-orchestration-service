@@ -1,15 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -17,12 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadRes
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 
 @Service
 @RequiredArgsConstructor
@@ -50,16 +44,25 @@ public class DocumentOrderingService {
             auditResponse.get(1).getModifiedOn());
     }
 
-    public boolean isOrderApprovedCollectionModifiedLaterThanNotApprovedCollection(CaseDetails caseDetails, String authorisationToken) {
-        Map<String, Object> caseData = caseDetails.getData();
-        List<ContestedConsentOrderData> orderNotApprovedOrders = documentHelper.convertToContestedConsentOrderData(
-            caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION));
-        CaseDocument latestOrderNotApproved = orderNotApprovedOrders.get(orderNotApprovedOrders.size() - 1).getConsentOrder().getConsentOrder();
+    public boolean isGeneralOrderRecentThanApprovedOrder(CaseDocument generalOrder,
+                                                     List<ConsentOrderCollection> orderCollection,
+                                                     String authorisationToken) {
 
-        List<CollectionElement<ApprovedOrder>> approvedOrders = getApprovedOrderCollection(caseDetails);
-        CaseDocument latestOrderApproved = approvedOrders.get(approvedOrders.size() - 1).getValue().getConsentOrder();
+        if (orderCollection != null && !orderCollection.isEmpty() && generalOrder != null) {
+            ApprovedOrder order = orderCollection.get(0).getApprovedOrder();
+            CaseDocument consentOrder = order.getConsentOrder();
+            List<FileUploadResponse> auditResponse = evidenceManagementAuditService.audit(asList(
+                generalOrder.getDocumentUrl(),
+                consentOrder.getDocumentUrl()), authorisationToken);
 
-        return isDocumentModifiedLater(latestOrderApproved, latestOrderNotApproved, authorisationToken);
+            if (auditResponse.size() != 2) {
+                throw new IllegalStateException();
+            }
+
+            return auditResponse.get(0).getCreatedOn().isAfter(
+                auditResponse.get(1).getCreatedOn());
+        }
+        return false;
     }
 
     public boolean isOrderApprovedCollectionModifiedLaterThanNotApprovedCollection(FinremCaseDetails caseDetails, String authorisationToken) {
@@ -68,25 +71,18 @@ public class DocumentOrderingService {
             caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders());
         CaseDocument latestOrderNotApproved = orderNotApprovedOrders.get(orderNotApprovedOrders.size() - 1).getConsentOrder().getConsentOrder();
 
-        List<CollectionElement<ApprovedOrder>> approvedOrders = getApprovedOrderCollection(caseDetails);
-        CaseDocument latestOrderApproved = approvedOrders.get(approvedOrders.size() - 1).getValue().getConsentOrder();
+        List<ConsentOrderCollection> approvedOrders = getApprovedOrderCollection(caseDetails);
+
+        CaseDocument latestOrderApproved = approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder().getConsentOrder();
 
         return isDocumentModifiedLater(latestOrderApproved, latestOrderNotApproved, authorisationToken);
     }
 
-    private List<CollectionElement<ApprovedOrder>> getApprovedOrderCollection(CaseDetails caseDetails) {
-        String approvedOrderCollectionFieldName = caseDataService.isConsentedInContestedCase(caseDetails)
-            ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
-
-        return objectMapper.convertValue(caseDetails.getData().get(approvedOrderCollectionFieldName), new TypeReference<>() {});
-    }
-
-    private List<CollectionElement<ApprovedOrder>> getApprovedOrderCollection(FinremCaseDetails caseDetails) {
-        return caseDataService.isConsentedInContestedCase(caseDetails)
-            ? objectMapper.convertValue(caseDetails.getData().getConsentOrderWrapper().getContestedConsentedApprovedOrders(),
-                new TypeReference<>() {
-                })
-            : objectMapper.convertValue(caseDetails.getData().getApprovedOrderCollection(), new TypeReference<>() {
-            });
+    private List<ConsentOrderCollection> getApprovedOrderCollection(FinremCaseDetails caseDetails) {
+        if (caseDataService.isConsentedInContestedCase(caseDetails)) {
+            return caseDetails.getData().getConsentOrderWrapper().getContestedConsentedApprovedOrders();
+        } else {
+            return caseDetails.getData().getApprovedOrderCollection();
+        }
     }
 }

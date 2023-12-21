@@ -316,6 +316,31 @@ public class TestSetUpUtils {
             .build();
     }
 
+    public static FinremCaseDetails defaultConsentFinremCaseDetails() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        List<NatureApplication> natureOfApplications = List.of(NatureApplication.LUMP_SUM_ORDER,
+            NatureApplication.PERIODICAL_PAYMENT_ORDER,
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.PENSION_ATTACHMENT_ORDER,
+            NatureApplication.PENSION_COMPENSATION_SHARING_ORDER,
+            NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER,
+            NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY,
+            NatureApplication.PROPERTY_ADJUSTMENT_ORDER,
+            NatureApplication.VARIATION_ORDER);
+        caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureOfApplications);
+        populateApplicantNameAndAddress(caseData);
+        populateRespondentNameAndAddressContested(caseData);
+        populateCourtDetails(caseData);
+        caseData.setCcdCaseType(CaseType.CONSENTED);
+
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONSENTED)
+            .id(987654321L)
+            .state(State.APPLICATION_SUBMITTED)
+            .data(caseData)
+            .build();
+    }
+
     public static FinremCaseDetails defaultContestedFinremCaseDetails() {
         FinremCaseData caseData = FinremCaseData.builder().build();
         List<NatureApplication> natureOfApplications = List.of(NatureApplication.LUMP_SUM_ORDER,

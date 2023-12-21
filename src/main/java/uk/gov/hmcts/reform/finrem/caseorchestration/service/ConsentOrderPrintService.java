@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -31,11 +29,9 @@ public class ConsentOrderPrintService {
     private final DocumentOrderingService documentOrderingService;
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public FinremCaseDetails sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-
+    public void sendConsentOrderToBulkPrint(FinremCaseDetails finremCaseDetails,
+                                            String authorisationToken) {
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
             log.info("Sending approved order for applicant to bulk print for Case ID {}", finremCaseDetails.getId());
             UUID applicantLetterId = shouldPrintOrderApprovedDocuments(finremCaseDetails, authorisationToken)
@@ -50,17 +46,15 @@ public class ConsentOrderPrintService {
             log.info("Sending approved order for respondent to bulk print for Case ID: {}", finremCaseDetails.getId());
             generateCoversheetForRespondentAndSendOrders(finremCaseDetails, authorisationToken);
         }
-
-        return finremCaseDetails;
     }
+
 
     private void generateCoversheetForRespondentAndSendOrders(FinremCaseDetails finremCaseDetails, String authorisationToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(finremCaseDetails, authorisationToken);
         UUID respondentLetterId = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, finremCaseDetails, authorisationToken);
         FinremCaseData caseData = finremCaseDetails.getData();
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
-        if (caseDataService.isRespondentAddressConfidential(caseDetails.getData())) {
+        if (caseDataService.isRespondentAddressConfidential(caseData)) {
             log.info("Case ID: {}, has been marked as confidential. Adding coversheet to confidential field", finremCaseDetails.getId());
             caseData.setBulkPrintCoverSheetRes(null);
             caseData.setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
@@ -73,7 +67,8 @@ public class ConsentOrderPrintService {
             respondentCoverSheet, respondentLetterId);
     }
 
-    private UUID printApplicantConsentOrderApprovedDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
+    private UUID printApplicantConsentOrderApprovedDocuments(FinremCaseDetails caseDetails,
+                                                             String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
         return bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, applicantDocuments);
@@ -90,18 +85,18 @@ public class ConsentOrderPrintService {
     }
 
     private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet, FinremCaseDetails caseDetails, String authorisationToken) {
-        log.info("Sending order documents to recipient / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
+        log.info("Preparing respondent order document for Bulk Print, Case ID: {}", caseDetails.getId());
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverSheet));
 
         FinremCaseData caseData = caseDetails.getData();
-
-        List<CaseDocument> orderDocuments = caseDataService.isOrderApprovedCollectionPresent(caseData)
-            ? consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, authorisationToken)
+        boolean approvedCollectionPresent = caseDataService.isOrderApprovedCollectionPresent(caseData);
+        List<CaseDocument> orderDocuments = approvedCollectionPresent
+            ? consentOrderApprovedDocumentService.getApprovedOrderDocumentsAndSetAuditOrder(caseDetails, RESPONDENT, authorisationToken)
             : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails);
 
-        if (!isNull(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
+        if (!isNull(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument()) && !approvedCollectionPresent) {
             CaseDocument generalOrder = documentHelper.getLatestGeneralOrder(caseDetails.getData());
 
             if (orderDocuments.isEmpty()) {

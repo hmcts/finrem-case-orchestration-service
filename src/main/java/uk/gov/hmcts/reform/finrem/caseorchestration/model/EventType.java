@@ -77,6 +77,7 @@ public enum EventType {
     UPDATE_FRC_INFORMATION("FR_updateFRCInformation"),
 
     UPDATE_COURT_INFO("FR_updateCourtInfo"),
+    SEND_ORDER_FOR_APPROVED("FR_sendOrderForApproved"),
 
     @JsonEnumDefaultValue
     NONE("");

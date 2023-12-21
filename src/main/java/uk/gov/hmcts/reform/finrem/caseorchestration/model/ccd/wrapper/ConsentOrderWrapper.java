@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AuditSendOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentNatureOfApplication;
@@ -93,4 +94,6 @@ public class ConsentOrderWrapper {
     private List<UnapprovedOrderCollection> intv2RefusedOrderCollection;
     private List<UnapprovedOrderCollection> intv3RefusedOrderCollection;
     private List<UnapprovedOrderCollection> intv4RefusedOrderCollection;
+
+    private List<AuditSendOrderCollection> auditSendOrders;
 }
