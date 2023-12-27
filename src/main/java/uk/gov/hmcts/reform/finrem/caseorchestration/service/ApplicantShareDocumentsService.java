@@ -32,7 +32,7 @@ public class ApplicantShareDocumentsService implements SharedService {
 
     public DynamicMultiSelectList applicantSourceDocumentList(FinremCaseDetails caseDetails) {
 
-        log.info("setting source document list for case {}", caseDetails.getId());
+        log.info("setting source document list for Case ID: {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 

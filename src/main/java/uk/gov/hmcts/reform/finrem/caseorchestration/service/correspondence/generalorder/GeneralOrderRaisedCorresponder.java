@@ -27,15 +27,15 @@ public class GeneralOrderRaisedCorresponder extends CaseDetailsEmailOnlyAllSolic
     @Override
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         if (caseDataService.isConsentedApplication(caseDetails)) {
-            log.info("Sending email notification to applicant Solicitor for 'Consented General Order' for case id: {}", caseDetails.getId());
+            log.info("Sending email notification to applicant Solicitor for 'Consented General Order' for Case ID: {}", caseDetails.getId());
             notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(caseDetails);
         } else {
             if (caseDataService.isConsentedInContestedCase(caseDetails)) {
-                log.info("Sending email notification to applicant Solicitor for 'Contested consent General Order' for case id: {}",
+                log.info("Sending email notification to applicant Solicitor for 'Contested consent General Order' for Case ID: {}",
                     caseDetails.getId());
                 notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(caseDetails);
             } else {
-                log.info("Sending email notification to applicant solicitor for 'Contested General Order' for case id: {}", caseDetails.getId());
+                log.info("Sending email notification to applicant solicitor for 'Contested General Order' for Case ID: {}", caseDetails.getId());
                 notificationService.sendContestedGeneralOrderEmailApplicant(caseDetails);
             }
         }
@@ -45,15 +45,15 @@ public class GeneralOrderRaisedCorresponder extends CaseDetailsEmailOnlyAllSolic
     @Override
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         if (caseDataService.isConsentedApplication(caseDetails)) {
-            log.info("Sending email notification to respondent Solicitor for 'Consented General Order' for case id: {}", caseDetails.getId());
+            log.info("Sending email notification to respondent Solicitor for 'Consented General Order' for Case ID: {}", caseDetails.getId());
             notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(caseDetails);
         } else {
             if (caseDataService.isConsentedInContestedCase(caseDetails)) {
-                log.info("Sending email notification to respondent Solicitor for 'Contested consent General Order' for case id: {}",
+                log.info("Sending email notification to respondent Solicitor for 'Contested consent General Order' for Case ID: {}",
                     caseDetails.getId());
                 notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
             } else {
-                log.info("Sending email notification to respondent solicitor for 'Contested General Order' for case id: {}", caseDetails.getId());
+                log.info("Sending email notification to respondent solicitor for 'Contested General Order' for Case ID: {}", caseDetails.getId());
                 notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
             }
         }
@@ -62,12 +62,12 @@ public class GeneralOrderRaisedCorresponder extends CaseDetailsEmailOnlyAllSolic
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
         if (caseDataService.isConsentedInContestedCase(caseDetails)) {
-            log.info("Sending email notification to intervener Solicitor for 'Contested consent General Order' for case id: {}",
+            log.info("Sending email notification to intervener Solicitor for 'Contested consent General Order' for Case ID: {}",
                 caseDetails.getId());
             notificationService.sendContestedConsentGeneralOrderEmailIntervenerSolicitor(caseDetails,
                 notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
         } else {
-            log.info("Sending email notification to intervener solicitor for 'Contested General Order' for case id: {}", caseDetails.getId());
+            log.info("Sending email notification to intervener solicitor for 'Contested General Order' for Case ID: {}", caseDetails.getId());
             notificationService.sendContestedGeneralOrderEmailIntervener(caseDetails,
                 notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
         }

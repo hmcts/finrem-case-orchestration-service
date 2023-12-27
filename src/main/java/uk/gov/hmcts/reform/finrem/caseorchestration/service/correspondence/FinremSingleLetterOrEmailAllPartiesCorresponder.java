@@ -32,10 +32,10 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
 
     protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         } else {
-            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending letter correspondence to applicant for Case ID: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(
                     caseDetails,
@@ -46,10 +46,10 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
 
     protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to respondent for Case ID: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
         } else {
-            log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
+            log.info("Sending letter correspondence to respondent for Case ID: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(
                     caseDetails,
@@ -63,12 +63,12 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         List<IntervenerWrapper> interveners = caseData.getInterveners();
         interveners.forEach(intervenerWrapper -> {
             if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
-                log.info("Sending email correspondence to {} for case: {}",
+                log.info("Sending email correspondence to {} for Case ID: {}",
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
                 this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
             } else if (shouldSendIntervenerLetter(intervenerWrapper)) {
-                log.info("Sending letter correspondence to {} for case: {}",
+                log.info("Sending letter correspondence to {} for Case ID: {}",
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
                 bulkPrintService.sendDocumentForPrint(

@@ -39,14 +39,14 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
                                                                               String userAuthorisation) {
 
         Long caseId = callbackRequest.getCaseDetails().getId();
-        log.info("Invoking contested {} about to submit callback for case id: {}",
+        log.info("Invoking contested {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseId);
 
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         CaseDocument document = service.generateContestedMiniForm(userAuthorisation, callbackRequest.getCaseDetails());
-        log.info("Issue application generated document {} for caseId {}", document, caseId);
+        log.info("Issue application generated document {} for Case ID: {}", document, caseId);
         caseData.setMiniFormA(document);
 
         if (ObjectUtils.isEmpty(caseData.getDivorceCaseNumber())) {

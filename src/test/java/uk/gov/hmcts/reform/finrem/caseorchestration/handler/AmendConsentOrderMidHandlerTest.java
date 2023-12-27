@@ -25,6 +25,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
@@ -83,6 +84,29 @@ class AmendConsentOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         assertTrue(response.getErrors().isEmpty());
         verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(helper).setConsentVariationOrderLabelField(caseData);
+    }
+
+    @Test
+    void givenContestedCase_whenAmendedConsentOrderUploadedNonEncryptedFileButThereIsAlreadySameDocument_thenDoNotCheck() {
+        FinremCallbackRequest finremCallbackRequest = buildConsentCallbackRequest(EventType.AMEND_CONSENT_ORDER);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+
+        List<AmendedConsentOrderCollection> amendedCollection = new  ArrayList<>();
+
+        AmendedConsentOrderCollection order = AmendedConsentOrderCollection.builder()
+            .value(AmendedConsentOrder.builder().amendedConsentOrder(caseDocument).build()).build();
+
+        amendedCollection.add(order);
+        caseData.setAmendedConsentOrderCollection(amendedCollection);
+        finremCallbackRequest.getCaseDetailsBefore().getData().setAmendedConsentOrderCollection(amendedCollection);;
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertTrue(response.getErrors().isEmpty());
+        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
         verify(helper).setConsentVariationOrderLabelField(caseData);
     }
 }
