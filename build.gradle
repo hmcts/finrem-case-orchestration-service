@@ -27,7 +27,7 @@ def versions = [
         pact                 : '4.6.4',
         pdfbox               : '2.0.30',
         reformLogging        : '6.0.1',
-        serenity             : '3.6.7',
+        serenity             : '4.0.30',
         serviceTokenGenerator: '4.1.2',
         springDoc            : '1.7.0',
         wiremock             : '3.0.1',
@@ -456,11 +456,7 @@ dependencies {
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: versions.jjwt
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
-    functionalImplementation("net.serenity-bdd:serenity-core:3.6.7") {
-        exclude group: "commons-net", module: "commons-net"
-        exclude group: "org.apache.commons", module: "commons-compress"
-        exclude group: "org.bouncycastle", module: "bcprov-jdk15on"
-    }
+    functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
