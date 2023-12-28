@@ -32,7 +32,7 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapper extends Abstrac
         final InterimWrapper interimWrapper = caseData.getInterimWrapper();
         return GeneralApplicationInterimHearingNoticeDetails.builder()
             .ccdCaseNumber(caseDetails.getId())
-            .divorceCaseNumber(caseData.getDivorceCaseNumber())
+            .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
             .applicantName(caseData.getFullApplicantName())
             .respondentName(caseData.getRespondentFullName())
             .courtDetails(courtDetails)

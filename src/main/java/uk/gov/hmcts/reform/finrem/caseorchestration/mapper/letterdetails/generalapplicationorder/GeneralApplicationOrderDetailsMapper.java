@@ -31,7 +31,7 @@ public class GeneralApplicationOrderDetailsMapper extends AbstractLetterDetailsM
         final CourtDetailsTemplateFields courtDetails = courtDetailsMapper.getCourtDetails(courtList);
 
         return GeneralApplicationOrderDetails.builder()
-            .divorceCaseNumber(caseData.getDivorceCaseNumber())
+            .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
             .courtDetails(courtDetails)

@@ -64,17 +64,9 @@ public class FinremCaseData {
     @JsonIgnore
     private CaseType ccdCaseType;
 
-    private String divorceCaseNumber;
-    private StageReached divorceStageReached;
-    private CaseDocument divorceUploadEvidence1;
-    private CaseDocument d11;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate divorceDecreeNisiDate;
-    private CaseDocument divorceUploadEvidence2;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate divorceDecreeAbsoluteDate;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private DivorceDetailWrapper divorceDetailWrapper;
     private Provision provisionMadeFor;
     private Intention applicantIntendsTo;
     private List<PeriodicalPaymentSubstitute> dischargePeriodicalPaymentSubstituteFor;
@@ -416,6 +408,13 @@ public class FinremCaseData {
     @Getter(AccessLevel.NONE)
     private CaseFlagsWrapper caseFlagsWrapper;
 
+    @JsonIgnore
+    public DivorceDetailWrapper getDivorceDetailWrapper() {
+        if (divorceDetailWrapper == null) {
+            this.divorceDetailWrapper = new DivorceDetailWrapper();
+        }
+        return divorceDetailWrapper;
+    }
 
     @JsonIgnore
     public CaseFlagsWrapper getCaseFlagsWrapper() {

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DivorceDetailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
@@ -112,7 +113,8 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
                 .consentedRespondentRepresented(YesOrNo.YES)
                 .build())
             .respSolNotificationsEmailConsent(YesOrNo.YES)
-            .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
+            .divorceDetailWrapper(DivorceDetailWrapper.builder()
+                .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER).build())
             .natureApplicationWrapper(NatureApplicationWrapper.builder()
                 .natureOfApplication2(List.of(NatureApplication.LUMP_SUM_ORDER,
                     NatureApplication.PERIODICAL_PAYMENT_ORDER,

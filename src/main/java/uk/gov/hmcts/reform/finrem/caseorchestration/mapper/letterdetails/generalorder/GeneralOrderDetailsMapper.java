@@ -26,7 +26,7 @@ public class GeneralOrderDetailsMapper extends AbstractLetterDetailsMapper {
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         return GeneralOrderDetails.builder()
-            .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
+            .divorceCaseNumber(caseDetails.getData().getDivorceDetailWrapper().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
             .generalOrderCourtSitting(GENERAL_ORDER_COURT_SITTING)

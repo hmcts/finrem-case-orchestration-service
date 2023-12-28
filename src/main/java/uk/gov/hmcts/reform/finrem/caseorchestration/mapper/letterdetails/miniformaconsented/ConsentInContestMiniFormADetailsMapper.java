@@ -95,7 +95,7 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
             .authorisationName(caseData.getAuthorisationName())
             .authorisationFirm(caseData.getAuthorisationFirm())
             .issueDate(String.valueOf(caseData.getIssueDate()))
-            .divorceCaseNumber(caseData.getDivorceCaseNumber())
+            .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
             .orderForChildrenQuestion1(YesOrNo.getYesOrNo(caseData.getConsentOrderWrapper().getConsentOrderForChildrenQuestion1()))
             .orderType(consentedApplicationHelper.getOrderType(caseData));
     }

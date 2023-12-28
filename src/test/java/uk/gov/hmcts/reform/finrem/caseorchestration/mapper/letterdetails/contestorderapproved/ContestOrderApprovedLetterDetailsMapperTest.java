@@ -70,7 +70,7 @@ public class ContestOrderApprovedLetterDetailsMapperTest extends AbstractLetterD
         caseData.getContactDetailsWrapper().setApplicantLname("Guy");
         caseData.getContactDetailsWrapper().setRespondentFmName("Test");
         caseData.getContactDetailsWrapper().setRespondentLname("Korivi");
-        caseData.setDivorceCaseNumber("DD12D12345");
+        caseData.getDivorceDetailWrapper().setDivorceCaseNumber("DD12D12345");
         caseData.setCivilPartnership(YesOrNo.NO);
         caseData.setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
         caseData.setOrderApprovedJudgeName("Details");

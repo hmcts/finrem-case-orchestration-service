@@ -50,7 +50,7 @@ public class LetterDetailsMapper {
             .letterDate(String.valueOf(LocalDate.now()))
             .reference(getReference(caseDetails.getData(), recipient))
             .caseNumber(String.valueOf(caseDetails.getId()))
-            .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
+            .divorceCaseNumber(caseDetails.getData().getDivorceDetailWrapper().getDivorceCaseNumber())
             .orderType(consentedApplicationHelper.getOrderType(caseDetails.getData()))
             .build();
     }

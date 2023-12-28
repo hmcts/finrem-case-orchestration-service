@@ -33,7 +33,7 @@ public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterD
             .judgeDetails(getJudgeDetails(caseDetails))
             .contestOrderNotApprovedRefusalReasons(getFormattedRefusalReasons(caseDetails))
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
-            .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
+            .divorceCaseNumber(caseDetails.getData().getDivorceDetailWrapper().getDivorceCaseNumber())
             .refusalOrderDate(String.valueOf(caseDetails.getData().getRefusalOrderDate()))
             .build();
     }

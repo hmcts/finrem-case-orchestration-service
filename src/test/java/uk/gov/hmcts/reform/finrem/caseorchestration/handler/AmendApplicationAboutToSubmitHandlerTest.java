@@ -95,8 +95,8 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
-        assertNull(responseData.getDivorceUploadEvidence2());
-        assertNull(responseData.getDivorceDecreeAbsoluteDate());
+        assertNull(responseData.getDivorceDetailWrapper().getDivorceUploadEvidence2());
+        assertNull(responseData.getDivorceDetailWrapper().getDivorceDecreeAbsoluteDate());
     }
 
     @Test
@@ -106,8 +106,8 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
-        assertNull(responseData.getDivorceUploadEvidence1());
-        assertNull(responseData.getDivorceDecreeNisiDate());
+        assertNull(responseData.getDivorceDetailWrapper().getDivorceUploadEvidence1());
+        assertNull(responseData.getDivorceDetailWrapper().getDivorceDecreeNisiDate());
     }
 
     @Test

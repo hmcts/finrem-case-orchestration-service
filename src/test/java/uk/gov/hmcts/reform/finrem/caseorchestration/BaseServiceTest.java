@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DivorceDetailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
@@ -178,7 +179,9 @@ public abstract class BaseServiceTest extends BaseTest {
             .build();
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapper)
-            .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
+            .divorceDetailWrapper(DivorceDetailWrapper.builder()
+                .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
+                .build())
             .natureApplicationWrapper(NatureApplicationWrapper.builder()
                 .natureOfApplication2(Arrays.stream(NatureApplication.values()).toList()).build()).build();
 
@@ -268,7 +271,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
         caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.getDivorceDetailWrapper().setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.setCcdCaseType(CaseType.CONSENTED);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
         caseData.getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.MIDLANDS);
@@ -356,7 +359,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
         caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
-        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.getDivorceDetailWrapper().setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
         caseData.getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.MIDLANDS);
         caseData.getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);

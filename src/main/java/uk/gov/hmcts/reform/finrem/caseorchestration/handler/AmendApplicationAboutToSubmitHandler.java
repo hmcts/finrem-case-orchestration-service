@@ -65,12 +65,12 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
     }
 
     private void updateDivorceDetails(FinremCaseData caseData) {
-        if (StageReached.DECREE_NISI.equals(caseData.getDivorceStageReached())) {
-            caseData.setDivorceUploadEvidence2(null);
-            caseData.setDivorceDecreeAbsoluteDate(null);
+        if (StageReached.DECREE_NISI.equals(caseData.getDivorceDetailWrapper().getDivorceStageReached())) {
+            caseData.getDivorceDetailWrapper().setDivorceUploadEvidence2(null);
+            caseData.getDivorceDetailWrapper().setDivorceDecreeAbsoluteDate(null);
         } else {
-            caseData.setDivorceUploadEvidence1(null);
-            caseData.setDivorceDecreeNisiDate(null);
+            caseData.getDivorceDetailWrapper().setDivorceUploadEvidence1(null);
+            caseData.getDivorceDetailWrapper().setDivorceDecreeNisiDate(null);
         }
     }
 

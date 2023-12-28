@@ -150,7 +150,7 @@ public class CaseHearingFunctionsTest {
 
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Reedley Family Hearing Centre"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), 
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY),
             is("The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("LancashireandCumbriaFRC@justice.gov.uk"));
@@ -165,7 +165,7 @@ public class CaseHearingFunctionsTest {
 
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Reedley Family Hearing Centre"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), 
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY),
             is("The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("LancashireandCumbriaFRC@justice.gov.uk"));
@@ -554,7 +554,7 @@ public class CaseHearingFunctionsTest {
         caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
         caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
-        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.getDivorceDetailWrapper().setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
         caseData.getRegionWrapper().setAllocatedRegionWrapper(regionWrapper);
         caseData.setBulkPrintLetterIdRes(NOTTINGHAM);

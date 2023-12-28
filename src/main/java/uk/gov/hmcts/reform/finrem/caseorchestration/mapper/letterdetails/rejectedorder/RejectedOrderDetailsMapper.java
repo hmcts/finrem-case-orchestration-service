@@ -49,7 +49,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
             .applicantName(caseData.getFullApplicantName())
             .respondentName(caseData.getRespondentFullName())
             .civilPartnership(YesOrNo.getYesOrNo(caseData.getCivilPartnership()))
-            .divorceCaseNumber(caseData.getDivorceCaseNumber())
+            .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
             .refusalOrderHeader(REFUSAL_ORDER_HEADER)
             .courtDetails(courtDetails)
             .courtName(getCourtName(caseData, courtDetails))

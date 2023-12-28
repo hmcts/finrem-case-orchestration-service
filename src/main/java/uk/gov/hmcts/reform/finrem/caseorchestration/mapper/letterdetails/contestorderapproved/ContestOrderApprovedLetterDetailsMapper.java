@@ -30,7 +30,7 @@ public class ContestOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
             .respondentName(caseDetails.getData().getRespondentFullName())
             .court(courtDetailsMapper.getCourtDetails(courtList).getCourtName())
             .judgeDetails(getJudgeDetails(caseDetails))
-            .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
+            .divorceCaseNumber(caseDetails.getData().getDivorceDetailWrapper().getDivorceCaseNumber())
             .orderApprovedDate(String.valueOf(caseDetails.getData().getOrderApprovedDate()))
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
             .letterDate(String.valueOf(LocalDate.now()))

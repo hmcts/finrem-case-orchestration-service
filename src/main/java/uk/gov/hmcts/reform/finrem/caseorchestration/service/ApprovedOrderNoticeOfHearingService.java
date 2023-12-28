@@ -171,7 +171,8 @@ public class ApprovedOrderNoticeOfHearingService {
         placeholdersMap.put("CourtEmail", selectedFRCDetails.getEmail());
 
         placeholdersMap.put("CCDCaseNumber", caseDetails.getId());
-        placeholdersMap.put("DivorceCaseNumber", nullToEmpty(caseDetails.getData().getDivorceCaseNumber()));
+        placeholdersMap.put("DivorceCaseNumber", nullToEmpty(caseDetails.getData().getDivorceDetailWrapper()
+            .getDivorceCaseNumber()));
         placeholdersMap.put("ApplicantName", caseDetails.getData().getFullApplicantName());
         placeholdersMap.put("RespondentName", caseDetails.getData().getRespondentFullName());
 

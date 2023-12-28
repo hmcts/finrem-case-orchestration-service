@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DivorceDetailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
@@ -72,7 +73,7 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = response.getData();
 
-        assertEquals("123", data.getDivorceCaseNumber());
+        assertEquals("123", data.getDivorceDetailWrapper().getDivorceCaseNumber());
         assertEquals(TypeOfApplication.MATRIMONIAL_CIVILPARTNERSHIP.getTypeOfApplication(),
             data.getScheduleOneWrapper().getTypeOfApplication().getValue());
         assertEquals(caseDocument(), data.getMiniFormA());
@@ -81,7 +82,10 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
     @Test
     void givenCase_whenIssueApplication_thenGenerateAppropriateCaseDocumentDoNotSetIfAlreadySetValue() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(123L).data(FinremCaseData.builder().divorceCaseNumber("897901").scheduleOneWrapper(ScheduleOneWrapper.builder()
+            .id(123L).data(FinremCaseData.builder()
+                .divorceDetailWrapper(DivorceDetailWrapper.builder()
+                    .divorceCaseNumber("897901").build())
+                .scheduleOneWrapper(ScheduleOneWrapper.builder()
                     .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989)
                 .build()).build()).build();
         FinremCallbackRequest callbackRequest
@@ -92,7 +96,7 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = response.getData();
 
-        assertEquals("897901", data.getDivorceCaseNumber());
+        assertEquals("897901", data.getDivorceDetailWrapper().getDivorceCaseNumber());
         assertEquals(TypeOfApplication.SCHEDULE_ONE.getTypeOfApplication(),
             data.getScheduleOneWrapper().getTypeOfApplication().getValue());
         assertEquals(caseDocument(), data.getMiniFormA());

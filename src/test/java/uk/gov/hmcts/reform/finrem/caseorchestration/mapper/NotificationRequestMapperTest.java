@@ -461,7 +461,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.getDivorceDetailWrapper().setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
         caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
 

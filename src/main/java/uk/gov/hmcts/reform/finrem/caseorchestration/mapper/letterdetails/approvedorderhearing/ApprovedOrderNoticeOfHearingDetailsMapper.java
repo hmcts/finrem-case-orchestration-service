@@ -49,7 +49,7 @@ public class ApprovedOrderNoticeOfHearingDetailsMapper extends AbstractLetterDet
             .applicantName(caseData.getFullApplicantName())
             .respondentName(caseData.getRespondentFullName())
             .ccdCaseNumber(caseDetails.getId())
-            .divorceCaseNumber(caseData.getDivorceCaseNumber())
+            .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
             .build();
     }
 
