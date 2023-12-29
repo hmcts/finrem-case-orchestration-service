@@ -82,10 +82,10 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
     private MiniFormADetails.MiniFormADetailsBuilder setOtherData(MiniFormADetails.MiniFormADetailsBuilder builder,
                                                                   FinremCaseData caseData) {
         return builder
-            .authorisation2b(caseData.getAuthorisation2b())
-            .authorisation3(String.valueOf(caseData.getAuthorisation3()))
-            .authorisationName(caseData.getAuthorisationName())
-            .authorisationFirm(caseData.getAuthorisationFirm())
+            .authorisation2b(caseData.getAuthorisationDetailsWrapper().getAuthorisation2b())
+            .authorisation3(String.valueOf(caseData.getAuthorisationDetailsWrapper().getAuthorisation3()))
+            .authorisationName(caseData.getAuthorisationDetailsWrapper().getAuthorisationName())
+            .authorisationFirm(caseData.getAuthorisationDetailsWrapper().getAuthorisationFirm())
             .issueDate(String.valueOf(caseData.getIssueDate()))
             .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
             .orderForChildrenQuestion1(YesOrNo.getYesOrNo(caseData.getNatureApplicationWrapper().getOrderForChildrenQuestion1()));

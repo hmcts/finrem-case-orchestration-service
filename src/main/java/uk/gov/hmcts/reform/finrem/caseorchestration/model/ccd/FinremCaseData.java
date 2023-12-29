@@ -75,12 +75,7 @@ public class FinremCaseData {
     private YesOrNo childSupportAgencyCalculationMade;
     @JsonProperty("ChildSupportAgencyCalculationReason")
     private String childSupportAgencyCalculationReason;
-    private String authorisationName;
-    private String authorisationFirm;
-    private String authorisation2b;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate authorisation3;
+    private AuthorisationDetailsWrapper authorisationDetailsWrapper;
     private CaseDocument miniFormA;
     private CaseDocument consentOrder;
     private CaseDocument consentOrderText;
@@ -411,6 +406,14 @@ public class FinremCaseData {
             this.divorceDetailWrapper = new DivorceDetailWrapper();
         }
         return divorceDetailWrapper;
+    }
+
+    @JsonIgnore
+    public AuthorisationDetailsWrapper getAuthorisationDetailsWrapper() {
+        if (authorisationDetailsWrapper == null) {
+            this.authorisationDetailsWrapper = new AuthorisationDetailsWrapper();
+        }
+        return authorisationDetailsWrapper;
     }
 
     @JsonIgnore

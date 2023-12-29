@@ -139,10 +139,10 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
             .typeOfApplication(getDefaultTypeOfApplicationIfNotPresent(caseData))
             .issueDate(String.valueOf(caseData.getIssueDate()))
-            .authorisationName(caseData.getAuthorisationName())
+            .authorisationName(caseData.getAuthorisationDetailsWrapper().getAuthorisationName())
             .authorisationFirm(contactDetails.getSolicitorFirm())
-            .authorisation2b(caseData.getAuthorisation2b())
-            .authorisation3(String.valueOf(caseData.getAuthorisation3()));
+            .authorisation2b(caseData.getAuthorisationDetailsWrapper().getAuthorisation2b())
+            .authorisation3(String.valueOf(caseData.getAuthorisationDetailsWrapper().getAuthorisation3()));
     }
 
     private String getDefaultTypeOfApplicationIfNotPresent(FinremCaseData caseData) {
