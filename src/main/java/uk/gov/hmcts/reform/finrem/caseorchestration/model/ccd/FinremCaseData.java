@@ -85,10 +85,7 @@ public class FinremCaseData {
     private CaseDocument consentOrder;
     private CaseDocument consentOrderText;
     private CaseDocument latestConsentOrder;
-    private YesOrNo d81Question;
-    private CaseDocument d81Joint;
-    private CaseDocument d81Applicant;
-    private CaseDocument d81Respondent;
+    private D81DetailsWrapper d81DetailsWrapper;
     private List<PensionTypeCollection> pensionCollection;
     private List<PensionTypeCollection> consentPensionCollection;
     private List<PaymentDocumentCollection> copyOfPaperFormA;
@@ -414,6 +411,14 @@ public class FinremCaseData {
             this.divorceDetailWrapper = new DivorceDetailWrapper();
         }
         return divorceDetailWrapper;
+    }
+
+    @JsonIgnore
+    public D81DetailsWrapper getD81DetailsWrapper() {
+        if (d81DetailsWrapper == null) {
+            this.d81DetailsWrapper = new D81DetailsWrapper();
+        }
+        return d81DetailsWrapper;
     }
 
     @JsonIgnore

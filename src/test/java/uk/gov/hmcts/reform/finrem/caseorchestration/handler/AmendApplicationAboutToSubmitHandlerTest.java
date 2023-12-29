@@ -117,9 +117,9 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
-        assertNull(responseData.getD81Applicant());
-        assertNull(responseData.getD81Respondent());
-        assertNotNull(responseData.getD81Joint());
+        assertNull(responseData.getD81DetailsWrapper().getD81Applicant());
+        assertNull(responseData.getD81DetailsWrapper().getD81Respondent());
+        assertNotNull(responseData.getD81DetailsWrapper().getD81Joint());
     }
 
     @Test
@@ -129,9 +129,9 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
-        assertNull(responseData.getD81Joint());
-        assertNotNull(responseData.getD81Applicant());
-        assertNotNull(responseData.getD81Respondent());
+        assertNull(responseData.getD81DetailsWrapper().getD81Joint());
+        assertNotNull(responseData.getD81DetailsWrapper().getD81Applicant());
+        assertNotNull(responseData.getD81DetailsWrapper().getD81Respondent());
     }
 
     @Test

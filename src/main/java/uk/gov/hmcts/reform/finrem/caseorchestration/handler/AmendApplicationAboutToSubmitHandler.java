@@ -99,11 +99,11 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
     }
 
     private void updateD81Details(FinremCaseData caseData) {
-        if (YesOrNo.YES.equals(caseData.getD81Question())) {
-            caseData.setD81Applicant(null);
-            caseData.setD81Respondent(null);
+        if (YesOrNo.YES.equals(caseData.getD81DetailsWrapper().getD81Question())) {
+            caseData.getD81DetailsWrapper().setD81Applicant(null);
+            caseData.getD81DetailsWrapper().setD81Respondent(null);
         } else {
-            caseData.setD81Joint(null);
+            caseData.getD81DetailsWrapper().setD81Joint(null);
         }
     }
 

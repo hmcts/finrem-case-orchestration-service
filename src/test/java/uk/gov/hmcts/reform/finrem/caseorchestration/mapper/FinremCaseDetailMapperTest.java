@@ -669,9 +669,9 @@ class FinremCaseDetailMapperTest {
     private void assertIndividualDocuments(FinremCaseData caseData) {
         assertEquals(caseData.getConsentOrder(), getTestDocument());
         assertEquals(caseData.getConsentOrderText(), getTestDocument());
-        assertEquals(caseData.getD81Applicant(), getTestDocument());
-        assertEquals(caseData.getD81Joint(), getTestDocument());
-        assertEquals(caseData.getD81Respondent(), getTestDocument());
+        assertEquals(caseData.getD81DetailsWrapper().getD81Applicant(), getTestDocument());
+        assertEquals(caseData.getD81DetailsWrapper().getD81Joint(), getTestDocument());
+        assertEquals(caseData.getD81DetailsWrapper().getD81Respondent(), getTestDocument());
         assertEquals(caseData.getDivorceDetailWrapper().getDivorceUploadEvidence1(), getTestDocument());
         assertEquals(caseData.getDivorceDetailWrapper().getDivorceUploadEvidence2(), getTestDocument());
         assertEquals(caseData.getMiniFormA(), getTestDocument());
