@@ -145,9 +145,6 @@ public class FinremCaseData {
     private List<ConsentOrderCollection> approvedOrderCollection;
     private ApplicantRole divRoleOfFrApplicant;
     private ApplicantRepresentedPaper applicantRepresentedPaper;
-    private String authorisationSolicitorAddress;
-    private YesOrNo authorisationSigned;
-    private AuthorisationSignedBy authorisationSignedBy;
     private String bulkScanCaseReference;
     private List<ChildrenInfoCollection> childrenInfo;
     private CaseDocument formA;

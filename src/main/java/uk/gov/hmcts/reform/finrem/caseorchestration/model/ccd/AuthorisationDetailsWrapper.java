@@ -25,4 +25,7 @@ public class AuthorisationDetailsWrapper {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate authorisation3;
+    private String authorisationSolicitorAddress;
+    private YesOrNo authorisationSigned;
+    private AuthorisationSignedBy authorisationSignedBy;
 }
