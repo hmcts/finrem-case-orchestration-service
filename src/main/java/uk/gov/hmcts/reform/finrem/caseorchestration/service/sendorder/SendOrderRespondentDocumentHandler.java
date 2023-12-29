@@ -72,7 +72,7 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
             if (caseDataService.isRespondentAddressConfidential(caseData)) {
                 setConfidentialBulkPrintFieldForRespondent(caseDetails, bulkPrintSheet, caseData);
             } else {
-                caseData.setBulkPrintCoverSheetRes(bulkPrintSheet);
+                caseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(bulkPrintSheet);
             }
         }
     }
@@ -92,8 +92,8 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
                                                                    FinremCaseData caseData) {
         log.info("Case {}, has been marked as confidential. Adding respondent cover sheet to confidential field",
             finremCaseDetails.getId());
-        caseData.setBulkPrintCoverSheetRes(null);
-        caseData.setBulkPrintCoverSheetResConfidential(bulkPrintSheet);
+        caseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(null);
+        caseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetResConfidential(bulkPrintSheet);
     }
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {

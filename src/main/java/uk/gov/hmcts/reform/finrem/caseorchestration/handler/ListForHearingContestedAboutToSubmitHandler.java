@@ -118,22 +118,22 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
     private void populateApplicantBulkPrintFieldsWithCoverSheet(FinremCaseData finremCaseData, String caseId, CaseDocument coverSheet) {
         if (caseDataService.isApplicantAddressConfidential(finremCaseData)) {
             log.info("Applicant has been marked as confidential, adding coversheet to confidential field for Case ID: {}", caseId);
-            finremCaseData.setBulkPrintCoverSheetApp(null);
-            finremCaseData.setBulkPrintCoverSheetAppConfidential(coverSheet);
+            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetApp(null);
+            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetAppConfidential(coverSheet);
         } else {
             log.info("Applicant adding coversheet to coversheet field for Case ID: {}", caseId);
-            finremCaseData.setBulkPrintCoverSheetApp(coverSheet);
+            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetApp(coverSheet);
         }
     }
 
     private void populateRespondentBulkPrintFieldsWithCoverSheet(FinremCaseData finremCaseData, CaseDocument coverSheet, String caseId) {
         if (caseDataService.isRespondentAddressConfidential(finremCaseData)) {
             log.info("Respondent has been marked as confidential, adding coversheet to confidential field for Case ID: {}", caseId);
-            finremCaseData.setBulkPrintCoverSheetRes(null);
-            finremCaseData.setBulkPrintCoverSheetResConfidential(coverSheet);
+            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(null);
+            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetResConfidential(coverSheet);
         } else {
             log.info("Respondent adding coversheet to coversheet field for Case ID: {}", caseId);
-            finremCaseData.setBulkPrintCoverSheetRes(coverSheet);
+            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(coverSheet);
         }
     }
 

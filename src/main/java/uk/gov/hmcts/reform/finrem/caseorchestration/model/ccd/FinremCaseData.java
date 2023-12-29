@@ -75,11 +75,15 @@ public class FinremCaseData {
     private YesOrNo childSupportAgencyCalculationMade;
     @JsonProperty("ChildSupportAgencyCalculationReason")
     private String childSupportAgencyCalculationReason;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
     private AuthorisationDetailsWrapper authorisationDetailsWrapper;
     private CaseDocument miniFormA;
     private CaseDocument consentOrder;
     private CaseDocument consentOrderText;
     private CaseDocument latestConsentOrder;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
     private D81DetailsWrapper d81DetailsWrapper;
     private List<PensionTypeCollection> pensionCollection;
     private List<PensionTypeCollection> consentPensionCollection;
@@ -134,12 +138,9 @@ public class FinremCaseData {
     private List<ScannedDocumentCollection> scannedDocuments;
     private YesOrNo evidenceHandled;
     private CaseDocument approvedConsentOrderLetter;
-    private CaseDocument bulkPrintCoverSheetApp;
-    private CaseDocument bulkPrintCoverSheetRes;
-    private CaseDocument bulkPrintCoverSheetIntv1;
-    private CaseDocument bulkPrintCoverSheetIntv2;
-    private CaseDocument bulkPrintCoverSheetIntv3;
-    private CaseDocument bulkPrintCoverSheetIntv4;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private BulkPrintCoverSheetWrapper bulkPrintCoverSheetWrapper;
     private String bulkPrintLetterIdRes;
     private String bulkPrintLetterIdApp;
     private List<ConsentOrderCollection> approvedOrderCollection;
@@ -159,8 +160,6 @@ public class FinremCaseData {
     @JsonProperty("RepresentationUpdateHistory")
     private List<RepresentationUpdateHistoryCollection> representationUpdateHistory;
     private YesOrNo paperApplication;
-    private CaseDocument bulkPrintCoverSheetAppConfidential;
-    private CaseDocument bulkPrintCoverSheetResConfidential;
     @JsonProperty("RespSolNotificationsEmailConsent")
     private YesOrNo respSolNotificationsEmailConsent;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -419,6 +418,14 @@ public class FinremCaseData {
             this.d81DetailsWrapper = new D81DetailsWrapper();
         }
         return d81DetailsWrapper;
+    }
+
+    @JsonIgnore
+    public BulkPrintCoverSheetWrapper getBulkPrintCoverSheetWrapper() {
+        if (bulkPrintCoverSheetWrapper == null) {
+            this.bulkPrintCoverSheetWrapper = new BulkPrintCoverSheetWrapper();
+        }
+        return bulkPrintCoverSheetWrapper;
     }
 
     @JsonIgnore

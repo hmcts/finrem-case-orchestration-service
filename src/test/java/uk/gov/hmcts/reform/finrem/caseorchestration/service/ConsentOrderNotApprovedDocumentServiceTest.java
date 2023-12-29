@@ -136,7 +136,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), equalTo("binurl1"));
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), equalTo("binurl2"));
 
-        assertNull(finremCaseDetails.getData().getBulkPrintCoverSheetApp());
+        assertNull(finremCaseDetails.getData().getBulkPrintCoverSheetWrapper().getBulkPrintCoverSheetApp());
     }
 
     @Test
@@ -162,7 +162,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
 
         assertThat(generatedDocuments, hasSize(0));
 
-        assertNull(finremCaseDetails.getData().getBulkPrintCoverSheetApp());
+        assertNull(finremCaseDetails.getData().getBulkPrintCoverSheetWrapper().getBulkPrintCoverSheetApp());
     }
 
     @Test

@@ -168,10 +168,10 @@ public class BulkPrintService {
 
         if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent())) {
             log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
-            caseDetails.getData().setBulkPrintCoverSheetApp(null);
-            caseDetails.getData().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
+            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetApp(null);
+            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
         } else {
-            caseDetails.getData().setBulkPrintCoverSheetApp(applicantCoverSheet);
+            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetApp(applicantCoverSheet);
         }
 
         return documentHelper.getCaseDocumentAsBulkPrintDocument(applicantCoverSheet);
@@ -230,10 +230,10 @@ public class BulkPrintService {
 
         if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
             log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
-            caseDetails.getData().setBulkPrintCoverSheetRes(null);
-            caseDetails.getData().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
+            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(null);
+            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
         } else {
-            caseDetails.getData().setBulkPrintCoverSheetRes(respondentCoverSheet);
+            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
         }
 
         return documentHelper.getCaseDocumentAsBulkPrintDocument(respondentCoverSheet);
