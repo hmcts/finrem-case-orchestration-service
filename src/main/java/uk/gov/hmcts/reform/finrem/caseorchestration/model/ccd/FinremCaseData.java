@@ -150,10 +150,9 @@ public class FinremCaseData {
     private List<ChildrenInfoCollection> childrenInfo;
     private CaseDocument formA;
     private List<DocumentCollection> scannedD81s;
-    private String transferLocalCourtName;
-    private String transferLocalCourtEmail;
-    private String transferLocalCourtInstructions;
-    private List<TransferCourtEmailCollection> transferLocalCourtEmailCollection;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private TransferLocalCourtWrapper transferLocalCourtWrapper;
     private YesOrNo civilPartnership;
     private YesOrNo promptForUrgentCaseQuestion;
     private String urgentCaseQuestionDetailsTextArea;
@@ -426,6 +425,14 @@ public class FinremCaseData {
             this.bulkPrintCoverSheetWrapper = new BulkPrintCoverSheetWrapper();
         }
         return bulkPrintCoverSheetWrapper;
+    }
+
+    @JsonIgnore
+    public TransferLocalCourtWrapper getTransferLocalCourtWrapper() {
+        if (transferLocalCourtWrapper == null) {
+            this.transferLocalCourtWrapper = new TransferLocalCourtWrapper();
+        }
+        return transferLocalCourtWrapper;
     }
 
     @JsonIgnore

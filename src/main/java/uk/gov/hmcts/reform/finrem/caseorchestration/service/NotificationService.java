@@ -1331,9 +1331,9 @@ public class NotificationService {
     public void sendTransferToLocalCourtEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         //Overwrite the email, set to the court provided, and use general body to include the Events "Free Text" field
-        notificationRequest.setNotificationEmail(caseDetails.getData().getTransferLocalCourtEmail());
+        notificationRequest.setNotificationEmail(caseDetails.getData().getTransferLocalCourtWrapper().getTransferLocalCourtEmail());
         notificationRequest.setGeneralEmailBody("The Judge has also ordered that:\n"
-            + caseDetails.getData().getTransferLocalCourtInstructions());
+            + caseDetails.getData().getTransferLocalCourtWrapper().getTransferLocalCourtInstructions());
         log.info("Received request for notification email for consented transfer to local court email Notification request : {}",
             notificationRequest);
         emailService.sendConfirmationEmail(notificationRequest, FR_TRANSFER_TO_LOCAL_COURT);
