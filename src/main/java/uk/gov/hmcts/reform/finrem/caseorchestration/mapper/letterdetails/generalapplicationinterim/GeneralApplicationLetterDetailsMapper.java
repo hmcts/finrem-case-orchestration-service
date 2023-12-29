@@ -32,7 +32,7 @@ public class GeneralApplicationLetterDetailsMapper extends AbstractLetterDetails
 
         return GeneralApplicationLetterDetails.builder()
             .ccdCaseNumber(String.valueOf(caseDetails.getId()))
-            .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
+            .divorceCaseNumber(caseData.getDivorceDetailsWrapper().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
             .courtDetails(courtDetails)

@@ -94,7 +94,7 @@ public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
         caseData.getContactDetailsWrapper().setApplicantLname("Applicant");
         caseData.getContactDetailsWrapper().setRespondentFmName("Test");
         caseData.getContactDetailsWrapper().setRespondentLname("Respondent");
-        caseData.getDivorceDetailWrapper().setDivorceCaseNumber("DD12D12345");
+        caseData.getDivorceDetailsWrapper().setDivorceCaseNumber("DD12D12345");
         caseData.getRegionWrapper().getDefaultCourtList().setBristolCourtList(BristolCourt.BRISTOL_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
         caseData.setHearingDate(HEARING_DATE);
         caseData.getContactDetailsWrapper().setSolicitorReference("Test Sol Reference");

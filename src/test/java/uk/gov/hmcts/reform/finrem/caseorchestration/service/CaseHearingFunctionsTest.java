@@ -554,7 +554,7 @@ public class CaseHearingFunctionsTest {
         caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
         caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
-        caseData.getDivorceDetailWrapper().setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.getDivorceDetailsWrapper().setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
         caseData.getRegionWrapper().setAllocatedRegionWrapper(regionWrapper);
         caseData.setBulkPrintLetterIdRes(NOTTINGHAM);

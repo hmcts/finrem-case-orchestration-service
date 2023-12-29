@@ -86,7 +86,7 @@ public class FinremNotificationRequestMapper {
         FinremCaseData caseData = caseDetails.getData();
         notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
         notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));
-        notificationRequest.setDivorceCaseNumber(Objects.toString(caseData.getDivorceDetailWrapper().getDivorceCaseNumber(), EMPTY_STRING));
+        notificationRequest.setDivorceCaseNumber(Objects.toString(caseData.getDivorceDetailsWrapper().getDivorceCaseNumber(), EMPTY_STRING));
         notificationRequest.setName(caseDataKeysWrapper.getSolicitorNameKey());
         notificationRequest.setNotificationEmail(caseDataKeysWrapper.getSolicitorEmailKey());
         notificationRequest.setCaseType(getCaseType(caseDetails));

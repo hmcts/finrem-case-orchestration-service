@@ -25,7 +25,7 @@ public class AdditionalHearingDetailsMapper extends AbstractLetterDetailsMapper 
 
         return AdditionalHearingDetails.builder()
             .ccdCaseNumber(String.valueOf(caseDetails.getId()))
-            .divorceCaseNumber(caseDetails.getData().getDivorceDetailWrapper().getDivorceCaseNumber())
+            .divorceCaseNumber(caseDetails.getData().getDivorceDetailsWrapper().getDivorceCaseNumber())
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
             .courtName(courtDetails.getCourtName())

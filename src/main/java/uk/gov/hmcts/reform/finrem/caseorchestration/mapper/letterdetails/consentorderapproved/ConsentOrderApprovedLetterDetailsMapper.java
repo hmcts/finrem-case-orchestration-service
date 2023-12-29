@@ -41,7 +41,7 @@ public class ConsentOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
             .respondentLastName(getRespondentLastName(caseDetails))
             .servePensionProviderResponsibility(getServePensionProviderResponsibility(caseData))
             .servePensionProvider(YesOrNo.getYesOrNo(caseData.getServePensionProvider()))
-            .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
+            .divorceCaseNumber(caseData.getDivorceDetailsWrapper().getDivorceCaseNumber())
             .orderDirectionDate(getDirectionDate(caseDetails))
             .orderDirectionJudge(getJudgeTitle(caseDetails))
             .orderDirectionJudgeName(getJudgeName(caseDetails))

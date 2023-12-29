@@ -413,7 +413,7 @@ class FinremCaseDetailMapperTest {
             caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsJudgeType());
         assertEquals(GeneralLetterAddressToType.APPLICANT_SOLICITOR, caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo());
         assertEquals(GeneralApplicationOutcome.NOT_APPROVED, caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome());
-        assertEquals(StageReached.DECREE_NISI, caseData.getDivorceDetailWrapper().getDivorceStageReached());
+        assertEquals(StageReached.DECREE_NISI, caseData.getDivorceDetailsWrapper().getDivorceStageReached());
         assertEquals(YesOrNo.YES, caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange());
         assertEquals(YesOrNo.YES, caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent());
         assertEquals(YesOrNo.YES, caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant());
@@ -673,8 +673,8 @@ class FinremCaseDetailMapperTest {
         assertEquals(caseData.getD81DetailsWrapper().getD81Applicant(), getTestDocument());
         assertEquals(caseData.getD81DetailsWrapper().getD81Joint(), getTestDocument());
         assertEquals(caseData.getD81DetailsWrapper().getD81Respondent(), getTestDocument());
-        assertEquals(caseData.getDivorceDetailWrapper().getDivorceUploadEvidence1(), getTestDocument());
-        assertEquals(caseData.getDivorceDetailWrapper().getDivorceUploadEvidence2(), getTestDocument());
+        assertEquals(caseData.getDivorceDetailsWrapper().getDivorceUploadEvidence1(), getTestDocument());
+        assertEquals(caseData.getDivorceDetailsWrapper().getDivorceUploadEvidence2(), getTestDocument());
         assertEquals(caseData.getMiniFormA(), getTestDocument());
 
     }

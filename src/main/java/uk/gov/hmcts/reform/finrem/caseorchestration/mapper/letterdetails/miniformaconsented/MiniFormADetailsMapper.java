@@ -87,7 +87,7 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
             .authorisationName(caseData.getAuthorisationDetailsWrapper().getAuthorisationName())
             .authorisationFirm(caseData.getAuthorisationDetailsWrapper().getAuthorisationFirm())
             .issueDate(String.valueOf(caseData.getIssueDate()))
-            .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
+            .divorceCaseNumber(caseData.getDivorceDetailsWrapper().getDivorceCaseNumber())
             .orderForChildrenQuestion1(YesOrNo.getYesOrNo(caseData.getNatureApplicationWrapper().getOrderForChildrenQuestion1()));
     }
 

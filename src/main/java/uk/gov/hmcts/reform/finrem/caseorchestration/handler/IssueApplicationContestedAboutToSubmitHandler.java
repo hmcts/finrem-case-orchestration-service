@@ -49,8 +49,8 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
         log.info("Issue application generated document {} for Case ID: {}", document, caseId);
         caseData.setMiniFormA(document);
 
-        if (ObjectUtils.isEmpty(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())) {
-            caseData.getDivorceDetailWrapper().setDivorceCaseNumber(caseId.toString());
+        if (ObjectUtils.isEmpty(caseData.getDivorceDetailsWrapper().getDivorceCaseNumber())) {
+            caseData.getDivorceDetailsWrapper().setDivorceCaseNumber(caseId.toString());
         }
         if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {
             caseData.setScheduleOneWrapper(ScheduleOneWrapper.builder()

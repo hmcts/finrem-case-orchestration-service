@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DivorceDetailWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DivorceDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -101,7 +101,7 @@ public class IntervenerDocumentServiceTest {
             .intervenerOrganisation(organisationPolicy).build();
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData = FinremCaseData.builder()
-            .divorceDetailWrapper(DivorceDetailWrapper.builder().divorceCaseNumber(CASE_NUMBER).build())
+            .divorceDetailsWrapper(DivorceDetailsWrapper.builder().divorceCaseNumber(CASE_NUMBER).build())
             .currentIntervenerChangeDetails(intervenerChangeDetails)
             .contactDetailsWrapper(contactDetailsWrapper)
             .build();

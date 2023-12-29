@@ -66,7 +66,7 @@ public class FinremCaseData {
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
-    private DivorceDetailWrapper divorceDetailWrapper;
+    private DivorceDetailsWrapper divorceDetailsWrapper;
     private Provision provisionMadeFor;
     private Intention applicantIntendsTo;
     private List<PeriodicalPaymentSubstitute> dischargePeriodicalPaymentSubstituteFor;
@@ -397,11 +397,11 @@ public class FinremCaseData {
     private CaseFlagsWrapper caseFlagsWrapper;
 
     @JsonIgnore
-    public DivorceDetailWrapper getDivorceDetailWrapper() {
-        if (divorceDetailWrapper == null) {
-            this.divorceDetailWrapper = new DivorceDetailWrapper();
+    public DivorceDetailsWrapper getDivorceDetailsWrapper() {
+        if (divorceDetailsWrapper == null) {
+            this.divorceDetailsWrapper = new DivorceDetailsWrapper();
         }
-        return divorceDetailWrapper;
+        return divorceDetailsWrapper;
     }
 
     @JsonIgnore

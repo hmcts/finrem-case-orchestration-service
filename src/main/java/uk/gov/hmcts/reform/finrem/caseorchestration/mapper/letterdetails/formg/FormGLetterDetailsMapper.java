@@ -24,7 +24,7 @@ public class FormGLetterDetailsMapper extends AbstractLetterDetailsMapper {
             .applicantLName(caseData.getContactDetailsWrapper().getApplicantLname())
             .respondentFmName(caseData.getContactDetailsWrapper().getRespondentFmName())
             .respondentLName(caseData.getContactDetailsWrapper().getRespondentLname())
-            .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
+            .divorceCaseNumber(caseData.getDivorceDetailsWrapper().getDivorceCaseNumber())
             .courtDetails(courtDetailsMapper.getCourtDetails(courtList))
             .hearingDate(String.valueOf(caseData.getHearingDate()))
             .solicitorReference(caseData.getContactDetailsWrapper().getSolicitorReference())

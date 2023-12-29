@@ -136,7 +136,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
         ContactDetailsWrapper contactDetails) {
         return builder
             .fastTrackDecision(getYesOrNo(caseData.getFastTrackDecision()))
-            .divorceCaseNumber(caseData.getDivorceDetailWrapper().getDivorceCaseNumber())
+            .divorceCaseNumber(caseData.getDivorceDetailsWrapper().getDivorceCaseNumber())
             .typeOfApplication(getDefaultTypeOfApplicationIfNotPresent(caseData))
             .issueDate(String.valueOf(caseData.getIssueDate()))
             .authorisationName(caseData.getAuthorisationDetailsWrapper().getAuthorisationName())
