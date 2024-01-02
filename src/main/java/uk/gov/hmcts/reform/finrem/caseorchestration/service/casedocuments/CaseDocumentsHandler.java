@@ -32,7 +32,7 @@ public class CaseDocumentsHandler extends PartyDocumentsHandler {
                 return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_JUDICIAL_NOTES;
             }
             case WITNESS_SUMMONS -> {
-                return DocumentCategory.ADMINISTRATIVE_DOCUMENTS;
+                return DocumentCategory.HEARING_DOCUMENTS_WITNESS_SUMMONS;
             }
             case JUDGMENT, TRANSCRIPT -> {
                 return DocumentCategory.JUDGMENT_OR_TRANSCRIPT;

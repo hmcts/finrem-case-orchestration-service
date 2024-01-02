@@ -71,7 +71,7 @@ public class CaseDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
         assertThat(
             caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_SUMMONS),
-            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS)
+            is(DocumentCategory.HEARING_DOCUMENTS_WITNESS_SUMMONS)
         );
 
         assertThat(

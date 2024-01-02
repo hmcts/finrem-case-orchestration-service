@@ -53,12 +53,12 @@ public class RespondentOtherDocumentsHandler extends OtherDocumentsHandler {
 
     @Override
     protected DocumentCategory getHouseParticularsDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_HOUSING_PARTICULARS;
+        return DocumentCategory.RESPONDENT_DOCUMENTS_HOUSING_PARTICULARS;
     }
 
     @Override
     protected DocumentCategory getPreHearingDraftOrderDocumentCategory() {
-        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_PRE_HEARING_DRAFT_ORDER;
+        return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
     }
 
     @Override
