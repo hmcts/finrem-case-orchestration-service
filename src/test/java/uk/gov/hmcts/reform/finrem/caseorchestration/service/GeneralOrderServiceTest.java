@@ -133,14 +133,14 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
         assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is("Applicant"));
 
-        CaseDocument latestGeneralOrder = (CaseDocument) documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
+        CaseDocument latestGeneralOrder = getCaseDocument(documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT));
         assertThat(latestGeneralOrder.getDocumentUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
         assertThat(latestGeneralOrder.getDocumentFilename(),
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        generalOrders.forEach(order -> assertThat(order.getGeneralOrder().getGeneralOrder().getCategoryId(),
+        generalOrders.forEach(order -> assertThat(order.getValue().getAdditionalDocument().getCategoryId(),
             is(DocumentCategory.APPROVED_ORDERS_CASE.getDocumentCategoryId())));
     }
 
@@ -184,7 +184,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        generalOrders.forEach(order -> assertThat(order.getGeneralOrder().getGeneralOrder().getCategoryId(),
+        generalOrders.forEach(order -> assertThat(order.getValue().getAdditionalDocument().getCategoryId(),
             is(DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId())));
     }
 
