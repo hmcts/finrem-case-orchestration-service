@@ -44,7 +44,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested event {} about to start callback for case id: {}",
+        log.info("Invoking contested event {} about to start callback for Case ID: {}",
             EventType.SOLICITOR_CREATE, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 

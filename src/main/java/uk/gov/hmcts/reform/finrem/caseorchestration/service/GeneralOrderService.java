@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderDocumentCategoriser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,6 +66,8 @@ public class GeneralOrderService {
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
     private final PartyService partyService;
+    private final GeneralOrderDocumentCategoriser generalOrderDocumentCategoriser;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
@@ -206,7 +210,11 @@ public class GeneralOrderService {
             caseData.put(GENERAL_ORDER_COLLECTION_CONTESTED, generalOrderList);
         }
 
-        return caseData;
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        generalOrderDocumentCategoriser.categorise(finremCaseDetails.getData());
+        CaseDetails mappedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
+        return mappedCaseDetails.getData();
     }
 
     private LocalDate objectToDate(Object object) {
@@ -352,7 +360,7 @@ public class GeneralOrderService {
                            List<CaseDocument> orders, Long caseId) {
         if (getDocumentId(obj.getValue().getUploadDraftDocument()).equals(doc.getCode())) {
             CaseDocument caseDocument = obj.getValue().getUploadDraftDocument();
-            log.info("Adding document to orders {} for caseId {}", caseDocument, caseId);
+            log.info("Adding document to orders {} for Case ID: {}", caseDocument, caseId);
             orders.add(caseDocument);
         }
     }

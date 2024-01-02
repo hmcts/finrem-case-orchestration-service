@@ -34,7 +34,7 @@ public class SolicitorCreateConsentedSubmittedHandler extends AssignApplicantSol
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Processing Submitted callback for event {} with Case ID : {}",
+        log.info("Processing Submitted callback for event {} with Case ID: {}",
             EventType.SOLICITOR_CREATE, callbackRequest.getCaseDetails().getId());
         createCaseService.setSupplementaryData(callbackRequest, userAuthorisation);
         return super.handle(callbackRequest, userAuthorisation);

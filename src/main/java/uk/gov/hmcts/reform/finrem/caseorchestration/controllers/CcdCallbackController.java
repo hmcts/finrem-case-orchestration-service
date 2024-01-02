@@ -53,7 +53,7 @@ public class CcdCallbackController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
-        log.info("About to start Financial Remedy case callback `{}` received for Case ID `{}`",
+        log.info("About to start Financial Remedy case callback `{}` received for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
@@ -74,7 +74,7 @@ public class CcdCallbackController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
-        log.info("About to submit Financial Remedy case callback `{}` received for Case ID `{}`",
+        log.info("About to submit Financial Remedy case callback `{}` received for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
@@ -95,7 +95,7 @@ public class CcdCallbackController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
-        log.info("Mid Event Financial Remedy case callback `{}` received for Case ID `{}`",
+        log.info("Mid Event Financial Remedy case callback `{}` received for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
@@ -117,7 +117,7 @@ public class CcdCallbackController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
-        log.info("Submitted Financial Remedy case callback `{}` received for Case ID `{}`",
+        log.info("Submitted Financial Remedy case callback `{}` received for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
@@ -141,7 +141,7 @@ public class CcdCallbackController {
         GenericAboutToStartOrSubmitCallbackResponse callbackResponse =
             callbackDispatchService.dispatchToHandlers(callbackType, callbackRequest, userAuthorisation);
 
-        log.info("Financial Remedy Case CCD callback `{}` handled for Case ID `{}`",
+        log.info("Financial Remedy Case CCD callback `{}` handled for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 

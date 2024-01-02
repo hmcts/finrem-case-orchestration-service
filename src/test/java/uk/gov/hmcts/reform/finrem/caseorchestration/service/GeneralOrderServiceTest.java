@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -75,7 +76,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     private DocumentHelper documentHelper;
     @Autowired
     private DocumentConfiguration documentConfiguration;
-
+    @MockBean
+    private FeatureToggleService featureToggleService;
     @MockBean
     private GenericDocumentService genericDocumentService;
 
@@ -112,6 +114,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void submitContestedGeneralOrder() throws Exception {
+        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(contestedCaseDetails());
 
         List<ContestedGeneralOrderCollection> generalOrders = convertToList(documentMap.get(GENERAL_ORDER_COLLECTION_CONTESTED));
@@ -137,6 +140,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+        generalOrders.forEach(order -> assertThat(order.getGeneralOrder().getGeneralOrder().getCategoryId(),
+            is(DocumentCategory.APPROVED_ORDERS_CASE.getDocumentCategoryId())));
     }
 
     @Test
@@ -151,6 +156,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void submitConsentedInContestedGeneralOrder() throws Exception {
+        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedInContestedCaseDetails());
 
         List<ContestedGeneralOrderCollection> generalOrders = convertToList(documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED));
@@ -171,13 +177,15 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
         assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is("Applicant"));
 
-        CaseDocument latestGeneralOrder = (CaseDocument) documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
+        CaseDocument latestGeneralOrder = getCaseDocument(documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT));
         assertThat(latestGeneralOrder.getDocumentUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
         assertThat(latestGeneralOrder.getDocumentFilename(),
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+        generalOrders.forEach(order -> assertThat(order.getGeneralOrder().getGeneralOrder().getCategoryId(),
+            is(DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId())));
     }
 
     @Test
@@ -571,6 +579,11 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             equalTo(generalOrderService.isOrderSharedWithIntervener3(caseDetails)));
         assertThat(data.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled(),
             equalTo(generalOrderService.isOrderSharedWithIntervener4(caseDetails)));
+    }
+
+    private CaseDocument getCaseDocument(Object documentMap) {
+        return objectMapper.convertValue(documentMap, new TypeReference<>() {
+        });
     }
 
     private DynamicMultiSelectList buildDynamicSelectableParties() {
