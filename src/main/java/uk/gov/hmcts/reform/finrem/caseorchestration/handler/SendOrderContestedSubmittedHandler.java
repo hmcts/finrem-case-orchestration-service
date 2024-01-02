@@ -47,10 +47,10 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested {} submitted callback for case id: {}", callbackRequest.getEventType(), caseDetails.getId());
+        log.info("Invoking contested {} submitted callback for Case ID: {}", callbackRequest.getEventType(), caseDetails.getId());
 
         List<String> parties = generalOrderService.getParties(caseDetails);
-        log.info("Selected parties {} on case {}", parties, caseDetails.getId());
+        log.info("Selected parties {} on Case ID: {}", parties, caseDetails.getId());
 
         sendNotifications(callbackRequest, parties, userAuthorisation);
 
@@ -82,9 +82,9 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         generalOrderService.setPartiesToReceiveCommunication(caseDetails, parties);
-        log.info("About to start send order correspondence for case {}", caseDetails.getId());
+        log.info("About to start send order correspondence for Case ID: {}", caseDetails.getId());
         contestedSendOrderCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
-        log.info("Finish sending order correspondence for case {}", caseDetails.getId());
+        log.info("Finish sending order correspondence for Case ID: {}", caseDetails.getId());
     }
 
 }

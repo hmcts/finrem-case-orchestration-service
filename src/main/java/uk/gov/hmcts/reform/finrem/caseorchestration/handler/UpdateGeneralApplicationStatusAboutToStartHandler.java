@@ -44,7 +44,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandler extends FinremCal
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
-        log.info("Start callback event type {} for case id: {}",
+        log.info("Start callback event type {} for Case ID: {}",
             EventType.UPDATE_CONTESTED_GENERAL_APPLICATION, caseId);
         FinremCaseData caseData = caseDetails.getData();
 

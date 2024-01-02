@@ -34,7 +34,7 @@ public class RejectedConsentOrderSubmittedHandler
         String userAuthorisation) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Sending consent order not approved email correspondence to applicant for case: {}", caseDetails.getId());
+        log.info("Sending consent order not approved email correspondence to applicant for Case ID: {}", caseDetails.getId());
         consentOrderNotApprovedCorresponder.sendCorrespondence(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse
