@@ -56,7 +56,7 @@
       "orderRefusalCollection" : [
         {
           "value" : {
-            "orderRefusalAfterText" : "testAfterText",
+            "orderRefusalAfterText": "testAfterText",
             "orderRefusal" : [
               "Insufficient information provided – A",
               "Insufficient information provided – B",
@@ -78,7 +78,7 @@
         }
       ],
       "orderRefusalCollectionNew" : {
-        "orderRefusalAfterText" : "testAfterText",
+        "orderRefusalAfterText": "testAfterText",
         "orderRefusal" : [
           "Insufficient information provided – A",
           "Insufficient information provided – B",
