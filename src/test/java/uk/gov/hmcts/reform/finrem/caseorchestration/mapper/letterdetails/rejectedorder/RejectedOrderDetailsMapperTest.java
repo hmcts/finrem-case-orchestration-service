@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON_CONTESTED = "/fixtures/refusal-order-contested.json";
-    public static final String TEST_JSON_CONSENTED = "/fixtures/refusal-order-consented.json";
+    public static final String TEST_JSON_CONSENTED = "/fixtures/rejectConsentOrder.json";
 
     @Autowired
     private RejectedOrderDetailsMapper rejectedOrderDetailsMapper;
@@ -112,9 +112,9 @@ public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperT
 
     private RejectedOrderDetails getExpectedConsentedRejectedOrderDetails() {
         return RejectedOrderDetails.builder()
-            .divorceCaseNumber("DD98D76543")
-            .applicantName("Contested Applicant Name")
-            .respondentName("Consented Respondent Korivi")
+            .divorceCaseNumber("DD12D12345")
+            .applicantName("Poor Guy")
+            .respondentName("test Korivi")
             .refusalOrderHeader(REFUSAL_ORDER_HEADER)
             .courtName(CONSENTED_COURT_NAME)
             .courtDetails(buildConsentedFrcCourtDetailsObject())
@@ -138,20 +138,22 @@ public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperT
                         .orderRefusalAfterText("testAfterText")
                         .orderRefusal(List.of(
                             "Insufficient information provided – A",
-                            "Insufficient information provided – C",
-                            "Order does not appear fair",
+                            "Insufficient information provided – B",
+                            "Transferred to Applicant's home Court",
+                            "Other (please specify)",
                             "Transferred to Applicant home Court - A",
-                            "Transferred to Applicant home Court - B"))
-                        .orderRefusalOther("testOther")
+                            "Transferred to Applicant home Court - B"
+                           ))
+                        .orderRefusalOther("test1")
                         .orderRefusalDocs(CaseDocument.builder().build().builder()
                             .documentBinaryUrl("http://doc1.binary")
                             .documentUrl("http://doc1")
                             .documentFilename("doc1")
                             .build())
-                        .orderRefusalJudgeName("Contested")
-                        .orderRefusalJudge(JudgeType.HIS_HONOUR_JUDGE.getValue())
-                        .orderRefusalDate(LocalDate.of(2022,1, 1))
-                        .orderRefusalAddComments("testComment")
+                        .orderRefusalJudgeName("test3")
+                        .orderRefusalJudge(JudgeType.DISTRICT_JUDGE.getValue())
+                        .orderRefusalDate(LocalDate.of(2003,2, 1))
+                        .orderRefusalAddComments("comment1")
                         .build())
                 .build());
     }
