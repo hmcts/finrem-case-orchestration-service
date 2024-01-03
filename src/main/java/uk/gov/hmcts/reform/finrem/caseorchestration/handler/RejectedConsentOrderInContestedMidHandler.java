@@ -14,35 +14,34 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocument
 
 @Slf4j
 @Service
-public class RejectedConsentOrderAboutToSubmitHandler extends FinremCallbackHandler {
+public class RejectedConsentOrderInContestedMidHandler extends FinremCallbackHandler {
 
     private final RefusalOrderDocumentService service;
 
     @Autowired
-    public RejectedConsentOrderAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                    RefusalOrderDocumentService service) {
+    public RejectedConsentOrderInContestedMidHandler(FinremCaseDetailsMapper mapper,
+                                                     RefusalOrderDocumentService service) {
         super(mapper);
         this.service = service;
     }
 
-
     @Override
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
                              final EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONSENTED.equals(caseType)
-            && EventType.REJECT_ORDER.equals(eventType);
+        return CallbackType.MID_EVENT.equals(callbackType)
+            && CaseType.CONTESTED.equals(caseType)
+            && EventType.CONSENT_ORDER_NOT_APPROVED.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to generate '{}' for Case ID: {}",
-            EventType.REJECT_ORDER, caseDetails.getId());
-        FinremCaseData caseData = service.processConsentOrderNotApproved(caseDetails, userAuthorisation);
+        log.info("Received request for '{}' event '{}' for Case ID: {}",CallbackType.MID_EVENT,
+            EventType.CONSENT_ORDER_NOT_APPROVED, caseDetails.getId());
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData)
+            .data(service.previewConsentOrderNotApproved(userAuthorisation, caseDetails))
             .build();
     }
 }

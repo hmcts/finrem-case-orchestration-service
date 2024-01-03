@@ -17,52 +17,55 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 
+
 @ExtendWith(MockitoExtension.class)
-class RejectedConsentOrderAboutToSubmitHandlerTest {
+class RejectedConsentOrderMidHandlerTest {
 
     @InjectMocks
-    private RejectedConsentOrderAboutToSubmitHandler handler;
+    private RejectedConsentOrderMidHandler handler;
     @Mock
     private RefusalOrderDocumentService refusalOrderDocumentService;
 
-    private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
+    private static final String AUTH_TOKEN = "Token-:";
 
     @Test
     void given_case_whenEventRejectedOrder_thenCanHandle() {
-        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.REJECT_ORDER));
+        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.REJECT_ORDER));
     }
 
 
     @Test
     void given_case_when_wrong_callback_then_case_can_not_handle() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.REJECT_ORDER));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.REJECT_ORDER));
     }
 
     @Test
     void given_case_when_wrong_event_type_then_case_can_not_handle() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CLOSE));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE));
     }
 
     @Test
     void given_case_when_all_wrong_then_case_can_not_handle() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CLOSE));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CLOSE));
     }
+
 
     @Test
     void given_case_when_order_not_approved_then_reject_order() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
-
         handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(refusalOrderDocumentService).processConsentOrderNotApproved(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(refusalOrderDocumentService).previewConsentOrderNotApproved(AUTH_TOKEN, callbackRequest.getCaseDetails());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
+        FinremCaseData caseData = new FinremCaseData();
         return FinremCallbackRequest
             .builder()
             .eventType(EventType.REJECT_ORDER)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
+                .data(caseData).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
-                .data(FinremCaseData.builder().ccdCaseType(CONSENTED).build()).build())
+                .data(caseData).build())
             .build();
     }
 }
