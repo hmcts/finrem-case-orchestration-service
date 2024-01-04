@@ -116,7 +116,7 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
             log.info("Respondent coversheet generated and attach to case {}  for Case ID: {}", caseId, coverSheet);
             populateRespondentBulkPrintFieldsWithCoverSheet(finremCaseData, coverSheet, caseId);
         }
-
+        callbackRequest.getCaseDetails().setData(finremCaseData);
         contestedListForHearingCorrespondenceService.sendHearingCorrespondence(callbackRequest, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
