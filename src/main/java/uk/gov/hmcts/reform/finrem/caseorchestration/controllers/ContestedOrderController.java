@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundle;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundle;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleData;
-
-import javax.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
