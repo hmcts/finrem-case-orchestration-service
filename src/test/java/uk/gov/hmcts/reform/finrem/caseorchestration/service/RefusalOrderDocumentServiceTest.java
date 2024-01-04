@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
@@ -84,10 +83,8 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
             .orderRefusalAfterText("Please begin here")
             .orderRefusal(refusalOptionList)
             .build();
-        OrderRefusalCollection refusalCollection
-            = OrderRefusalCollection.builder().value(orderRefusalCollectionNew).build();
         FinremCaseData finremCaseData = caseDetails.getData();
-        finremCaseData.setOrderRefusalCollectionNew(refusalCollection);
+        finremCaseData.setOrderRefusalCollectionNew(orderRefusalCollectionNew);
         finremCaseData.getContactDetailsWrapper().setApplicantFmName("Poor");
         finremCaseData.getContactDetailsWrapper().setApplicantLname("Guy");
         finremCaseData.getContactDetailsWrapper().setAppRespondentFmName("john");
@@ -122,9 +119,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
             .orderRefusal(refusalOptionList)
             .build();
         FinremCaseData finremCaseData = caseDetails.getData();
-        OrderRefusalCollection refusalCollection
-            = OrderRefusalCollection.builder().value(orderRefusalCollectionNew).build();
-        finremCaseData.setOrderRefusalCollectionNew(refusalCollection);
+        finremCaseData.setOrderRefusalCollectionNew(orderRefusalCollectionNew);
         finremCaseData.getContactDetailsWrapper().setApplicantFmName("Poor");
         finremCaseData.getContactDetailsWrapper().setApplicantLname("Guy");
         finremCaseData.getContactDetailsWrapper().setAppRespondentFmName("john");
@@ -160,9 +155,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
             .build();
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        OrderRefusalCollection refusalCollection
-            = OrderRefusalCollection.builder().value(orderRefusalCollectionNew).build();
-        finremCaseData.setOrderRefusalCollectionNew(refusalCollection);
+        finremCaseData.setOrderRefusalCollectionNew(orderRefusalCollectionNew);
         finremCaseData.getContactDetailsWrapper().setApplicantFmName("Poor");
         finremCaseData.getContactDetailsWrapper().setApplicantLname("Guy");
         finremCaseData.getContactDetailsWrapper().setRespondentFmName("john");
@@ -210,9 +203,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
             .orderRefusal(refusalOptionList)
             .build();
         FinremCaseData finremCaseData = caseDetails.getData();
-        OrderRefusalCollection refusalCollection
-            = OrderRefusalCollection.builder().value(orderRefusalCollectionNew).build();
-        finremCaseData.setOrderRefusalCollectionNew(refusalCollection);
+        finremCaseData.setOrderRefusalCollectionNew(orderRefusalCollectionNew);
         finremCaseData.getContactDetailsWrapper().setApplicantFmName("Poor");
         finremCaseData.getContactDetailsWrapper().setApplicantLname("Guy");
         finremCaseData.getContactDetailsWrapper().setAppRespondentFmName("john");
@@ -236,9 +227,9 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("moj moj");
 
         FinremCaseData caseData = refusalOrderDocumentService.setDefaults(finremCaseData, AUTH_TOKEN);
-        OrderRefusalCollection orderRefusalCollectionNew = caseData.getOrderRefusalCollectionNew();
-        assertEquals("moj moj", orderRefusalCollectionNew.getValue().getOrderRefusalJudgeName());
-        assertEquals(LocalDate.now(), orderRefusalCollectionNew.getValue().getOrderRefusalDate());
+        OrderRefusalHolder orderRefusalCollectionNew = caseData.getOrderRefusalCollectionNew();
+        assertEquals("moj moj", orderRefusalCollectionNew.getOrderRefusalJudgeName());
+        assertEquals(LocalDate.now(), orderRefusalCollectionNew.getOrderRefusalDate());
 
     }
 

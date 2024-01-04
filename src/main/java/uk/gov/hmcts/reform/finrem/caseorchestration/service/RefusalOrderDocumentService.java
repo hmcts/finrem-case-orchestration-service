@@ -90,11 +90,11 @@ public class RefusalOrderDocumentService {
     }
 
     private FinremCaseData addToOrderRefusalCollection(FinremCaseData caseData) {
-        OrderRefusalCollection orderRefusalCollectionNew = caseData.getOrderRefusalCollectionNew();
+        OrderRefusalHolder orderRefusalCollectionNew = caseData.getOrderRefusalCollectionNew();
         List<OrderRefusalCollection> refusalCollections
             = Optional.ofNullable(caseData.getOrderRefusalCollection()).orElse(new ArrayList<>());
         OrderRefusalCollection refusalCollection = OrderRefusalCollection.builder()
-            .value(orderRefusalCollectionNew.getValue())
+            .value(orderRefusalCollectionNew)
             .build();
         refusalCollections.add(refusalCollection);
         caseData.setOrderRefusalCollection(refusalCollections);
@@ -121,12 +121,12 @@ public class RefusalOrderDocumentService {
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
-        OrderRefusalCollection orderRefusalCollectionNew = convertToRefusalOrder(caseDetailsCopy.getData().get("orderRefusalCollectionNew"));
-        List<OrderRefusalOption> optionList = orderRefusalCollectionNew.getValue().getOrderRefusal();
+        OrderRefusalHolder orderRefusalCollectionNew = convertToRefusalOrder(caseDetailsCopy.getData().get("orderRefusalCollectionNew"));
+        List<OrderRefusalOption> optionList = orderRefusalCollectionNew.getOrderRefusal();
         List<OrderRefusalOption> optionListTranslated = new ArrayList<>();
         optionList.forEach(s -> optionListTranslated.add(OrderRefusalOption
             .getOrderRefusalOption(REFUSAL_KEYS.getOrDefault(s.getId(), s.getId()))));
-        orderRefusalCollectionNew.getValue().setOrderRefusal(optionListTranslated);
+        orderRefusalCollectionNew.setOrderRefusal(optionListTranslated);
         caseDetailsCopy.getData().put("orderRefusalCollectionNew", orderRefusalCollectionNew);
 
         return genericDocumentService.generateDocument(authorisationToken,
@@ -143,7 +143,7 @@ public class RefusalOrderDocumentService {
             .insert(rejectOrderFileName.length() - 4, "-" + dateTimeString).toString();
     }
 
-    private OrderRefusalCollection convertToRefusalOrder(Object object) {
+    private OrderRefusalHolder convertToRefusalOrder(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
@@ -173,11 +173,11 @@ public class RefusalOrderDocumentService {
     }
 
     public FinremCaseData setDefaults(FinremCaseData caseData, String userAuthorisation) {
-        OrderRefusalHolder refusalHolder = OrderRefusalHolder.builder()
-            .orderRefusalDate(LocalDate.now())
-            .orderRefusalJudgeName(idamService.getIdamFullName(userAuthorisation)).build();
-        OrderRefusalCollection orderRefusalCollection = OrderRefusalCollection.builder().value(refusalHolder).build();
-        caseData.setOrderRefusalCollectionNew(orderRefusalCollection);
+        OrderRefusalHolder refusalHolder = Optional.ofNullable(caseData.getOrderRefusalCollectionNew())
+            .orElse(new OrderRefusalHolder());
+        refusalHolder.setOrderRefusalDate(LocalDate.now());
+        refusalHolder.setOrderRefusalJudgeName(idamService.getIdamFullName(userAuthorisation));
+        caseData.setOrderRefusalCollectionNew(refusalHolder);
         return caseData;
     }
 }
