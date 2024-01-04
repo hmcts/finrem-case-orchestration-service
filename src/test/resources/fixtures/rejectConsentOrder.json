@@ -56,7 +56,7 @@
       "orderRefusalCollection" : [
         {
           "value" : {
-            "orderRefusalAfterText": "testAfterText",
+            "orderRefusalAfterText" : "testAfterText",
             "orderRefusal" : [
               "Insufficient information provided – A",
               "Insufficient information provided – B",
@@ -77,26 +77,30 @@
           }
         }
       ],
-      "orderRefusalCollectionNew" : {
-        "orderRefusalAfterText": "testAfterText",
-        "orderRefusal" : [
-          "Insufficient information provided – A",
-          "Insufficient information provided – B",
-          "Transferred to Applicant home Court - A",
-          "Transferred to Applicant home Court - B",
-          "Other (please specify)"
-        ],
-        "orderRefusalOther" : "test1",
-        "orderRefusalDocs" : {
-          "document_url" : "http://doc1",
-          "document_filename" : "doc1",
-          "document_binary_url" : "http://doc1.binary"
-        },
-        "orderRefusalJudgeName" : "test3",
-        "orderRefusalDate" : "2003-02-01",
-        "orderRefusalAddComments" : "comment1",
-        "orderRefusalJudge" : "District Judge"
-      },
+      "orderRefusalCollectionNew" :
+        {
+          "value" : {
+            "orderRefusalAfterText" : "testAfterText",
+            "orderRefusal" : [
+              "Insufficient information provided – A",
+              "Insufficient information provided – B",
+              "Transferred to Applicant home Court - A",
+              "Transferred to Applicant home Court - B",
+              "Other (please specify)"
+            ],
+            "orderRefusalOther" : "test1",
+            "orderRefusalDocs" : {
+              "document_url" : "http://doc1",
+              "document_filename" : "doc1",
+              "document_binary_url" : "http://doc1.binary"
+            },
+            "orderRefusalJudgeName" : "test3",
+            "orderRefusalDate" : "2003-02-01",
+            "orderRefusalAddComments" : "comment1",
+            "orderRefusalJudge" : "District Judge"
+          }
+        }
+      ,
       "uploadOrder" : [
         {
           "value" : {
