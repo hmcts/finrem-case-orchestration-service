@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 
 @RunWith(SerenityRunner.class)
@@ -60,7 +60,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
         List<Object> orderRefusalPreviewDocuments = JsonPath.parse(response.asString())
             .read("$.data[?(@.orderRefusalPreviewDocument)]");
         assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
-        assertFalse("Order Refusal Preview Document not found ", orderRefusalPreviewDocuments.isEmpty());
+        assertTrue("Order Refusal Preview Document not found ", !orderRefusalPreviewDocuments.isEmpty());
     }
 
     @Test
