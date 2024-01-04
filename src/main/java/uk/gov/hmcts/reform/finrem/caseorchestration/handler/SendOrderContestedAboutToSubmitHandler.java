@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -104,6 +106,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
             caseData.setAdditionalDocument(null);
             setConsolidateView(caseDetails, parties);
+            caseData.setOrdersToShare(new DynamicMultiSelectList());
         } catch (RuntimeException e) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
@@ -170,12 +173,19 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         log.info("Share selected 'GeneralOrder' With selected parties for caseId {}", caseId);
 
         FinremCaseData caseData = caseDetails.getData();
-        CaseDocument generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
 
-        if (generalOrderService.isSelectedOrderMatches(selectedOrders, generalOrder)) {
-            sendOrderPartyDocumentList.forEach(
-                handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, List.of(generalOrder)));
-            printOrderCollection.add(addToPrintOrderCollection(generalOrder));
+        List<ContestedGeneralOrderCollection> generalOrders = caseData.getGeneralOrderWrapper().getGeneralOrders();
+
+        if (generalOrders != null && !generalOrders.isEmpty()) {
+            generalOrders.forEach(go -> {
+                ContestedGeneralOrder contestedGeneralOrder = go.getValue();
+                CaseDocument generalOrder = contestedGeneralOrder.getAdditionalDocument();
+                if (generalOrderService.isSelectedOrderMatches(selectedOrders, contestedGeneralOrder)) {
+                    sendOrderPartyDocumentList.forEach(
+                        handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, List.of(generalOrder)));
+                    printOrderCollection.add(addToPrintOrderCollection(generalOrder));
+                }
+            });
         }
     }
 

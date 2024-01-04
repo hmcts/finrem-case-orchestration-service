@@ -1,10 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformerFactory;
-
-import javax.annotation.PostConstruct;
 
 import java.util.HashMap;
 
