@@ -4,6 +4,8 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BINARY_URL_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
@@ -26,9 +27,12 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static final String SOLICITOR_NAME = "Jane Smith";
     private static final String SOLICITOR_REF = "JAW052018";
     private static final String GENERAL_ORDER_JSON = "document-rejected-order1.json";
+    private static final String CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON = "contested-hearing-order-conversion.json";
     private static final String MINI_FORM_A_JSON = "documentGeneratePayload1.json";
     private static final String MINI_FORM_A_CONTESTED_JSON = "generate-contested-form-A1.json";
     private static final String CONTESTED_HEARING_JSON = "validate-hearing-with-fastTrackDecision1.json";
+    private static final String APPLICANT_NAME_HEARING = "Guy";
+    private static final String SOLICITOR_REF_HEARING = "LL01";
     private static final String contestedDir = "/json/contested/";
     private static final String consentedDir = "/json/consented/";
 
@@ -62,6 +66,32 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Value("${case.orchestration.api}")
     private String caseOrchestration;
 
+    @Ignore
+    @Test
+    public void convertDocumentToPdf()  {
+
+        JsonPath jsonPathEvaluator = generateDocument(CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON, hearingOrderStoreUrl, contestedDir);
+
+        assertTrue(jsonPathEvaluator.get("data.latestDraftHearingOrder.document_filename").toString()
+            .equalsIgnoreCase("approvedConvertedHearingOrder.pdf"));
+    }
+
+
+    @Ignore
+    @Test
+    public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
+            BINARY_URL_TYPE, "generalOrder", consentedDir);
+
+        String payload = utils.getJsonFromFile("bulk-print.json", consentedDir)
+            .replace("$DOCUMENT-BINARY-URL", documentUrl);
+        jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/bulk-print", payload, "data");
+
+        if (jsonPathEvaluator.get("bulkPrintLetterIdRes") == null) {
+            Assert.fail("bulk Printing not successful");
+        }
+    }
+
     @Test
     public void verifyContestedDraftDocumentGenerationShouldReturnOkResponseCode() {
         utils.validatePostSuccess(generateContestedUrl, CONTESTED_HEARING_JSON, contestedDir);
@@ -75,7 +105,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyRejectedOrderDocumentGenerationPostResponseContent() {
 
-        JsonPath jsonPathEvaluator = generateDocument("rejected-consent-order.json", documentRejectedOrderUrl, consentedDir);
+        JsonPath jsonPathEvaluator = generateDocument(GENERAL_ORDER_JSON, documentRejectedOrderUrl, consentedDir);
 
         assertTrue(jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentType").toString()
             .equalsIgnoreCase("generalOrder"));
@@ -113,7 +143,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
 
-        assertTrue(jsonPathEvaluator1.get("originalDocumentName").toString().contains("GeneralOrder"));
+        assertTrue(jsonPathEvaluator1.get("originalDocumentName").toString().equalsIgnoreCase("GeneralOrder.pdf"));
     }
 
     @Test
@@ -160,7 +190,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
             BINARY_URL_TYPE, "generalOrder", consentedDir);
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
-        assertNotNull(documentContent);
+        assertTrue(documentContent.contains("Approved by:  District Judge test3"));
     }
 
     @Test
