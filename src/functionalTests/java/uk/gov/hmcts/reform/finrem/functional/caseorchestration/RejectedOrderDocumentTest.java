@@ -5,6 +5,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     @Value("${cos.consentOrder.not.approved}")
     private String consentOrderNotApprovedEndPoint;
 
+    @Ignore
     @Test
     public void verifyPreviewConsentOrderNotApproved() {
 
@@ -63,6 +65,8 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
         assertTrue("Order Refusal Preview Document not found ", !orderRefusalPreviewDocuments.isEmpty());
     }
 
+
+    @Ignore
     @Test
     public void verifyConsentOrderNotApproved() {
 

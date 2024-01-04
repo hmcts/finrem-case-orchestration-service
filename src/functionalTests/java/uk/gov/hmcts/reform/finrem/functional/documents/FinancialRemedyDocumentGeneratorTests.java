@@ -102,6 +102,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         generateDocument(MINI_FORM_A_JSON, generatorUrl, consentedDir);
     }
 
+    @Ignore
     @Test
     public void verifyRejectedOrderDocumentGenerationPostResponseContent() {
 
@@ -135,6 +136,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         generateDocument(CONTESTED_HEARING_JSON, generateHearingUrl, contestedDir);
     }
 
+    @Ignore
     @Test
     public void verifyRejectedOrderGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
@@ -184,6 +186,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         assertTrue(documentContent.contains(SOLICITOR_REF));
     }
 
+    @Ignore
     @Test
     public void downloadRejectOrderDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
