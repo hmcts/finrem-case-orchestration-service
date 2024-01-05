@@ -109,7 +109,7 @@ public class FinremCaseDataTest {
             boolean hasAnnotation = hasJsonIncludeAnnotation(fieldType);
             String fieldDeclaration = field.toString();
             assertTrue(hasAnnotation,
-                "Field '" + fieldDeclaration + "' should have @JsonInclude(JsonInclude.Include.NON_NULL) inside the file" + wrapperFields);
+                "Field '" + fieldDeclaration + "' should have @JsonInclude(JsonInclude.Include.NON_NULL) inside the file");
         }
     }
 
