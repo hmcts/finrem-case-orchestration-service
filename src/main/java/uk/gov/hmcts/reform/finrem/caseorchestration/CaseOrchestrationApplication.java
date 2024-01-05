@@ -16,7 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.task.ScheduledTaskRu
 @SpringBootApplication(scanBasePackages = {
     "uk.gov.hmcts.reform.finrem", "uk.gov.hmcts.reform.bsp.common", "uk.gov.hmcts.reform.ccd.document.am.feign"
 })
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.finrem"},
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.finrem",
+    "uk.gov.hmcts.reform.ccd.client"},
     basePackageClasses = {CaseDocumentClientApi.class, ServiceAuthorisationApi.class})
 @EnableCaching
 @EnableScheduling
