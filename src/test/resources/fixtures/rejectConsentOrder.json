@@ -77,7 +77,7 @@
           }
         }
       ],
-      "orderRefusalCollectionNew" : {
+      "orderRefusalOnScreen" : {
         "orderRefusalAfterText": "testAfterText",
         "orderRefusal" : [
           "Insufficient information provided – A",

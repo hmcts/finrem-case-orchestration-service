@@ -129,7 +129,8 @@ public class FinremCaseData {
     private LocalDate orderDirectionDate;
     private String orderDirectionAddComments;
     private List<OrderRefusalCollection> orderRefusalCollection;
-    private OrderRefusalHolder orderRefusalCollectionNew;
+    private List<OrderRefusalCollection> orderRefusalCollectionNew;
+    private OrderRefusalHolder orderRefusalOnScreen;
     private CaseDocument orderRefusalPreviewDocument;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

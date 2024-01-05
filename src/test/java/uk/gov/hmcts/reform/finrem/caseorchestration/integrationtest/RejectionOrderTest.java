@@ -47,6 +47,7 @@ public class RejectionOrderTest extends AbstractDocumentTest {
         generateEvidenceUploadServiceSuccessStub();
         idamServiceStub();
         generateDocumentServiceSuccessStub();
+        String valueAsString = objectMapper.writeValueAsString(request);
 
         webClient.perform(MockMvcRequestBuilders.post(apiUrl())
             .content(objectMapper.writeValueAsString(request))

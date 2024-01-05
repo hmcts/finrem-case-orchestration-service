@@ -84,7 +84,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
             .orderRefusal(refusalOptionList)
             .build();
         FinremCaseData finremCaseData = caseDetails.getData();
-        finremCaseData.setOrderRefusalCollectionNew(orderRefusalCollectionNew);
+        finremCaseData.setOrderRefusalOnScreen(orderRefusalCollectionNew);
         finremCaseData.getContactDetailsWrapper().setApplicantFmName("Poor");
         finremCaseData.getContactDetailsWrapper().setApplicantLname("Guy");
         finremCaseData.getContactDetailsWrapper().setAppRespondentFmName("john");
@@ -119,7 +119,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
             .orderRefusal(refusalOptionList)
             .build();
         FinremCaseData finremCaseData = caseDetails.getData();
-        finremCaseData.setOrderRefusalCollectionNew(orderRefusalCollectionNew);
+        finremCaseData.setOrderRefusalOnScreen(orderRefusalCollectionNew);
         finremCaseData.getContactDetailsWrapper().setApplicantFmName("Poor");
         finremCaseData.getContactDetailsWrapper().setApplicantLname("Guy");
         finremCaseData.getContactDetailsWrapper().setAppRespondentFmName("john");
@@ -155,7 +155,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
             .build();
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        finremCaseData.setOrderRefusalCollectionNew(orderRefusalCollectionNew);
+        finremCaseData.setOrderRefusalOnScreen(orderRefusalCollectionNew);
         finremCaseData.getContactDetailsWrapper().setApplicantFmName("Poor");
         finremCaseData.getContactDetailsWrapper().setApplicantLname("Guy");
         finremCaseData.getContactDetailsWrapper().setRespondentFmName("john");
@@ -203,7 +203,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
             .orderRefusal(refusalOptionList)
             .build();
         FinremCaseData finremCaseData = caseDetails.getData();
-        finremCaseData.setOrderRefusalCollectionNew(orderRefusalCollectionNew);
+        finremCaseData.setOrderRefusalOnScreen(orderRefusalCollectionNew);
         finremCaseData.getContactDetailsWrapper().setApplicantFmName("Poor");
         finremCaseData.getContactDetailsWrapper().setApplicantLname("Guy");
         finremCaseData.getContactDetailsWrapper().setAppRespondentFmName("john");
@@ -227,7 +227,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("moj moj");
 
         FinremCaseData caseData = refusalOrderDocumentService.setDefaults(finremCaseData, AUTH_TOKEN);
-        OrderRefusalHolder orderRefusalCollectionNew = caseData.getOrderRefusalCollectionNew();
+        OrderRefusalHolder orderRefusalCollectionNew = caseData.getOrderRefusalOnScreen();
         assertEquals("moj moj", orderRefusalCollectionNew.getOrderRefusalJudgeName());
         assertEquals(LocalDate.now(), orderRefusalCollectionNew.getOrderRefusalDate());
 

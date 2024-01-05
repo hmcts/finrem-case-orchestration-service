@@ -132,7 +132,8 @@
         "previousMIAMattendance",
         "other"
       ],
-      "orderRefusalCollectionNew": {
+      "orderRefusalCollectionNew": [],
+      "orderRefusalOnScreen": {
         "orderRefusalAfterText" : "testAfterText",
         "orderRefusal" : [
           "Transferred to Applicant’s home Court",
@@ -140,7 +141,7 @@
           "Insufficient information provided – C",
           "Order does not appear fair"
         ],
-        "orderRefusalOther" : "testOther",
+        "orderRefusalOther" : null,
         "orderRefusalDocs" : {
           "document_url" : "http://doc1",
           "document_filename" : "doc1",

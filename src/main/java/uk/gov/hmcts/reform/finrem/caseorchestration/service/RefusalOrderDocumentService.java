@@ -90,15 +90,15 @@ public class RefusalOrderDocumentService {
     }
 
     private FinremCaseData addToOrderRefusalCollection(FinremCaseData caseData) {
-        OrderRefusalHolder orderRefusalCollectionNew = caseData.getOrderRefusalCollectionNew();
+        OrderRefusalHolder orderRefusalOnScreen = caseData.getOrderRefusalOnScreen();
         List<OrderRefusalCollection> refusalCollections
             = Optional.ofNullable(caseData.getOrderRefusalCollection()).orElse(new ArrayList<>());
         OrderRefusalCollection refusalCollection = OrderRefusalCollection.builder()
-            .value(orderRefusalCollectionNew)
+            .value(orderRefusalOnScreen)
             .build();
         refusalCollections.add(refusalCollection);
         caseData.setOrderRefusalCollection(refusalCollections);
-        caseData.setOrderRefusalCollectionNew(null);
+        caseData.setOrderRefusalOnScreen(null);
         return caseData;
     }
 
@@ -121,13 +121,13 @@ public class RefusalOrderDocumentService {
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
-        OrderRefusalHolder orderRefusalCollectionNew = convertToRefusalOrder(caseDetailsCopy.getData().get("orderRefusalCollectionNew"));
-        List<OrderRefusalOption> optionList = orderRefusalCollectionNew.getOrderRefusal();
+        OrderRefusalHolder orderRefusalOnScreen = convertToRefusalOrder(caseDetailsCopy.getData().get("orderRefusalOnScreen"));
+        List<OrderRefusalOption> optionList = orderRefusalOnScreen.getOrderRefusal();
         List<OrderRefusalOption> optionListTranslated = new ArrayList<>();
         optionList.forEach(s -> optionListTranslated.add(OrderRefusalOption
             .getOrderRefusalOption(REFUSAL_KEYS.getOrDefault(s.getId(), s.getId()))));
-        orderRefusalCollectionNew.setOrderRefusal(optionListTranslated);
-        caseDetailsCopy.getData().put("orderRefusalCollectionNew", orderRefusalCollectionNew);
+        orderRefusalOnScreen.setOrderRefusal(optionListTranslated);
+        caseDetailsCopy.getData().put("orderRefusalOnScreen", orderRefusalOnScreen);
 
         return genericDocumentService.generateDocument(authorisationToken,
             applyAddExtraFields(caseDetailsCopy),
@@ -173,11 +173,11 @@ public class RefusalOrderDocumentService {
     }
 
     public FinremCaseData setDefaults(FinremCaseData caseData, String userAuthorisation) {
-        OrderRefusalHolder refusalHolder = Optional.ofNullable(caseData.getOrderRefusalCollectionNew())
-            .orElse(new OrderRefusalHolder());
-        refusalHolder.setOrderRefusalDate(LocalDate.now());
-        refusalHolder.setOrderRefusalJudgeName(idamService.getIdamFullName(userAuthorisation));
-        caseData.setOrderRefusalCollectionNew(refusalHolder);
+        OrderRefusalHolder refusalHolder = OrderRefusalHolder.builder()
+                .orderRefusalDate(LocalDate.now())
+                .orderRefusalJudgeName(idamService.getIdamFullName(userAuthorisation))
+            .build();
+        caseData.setOrderRefusalOnScreen(refusalHolder);
         return caseData;
     }
 }
