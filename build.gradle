@@ -31,7 +31,7 @@ def versions = [
         serviceTokenGenerator: '5.1.1',
         springDoc            : '1.7.0',
         wiremock             : '3.0.1',
-        apacheLogging        : '2.22.0',
+        apacheLogging        : '2.22.1',
         idamClient           : '3.0.3',
         jjwt                 : '0.12.3',
         skyscreamer          : '1.5.1',
