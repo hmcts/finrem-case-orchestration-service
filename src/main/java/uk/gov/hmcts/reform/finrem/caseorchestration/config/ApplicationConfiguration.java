@@ -1,12 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -17,22 +14,16 @@ public class ApplicationConfiguration {
 
     @Bean
     public RestTemplate restTemplate() {
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient()));
+        RestTemplate restTemplate = new RestTemplate(httpClient());
         return restTemplate;
     }
 
-    private CloseableHttpClient httpClient() {
-        RequestConfig config = RequestConfig.custom()
-            .setConnectTimeout(httpConfiguration.getTimeout())
-            .setConnectionRequestTimeout(httpConfiguration.getRequestTimeout())
-            .setSocketTimeout(httpConfiguration.getReadTimeout()) // read time out
-            .build();
+    private SimpleClientHttpRequestFactory httpClient() {
 
-        return HttpClientBuilder
-            .create()
-            .useSystemProperties()
-            .setDefaultRequestConfig(config)
-            .build();
+        SimpleClientHttpRequestFactory clientHttpRequestFactory  = new SimpleClientHttpRequestFactory();
+        clientHttpRequestFactory.setConnectTimeout(httpConfiguration.getTimeout());
+        clientHttpRequestFactory.setReadTimeout(httpConfiguration.getRequestTimeout());
+
+        return clientHttpRequestFactory;
     }
 }
