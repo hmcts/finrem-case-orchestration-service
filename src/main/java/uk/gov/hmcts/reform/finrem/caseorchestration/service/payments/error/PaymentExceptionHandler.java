@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.error;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,7 +31,7 @@ public class PaymentExceptionHandler {
 
         if (exception.getCause() instanceof HttpClientErrorException) {
             HttpClientErrorException cause = (HttpClientErrorException) exception.getCause();
-            HttpStatus errorCode = cause.getStatusCode();
+            HttpStatusCode errorCode = cause.getStatusCode();
             try {
                 log.info("Payment error, exception: {} ", cause);
                 if (errorCode == BAD_REQUEST || errorCode == NOT_FOUND || errorCode == UNPROCESSABLE_ENTITY) {
