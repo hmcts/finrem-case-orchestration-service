@@ -125,7 +125,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION),
-            hasSize(9));
+            hasSize(4));
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(3));
