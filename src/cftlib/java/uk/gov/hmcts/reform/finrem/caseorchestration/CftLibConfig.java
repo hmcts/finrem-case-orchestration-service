@@ -10,6 +10,10 @@ import java.nio.file.Path;
 
 @Component
 public class CftLibConfig implements CFTLibConfigurer {
+
+    public static final String CASEWORKER_DIVORCE_FINANCIALREMEDY_SOLICITOR = "caseworker-divorce-financialremedy-solicitor";
+    public static final String CASEWORKER = "caseworker";
+
     @Override
     public void configure(CFTLib lib) throws Exception {
         createCcdRoles(lib);
@@ -28,10 +32,10 @@ public class CftLibConfig implements CFTLibConfigurer {
     private void createCcdRoles(CFTLib lib) {
         lib.createRoles(
             "citizen",
-            "caseworker",
+            CASEWORKER,
             "caseworker-approver",
             "caseworker-divorce-financialremedy-courtadmin",
-            "caseworker-divorce-financialremedy-solicitor",
+            CASEWORKER_DIVORCE_FINANCIALREMEDY_SOLICITOR,
             "caseworker-divorce-financialremedy-judiciary",
             "caseworker-divorce-systemupdate",
             "caseworker-divorce-bulkscan",
@@ -42,13 +46,13 @@ public class CftLibConfig implements CFTLibConfigurer {
     }
 
     private void createIdamUsers(CFTLib lib) {
-        lib.createIdamUser("fr_applicant_solicitor@mailinator.com", "caseworker", "caseworker-divorce-financialremedy-solicitor");
-        lib.createIdamUser("fr_applicant_solicitor2@mailinator.com", "caseworker", "caseworker-divorce-financialremedy-solicitor");
-        lib.createIdamUser("fr_respondent_solicitor@mailinator.com", "caseworker", "caseworker-divorce-financialremedy-solicitor");
-        lib.createIdamUser("fr_respondent_solicitor2@mailinator.com", "caseworker", "caseworker-divorce-financialremedy-solicitor");
-        lib.createIdamUser("fr_judge@mailinator.com", "caseworker", "caseworker-divorce-financialremedy-judiciary");
+        lib.createIdamUser("fr_applicant_solicitor@mailinator.com", CASEWORKER, CASEWORKER_DIVORCE_FINANCIALREMEDY_SOLICITOR);
+        lib.createIdamUser("fr_applicant_solicitor2@mailinator.com", CASEWORKER, CASEWORKER_DIVORCE_FINANCIALREMEDY_SOLICITOR);
+        lib.createIdamUser("fr_respondent_solicitor@mailinator.com", CASEWORKER, CASEWORKER_DIVORCE_FINANCIALREMEDY_SOLICITOR);
+        lib.createIdamUser("fr_respondent_solicitor2@mailinator.com", CASEWORKER, CASEWORKER_DIVORCE_FINANCIALREMEDY_SOLICITOR);
+        lib.createIdamUser("fr_judge@mailinator.com", CASEWORKER, "caseworker-divorce-financialremedy-judiciary");
 
-        lib.createIdamUser("fr_courtadmin@mailinator.com", "caseworker", "caseworker-divorce",
+        lib.createIdamUser("fr_courtadmin@mailinator.com", CASEWORKER, "caseworker-divorce",
             "caseworker-divorce-bulkscan", "caseworker-divorce-financialremedy",
             "caseworker-divorce-financialremedy-courtadmin");
 
