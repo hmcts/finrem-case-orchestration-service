@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Before;
@@ -8,12 +9,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 public class FinremCaseDataTest {
@@ -94,6 +97,23 @@ public class FinremCaseDataTest {
         validateState(configFile);
     }
 
+    @Test
+    public void testAllFieldsWithWrapperShouldHaveJsonIncludeNonNull() {
+        List<Field> allFields = getAllFields(FinremCaseData.class);
+        List<Field> wrapperFields = allFields.stream()
+            .filter(field -> field.getName().contains("Wrapper"))
+            .filter(field -> !field.getName().contains("uploadCaseDocumentWrapper"))
+            .toList();
+
+        for (Field field : wrapperFields) {
+            Class<?> fieldType = field.getType();
+            boolean hasAnnotation = hasJsonIncludeAnnotation(fieldType);
+            String fieldDeclaration = field.toString();
+            assertTrue(hasAnnotation,
+                "Field '" + fieldDeclaration + "' should have @JsonInclude(JsonInclude.Include.NON_NULL) inside the file");
+        }
+    }
+
     private void validateConfig(List<File> configFiles) throws IOException, InvalidFormatException {
         CCDConfigValidator ccdConfigValidator = new CCDConfigValidator();
         List<String> errors = ccdConfigValidator.validateCaseFields(configFiles, FinremCaseData.class);
@@ -118,6 +138,27 @@ public class FinremCaseDataTest {
         File configFile = localMode ? new File(classLoader.getResource(name).getFile())
             : new File(fileNameWithPath);
         return configFile;
+    }
+
+    private List<Field> getAllFields(Class<?> clazz) {
+        List<Field> fields = Arrays.asList(clazz.getDeclaredFields());
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass != null) {
+            fields.addAll(getAllFields(superclass));
+        }
+        return  fields;
+    }
+
+    private boolean hasJsonIncludeAnnotation(Class<?> clazz) {
+        Class<?> superClass;
+        while ((superClass = clazz.getSuperclass()) != null && !superClass.equals(clazz)) {
+            if (clazz.isAnnotationPresent(JsonInclude.class)) {
+                JsonInclude jsonIncludeAnnotation = clazz.getAnnotation(JsonInclude.class);
+                return  jsonIncludeAnnotation.value() == JsonInclude.Include.NON_NULL;
+            }
+            clazz = superClass;
+        }
+        return false;
     }
 }
 
