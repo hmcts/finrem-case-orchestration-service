@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralEmailDocumentCategoriser;
 
 @Slf4j
 @Service
@@ -22,16 +23,19 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
     private final NotificationService notificationService;
     private final GeneralEmailService generalEmailService;
     private final GenericDocumentService genericDocumentService;
+    private final GeneralEmailDocumentCategoriser generalEmailCategoriser;
 
     @Autowired
     public GeneralEmailAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                             NotificationService notificationService,
                                             GeneralEmailService generalEmailService,
-                                            GenericDocumentService genericDocumentService) {
+                                            GenericDocumentService genericDocumentService,
+                                            GeneralEmailDocumentCategoriser generalEmailCategoriser) {
         super(mapper);
         this.notificationService = notificationService;
         this.generalEmailService = generalEmailService;
         this.genericDocumentService = genericDocumentService;
+        this.generalEmailCategoriser = generalEmailCategoriser;
     }
 
     @Override
@@ -55,13 +59,14 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
                 userAuthorisation, caseDetails.getId().toString());
             caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
         }
+        generalEmailService.storeGeneralEmail(caseDetails);
+
         if (caseDetails.isConsentedApplication()) {
             notificationService.sendConsentGeneralEmail(caseDetails, userAuthorisation);
         } else {
             notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);
+            generalEmailCategoriser.categorise(caseDetails.getData());
         }
-
-        generalEmailService.storeGeneralEmail(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
