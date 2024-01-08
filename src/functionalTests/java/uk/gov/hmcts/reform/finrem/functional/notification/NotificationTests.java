@@ -10,9 +10,6 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 @RunWith(SerenityRunner.class)
 public class NotificationTests extends IntegrationTestBase {
 
-    @Value("${cos.notification.prepare-for-hearing.api}")
-    private String prepareForHearingApiUri;
-
     @Value("${cos.notification.prepare-for-hearing-order-sent.api}")
     private String prepareForHearingOrderSentApiUri;
 
@@ -24,13 +21,6 @@ public class NotificationTests extends IntegrationTestBase {
 
     private final String consentedDir = "/json/consented/";
     private final String contestedDir = "/json/contested/";
-
-    @Test
-    public void verifyNotifyPrepareForHearingTestIsOkay() {
-
-        utils.validatePostSuccess(prepareForHearingApiUri,
-            "ccd-request-with-solicitor-prepareForHearing.json", contestedDir);
-    }
 
     @Test
     public void verifyNotifyContestApplicationIssuedIsOkay() {
