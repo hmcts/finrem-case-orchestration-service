@@ -121,7 +121,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
 
         documentHandlers.forEach(documentCollectionService ->
             Mockito.verify(documentCollectionService)
-                .replaceManagedDocumentsInCollectionType(callbackRequest, caseData.getManageScannedDocumentCollection()));
+                .replaceManagedDocumentsInCollectionType(callbackRequest, caseData.getManageScannedDocumentCollection(), true));
 
         assertThat(caseDetails.getData().getScannedDocuments().size(), is(0));
     }

@@ -31,7 +31,16 @@ public abstract class DocumentHandler {
     );
 
     public void replaceManagedDocumentsInCollectionType(FinremCallbackRequest callbackRequest,
-                                                        List<UploadCaseDocumentCollection> screenCollection) {
+                                                        List<UploadCaseDocumentCollection> screenCollection,
+                                                        boolean clearExistingCollection) {
+        if (clearExistingCollection) {
+            FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+            List<UploadCaseDocumentCollection> originalCollectionForType =
+                caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
+
+            originalCollectionForType.clear();
+        }
         addUploadedDocumentToDocumentCollectionType(callbackRequest, screenCollection);
     }
 

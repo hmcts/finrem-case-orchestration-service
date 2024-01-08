@@ -60,7 +60,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
         updateFileNames(manageScannedDocumentCollection);
 
         documentHandlers.forEach(documentCollectionService ->
-            documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, manageScannedDocumentCollection));
+            documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, manageScannedDocumentCollection, false));
 
         Optional.ofNullable(caseData.getScannedDocuments()).ifPresent(List::clear);
 

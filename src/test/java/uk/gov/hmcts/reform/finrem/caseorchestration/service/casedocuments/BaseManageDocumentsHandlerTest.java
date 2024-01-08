@@ -91,7 +91,7 @@ public abstract class BaseManageDocumentsHandlerTest {
 
         handler.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+            screenUploadDocumentList, true);
 
         assertExpectedCollectionType();
         assertDocumentCategoryIdAppliedForDocumentCollection();
