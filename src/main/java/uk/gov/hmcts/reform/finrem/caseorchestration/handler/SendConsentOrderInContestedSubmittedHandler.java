@@ -69,22 +69,22 @@ public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackH
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
-        log.info("Invoking contested {} submitted callback for case id: {}", callbackRequest.getEventType(), finremCaseDetails.getId());
+        log.info("Invoking contested {} submitted callback for Case ID: {}", callbackRequest.getEventType(), finremCaseDetails.getId());
 
         List<String> parties = generalOrderService.getParties(finremCaseDetails);
-        log.info("Selected parties {} on case {}", parties, finremCaseDetails.getId());
+        log.info("Selected parties {} on Case ID: {}", parties, finremCaseDetails.getId());
 
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         ConsentOrderWrapper wrapper = finremCaseDetails.getData().getConsentOrderWrapper();
         CaseDocument latestGeneralOrder = finremCaseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
         if (getApprovedOrderModifiedLatest(wrapper, latestGeneralOrder, userAuthorisation)) {
-            log.info("Approved consent order modified after general and refused orders for case {}", finremCaseDetails.getId());
+            log.info("Approved consent order modified after general and refused orders for Case ID: {}", finremCaseDetails.getId());
             contestedConsentOrderApprovedCorresponder.sendCorrespondence(caseDetails);
         } else if (getRefusedOrderModifiedLatest(wrapper, latestGeneralOrder, userAuthorisation)) {
-            log.info("Refused consent order modified after general and approved orders for case {}", finremCaseDetails.getId());
+            log.info("Refused consent order modified after general and approved orders for Case ID: {}", finremCaseDetails.getId());
             contestedConsentOrderNotApprovedCorresponder.sendCorrespondence(caseDetails);
         } else {
-            log.info("General order modified after approved and refused consent orders for case {}", finremCaseDetails.getId());
+            log.info("General order modified after approved and refused consent orders for Case ID: {}", finremCaseDetails.getId());
             generalOrderRaisedCorresponder.sendCorrespondence(caseDetails);
         }
 
@@ -96,9 +96,9 @@ public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackH
 
     private void sendNotifications(FinremCaseDetails caseDetails, List<String> parties, String userAuthorisation) {
         generalOrderService.setPartiesToReceiveCommunication(caseDetails, parties);
-        log.info("About to start send order correspondence for case {}", caseDetails.getId());
+        log.info("About to start send order correspondence for Case ID: {}", caseDetails.getId());
         contestedSendOrderCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
-        log.info("Finish sending order correspondence for case {}", caseDetails.getId());
+        log.info("Finish sending order correspondence for Case ID: {}", caseDetails.getId());
     }
 
     private boolean getApprovedOrderModifiedLatest(ConsentOrderWrapper wrapper, CaseDocument latestGeneralOrder, String userAuth) {

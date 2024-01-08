@@ -38,7 +38,7 @@ public class ManualPaymentAboutToSubmitHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         String caseId = callbackRequest.getCaseDetails().getId().toString();
-        log.info("Invoking contested event {} about to start callback for case id: {}",
+        log.info("Invoking contested event {} about to start callback for Case ID: {}",
             EventType.MANUAL_PAYMENT, caseId);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 

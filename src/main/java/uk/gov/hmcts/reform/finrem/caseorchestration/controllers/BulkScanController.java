@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,6 @@ import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.event.bulkscan.BulkScanEvents;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
-
-import javax.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
@@ -99,7 +98,7 @@ public class BulkScanController {
         @Valid @RequestBody ExceptionRecord exceptionRecord
     ) {
         String exceptionRecordId = exceptionRecord.getId();
-        log.info("Transforming exception record to case. Id: {}", exceptionRecordId);
+        log.info("Transforming exception record to Case ID: {}", exceptionRecordId);
 
         authService.assertIsServiceAllowedToUpdate(s2sAuthToken);
 

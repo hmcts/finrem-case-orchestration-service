@@ -46,12 +46,12 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         Long caseId = callbackRequest.getCaseDetails().getId();
-        log.info("Invoking contested event {}, callback {} callback for case id: {}",
+        log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
             callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
-        log.info("selected operation choice {} for intervener {} for case id: {}",
+        log.info("selected operation choice {} for intervener {} for Case ID: {}",
             selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
         List<String> errors = new ArrayList<>();
         switch (selectedOperationCode) {

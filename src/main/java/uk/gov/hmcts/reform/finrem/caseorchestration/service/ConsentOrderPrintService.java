@@ -37,7 +37,7 @@ public class ConsentOrderPrintService {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
 
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
-            log.info("Sending approved order for applicant to bulk print for case {}", finremCaseDetails.getId());
+            log.info("Sending approved order for applicant to bulk print for Case ID {}", finremCaseDetails.getId());
             UUID applicantLetterId = shouldPrintOrderApprovedDocuments(finremCaseDetails, authorisationToken)
                 ? printApplicantConsentOrderApprovedDocuments(finremCaseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(finremCaseDetails, authorisationToken);
@@ -47,7 +47,7 @@ public class ConsentOrderPrintService {
         }
 
         if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
-            log.info("Sending approved order for respondent to bulk print for case {}", finremCaseDetails.getId());
+            log.info("Sending approved order for respondent to bulk print for Case ID: {}", finremCaseDetails.getId());
             generateCoversheetForRespondentAndSendOrders(finremCaseDetails, authorisationToken);
         }
 
@@ -61,7 +61,7 @@ public class ConsentOrderPrintService {
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
         if (caseDataService.isRespondentAddressConfidential(caseDetails.getData())) {
-            log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", finremCaseDetails.getId());
+            log.info("Case ID: {}, has been marked as confidential. Adding coversheet to confidential field", finremCaseDetails.getId());
             caseData.setBulkPrintCoverSheetRes(null);
             caseData.setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
         } else {
@@ -69,7 +69,7 @@ public class ConsentOrderPrintService {
             caseData.setBulkPrintLetterIdRes(respondentLetterId.toString());
         }
 
-        log.info("Generated Respondent CoverSheet for bulk print, case {}. coversheet: {}, letterId : {}", finremCaseDetails.getId(),
+        log.info("Generated Respondent CoverSheet for bulk print, Case ID: {}. coversheet: {}, letterId : {}", finremCaseDetails.getId(),
             respondentCoverSheet, respondentLetterId);
     }
 
@@ -90,7 +90,7 @@ public class ConsentOrderPrintService {
     }
 
     private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet, FinremCaseDetails caseDetails, String authorisationToken) {
-        log.info("Sending order documents to recipient / solicitor for Bulk Print, case {}", caseDetails.getId());
+        log.info("Sending order documents to recipient / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverSheet));
