@@ -275,6 +275,59 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertEquals("One document available to share with other parties", 1, data.getOrdersToShare().getListItems().size());
     }
 
+
+    @Test
+    public void whenRequestedGeneralOrderListPresentButGeneralOrderIsNotThere_and_shared_before_returnList() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollectionNoAdditionalDocument());
+
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(
+            caseDocument("url", "moj.pdf", "binaryurl")));
+
+        DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+
+        data.setOrdersToShare(selectList);
+
+        generalOrderService.setOrderList(caseDetails);
+
+        assertEquals("Not document available to share with other parties", 0,
+            data.getOrdersToShare().getListItems().size());
+    }
+
+    @Test
+    public void whenRequestedGeneralOrderListIsEmptyPresentButGeneralOrderIsNotThere_and_shared_before_returnList() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        ContestedGeneralOrderCollection collection = ContestedGeneralOrderCollection.builder().value(null).build();
+        List<ContestedGeneralOrderCollection> collections = new ArrayList<>();
+        collections.add(collection);
+
+        data.getGeneralOrderWrapper().setGeneralOrders(collections);
+
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(
+            caseDocument("url", "moj.pdf", "binaryurl")));
+
+        DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+
+        data.setOrdersToShare(selectList);
+
+        generalOrderService.setOrderList(caseDetails);
+
+        assertEquals("Not document available to share with other parties", 0,
+            data.getOrdersToShare().getListItems().size());
+    }
+
     @Test
     public void whenRequestedOrderList_and_shared_before_returnList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
@@ -636,6 +689,20 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .judge("Moj")
             .generalOrderText("general order")
             .additionalDocument(caseDocument())
+            .build();
+
+        ContestedGeneralOrderCollection collection = ContestedGeneralOrderCollection.builder().value(generalOrder).build();
+        List<ContestedGeneralOrderCollection> collections = new ArrayList<>();
+        collections.add(collection);
+        return collections;
+    }
+
+    private List<ContestedGeneralOrderCollection> getGeneralOrderCollectionNoAdditionalDocument() {
+        ContestedGeneralOrder generalOrder = ContestedGeneralOrder
+            .builder()
+            .dateOfOrder(LocalDate.of(2002, 2, 5))
+            .judge("Moj")
+            .generalOrderText("general order")
             .build();
 
         ContestedGeneralOrderCollection collection = ContestedGeneralOrderCollection.builder().value(generalOrder).build();
