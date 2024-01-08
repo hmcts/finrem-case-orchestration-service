@@ -53,7 +53,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         if (existingList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
-            log.info("outcome stage migrate existing general application for Case ID: {}", caseId);
+            log.info("Outcome stage migrate existing general application for Case ID: {}", caseId);
             migrateExistingApplication(caseDetails, userAuthorisation);
         } else {
             DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcomeList());
@@ -67,7 +67,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
             final List<GeneralApplicationCollectionData> applicationCollectionDataList
                 = existingList.stream().map(ga -> setStatusForElement(caseData, ga, valueCode, outcome)).sorted(helper::getCompareTo).toList();
 
-            log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseId);
+            log.info("applicationCollectionDataList : {} Case ID: {}", applicationCollectionDataList.size(), caseId);
             service.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
             caseData.getGeneralApplicationWrapper().setGeneralApplications(
                 helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
@@ -87,7 +87,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
         String caseId = caseDetails.getId().toString();
         FinremCaseData caseData = caseDetails.getData();
         GeneralApplicationCollectionData data =
-            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
+            helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         if (data != null) {

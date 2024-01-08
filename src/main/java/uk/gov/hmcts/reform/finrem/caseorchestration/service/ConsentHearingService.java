@@ -50,7 +50,7 @@ public class ConsentHearingService {
     private final ConsentedHearingHelper helper;
 
     public void sendNotification(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        log.info("Hearing notification for case id {}", caseDetails.getId());
+        log.info("Hearing notification for Case ID: {}", caseDetails.getId());
 
         FinremCaseData data = caseDetails.getData();
         if (!data.isPaperCase()) {
@@ -72,38 +72,38 @@ public class ConsentHearingService {
         if (hearingIdsToProcess.contains(hearingCaseData.getId())) {
             Map<String, Object> caseData = helper.convertToMap(hearingCaseData.getValue());
             if (caseDetails.isApplicantSolicitorAgreeToReceiveEmails()) {
-                log.info("Sending email notification to Applicant Solicitor about hearing for case id {}", caseDetails.getId());
+                log.info("Sending email notification to Applicant Solicitor about hearing for Case ID: {}", caseDetails.getId());
                 notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(caseDetails, caseData);
-                log.info("Email notification to Applicant Solicitor about hearing for case id {} sent.", caseDetails.getId());
+                log.info("Email notification to Applicant Solicitor about hearing for Case ID: {} sent.", caseDetails.getId());
             }
             if (caseDetails.getData().isRespondentSolicitorEmailCommunicationEnabled()) {
-                log.info("Sending email notification to Respondent Solicitor about hearing for case id {}", caseDetails.getId());
+                log.info("Sending email notification to Respondent Solicitor about hearing for Case ID: {}", caseDetails.getId());
                 notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(caseDetails, caseData);
-                log.info("Email notification to Respondent Solicitor about hearing for case id {} sent", caseDetails.getId());
+                log.info("Email notification to Respondent Solicitor about hearing for Case ID: {} sent", caseDetails.getId());
             }
         }
     }
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void submitHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
-        log.info("In submit Hearing for case id {}", caseDetails.getId());
+        log.info("In submit Hearing for Case ID: {}", caseDetails.getId());
 
         Map<String, Object> caseData = caseDetails.getData();
         List<ConsentedHearingDataWrapper> hearingList = helper.getHearings(caseData);
 
-        log.info("hearingList ::{} for case id {}", hearingList.size(), caseDetails.getId());
+        log.info("hearingList ::{} for Case ID: {}", hearingList.size(), caseDetails.getId());
         List<String> hearingIdsToProcess =  getNewOrDateTimeModifiedHearingIdsList(caseDetails, caseDetailsBefore);
-        log.info("Hearing to Process ::{} for case id {}", hearingIdsToProcess.size(), caseDetails.getId());
+        log.info("Hearing to Process ::{} for Case ID: {}", hearingIdsToProcess.size(), caseDetails.getId());
 
         List<BulkPrintDocument> documents = new ArrayList<>();
         List<ConsentedHearingDataWrapper> updatedHearingList =
             hearingList.stream().map(hearingData -> generateHearingDocument(caseDetails,
                 hearingData, hearingIdsToProcess, documents, authorisationToken)).toList();
 
-        log.info("Bulk Print list  ::{} for case id {}", documents.size(), caseDetails.getId());
+        log.info("Bulk Print list  ::{} for Case ID: {}", documents.size(), caseDetails.getId());
         caseData.put(LIST_FOR_HEARING_COLLECTION_CONSENTED, sortEarliestHearingFirst(updatedHearingList));
 
-        log.info("Sending hearing documents to bulk print for caseid {}", caseDetails.getId());
+        log.info("Sending hearing documents to bulk print for Case ID: {}", caseDetails.getId());
         sendToBulkPrint(caseDetails, caseData, authorisationToken, documents);
     }
 
@@ -112,14 +112,14 @@ public class ConsentHearingService {
                                  List<BulkPrintDocument> documents) {
 
         if (helper.isPaperApplication(caseData) || !helper.isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-            log.info("Sending hearing documents to applicant - bulk print for caseid {}", caseDetails.getId());
+            log.info("Sending hearing documents to applicant - bulk print for Case ID: {}", caseDetails.getId());
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sent hearing documents to applicant - bulk print for caseid {}", caseDetails.getId());
+            log.info("Sent hearing documents to applicant - bulk print for Case ID: {}", caseDetails.getId());
         }
         if (helper.isPaperApplication(caseData) || !helper.isRespondentSolicitorAgreeToReceiveEmails(caseData)) {
-            log.info("Sending hearing documents to respondent - bulk print for caseid {}", caseDetails.getId());
+            log.info("Sending hearing documents to respondent - bulk print for Case ID: {}", caseDetails.getId());
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sent hearing documents to respondent - bulk print for caseid {}", caseDetails.getId());
+            log.info("Sent hearing documents to respondent - bulk print for Case ID: {}", caseDetails.getId());
         }
     }
 
@@ -174,9 +174,9 @@ public class ConsentHearingService {
                                     List<BulkPrintDocument> documents,String authorisationToken) {
         String isDocUploaded = nullToEmpty(hearingData.get(HEARING_PROMPT_FOR_DOCUMENT));
         String caseId = caseDetails.getId().toString();
-        log.warn("Additional uploaded hearing document found for printing for case id {}", caseId);
+        log.warn("Additional uploaded hearing document found for printing for Case ID: {}", caseId);
         if (YES_VALUE.equalsIgnoreCase(isDocUploaded)) {
-            log.warn("Additional uploaded hearing document found for printing for case id {}", caseId);
+            log.warn("Additional uploaded hearing document found for printing for Case ID: {}", caseId);
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(hearingData.get(HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments =
                 genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
@@ -187,12 +187,12 @@ public class ConsentHearingService {
     private void addHearingVenueDetails(CaseDetails caseDetailsCopy, Map<String, Object> hearingCaseData) {
         Map<String, Object> caseData = caseDetailsCopy.getData();
         try {
-            log.info("Hearing Case Data {} for caseId {}", hearingCaseData, caseDetailsCopy.getId());
+            log.info("Hearing Case Data {} for Case ID: {}", hearingCaseData, caseDetailsCopy.getId());
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
             String selectedCourt = getSelectedCourt(hearingCaseData);
-            log.info("SELECTED COURT ---> {} for caseId {}", selectedCourt, caseDetailsCopy.getId());//FR_londonList
+            log.info("SELECTED COURT ---> {} for Case ID: {}", selectedCourt, caseDetailsCopy.getId());//FR_londonList
             String courtDetailsObj = Objects.toString(hearingCaseData.get(selectedCourt), null);
-            log.info("HEARING COURT ---> {} for caseId {}", courtDetailsObj, caseDetailsCopy.getId());
+            log.info("HEARING COURT ---> {} for Case ID: {}", courtDetailsObj, caseDetailsCopy.getId());
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
             caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
         } catch (IOException exception) {

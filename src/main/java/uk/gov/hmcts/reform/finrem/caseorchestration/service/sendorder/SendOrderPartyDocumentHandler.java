@@ -34,7 +34,7 @@ public abstract class SendOrderPartyDocumentHandler {
         if (partyList.contains(caseRoleCode)) {
             final Long caseId = finremCaseDetails.getId();
             FinremCaseData caseData = finremCaseDetails.getData();
-            log.info("Received request to send hearing pack to {} for case {}:", caseRoleCode,  caseId);
+            log.info("Received request to send hearing pack to {} for Case ID: {}:", caseRoleCode,  caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData)).orElse(new ArrayList<>());
             if (orderColl.isEmpty()) {
                 addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
@@ -85,7 +85,7 @@ public abstract class SendOrderPartyDocumentHandler {
         if (partyList.contains(caseRoleCode)) {
             final Long caseId = finremCaseDetails.getId();
             FinremCaseData caseData = finremCaseDetails.getData();
-            log.info("Received request to set consolidate document for {} for case {}:", caseRoleCode,  caseId);
+            log.info("Received request to set consolidate document for {} for Case ID: {}:", caseRoleCode,  caseId);
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData)).orElse(new ArrayList<>());
             setConsolidateCollection(caseData, orderColl);
         }

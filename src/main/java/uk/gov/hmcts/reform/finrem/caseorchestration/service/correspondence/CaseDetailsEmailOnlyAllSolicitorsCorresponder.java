@@ -21,7 +21,7 @@ public abstract class CaseDetailsEmailOnlyAllSolicitorsCorresponder extends Emai
 
     @Override
     public void sendCorrespondence(CaseDetails caseDetails) {
-        log.info("Determine whether to send email notifications to all solicitors for case: {}", caseDetails.getId());
+        log.info("Determine whether to send email notifications to all solicitors for Case ID: {}", caseDetails.getId());
         sendApplicantCorrespondence(caseDetails);
         sendRespondentCorrespondence(caseDetails);
         if (notificationService.isContestedApplication(caseDetails)) {
@@ -31,14 +31,14 @@ public abstract class CaseDetailsEmailOnlyAllSolicitorsCorresponder extends Emai
 
     private void sendApplicantCorrespondence(CaseDetails caseDetails) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         }
     }
 
     private void sendRespondentCorrespondence(CaseDetails caseDetails) {
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to respondent for Case ID: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
         }
     }
@@ -48,7 +48,7 @@ public abstract class CaseDetailsEmailOnlyAllSolicitorsCorresponder extends Emai
         final List<IntervenerWrapper> interveners =  finremCaseDetails.getData().getInterveners();
         interveners.forEach(intervenerWrapper -> {
             if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
-                log.info("Sending email correspondence to {} for case: {}",
+                log.info("Sending email correspondence to {} for Case ID: {}",
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
                 this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
-
-import javax.validation.constraints.NotNull;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.ResponseEntity.ok;
@@ -53,7 +52,7 @@ public class CcdCallbackController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
-        log.info("About to start Financial Remedy case callback `{}` received for Case ID `{}`",
+        log.info("About to start Financial Remedy case callback `{}` received for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
@@ -74,7 +73,7 @@ public class CcdCallbackController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
-        log.info("About to submit Financial Remedy case callback `{}` received for Case ID `{}`",
+        log.info("About to submit Financial Remedy case callback `{}` received for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
@@ -95,7 +94,7 @@ public class CcdCallbackController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
-        log.info("Mid Event Financial Remedy case callback `{}` received for Case ID `{}`",
+        log.info("Mid Event Financial Remedy case callback `{}` received for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
@@ -117,7 +116,7 @@ public class CcdCallbackController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
-        log.info("Submitted Financial Remedy case callback `{}` received for Case ID `{}`",
+        log.info("Submitted Financial Remedy case callback `{}` received for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
@@ -141,7 +140,7 @@ public class CcdCallbackController {
         GenericAboutToStartOrSubmitCallbackResponse callbackResponse =
             callbackDispatchService.dispatchToHandlers(callbackType, callbackRequest, userAuthorisation);
 
-        log.info("Financial Remedy Case CCD callback `{}` handled for Case ID `{}`",
+        log.info("Financial Remedy Case CCD callback `{}` handled for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 

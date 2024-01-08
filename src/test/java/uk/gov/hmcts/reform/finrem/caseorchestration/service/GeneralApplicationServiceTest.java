@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -89,6 +90,8 @@ public class GeneralApplicationServiceTest {
     private AssignCaseAccessService accessService;
     @Mock
     private BulkPrintDocumentService service;
+    @Mock
+    private GeneralApplicationsCategoriser generalApplicationsCategoriser;
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
     private CaseDetails caseDetails;
@@ -102,7 +105,8 @@ public class GeneralApplicationServiceTest {
         caseDetails = CaseDetails.builder().data(new LinkedHashMap<>()).build();
         helper = new GeneralApplicationHelper(objectMapper, genericDocumentService);
         generalApplicationService = new GeneralApplicationService(documentHelper,
-            objectMapper, idamService, genericDocumentService, accessService, helper, service);
+            objectMapper, idamService, genericDocumentService, accessService, helper, service,
+            generalApplicationsCategoriser);
 
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
@@ -337,7 +341,8 @@ public class GeneralApplicationServiceTest {
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
         List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
-            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {});
+            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {
+            });
         assertThat(generalApplicationDataList, hasSize(1));
         assertThat(
             matchesUploadedDocumentFields(
@@ -362,7 +367,8 @@ public class GeneralApplicationServiceTest {
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
         List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
-            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {});
+            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {
+            });
         assertThat(generalApplicationDataList, hasSize(2));
         assertThat(generalApplicationDataList.get(0).getGeneralApplication().getGeneralApplicationDocument().getDocumentUrl(),
             is(DOC_IN_EXISTING_COLLECTION_URL));
@@ -415,11 +421,10 @@ public class GeneralApplicationServiceTest {
             caseDataBefore.getGeneralApplicationWrapper().getGeneralApplications().get(0), generalApplications));
         caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(ga -> ga.getValue()
             .setGeneralApplicationSender(buildDynamicList(INTERVENER1)));
-        String generalApplicationCollection = GENERAL_APPLICATION_COLLECTION;
 
         List<GeneralApplicationCollectionData> col =
             generalApplicationService.getInterimGeneralApplicationList(
-                generalApplicationCollection, caseData, caseDataBefore);
+                GENERAL_APPLICATION_COLLECTION, caseData, caseDataBefore);
         List<GeneralApplicationItems> itemsActual = new ArrayList<>();
 
         col.forEach(x -> itemsActual.add(x.getGeneralApplicationItems()));

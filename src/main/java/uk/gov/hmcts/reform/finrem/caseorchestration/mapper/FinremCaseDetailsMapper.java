@@ -36,6 +36,12 @@ public class FinremCaseDetailsMapper {
             .build();
     }
 
+    public FinremCaseData mapToFinremCaseData(Map<String, Object> caseData, String caseTypeId) {
+        FinremCaseData data = objectMapper.convertValue(caseData, FinremCaseData.class);
+        data.setCcdCaseType(CaseType.forValue(caseTypeId));
+        return data;
+    }
+
     public CaseDetails mapToCaseDetails(FinremCaseDetails caseDetails) {
         Map<String, Object> data = objectMapper.convertValue(caseDetails.getData(), Map.class);
         return CaseDetails.builder().caseTypeId(caseDetails.getCaseType().getCcdType())

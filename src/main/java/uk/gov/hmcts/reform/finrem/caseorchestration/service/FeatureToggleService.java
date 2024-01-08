@@ -1,14 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.google.common.collect.Maps;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.Features;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
-
-import javax.validation.constraints.NotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,6 +17,7 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASEWORKER_NOTICE_OF_CHANGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASE_FILE_VIEW_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.INTERVENER_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
@@ -89,6 +89,10 @@ public class FeatureToggleService {
 
     public boolean isIntervenerEnabled() {
         return isFeatureEnabled(INTERVENER_ENABLED);
+    }
+
+    public boolean isCaseFileViewEnabled() {
+        return isFeatureEnabled(CASE_FILE_VIEW_ENABLED);
     }
 
     /**

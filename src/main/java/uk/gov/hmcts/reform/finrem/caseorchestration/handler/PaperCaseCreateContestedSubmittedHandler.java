@@ -31,7 +31,7 @@ public class PaperCaseCreateContestedSubmittedHandler implements CallbackHandler
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
-        log.info("Processing Submitted callback for event {} with Case ID : {}",
+        log.info("Processing Submitted callback for event {} with Case ID: {}",
             EventType.NEW_PAPER_CASE, callbackRequest.getCaseDetails().getId());
 
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();

@@ -33,7 +33,7 @@ public class UpdateFrcInfoRespondentDocumentService extends BaseUpdateFrcInfoDoc
         } else if (shouldPrintForRespondent(caseDetails)) {
             return Optional.of(generateLitigantUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
         }
-        log.info("No frc info letter notification required for RESPONDENT or RESPONDENT SOLICITOR for caseID {}", caseDetails.getId());
+        log.info("No frc info letter notification required for RESPONDENT or RESPONDENT SOLICITOR for Case ID: {}", caseDetails.getId());
         return Optional.empty();
     }
 

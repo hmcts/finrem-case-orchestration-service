@@ -40,15 +40,26 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for case id: {}",
+        log.info("Invoking contested event {} mid callback for Case ID: {}",
             EventType.JUDGE_DRAFT_ORDER, caseId);
         FinremCaseData caseData = caseDetails.getData();
 
         DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = draftDirectionWrapper.getDraftDirectionOrderCollection();
 
-        List<String> errors = new ArrayList<>();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData beforeCaseData = caseDetailsBefore.getData();
+        DraftDirectionWrapper draftDirectionWrapperBefore = beforeCaseData.getDraftDirectionWrapper();
 
+        if (draftDirectionWrapperBefore != null) {
+            List<DraftDirectionOrderCollection> draftDirectionOrderCollectionBefore
+                = draftDirectionWrapperBefore.getDraftDirectionOrderCollection();
+            if (draftDirectionOrderCollectionBefore != null && !draftDirectionOrderCollectionBefore.isEmpty()) {
+                draftDirectionOrderCollection.removeAll(draftDirectionOrderCollectionBefore);
+            }
+        }
+
+        List<String> errors = new ArrayList<>();
         draftDirectionOrderCollection.forEach(doc ->
             service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
                 caseId, errors, userAuthorisation)

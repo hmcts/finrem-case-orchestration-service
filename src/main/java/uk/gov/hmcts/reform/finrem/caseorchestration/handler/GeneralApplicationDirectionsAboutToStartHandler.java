@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -29,7 +28,6 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
     private final AssignCaseAccessService assignCaseAccessService;
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public GeneralApplicationDirectionsAboutToStartHandler(AssignCaseAccessService assignCaseAccessService,
                                                            FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -39,7 +37,6 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         this.helper = helper;
         this.service = service;
         this.assignCaseAccessService = assignCaseAccessService;
-        this.finremCaseDetailsMapper = finremCaseDetailsMapper;
     }
 
     @Override
@@ -55,23 +52,22 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
         String caseId = finremCaseDetails.getId().toString();
-        log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
+        log.info("About to Start callback event type {} for Case ID: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
 
         FinremCaseData caseData = finremCaseDetails.getData();
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
-        log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
+        log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails());
 
-        service.startGeneralApplicationDirections(caseDetails);
+        service.resetGeneralApplicationDirectionsFields(caseData);
 
         helper.populateGeneralApplicationSender(caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
         List<GeneralApplicationCollectionData> outcomeList = helper.getOutcomeList(caseData);
         AtomicInteger index = new AtomicInteger(0);
         if (outcomeList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
-            log.info("setting direction list if existing ga not moved to collection for Case ID: {}", caseId);
+            log.info("Setting direction list if existing general application not moved to collection for Case ID: {}", caseId);
             setDirectionListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
         } else {
             if (outcomeList.isEmpty()) {

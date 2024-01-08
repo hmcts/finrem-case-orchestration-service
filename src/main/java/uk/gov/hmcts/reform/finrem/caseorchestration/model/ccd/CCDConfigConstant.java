@@ -507,6 +507,7 @@ public class CCDConfigConstant {
 
     //scheduled hearings
     public static final String ADDITIONAL_HEARING_DOCUMENT_COLLECTION = "additionalHearingDocuments";
+    public static final String ADDITIONAL_HEARING_DOCUMENTS_OPTION = "additionalHearingDocumentsOption";
     public static final String HEARING_TYPE = "hearingType";
     public static final String TIME_ESTIMATE = "timeEstimate";
     public static final String HEARING_DATE = "hearingDate";
@@ -648,6 +649,7 @@ public class CCDConfigConstant {
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 
     public static final String PARTIES_ON_CASE = "partiesOnCase";
+    public static final String ORDERS_TO_SHARE = "ordersToShare";
 
     public static final String HEARING_PREFIX = "hearing_";
 

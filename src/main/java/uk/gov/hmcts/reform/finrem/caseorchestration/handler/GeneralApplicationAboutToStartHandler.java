@@ -53,16 +53,16 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
-        log.info("Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseId);
+        log.info("Start callback event type {} for Case ID: {}", EventType.GENERAL_APPLICATION, caseId);
         FinremCaseData caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         GeneralApplicationCollectionData data =
-            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
+            helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
-        log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
+        log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         if (data != null) {

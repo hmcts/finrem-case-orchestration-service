@@ -97,7 +97,7 @@ public class GeneralApplicationHelperTest {
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
-        assertNull(helper.migrateExistingGeneralApplication(data, AUTH_TOKEN, anyString()));
+        assertNull(helper.mapExistingGeneralApplicationToData(data, AUTH_TOKEN, anyString()));
     }
 
     @Test

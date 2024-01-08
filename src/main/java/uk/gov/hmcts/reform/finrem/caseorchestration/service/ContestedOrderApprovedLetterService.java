@@ -8,7 +8,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +29,19 @@ public class ContestedOrderApprovedLetterService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
+    private final FinremCaseDetailsMapper mapper;
+
+    public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        populateTemplateVariables(caseDetailsCopy);
+
+        CaseDocument approvedOrderCoverLetter = genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
+            documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
+            documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
+
+        finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
+    }
 
     public void generateAndStoreContestedOrderApprovedLetter(CaseDetails caseDetails, String authorisationToken) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);

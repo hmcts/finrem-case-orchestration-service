@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -107,7 +108,21 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
                 .contains("Any changes to an existing General Applications will not be saved."
                     + " Please add a new General Application in order to progress."));
         });
-        verify(service, times(24)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+    }
+
+
+    @Test
+    public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplicationWithSelectedParty_thenThrowErrorMessage1() {
+        List<String> roleList = List.of("Case", "Intervener1", "Intervener2", "Intervener3", "Intervener4", "Applicant");
+        roleList.forEach(role -> {
+            FinremCallbackRequest finremCallbackRequest = buildCallbackRequestWithCaseDetailsBeforeWithOneDoc();
+            when(assignCaseAccessService.getActiveUser(anyString(), anyString())).thenReturn(role);
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+            assertTrue(response.getErrors().isEmpty());
+        });
+        verify(service, times(12)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
 
@@ -143,6 +158,41 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
             .eventType(EventType.GENERAL_APPLICATION)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
                 .data(FinremCaseData.builder().generalApplicationWrapper(wrapper).build()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(FinremCaseData.builder().generalApplicationWrapper(wrapper).build()).build())
+            .build();
+    }
+
+    private FinremCallbackRequest buildCallbackRequestWithCaseDetailsBeforeWithOneDoc() {
+        GeneralApplicationsCollection record1 = GeneralApplicationsCollection.builder().id(UUID.randomUUID())
+            .value(GeneralApplicationItems.builder().generalApplicationCreatedBy("Test1").build()).build();
+        GeneralApplicationsCollection record2 = GeneralApplicationsCollection.builder().id(UUID.randomUUID())
+            .value(GeneralApplicationItems.builder().generalApplicationCreatedBy("Test2").build()).build();
+
+        GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder()
+            .generalApplications(List.of(record1, record2))
+            .intervener1GeneralApplications(List.of(record1, record2))
+            .intervener2GeneralApplications(List.of(record1, record2))
+            .intervener3GeneralApplications(List.of(record1, record2))
+            .intervener4GeneralApplications(List.of(record1, record2))
+            .appRespGeneralApplications(List.of(record1, record2))
+            .build();
+
+
+        GeneralApplicationWrapper wrapperBefore = GeneralApplicationWrapper.builder()
+            .generalApplications(List.of(record1))
+            .intervener1GeneralApplications(List.of(record1))
+            .intervener2GeneralApplications(List.of(record1))
+            .intervener3GeneralApplications(List.of(record1))
+            .intervener4GeneralApplications(List.of(record1))
+            .appRespGeneralApplications(List.of(record1))
+            .build();
+
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.GENERAL_APPLICATION)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(FinremCaseData.builder().generalApplicationWrapper(wrapperBefore).build()).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
                 .data(FinremCaseData.builder().generalApplicationWrapper(wrapper).build()).build())
             .build();

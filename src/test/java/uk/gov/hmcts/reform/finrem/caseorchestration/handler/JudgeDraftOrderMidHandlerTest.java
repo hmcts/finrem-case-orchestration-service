@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -23,11 +22,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
 class JudgeDraftOrderMidHandlerTest extends BaseHandlerTestSetup {
@@ -49,30 +49,22 @@ class JudgeDraftOrderMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void canHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.JUDGE_DRAFT_ORDER),
-            is(true));
+        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.JUDGE_DRAFT_ORDER));
     }
 
     @Test
     void canNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.JUDGE_DRAFT_ORDER),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.JUDGE_DRAFT_ORDER));
     }
 
     @Test
     void canNotHandleWrongEventType() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE));
     }
 
     @Test
     void canNotHandleWrongCallbackType() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.JUDGE_DRAFT_ORDER),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.JUDGE_DRAFT_ORDER));
     }
 
 
@@ -81,8 +73,35 @@ class JudgeDraftOrderMidHandlerTest extends BaseHandlerTestSetup {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.JUDGE_DRAFT_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
+        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
+        draftDirectionWrapper.setDraftDirectionOrderCollection(getDraftDirectionOrderObj());
 
-        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertTrue(response.getErrors().isEmpty());
+        verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenThereIsexistingDraftOrderNonEncryptedFileShouldNotGetError() throws Exception {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.JUDGE_DRAFT_ORDER);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
+        draftDirectionWrapper.setDraftDirectionOrderCollection(getDraftDirectionOrderObj());
+
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        DraftDirectionWrapper draftDirectionWrapperBefore = caseDataBefore.getDraftDirectionWrapper();
+        draftDirectionWrapperBefore.setDraftDirectionOrderCollection(getDraftDirectionOrderObj());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertTrue(response.getErrors().isEmpty());
+        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+    }
+
+    private List<DraftDirectionOrderCollection> getDraftDirectionOrderObj() {
+        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
         DraftDirectionOrder directionOrder =
             DraftDirectionOrder
                 .builder()
@@ -93,13 +112,6 @@ class JudgeDraftOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = new ArrayList<>();
         draftDirectionOrderCollection.add(directionOrderCollection);
-
-        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
-        draftDirectionWrapper.setDraftDirectionOrderCollection(draftDirectionOrderCollection);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertTrue(response.getErrors().isEmpty());
-        verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        return draftDirectionOrderCollection;
     }
 }

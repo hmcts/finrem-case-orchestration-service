@@ -44,7 +44,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandler extends FinremCal
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
-        log.info("Start callback event type {} for case id: {}",
+        log.info("Start callback event type {} for Case ID: {}",
             EventType.UPDATE_CONTESTED_GENERAL_APPLICATION, caseId);
         FinremCaseData caseData = caseDetails.getData();
 
@@ -53,7 +53,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandler extends FinremCal
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(
             caseData, GENERAL_APPLICATION_COLLECTION);
         GeneralApplicationCollectionData data =
-            helper.migrateExistingGeneralApplication(caseData, userAuthorisation, caseId);
+            helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
 
         if (data != null) {
             data.getGeneralApplicationItems().setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId());

@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -16,14 +18,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 @Slf4j
@@ -34,18 +40,21 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList;
+    private final OrderDateService dateService;
 
 
     public SendOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                   GeneralOrderService generalOrderService,
                                                   GenericDocumentService genericDocumentService,
                                                   DocumentHelper documentHelper,
-                                                  List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList) {
+                                                  List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
+                                                  OrderDateService dateService) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
         this.sendOrderPartyDocumentList = sendOrderPartyDocumentList;
+        this.dateService =  dateService;
     }
 
     @Override
@@ -60,43 +69,44 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {}, callback {} callback for case id: {}",
+        log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
             EventType.SEND_ORDER, CallbackType.ABOUT_TO_SUBMIT, caseId);
 
         try {
             FinremCaseData caseData = caseDetails.getData();
             List<String> parties = generalOrderService.getParties(caseDetails);
-            log.info("selected parties {} on case {}", parties, caseId);
+            log.info("Selected parties {} on Case ID: {}", parties, caseId);
 
             DynamicMultiSelectList selectedOrders = caseData.getOrdersToShare();
-            log.info("selected orders {} on case {}", selectedOrders, caseId);
+            log.info("Selected orders {} on Case ID: {} ", selectedOrders, caseId);
 
             List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
             CaseDocument document = caseData.getAdditionalDocument();
             if (document != null) {
-                log.info("additional uploaded document with send order {} for caseId {}", document, caseId);
+                log.info("Additional uploaded document with send order {} for Case ID: {}", document, caseId);
                 CaseDocument additionalUploadedOrderDoc = genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseId);
                 printOrderCollection.add(addToPrintOrderCollection(additionalUploadedOrderDoc));
                 caseData.setAdditionalDocument(additionalUploadedOrderDoc);
             }
 
-            log.info("Share and print general with for case {}", caseDetails.getId());
+            log.info("Share and print general with for Case ID: {}", caseDetails.getId());
             shareAndSendGeneralOrderWithSelectedParties(caseDetails, parties, selectedOrders, printOrderCollection);
 
 
-            log.info("Share and print hearing order for case {}", caseDetails.getId());
+            log.info("Share and print hearing order for Case ID: {}", caseDetails.getId());
             List<CaseDocument> hearingOrders = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
             if (hearingOrders != null && !hearingOrders.isEmpty()) {
                 shareAndSendHearingDocuments(caseDetails, hearingOrders, parties, printOrderCollection, userAuthorisation);
-                log.info("sending for stamp final order on case {}", caseDetails.getId());
+                log.info("Sending for stamp final order on Case ID: {}", caseDetails.getId());
                 hearingOrders.forEach(orderToStamp -> {
-                    log.info("StampFinalOrder {} for Case ID {}, ", orderToStamp, caseId);
+                    log.info("StampFinalOrder {} for Case ID: {}, ", orderToStamp, caseId);
                     stampAndAddToCollection(caseDetails, orderToStamp, userAuthorisation);
                 });
             }
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
             caseData.setAdditionalDocument(null);
             setConsolidateView(caseDetails, parties);
+            caseData.setOrdersToShare(new DynamicMultiSelectList());
         } catch (RuntimeException e) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
@@ -109,7 +119,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void setConsolidateView(FinremCaseDetails caseDetails,
                                     List<String> partyList) {
         Long caseId = caseDetails.getId();
-        log.info("setting Documents for case {}:", caseId);
+        log.info("Setting Documents for Case ID: {}", caseId);
         sendOrderPartyDocumentList.forEach(
             handler -> handler.setUpOrderDocumentsOnPartiesTab(caseDetails, partyList));
     }
@@ -121,7 +131,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                               List<OrderSentToPartiesCollection> printOrderCollection,
                                               String userAuthorisation) {
         Long caseId = caseDetails.getId();
-        log.info("Share Hearing Documents for case {}:", caseId);
+        log.info("Share Hearing Documents for Case ID: {}", caseId);
         List<CaseDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, hearingOrders, userAuthorisation);
         hearingDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
         sendOrderPartyDocumentList.forEach(
@@ -163,12 +173,19 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         log.info("Share selected 'GeneralOrder' With selected parties for caseId {}", caseId);
 
         FinremCaseData caseData = caseDetails.getData();
-        CaseDocument generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
 
-        if (generalOrderService.isSelectedOrderMatches(selectedOrders, generalOrder)) {
-            sendOrderPartyDocumentList.forEach(
-                handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, List.of(generalOrder)));
-            printOrderCollection.add(addToPrintOrderCollection(generalOrder));
+        List<ContestedGeneralOrderCollection> generalOrders = caseData.getGeneralOrderWrapper().getGeneralOrders();
+
+        if (generalOrders != null && !generalOrders.isEmpty()) {
+            generalOrders.forEach(go -> {
+                ContestedGeneralOrder contestedGeneralOrder = go.getValue();
+                CaseDocument generalOrder = contestedGeneralOrder.getAdditionalDocument();
+                if (generalOrderService.isSelectedOrderMatches(selectedOrders, contestedGeneralOrder)) {
+                    sendOrderPartyDocumentList.forEach(
+                        handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, List.of(generalOrder)));
+                    printOrderCollection.add(addToPrintOrderCollection(generalOrder));
+                }
+            });
         }
     }
 
@@ -177,19 +194,38 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                          String authToken) {
         String caseId = String.valueOf(caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
+        List<DirectionOrderCollection> finalOrderCollection
+            = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authToken);
+        if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, latestHearingOrder)) {
+            AtomicReference<YesOrNo> result = isOrderAlreadyStamped(caseData, latestHearingOrder);
+            if (result.get() == null || result.get().equals(YesOrNo.NO)) {
+                StampType stampType = documentHelper.getStampType(caseData);
+                CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, caseId);
+                log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
+                finalOrderCollection.add(prepareFinalOrderList(stampedDocs));
+                log.info("If Existing final order collection = {}", finalOrderCollection);
+            }
+            caseData.setFinalOrderCollection(finalOrderCollection);
+            log.info("Finished stamping final order for caseId {}", caseId);
+        } else {
+            caseData.setFinalOrderCollection(finalOrderCollection);
+            log.info("Finished stamping else final order for caseId {}", caseId);
+        }
+    }
 
-        StampType stampType = documentHelper.getStampType(caseData);
-        CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, caseId);
-        log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
-
-        List<DirectionOrderCollection> finalOrderCollection = Optional.ofNullable(caseData.getFinalOrderCollection())
-            .orElse(new ArrayList<>());
-
-        finalOrderCollection.add(prepareFinalOrderList(stampedDocs));
-        log.info("Existing final order collection = {}", finalOrderCollection);
-
-        caseData.setFinalOrderCollection(finalOrderCollection);
-        log.info("Finished stamping final order for caseId {}", caseId);
+    private AtomicReference<YesOrNo> isOrderAlreadyStamped(FinremCaseData caseData, CaseDocument latestHearingOrder) {
+        List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
+        AtomicReference<YesOrNo> result = new AtomicReference<>();
+        if (hearingOrders != null && !hearingOrders.isEmpty()) {
+            hearingOrders.forEach(order -> {
+                CaseDocument document = order.getValue().getUploadDraftDocument();
+                if (latestHearingOrder.getDocumentFilename().equals(
+                    document.getDocumentFilename())) {
+                    result.set(order.getValue().getIsOrderStamped());
+                }
+            });
+        }
+        return result;
     }
 
     private OrderSentToPartiesCollection addToPrintOrderCollection(CaseDocument document) {
@@ -200,7 +236,10 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private DirectionOrderCollection prepareFinalOrderList(CaseDocument document) {
         return DirectionOrderCollection.builder()
-            .value(DirectionOrder.builder().uploadDraftDocument(document).build())
+            .value(DirectionOrder.builder().uploadDraftDocument(document)
+                .orderDateTime(LocalDateTime.now())
+                .isOrderStamped(YesOrNo.YES)
+                .build())
             .build();
     }
 }

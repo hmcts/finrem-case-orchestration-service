@@ -21,6 +21,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -49,6 +53,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,6 +83,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
@@ -134,6 +140,13 @@ public class DocumentHelperTest {
         assertThat(pensionDocuments.size(), is(2));
     }
 
+    @Test
+    public void returnNewListWhenCaseDataIsNullPensionDocuments() {
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetailsBefore(CaseDetails.builder().build()).build();
+        List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
+            callbackRequest.getCaseDetailsBefore().getData());
+        assertThat(pensionDocuments.size(), is(0));
+    }
 
     @Test
     public void shouldGetPensionDocumentsFinrem() throws Exception {
@@ -149,6 +162,10 @@ public class DocumentHelperTest {
         List<CaseDocument> pensionDocuments = documentHelper.getVariationOrderDocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(1));
+        callbackRequest = CallbackRequest.builder().caseDetailsBefore(CaseDetails.builder().build()).build();
+        List<CaseDocument> pensionDocuments1 = documentHelper.getVariationOrderDocumentsData(
+            callbackRequest.getCaseDetailsBefore().getData());
+        assertThat(pensionDocuments1.size(), is(0));
     }
 
     @Test
@@ -157,6 +174,31 @@ public class DocumentHelperTest {
         List<CaseDocument> pensionDocuments = documentHelper.getConsentOrderOtherDocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(1));
+        callbackRequest = CallbackRequest.builder().caseDetailsBefore(CaseDetails.builder().build()).build();
+        List<CaseDocument> pensionDocuments1 = documentHelper.getConsentOrderOtherDocumentsData(
+            callbackRequest.getCaseDetailsBefore().getData());
+        assertThat(pensionDocuments1.size(), is(0));
+    }
+
+    @Test
+    public void hasAnotherHearingFalse() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().id(123L).data(new HashMap<>()).build()).build();
+        assertFalse(documentHelper.hasAnotherHearing(callbackRequest.getCaseDetails().getData()));
+    }
+
+    @Test
+    public void hasAnotherHearingTrue() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().id(123L).data(new HashMap<>()).build()).build();
+
+        DirectionDetailsCollection ddc = DirectionDetailsCollection.builder().isAnotherHearingYN("Yes").build();
+        DirectionDetailsCollectionData dt = DirectionDetailsCollectionData.builder().directionDetailsCollection(ddc).build();
+        List<DirectionDetailsCollectionData> list = new ArrayList<>();
+        list.add(dt);
+        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+        data.put(DIRECTION_DETAILS_COLLECTION_CT, list);
+        assertTrue(documentHelper.hasAnotherHearing(data));
     }
 
     @Test
@@ -851,6 +893,34 @@ public class DocumentHelperTest {
     public void whenNoLatestGeneralOrder_thenReturnNull() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         assertNull(documentHelper.getLatestGeneralOrder(caseDetails.getData()));
+    }
+
+    @Test
+    public void checkIfOrderAlreadyInFinalOrderCollection() {
+        List<DirectionOrderCollection> list = new ArrayList<>();
+
+        assertFalse(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+
+        DirectionOrderCollection orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build()).build();
+        list.add(orderCollection);
+
+        assertTrue(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+
+        list = new ArrayList<>();
+        CaseDocument caseDocument = caseDocument("url", "name.pdf", "binary");
+        orderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(caseDocument).build()).build();
+        list.add(orderCollection);
+
+        assertFalse(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+    }
+
+    @Test
+    public void prepareFinalOrder() {
+        DirectionOrderCollection orderCollection = documentHelper.prepareFinalOrder(caseDocument());
+        assertEquals(YesOrNo.YES, orderCollection.getValue().getIsOrderStamped());
+        assertNotNull(orderCollection.getValue().getOrderDateTime());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

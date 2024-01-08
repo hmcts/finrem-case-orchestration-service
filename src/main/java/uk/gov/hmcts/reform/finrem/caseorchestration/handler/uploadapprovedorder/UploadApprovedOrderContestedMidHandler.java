@@ -42,14 +42,24 @@ public class UploadApprovedOrderContestedMidHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for case id: {}",
+        log.info("Invoking contested event {} mid callback for Case ID: {}",
             EventType.UPLOAD_APPROVED_ORDER, caseId);
 
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData beforeData = caseDetailsBefore.getData();
+
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
         if (uploadHearingOrders != null) {
+            log.info("Latest no. of hearing orders {} for case Id {}", uploadHearingOrders.size(), caseId);
+            List<DirectionOrderCollection> uploadHearingOrdersBefore = beforeData.getUploadHearingOrder();
+            if (uploadHearingOrdersBefore != null && !uploadHearingOrdersBefore.isEmpty()) {
+                log.info("Existing no. of hearing orders {} for case Id {}", uploadHearingOrdersBefore.size(), caseId);
+                uploadHearingOrders.removeAll(uploadHearingOrdersBefore);
+            }
+            log.info("No. of hearing orders {} to check for error for case Id {}", uploadHearingOrders.size(), caseId);
             uploadHearingOrders.forEach(doc ->
                 service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
                     caseId, errors, userAuthorisation)
@@ -58,6 +68,10 @@ public class UploadApprovedOrderContestedMidHandler extends FinremCallbackHandle
 
         List<UploadAdditionalDocumentCollection> uploadAdditionalDocument = caseData.getUploadAdditionalDocument();
         if (uploadAdditionalDocument != null) {
+            List<UploadAdditionalDocumentCollection> uploadAdditionalBefore = beforeData.getUploadAdditionalDocument();
+            if (uploadAdditionalBefore != null && !uploadAdditionalBefore.isEmpty()) {
+                uploadAdditionalDocument.removeAll(uploadAdditionalBefore);
+            }
             uploadAdditionalDocument.forEach(doc ->
                 service.validateEncryptionOnUploadedDocument(doc.getValue().getAdditionalDocuments(),
                     caseId, errors, userAuthorisation)

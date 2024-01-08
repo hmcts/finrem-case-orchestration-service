@@ -53,13 +53,13 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        log.info("Mid callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
+        log.info("Mid callback event type {} for Case ID: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         String caseId = caseDetails.getId().toString();
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(
             caseId, userAuthorisation);
-        log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
+        log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();

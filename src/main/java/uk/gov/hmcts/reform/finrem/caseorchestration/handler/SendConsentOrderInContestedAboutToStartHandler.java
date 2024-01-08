@@ -37,7 +37,7 @@ public class SendConsentOrderInContestedAboutToStartHandler extends FinremCallba
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested {} about to start callback for case id: {}",
+        log.info("Invoking contested {} about to start callback for Case ID: {}",
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
 

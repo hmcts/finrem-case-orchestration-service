@@ -149,8 +149,8 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    public GeneralApplicationCollectionData migrateExistingGeneralApplication(FinremCaseData caseData,
-                                                                              String userAuthorisation, String caseId) {
+    public GeneralApplicationCollectionData mapExistingGeneralApplicationToData(FinremCaseData caseData,
+                                                                                String userAuthorisation, String caseId) {
         if (caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             String collectionId = UUID.randomUUID().toString();
             caseData.getGeneralApplicationWrapper().setGeneralApplicationTracking(collectionId);
@@ -336,7 +336,7 @@ public class GeneralApplicationHelper {
     public void checkAndRemoveDuplicateGeneralApplications(FinremCaseData caseData) {
         List<GeneralApplicationsCollection> generalApplicationList = caseData.getGeneralApplicationWrapper().getGeneralApplications();
 
-        log.info("Before removing duplicate General application count: {} for Case ID: ", generalApplicationList.size(),
+        log.info("Before removing duplicate General application count: {} for Case ID: {} ", generalApplicationList.size(),
             caseData.getCcdCaseId());
 
         List<GeneralApplicationsCollection> uniqueGeneralApplicationList = generalApplicationList.stream().collect(Collectors.groupingBy(ga ->
@@ -347,7 +347,7 @@ public class GeneralApplicationHelper {
         Collections.sort(uniqueGeneralApplicationList, (o1, o2) -> o2.getValue().getGeneralApplicationCreatedDate()
             .compareTo(o1.getValue().getGeneralApplicationCreatedDate()));
 
-        log.info("After removing duplicate General application count: {} for Case ID: ", uniqueGeneralApplicationList.size(),
+        log.info("After removing duplicate General application count: {} for Case ID: {} ", uniqueGeneralApplicationList.size(),
             caseData.getCcdCaseId());
 
         caseData.getGeneralApplicationWrapper().setGeneralApplications(uniqueGeneralApplicationList);
@@ -363,25 +363,25 @@ public class GeneralApplicationHelper {
                                                   GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
         CaseDocument caseDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDocument());
         if (caseDocument != null) {
-            log.info("General Application Document before converting to Pdf {}", caseDocument);
+            log.info("General Application Document before converting to Pdf {} for Case ID: {}", caseDocument, caseId);
             CaseDocument pdfCaseDocument = getPdfDocument(caseDocument, userAuthorisation, caseId);
             builder.generalApplicationDocument(pdfCaseDocument);
-            log.info("General Application Document after converting to Pdf {}", pdfCaseDocument);
+            log.info("General Application Document after converting to Pdf {} for Case ID: {}", pdfCaseDocument, caseId);
         }
 
         CaseDocument draftDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDraftOrder());
         if (draftDocument != null) {
-            log.info("General Application Draft Document before converting to Pdf {}", draftDocument);
+            log.info("General Application Draft Document before converting to Pdf {} for Case ID: {}", draftDocument, caseId);
             CaseDocument draftCaseDocument = getPdfDocument(draftDocument, userAuthorisation, caseId);
             builder.generalApplicationDraftOrder(draftCaseDocument);
-            log.info("General Application Draft Document after converting to Pdf {}", draftCaseDocument);
+            log.info("General Application Draft Document after converting to Pdf {} for Case ID: {}", draftCaseDocument, caseId);
         }
         CaseDocument directionDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
         if (directionDocument != null) {
-            log.info("General Application Direction Document before converting to Pdf {}", directionDocument);
+            log.info("General Application Direction Document before converting to Pdf {} for Case ID: {}", directionDocument, caseId);
             CaseDocument directionCaseDocument = getPdfDocument(directionDocument, userAuthorisation, caseId);
             builder.generalApplicationDirectionsDocument(directionCaseDocument);
-            log.info("General Application Direction Document after converting to Pdf {}", directionCaseDocument);
+            log.info("General Application Direction Document after converting to Pdf {} for Case ID: {}", directionCaseDocument, caseId);
         }
 
     }
