@@ -14,6 +14,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 public class GeneralEmailServiceTest extends BaseServiceTest {
 
@@ -32,7 +33,7 @@ public class GeneralEmailServiceTest extends BaseServiceTest {
         assertThat(originalEmail.getGeneralEmailCreatedBy(), is("first user"));
         assertThat(originalEmail.getGeneralEmailBody(), is("original email body"));
 
-        GeneralEmailHolder addedEmail = generalEmailCollections.get(1).getValue();;
+        GeneralEmailHolder addedEmail = generalEmailCollections.get(1).getValue();
         assertThat(addedEmail.getGeneralEmailRecipient(), is("b1@b.com"));
         assertThat(addedEmail.getGeneralEmailCreatedBy(), is("Test user"));
         assertThat(addedEmail.getGeneralEmailBody(), is("Test email body"));
@@ -41,6 +42,7 @@ public class GeneralEmailServiceTest extends BaseServiceTest {
     @Test
     public void generateGeneralEmailContested() throws Exception {
         FinremCaseDetails caseDetails = caseDetailsContested();
+        caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailUploadedDocument(caseDocument());
         generalEmailService.storeGeneralEmail(caseDetails);
         List<GeneralEmailCollection> generalEmailCollections = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailCollection();
         assertThat(generalEmailCollections, hasSize(2));
@@ -54,6 +56,7 @@ public class GeneralEmailServiceTest extends BaseServiceTest {
         assertThat(addedEmail.getGeneralEmailRecipient(), is("b1@b.com"));
         assertThat(addedEmail.getGeneralEmailCreatedBy(), is("Test user"));
         assertThat(addedEmail.getGeneralEmailBody(), is("Test email body"));
+        assertThat(addedEmail.getGeneralEmailUploadedDocument(), is(caseDocument()));
     }
 
     private FinremCaseDetails caseDetailsConsented() throws Exception {
