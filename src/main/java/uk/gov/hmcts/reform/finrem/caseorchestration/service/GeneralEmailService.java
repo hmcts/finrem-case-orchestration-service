@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder;
@@ -18,11 +18,8 @@ import java.util.Optional;
 @Slf4j
 public class GeneralEmailService {
 
-    private final ObjectMapper objectMapper;
-
     public void storeGeneralEmail(FinremCaseDetails caseDetails) {
         log.info("Storing general email for Case ID: {}", caseDetails.getId());
-
         addGeneralEmailToCollection(caseDetails);
     }
 
@@ -31,14 +28,34 @@ public class GeneralEmailService {
         List<GeneralEmailCollection> generalEmailCollection = Optional.ofNullable(generalEmailWrapper
                 .getGeneralEmailCollection())
             .orElse(new ArrayList<>(1));
-
-        generalEmailCollection.add(GeneralEmailCollection.builder().value(GeneralEmailHolder.builder()
-                .generalEmailBody(generalEmailWrapper.getGeneralEmailBody())
-                .generalEmailCreatedBy(generalEmailWrapper.getGeneralEmailCreatedBy())
-                .generalEmailRecipient(generalEmailWrapper.getGeneralEmailRecipient())
-                .generalEmailUploadedDocument(generalEmailWrapper.getGeneralEmailUploadedDocument())
-            .build()).build());
+        GeneralEmailCollection collection = GeneralEmailCollection.builder().value(GeneralEmailHolder.builder()
+            .generalEmailBody(generalEmailWrapper.getGeneralEmailBody())
+            .generalEmailCreatedBy(generalEmailWrapper.getGeneralEmailCreatedBy())
+            .generalEmailRecipient(generalEmailWrapper.getGeneralEmailRecipient())
+            .generalEmailUploadedDocument(createNewCaseDocumentObject(generalEmailWrapper))
+            .build()).build();
+        generalEmailCollection.add(collection);
 
         caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailCollection(generalEmailCollection);
+    }
+
+    private CaseDocument createNewCaseDocumentObject(GeneralEmailWrapper wrapper) {
+        CaseDocument documentToReturn = CaseDocument.builder().build();
+        CaseDocument latestUploadedDocument = wrapper.getGeneralEmailUploadedDocument();
+        if (latestUploadedDocument != null) {
+            String binaryUrl = latestUploadedDocument.getDocumentBinaryUrl();
+            if (binaryUrl != null) {
+                documentToReturn.setDocumentBinaryUrl(binaryUrl);
+            }
+            String fileName = latestUploadedDocument.getDocumentFilename();
+            if (fileName != null) {
+                documentToReturn.setDocumentFilename(fileName);
+            }
+            String url = latestUploadedDocument.getDocumentUrl();
+            if (url != null) {
+                documentToReturn.setDocumentUrl(url);
+            }
+        }
+        return documentToReturn;
     }
 }
