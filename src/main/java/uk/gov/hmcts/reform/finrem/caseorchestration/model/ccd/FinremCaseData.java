@@ -240,6 +240,7 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private IntervenerHearingNoticeCollectionWrapper intervenerHearingNoticeCollectionWrapper;
+    private List<JudgeNotApprovedReasonsCollection> judgeNotApprovedReasons;
     private JudgeType refusalOrderJudgeType;
     private String refusalOrderJudgeName;
     @JsonSerialize(using = LocalDateSerializer.class)
