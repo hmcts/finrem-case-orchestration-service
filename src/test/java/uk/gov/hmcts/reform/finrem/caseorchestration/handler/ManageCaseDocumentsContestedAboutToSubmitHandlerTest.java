@@ -96,7 +96,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         manageCaseDocumentsAboutToSubmitCaseHandler =
             new ManageCaseDocumentsContestedAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentHandlers, uploadedDocumentHelper, evidenceManagementDeleteService, manageDocumentsHandlerValidator, featureToggleService);
+                documentHandlers, uploadedDocumentHelper, evidenceManagementDeleteService, featureToggleService);
     }
 
     @Test
