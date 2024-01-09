@@ -20,18 +20,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderApprovedCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderNotApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedDraftOrderCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedIntermHearingCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.GeneralOrderRaisedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
@@ -56,8 +51,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NotificationsController extends BaseController {
 
     private final NotificationService notificationService;
-    private final PaperNotificationService paperNotificationService;
-    private final GeneralEmailService generalEmailService;
     private final CaseDataService caseDataService;
     private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
@@ -66,11 +59,8 @@ public class NotificationsController extends BaseController {
     private final UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
     private final AssignToJudgeCorresponder assignToJudgeCorrespondenceService;
     private final ConsentOrderNotApprovedCorresponder consentOrderNotApprovedCorresponder;
-    private final ContestedConsentOrderApprovedCorresponder contestedConsentOrderApprovedCorresponder;
-    private final ContestedConsentOrderNotApprovedCorresponder contestedConsentOrderNotApprovedCorresponder;
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
-    private final ContestedIntermHearingCorresponder contestedIntermHearingCorresponder;
     private final ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
     private final GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
 
@@ -133,45 +123,6 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/contested-consent-order-approved", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for contested consent order approved.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Contested consent order approved e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderApprovedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request to process notifications for 'Contested Consent Order Approved' for Case ID: {}",
-            callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        contestedConsentOrderApprovedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    @PostMapping(value = "/contested-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for contested consent order not approved.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Contested consent order not approved e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderNotApprovedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to process notifications for 'Contested Consent Order Not Approved' for Case ID: {}",
-            callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        contestedConsentOrderNotApprovedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
     @PostMapping(value = "/general-order-raised", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for general order raised.")
     @ApiResponses(value = {
@@ -208,35 +159,6 @@ public class NotificationsController extends BaseController {
         consentOrderAvailableCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    @PostMapping(value = "/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for 'Prepare for Hearing'.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "204",
-            description = "'Prepare for Hearing' e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
-    public ResponseEntity<SubmittedCallbackResponse> sendPrepareForHearingEmail(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request for 'Prepare for Hearing' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing' for Case ID: {}",
-                callbackRequest.getCaseDetails().getId());
-            notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
-        }
-        if (notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing' for Case ID: {}",
-                callbackRequest.getCaseDetails().getId());
-            notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
-        }
-
-        return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
     }
 
     @PostMapping(value = "/draft-order", consumes = APPLICATION_JSON_VALUE)
@@ -304,7 +226,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to process notificatons for consent order not approved sent email for Case ID: {}", caseDetails.getId());
+        log.info("Received request to process notifications for consent order not approved sent email for Case ID: {}", caseDetails.getId());
         consentOrderNotApprovedSentCorresponder.sendCorrespondence(caseDetails);
 
         return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
@@ -393,7 +315,7 @@ public class NotificationsController extends BaseController {
     @Operation(summary = "Send FRC change update notifications")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204",
-            description = "Update FRC information notificatons sent successfully",
+            description = "Update FRC information notifications sent successfully",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
     ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,

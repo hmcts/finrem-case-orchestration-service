@@ -45,14 +45,14 @@ public class IntervenerRemovedCorresponder extends IntervenerCorresponder {
     protected void sendIntervenerCorrespondence(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails, String auth) {
         IntervenerChangeDetails intervenerChangeDetails = caseDetails.getData().getCurrentIntervenerChangeDetails();
         if (shouldSendIntervenerSolicitorEmail(intervenerChangeDetails.getIntervenerDetails())) {
-            log.info("Sending email correspondence to {} for case: {}", intervenerChangeDetails.getIntervenerType(), caseDetails.getId());
+            log.info("Sending email correspondence to {} for Case ID: {}", intervenerChangeDetails.getIntervenerType(), caseDetails.getId());
             String recipientName = intervenerChangeDetails.getIntervenerDetails().getIntervenerSolName();
             String recipientEmail = intervenerChangeDetails.getIntervenerDetails().getIntervenerSolEmail();
             String referenceNumber = intervenerChangeDetails.getIntervenerDetails().getIntervenerSolicitorReference();
             notificationService.sendIntervenerSolicitorRemovedEmail(caseDetails, intervenerChangeDetails.getIntervenerDetails(),
                 recipientName, recipientEmail, referenceNumber);
         } else {
-            log.info("Sending letter correspondence to {} for case: {}", intervenerChangeDetails.getIntervenerType(), caseDetails.getId());
+            log.info("Sending letter correspondence to {} for Case ID: {}", intervenerChangeDetails.getIntervenerType(), caseDetails.getId());
             String recipient = intervenerWrapper.getPaperNotificationRecipient().toString();
 
             bulkPrintService.sendDocumentForPrint(

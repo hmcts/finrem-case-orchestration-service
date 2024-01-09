@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
-@Service
+@Component
 public class IntervenerTwoFdrHandler extends PartyDocumentsHandler {
 
     public IntervenerTwoFdrHandler(FeatureToggleService featureToggleService) {

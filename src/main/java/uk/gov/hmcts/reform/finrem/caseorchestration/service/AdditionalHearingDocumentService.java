@@ -70,7 +70,7 @@ public class AdditionalHearingDocumentService {
     private final FinremAdditionalHearingCorresponder finremAdditionalHearingCorresponder;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final OrderDateService dateService;
-    private static final String ADDITIONAL_MESSAGE = "Additional hearing document not required for case: {}";
+    private static final String ADDITIONAL_MESSAGE = "Additional hearing document not required for Case ID: {}";
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
         Map<String, Object> caseData = caseDetails.getData();
@@ -80,7 +80,8 @@ public class AdditionalHearingDocumentService {
 
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
-        prepareHearingCaseDetails(caseDetailsCopy, courtDetails, caseData.get(HEARING_TYPE), caseData.get(HEARING_DATE),
+        prepareHearingCaseDetails(caseDetailsCopy, courtDetails, caseData.get(HEARING_TYPE),
+            caseData.get(HEARING_DATE),
             caseData.get(HEARING_TIME), caseData.get(TIME_ESTIMATE));
         caseDetailsCopy.getData().put("AnyOtherDirections", caseData.get(HEARING_ADDITIONAL_INFO));
 
@@ -95,7 +96,7 @@ public class AdditionalHearingDocumentService {
     public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken,
                                                                           FinremCaseDetails caseDetails) {
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("dealing upload approve order for caseId {}", caseId);
+        log.info("dealing upload approve order for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
         List<DirectionOrderCollection> uploadHearingOrder = toPdf(caseData.getUploadHearingOrder(), stampType, caseId, authorisationToken);
@@ -175,7 +176,7 @@ public class AdditionalHearingDocumentService {
 
     public void createAndStoreAdditionalHearingDocuments(FinremCaseDetails caseDetails, String authorisationToken)
         throws CourtDetailsParseException, JsonProcessingException {
-        log.info("Dealing with caseId {}", caseDetails.getId());
+        log.info("Dealing with Case ID: {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 
         List<DirectionOrderCollection> finalOrderCollection
@@ -189,7 +190,7 @@ public class AdditionalHearingDocumentService {
                 LocalDateTime orderDateTime = doc.getValue().getOrderDateTime();
                 if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, uploadDraftDocument)) {
                     CaseDocument stampedDocs = getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument);
-                    log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseId);
+                    log.info("Stamped Documents = {} for Case ID: {}", stampedDocs, caseId);
                     if (!finalOrderCollection.isEmpty()) {
                         caseData.getFinalOrderCollection().add(documentHelper.prepareFinalOrder(stampedDocs));
                     } else {
@@ -230,7 +231,7 @@ public class AdditionalHearingDocumentService {
             CaseDetails caseDetailsCopy = documentHelper.deepCopy(mapToCaseDetails, CaseDetails.class);
             prepareHearingCaseDetails(caseDetailsCopy, courtDetails,
                 directionDetail.getTypeOfHearing(),
-                directionDetail.getDateOfHearing(),
+                directionDetail.getDateOfHearing().toString(),
                 directionDetail.getHearingTime(),
                 directionDetail.getTimeEstimate());
 

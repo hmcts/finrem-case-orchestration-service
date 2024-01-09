@@ -88,7 +88,7 @@ public class GenericDocumentService {
                                       StampType stampType,
                                       String caseId) {
         CaseDocument pdfCaseDocument = convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
-        log.info("Pdf converation if document is not pdf origial {} pdfdocument {} for case Id {}",
+        log.info("Pdf converation if document is not pdf origial {} pdfdocument {} for Case ID: {}",
             document.getDocumentFilename(), pdfCaseDocument.getDocumentFilename(), caseId);
         Document stampedDocument = pdfStampingService.stampDocument(
             Document.builder().url(pdfCaseDocument.getDocumentUrl())

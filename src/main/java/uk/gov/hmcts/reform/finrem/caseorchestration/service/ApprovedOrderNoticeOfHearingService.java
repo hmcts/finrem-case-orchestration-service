@@ -100,7 +100,7 @@ public class ApprovedOrderNoticeOfHearingService {
             = Optional.ofNullable(data.getHearingDirectionDetailsCollection());
 
         if (hearingDirectionDetailsCollection.isEmpty()) {
-            throw new IllegalStateException("Invalid Case Data - hearing direction is empty for caseId " + caseDetails.getId());
+            throw new IllegalStateException("Invalid Case Data - hearing direction is empty for Case iD: " + caseDetails.getId());
         }
         List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollections = hearingDirectionDetailsCollection.get();
         HearingDirectionDetailsCollection directionDetailsCollection
@@ -160,7 +160,7 @@ public class ApprovedOrderNoticeOfHearingService {
         Map<String, Object> placeholdersMap = new HashMap<>();
         placeholdersMap.put("HearingType", directionDetail.getTypeOfHearing());
         placeholdersMap.put("HearingVenue", getFrcCourtDetailsAsOneLineAddressString(getCourtDetails(directionDetail)));
-        placeholdersMap.put("HearingDate", directionDetail.getDateOfHearing());
+        placeholdersMap.put("HearingDate", directionDetail.getDateOfHearing().toString());
         placeholdersMap.put("HearingTime", directionDetail.getHearingTime());
         placeholdersMap.put("HearingLength", directionDetail.getTimeEstimate());
         placeholdersMap.put("AdditionalHearingDated", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));

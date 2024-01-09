@@ -219,7 +219,7 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
             interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseDetails.getData());
 
-        assertEquals(3, bulkPrintDocumentsList.size());
+        assertEquals(2, bulkPrintDocumentsList.size());
 
     }
 
@@ -307,9 +307,9 @@ public class InterimHearingServiceTest extends BaseServiceTest {
 
 
         verify(notificationService, never()).isIntervenerSolicitorDigitalAndEmailPopulated(any(), any(CaseDetails.class));
-        verify(notificationService, times(3)).isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
-        verify(notificationService, times(3)).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
-        verify(notificationService, times(3)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
+        verify(notificationService, times(2)).isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(notificationService, times(2)).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
+        verify(notificationService, times(2)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
         verify(notificationService, never()).sendInterimHearingNotificationEmailToIntervenerSolicitor(any(), anyMap(),
             any(SolicitorCaseDataKeysWrapper.class));
     }

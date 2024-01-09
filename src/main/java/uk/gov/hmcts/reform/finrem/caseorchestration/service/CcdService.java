@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class CcdService {
     private final CaseEventsApi caseEventsApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamAuthService idamAuthService;
-    private static final String LOGGER =  "Executing eventType {} on caseId {}";
+    private static final String LOGGER =  "Executing eventType {} on Case ID: {}";
 
     public void executeCcdEventOnCase(String authorisation, String caseId, String caseTypeId,
                                       String eventType) {
@@ -131,19 +131,18 @@ public class CcdService {
             caseId.toString());
     }
 
-    public List<CaseEventDetail> getCcdEventDetailsOnCase(String authorisation, FinremCaseData finremCaseData) {
-        String caseId = finremCaseData.getCcdCaseId();
-        String caseTypeId = finremCaseData.getCcdCaseType().getCcdType();
+    public List<CaseEventDetail> getCcdEventDetailsOnCase(String authorisation, FinremCaseDetails caseDetails) {
+        Long caseId = caseDetails.getId();
+        String caseTypeId = caseDetails.getCaseType().getCcdType();
         log.info(LOGGER, caseTypeId, caseId);
 
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
-
         return caseEventsApi.findEventDetailsForCase(idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(),
             idamToken.getUserId(),
             JURISDICTION,
             caseTypeId,
-            caseId);
+            caseId.toString());
     }
 
     public SearchResult getCaseByCaseId(String caseId, CaseType caseType, String authorisation) {

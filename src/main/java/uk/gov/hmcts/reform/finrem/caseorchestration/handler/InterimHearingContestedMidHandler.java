@@ -40,13 +40,25 @@ public class InterimHearingContestedMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for case id: {}",
+        log.info("Invoking contested event {} mid callback for Case ID: {}",
             EventType.INTERIM_HEARING, caseId);
         FinremCaseData finremCaseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
         List<InterimHearingCollection> interimHearings = finremCaseData.getInterimWrapper().getInterimHearings();
         if (interimHearings != null && !interimHearings.isEmpty()) {
+            log.info("current no. of interim hearing {}, for caseId {}", interimHearings.size(), caseId);
+            FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+            if (caseDetailsBefore != null) {
+                FinremCaseData finremCaseDataBefore = caseDetailsBefore.getData();
+                List<InterimHearingCollection> interimHearingsBefore = finremCaseDataBefore.getInterimWrapper().getInterimHearings();
+                if (interimHearingsBefore != null && !interimHearingsBefore.isEmpty()) {
+                    log.info("before no. of interim hearing {}, for caseId {}", interimHearingsBefore.size(), caseId);
+                    interimHearings.removeAll(interimHearingsBefore);
+                    log.info("final no. of interim hearing {} to process, for caseId {}", interimHearings.size(), caseId);
+                }
+            }
+
             interimHearings.forEach(hearing -> {
                 if (hearing.getValue().getInterimPromptForAnyDocument().equalsIgnoreCase("Yes")) {
                     CaseDocument document = hearing.getValue().getInterimUploadAdditionalDocument();

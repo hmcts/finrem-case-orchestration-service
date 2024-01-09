@@ -35,11 +35,9 @@ public class InterimHearingContestedAboutToSubmitHandler
         String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        log.info("About to submit Interim hearing for case id {}", caseDetails.getId());
+        log.info("About to submit Interim hearing for Case ID {}", caseDetails.getId());
         List<String> errors = interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, userAuthorisation);
-        if (!errors.isEmpty()) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).errors(errors).build();
-        }
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
+            .data(caseDetails.getData()).errors(errors).build();
     }
 }

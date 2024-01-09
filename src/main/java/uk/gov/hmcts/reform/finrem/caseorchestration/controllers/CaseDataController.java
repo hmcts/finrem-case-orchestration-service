@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -156,33 +155,6 @@ public class CaseDataController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
-    @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> moveValues(
-        @RequestBody final CallbackRequest callbackRequest,
-        @PathVariable("source") final String source,
-        @PathVariable("destination") final String destination) {
-
-        validateCaseData(callbackRequest);
-
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseDataService.moveCollection(caseData, source, destination);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    @PostMapping(path = "/default-values", consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(description = "Default application state")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> defaultValue(
-        @RequestBody final CallbackRequest callbackRequest) {
-
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
-        caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
     @PostMapping(path = "/org-policies", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Add empty org policies for both parties")
@@ -196,9 +168,11 @@ public class CaseDataController extends BaseController {
         }
         addOrganisationPoliciesIfPartiesNotRepresented(caseData);
         List<String> errors = new ArrayList<>();
-        List<CaseDocument> caseDocuments = consentOrderService.checkIfD81DocumentContainsEncryption(caseData);
-
-        caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, "na", errors, authToken));
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        List<CaseDocument> caseDocuments = consentOrderService.checkIfD81DocumentContainsEncryption(caseData, caseDataBefore);
+        if (caseDocuments != null && !caseDocuments.isEmpty()) {
+            caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, "na", errors, authToken));
+        }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
 

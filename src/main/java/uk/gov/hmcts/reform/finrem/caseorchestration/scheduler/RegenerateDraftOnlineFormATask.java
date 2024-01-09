@@ -53,13 +53,13 @@ public class RegenerateDraftOnlineFormATask extends BaseTask {
 
     @Override
     protected String getSummary() {
-        return "Regenerate miniform a -  DFR-2523";
+        return "Regenerate miniform a -  DFR-2590";
     }
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
 
-        log.info("RegenerateDraftOnlineFormATask started for case id {}", finremCaseDetails.getId());
-        finremCaseDetails.getData().setMiniFormA(onlineFormDocumentService.generateDraftContestedMiniFormA(getSystemUserToken(), finremCaseDetails));
+        log.info("RegenerateOnlineFormATask started for case id {}", finremCaseDetails.getId());
+        finremCaseDetails.getData().setMiniFormA(onlineFormDocumentService.generateContestedMiniForm(getSystemUserToken(), finremCaseDetails));
     }
 }

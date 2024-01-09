@@ -34,7 +34,7 @@ public class RespondToOrderAboutToSubmitHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested event {} about to start callback for case id: {}",
+        log.info("Invoking contested event {} about to start callback for Case ID: {}",
             EventType.RESPOND_TO_ORDER, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 

@@ -24,7 +24,6 @@ public class IntervenerThreeFormEExhibitsHandlerTest extends BaseManageDocuments
     @InjectMocks
     IntervenerThreeFormEExhibitsHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.APPLICANT_FORM_E,

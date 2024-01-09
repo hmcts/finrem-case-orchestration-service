@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,7 +21,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -63,31 +59,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private CaseDataService caseDataService;
 
     protected CaseDetails caseDetails;
-
-    private void setUpCaseDetails(String fileName) throws Exception {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream(PATH + fileName)) {
-            caseDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
-    }
-
-    @Test
-    public void shouldSuccessfullyMoveCollection() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
-        String source = "uploadHearingOrder";
-        String destination = "uploadHearingOrderRO";
-
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
-        mvc.perform(post(String.format("/case-orchestration/move-collection/%s/to/%s", source, destination))
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
-
-        verify(caseDataService, times(1)).moveCollection(any(), eq(source), eq(destination));
-    }
+    private CallbackRequest request;
 
     @Test
     public void shouldSuccessfullyReturnAsAdminConsented() throws Exception {
@@ -157,7 +129,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenContestedCase_whenSolicitorTryToCreateCaseWithNonEligiableCourtSelected_thenShowError() throws Exception {
+    public void givenContestedCase_whenSolicitorTryToCreateCaseWithNonEligibleCourtSelected_thenShowError() throws Exception {
         doValidCourtDataSetUp();
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
         mvc.perform(post("/case-orchestration/contested/set-frc-details")
@@ -322,29 +294,22 @@ public class CaseDataControllerTest extends BaseControllerTest {
         verifyNoInteractions(updateSolicitorDetailsService);
     }
 
-    @Test
-    public void shouldSuccessfullySetDefaultValue() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
-
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
-        mvc.perform(post("/case-orchestration/default-values")
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.civilPartnership", is(NO_VALUE)));
+    public void createRequest(String payload) throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream(payload)) {
+            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            request.setCaseDetailsBefore(request.getCaseDetails());
+        }
     }
 
     @Test
     public void shouldSuccessfullySetOrgPolicies() throws Exception {
-
-        loadRequestContentWith(PATH + "no-org-policies.json");
+        createRequest(PATH + "no-org-policies.json");
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
         when(featureToggleService.isSolicitorNoticeOfChangeEnabled()).thenReturn(true);
         mvc.perform(post("/case-orchestration/org-policies")
-                .content(requestContent.toString())
+                .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
@@ -358,12 +323,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSetOrgPolicies() throws Exception {
-        loadRequestContentWith(PATH + "no-orgs-is-represented.json");
+        createRequest(PATH + "no-orgs-is-represented.json");
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(featureToggleService.isSolicitorNoticeOfChangeEnabled()).thenReturn(true);
         mvc.perform(post("/case-orchestration/org-policies")
-                .content(requestContent.toString())
+                .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
@@ -374,12 +339,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSetChangeRequestFieldWhenFeatureToggleDisabled() throws Exception {
-        loadRequestContentWith(PATH + "no-orgs-is-represented.json");
+        createRequest(PATH + "no-orgs-is-represented.json");
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(featureToggleService.isSolicitorNoticeOfChangeEnabled()).thenReturn(false);
         mvc.perform(post("/case-orchestration/org-policies")
-                .content(requestContent.toString())
+                .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())

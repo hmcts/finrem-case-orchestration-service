@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
 import java.util.List;
 
@@ -23,9 +22,6 @@ public class IntervenerThreeChronologiesStatementHandlerTest extends BaseManageD
     @InjectMocks
     IntervenerThreeChronologiesStatementHandler handler;
 
-   
-
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_OF_ISSUES,
@@ -37,7 +33,7 @@ public class IntervenerThreeChronologiesStatementHandlerTest extends BaseManageD
     }
 
     @Override
-    public DocumentHandler getDocumentHandler() {
+    public IntervenerThreeChronologiesStatementHandler getDocumentHandler() {
         return handler;
     }
 

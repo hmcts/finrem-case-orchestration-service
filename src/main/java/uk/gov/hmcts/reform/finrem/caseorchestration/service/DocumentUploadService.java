@@ -14,15 +14,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
-public abstract class DocumentDateService<T extends CaseDocumentTabData> {
+public abstract class DocumentUploadService<T extends CaseDocumentTabData> {
 
     private final ObjectMapper mapper;
     private final Class<T> documentType;
 
-    private final BiPredicate<String, List<T>> isNewDocument = (id, oldDocuments) ->
+    protected final BiPredicate<String, List<T>> isNewDocument = (id, oldDocuments) ->
         oldDocuments.stream().map(T::getElementId).noneMatch(oldId -> oldId.equals(id));
 
-    protected DocumentDateService(ObjectMapper objectMapper, Class<T> documentType) {
+    protected DocumentUploadService(ObjectMapper objectMapper, Class<T> documentType) {
         objectMapper.registerModule(new JavaTimeModule());
         this.mapper = objectMapper;
         this.documentType = documentType;
@@ -50,6 +50,8 @@ public abstract class DocumentDateService<T extends CaseDocumentTabData> {
 
         allDocuments.stream().forEach(document -> addDateToNewDocuments(documentsBeforeEvent, document));
     }
+
+
 
     private void addDateToNewDocuments(List<T> documentsBeforeEvent, T document) {
         if (isNewDocument.test(document.getElementId(), documentsBeforeEvent)) {
