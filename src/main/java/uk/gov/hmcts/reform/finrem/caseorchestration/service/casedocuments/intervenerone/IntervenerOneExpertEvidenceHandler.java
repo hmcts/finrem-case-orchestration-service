@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ExpertEvidenceHandler;
 
@@ -14,5 +15,10 @@ public class IntervenerOneExpertEvidenceHandler extends ExpertEvidenceHandler {
     @Autowired
     public IntervenerOneExpertEvidenceHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_ONE_EXPERT_EVIDENCE_COLLECTION, INTERVENER_ONE, featureToggleService);
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsFamilyHomeValuation() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_FAMILY_HOME_VALUATION;
     }
 }

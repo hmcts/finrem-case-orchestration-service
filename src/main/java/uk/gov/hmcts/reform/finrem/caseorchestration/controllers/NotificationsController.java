@@ -161,35 +161,6 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for 'Prepare for Hearing'.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "204",
-            description = "'Prepare for Hearing' e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
-    public ResponseEntity<SubmittedCallbackResponse> sendPrepareForHearingEmail(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request for 'Prepare for Hearing' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing' for Case ID: {}",
-                callbackRequest.getCaseDetails().getId());
-            notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
-        }
-        if (notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing' for Case ID: {}",
-                callbackRequest.getCaseDetails().getId());
-            notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
-        }
-
-        return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
-    }
-
     @PostMapping(value = "/draft-order", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for Solicitor To Draft Order")
     @ApiResponses(value = {
@@ -255,7 +226,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to process notificatons for consent order not approved sent email for Case ID: {}", caseDetails.getId());
+        log.info("Received request to process notifications for consent order not approved sent email for Case ID: {}", caseDetails.getId());
         consentOrderNotApprovedSentCorresponder.sendCorrespondence(caseDetails);
 
         return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
@@ -344,7 +315,7 @@ public class NotificationsController extends BaseController {
     @Operation(summary = "Send FRC change update notifications")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204",
-            description = "Update FRC information notificatons sent successfully",
+            description = "Update FRC information notifications sent successfully",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
     ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,

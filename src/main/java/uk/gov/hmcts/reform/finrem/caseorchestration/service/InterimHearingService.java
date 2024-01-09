@@ -96,7 +96,7 @@ public class InterimHearingService {
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     public List<String> submitInterimHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
-        log.info("In submitInterimHearing for case id {}", caseDetails.getId());
+        log.info("In submitInterimHearing for Case ID: {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
         Map<String, Object> caseDataBefore = caseDetailsBefore.getData();
         List<InterimHearingData> interimHearingList = filterInterimHearingToProcess(caseData, caseDataBefore);
@@ -128,11 +128,11 @@ public class InterimHearingService {
                                  CaseDocumentsHolder caseDocumentsHolder) {
 
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            log.info("Sending interim hearing documents to applicant - bulk print for caseid {}", caseDetails.getId());
+            log.info("Sending interim hearing documents to applicant - bulk print for Case ID: {}", caseDetails.getId());
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
         }
         if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            log.info("Sending interim hearing documents to respondent - bulk print for caseid {}", caseDetails.getId());
+            log.info("Sending interim hearing documents to respondent - bulk print for Case ID: {}", caseDetails.getId());
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
         }
         sendToBulkPrintForInterveners(authorisationToken, caseDetails, finremCaseDetails, caseDocumentsHolder);
@@ -149,7 +149,7 @@ public class InterimHearingService {
                 addCaseDocumentsToIntervenerHearingNotices(intervenerWrapper, caseDocumentsHolder, finremCaseDetails.getData(),
                     caseDetails.getData());
                 if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, finremCaseDetails)) {
-                    log.info("Sending letter correspondence to {} for case: {}",
+                    log.info("Sending letter correspondence to {} for Case ID: {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
                         caseDetails.getId());
                     bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
@@ -179,7 +179,7 @@ public class InterimHearingService {
 
 
         String caseId = caseDetails.getId().toString();
-        log.info("preparing for bulk print document for case id {}", caseId);
+        log.info("preparing for bulk print document for Case ID: {}", caseId);
         Map<String, Object> caseData = caseDetails.getData();
         List<CaseDocument> interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails,
             interimHearingList, authorisationToken);
@@ -217,7 +217,7 @@ public class InterimHearingService {
                                     CaseDocumentsHolder caseDocumentsHolder, String authorisationToken) {
         String isDocUploaded = nullToEmpty(interimData.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
         if ("Yes".equalsIgnoreCase(isDocUploaded)) {
-            log.warn("Additional uploaded interim document found for printing for case id {}", caseId);
+            log.warn("Additional uploaded interim document found for printing for Case ID: {}", caseId);
             CaseDocument caseDocument =
                 documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments =
@@ -411,7 +411,7 @@ public class InterimHearingService {
     }
 
     public void sendNotification(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
-        log.info("Sending email notification for case id {}", caseDetails.getId());
+        log.info("Sending email notification for Case ID: {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
         Map<String, Object> caseDataBefore = caseDetailsBefore.getData();
         List<InterimHearingData> caseDataList = filterInterimHearingToProcess(caseData, caseDataBefore);
@@ -426,12 +426,12 @@ public class InterimHearingService {
 
         if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
             && finremCaseDetails.getData().isApplicantCorrespondenceEnabled()) {
-            log.info("Sending email notification to Applicant Solicitor about interim hearing for case id {}", caseDetails.getId());
+            log.info("Sending email notification to Applicant Solicitor about interim hearing for Case ID: {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(caseDetails, interimHearingData);
         }
         if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
             && finremCaseDetails.getData().isRespondentCorrespondenceEnabled()) {
-            log.info("Sending email notification to Respondent Solicitor about interim hearing for case id {}", caseDetails.getId());
+            log.info("Sending email notification to Respondent Solicitor about interim hearing for Case ID: {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(caseDetails, interimHearingData);
         }
         if (notificationService.isContestedApplication(caseDetails)) {
@@ -441,7 +441,7 @@ public class InterimHearingService {
                 if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)
                     && (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
                     && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled()))) {
-                    log.info("Sending email notification to {} Solicitor about interim hearing for case id {}",
+                    log.info("Sending email notification to {} Solicitor about interim hearing for Case ID: {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
                         caseDetails.getId());
                     notificationService.sendInterimHearingNotificationEmailToIntervenerSolicitor(caseDetails, interimHearingData,

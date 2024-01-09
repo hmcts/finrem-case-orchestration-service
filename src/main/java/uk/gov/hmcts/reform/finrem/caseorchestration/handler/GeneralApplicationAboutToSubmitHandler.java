@@ -37,7 +37,7 @@ public class GeneralApplicationAboutToSubmitHandler extends FinremCallbackHandle
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("About to Submit callback event type {} for case id: {}",
+        log.info("About to Submit callback event type {} for Case ID: {}",
             EventType.GENERAL_APPLICATION, caseDetails.getId());
 
         FinremCaseData caseData = service.updateGeneralApplications(callbackRequest, userAuthorisation);

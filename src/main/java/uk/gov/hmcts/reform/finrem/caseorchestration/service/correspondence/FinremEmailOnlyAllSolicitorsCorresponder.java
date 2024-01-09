@@ -15,13 +15,13 @@ public abstract class FinremEmailOnlyAllSolicitorsCorresponder extends EmailOnly
 
     @Override
     public void sendCorrespondence(FinremCaseDetails caseDetails) {
-        log.info("Determine whether to send email notifications to all solicitors for case: {}", caseDetails.getId());
+        log.info("Determine whether to send email notifications to all solicitors for Case ID: {}", caseDetails.getId());
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         }
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
-            log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
+            log.info("Sending email correspondence to respondent for Case ID: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
         }
     }

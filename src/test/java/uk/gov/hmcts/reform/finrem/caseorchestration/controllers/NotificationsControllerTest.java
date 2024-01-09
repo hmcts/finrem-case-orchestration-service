@@ -50,8 +50,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.H
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcLetterOrEmailAllSolicitorsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
@@ -118,10 +116,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean
     private FeatureToggleService featureToggleService;
     @MockBean
-    private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-    @MockBean
-    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
-    @MockBean
     private BulkPrintService bulkPrintService;
     @MockBean
     private GenericDocumentService genericDocumentService;
@@ -131,8 +125,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private DocumentHelper documentHelper;
     @MockBean
     private GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
-    @MockBean
-    private ContestedIntermHearingCorresponder contestedIntermHearingCorresponder;
     @MockBean
     private ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
     @MockBean
@@ -265,45 +257,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    public void givenApplicantSolicitorIsRegisteredAndAgreedToEmails_shouldSendPrepareForHearingEmail() {
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService).sendPrepareForHearingEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendPrepareForHearingEmailToApplicantSolicitorWhenNotAgreed() {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
-
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldSendPrepareForHearingOrderSentEmailWhenRespondentIsRegisteredAndAgreedToEmails() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService).sendPrepareForHearingEmailRespondent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendPrepareForHearingOrderSentEmailWhenRespondentAgreedButNotRegistered() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any(CaseDetails.class));
-        verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any(CaseDetails.class));
     }
 
     @Test

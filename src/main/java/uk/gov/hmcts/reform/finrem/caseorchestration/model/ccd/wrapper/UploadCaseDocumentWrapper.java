@@ -191,11 +191,9 @@ public class UploadCaseDocumentWrapper {
     @SuppressWarnings({"java:S6204", "java:S1121"})
     public List<UploadCaseDocumentCollection> getAllManageableCollections() {
         return Stream.of(uploadCaseDocument, fdrCaseDocumentCollection, appCorrespondenceCollection,
-                appFrFormsCollection, appEvidenceCollection, appTrialBundleCollection, appConfidentialDocsCollection,
-                respCorrespondenceCollection, respFrFormsCollection, respEvidenceCollection, respTrialBundleCollection,
-                respConfidentialDocsCollection, appHearingBundlesCollection, appFormEExhibitsCollection,
-                appChronologiesCollection, appQaCollection, appStatementsExhibitsCollection, appCaseSummariesCollection,
-                appFormsHCollection, appExpertEvidenceCollection, appCorrespondenceDocsCollection, appOtherCollection,
+                appHearingBundlesCollection, appFormEExhibitsCollection, appChronologiesCollection,
+                appQaCollection, appStatementsExhibitsCollection, appCaseSummariesCollection,
+                appFormsHCollection, appExpertEvidenceCollection, appOtherCollection,
                 respHearingBundlesCollection, respFormEExhibitsCollection, respChronologiesCollection, respQaCollection,
                 respStatementsExhibitsCollection, respCaseSummariesCollection, respFormsHCollection,
                 respExpertEvidenceCollection, respCorrespondenceDocsColl, respOtherCollection, intv1Summaries,

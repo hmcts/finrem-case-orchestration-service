@@ -16,11 +16,11 @@ public class UpdateFrcCorrespondenceService {
     private final NotificationService notificationService;
 
     public void sendCorrespondence(CaseDetails caseDetails, String authToken) throws JsonProcessingException {
-        log.info("Send Update FRC correspondence for case: {}", caseDetails.getId());
+        log.info("Send Update FRC correspondence for Case ID: {}", caseDetails.getId());
 
         updateFrcLetterOrEmailAllSolicitorsCorresponder.sendCorrespondence(caseDetails, authToken);
 
-        log.info("Sending email notification to court for 'Update Frc Information' for case: {}", caseDetails.getId());
+        log.info("Sending email notification to court for 'Update Frc Information' for Case ID: {}", caseDetails.getId());
         notificationService.sendUpdateFrcInformationEmailToCourt(caseDetails);
 
     }

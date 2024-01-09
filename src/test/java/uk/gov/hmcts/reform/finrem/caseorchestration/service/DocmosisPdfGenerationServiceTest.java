@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -86,7 +87,7 @@ public class DocmosisPdfGenerationServiceTest {
             pdfGenerationService.generateDocFrom(TEMPLATE_NAME, PLACEHOLDERS);
             fail("should have thrown bad-request exception");
         } catch (PdfGenerationException e) {
-            HttpStatus httpStatus = ((HttpClientErrorException) e.getCause()).getStatusCode();
+            HttpStatusCode httpStatus = ((HttpClientErrorException) e.getCause()).getStatusCode();
             assertThat(httpStatus, is(HttpStatus.BAD_REQUEST));
         }
     }

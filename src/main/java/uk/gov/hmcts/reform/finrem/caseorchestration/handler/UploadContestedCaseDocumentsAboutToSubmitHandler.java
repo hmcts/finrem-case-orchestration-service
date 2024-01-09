@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -35,6 +36,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 @Slf4j
 @Service
 public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCallbackHandler {
+
+    private static List<CaseDocumentType> administrativeCaseDocumentTypes = List.of(
+        CaseDocumentType.ATTENDANCE_SHEETS,
+        CaseDocumentType.JUDICIAL_NOTES,
+        CaseDocumentType.JUDGMENT,
+        CaseDocumentType.WITNESS_SUMMONS,
+        CaseDocumentType.TRANSCRIPT,
+        CaseDocumentType.BILL_OF_COSTS
+    );
 
     public static final String TRIAL_BUNDLE_SELECTED_ERROR =
         "To upload a hearing bundle please use the Manage hearing "
@@ -68,15 +78,17 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = getValidatedResponse(caseData);
+
+        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
+        validateManageCaseDocumentsTypes(managedCollections, response.getErrors());
+
         if (response.hasErrors()) {
             return response;
         }
 
-
-        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
-
         CaseDocumentParty loggedInUserRole =
             getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
+
 
         managedCollections.forEach(doc -> doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole));
 
@@ -94,6 +106,16 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
 
         return response;
     }
+
+    private void validateManageCaseDocumentsTypes(List<UploadCaseDocumentCollection> managedCollections, List<String> errors) {
+        managedCollections.stream().forEach(uploadCaseDocumentCollection -> {
+            CaseDocumentType caseDocumentType = uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType();
+            if (administrativeCaseDocumentTypes.contains(caseDocumentType)) {
+                errors.add(caseDocumentType.getId() + " cannot be uploaded using this event");
+            }
+        });
+    }
+
 
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> getValidatedResponse(FinremCaseData caseData) {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -118,14 +140,14 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
     }
 
     private CaseDocumentParty getActiveUserCaseDocumentParty(String caseId, String userAuthorisation) {
-        String logMessage = "Logged in user role {} caseId {}";
+        String logMessage = "Logged in user role {} Case ID: {}";
         CaseAssignedUserRolesResource caseAssignedUserRole =
             caseAssignedRoleService.getCaseAssignedUserRole(caseId, userAuthorisation);
         if (caseAssignedUserRole != null) {
             List<CaseAssignedUserRole> caseAssignedUserRoleList = caseAssignedUserRole.getCaseAssignedUserRoles();
             if (!caseAssignedUserRoleList.isEmpty()) {
                 String loggedInUserCaseRole = caseAssignedUserRoleList.get(0).getCaseRole();
-                log.info("logged-in user role {} in case {}", loggedInUserCaseRole, caseId);
+                log.info("logged-in user role {} in Case ID: {}", loggedInUserCaseRole, caseId);
                 return getRole(logMessage, caseId, loggedInUserCaseRole);
             }
         }
