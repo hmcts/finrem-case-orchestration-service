@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.hearingbundles;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -36,8 +37,14 @@ public class ManageHearingBundlesAboutToSubmitHandlerTest {
 
     @Mock
     private FdrHearingBundleDocumentCategoriser fdrHearingBundleDocumentCategoriser;
-    ManageHearingBundlesAboutToSubmitHandler manageHearingBundlesAboutToSubmitHandler =
-        new ManageHearingBundlesAboutToSubmitHandler(new FinremCaseDetailsMapper(new ObjectMapper()), fdrHearingBundleDocumentCategoriser);
+
+    ManageHearingBundlesAboutToSubmitHandler manageHearingBundlesAboutToSubmitHandler;
+
+    @Before
+    public void setUp() {
+        manageHearingBundlesAboutToSubmitHandler =
+            new ManageHearingBundlesAboutToSubmitHandler(new FinremCaseDetailsMapper(new ObjectMapper()), fdrHearingBundleDocumentCategoriser);
+    }
 
     @Test
     public void givenHandlerCanHandleCallback_whenCanHandle_thenReturnTrue() {
