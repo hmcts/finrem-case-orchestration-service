@@ -97,8 +97,8 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         if (orderWrapper.getAppConsentApprovedOrders() != null) {
             IntStream.range(0, orderWrapper.getAppConsentApprovedOrders().size()).forEach(idx -> {
                 final String categoryToApply = getNumberCategory(idx,
-                    DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS,
-                    DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS_OVERFLOW);
+                    DocumentCategory.APPLICANT_DOCUMENTS_CONSENT_ORDERS,
+                    DocumentCategory.APPLICANT_DOCUMENTS_CONSENT_ORDERS_OVERFLOW);
                 setCategoryToAllOrdersDocs(orderWrapper.getAppConsentApprovedOrders().get(idx).getApprovedOrder().getConsentOrder(),
                     categoryToApply);
             });
@@ -106,8 +106,8 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         if (orderWrapper.getRespConsentApprovedOrders() != null) {
             IntStream.range(0, orderWrapper.getRespConsentApprovedOrders().size()).forEach(idx -> {
                 final String categoryToApply = getNumberCategory(idx,
-                    DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS,
-                    DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS_OVERFLOW);
+                    DocumentCategory.RESPONDENT_DOCUMENTS_CONSENT_ORDERS,
+                    DocumentCategory.RESPONDENT_DOCUMENTS_CONSENT_ORDERS_OVERFLOW);
                 setCategoryToAllOrdersDocs(orderWrapper.getRespConsentApprovedOrders().get(idx).getApprovedOrder().getConsentOrder(),
                     categoryToApply);
             });
@@ -115,8 +115,8 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         if (orderWrapper.getIntv1ConsentApprovedOrders() != null) {
             IntStream.range(0, orderWrapper.getIntv1ConsentApprovedOrders().size()).forEach(idx -> {
                 final String categoryToApply = getNumberCategory(idx,
-                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS,
-                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS_OVERFLOW);
+                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_CONSENT_ORDERS,
+                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_CONSENT_ORDERS_OVERFLOW);
                 setCategoryToAllOrdersDocs(orderWrapper.getIntv1ConsentApprovedOrders().get(idx).getApprovedOrder().getConsentOrder(),
                     categoryToApply);
             });
@@ -124,8 +124,8 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         if (orderWrapper.getIntv2ConsentApprovedOrders() != null) {
             IntStream.range(0, orderWrapper.getIntv2ConsentApprovedOrders().size()).forEach(idx -> {
                 final String categoryToApply = getNumberCategory(idx,
-                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS,
-                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS_OVERFLOW);
+                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_CONSENT_ORDERS,
+                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_CONSENT_ORDERS_OVERFLOW);
                 setCategoryToAllOrdersDocs(orderWrapper.getIntv2ConsentApprovedOrders().get(idx).getApprovedOrder().getConsentOrder(),
                     categoryToApply);
             });
@@ -133,8 +133,8 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         if (orderWrapper.getIntv3ConsentApprovedOrders() != null) {
             IntStream.range(0, orderWrapper.getIntv3ConsentApprovedOrders().size()).forEach(idx -> {
                 final String categoryToApply = getNumberCategory(idx,
-                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS,
-                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS_OVERFLOW);
+                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_CONSENT_ORDERS,
+                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_CONSENT_ORDERS_OVERFLOW);
                 setCategoryToAllOrdersDocs(orderWrapper.getIntv3ConsentApprovedOrders().get(idx).getApprovedOrder().getConsentOrder(),
                     categoryToApply);
             });
@@ -142,8 +142,8 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         if (orderWrapper.getIntv4ConsentApprovedOrders() != null) {
             IntStream.range(0, orderWrapper.getIntv4ConsentApprovedOrders().size()).forEach(idx -> {
                 final String categoryToApply = getNumberCategory(idx,
-                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS,
-                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS_OVERFLOW);
+                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_CONSENT_ORDERS,
+                    DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_CONSENT_ORDERS_OVERFLOW);
                 setCategoryToAllOrdersDocs(orderWrapper.getIntv4ConsentApprovedOrders().get(idx).getApprovedOrder().getConsentOrder(),
                     categoryToApply);
             });

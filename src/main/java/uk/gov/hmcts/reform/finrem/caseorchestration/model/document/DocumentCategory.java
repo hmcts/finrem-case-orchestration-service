@@ -287,6 +287,19 @@ public enum DocumentCategory {
     INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS("intervenerDocumentsIntervener4SendOrders"),
     INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS_OVERFLOW("intervenerDocumentsIntervener4SendOrdersOverflow"),
 
+    APPLICANT_DOCUMENTS_CONSENT_ORDERS("applicantDocumentsConsentOrders"),
+    APPLICANT_DOCUMENTS_CONSENT_ORDERS_OVERFLOW("applicantDocumentsConsentOrdersOverflow"),
+    RESPONDENT_DOCUMENTS_CONSENT_ORDERS("respondentDocumentsConsentOrders"),
+    RESPONDENT_DOCUMENTS_CONSENT_ORDERS_OVERFLOW("respondentDocumentsConsentOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_1_CONSENT_ORDERS("intervenerDocumentsIntervener1ConsentOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_1_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener1ConsentOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_2_CONSENT_ORDERS("intervenerDocumentsIntervener2ConsentOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_2_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener2ConsentOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_3_CONSENT_ORDERS("intervenerDocumentsIntervener3ConsentOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_3_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener3ConsentOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_4_CONSENT_ORDERS("intervenerDocumentsIntervener4ConsentOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_4_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener4ConsentOrdersOverflow"),
+
     UNCATEGORISED(null);
 
     private final String documentCategoryId;
