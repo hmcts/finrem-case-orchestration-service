@@ -22,6 +22,7 @@ public abstract class PartyDocumentsHandler extends DocumentHandler {
 
     protected abstract boolean canHandleDocument(UploadCaseDocument uploadCaseDocument);
 
+    @Override
     protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 

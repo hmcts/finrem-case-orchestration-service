@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class ApplicantOtherDocumentsCollectionServiceTest extends BaseManageDocumentsHandlerTest {
+public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
     ApplicantOtherDocumentsHandler collectionService;
@@ -37,6 +37,7 @@ public class ApplicantOtherDocumentsCollectionServiceTest extends BaseManageDocu
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+
     }
 
     @Override
@@ -85,5 +86,51 @@ public class ApplicantOtherDocumentsCollectionServiceTest extends BaseManageDocu
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
             is(DocumentCategory.APPLICANT_DOCUMENTS_PENSION_PLAN)
         );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE),
+            is(DocumentCategory.APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES1)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES2),
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES2)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES),
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_MORTGAGE_CAPACITIES)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT),
+            is(DocumentCategory.REPORTS_PENSION_REPORTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS),
+            is(DocumentCategory.APPLICANT_DOCUMENTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS),
+            is(DocumentCategory.APPLICANT_DOCUMENTS_HOUSING_PARTICULARS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PRE_HEARING_DRAFT_ORDER),
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER)
+        );
+
     }
 }
