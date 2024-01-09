@@ -25,7 +25,7 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         if (CollectionUtils.isNotEmpty(finremCaseData.getOrdersSentToPartiesCollection())) {
             finremCaseData.getOrdersSentToPartiesCollection().forEach(
                 order -> setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(),
-                    DocumentCategory.APPROVED_ORDERS.getDocumentCategoryId()));
+                    DocumentCategory.ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId()));
         }
 
         categoryToAllPartiesOrders(finremCaseData.getOrderWrapper());
