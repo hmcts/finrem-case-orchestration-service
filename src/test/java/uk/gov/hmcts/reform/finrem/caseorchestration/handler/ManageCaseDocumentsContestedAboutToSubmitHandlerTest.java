@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCase
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
@@ -83,11 +84,13 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             new RespondentQuestionnairesAnswersHandler(featureToggleService);
         ApplicantChronologiesStatementHandler applicantChronologiesStatementCollectionService =
             new ApplicantChronologiesStatementHandler(featureToggleService);
+        CaseDocumentsHandler caseDocumentsHandler =
+            new CaseDocumentsHandler(featureToggleService);
 
         List<DocumentHandler> documentHandlers =
             Stream.of(respondentChronologiesStatementCollectionService, applicantOtherDocumentsCollectionService,
                     fdrDocumentsCollectionService, respondentQuestionnairesAnswersCollectionService,
-                    applicantChronologiesStatementCollectionService)
+                    applicantChronologiesStatementCollectionService, caseDocumentsHandler)
                 .collect(Collectors.toList());
         FinremCaseDetailsMapper finremCaseDetailsMapper =
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
@@ -138,8 +141,37 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
 
     @Test
+    public void givenAdministrativeDocsAreAdded_ThenDefaultsAreSetCorrectly() {
+        setUpAdministrativeDocuments();
+
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentCollection().get(0).getUploadCaseDocument()
+            .setCaseDocumentParty(null);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            AUTH_TOKEN);
+
+        assertTrue(response.getWarnings().isEmpty());
+        List<UploadCaseDocumentCollection> uploadCaseDocumentCollections = caseData.getUploadCaseDocumentWrapper()
+            .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_UPLOADED_DOCUMENTS);
+        assertThat(uploadCaseDocumentCollections,
+            hasSize(4));
+        uploadCaseDocumentCollections.forEach(uploadCaseDocumentCollection -> {
+            assertThat(uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentParty(),
+                is(CaseDocumentParty.CASE));
+            assertThat(uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentConfidentiality(),
+                is(YesOrNo.NO));
+            assertThat(uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentFdr(),
+                is(YesOrNo.NO));
+        });
+    }
+
+
+
+    @Test
     public void givenACaseWithoutIntervenersAndManagedDocIntoIntv2WhichIsNull_WhenHandle_thenThrowValidationError() {
-        setUpRemovedDocuments();
+        setUpAdministrativeDocuments();
         setUpAddedDocuments();
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
@@ -153,7 +185,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         assertTrue(response.getWarnings().isEmpty());
     }
 
-
     private void setUpAddedDocuments() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_OF_ISSUES,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
@@ -165,6 +196,18 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.YES, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+    }
+
+    private void setUpAdministrativeDocuments() {
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.ATTENDANCE_SHEETS,
+            null, null, null, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.JUDICIAL_NOTES,
+            null, null, null, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.WITNESS_SUMMONS,
+            null, null, null, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRANSCRIPT,
+            null, null, null, null));
+
     }
 
     private void setUpRemovedDocuments() {
