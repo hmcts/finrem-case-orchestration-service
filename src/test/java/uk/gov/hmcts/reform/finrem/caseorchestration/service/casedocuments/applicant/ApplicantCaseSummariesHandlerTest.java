@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseSummariesHandlerTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class ApplicantCaseSummariesCollectionServiceTest extends CaseSummariesHandlerTest {
+public class ApplicantCaseSummariesHandlerTest extends CaseSummariesHandlerTest<ApplicantCaseSummariesHandler> {
 
     @InjectMocks
     ApplicantCaseSummariesHandler collectionService;
@@ -35,7 +34,7 @@ public class ApplicantCaseSummariesCollectionServiceTest extends CaseSummariesHa
     }
 
     @Override
-    public DocumentHandler getDocumentHandler() {
+    public ApplicantCaseSummariesHandler getDocumentHandler() {
         return collectionService;
     }
 
