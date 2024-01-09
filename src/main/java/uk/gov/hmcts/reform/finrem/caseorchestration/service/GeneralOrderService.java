@@ -257,10 +257,12 @@ public class GeneralOrderService {
             generalOrders.sort(Comparator.nullsLast(this::getCompareTo));
             generalOrders.forEach(generalOrder -> {
                 ContestedGeneralOrder order = generalOrder.getValue();
-                String filename = order.getAdditionalDocument().getDocumentFilename();
-                String documentId = getDocumentId(order.getAdditionalDocument());
-                dynamicListElements.add(partyService.getDynamicMultiSelectListElement(documentId,
-                    "Judiciary Outcome tab" + " - " + filename));
+                if (order != null && order.getAdditionalDocument() != null) {
+                    String filename = order.getAdditionalDocument().getDocumentFilename();
+                    String documentId = getDocumentId(order.getAdditionalDocument());
+                    dynamicListElements.add(partyService.getDynamicMultiSelectListElement(documentId,
+                        "Judiciary Outcome tab" + " - " + filename));
+                }
             });
         }
 

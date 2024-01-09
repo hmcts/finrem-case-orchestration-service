@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ExpertEvidenceHandlerTest;
 
 import java.util.List;
@@ -22,7 +22,6 @@ public class IntervenerThreeExpertEvidenceHandlerTest extends ExpertEvidenceHand
     @InjectMocks
     IntervenerThreeExpertEvidenceHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.VALUATION_REPORT,
@@ -32,7 +31,7 @@ public class IntervenerThreeExpertEvidenceHandlerTest extends ExpertEvidenceHand
     }
 
     @Override
-    public DocumentHandler getDocumentHandler() {
+    public IntervenerThreeExpertEvidenceHandler getDocumentHandler() {
         return handler;
     }
 
@@ -48,5 +47,10 @@ public class IntervenerThreeExpertEvidenceHandlerTest extends ExpertEvidenceHand
     protected List<UploadCaseDocumentCollection> getDocumentCollection() {
         return caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_THREE_EXPERT_EVIDENCE_COLLECTION);
+    }
+
+    @Override
+    protected DocumentCategory getValuationReportCategory() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_FAMILY_HOME_VALUATION;
     }
 }
