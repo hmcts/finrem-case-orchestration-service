@@ -24,23 +24,23 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FdrHearingBundleDocumentCategoriserTest {
+public class HearingBundleDocumentCategoriserTest {
 
-    private FdrHearingBundleDocumentCategoriser fdrHearingBundleDocumentCategoriser;
+    private HearingBundleDocumentCategoriser hearingBundleDocumentCategoriser;
 
     @Mock
     FeatureToggleService featureToggleService;
 
     @Before
     public void setUp() {
-        fdrHearingBundleDocumentCategoriser = new FdrHearingBundleDocumentCategoriser(featureToggleService);
+        hearingBundleDocumentCategoriser = new HearingBundleDocumentCategoriser(featureToggleService);
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
     }
 
     @Test
     public void testCategorizeDocuments() {
-        FinremCaseData finremCaseData = buildFinremCaseData();
-        fdrHearingBundleDocumentCategoriser.categorise(finremCaseData);
+        FinremCaseData finremCaseData = buildFinremCaseDataWithBundles();
+        hearingBundleDocumentCategoriser.categorise(finremCaseData);
         HearingUploadBundleHolder hearingUploadBundleHolder = finremCaseData.getFdrHearingBundleCollections().get(0).getValue();
         assertThat(hearingUploadBundleHolder.getHearingBundleDocuments().get(0).getValue()
             .getBundleDocuments().getCategoryId(), is(
@@ -50,10 +50,32 @@ public class FdrHearingBundleDocumentCategoriserTest {
             .getBundleDocuments().getCategoryId(), is(
             DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE.getDocumentCategoryId()
         ));
+
+
+        HearingUploadBundleHolder hearingUploadBundleHolder1 = finremCaseData.getHearingUploadBundle().get(0).getValue();
+        assertThat(hearingUploadBundleHolder1.getHearingBundleDocuments().get(0).getValue()
+            .getBundleDocuments().getCategoryId(), is(
+            DocumentCategory.HEARING_BUNDLE.getDocumentCategoryId()
+        ));
+        assertThat(hearingUploadBundleHolder1.getHearingBundleDocuments().get(1).getValue()
+            .getBundleDocuments().getCategoryId(), is(
+            DocumentCategory.HEARING_BUNDLE.getDocumentCategoryId()
+        ));
     }
 
-    private FinremCaseData buildFinremCaseData() {
+    private FinremCaseData buildFinremCaseDataWithBundles() {
 
+        HearingUploadBundleCollection fdrHearingUploadBundleCollection =
+            getHearingUploadBundleCollection();
+
+        HearingUploadBundleCollection hearingUploadBundleCollection =
+            getHearingUploadBundleCollection();
+
+        return FinremCaseData.builder().fdrHearingBundleCollections(List.of(fdrHearingUploadBundleCollection))
+            .hearingUploadBundle(List.of(hearingUploadBundleCollection)).build();
+    }
+
+    private static HearingUploadBundleCollection getHearingUploadBundleCollection() {
         List<HearingBundleDocumentCollection> hearingBundleDocumentCollections =
             Arrays.asList(getHearingBundleDocumentCollection("file2.pdf"), getHearingBundleDocumentCollection("file4.pdf"));
 
@@ -64,8 +86,7 @@ public class FdrHearingBundleDocumentCategoriserTest {
                 .hearingBundleFdr(YesOrNo.NO)
                 .build())
             .build();
-
-        return FinremCaseData.builder().fdrHearingBundleCollections(List.of(hearingUploadBundleCollection)).build();
+        return hearingUploadBundleCollection;
     }
 
 

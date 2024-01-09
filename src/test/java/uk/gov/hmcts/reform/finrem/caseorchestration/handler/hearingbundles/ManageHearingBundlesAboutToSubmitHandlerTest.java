@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.FdrHearingBundleDocumentCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.HearingBundleDocumentCategoriser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,14 +36,14 @@ public class ManageHearingBundlesAboutToSubmitHandlerTest {
 
 
     @Mock
-    private FdrHearingBundleDocumentCategoriser fdrHearingBundleDocumentCategoriser;
+    private HearingBundleDocumentCategoriser hearingBundleDocumentCategoriser;
 
     ManageHearingBundlesAboutToSubmitHandler manageHearingBundlesAboutToSubmitHandler;
 
     @Before
     public void setUp() {
         manageHearingBundlesAboutToSubmitHandler =
-            new ManageHearingBundlesAboutToSubmitHandler(new FinremCaseDetailsMapper(new ObjectMapper()), fdrHearingBundleDocumentCategoriser);
+            new ManageHearingBundlesAboutToSubmitHandler(new FinremCaseDetailsMapper(new ObjectMapper()), hearingBundleDocumentCategoriser);
     }
 
     @Test
