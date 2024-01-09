@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument.CaseDocumentBuilder;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument.builder;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,11 +31,13 @@ public class GeneralEmailService {
         List<GeneralEmailCollection> generalEmailCollection = Optional.ofNullable(generalEmailWrapper
                 .getGeneralEmailCollection())
             .orElse(new ArrayList<>(1));
+        CaseDocument newCaseDocumentObject = createNewCaseDocumentObject(generalEmailWrapper);
+        log.info("General email document obj {} for case Id {}", newCaseDocumentObject, caseDetails.getId());
         GeneralEmailCollection collection = GeneralEmailCollection.builder().value(GeneralEmailHolder.builder()
             .generalEmailBody(generalEmailWrapper.getGeneralEmailBody())
             .generalEmailCreatedBy(generalEmailWrapper.getGeneralEmailCreatedBy())
             .generalEmailRecipient(generalEmailWrapper.getGeneralEmailRecipient())
-            .generalEmailUploadedDocument(createNewCaseDocumentObject(generalEmailWrapper))
+            .generalEmailUploadedDocument(newCaseDocumentObject)
             .build()).build();
         generalEmailCollection.add(collection);
 
@@ -40,22 +45,22 @@ public class GeneralEmailService {
     }
 
     private CaseDocument createNewCaseDocumentObject(GeneralEmailWrapper wrapper) {
-        CaseDocument documentToReturn = CaseDocument.builder().build();
+        CaseDocumentBuilder builder = builder();
         CaseDocument latestUploadedDocument = wrapper.getGeneralEmailUploadedDocument();
         if (latestUploadedDocument != null) {
             String binaryUrl = latestUploadedDocument.getDocumentBinaryUrl();
             if (binaryUrl != null) {
-                documentToReturn.setDocumentBinaryUrl(binaryUrl);
+                builder.documentBinaryUrl(binaryUrl);
             }
             String fileName = latestUploadedDocument.getDocumentFilename();
             if (fileName != null) {
-                documentToReturn.setDocumentFilename(fileName);
+                builder.documentFilename(fileName);
             }
             String url = latestUploadedDocument.getDocumentUrl();
             if (url != null) {
-                documentToReturn.setDocumentUrl(url);
+                builder.documentUrl(url);
             }
         }
-        return documentToReturn;
+        return builder.build();
     }
 }
