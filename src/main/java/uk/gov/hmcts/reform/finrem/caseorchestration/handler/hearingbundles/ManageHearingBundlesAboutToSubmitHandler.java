@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.FdrHearingBundleDocumentCategoriser;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,8 +26,12 @@ import java.util.Optional;
 @Service
 public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHandler {
 
-    public ManageHearingBundlesAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final FdrHearingBundleDocumentCategoriser fdrHearingBundleDocumentCategoriser;
+
+    public ManageHearingBundlesAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                    FdrHearingBundleDocumentCategoriser fdrHearingBundleDocumentCategoriser) {
         super(finremCaseDetailsMapper);
+        this.fdrHearingBundleDocumentCategoriser = fdrHearingBundleDocumentCategoriser;
     }
 
     @Override
@@ -60,6 +65,7 @@ public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHand
 
         caseData.getHearingUploadBundle().removeAll(fdrHearingUploadBundleCollections);
         caseData.setFdrHearingBundleCollections(fdrHearingUploadBundleCollections);
+        fdrHearingBundleDocumentCategoriser.categorise(caseData);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).data(caseData).build();
 
     }

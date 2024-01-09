@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.hearingbundles;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -16,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.FdrHearingBundleDocumentCategoriser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,11 +30,14 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ManageHearingBundlesAboutToSubmitHandlerTest {
 
 
+    @Mock
+    private FdrHearingBundleDocumentCategoriser fdrHearingBundleDocumentCategoriser;
     ManageHearingBundlesAboutToSubmitHandler manageHearingBundlesAboutToSubmitHandler =
-        new ManageHearingBundlesAboutToSubmitHandler(new FinremCaseDetailsMapper(new ObjectMapper()));
+        new ManageHearingBundlesAboutToSubmitHandler(new FinremCaseDetailsMapper(new ObjectMapper()), fdrHearingBundleDocumentCategoriser);
 
     @Test
     public void givenHandlerCanHandleCallback_whenCanHandle_thenReturnTrue() {
@@ -85,7 +92,6 @@ public class ManageHearingBundlesAboutToSubmitHandlerTest {
             is(LocalDateTime.of(2023, 1, 1, 1, 1)));
         assertThat(hearingUploadBundleCollections.get(1).getValue().getHearingBundleDocuments().get(1).getValue().getBundleUploadDate(),
             is(LocalDateTime.of(2019, 1, 1, 1, 1)));
-
 
     }
 
