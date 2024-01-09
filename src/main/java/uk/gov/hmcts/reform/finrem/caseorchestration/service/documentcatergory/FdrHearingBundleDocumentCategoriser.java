@@ -18,10 +18,13 @@ public class FdrHearingBundleDocumentCategoriser extends DocumentCategoriser {
 
     @Override
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
-        finremCaseData.getFdrHearingBundleCollections().forEach(fdrHearingBundleCollection -> {
-            fdrHearingBundleCollection.getValue().getHearingBundleDocuments().forEach(hearingBundleDocument -> {
-               hearingBundleDocument.getValue().getBundleDocuments().setCategoryId(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE.getDocumentCategoryId());
+        if (finremCaseData.getFdrHearingBundleCollections() != null) {
+            finremCaseData.getFdrHearingBundleCollections().forEach(fdrHearingBundleCollection -> {
+                fdrHearingBundleCollection.getValue().getHearingBundleDocuments().forEach(hearingBundleDocument -> {
+                    hearingBundleDocument.getValue().getBundleDocuments()
+                        .setCategoryId(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE.getDocumentCategoryId());
+                });
             });
-        });
+        }
     }
 }
