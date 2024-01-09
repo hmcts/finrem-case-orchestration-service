@@ -69,10 +69,10 @@ public class IntervenerOneWrapper extends IntervenerWrapper {
     @Override
     @JsonIgnore
     public List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData) {
-        if (caseData.getIntv1HearingNoticesCollection() == null) {
-            caseData.setIntv1HearingNoticesCollection(new ArrayList<>());
+        if (caseData.getIntervenerHearingNoticeCollectionWrapper().getIntv1HearingNoticesCollection() == null) {
+            caseData.getIntervenerHearingNoticeCollectionWrapper().setIntv1HearingNoticesCollection(new ArrayList<>());
         }
-        return caseData.getIntv1HearingNoticesCollection();
+        return caseData.getIntervenerHearingNoticeCollectionWrapper().getIntv1HearingNoticesCollection();
     }
 
     @Override

@@ -93,9 +93,9 @@ public class IntervenerTwoWrapper extends IntervenerWrapper {
     @Override
     @JsonIgnore
     public List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData) {
-        if (caseData.getIntv2HearingNoticesCollection() == null) {
-            caseData.setIntv2HearingNoticesCollection(new ArrayList<>());
+        if (caseData.getIntervenerHearingNoticeCollectionWrapper().getIntv2HearingNoticesCollection() == null) {
+            caseData.getIntervenerHearingNoticeCollectionWrapper().setIntv2HearingNoticesCollection(new ArrayList<>());
         }
-        return caseData.getIntv2HearingNoticesCollection();
+        return caseData.getIntervenerHearingNoticeCollectionWrapper().getIntv2HearingNoticesCollection();
     }
 }

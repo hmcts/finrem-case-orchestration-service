@@ -237,11 +237,9 @@ public class FinremCaseData {
 
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;
-    private List<IntervenerHearingNoticeCollection> intv1HearingNoticesCollection;
-    private List<IntervenerHearingNoticeCollection> intv2HearingNoticesCollection;
-    private List<IntervenerHearingNoticeCollection> intv3HearingNoticesCollection;
-    private List<IntervenerHearingNoticeCollection> intv4HearingNoticesCollection;
-    private List<JudgeNotApprovedReasonsCollection> judgeNotApprovedReasons;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private IntervenerHearingNoticeCollectionWrapper intervenerHearingNoticeCollectionWrapper;
     private JudgeType refusalOrderJudgeType;
     private String refusalOrderJudgeName;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -433,6 +431,14 @@ public class FinremCaseData {
             this.transferLocalCourtWrapper = new TransferLocalCourtWrapper();
         }
         return transferLocalCourtWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerHearingNoticeCollectionWrapper getIntervenerHearingNoticeCollectionWrapper() {
+        if (intervenerHearingNoticeCollectionWrapper == null){
+            this.intervenerHearingNoticeCollectionWrapper = new IntervenerHearingNoticeCollectionWrapper();
+        }
+        return intervenerHearingNoticeCollectionWrapper;
     }
 
     @JsonIgnore
