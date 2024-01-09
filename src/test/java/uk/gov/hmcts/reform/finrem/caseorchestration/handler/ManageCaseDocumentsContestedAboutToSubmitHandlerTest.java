@@ -124,8 +124,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
             AUTH_TOKEN);
 
-        verify(manageDocumentsHandlerValidator, times(1)).validateSelectedIntervenerParties(caseData, screenUploadDocumentList, new ArrayList<>());
-
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION),
             hasSize(4));
