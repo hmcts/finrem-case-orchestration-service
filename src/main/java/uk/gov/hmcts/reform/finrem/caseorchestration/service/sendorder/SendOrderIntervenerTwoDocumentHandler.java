@@ -89,7 +89,7 @@ public class SendOrderIntervenerTwoDocumentHandler extends SendOrderPartyDocumen
     }
 
     protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getIntv2OrderCollections())
+        return Optional.ofNullable(caseData.getOrderWrapper().getIntv2OrderCollections())
                 .orElse(new ArrayList<>());
     }
 }

@@ -88,7 +88,7 @@ public class SendOrderIntervenerOneDocumentHandler extends SendOrderPartyDocumen
     }
 
     protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getIntv1OrderCollections())
+        return Optional.ofNullable(caseData.getOrderWrapper().getIntv1OrderCollections())
                 .orElse(new ArrayList<>());
     }
 }

@@ -422,7 +422,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         List<ApprovedOrderConsolidateCollection> mutableList = new ArrayList<>();
         mutableList.add(existingCollection1);
         mutableList.add(existingCollection2);
-        data.setIntv1OrderCollections(mutableList);
+        data.getOrderWrapper().setIntv1OrderCollections(mutableList);
         String coverLetterDocumentFilename = "contestedOrderApprovedCoverLetter.pdf";
         String coverLetterUrl = "http://dm-store:8080/documents/129456-654321-123456-654321";
         data.setOrderApprovedCoverLetter(caseDocument(coverLetterUrl, coverLetterDocumentFilename, "http://dm-store:8080/documents/129456-654321-123456-654321/binary"));
@@ -447,21 +447,21 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-            = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+            = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
         assertEquals(1, caseData.getFinalOrderCollection().size());
-        assertNull(caseData.getIntv1OrderCollection());
-        assertEquals(3, caseData.getIntv1OrderCollections().size());
-        assertThat(caseData.getIntv1OrderCollections().get(0).getValue().getApproveOrders().size(), is(2));
-        assertThat(caseData.getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), is("app_docs.pdf"));
-        assertThat(caseData.getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(1)
-                .getValue().getCaseDocument().getDocumentFilename(), is("contestedOrderApprovedCoverLetter.pdf"));
-        assertThat(caseData.getIntv1OrderCollections().get(1).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), is("AdditionalHearingDocument.pdf"));
-        assertThat(caseData.getIntv1OrderCollections().get(2).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), is("PreviousOrder.pdf"));
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertEquals(3, caseData.getOrderWrapper().getIntv1OrderCollections().size());
+        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().size(), 2);
+        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(0)
+                .getValue().getCaseDocument().getDocumentFilename(), "app_docs.pdf");
+        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(1)
+                .getValue().getCaseDocument().getDocumentFilename(), "contestedOrderApprovedCoverLetter.pdf");
+        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(1).getValue().getApproveOrders().get(0)
+                .getValue().getCaseDocument().getDocumentFilename(), "AdditionalHearingDocument.pdf");
+        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(2).getValue().getApproveOrders().get(0)
+                .getValue().getCaseDocument().getDocumentFilename(), "PreviousOrder.pdf");
     }
 
     private DynamicMultiSelectList getParties() {

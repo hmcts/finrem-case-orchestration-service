@@ -89,7 +89,7 @@ public class SendOrderIntervenerThreeDocumentHandler extends SendOrderPartyDocum
     }
 
     protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getIntv3OrderCollections())
+        return Optional.ofNullable(caseData.getOrderWrapper().getIntv3OrderCollections())
                 .orElse(new ArrayList<>());
     }
 }

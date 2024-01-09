@@ -105,7 +105,7 @@ public class SendOrderApplicantDocumentHandler extends SendOrderPartyDocumentHan
     }
 
     protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getAppOrderCollections())
+        return Optional.ofNullable(caseData.getOrderWrapper().getAppOrderCollections())
             .orElse(new ArrayList<>());
     }
 }
