@@ -30,7 +30,25 @@ public enum CaseDocumentType {
     TRIAL_BUNDLE("Trial Bundle"),
     CONDITIONAL_ORDER("Conditional order"),
     FINAL_ORDER("Final order"),
-    OTHER("other");
+    OTHER("other"),
+
+    // New CFV document types
+    ATTENDANCE_SHEETS("Attendance Sheets"),
+    BILL_OF_COSTS("Bill of Costs"),
+    CERTIFICATES_OF_SERVICE("Certificates of service"),
+    ES1("ES1"),
+    ES2("ES2"),
+    FAMILY_HOME_VALUATION("Family home valuation"),
+    HOUSING_PARTICULARS("Housing particulars"),
+    JUDICIAL_NOTES("Judicial notes"),
+    JUDGMENT("Judgment"),
+    MORTGAGE_CAPACITIES("Mortgage capacities"),
+    PENSION_REPORT("Pension report"),
+    PRE_HEARING_DRAFT_ORDER("Pre hearing draft order"),
+    TRANSCRIPT("Transcript"),
+    WITHOUT_PREJUDICE_OFFERS("Without Prejudice offers"),
+    WITNESS_SUMMONS("Witness Summons");
+
 
     private final String id;
 
