@@ -436,7 +436,7 @@ public class FinremCaseData {
 
     @JsonIgnore
     public IntervenerHearingNoticeCollectionWrapper getIntervenerHearingNoticeCollectionWrapper() {
-        if (intervenerHearingNoticeCollectionWrapper == null){
+        if (intervenerHearingNoticeCollectionWrapper == null) {
             this.intervenerHearingNoticeCollectionWrapper = new IntervenerHearingNoticeCollectionWrapper();
         }
         return intervenerHearingNoticeCollectionWrapper;
