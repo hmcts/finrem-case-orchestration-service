@@ -95,12 +95,9 @@ public class FinremCaseData {
     private String hwfNumber;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private BigDecimal amountToPay;
-    @JsonProperty("PBANumber")
-    private String pbaNumber;
-    @JsonProperty("PBAreference")
-    private String pbaReference;
-    @JsonProperty("PBAPaymentReference")
-    private String pbaPaymentReference;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private PBAWrapper pbaWrapper;
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
     private CaseDocument additionalDocument;
