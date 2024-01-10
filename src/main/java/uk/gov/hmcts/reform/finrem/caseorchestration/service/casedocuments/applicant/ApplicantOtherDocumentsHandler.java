@@ -1,14 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.OtherDocumentsHandler;
 
-@Service
+@Component
 public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
 
     public ApplicantOtherDocumentsHandler(FeatureToggleService featureToggleService) {
@@ -17,20 +16,54 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        switch (caseDocumentType) {
-            case OTHER -> {
-                return DocumentCategory.APPLICANT_DOCUMENTS_MISCELLANEOUS_OR_OTHER;
-            }
-            case PENSION_PLAN -> {
-                return DocumentCategory.APPLICANT_DOCUMENTS_PENSION_PLAN;
-            }
-            case FORM_B, FORM_F, CARE_PLAN -> {
-                return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER;
-            }
-            default -> {
-                return DocumentCategory.APPLICANT_DOCUMENTS;
-            }
-        }
+    protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
+        return DocumentCategory.APPLICANT_DOCUMENTS_MISCELLANEOUS_OR_OTHER;
+    }
+
+    @Override
+    protected DocumentCategory getPensionPlanDocumentCategory() {
+        return DocumentCategory.APPLICANT_DOCUMENTS_PENSION_PLAN;
+    }
+
+
+    @Override
+    protected DocumentCategory getCertificatesOfServiceDocumentCategory() {
+        return DocumentCategory.APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryES1() {
+        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES1;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryES2() {
+        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES2;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_MORTGAGE_CAPACITIES;
+    }
+
+
+    @Override
+    protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
+    }
+
+    @Override
+    protected DocumentCategory getDefaultPartyCategory() {
+        return DocumentCategory.APPLICANT_DOCUMENTS;
+    }
+
+    @Override
+    protected DocumentCategory getHouseParticularsDocumentCategory() {
+        return DocumentCategory.APPLICANT_DOCUMENTS_HOUSING_PARTICULARS;
+    }
+
+    @Override
+    protected DocumentCategory getPreHearingDraftOrderDocumentCategory() {
+        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
     }
 }

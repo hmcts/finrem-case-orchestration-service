@@ -129,7 +129,7 @@ public class FinremCaseData {
     private LocalDate orderDirectionDate;
     private String orderDirectionAddComments;
     private List<OrderRefusalCollection> orderRefusalCollection;
-    private OrderRefusalHolder orderRefusalCollectionNew;
+    private List<OrderRefusalCollection> orderRefusalCollectionNew;
     private CaseDocument orderRefusalPreviewDocument;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -891,15 +891,21 @@ public class FinremCaseData {
         return Optional.ofNullable(courtList).orElse(new DefaultCourt());
     }
 
+
     @JsonIgnore
     public List<String> getSelectedParties() {
         DynamicMultiSelectList parties = this.getPartiesOnCase();
+        return this.getSelectedParties(parties);
+    }
+
+
+    @JsonIgnore
+    public List<String> getSelectedParties(DynamicMultiSelectList parties) {
         if (parties == null) {
             return List.of();
         }
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
-
 
 }
 

@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -61,22 +60,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     protected CaseDetails caseDetails;
     private CallbackRequest request;
-
-    @Test
-    public void shouldSuccessfullyMoveCollection() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
-        String source = "uploadHearingOrder";
-        String destination = "uploadHearingOrderRO";
-
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
-        mvc.perform(post(String.format("/case-orchestration/move-collection/%s/to/%s", source, destination))
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
-
-        verify(caseDataService, times(1)).moveCollection(any(), eq(source), eq(destination));
-    }
 
     @Test
     public void shouldSuccessfullyReturnAsAdminConsented() throws Exception {
@@ -146,7 +129,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenContestedCase_whenSolicitorTryToCreateCaseWithNonEligiableCourtSelected_thenShowError() throws Exception {
+    public void givenContestedCase_whenSolicitorTryToCreateCaseWithNonEligibleCourtSelected_thenShowError() throws Exception {
         doValidCourtDataSetUp();
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
         mvc.perform(post("/case-orchestration/contested/set-frc-details")
@@ -309,20 +292,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
         caseDataController.setConsentedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(updateSolicitorDetailsService);
-    }
-
-    @Test
-    public void shouldSuccessfullySetDefaultValue() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
-
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
-        mvc.perform(post("/case-orchestration/default-values")
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.civilPartnership", is(NO_VALUE)));
     }
 
     public void createRequest(String payload) throws Exception {

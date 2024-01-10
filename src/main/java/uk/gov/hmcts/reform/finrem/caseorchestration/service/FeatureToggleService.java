@@ -1,14 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.google.common.collect.Maps;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.Features;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
-
-import javax.validation.constraints.NotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;

@@ -28,7 +28,6 @@ public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTes
     @InjectMocks
     IntervenerThreeFdrHandler collectionService;
 
-
     @Test
     public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType() {
         screenUploadDocumentList = new ArrayList<>();
