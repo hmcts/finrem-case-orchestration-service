@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ExpertEvidenceHandlerTest;
 
 import java.util.List;
@@ -17,10 +17,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class ApplicantExpertEvidenceCollectionServiceTest extends ExpertEvidenceHandlerTest {
+public class ApplicantExpertEvidenceHandlerTest extends ExpertEvidenceHandlerTest {
 
     @InjectMocks
-    ApplicantExpertEvidenceHandler collectionService;
+    ApplicantExpertEvidenceHandler applicantExpertEvidenceHandler;
 
 
     @Override
@@ -32,8 +32,8 @@ public class ApplicantExpertEvidenceCollectionServiceTest extends ExpertEvidence
     }
 
     @Override
-    public DocumentHandler getDocumentHandler() {
-        return collectionService;
+    public ApplicantExpertEvidenceHandler getDocumentHandler() {
+        return applicantExpertEvidenceHandler;
     }
 
     @Override
@@ -48,5 +48,10 @@ public class ApplicantExpertEvidenceCollectionServiceTest extends ExpertEvidence
     protected List<UploadCaseDocumentCollection> getDocumentCollection() {
         return caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_EXPERT_EVIDENCE_COLLECTION);
+    }
+
+    @Override
+    protected DocumentCategory getValuationReportCategory() {
+        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FAMILY_HOME_VALUATION;
     }
 }
