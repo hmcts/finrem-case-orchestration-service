@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 
 @Service
-public class UploadedDocumentService extends DocumentDateService<UploadCaseDocumentCollection> {
-
+public class UploadedDocumentService extends DocumentUploadService<UploadCaseDocumentCollection> {
     public UploadedDocumentService(ObjectMapper objectMapper) {
         super(objectMapper, UploadCaseDocumentCollection.class);
     }
+
 }

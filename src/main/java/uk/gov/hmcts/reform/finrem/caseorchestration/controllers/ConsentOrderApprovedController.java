@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,51 +18,48 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
-@Slf4j
-public class GeneralApplicationDirectionsController extends BaseController {
+public class ConsentOrderApprovedController extends BaseController {
 
-    private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
+    private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
-
-    @PostMapping(path = "/submit-for-interim-hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @Operation(summary = "submit for interim hearing")
+    @PostMapping(path = "/consent-in-contested/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @Operation(summary = "'Consent Order Approved' callback handler for consent in contested. Stamps Consent Order Approved documents\"\n"
+        + "        + \"and adds them to a collection")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+        @ApiResponse(responseCode = "200",
+            description = "Callback was processed successfully or in case of an error message is attached to the case",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> submitInterimHearing(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedConsentOrderApproved(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
-
-        CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to submit for interim hearing for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
+        CaseDetails caseDetails = callback.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
 
-        List<String> errors = new ArrayList<>();
-        try {
-            generalApplicationDirectionsService.submitInterimHearing(caseDetails, authorisationToken);
-        } catch (InvalidCaseDataException invalidCaseDataException) {
-            errors.add(invalidCaseDataException.getMessage());
-        }
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData,
+                authToken, caseDetails.getId().toString());
+        CaseDetails mappedCaseDetails =
+            consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(caseDetails.getData())
-            .errors(errors)
-            .build());
+        return ResponseEntity.ok(
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(mappedCaseDetails.getData())
+                .errors(List.of())
+                .warnings(List.of())
+                .build());
     }
 }
