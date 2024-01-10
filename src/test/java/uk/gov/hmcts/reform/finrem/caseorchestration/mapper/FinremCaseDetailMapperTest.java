@@ -712,7 +712,7 @@ class FinremCaseDetailMapperTest {
                 .build()
         );
 
-        assertTrue(caseData.getOrderRefusalCollection().containsAll(expected));
+        assertTrue(caseData.getOrderRefusalWrapper().getOrderRefusalCollection().containsAll(expected));
     }
 
     private void assertOtherCollection(FinremCaseData caseData) {

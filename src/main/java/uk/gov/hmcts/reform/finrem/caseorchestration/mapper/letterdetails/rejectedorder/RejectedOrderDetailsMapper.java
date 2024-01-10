@@ -72,7 +72,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
 
     private List<TranslatedOrderRefusalDocumentCollection> getTranslatedRefusalOrderCollection(FinremCaseData caseData) {
 
-        return Optional.ofNullable(caseData.getOrderRefusalCollectionNew()).orElse(new ArrayList<>())
+        return Optional.ofNullable(caseData.getOrderRefusalWrapper().getOrderRefusalCollectionNew()).orElse(new ArrayList<>())
             .stream()
             .map(refusalOrder -> TranslatedOrderRefusalDocumentCollection.builder()
                 .value(TranslatedOrderRefusalDocument.builder()

@@ -106,9 +106,9 @@ public class FinremCaseData {
     private YesOrNo servePensionProvider;
     private PensionProvider servePensionProviderResponsibility;
     private String servePensionProviderOther;
-    private List<OrderRefusalCollection> orderRefusalCollection;
-    private List<OrderRefusalCollection> orderRefusalCollectionNew;
-    private CaseDocument orderRefusalPreviewDocument;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private OrderRefusalWrapper orderRefusalWrapper;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
@@ -429,6 +429,14 @@ public class FinremCaseData {
             this.orderDirectionWrapper = new OrderDirectionWrapper();
         }
         return orderDirectionWrapper;
+    }
+
+    @JsonIgnore
+    public OrderRefusalWrapper getOrderRefusalWrapper() {
+        if (orderRefusalWrapper == null) {
+            this.orderRefusalWrapper = new OrderRefusalWrapper();
+        }
+        return orderRefusalWrapper;
     }
 
     @JsonIgnore
