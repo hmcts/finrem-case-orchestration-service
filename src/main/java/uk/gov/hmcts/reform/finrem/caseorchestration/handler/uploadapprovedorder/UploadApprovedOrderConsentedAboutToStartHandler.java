@@ -42,16 +42,16 @@ public class UploadApprovedOrderConsentedAboutToStartHandler extends FinremCallb
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        caseData.setOrderDirectionAbsolute(null);
+        caseData.getOrderDirectionWrapper().setOrderDirectionAbsolute(null);
         caseData.setServePensionProvider(null);
         caseData.setServePensionProviderResponsibility(null);
         caseData.setServePensionProviderOther(null);
-        caseData.setOrderDirectionJudge(null);
-        caseData.setOrderDirectionAddComments(null);
+        caseData.getOrderDirectionWrapper().setOrderDirectionJudge(null);
+        caseData.getOrderDirectionWrapper().setOrderDirectionAddComments(null);
         caseData.getConsentOrderWrapper().setUploadApprovedConsentOrder(null);
 
-        caseData.setOrderDirectionJudgeName(idamService.getIdamSurname(userAuthorisation));
-        caseData.setOrderDirectionDate(LocalDate.now());
+        caseData.getOrderDirectionWrapper().setOrderDirectionJudgeName(idamService.getIdamSurname(userAuthorisation));
+        caseData.getOrderDirectionWrapper().setOrderDirectionDate(LocalDate.now());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

@@ -54,15 +54,15 @@ public class UploadApprovedOrderConsentedAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             uploadApprovedOrderConsentedAboutToStartHandler.handle(callbackRequest, "auth");
         FinremCaseData caseData = response.getData();
-        assertThat(caseData.getOrderDirectionJudgeName(), is("judge"));
-        assertThat(caseData.getOrderDirectionDate(), is(LocalDate.now()));
+        assertThat(caseData.getOrderDirectionWrapper().getOrderDirectionJudgeName(), is("judge"));
+        assertThat(caseData.getOrderDirectionWrapper().getOrderDirectionDate(), is(LocalDate.now()));
 
-        assertNull(caseData.getOrderDirectionAbsolute());
+        assertNull(caseData.getOrderDirectionWrapper().getOrderDirectionAbsolute());
         assertNull(caseData.getServePensionProvider());
         assertNull(caseData.getServePensionProviderResponsibility());
         assertNull(caseData.getServePensionProviderOther());
-        assertNull(caseData.getOrderDirectionJudge());
-        assertNull(caseData.getOrderDirectionAddComments());
+        assertNull(caseData.getOrderDirectionWrapper().getOrderDirectionJudge());
+        assertNull(caseData.getOrderDirectionWrapper().getOrderDirectionAddComments());
         assertNull(caseData.getConsentOrderWrapper().getUploadApprovedConsentOrder());
     }
 }

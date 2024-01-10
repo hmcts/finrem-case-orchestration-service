@@ -383,8 +383,8 @@ class FinremCaseDetailMapperTest {
         assertEquals(RegionSouthEastFrc.KENT, caseData.getRegionWrapper().getAllocatedRegionWrapper().getSouthEastFrcList());
         assertEquals(KentSurreyCourt.FR_kent_surreyList_1,
             caseData.getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper().getKentSurreyCourtList());
-        assertEquals(OrderDirection.ORDER_ACCEPTED_AS_DRAFTED, caseData.getOrderDirection());
-        assertEquals(JudgeType.DISTRICT_JUDGE, caseData.getOrderDirectionJudge());
+        assertEquals(OrderDirection.ORDER_ACCEPTED_AS_DRAFTED, caseData.getOrderDirectionWrapper().getOrderDirection());
+        assertEquals(JudgeType.DISTRICT_JUDGE, caseData.getOrderDirectionWrapper().getOrderDirectionJudge());
         assertEquals(Region.SOUTHWEST, caseData.getRegionWrapper().getInterimRegionWrapper().getInterimRegionList());
         assertEquals(RegionSouthWestFrc.BRISTOL, caseData.getRegionWrapper().getInterimRegionWrapper().getInterimSouthWestFrcList());
         assertEquals(BristolCourt.SALISBURY_LAW_COURTS,

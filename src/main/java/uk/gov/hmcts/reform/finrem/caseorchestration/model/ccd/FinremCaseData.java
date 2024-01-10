@@ -98,21 +98,14 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private PBAWrapper pbaWrapper;
-    private OrderDirection orderDirection;
-    private CaseDocument orderDirectionOpt1;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private OrderDirectionWrapper orderDirectionWrapper;
     private CaseDocument additionalDocument;
     private List<DocumentCollection> additionalCicDocuments;
-    private String orderDirectionOpt2;
-    private YesOrNo orderDirectionAbsolute;
     private YesOrNo servePensionProvider;
     private PensionProvider servePensionProviderResponsibility;
     private String servePensionProviderOther;
-    private JudgeType orderDirectionJudge;
-    private String orderDirectionJudgeName;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate orderDirectionDate;
-    private String orderDirectionAddComments;
     private List<OrderRefusalCollection> orderRefusalCollection;
     private List<OrderRefusalCollection> orderRefusalCollectionNew;
     private CaseDocument orderRefusalPreviewDocument;
@@ -428,6 +421,14 @@ public class FinremCaseData {
             this.intervenerHearingNoticeCollectionWrapper = new IntervenerHearingNoticeCollectionWrapper();
         }
         return intervenerHearingNoticeCollectionWrapper;
+    }
+
+    @JsonIgnore
+    public OrderDirectionWrapper getOrderDirectionWrapper() {
+        if (orderDirectionWrapper == null) {
+            this.orderDirectionWrapper = new OrderDirectionWrapper();
+        }
+        return orderDirectionWrapper;
     }
 
     @JsonIgnore

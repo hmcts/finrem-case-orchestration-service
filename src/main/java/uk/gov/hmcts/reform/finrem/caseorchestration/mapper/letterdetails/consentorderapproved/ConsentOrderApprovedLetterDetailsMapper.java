@@ -71,19 +71,19 @@ public class ConsentOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
     private String getJudgeTitle(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isContestedApplication()
             ? caseDetails.getData().getConsentOrderWrapper().getConsentSelectJudge()
-            : Optional.ofNullable(caseDetails.getData().getOrderDirectionJudge())
+            : Optional.ofNullable(caseDetails.getData().getOrderDirectionWrapper().getOrderDirectionJudge())
             .map(JudgeType::getValue).orElse(null);
     }
 
     private String getJudgeName(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isContestedApplication()
             ? caseDetails.getData().getConsentOrderWrapper().getConsentJudgeName()
-            : caseDetails.getData().getOrderDirectionJudgeName();
+            : caseDetails.getData().getOrderDirectionWrapper().getOrderDirectionJudgeName();
     }
 
     private String getDirectionDate(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isContestedApplication()
             ? String.valueOf(caseDetails.getData().getConsentOrderWrapper().getConsentDateOfOrder())
-            : String.valueOf(caseDetails.getData().getOrderDirectionDate());
+            : String.valueOf(caseDetails.getData().getOrderDirectionWrapper().getOrderDirectionDate());
     }
 }

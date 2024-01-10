@@ -61,7 +61,7 @@ public class ConsentOrderApprovedLetterDetailsMapperTest extends AbstractLetterD
         caseDetails.getData().setCivilPartnership(null);
         caseDetails.getData().setServePensionProvider(null);
         caseDetails.getData().setServePensionProviderResponsibility(null);
-        caseDetails.getData().setOrderDirectionJudge(null);
+        caseDetails.getData().getOrderDirectionWrapper().setOrderDirectionJudge(null);
     }
 
     private void setContestedFields() {
@@ -71,9 +71,9 @@ public class ConsentOrderApprovedLetterDetailsMapperTest extends AbstractLetterD
         caseDetails.getData().getConsentOrderWrapper().setConsentDateOfOrder(LocalDate.of(2022, 7, 1));
         caseDetails.getData().getContactDetailsWrapper().setRespondentFmName("test");
         caseDetails.getData().getContactDetailsWrapper().setRespondentLname("Korivi");
-        caseDetails.getData().setOrderDirectionDate(null);
-        caseDetails.getData().setOrderDirectionJudge(null);
-        caseDetails.getData().setOrderDirectionJudgeName(null);
+        caseDetails.getData().getOrderDirectionWrapper().setOrderDirectionDate(null);
+        caseDetails.getData().getOrderDirectionWrapper().setOrderDirectionJudge(null);
+        caseDetails.getData().getOrderDirectionWrapper().setOrderDirectionJudgeName(null);
         caseDetails.getData().getContactDetailsWrapper().setAppRespondentFmName(null);
         caseDetails.getData().getContactDetailsWrapper().setAppRespondentLName(null);
     }
