@@ -40,7 +40,7 @@ public class ContestedOrderApprovedLetterService {
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
 
-        finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
+        finremCaseDetails.getData().getOrderApprovedWrapper().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }
 
     public void generateAndStoreContestedOrderApprovedLetter(CaseDetails caseDetails, String authorisationToken) {

@@ -170,7 +170,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.setOrdersToShare(selectedDocs);
         data.setAdditionalDocument(caseDocument());
-        data.setOrderApprovedCoverLetter(caseDocument());
+        data.getOrderApprovedWrapper().setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
 
@@ -222,7 +222,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.setOrdersToShare(selectedDocs);
         data.setAdditionalDocument(caseDocument());
-        data.setOrderApprovedCoverLetter(caseDocument());
+        data.getOrderApprovedWrapper().setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());

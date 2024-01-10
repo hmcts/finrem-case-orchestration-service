@@ -89,7 +89,7 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
             eq(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()));
 
         verifyTemplateVariablesArePopulated();
-        assertThat(finremCaseDetails.getData().getOrderApprovedCoverLetter(), is(expectedCaseDocument));
+        assertThat(finremCaseDetails.getData().getOrderApprovedWrapper().getOrderApprovedCoverLetter(), is(expectedCaseDocument));
     }
 
     protected FinremCallbackRequest buildCallbackRequest() {

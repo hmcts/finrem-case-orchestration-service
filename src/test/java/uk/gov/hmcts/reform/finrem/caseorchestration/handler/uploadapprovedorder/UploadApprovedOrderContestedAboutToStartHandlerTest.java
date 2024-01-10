@@ -60,9 +60,9 @@ class UploadApprovedOrderContestedAboutToStartHandlerTest extends BaseHandlerTes
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        caseData.setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
-        caseData.setOrderApprovedJudgeName("moj");
-        caseData.setOrderApprovedDate(LocalDate.now());
+        caseData.getOrderApprovedWrapper().setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
+        caseData.getOrderApprovedWrapper().setOrderApprovedJudgeName("moj");
+        caseData.getOrderApprovedWrapper().setOrderApprovedDate(LocalDate.now());
         List<DocumentCollection> hearingNoticeDocumentPack = new ArrayList<>();
         DocumentCollection collection = DocumentCollection.builder().value(caseDocument()).build();
         hearingNoticeDocumentPack.add(collection);
@@ -79,9 +79,9 @@ class UploadApprovedOrderContestedAboutToStartHandlerTest extends BaseHandlerTes
             = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         FinremCaseData finremCaseData = response.getData();
-        assertNull(finremCaseData.getOrderApprovedJudgeType());
-        assertNull(finremCaseData.getOrderApprovedJudgeName());
-        assertNull(finremCaseData.getOrderApprovedDate());
+        assertNull(finremCaseData.getOrderApprovedWrapper().getOrderApprovedJudgeType());
+        assertNull(finremCaseData.getOrderApprovedWrapper().getOrderApprovedJudgeName());
+        assertNull(finremCaseData.getOrderApprovedWrapper().getOrderApprovedDate());
         assertTrue(finremCaseData.getHearingNoticeDocumentPack().isEmpty());
         assertTrue(finremCaseData.getUploadHearingOrder().isEmpty());
         assertFalse(response.hasErrors());

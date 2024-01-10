@@ -31,7 +31,7 @@ public class ContestOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
             .court(courtDetailsMapper.getCourtDetails(courtList).getCourtName())
             .judgeDetails(getJudgeDetails(caseDetails))
             .divorceCaseNumber(caseDetails.getData().getDivorceDetailsWrapper().getDivorceCaseNumber())
-            .orderApprovedDate(String.valueOf(caseDetails.getData().getOrderApprovedDate()))
+            .orderApprovedDate(String.valueOf(caseDetails.getData().getOrderApprovedWrapper().getOrderApprovedDate()))
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
             .letterDate(String.valueOf(LocalDate.now()))
             .build();
@@ -40,11 +40,11 @@ public class ContestOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
     private String getJudgeDetails(FinremCaseDetails caseDetails) {
         return StringUtils.joinWith(" ",
             getOrderApprovedJudgeType(caseDetails),
-            caseDetails.getData().getOrderApprovedJudgeName());
+            caseDetails.getData().getOrderApprovedWrapper().getOrderApprovedJudgeName());
     }
 
     private String getOrderApprovedJudgeType(FinremCaseDetails caseDetails) {
-        return Optional.ofNullable(caseDetails.getData().getOrderApprovedJudgeType()).map(JudgeType::getValue)
+        return Optional.ofNullable(caseDetails.getData().getOrderApprovedWrapper().getOrderApprovedJudgeType()).map(JudgeType::getValue)
             .orElse("");
     }
 }

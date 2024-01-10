@@ -72,9 +72,9 @@ public class ContestOrderApprovedLetterDetailsMapperTest extends AbstractLetterD
         caseData.getContactDetailsWrapper().setRespondentLname("Korivi");
         caseData.getDivorceDetailsWrapper().setDivorceCaseNumber("DD12D12345");
         caseData.setCivilPartnership(YesOrNo.NO);
-        caseData.setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
-        caseData.setOrderApprovedJudgeName("Details");
-        caseData.setOrderApprovedDate(LocalDate.of(2022, 2, 2));
+        caseData.getOrderApprovedWrapper().setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
+        caseData.getOrderApprovedWrapper().setOrderApprovedJudgeName("Details");
+        caseData.getOrderApprovedWrapper().setOrderApprovedDate(LocalDate.of(2022, 2, 2));
         caseData.getRegionWrapper().getDefaultCourtList().setCfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT);
         caseData.setCcdCaseType(CaseType.CONTESTED);
 

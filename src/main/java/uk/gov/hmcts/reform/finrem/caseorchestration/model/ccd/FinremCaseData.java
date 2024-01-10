@@ -239,13 +239,12 @@ public class FinremCaseData {
     private CaseDocument refusalOrderAdditionalDocument;
     private String hiddenTabValue;
     private CaseDocument latestDraftHearingOrder;
-    private String orderApprovedJudgeName;
-    private JudgeType orderApprovedJudgeType;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private OrderApprovedWrapper orderApprovedWrapper;
     private List<UploadAdditionalDocumentCollection> uploadAdditionalDocument;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate orderApprovedDate;
-    private CaseDocument orderApprovedCoverLetter;
     private String hearingDetails;
     private YesOrNo applicantShareDocs;
     private YesOrNo respondentShareDocs;
@@ -442,6 +441,14 @@ public class FinremCaseData {
             this.currentUserCaseRoleWrapper = new CurrentUserCaseRoleWrapper();
         }
         return currentUserCaseRoleWrapper;
+    }
+
+    @JsonIgnore
+    public OrderApprovedWrapper getOrderApprovedWrapper() {
+        if (orderApprovedWrapper == null) {
+            this.orderApprovedWrapper = new OrderApprovedWrapper();
+        }
+        return orderApprovedWrapper;
     }
 
     @JsonIgnore

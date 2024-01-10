@@ -34,9 +34,9 @@ public class UploadApprovedOrderContestedAboutToStartHandler extends FinremCallb
             callbackRequest.getCaseDetails().getId());
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        caseData.setOrderApprovedJudgeType(null);
-        caseData.setOrderApprovedJudgeName(null);
-        caseData.setOrderApprovedDate(null);
+        caseData.getOrderApprovedWrapper().setOrderApprovedJudgeType(null);
+        caseData.getOrderApprovedWrapper().setOrderApprovedJudgeName(null);
+        caseData.getOrderApprovedWrapper().setOrderApprovedDate(null);
         caseData.setHearingNoticeDocumentPack(new ArrayList<>());
         caseData.setUploadHearingOrder(new ArrayList<>());
 

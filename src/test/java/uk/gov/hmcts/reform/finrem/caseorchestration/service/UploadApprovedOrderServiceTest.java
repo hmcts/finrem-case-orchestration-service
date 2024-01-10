@@ -59,16 +59,16 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
 
-        finremCaseData.setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
-        finremCaseData.setOrderApprovedJudgeName(JUDGE_NAME);
-        finremCaseData.setOrderApprovedDate(LocalDate.of(2023,11,11));
+        finremCaseData.getOrderApprovedWrapper().setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
+        finremCaseData.getOrderApprovedWrapper().setOrderApprovedJudgeName(JUDGE_NAME);
+        finremCaseData.getOrderApprovedWrapper().setOrderApprovedDate(LocalDate.of(2023,11,11));
 
         FinremCaseDetails finremCaseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData finremCaseDataBefore = finremCaseDetailsBefore.getData();
 
-        finremCaseDataBefore.setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
-        finremCaseDataBefore.setOrderApprovedJudgeName(JUDGE_NAME);
-        finremCaseDataBefore.setOrderApprovedDate(LocalDate.of(2023,11,11));
+        finremCaseDataBefore.getOrderApprovedWrapper().setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
+        finremCaseDataBefore.getOrderApprovedWrapper().setOrderApprovedJudgeName(JUDGE_NAME);
+        finremCaseDataBefore.getOrderApprovedWrapper().setOrderApprovedDate(LocalDate.of(2023,11,11));
 
         finremCaseData.setUploadHearingOrder(getHearingOrderCollection());
         finremCaseData.setFinalOrderCollection(getHearingOrderCollection());
