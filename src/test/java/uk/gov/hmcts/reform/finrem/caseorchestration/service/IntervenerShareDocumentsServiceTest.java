@@ -297,7 +297,7 @@ public class IntervenerShareDocumentsServiceTest {
         DynamicMultiSelectList roleList = new DynamicMultiSelectList();
         roleList.setValue(singletonList(getSelectedParty(RESP_SOLICITOR)));
         data.setSolicitorRoleList(roleList);
-        data.setCurrentUserCaseRoleType("[INTVRSOLICITOR1]");
+        data.getCurrentUserCaseRoleWrapper().setCurrentUserCaseRoleType("[INTVRSOLICITOR1]");
 
         List<String> warnings = intervenerShareDocumentsService.checkThatApplicantAndRespondentAreBothSelected(data);
 
@@ -315,7 +315,7 @@ public class IntervenerShareDocumentsServiceTest {
         DynamicMultiSelectList roleList = new DynamicMultiSelectList();
         roleList.setValue(singletonList(getSelectedParty(RESP_SOLICITOR)));
         data.setSolicitorRoleList(roleList);
-        data.setCurrentUserCaseRoleType("[APPBARRISTER]");
+        data.getCurrentUserCaseRoleWrapper().setCurrentUserCaseRoleType("[APPBARRISTER]");
 
         List<String> warnings = intervenerShareDocumentsService.checkThatApplicantAndRespondentAreBothSelected(data);
 
@@ -333,7 +333,7 @@ public class IntervenerShareDocumentsServiceTest {
         DynamicMultiSelectList roleList = new DynamicMultiSelectList();
         roleList.setValue(List.of(getSelectedParty(RESP_SOLICITOR), getSelectedParty(APP_SOLICITOR)));
         data.setSolicitorRoleList(roleList);
-        data.setCurrentUserCaseRoleType("[INTVRSOLICITOR1]");
+        data.getCurrentUserCaseRoleWrapper().setCurrentUserCaseRoleType("[INTVRSOLICITOR1]");
 
         List<String> warnings = intervenerShareDocumentsService.checkThatApplicantAndRespondentAreBothSelected(data);
 

@@ -485,7 +485,7 @@ public class IntervenerShareDocumentsService implements SharedService {
 
     public List<String> checkThatApplicantAndRespondentAreBothSelected(FinremCaseData data) {
         List<String> warnings = new ArrayList<>();
-        if (isLoggedInUSerIntervenerType(data.getCurrentUserCaseRoleType())) {
+        if (isLoggedInUSerIntervenerType(data.getCurrentUserCaseRoleWrapper().getCurrentUserCaseRoleType())) {
             selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(data, data.getSelectedParties(data.getSolicitorRoleList()));
             if ((data.isApplicantCorrespondenceEnabled() || data.isRespondentCorrespondenceEnabled())
                 && data.isApplicantCorrespondenceEnabled() != data.isRespondentCorrespondenceEnabled()) {

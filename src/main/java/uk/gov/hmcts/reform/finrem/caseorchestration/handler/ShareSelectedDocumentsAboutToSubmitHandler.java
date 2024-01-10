@@ -48,7 +48,7 @@ public class ShareSelectedDocumentsAboutToSubmitHandler extends FinremCallbackHa
         FinremCaseData caseData = caseDetails.getData();
 
         String activeUser = assignCaseAccessService.getActiveUserCaseRole(caseId.toString(), userAuthorisation);
-        caseData.setCurrentUserCaseRoleType(activeUser);
+        caseData.getCurrentUserCaseRoleWrapper().setCurrentUserCaseRoleType(activeUser);
         List<String> warnings = intervenerShareDocumentsService.checkThatApplicantAndRespondentAreBothSelected(caseData);
 
         intervenerShareDocumentsService.shareSelectedDocumentWithOtherSelectedSolicitors(caseData);

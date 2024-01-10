@@ -63,7 +63,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
         log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
-        caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
+        caseData.getCurrentUserCaseRoleWrapper().setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         if (data != null) {
             existingGeneralApplication.add(data);

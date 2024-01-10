@@ -264,9 +264,9 @@ public class FinremCaseData {
     private OrganisationPolicy applicantOrganisationPolicy;
     @JsonProperty("RespondentOrganisationPolicy")
     private OrganisationPolicy respondentOrganisationPolicy;
-    private CaseRole currentUserCaseRole;
-    private String currentUserCaseRoleLabel;
-    private String currentUserCaseRoleType;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private CurrentUserCaseRoleWrapper currentUserCaseRoleWrapper;
     private CaseDocument outOfFamilyCourtResolution;
 
     private DynamicMultiSelectList sourceDocumentList;
@@ -437,6 +437,14 @@ public class FinremCaseData {
             this.orderRefusalWrapper = new OrderRefusalWrapper();
         }
         return orderRefusalWrapper;
+    }
+
+    @JsonIgnore
+    public CurrentUserCaseRoleWrapper getCurrentUserCaseRoleWrapper() {
+        if (currentUserCaseRoleWrapper == null) {
+            this.currentUserCaseRoleWrapper = new CurrentUserCaseRoleWrapper();
+        }
+        return currentUserCaseRoleWrapper;
     }
 
     @JsonIgnore
