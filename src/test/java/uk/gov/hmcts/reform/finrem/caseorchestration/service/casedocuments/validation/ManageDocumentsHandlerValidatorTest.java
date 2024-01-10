@@ -77,7 +77,7 @@ public class ManageDocumentsHandlerValidatorTest {
 
         manageDocumentsHandlerValidator.validateSelectedIntervenerParties(caseData, caseData.getManageScannedDocumentCollection(), warnings);
 
-        assertEquals(warnings.get(0), intervenerText + CHOOSE_A_DIFFERENT_PARTY);
+        assertEquals(intervenerText + CHOOSE_A_DIFFERENT_PARTY, warnings.get(0));
     }
 
     private void setUpAddedDocuments() {

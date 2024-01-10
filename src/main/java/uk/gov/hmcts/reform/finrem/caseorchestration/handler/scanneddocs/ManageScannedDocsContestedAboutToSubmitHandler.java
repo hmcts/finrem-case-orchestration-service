@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.validation.ManageDocumentsHandlerValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,15 +43,12 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
         CaseDocumentType.TRANSCRIPT
     );
     private final List<DocumentHandler> documentHandlers;
-    private final ManageDocumentsHandlerValidator manageDocumentsHandlerValidator;
 
     @Autowired
     public ManageScannedDocsContestedAboutToSubmitHandler(
-        FinremCaseDetailsMapper finremCaseDetailsMapper, List<DocumentHandler> documentHandlers,
-        ManageDocumentsHandlerValidator manageDocumentsHandlerValidator) {
+        FinremCaseDetailsMapper finremCaseDetailsMapper, List<DocumentHandler> documentHandlers) {
         super(finremCaseDetailsMapper);
         this.documentHandlers = documentHandlers;
-        this.manageDocumentsHandlerValidator = manageDocumentsHandlerValidator;
     }
 
     @Override
@@ -134,7 +130,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
 
     private void addDefaultsToAdministrativeDocuments(List<UploadCaseDocumentCollection> managedCollections) {
 
-        managedCollections.stream().forEach(document -> setDefaultsForDocumentTypes(document));
+        managedCollections.stream().forEach(this::setDefaultsForDocumentTypes);
     }
 
     private void setDefaultsForDocumentTypes(UploadCaseDocumentCollection document) {

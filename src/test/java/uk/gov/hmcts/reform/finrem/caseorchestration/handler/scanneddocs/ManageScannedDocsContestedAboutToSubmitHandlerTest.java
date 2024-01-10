@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applic
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantOtherDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentQuestionnairesAnswersHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.validation.ManageDocumentsHandlerValidator;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -49,8 +48,6 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
 
     private ManageScannedDocsContestedAboutToSubmitHandler handler;
 
-    @Mock
-    private ManageDocumentsHandlerValidator manageDocumentsHandlerValidator;
     @Mock
     RespondentChronologiesStatementHandler respondentChronologiesStatementCollectionService;
     @Mock
@@ -80,7 +77,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         handler =
             new ManageScannedDocsContestedAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentHandlers, manageDocumentsHandlerValidator);
+                documentHandlers);
     }
 
 
@@ -124,6 +121,33 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
         assertThat(caseDetails.getData().getScannedDocuments().size(), is(0));
     }
 
+    @Test
+    public void givenAdministrativeDocsAreAdded_ThenDefaultsAreSetCorrectly() {
+        List<ScannedDocumentCollection> scannedDocumentCollections = new ArrayList<>();
+        scannedDocumentCollections.add(ScannedDocumentCollection.builder().value(
+            ScannedDocument.builder()
+                .scannedDate(LocalDateTime.now())
+                .fileName("file1")
+                .url(CaseDocument.builder()
+                    .documentUrl(DOCUMENT_URL_TEST)
+                    .build())
+                .build()).build());
+
+        caseDetails = buildCaseDetailsForAdministrativeDocuments();
+        caseData.setScannedDocuments(scannedDocumentCollections);
+        caseData.setEvidenceHandled(YesOrNo.YES);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(caseDetails).build();
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(caseDetails.getData().getManageScannedDocumentCollection().size(), is(4));
+
+        documentHandlers.forEach(documentCollectionService ->
+            Mockito.verify(documentCollectionService)
+                .replaceManagedDocumentsInCollectionType(callbackRequest, caseData.getManageScannedDocumentCollection(), false));
+
+        assertThat(caseDetails.getData().getScannedDocuments().size(), is(0));
+    }
+
 
     private List<UploadCaseDocumentCollection> setUpAddedDocuments() {
         List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
@@ -137,6 +161,19 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.YES, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+        return screenUploadDocumentList;
+    }
+
+    private List<UploadCaseDocumentCollection> setUpAdministrativeDocuments() {
+        List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.ATTENDANCE_SHEETS,
+            null, null, null, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.JUDICIAL_NOTES,
+            null, null, null, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.WITNESS_SUMMONS,
+            null, null, null, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRANSCRIPT,
+            null, null, null, null));
         return screenUploadDocumentList;
     }
 
@@ -167,6 +204,14 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
     protected FinremCaseDetails buildCaseDetails() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageScannedDocumentCollection(setUpAddedDocuments())
+            .build();
+        return FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED)
+            .data(finremCaseData).build();
+    }
+
+    protected FinremCaseDetails buildCaseDetailsForAdministrativeDocuments() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .manageScannedDocumentCollection(setUpAdministrativeDocuments())
             .build();
         return FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED)
             .data(finremCaseData).build();
