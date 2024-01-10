@@ -168,10 +168,10 @@ public class BulkPrintService {
 
         if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent())) {
             log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
-            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetApp(null);
-            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
+            caseDetails.getData().getBulkPrintWrapper().setBulkPrintCoverSheetApp(null);
+            caseDetails.getData().getBulkPrintWrapper().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
         } else {
-            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetApp(applicantCoverSheet);
+            caseDetails.getData().getBulkPrintWrapper().setBulkPrintCoverSheetApp(applicantCoverSheet);
         }
 
         return documentHelper.getCaseDocumentAsBulkPrintDocument(applicantCoverSheet);
@@ -230,10 +230,10 @@ public class BulkPrintService {
 
         if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
             log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
-            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(null);
-            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
+            caseDetails.getData().getBulkPrintWrapper().setBulkPrintCoverSheetRes(null);
+            caseDetails.getData().getBulkPrintWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
         } else {
-            caseDetails.getData().getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
+            caseDetails.getData().getBulkPrintWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
         }
 
         return documentHelper.getCaseDocumentAsBulkPrintDocument(respondentCoverSheet);

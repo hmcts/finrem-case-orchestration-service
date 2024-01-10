@@ -156,7 +156,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
-        assertThat(caseDetails.getData().getBulkPrintCoverSheetWrapper().getBulkPrintCoverSheetApp(), is(caseDocument));
+        assertThat(caseDetails.getData().getBulkPrintWrapper().getBulkPrintCoverSheetApp(), is(caseDocument));
     }
 
     @Test
@@ -202,7 +202,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
-        assertThat(caseDetails.getData().getBulkPrintCoverSheetWrapper().getBulkPrintCoverSheetRes(), is(caseDocument));
+        assertThat(caseDetails.getData().getBulkPrintWrapper().getBulkPrintCoverSheetRes(), is(caseDocument));
     }
 
     @Test
@@ -254,8 +254,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
         assertThat(uuid, is(letterId));
-        assertThat(caseDetails.getData().getBulkPrintCoverSheetWrapper().getBulkPrintCoverSheetAppConfidential(), is(caseDocument));
-        assertNull(caseDetails.getData().getBulkPrintCoverSheetWrapper().getBulkPrintCoverSheetApp());
+        assertThat(caseDetails.getData().getBulkPrintWrapper().getBulkPrintCoverSheetAppConfidential(), is(caseDocument));
+        assertNull(caseDetails.getData().getBulkPrintWrapper().getBulkPrintCoverSheetApp());
     }
 
     @Test
@@ -272,8 +272,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
         assertThat(uuid, is(letterId));
-        assertThat(caseDetails.getData().getBulkPrintCoverSheetWrapper().getBulkPrintCoverSheetResConfidential(), is(caseDocument));
-        assertNull(caseDetails.getData().getBulkPrintCoverSheetWrapper().getBulkPrintCoverSheetRes());
+        assertThat(caseDetails.getData().getBulkPrintWrapper().getBulkPrintCoverSheetResConfidential(), is(caseDocument));
+        assertNull(caseDetails.getData().getBulkPrintWrapper().getBulkPrintCoverSheetRes());
     }
 
     @Test

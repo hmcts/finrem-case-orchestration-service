@@ -118,22 +118,22 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
     private void populateApplicantBulkPrintFieldsWithCoverSheet(FinremCaseData finremCaseData, String caseId, CaseDocument coverSheet) {
         if (caseDataService.isApplicantAddressConfidential(finremCaseData)) {
             log.info("Applicant has been marked as confidential, adding coversheet to confidential field for Case ID: {}", caseId);
-            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetApp(null);
-            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetAppConfidential(coverSheet);
+            finremCaseData.getBulkPrintWrapper().setBulkPrintCoverSheetApp(null);
+            finremCaseData.getBulkPrintWrapper().setBulkPrintCoverSheetAppConfidential(coverSheet);
         } else {
             log.info("Applicant adding coversheet to coversheet field for Case ID: {}", caseId);
-            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetApp(coverSheet);
+            finremCaseData.getBulkPrintWrapper().setBulkPrintCoverSheetApp(coverSheet);
         }
     }
 
     private void populateRespondentBulkPrintFieldsWithCoverSheet(FinremCaseData finremCaseData, CaseDocument coverSheet, String caseId) {
         if (caseDataService.isRespondentAddressConfidential(finremCaseData)) {
             log.info("Respondent has been marked as confidential, adding coversheet to confidential field for Case ID: {}", caseId);
-            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(null);
-            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetResConfidential(coverSheet);
+            finremCaseData.getBulkPrintWrapper().setBulkPrintCoverSheetRes(null);
+            finremCaseData.getBulkPrintWrapper().setBulkPrintCoverSheetResConfidential(coverSheet);
         } else {
             log.info("Respondent adding coversheet to coversheet field for Case ID: {}", caseId);
-            finremCaseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(coverSheet);
+            finremCaseData.getBulkPrintWrapper().setBulkPrintCoverSheetRes(coverSheet);
         }
     }
 

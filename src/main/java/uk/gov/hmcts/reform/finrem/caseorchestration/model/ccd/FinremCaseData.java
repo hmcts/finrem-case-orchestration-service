@@ -130,16 +130,13 @@ public class FinremCaseData {
     private CaseDocument approvedConsentOrderLetter;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
-    private BulkPrintCoverSheetWrapper bulkPrintCoverSheetWrapper;
-    private String bulkPrintLetterIdRes;
-    private String bulkPrintLetterIdApp;
+    private BulkPrintWrapper bulkPrintWrapper;
     private List<ConsentOrderCollection> approvedOrderCollection;
     private ApplicantRole divRoleOfFrApplicant;
     private ApplicantRepresentedPaper applicantRepresentedPaper;
     private String bulkScanCaseReference;
     private List<ChildrenInfoCollection> childrenInfo;
     private CaseDocument formA;
-    private List<DocumentCollection> scannedD81s;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private TransferLocalCourtWrapper transferLocalCourtWrapper;
@@ -400,11 +397,11 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
-    public BulkPrintCoverSheetWrapper getBulkPrintCoverSheetWrapper() {
-        if (bulkPrintCoverSheetWrapper == null) {
-            this.bulkPrintCoverSheetWrapper = new BulkPrintCoverSheetWrapper();
+    public BulkPrintWrapper getBulkPrintWrapper() {
+        if (bulkPrintWrapper == null) {
+            this.bulkPrintWrapper = new BulkPrintWrapper();
         }
-        return bulkPrintCoverSheetWrapper;
+        return bulkPrintWrapper;
     }
 
     @JsonIgnore

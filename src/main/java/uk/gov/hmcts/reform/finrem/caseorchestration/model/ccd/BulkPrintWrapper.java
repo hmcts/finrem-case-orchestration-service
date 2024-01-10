@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BulkPrintCoverSheetWrapper {
+public class BulkPrintWrapper {
     private CaseDocument bulkPrintCoverSheetApp;
     private CaseDocument bulkPrintCoverSheetRes;
     private CaseDocument bulkPrintCoverSheetIntv1;
@@ -22,4 +22,6 @@ public class BulkPrintCoverSheetWrapper {
     private CaseDocument bulkPrintCoverSheetIntv4;
     private CaseDocument bulkPrintCoverSheetAppConfidential;
     private CaseDocument bulkPrintCoverSheetResConfidential;
+    private String bulkPrintLetterIdRes;
+    private String bulkPrintLetterIdApp;
 }

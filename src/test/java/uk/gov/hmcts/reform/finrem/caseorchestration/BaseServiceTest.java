@@ -278,7 +278,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
         caseData.getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()
             .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
-        caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
+        caseData.getBulkPrintWrapper().setBulkPrintLetterIdRes(NOTTINGHAM);
         return FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .caseType(CaseType.CONSENTED)
@@ -365,7 +365,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
         caseData.getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()
             .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
-        caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
+        caseData.getBulkPrintWrapper().setBulkPrintLetterIdRes(NOTTINGHAM);
         return caseData;
     }
 

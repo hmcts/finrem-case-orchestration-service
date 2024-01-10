@@ -557,7 +557,7 @@ public class CaseHearingFunctionsTest {
         caseData.getDivorceDetailsWrapper().setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
         caseData.getRegionWrapper().setAllocatedRegionWrapper(regionWrapper);
-        caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
+        caseData.getBulkPrintWrapper().setBulkPrintLetterIdRes(NOTTINGHAM);
         return caseData;
     }
 }

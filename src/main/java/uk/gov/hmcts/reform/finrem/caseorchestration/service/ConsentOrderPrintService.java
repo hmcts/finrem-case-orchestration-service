@@ -42,7 +42,7 @@ public class ConsentOrderPrintService {
                 ? printApplicantConsentOrderApprovedDocuments(finremCaseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(finremCaseDetails, authorisationToken);
             if (applicantLetterId != null) {
-                finremCaseDetails.getData().setBulkPrintLetterIdApp(applicantLetterId.toString());
+                finremCaseDetails.getData().getBulkPrintWrapper().setBulkPrintLetterIdApp(applicantLetterId.toString());
             }
         }
 
@@ -62,11 +62,11 @@ public class ConsentOrderPrintService {
 
         if (caseDataService.isRespondentAddressConfidential(caseDetails.getData())) {
             log.info("Case ID: {}, has been marked as confidential. Adding coversheet to confidential field", finremCaseDetails.getId());
-            caseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(null);
-            caseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
+            caseData.getBulkPrintWrapper().setBulkPrintCoverSheetRes(null);
+            caseData.getBulkPrintWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
         } else {
-            caseData.getBulkPrintCoverSheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
-            caseData.setBulkPrintLetterIdRes(respondentLetterId.toString());
+            caseData.getBulkPrintWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
+            caseData.getBulkPrintWrapper().setBulkPrintLetterIdRes(respondentLetterId.toString());
         }
 
         log.info("Generated Respondent CoverSheet for bulk print, Case ID: {}. coversheet: {}, letterId : {}", finremCaseDetails.getId(),

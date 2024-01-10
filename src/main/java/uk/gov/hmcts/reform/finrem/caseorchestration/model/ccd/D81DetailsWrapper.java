@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -18,4 +20,5 @@ public class D81DetailsWrapper {
     private CaseDocument d81Joint;
     private CaseDocument d81Applicant;
     private CaseDocument d81Respondent;
+    private List<DocumentCollection> scannedD81s;
 }
