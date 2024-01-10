@@ -184,6 +184,7 @@ public enum DocumentCategory {
     HEARING_DOCUMENTS_INTERVENER_4_COSTS_ESTIMATES_OR_FORM_H_OR_FORM_H1("hearingDocumentsIntervener4CostsEstimatesOrFormHOrFormH1"),
     HEARING_DOCUMENTS_INTERVENER_4_PRE_HEARING_DRAFT_ORDER("hearingDocumentsIntervener4PreHearingDraftOrder"),
     HEARING_DOCUMENTS_INTERVENER_4_SKELETON_ARGUMENT("hearingDocumentsIntervener4SkeletonArgument"),
+    HEARING_DOCUMENTS_WITNESS_SUMMONS("hearingDocumentsWitnessSummons"),
     HEARING_BUNDLE("hearingBundle"),
     REPORTS("reports"),
     REPORTS_EXPERT_REPORTS("reportsExpertReports"),
