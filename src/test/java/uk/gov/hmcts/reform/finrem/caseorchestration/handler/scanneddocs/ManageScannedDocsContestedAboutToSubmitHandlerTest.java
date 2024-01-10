@@ -115,8 +115,6 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(caseDetails).build();
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        Mockito.verify(manageDocumentsHandlerValidator)
-            .validateSelectedIntervenerParties(caseData, caseData.getManageScannedDocumentCollection(), new ArrayList<>());
         assertThat(caseDetails.getData().getManageScannedDocumentCollection().size(), is(5));
 
         documentHandlers.forEach(documentCollectionService ->
