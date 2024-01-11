@@ -65,7 +65,7 @@ public class RejectGeneralApplicationAboutToSubmitHandler
             final List<GeneralApplicationCollectionData> applicationCollectionDataList
                 = existingList.stream().filter(ga -> !ga.getId().equals(valueCode)).sorted(helper::getCompareTo).toList();
             log.info("applicationCollectionDataList : {}", applicationCollectionDataList.size());
-            generalApplicationService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
+            generalApplicationService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseDetails);
             caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
                 ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
         }
