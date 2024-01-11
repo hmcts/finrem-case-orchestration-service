@@ -134,6 +134,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
                 .build()).build());
 
         caseDetails = buildCaseDetailsForAdministrativeDocuments();
+        caseData = caseDetails.getData();
         caseData.setScannedDocuments(scannedDocumentCollections);
         caseData.setEvidenceHandled(YesOrNo.YES);
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(caseDetails).build();
