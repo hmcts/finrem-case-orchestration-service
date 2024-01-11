@@ -39,7 +39,7 @@ public class RejectGeneralApplicationDocumentService  {
         Map letterDetailsMap = convertGeneralApplicationRejectionLetterDetailsToMap(letterDetails);
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, letterDetailsMap,
             documentConfiguration.getGeneralApplicationRejectionTemplate(),
-            documentConfiguration.getGeneralApplicationRejectionFileName(), caseDetails.getId().toString());
+            documentConfiguration.getGeneralApplicationRejectionFileName(), String.valueOf(caseDetails.getId()));
     }
 
     @SuppressWarnings("java:S3740")
