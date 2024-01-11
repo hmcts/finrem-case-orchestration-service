@@ -332,10 +332,9 @@ public class FinremCaseData {
     private YesOrNo additionalHearingDocumentsOption;
     private CaseDocument additionalListOfHearingDocuments;
 
-    @JsonProperty("typeOfDocument")
-    private ScannedDocumentTypeOption scannedDocsTypeOfDocument;
-    private List<ScannedDocumentCollection> applicantScanDocuments;
-    private List<ScannedDocumentCollection> respondentScanDocuments;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private ScannedDocumentWrapper scannedDocumentWrapper;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
