@@ -34,14 +34,14 @@ public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterD
             .contestOrderNotApprovedRefusalReasons(getFormattedRefusalReasons(caseDetails))
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
             .divorceCaseNumber(caseDetails.getData().getDivorceDetailsWrapper().getDivorceCaseNumber())
-            .refusalOrderDate(String.valueOf(caseDetails.getData().getRefusalOrderDate()))
+            .refusalOrderDate(String.valueOf(caseDetails.getData().getRefusalOrderWrapper().getRefusalOrderDate()))
             .build();
     }
 
     private String getJudgeDetails(FinremCaseDetails caseDetails) {
         return StringUtils.joinWith(" ",
-            caseDetails.getData().getRefusalOrderJudgeType().getValue(),
-            caseDetails.getData().getRefusalOrderJudgeName());
+            caseDetails.getData().getRefusalOrderWrapper().getRefusalOrderJudgeType().getValue(),
+            caseDetails.getData().getRefusalOrderWrapper().getRefusalOrderJudgeName());
     }
 
     private String getFormattedRefusalReasons(FinremCaseDetails caseDetails) {

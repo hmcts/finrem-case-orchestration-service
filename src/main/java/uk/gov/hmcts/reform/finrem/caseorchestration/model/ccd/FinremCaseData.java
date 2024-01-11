@@ -228,15 +228,9 @@ public class FinremCaseData {
     @Getter(AccessLevel.NONE)
     private IntervenerHearingNoticeCollectionWrapper intervenerHearingNoticeCollectionWrapper;
     private List<JudgeNotApprovedReasonsCollection> judgeNotApprovedReasons;
-    private JudgeType refusalOrderJudgeType;
-    private String refusalOrderJudgeName;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate refusalOrderDate;
-    private CaseDocument refusalOrderPreviewDocument;
-    private List<RefusalOrderCollection> refusalOrderCollection;
-    private CaseDocument latestRefusalOrder;
-    private CaseDocument refusalOrderAdditionalDocument;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private RefusalOrderWrapper refusalOrderWrapper;
     private String hiddenTabValue;
     private CaseDocument latestDraftHearingOrder;
     @JsonUnwrapped
@@ -456,6 +450,14 @@ public class FinremCaseData {
             this.servePensionProviderWrapper = new ServePensionProviderWrapper();
         }
         return servePensionProviderWrapper;
+    }
+
+    @JsonIgnore
+    public RefusalOrderWrapper getRefusalOrderWrapper() {
+        if (refusalOrderWrapper == null) {
+            this.refusalOrderWrapper = new RefusalOrderWrapper();
+        }
+        return refusalOrderWrapper;
     }
 
     @JsonIgnore
