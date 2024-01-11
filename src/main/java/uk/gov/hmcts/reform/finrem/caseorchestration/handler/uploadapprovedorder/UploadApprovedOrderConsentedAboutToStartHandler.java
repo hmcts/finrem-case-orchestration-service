@@ -43,9 +43,9 @@ public class UploadApprovedOrderConsentedAboutToStartHandler extends FinremCallb
         FinremCaseData caseData = caseDetails.getData();
 
         caseData.getOrderDirectionWrapper().setOrderDirectionAbsolute(null);
-        caseData.setServePensionProvider(null);
-        caseData.setServePensionProviderResponsibility(null);
-        caseData.setServePensionProviderOther(null);
+        caseData.getServePensionProviderWrapper().setServePensionProvider(null);
+        caseData.getServePensionProviderWrapper().setServePensionProviderResponsibility(null);
+        caseData.getServePensionProviderWrapper().setServePensionProviderOther(null);
         caseData.getOrderDirectionWrapper().setOrderDirectionJudge(null);
         caseData.getOrderDirectionWrapper().setOrderDirectionAddComments(null);
         caseData.getConsentOrderWrapper().setUploadApprovedConsentOrder(null);

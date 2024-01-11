@@ -59,8 +59,8 @@ public class ConsentOrderApprovedLetterDetailsMapperTest extends AbstractLetterD
 
     private void setNullFields() {
         caseDetails.getData().setCivilPartnership(null);
-        caseDetails.getData().setServePensionProvider(null);
-        caseDetails.getData().setServePensionProviderResponsibility(null);
+        caseDetails.getData().getServePensionProviderWrapper().setServePensionProvider(null);
+        caseDetails.getData().getServePensionProviderWrapper().setServePensionProviderResponsibility(null);
         caseDetails.getData().getOrderDirectionWrapper().setOrderDirectionJudge(null);
     }
 

@@ -407,7 +407,7 @@ class FinremCaseDetailMapperTest {
             PeriodicalPaymentSubstitute.LUMP_SUM_ORDER,
             PeriodicalPaymentSubstitute.PENSION_SHARING_ORDER
         )));
-        assertEquals(PensionProvider.THE_COURT, caseData.getServePensionProviderResponsibility());
+        assertEquals(PensionProvider.THE_COURT, caseData.getServePensionProviderWrapper().getServePensionProviderResponsibility());
         assertEquals(EvidenceParty.CASE.getValue(), caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom());
         assertEquals(JudgeType.DEPUTY_DISTRICT_JUDGE,
             caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsJudgeType());

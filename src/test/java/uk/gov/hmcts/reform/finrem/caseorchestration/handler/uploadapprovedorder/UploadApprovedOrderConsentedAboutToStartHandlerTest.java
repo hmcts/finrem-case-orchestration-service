@@ -58,9 +58,9 @@ public class UploadApprovedOrderConsentedAboutToStartHandlerTest {
         assertThat(caseData.getOrderDirectionWrapper().getOrderDirectionDate(), is(LocalDate.now()));
 
         assertNull(caseData.getOrderDirectionWrapper().getOrderDirectionAbsolute());
-        assertNull(caseData.getServePensionProvider());
-        assertNull(caseData.getServePensionProviderResponsibility());
-        assertNull(caseData.getServePensionProviderOther());
+        assertNull(caseData.getServePensionProviderWrapper().getServePensionProvider());
+        assertNull(caseData.getServePensionProviderWrapper().getServePensionProviderResponsibility());
+        assertNull(caseData.getServePensionProviderWrapper().getServePensionProviderOther());
         assertNull(caseData.getOrderDirectionWrapper().getOrderDirectionJudge());
         assertNull(caseData.getOrderDirectionWrapper().getOrderDirectionAddComments());
         assertNull(caseData.getConsentOrderWrapper().getUploadApprovedConsentOrder());

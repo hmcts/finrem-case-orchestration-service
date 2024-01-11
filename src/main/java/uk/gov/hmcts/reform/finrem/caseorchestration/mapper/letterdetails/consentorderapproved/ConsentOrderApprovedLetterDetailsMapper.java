@@ -40,18 +40,18 @@ public class ConsentOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
             .respondentFirstName(getRespondentFirstName(caseDetails))
             .respondentLastName(getRespondentLastName(caseDetails))
             .servePensionProviderResponsibility(getServePensionProviderResponsibility(caseData))
-            .servePensionProvider(YesOrNo.getYesOrNo(caseData.getServePensionProvider()))
+            .servePensionProvider(YesOrNo.getYesOrNo(caseData.getServePensionProviderWrapper().getServePensionProvider()))
             .divorceCaseNumber(caseData.getDivorceDetailsWrapper().getDivorceCaseNumber())
             .orderDirectionDate(getDirectionDate(caseDetails))
             .orderDirectionJudge(getJudgeTitle(caseDetails))
             .orderDirectionJudgeName(getJudgeName(caseDetails))
-            .servePensionProviderOther(nullToEmpty(caseData.getServePensionProviderOther()))
+            .servePensionProviderOther(nullToEmpty(caseData.getServePensionProviderWrapper().getServePensionProviderOther()))
             .orderType(consentedApplicationHelper.getOrderType(caseData))
             .build();
     }
 
     private String getServePensionProviderResponsibility(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getServePensionProviderResponsibility())
+        return Optional.ofNullable(caseData.getServePensionProviderWrapper().getServePensionProviderResponsibility())
             .map(PensionProvider::getValue)
             .orElse(null);
     }

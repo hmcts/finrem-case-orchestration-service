@@ -103,9 +103,9 @@ public class FinremCaseData {
     private OrderDirectionWrapper orderDirectionWrapper;
     private CaseDocument additionalDocument;
     private List<DocumentCollection> additionalCicDocuments;
-    private YesOrNo servePensionProvider;
-    private PensionProvider servePensionProviderResponsibility;
-    private String servePensionProviderOther;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private ServePensionProviderWrapper servePensionProviderWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private OrderRefusalWrapper orderRefusalWrapper;
@@ -448,6 +448,14 @@ public class FinremCaseData {
             this.orderApprovedWrapper = new OrderApprovedWrapper();
         }
         return orderApprovedWrapper;
+    }
+
+    @JsonIgnore
+    public ServePensionProviderWrapper getServePensionProviderWrapper() {
+        if (servePensionProviderWrapper == null) {
+            this.servePensionProviderWrapper = new ServePensionProviderWrapper();
+        }
+        return servePensionProviderWrapper;
     }
 
     @JsonIgnore
