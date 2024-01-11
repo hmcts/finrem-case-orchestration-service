@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.ShareSelectedDocumentService;
 
 import java.util.ArrayList;
@@ -73,6 +74,11 @@ public class IntervenerShareDocumentsService implements SharedService {
     public static final String QUESTIONNAIRES_ANSWERS = "QUESTIONNAIRES_ANSWERS";
     public static final String STATEMENTS_EXHIBITS = "STATEMENTS_EXHIBITS";
 
+    protected static final String SHAREABLE_DOCS_WARNING =
+        "Both the applicant and respondent solicitors will be able to access selected shared documents";
+
+    private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+
     private final ShareSelectedDocumentService shareSelectedDocumentService;
 
     public DynamicMultiSelectList intervenerSourceDocumentList(FinremCaseDetails caseDetails, String role) {
@@ -81,7 +87,7 @@ public class IntervenerShareDocumentsService implements SharedService {
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
-        List<String>  collectionType =  List.of(OTHER, CHRONOLOGIES, STATEMENTS_EXHIBITS, HEARING_BUNDLES, FORM_E_EXHIBITS,
+        List<String> collectionType = List.of(OTHER, CHRONOLOGIES, STATEMENTS_EXHIBITS, HEARING_BUNDLES, FORM_E_EXHIBITS,
             QUESTIONNAIRES_ANSWERS, SUMMARIES, FORM_H, EXPERT_EVIDENCE, CORRESPONDENCE);
 
         collectionType.forEach(obj -> {
@@ -141,7 +147,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv1FormEsExhibits();
                 }
                 case QUESTIONNAIRES_ANSWERS -> {
-                    return  caseData.getUploadCaseDocumentWrapper().getIntv1Qa();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv1Qa();
                 }
                 case SUMMARIES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv1Summaries();
@@ -188,7 +194,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv2FormEsExhibits();
                 }
                 case QUESTIONNAIRES_ANSWERS -> {
-                    return  caseData.getUploadCaseDocumentWrapper().getIntv2Qa();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv2Qa();
                 }
                 case SUMMARIES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv2Summaries();
@@ -228,7 +234,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv3FormEsExhibits();
                 }
                 case QUESTIONNAIRES_ANSWERS -> {
-                    return  caseData.getUploadCaseDocumentWrapper().getIntv3Qa();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv3Qa();
                 }
                 case SUMMARIES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv3Summaries();
@@ -268,7 +274,7 @@ public class IntervenerShareDocumentsService implements SharedService {
                     return caseData.getUploadCaseDocumentWrapper().getIntv4FormEsExhibits();
                 }
                 case QUESTIONNAIRES_ANSWERS -> {
-                    return  caseData.getUploadCaseDocumentWrapper().getIntv4Qa();
+                    return caseData.getUploadCaseDocumentWrapper().getIntv4Qa();
                 }
                 case SUMMARIES -> {
                     return caseData.getUploadCaseDocumentWrapper().getIntv4Summaries();
@@ -292,7 +298,7 @@ public class IntervenerShareDocumentsService implements SharedService {
     private String getIntervenerOtherCollection(String role, String collectionType) {
         String result = null;
         if (role.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
-            result =  getIntervenerOneCollectionType(collectionType, role);
+            result = getIntervenerOneCollectionType(collectionType, role);
         } else if (role.equals(CaseRole.INTVR_SOLICITOR_2.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_2.getCcdCode())) {
             result = getIntervenerTwoCollectionType(collectionType, role);
         } else if (role.equals(CaseRole.INTVR_SOLICITOR_3.getCcdCode()) || role.equals(CaseRole.INTVR_BARRISTER_3.getCcdCode())) {
@@ -474,5 +480,22 @@ public class IntervenerShareDocumentsService implements SharedService {
                 shareSelectedDocumentService.copySharedDocumentsToSharedCollection(caseData, role.getCode(), documentList);
             });
         }
+    }
+
+
+    public List<String> checkThatApplicantAndRespondentAreBothSelected(FinremCaseData data) {
+        List<String> warnings = new ArrayList<>();
+        if (isLoggedInUSerIntervenerType(data.getCurrentUserCaseRoleType())) {
+            selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(data, data.getSelectedParties(data.getSolicitorRoleList()));
+            if ((data.isApplicantCorrespondenceEnabled() || data.isRespondentCorrespondenceEnabled())
+                && data.isApplicantCorrespondenceEnabled() != data.isRespondentCorrespondenceEnabled()) {
+                warnings.add(SHAREABLE_DOCS_WARNING);
+            }
+        }
+        return warnings;
+    }
+
+    private boolean isLoggedInUSerIntervenerType(String role) {
+        return role.startsWith("[INTVR");
     }
 }
