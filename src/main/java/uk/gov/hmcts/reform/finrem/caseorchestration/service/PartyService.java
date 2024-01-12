@@ -41,15 +41,15 @@ public class PartyService {
         log.info("Event {} fetching all partys solicitor case role for Case ID: {}", EventType.SEND_ORDER, caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
-        List<DynamicMultiSelectListElement> activeCasePartiesSelectedList = new ArrayList<>();
-        List<DynamicMultiSelectListElement> activeCasePartiesList = new ArrayList<>();
+        List<DynamicMultiSelectListElement> activeCasePartiesSelected = new ArrayList<>();
+        List<DynamicMultiSelectListElement> activeCaseParties = new ArrayList<>();
 
         if (caseData.getApplicantOrganisationPolicy() != null
             && caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole() != null) {
             String assignedAppRole = caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole();
             DynamicMultiSelectListElement appMultiSelectListElement = getDynamicMultiSelectListElement(assignedAppRole,
                 DISPLAY_LABEL.formatted(APPLICANT, caseData.getFullApplicantName()));
-            activeCasePartiesSelectedList.add(appMultiSelectListElement);
+            activeCasePartiesSelected.add(appMultiSelectListElement);
         }
 
         if (caseData.getRespondentOrganisationPolicy() != null
@@ -57,15 +57,15 @@ public class PartyService {
             String assignedRespRole = caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole();
             DynamicMultiSelectListElement respMultiSelectListElement = getDynamicMultiSelectListElement(assignedRespRole,
                 DISPLAY_LABEL.formatted(RESPONDENT, caseData.getRespondentFullName()));
-            activeCasePartiesSelectedList.add(respMultiSelectListElement);
+            activeCasePartiesSelected.add(respMultiSelectListElement);
         }
 
-        activeCasePartiesList.addAll(activeCasePartiesSelectedList);
+        activeCaseParties.addAll(activeCasePartiesSelected);
 
-        addActiveIntervenersToPartyList(caseData, activeCasePartiesList);
+        addActiveIntervenersToPartyList(caseData, activeCaseParties);
         return DynamicMultiSelectList.builder()
-            .value(activeCasePartiesSelectedList)
-            .listItems(activeCasePartiesList)
+            .value(activeCasePartiesSelected)
+            .listItems(activeCaseParties)
             .build();
     }
 
