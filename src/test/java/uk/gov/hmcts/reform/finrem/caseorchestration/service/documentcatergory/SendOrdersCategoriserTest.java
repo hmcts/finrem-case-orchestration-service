@@ -120,7 +120,6 @@ class SendOrdersCategoriserTest extends BaseHandlerTestSetup {
     protected FinremCaseData buildFinremCaseData() {
 
         OrderSentToPartiesCollection orderSentToPartiesCollection = OrderSentToPartiesCollection.builder()
-            .id("1")
             .value(SendOrderDocuments.builder().caseDocument(CaseDocument.builder().build()).build())
             .build();
 

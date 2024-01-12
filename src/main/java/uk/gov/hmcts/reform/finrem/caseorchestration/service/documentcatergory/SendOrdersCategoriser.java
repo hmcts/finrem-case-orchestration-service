@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
@@ -32,13 +31,13 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
 
         if (CollectionUtils.isNotEmpty(finremCaseData.getOrdersSentToPartiesCollection())) {
-            List<OrderSentToPartiesCollection> partiesCollectionsCopy = documentHelper
-                .deepCopyArray(finremCaseData.getOrdersSentToPartiesCollection(),
-                    new TypeReference<List<OrderSentToPartiesCollection>>() {});
-            partiesCollectionsCopy.forEach(
-                order -> setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(),
-                    DocumentCategory.ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId()));
-            finremCaseData.setOrdersSentToPartiesCollection(partiesCollectionsCopy);
+            finremCaseData.getOrdersSentToPartiesCollection().forEach(
+                order -> {
+                    CaseDocument documentCopy = new CaseDocument(order.getValue().getCaseDocument());
+                    setCategoryToAllOrdersDocs(documentCopy,
+                        DocumentCategory.ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId());
+                    order.getValue().setCaseDocument(documentCopy);
+                });
         }
 
         categoryToAllPartiesOrders(finremCaseData.getOrderWrapper());
