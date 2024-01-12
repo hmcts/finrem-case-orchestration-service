@@ -80,6 +80,9 @@ public enum EventType {
 
     MANAGE_HEARING_BUNDLES("FR_manageHearingBundles"),
 
+    MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
+
+
     @JsonEnumDefaultValue
     NONE("");
 
