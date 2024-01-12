@@ -41,7 +41,7 @@ public class IntervenerOneFdrHandlerTest extends BaseManageDocumentsHandlerTest 
 
         collectionService.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+            screenUploadDocumentList, true);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_ONE_FDR_DOCS_COLLECTION),
