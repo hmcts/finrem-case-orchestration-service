@@ -171,13 +171,17 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
     }
 
     private void setCategoryToConsentInContestedOrdersDoc(ConsentInContestedApprovedOrder approvedOrder, String categoryToApply) {
-        CaseDocument consentOrderCopy = new CaseDocument(approvedOrder.getConsentOrder());
-        consentOrderCopy.setCategoryId(categoryToApply);
-        approvedOrder.setConsentOrder(consentOrderCopy);
+        if (approvedOrder.getConsentOrder() != null) {
+            CaseDocument consentOrderCopy = new CaseDocument(approvedOrder.getConsentOrder());
+            consentOrderCopy.setCategoryId(categoryToApply);
+            approvedOrder.setConsentOrder(consentOrderCopy);
+        }
 
-        CaseDocument orderLetterCopy = new CaseDocument(approvedOrder.getOrderLetter());
-        orderLetterCopy.setCategoryId(categoryToApply);
-        approvedOrder.setOrderLetter(orderLetterCopy);
+        if (approvedOrder.getOrderLetter() != null) {
+            CaseDocument orderLetterCopy = new CaseDocument(approvedOrder.getOrderLetter());
+            orderLetterCopy.setCategoryId(categoryToApply);
+            approvedOrder.setOrderLetter(orderLetterCopy);
+        }
 
         if (CollectionUtils.isNotEmpty(approvedOrder.getAdditionalConsentDocuments())) {
             List<DocumentCollection> additionalConsentDocumentsCopy = documentHelper.deepCopyArray(approvedOrder.getAdditionalConsentDocuments(),

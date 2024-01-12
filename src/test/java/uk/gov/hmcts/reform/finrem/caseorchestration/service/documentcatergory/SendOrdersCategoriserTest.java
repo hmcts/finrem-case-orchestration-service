@@ -150,28 +150,46 @@ class SendOrdersCategoriserTest extends BaseHandlerTestSetup {
 
         ConsentInContestedApprovedOrderCollection appConsentOrderCollection = ConsentInContestedApprovedOrderCollection
             .builder().approvedOrder(ConsentInContestedApprovedOrder.builder()
-                .consentOrder(CaseDocument.builder().build()).build())
+                .consentOrder(CaseDocument.builder().build())
+                .orderLetter(CaseDocument.builder().build())
+                .additionalConsentDocuments(null)
+                .pensionDocuments(null).build())
             .build();
 
         ConsentInContestedApprovedOrderCollection repsConsentOrderCollection = ConsentInContestedApprovedOrderCollection
             .builder().approvedOrder(ConsentInContestedApprovedOrder.builder()
-                .consentOrder(CaseDocument.builder().build()).build())
+                .consentOrder(CaseDocument.builder().build())
+                .orderLetter(CaseDocument.builder().build())
+                .additionalConsentDocuments(null)
+                .pensionDocuments(null).build())
             .build();
         ConsentInContestedApprovedOrderCollection intv1ConsentOrderCollection = ConsentInContestedApprovedOrderCollection
             .builder().approvedOrder(ConsentInContestedApprovedOrder.builder()
-                .consentOrder(CaseDocument.builder().build()).build())
+                .consentOrder(CaseDocument.builder().build())
+                .orderLetter(CaseDocument.builder().build())
+                .additionalConsentDocuments(null)
+                .pensionDocuments(null).build())
             .build();
         ConsentInContestedApprovedOrderCollection intv2ConsentOrderCollection = ConsentInContestedApprovedOrderCollection
             .builder().approvedOrder(ConsentInContestedApprovedOrder.builder()
-                .consentOrder(CaseDocument.builder().build()).build())
+                .consentOrder(CaseDocument.builder().build())
+                .orderLetter(CaseDocument.builder().build())
+                .additionalConsentDocuments(null)
+                .pensionDocuments(null).build())
             .build();
         ConsentInContestedApprovedOrderCollection intv3ConsentOrderCollection = ConsentInContestedApprovedOrderCollection
             .builder().approvedOrder(ConsentInContestedApprovedOrder.builder()
-                .consentOrder(CaseDocument.builder().build()).build())
+                .consentOrder(CaseDocument.builder().build())
+                .orderLetter(CaseDocument.builder().build())
+                .additionalConsentDocuments(null)
+                .pensionDocuments(null).build())
             .build();
         ConsentInContestedApprovedOrderCollection intv4ConsentOrderCollection = ConsentInContestedApprovedOrderCollection
             .builder().approvedOrder(ConsentInContestedApprovedOrder.builder()
-                .consentOrder(CaseDocument.builder().build()).build())
+                .consentOrder(CaseDocument.builder().build())
+                .orderLetter(CaseDocument.builder().build())
+                .additionalConsentDocuments(null)
+                .pensionDocuments(null).build())
             .build();
 
         ConsentOrderWrapper consentOrderWrapper = ConsentOrderWrapper.builder()
