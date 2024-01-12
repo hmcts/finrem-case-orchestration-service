@@ -80,8 +80,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = getValidatedResponse(caseData);
 
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
-        validateManageCaseDocumentsTypes(managedCollections, response.getErrors());
-
         if (response.hasErrors()) {
             return response;
         }
@@ -107,7 +105,13 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         return response;
     }
 
-    private void validateManageCaseDocumentsTypes(List<UploadCaseDocumentCollection> managedCollections, List<String> errors) {
+    private void validateManageCaseDocumentsTypes(FinremCaseData finremCaseData, List<String> errors) {
+        List<UploadCaseDocumentCollection> managedCollections =
+            finremCaseData.getManageCaseDocumentCollection();
+
+        if (CollectionUtils.isEmpty(managedCollections)) {
+            return;
+        }
         managedCollections.stream().forEach(uploadCaseDocumentCollection -> {
             CaseDocumentType caseDocumentType = uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType();
             if (administrativeCaseDocumentTypes.contains(caseDocumentType)) {
@@ -125,6 +129,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         } else if (isAnyTrialBundleDocumentPresent(caseData)) {
             response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
         }
+        validateManageCaseDocumentsTypes(caseData, response.getErrors());
         return response;
     }
 
