@@ -31,14 +31,16 @@ public abstract class DocumentHandler {
     );
 
     public void replaceManagedDocumentsInCollectionType(FinremCallbackRequest callbackRequest,
-                                                        List<UploadCaseDocumentCollection> screenCollection) {
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+                                                        List<UploadCaseDocumentCollection> screenCollection,
+                                                        boolean clearExistingCollection) {
+        if (clearExistingCollection) {
+            FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        List<UploadCaseDocumentCollection> originalCollectionForType =
-            caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
+            List<UploadCaseDocumentCollection> originalCollectionForType =
+                caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
 
-        originalCollectionForType.clear();
-
+            originalCollectionForType.clear();
+        }
         addUploadedDocumentToDocumentCollectionType(callbackRequest, screenCollection);
     }
 

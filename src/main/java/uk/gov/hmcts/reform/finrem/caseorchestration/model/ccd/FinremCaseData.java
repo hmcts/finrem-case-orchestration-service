@@ -287,6 +287,7 @@ public class FinremCaseData {
     @JsonProperty("reasonForFRCLocation")
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
+    private List<HearingUploadBundleCollection> fdrHearingBundleCollections;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
     private DynamicMultiSelectList ordersToShare;
     private DynamicMultiSelectList partiesOnCase;
@@ -372,7 +373,7 @@ public class FinremCaseData {
     private ScannedDocumentTypeOption scannedDocsTypeOfDocument;
     private List<ScannedDocumentCollection> applicantScanDocuments;
     private List<ScannedDocumentCollection> respondentScanDocuments;
-
+    private List<UploadCaseDocumentCollection> manageScannedDocumentCollection;
     @JsonProperty("appBarristerCollection")
     private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")
