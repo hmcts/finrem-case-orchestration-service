@@ -186,18 +186,16 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         if (CollectionUtils.isNotEmpty(approvedOrder.getAdditionalConsentDocuments())) {
             List<DocumentCollection> additionalConsentDocumentsCopy = documentHelper.deepCopyArray(approvedOrder.getAdditionalConsentDocuments(),
                 new TypeReference<List<DocumentCollection>>() {});
-            additionalConsentDocumentsCopy.forEach(ad -> {
-                setCategoryToAllOrdersDocs(ad.getValue(), categoryToApply);
-            });
+            additionalConsentDocumentsCopy.forEach(ad ->
+                setCategoryToAllOrdersDocs(ad.getValue(), categoryToApply));
             approvedOrder.setAdditionalConsentDocuments(additionalConsentDocumentsCopy);
         }
 
         if (CollectionUtils.isNotEmpty(approvedOrder.getPensionDocuments())) {
             List<PensionTypeCollection> pensionDocumentsCopy = documentHelper.deepCopyArray(approvedOrder.getPensionDocuments(),
                 new TypeReference<List<PensionTypeCollection>>() {});
-            pensionDocumentsCopy.forEach(pd -> {
-                setCategoryToAllOrdersDocs(pd.getTypedCaseDocument().getPensionDocument(), categoryToApply);
-            });
+            pensionDocumentsCopy.forEach(pd ->
+                setCategoryToAllOrdersDocs(pd.getTypedCaseDocument().getPensionDocument(), categoryToApply));
             approvedOrder.setPensionDocuments(pensionDocumentsCopy);
         }
 

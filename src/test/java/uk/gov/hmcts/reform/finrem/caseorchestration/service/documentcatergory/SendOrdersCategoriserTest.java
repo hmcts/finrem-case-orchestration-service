@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
@@ -45,6 +47,10 @@ class SendOrdersCategoriserTest extends BaseHandlerTestSetup {
     void testCategorizeDocuments() {
         FinremCaseData finremCaseData = buildFinremCaseData();
         sendOrdersCategoriser.categorise(finremCaseData);
+
+        assertEquals(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId(),
+            finremCaseData.getOrdersSentToPartiesCollection().get(0).getValue().getCaseDocument().getCategoryId());
+
         OrderWrapper orderWrapper = finremCaseData.getOrderWrapper();
         assertEquals(DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS.getDocumentCategoryId() + 1,
             orderWrapper.getAppOrderCollections().get(0).getValue().getApproveOrders()
@@ -112,6 +118,12 @@ class SendOrdersCategoriserTest extends BaseHandlerTestSetup {
     }
 
     protected FinremCaseData buildFinremCaseData() {
+
+        OrderSentToPartiesCollection orderSentToPartiesCollection = OrderSentToPartiesCollection.builder()
+            .id("1")
+            .value(SendOrderDocuments.builder().caseDocument(CaseDocument.builder().build()).build())
+            .build();
+
 
         ApprovedOrderConsolidateCollection appApprovedOrderConsolidateCollection = ApprovedOrderConsolidateCollection.builder()
             .value(ApproveOrdersHolder.builder().approveOrders(List.of(ApprovedOrderCollection.builder()
@@ -201,7 +213,8 @@ class SendOrdersCategoriserTest extends BaseHandlerTestSetup {
             .intv4ConsentApprovedOrders(List.of(intv4ConsentOrderCollection))
             .build();
 
-        return FinremCaseData.builder().orderWrapper(orderWrapper).consentOrderWrapper(consentOrderWrapper).build();
+        return FinremCaseData.builder().ordersSentToPartiesCollection(List.of(orderSentToPartiesCollection))
+            .orderWrapper(orderWrapper).consentOrderWrapper(consentOrderWrapper).build();
 
     }
 }
