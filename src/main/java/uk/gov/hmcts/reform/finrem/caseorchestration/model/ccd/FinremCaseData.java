@@ -330,6 +330,7 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ScannedDocumentWrapper scannedDocumentWrapper;
+    private List<UploadCaseDocumentCollection> manageScannedDocumentCollection;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
