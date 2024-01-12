@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.BaseHandlerTestSetup;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrdersHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
@@ -31,10 +32,12 @@ class SendOrdersCategoriserTest extends BaseHandlerTestSetup {
 
     @Mock
     FeatureToggleService featureToggleService;
+    @Mock
+    DocumentHelper documentHelper;
 
     @BeforeEach
     public void setUp() {
-        sendOrdersCategoriser = new SendOrdersCategoriser(featureToggleService);
+        sendOrdersCategoriser = new SendOrdersCategoriser(featureToggleService, documentHelper);
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
     }
 
