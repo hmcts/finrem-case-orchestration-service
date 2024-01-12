@@ -41,60 +41,55 @@ public class PartyService {
         log.info("Event {} fetching all partys solicitor case role for Case ID: {}", EventType.SEND_ORDER, caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
-        List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
-        List<DynamicMultiSelectListElement> defaultDynamicListElements = new ArrayList<>();
+        List<DynamicMultiSelectListElement> activeCasePartiesSelectedList = new ArrayList<>();
+        List<DynamicMultiSelectListElement> activeCasePartiesList = new ArrayList<>();
 
-        if (caseData.getApplicantOrganisationPolicy() != null && caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole() != null) {
+        if (caseData.getApplicantOrganisationPolicy() != null
+            && caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole() != null) {
             String assignedAppRole = caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole();
             DynamicMultiSelectListElement appMultiSelectListElement = getDynamicMultiSelectListElement(assignedAppRole,
                 DISPLAY_LABEL.formatted(APPLICANT, caseData.getFullApplicantName()));
-            dynamicListElements.add(appMultiSelectListElement);
-            defaultDynamicListElements.add(appMultiSelectListElement);
+            activeCasePartiesSelectedList.add(appMultiSelectListElement);
         }
 
-        if (caseData.getRespondentOrganisationPolicy() != null && caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole() != null) {
+        if (caseData.getRespondentOrganisationPolicy() != null
+            && caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole() != null) {
             String assignedRespRole = caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole();
             DynamicMultiSelectListElement respMultiSelectListElement = getDynamicMultiSelectListElement(assignedRespRole,
                 DISPLAY_LABEL.formatted(RESPONDENT, caseData.getRespondentFullName()));
-            dynamicListElements.add(respMultiSelectListElement);
-            defaultDynamicListElements.add(respMultiSelectListElement);
+            activeCasePartiesSelectedList.add(respMultiSelectListElement);
         }
 
-        return getRoleList(intervenerCaseRoleList(caseData, dynamicListElements), defaultDynamicListElements);
-    }
+        activeCasePartiesList.addAll(activeCasePartiesSelectedList);
 
-    private DynamicMultiSelectList getRoleList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
-                                               List<DynamicMultiSelectListElement> defaultDynamicListElements) {
+        addActiveIntervenersToPartyList(caseData, activeCasePartiesList);
         return DynamicMultiSelectList.builder()
-            .value(defaultDynamicListElements)
-            .listItems(dynamicMultiSelectListElement)
+            .value(activeCasePartiesSelectedList)
+            .listItems(activeCasePartiesList)
             .build();
-
     }
 
-    private List<DynamicMultiSelectListElement> intervenerCaseRoleList(FinremCaseData caseData,
-                                                                       List<DynamicMultiSelectListElement> dynamicListElements) {
+    private void addActiveIntervenersToPartyList(FinremCaseData caseData,
+                                                 List<DynamicMultiSelectListElement> activePartyList) {
         IntervenerWrapper oneWrapper = caseData.getIntervenerOneWrapperIfPopulated();
-        setIntervener(dynamicListElements, oneWrapper, INTERVENER_ONE);
+        setIntervener(activePartyList, oneWrapper, INTERVENER_ONE);
 
         IntervenerWrapper twoWrapper = caseData.getIntervenerTwoWrapperIfPopulated();
-        setIntervener(dynamicListElements, twoWrapper, INTERVENER_TWO);
+        setIntervener(activePartyList, twoWrapper, INTERVENER_TWO);
 
         IntervenerWrapper threeWrapper = caseData.getIntervenerThreeWrapperIfPopulated();
-        setIntervener(dynamicListElements, threeWrapper, INTERVENER_THREE);
+        setIntervener(activePartyList, threeWrapper, INTERVENER_THREE);
 
         IntervenerWrapper fourWrapper = caseData.getIntervenerFourWrapperIfPopulated();
-        setIntervener(dynamicListElements, fourWrapper, INTERVENER_FOUR);
-
-        return dynamicListElements;
+        setIntervener(activePartyList, fourWrapper, INTERVENER_FOUR);
     }
 
-    private void setIntervener(List<DynamicMultiSelectListElement> dynamicListElements,
+    private void setIntervener(List<DynamicMultiSelectListElement> activePartyList,
                                IntervenerWrapper wrapper,
                                String intervener) {
         if (wrapper != null && ObjectUtils.isNotEmpty(wrapper.getIntervenerOrganisation())) {
             String assignedRole = wrapper.getIntervenerOrganisation().getOrgPolicyCaseAssignedRole();
-            dynamicListElements.add(getDynamicMultiSelectListElement(assignedRole,
+            activePartyList.add(getDynamicMultiSelectListElement(assignedRole,
                 DISPLAY_LABEL.formatted(capitalize(intervener), wrapper.getIntervenerName())));
         }
     }

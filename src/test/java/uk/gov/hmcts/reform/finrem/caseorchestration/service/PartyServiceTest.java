@@ -29,7 +29,7 @@ class PartyServiceTest {
     }
 
     @Test
-    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreNotdigital_thenPartyListDefaultSelectedAppAndResp() {
+    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreNotDigital_thenPartyListDefaultSelectedAppAndResp() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -69,7 +69,7 @@ class PartyServiceTest {
     }
 
     @Test
-    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAredigitalAndAllSelected_thenPartyList() {
+    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreDigitalAndAllSelected_thenPartyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
