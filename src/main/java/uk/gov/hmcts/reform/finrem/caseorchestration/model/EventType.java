@@ -82,6 +82,8 @@ public enum EventType {
 
     MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
 
+    INITIATE_CFV_MIGRATION("FR_initiateCfvMigration"),
+
 
     @JsonEnumDefaultValue
     NONE("");
