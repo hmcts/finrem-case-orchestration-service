@@ -81,7 +81,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
         List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
         addDefaultsToAdministrativeDocuments(managedCollections);
         documentHandlers.forEach(documentCollectionService ->
-            documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, managedCollections));
+            documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, managedCollections, true));
         uploadedDocumentService.addUploadDateToNewDocuments(caseData, caseDataBefore);
 
         Optional.ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);

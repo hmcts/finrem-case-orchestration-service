@@ -38,7 +38,7 @@ public class ApplicantHearingBundleCollectionServiceTest extends HearingBundleHa
 
         collectionService.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+            screenUploadDocumentList, true);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_HEARING_BUNDLES_COLLECTION),

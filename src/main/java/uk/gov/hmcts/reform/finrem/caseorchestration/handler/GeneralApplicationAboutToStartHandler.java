@@ -75,7 +75,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
 
         helper.populateGeneralApplicationDataSender(caseData, existingGeneralApplication);
 
-        generalApplicationService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
+        generalApplicationService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseDetails);
 
         if (loggedInUserCaseRole.equalsIgnoreCase("Case")) {
             List<GeneralApplicationsCollection> generalApplications = caseData.getGeneralApplicationWrapper()

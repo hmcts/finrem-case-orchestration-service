@@ -79,6 +79,11 @@ public enum EventType {
     UPDATE_COURT_INFO("FR_updateCourtInfo"),
     SEND_ORDER_FOR_APPROVED("FR_sendOrderForApproved"),
 
+    MANAGE_HEARING_BUNDLES("FR_manageHearingBundles"),
+
+    MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
+
+
     @JsonEnumDefaultValue
     NONE("");
 

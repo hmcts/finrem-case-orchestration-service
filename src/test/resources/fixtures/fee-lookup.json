@@ -29,7 +29,6 @@
       "solicitorFirm": "Mr",
       "solicitorName": "Solictor",
       "applicantLName": "Guy",
-      "authorisation3": "2010-01-01",
       "solicitorEmail": "test@admin.com",
       "solicitorPhone": "9963472494",
       "applicantFMName": "Poor",
@@ -132,9 +131,8 @@
               "Insufficient information provided – B",
               "Transferred to Applicant’s home Court",
               "Transferred to Applicant's home Court",
-              "Other"
+              "Other (please specify)"
             ],
-            "orderRefusalDate": "2003-02-01",
             "orderRefusalDocs": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -159,14 +157,13 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Other",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
               "document_binary_url": "http://doc1.binary"
             },
             "DocumentEmailContent": "email-content",
-            "DocumentDateAdded": "2010-01-02",
             "DocumentComment": "doc-comment",
             "DocumentFileName": "file1"
           }
