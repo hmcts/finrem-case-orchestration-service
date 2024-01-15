@@ -32,7 +32,7 @@ public class CfvMigrationTask extends BaseTask {
     public static final String CFV_CATEGORIES_APPLIED_FLAG_FIELD = "isCfvCategoriesAppliedFlag";
     private static final String CASE_DATA_CFV_CATEGORIES_APPLIED_FLAG = String.format("data.%s", CFV_CATEGORIES_APPLIED_FLAG_FIELD);
 
-    private static List<State> STATES_TO_CATEGORISE = List.of(State.PREPARE_FOR_HEARING, State.ORDER_MADE, State.AWAITING_RESPONSE);
+    private static List<State> STATES_TO_CATEGORISE = List.of(State.PREPARE_FOR_HEARING, State.ORDER_MADE, State.AWAITING_RESPONSE, State.APPLICATION_ISSUED);
 
     @Value("${cron.cfvCategorisation.task.enabled:false}")
     private boolean isCfvMigrationTaskEnabled;
@@ -54,15 +54,20 @@ public class CfvMigrationTask extends BaseTask {
 
     @Override
     public List<CaseReference> getCaseReferences() {
+        log.info("Getting case references for CFV migration");
         List<CaseReference> caseReferences = new ArrayList<>();
         String systemUserToken = getSystemUserToken();
         for (State state : STATES_TO_CATEGORISE) {
+            log.info("Getting case references for state {} with case reference size {}", state, caseReferences.size());
             if (caseReferences.size() >= cfvCategorisationBatchSize) {
                 break;
             }
             int remaining = cfvCategorisationBatchSize - caseReferences.size();
+            log.info("Getting case references for state {} with remaining case reference size {}", state, remaining);
             String esSearchString = buildSearchString(state.toString(), remaining);
+            log.info("Getting case references for state {} with search string {}", state, esSearchString);
             SearchResult searchResult = ccdService.esSearchCases(CaseType.CONTESTED, esSearchString, systemUserToken);
+            log.info("Getting case references for state {} with search result total {}", state, searchResult.getTotal());
             caseReferences.addAll(getCaseReferencesFromSearchResult(searchResult));
         }
         return caseReferences;
@@ -130,9 +135,12 @@ public class CfvMigrationTask extends BaseTask {
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
+
         FinremCaseData finremCaseData = finremCaseDetails.getData();
+        log.info("Executing {} for case id {}", getTaskName(), finremCaseDetails.getId());
         documentCategoryAssigner.assignDocumentCategories(finremCaseData);
         finremCaseData.setIsCfvCategoriesAppliedFlag(YesOrNo.YES);
+        log.info("Executed {} for case id {}", getTaskName(), finremCaseDetails.getId());
 
     }
 }
