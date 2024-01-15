@@ -23,6 +23,7 @@ import java.util.Optional;
 @Slf4j
 public abstract class SendOrderPartyDocumentHandler {
     private final String caseRoleCode;
+    protected static final String ADDITIONAL_HEARING_FILE_NAME = "AdditionalHearingDocument.pdf";
 
     protected SendOrderPartyDocumentHandler(String caseRoleCode) {
         this.caseRoleCode = caseRoleCode;
@@ -38,7 +39,11 @@ public abstract class SendOrderPartyDocumentHandler {
             if (orderColl.isEmpty()) {
                 addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
             }
-            orderDocumentPack.forEach(document -> orderColl.add(getApprovedOrderCollection(document)));
+            orderDocumentPack.forEach(document -> {
+                if (shouldAddDocumentToOrderColl(document, getExistingConsolidateCollection(caseData))) {
+                    orderColl.add(getApprovedOrderCollection(document));
+                }
+            });
             addOrdersToPartyCollection(caseData, orderColl);
         }
     }
@@ -114,6 +119,24 @@ public abstract class SendOrderPartyDocumentHandler {
         }
     }
 
+    protected boolean shouldAddDocumentToOrderColl(CaseDocument document,
+                                                   List<ApprovedOrderConsolidateCollection> orderCollForRole) {
+        List<ApprovedOrderConsolidateCollection> existingCollection = Optional.ofNullable(orderCollForRole)
+                .orElse(new ArrayList<>());
+        if (existingCollection.isEmpty()) {
+            return true;
+        }
+        return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order ->
+                order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
+                        && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl())
+        ));
+    }
+
+    protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {
+        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
+                .approveOrders(orderCollection).orderReceivedAt(LocalDateTime.now()).build()).build();
+    }
+
     protected abstract List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData);
 
     protected abstract List<ConsentInContestedApprovedOrderCollection> getConsentOrderCollectionForParty(FinremCaseData caseData);
@@ -133,8 +156,5 @@ public abstract class SendOrderPartyDocumentHandler {
 
     protected abstract void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderColl);
 
-    protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {
-        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
-            .approveOrders(orderCollection).orderReceivedAt(LocalDateTime.now()).build()).build();
-    }
+    protected abstract List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData);
 }

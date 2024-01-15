@@ -87,4 +87,9 @@ public class SendOrderIntervenerTwoDocumentHandler extends SendOrderPartyDocumen
         caseData.getOrderWrapper().setIntv2OrderCollections(orders);
         caseData.getOrderWrapper().setIntv2OrderCollection(null);
     }
+
+    protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getOrderWrapper().getIntv2OrderCollections())
+                .orElse(new ArrayList<>());
+    }
 }
