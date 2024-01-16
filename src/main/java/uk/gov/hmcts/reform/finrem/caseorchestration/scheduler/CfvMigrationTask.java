@@ -32,16 +32,17 @@ public class CfvMigrationTask extends BaseTask {
     public static final String CFV_CATEGORIES_APPLIED_FLAG_FIELD = "isCfvCategoriesAppliedFlag";
     private static final String CASE_DATA_CFV_CATEGORIES_APPLIED_FLAG = String.format("data.%s", CFV_CATEGORIES_APPLIED_FLAG_FIELD);
 
-    private static List<State> STATES_TO_CATEGORISE = List.of(State.PREPARE_FOR_HEARING, State.ORDER_MADE, State.AWAITING_RESPONSE, State.APPLICATION_ISSUED);
+    private static List<State> STATES_TO_CATEGORISE =
+        List.of(State.PREPARE_FOR_HEARING, State.ORDER_MADE, State.AWAITING_RESPONSE, State.APPLICATION_ISSUED);
 
-    @Value("${cron.cfvCategorisation.task.enabled:false}")
+    @Value("${cron.cfvCategorisation.task.enabled:true}")
     private boolean isCfvMigrationTaskEnabled;
 
     @Value("${cron.cfvCategorisation.batchSize:50}")
     private int cfvCategorisationBatchSize;
 
-    @Value("${cron.cfvCategorisation.cfvReleaseDate:01-01-2023}")
-    private static String cfvReleaseDate;
+    @Value("${cron.cfvCategorisation.cfvReleaseDate:01-03-2024 23:59}")
+    private String cfvReleaseDate;
 
     private final DocumentCategoryAssigner documentCategoryAssigner;
 
@@ -50,7 +51,6 @@ public class CfvMigrationTask extends BaseTask {
         super(ccdService, systemUserService, finremCaseDetailsMapper);
         this.documentCategoryAssigner = documentCategoryAssigner;
     }
-
 
     @Override
     public List<CaseReference> getCaseReferences() {
@@ -64,27 +64,29 @@ public class CfvMigrationTask extends BaseTask {
             }
             int remaining = cfvCategorisationBatchSize - caseReferences.size();
             log.info("Getting case references for state {} with remaining case reference size {}", state, remaining);
-            String esSearchString = buildSearchString(state.toString(), remaining);
+            String esSearchString = buildSearchString(state.getStateId(), remaining);
             log.info("Getting case references for state {} with search string {}", state, esSearchString);
-            SearchResult searchResult = ccdService.esSearchCases(CaseType.CONTESTED, esSearchString, systemUserToken);
+            SearchResult searchResult = null;
+            try {
+                searchResult = ccdService.esSearchCases(CaseType.CONTESTED, esSearchString, systemUserToken);
+            } catch (RuntimeException e) {
+                log.error("Error occurred while running CFV migration task", e);
+                e.printStackTrace();
+            }
             log.info("Getting case references for state {} with search result total {}", state, searchResult.getTotal());
             caseReferences.addAll(getCaseReferencesFromSearchResult(searchResult));
         }
         return caseReferences;
     }
 
-
     private String buildSearchString(final String state, int pageSize) {
-
-
         BoolQueryBuilder cfvFlagMustNotExist = QueryBuilders
             .boolQuery()
             .mustNot(QueryBuilders.existsQuery(CASE_DATA_CFV_CATEGORIES_APPLIED_FLAG));
 
-
         QueryBuilder stateQuery = QueryBuilders.matchQuery("state", state);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-YYYY");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
         LocalDateTime cfvReleaseDateTime = LocalDateTime.parse(cfvReleaseDate, formatter);
         QueryBuilder caseCreatedDateBeforeCfv = QueryBuilders.rangeQuery("created_date").lt(cfvReleaseDateTime);
 
@@ -120,7 +122,7 @@ public class CfvMigrationTask extends BaseTask {
 
     @Override
     protected boolean isTaskEnabled() {
-        return isCfvMigrationTaskEnabled;
+        return true;
     }
 
     @Override

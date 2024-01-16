@@ -41,9 +41,18 @@ public class InitiateCfvMigrationAboutToSubmitHandler extends FinremCallbackHand
             callbackRequestWithFinremCaseDetails.getCaseDetails().getId());
 
         ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.submit(() -> {
-            cfvMigrationTask.run();
-        });
+        try {
+            executor.submit(() -> {
+                cfvMigrationTask.run();
+            });
+        }
+        catch (RuntimeException e) {
+            log.error("Error occurred while running CFV migration task", e);
+            e.printStackTrace();
+        }
+        finally {
+            executor.shutdown();
+        }
         log.info("Migrate data called");
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
