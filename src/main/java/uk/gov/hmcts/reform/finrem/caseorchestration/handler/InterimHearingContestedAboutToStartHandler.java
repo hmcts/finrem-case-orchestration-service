@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.InterimHearingItemMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
@@ -52,8 +51,7 @@ public class InterimHearingContestedAboutToStartHandler
         Map<String, Object> caseData = caseDetails.getData();
 
         loadInterimHearing(caseData);
-        DynamicMultiSelectList allActivePartyList = partyService.getAllActivePartyList(caseDetails);
-        caseData.put(PARTIES_ON_CASE, allActivePartyList);
+        caseData.put(PARTIES_ON_CASE, partyService.getActiveIntervenersMultiselectList(caseDetails));
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }
 

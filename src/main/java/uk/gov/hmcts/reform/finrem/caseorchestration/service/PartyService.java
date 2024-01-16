@@ -32,24 +32,66 @@ public class PartyService {
 
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public DynamicMultiSelectList getAllActivePartyList(CaseDetails caseDetails) {
-        return getAllActivePartyList(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails));
+    public DynamicMultiSelectList getActiveIntervenersMultiselectList(CaseDetails caseDetails) {
+        return getActiveIntervenersMultiselectList(
+            finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails).getData());
     }
 
+    public DynamicMultiSelectList getActiveIntervenersMultiselectList(FinremCaseData caseData) {
+        return DynamicMultiSelectList.builder()
+            .value(new ArrayList<>())
+            .listItems(getActiveInterveners(caseData))
+            .build();
+    }
 
-    public DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
-        log.info("Event {} fetching all partys solicitor case role for Case ID: {}", EventType.SEND_ORDER, caseDetails.getId());
+    public DynamicMultiSelectList getActiveSolicitorsMultiselectList(FinremCaseData caseData) {
+        return DynamicMultiSelectList.builder()
+            .value(new ArrayList<>())
+            .listItems(getActiveSolicitors(caseData))
+            .build();
+    }
+
+    public DynamicMultiSelectList getAllActivePartyMultiselectList(FinremCaseDetails caseDetails) {
+        log.info("Event {} fetching all parties solicitor case role for Case ID: {}", EventType.SEND_ORDER, caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
-        List<DynamicMultiSelectListElement> activeCasePartiesSelected = new ArrayList<>();
         List<DynamicMultiSelectListElement> activeCaseParties = new ArrayList<>();
 
+        activeCaseParties.addAll(getActiveSolicitors(caseData));
+        activeCaseParties.addAll(getActiveInterveners(caseData));
+
+        return DynamicMultiSelectList.builder()
+            .value(new ArrayList<>())
+            .listItems(activeCaseParties)
+            .build();
+    }
+
+    public void addDefaultNotificationPartiesToCase(CaseDetails caseDetails) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        addDefaultNotificationPartiesToCase(finremCaseDetails.getData());
+        caseDetails.setData(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails).getData());
+    }
+
+    public void addDefaultNotificationPartiesToCase(FinremCaseData finremCaseData) {
+        List<DynamicMultiSelectListElement> activeSolicitors =
+            getActiveSolicitorsMultiselectList(finremCaseData).getListItems();
+        if (!activeSolicitors.isEmpty()) {
+
+            finremCaseData.getPartiesOnCase().getListItems().addAll(
+                activeSolicitors);
+            finremCaseData.getPartiesOnCase().getValue().addAll(
+                activeSolicitors);
+        }
+    }
+
+    private List<DynamicMultiSelectListElement> getActiveSolicitors(FinremCaseData caseData) {
+        List<DynamicMultiSelectListElement> activeSolicitors = new ArrayList<>();
         if (caseData.getApplicantOrganisationPolicy() != null
             && caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole() != null) {
             String assignedAppRole = caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole();
             DynamicMultiSelectListElement appMultiSelectListElement = getDynamicMultiSelectListElement(assignedAppRole,
                 DISPLAY_LABEL.formatted(APPLICANT, caseData.getFullApplicantName()));
-            activeCasePartiesSelected.add(appMultiSelectListElement);
+            activeSolicitors.add(appMultiSelectListElement);
         }
 
         if (caseData.getRespondentOrganisationPolicy() != null
@@ -57,31 +99,29 @@ public class PartyService {
             String assignedRespRole = caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole();
             DynamicMultiSelectListElement respMultiSelectListElement = getDynamicMultiSelectListElement(assignedRespRole,
                 DISPLAY_LABEL.formatted(RESPONDENT, caseData.getRespondentFullName()));
-            activeCasePartiesSelected.add(respMultiSelectListElement);
+            activeSolicitors.add(respMultiSelectListElement);
         }
 
-        activeCaseParties.addAll(activeCasePartiesSelected);
-
-        addActiveIntervenersToPartyList(caseData, activeCaseParties);
-        return DynamicMultiSelectList.builder()
-            .value(activeCasePartiesSelected)
-            .listItems(activeCaseParties)
-            .build();
+        return activeSolicitors;
     }
 
-    private void addActiveIntervenersToPartyList(FinremCaseData caseData,
-                                                 List<DynamicMultiSelectListElement> activeCaseParties) {
+    private List<DynamicMultiSelectListElement> getActiveInterveners(FinremCaseData caseData) {
+
+        List<DynamicMultiSelectListElement> activeIntervenerParties = new ArrayList<>();
+
         IntervenerWrapper oneWrapper = caseData.getIntervenerOneWrapperIfPopulated();
-        setIntervener(activeCaseParties, oneWrapper, INTERVENER_ONE);
+        setIntervener(activeIntervenerParties, oneWrapper, INTERVENER_ONE);
 
         IntervenerWrapper twoWrapper = caseData.getIntervenerTwoWrapperIfPopulated();
-        setIntervener(activeCaseParties, twoWrapper, INTERVENER_TWO);
+        setIntervener(activeIntervenerParties, twoWrapper, INTERVENER_TWO);
 
         IntervenerWrapper threeWrapper = caseData.getIntervenerThreeWrapperIfPopulated();
-        setIntervener(activeCaseParties, threeWrapper, INTERVENER_THREE);
+        setIntervener(activeIntervenerParties, threeWrapper, INTERVENER_THREE);
 
         IntervenerWrapper fourWrapper = caseData.getIntervenerFourWrapperIfPopulated();
-        setIntervener(activeCaseParties, fourWrapper, INTERVENER_FOUR);
+        setIntervener(activeIntervenerParties, fourWrapper, INTERVENER_FOUR);
+
+        return activeIntervenerParties;
     }
 
     private void setIntervener(List<DynamicMultiSelectListElement> activeCaseParties,

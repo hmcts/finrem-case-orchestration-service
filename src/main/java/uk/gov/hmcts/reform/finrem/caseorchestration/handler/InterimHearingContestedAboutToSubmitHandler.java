@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class InterimHearingContestedAboutToSubmitHandler
     implements CallbackHandler<Map<String, Object>> {
 
     private final InterimHearingService interimHearingService;
+    private final PartyService partyService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -36,7 +38,11 @@ public class InterimHearingContestedAboutToSubmitHandler
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         log.info("About to submit Interim hearing for Case ID {}", caseDetails.getId());
-        List<String> errors = interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, userAuthorisation);
+        List<String> errors =
+            interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, userAuthorisation);
+
+         partyService.addDefaultNotificationPartiesToCase(caseDetails);
+
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
             .data(caseDetails.getData()).errors(errors).build();
     }

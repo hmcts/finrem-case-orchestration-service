@@ -61,11 +61,10 @@ class PartyServiceTest {
         data.getIntervenerFourWrapper().setIntervenerName("Intv4");
 
 
-        DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyList(caseDetails);
+        DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyMultiselectList(caseDetails);
 
 
         Assertions.assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
-        Assertions.assertEquals(2, partiesOnCase.getValue().size(), "pre-selected parties");
     }
 
     @Test
@@ -102,10 +101,47 @@ class PartyServiceTest {
 
         data.setPartiesOnCase(parties);
 
-        DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyList(caseDetails);
+        DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyMultiselectList(caseDetails);
 
         Assertions.assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
-        Assertions.assertEquals(2, partiesOnCase.getValue().size(), "selected parties");
+    }
+
+    @Test
+    void givenCaseWithInterveners_whenGetActiveIntervenersMultiselectList_thenAllActiveIntervenersInAndNoRespOrAppInList() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        data.setApplicantOrganisationPolicy(getOrganisation("ORGAPP","applicant",
+            CaseRole.APP_SOLICITOR.getCcdCode()));
+        data.setRespondentOrganisationPolicy(getOrganisation("ORGRESP","respondent",
+            CaseRole.RESP_SOLICITOR.getCcdCode()));
+        data.getIntervenerOneWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV1","intervener1",
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
+        data.getIntervenerTwoWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV2","intervener2",
+            CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
+        data.getIntervenerThreeWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV3","intervener3",
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
+        data.getIntervenerFourWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV4","intervener4",
+            CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
+
+
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
+
+        DynamicMultiSelectList parties = DynamicMultiSelectList.builder()
+            .value(null)
+            .listItems(dynamicElementList)
+            .build();
+
+        data.setPartiesOnCase(parties);
+
+        DynamicMultiSelectList partiesOnCase = partyService.getActiveIntervenersMultiselectList(data);
+
+        Assertions.assertEquals(4, partiesOnCase.getListItems().size(), "available parties");
     }
 
     private DynamicMultiSelectListElement getDynamicElementList(String role) {

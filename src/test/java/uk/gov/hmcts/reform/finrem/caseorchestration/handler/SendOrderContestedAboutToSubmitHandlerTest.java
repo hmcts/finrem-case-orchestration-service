@@ -129,7 +129,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = response.getData();
 
-        assertNull(caseData.getPartiesOnCase());
+        assertTrue(caseData.getPartiesOnCase().getValue().isEmpty());
 
         verify(generalOrderService).getParties(callbackRequest.getCaseDetails());
         verify(generalOrderService).hearingOrdersToShare(callbackRequest.getCaseDetails(), null);

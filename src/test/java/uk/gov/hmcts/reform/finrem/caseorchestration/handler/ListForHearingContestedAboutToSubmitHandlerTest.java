@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingServi
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 
 import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -42,12 +41,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENTS_OPTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARTIES_ON_CASE;
 
 @ExtendWith(MockitoExtension.class)
 class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
@@ -73,8 +72,6 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
     private NotificationService notificationService;
     @InjectMocks
     private ListForHearingContestedAboutToSubmitHandler aboutToSubmitHandler;
-    @InjectMocks
-    private ListForHearingContestedAboutToStartHandler aboutToStartHandler;
 
     private static final String BULK_PRINT_ADDITIONAL_HEARING_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
     private static final String NON_FAST_TRACK_HEARING_JSON = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
@@ -90,30 +87,32 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
     @Test
     void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEvent_thenHandlerCanHandle() {
         assertThat(aboutToSubmitHandler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                equalTo(true));
+            equalTo(true));
     }
 
     @Test
     void givenACcdCallbackConsentedCase_WhenAnAboutToStartEvent_thenHandlerCanNotHandle() {
         assertThat(aboutToSubmitHandler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                equalTo(false));
+            equalTo(false));
     }
 
     @Test
     void givenACcdCallbackConsentedCase_WhenASubmittedEvent_thenHandlerCanNotHandle() {
         assertThat(aboutToSubmitHandler.canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                equalTo(false));
+            equalTo(false));
     }
 
     @Test
     void givenContestedCase_whenNotFastTrackDecision_thenShouldThrowWarnings() {
         when(validateHearingService.validateHearingErrors(any())).thenReturn(ImmutableList.of());
         when(validateHearingService.validateHearingWarnings(any()))
-                .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
+            .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
         FinremCallbackRequest finremCallbackRequest =
-                buildFinremCallbackRequest(NON_FAST_TRACK_HEARING_JSON);
+            buildFinremCallbackRequest(NON_FAST_TRACK_HEARING_JSON);
         CallbackRequest callbackRequest = buildCallbackRequest(NON_FAST_TRACK_HEARING_JSON);
+        when(partyService.getActiveSolicitorsMultiselectList(any())).thenReturn(getSolicitorParties());
+        doCallRealMethod().when(partyService).addDefaultNotificationPartiesToCase(any(FinremCaseData.class));
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCallbackRequest.getCaseDetails());
         when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(callbackRequest.getCaseDetails());
         finremCallbackRequest.getCaseDetails().getData().setIssueDate(LocalDate.now().minusDays(1));
@@ -140,12 +139,8 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
             FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
         finremCallbackRequest.setCaseDetailsBefore(finremCaseDetailsBefore);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().put(PARTIES_ON_CASE, getParties());
         caseDetails.getData().put(ADDITIONAL_HEARING_DOCUMENTS_OPTION, YesOrNo.NO);
-
-        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class))).thenReturn(getParties());
-
-        aboutToStartHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        finremCallbackRequest.getCaseDetails().getData().setPartiesOnCase(getIntervenerParties());
 
         when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(caseDetails);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCallbackRequest.getCaseDetails());
@@ -159,15 +154,18 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         when(coverSheetService.generateApplicantCoverSheet(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument());
         when(coverSheetService.generateRespondentCoverSheet(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument());
         CaseDocument document = caseDocument("http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
-                "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
+            "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
         when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
         when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), anyString())).thenReturn(document);
         when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(true);
+        when(partyService.getActiveSolicitorsMultiselectList(any())).thenReturn(getSolicitorParties());
+        doCallRealMethod().when(partyService).addDefaultNotificationPartiesToCase(any(FinremCaseData.class));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData().getBulkPrintCoverSheetRes(), equalTo(caseDocument()));
         assertThat(response.getData().getBulkPrintCoverSheetApp(), equalTo(caseDocument()));
         assertThat(response.getData().getBulkPrintCoverSheetResConfidential(), nullValue());
         assertThat(response.getData().getBulkPrintCoverSheetAppConfidential(), nullValue());
+        assertThat(response.getData().getPartiesOnCase().getValue().size(), equalTo(getAllParties().getValue().size()));
 
         verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
         verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
@@ -186,13 +184,9 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
             FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
         finremCallbackRequest.setCaseDetailsBefore(finremCaseDetailsBefore);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().put(PARTIES_ON_CASE, getParties());
         caseDetails.getData().put(ADDITIONAL_HEARING_DOCUMENTS_OPTION, YesOrNo.NO);
-
-        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class))).thenReturn(getParties());
-
-        aboutToStartHandler.handle(finremCallbackRequest, AUTH_TOKEN);
-
+        when(partyService.getActiveSolicitorsMultiselectList(any())).thenReturn(getSolicitorParties());
+        doCallRealMethod().when(partyService).addDefaultNotificationPartiesToCase(any(FinremCaseData.class));
         when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(caseDetails);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCallbackRequest.getCaseDetails());
 
@@ -227,15 +221,10 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(BULK_PRINT_ADDITIONAL_HEARING_JSON);
         CallbackRequest callbackRequest = buildCallbackRequest(BULK_PRINT_ADDITIONAL_HEARING_JSON);
         FinremCaseDetails finremCaseDetailsBefore =
-                FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
+            FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
         finremCallbackRequest.setCaseDetailsBefore(finremCaseDetailsBefore);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().put(PARTIES_ON_CASE, getParties());
         caseDetails.getData().put(ADDITIONAL_HEARING_DOCUMENTS_OPTION, YesOrNo.NO);
-
-        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class))).thenReturn(getParties());
-
-        aboutToStartHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(caseDetails);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCallbackRequest.getCaseDetails());
@@ -249,11 +238,12 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         when(coverSheetService.generateApplicantCoverSheet(isA(FinremCaseDetails.class), anyString())).thenReturn(caseDocument());
         when(coverSheetService.generateRespondentCoverSheet(isA(FinremCaseDetails.class), anyString())).thenReturn(caseDocument());
         CaseDocument document = caseDocument("http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
-                "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
+            "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
         when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
         when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), anyString())).thenReturn(document);
         when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(true);
-
+        when(partyService.getActiveSolicitorsMultiselectList(any())).thenReturn(getSolicitorParties());
+        doCallRealMethod().when(partyService).addDefaultNotificationPartiesToCase(any(FinremCaseData.class));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData().getBulkPrintCoverSheetResConfidential(), equalTo(caseDocument()));
         assertThat(response.getData().getBulkPrintCoverSheetAppConfidential(), equalTo(caseDocument()));
@@ -269,29 +259,55 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
 
     }
 
-    private DynamicMultiSelectList getParties() {
+    private DynamicMultiSelectList getAllParties() {
+        DynamicMultiSelectList allParties = getSolicitorParties();
+        allParties.getValue().addAll(getIntervenerParties().getValue());
+        allParties.getListItems().addAll(getIntervenerParties().getListItems());
+        return allParties;
+    }
 
-        List<DynamicMultiSelectListElement> list = new ArrayList<>();
-        partyList().forEach(role -> list.add(getElementList(role)));
+    private DynamicMultiSelectList getSolicitorParties() {
 
         return DynamicMultiSelectList.builder()
-            .value(of(DynamicMultiSelectListElement.builder()
-                .code(CaseRole.APP_SOLICITOR.getCcdCode())
-                .label(CaseRole.APP_SOLICITOR.getCcdCode())
-                .build(),
+            .value(new ArrayList<>(of(DynamicMultiSelectListElement.builder()
+                    .code(CaseRole.APP_SOLICITOR.getCcdCode())
+                    .label(CaseRole.APP_SOLICITOR.getCcdCode())
+                    .build(),
                 DynamicMultiSelectListElement.builder()
-                .code(CaseRole.RESP_SOLICITOR.getCcdCode())
-                .label(CaseRole.RESP_SOLICITOR.getCcdCode())
-                .build()))
-            .listItems(list)
+                    .code(CaseRole.RESP_SOLICITOR.getCcdCode())
+                    .label(CaseRole.RESP_SOLICITOR.getCcdCode())
+                    .build())))
+            .listItems(new ArrayList<>(of(DynamicMultiSelectListElement.builder()
+                    .code(CaseRole.APP_SOLICITOR.getCcdCode())
+                    .label(CaseRole.APP_SOLICITOR.getCcdCode())
+                    .build(),
+                DynamicMultiSelectListElement.builder()
+                    .code(CaseRole.RESP_SOLICITOR.getCcdCode())
+                    .label(CaseRole.RESP_SOLICITOR.getCcdCode())
+                    .build())))
             .build();
     }
 
+    private DynamicMultiSelectList getIntervenerParties() {
 
-    private List<String> partyList() {
-        return of(CaseRole.APP_SOLICITOR.getCcdCode(),
-            CaseRole.RESP_SOLICITOR.getCcdCode(), CaseRole.INTVR_SOLICITOR_1.getCcdCode(), CaseRole.INTVR_SOLICITOR_2.getCcdCode(),
-            CaseRole.INTVR_SOLICITOR_3.getCcdCode(), CaseRole.INTVR_SOLICITOR_4.getCcdCode());
+        return DynamicMultiSelectList.builder()
+            .value(new ArrayList<>(of(DynamicMultiSelectListElement.builder()
+                    .code(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                    .label(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                    .build(),
+                DynamicMultiSelectListElement.builder()
+                    .code(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                    .label(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                    .build())))
+            .listItems(new ArrayList<>(of(DynamicMultiSelectListElement.builder()
+                    .code(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                    .label(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                    .build(),
+                DynamicMultiSelectListElement.builder()
+                    .code(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                    .label(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                    .build())))
+            .build();
     }
 
     private DynamicMultiSelectListElement getElementList(String role) {

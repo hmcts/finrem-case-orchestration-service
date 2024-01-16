@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerC
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -473,6 +474,18 @@ public class FinremCaseData {
         }
         return interimWrapper;
     }
+
+    @JsonIgnore
+    public DynamicMultiSelectList getPartiesOnCase() {
+        if (partiesOnCase == null) {
+            this.partiesOnCase = DynamicMultiSelectList.builder()
+                .value(new ArrayList<>())
+                .listItems(new ArrayList<>())
+                .build();
+        }
+        return partiesOnCase;
+    }
+
 
     @JsonIgnore
     public GeneralOrderWrapper getGeneralOrderWrapper() {

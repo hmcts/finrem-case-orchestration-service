@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,8 +30,4 @@ public class DynamicMultiSelectList {
      */
     @JsonProperty("list_items")
     private List<DynamicMultiSelectListElement> listItems;
-
-    public List<DynamicMultiSelectListElement> getValue() {
-        return value != null ? value : null;
-    }
 }

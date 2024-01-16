@@ -48,7 +48,7 @@ class SendOrderContestedAboutToStartHandlerTest {
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         verify(generalOrderService).setOrderList(caseDetails);
-        verify(partyService).getAllActivePartyList(caseDetails);
+        verify(partyService).getAllActivePartyMultiselectList(caseDetails);
     }
 
 

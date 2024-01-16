@@ -66,11 +66,11 @@ class SendConsentOrderInContestedAboutToStartHandlerTest {
             .listItems(dynamicElementList)
             .build();
 
-        when(partyService.getAllActivePartyList(caseDetails)).thenReturn(parties);
+        when(partyService.getAllActivePartyMultiselectList(caseDetails)).thenReturn(parties);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(partyService).getAllActivePartyList(caseDetails);
+        verify(partyService).getAllActivePartyMultiselectList(caseDetails);
     }
 
     private DynamicMultiSelectListElement getDynamicElementList(String role) {

@@ -41,7 +41,7 @@ public class SendConsentOrderInContestedAboutToStartHandler extends FinremCallba
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        DynamicMultiSelectList roleList = partyService.getAllActivePartyList(caseDetails);
+        DynamicMultiSelectList roleList = partyService.getAllActivePartyMultiselectList(caseDetails);
         roleList.setValue(List.of(roleList.getListItems().get(0), roleList.getListItems().get(1)));
         finremCaseData.setPartiesOnCase(roleList);
 

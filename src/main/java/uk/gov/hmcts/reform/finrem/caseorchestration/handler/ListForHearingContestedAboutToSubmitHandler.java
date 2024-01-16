@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.util.List;
@@ -35,13 +36,14 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
     private final NotificationService notificationService;
     private final GenerateCoverSheetService coverSheetService;
 
+    private final PartyService partyService;
 
     public ListForHearingContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
                                                        AdditionalHearingDocumentService additionalHearingDocumentService,
                                                        CaseDataService caseDataService,
                                                        ValidateHearingService validateHearingService, ObjectMapper objectMapper,
                                                        NotificationService notificationService,
-                                                       GenerateCoverSheetService coverSheetService) {
+                                                       GenerateCoverSheetService coverSheetService, PartyService partyService) {
         super(finremCaseDetailsMapper);
         this.hearingDocumentService = hearingDocumentService;
         this.additionalHearingDocumentService = additionalHearingDocumentService;
@@ -51,6 +53,7 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
         this.objectMapper = objectMapper;
         this.notificationService = notificationService;
         this.coverSheetService = coverSheetService;
+        this.partyService = partyService;
     }
 
     @Override
@@ -76,9 +79,11 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).build();
         }
 
+        partyService.addDefaultNotificationPartiesToCase(finremCaseData);
+
         if (finremCaseData.getAdditionalListOfHearingDocuments() != null) {
             CaseDocument caseDocument = objectMapper.convertValue(finremCaseData.getAdditionalListOfHearingDocuments(),
-                    CaseDocument.class);
+                CaseDocument.class);
             CaseDocument pdfDocument = additionalHearingDocumentService.convertToPdf(caseDocument, userAuthorisation, caseId);
             finremCaseData.setAdditionalListOfHearingDocuments(pdfDocument);
         }
@@ -112,7 +117,7 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(finremCaseData).warnings(warnings).build();
+            .data(finremCaseData).warnings(warnings).build();
     }
 
     private void populateApplicantBulkPrintFieldsWithCoverSheet(FinremCaseData finremCaseData, String caseId, CaseDocument coverSheet) {
