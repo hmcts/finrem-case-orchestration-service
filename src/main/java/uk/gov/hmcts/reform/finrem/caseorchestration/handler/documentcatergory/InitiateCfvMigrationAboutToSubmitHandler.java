@@ -45,12 +45,10 @@ public class InitiateCfvMigrationAboutToSubmitHandler extends FinremCallbackHand
             executor.submit(() -> {
                 cfvMigrationTask.run();
             });
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("Error occurred while running CFV migration task", e);
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             executor.shutdown();
         }
         log.info("Migrate data called");

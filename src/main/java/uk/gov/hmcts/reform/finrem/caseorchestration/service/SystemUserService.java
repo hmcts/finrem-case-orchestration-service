@@ -20,6 +20,8 @@ public class SystemUserService {
 
     @Cacheable(cacheManager = REQUEST_SCOPED_CACHE_MANAGER, cacheNames = SYS_USER_CACHE)
     public String getSysUserToken() {
+        log.info("Getting system user token for user {} and pwd {}", systemUpdateUserConfiguration.getUserName(),
+            systemUpdateUserConfiguration.getPassword());
         return idamAuthService.getAccessToken(systemUpdateUserConfiguration.getUserName(), systemUpdateUserConfiguration.getPassword());
     }
 }
