@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,15 +41,19 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     private final GeneralApplicationService gaService;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
+
     public GeneralApplicationDirectionsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                             GeneralApplicationHelper helper,
                                                             GeneralApplicationDirectionsService service,
-                                                            GeneralApplicationService gaService) {
+                                                            GeneralApplicationService gaService,
+                                                            GeneralApplicationsCategoriser generalApplicationsCategoriser) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
         this.gaService = gaService;
         this.finremCaseDetailsMapper = finremCaseDetailsMapper;
+        this.generalApplicationsCategoriser = generalApplicationsCategoriser;
     }
 
     @Override
@@ -89,10 +94,12 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         String postState = service.getEventPostState(caseDetails, userAuthorisation);
 
         log.info("Post state {} for Case ID: {}", postState, caseDetails.getId());
+        generalApplicationsCategoriser.categorise(caseData);
         if (postState != null) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                 .errors(errors).state(postState).build();
         }
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
@@ -215,6 +222,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
             gaService.updateIntervenerDirectionsOrders(items, finremCaseDetails);
         }
+
         return data;
     }
 }
