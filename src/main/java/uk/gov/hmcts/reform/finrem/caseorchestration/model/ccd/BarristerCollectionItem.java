@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper = true)
 @SuppressWarnings({"java:S2387"})
 public class BarristerCollectionItem extends CollectionElement<Barrister> {
 
