@@ -38,7 +38,7 @@ public class PartyService {
 
 
     public DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
-        log.info("Event {} fetching all partys solicitor case role for Case ID: {}",
+        log.info("Event {} fetching all parties solicitor case role for Case ID: {}",
             EventType.SEND_ORDER, caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
