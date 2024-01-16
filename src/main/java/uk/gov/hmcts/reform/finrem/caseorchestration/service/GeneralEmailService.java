@@ -40,9 +40,9 @@ public class GeneralEmailService {
     }
 
     private CaseDocument createNewCaseDocumentObject(GeneralEmailWrapper wrapper) {
-        CaseDocument documentToReturn = CaseDocument.builder().build();
         CaseDocument latestUploadedDocument = wrapper.getGeneralEmailUploadedDocument();
         if (latestUploadedDocument != null) {
+            CaseDocument documentToReturn = CaseDocument.builder().build();
             String binaryUrl = latestUploadedDocument.getDocumentBinaryUrl();
             if (binaryUrl != null) {
                 documentToReturn.setDocumentBinaryUrl(binaryUrl);
@@ -55,7 +55,8 @@ public class GeneralEmailService {
             if (url != null) {
                 documentToReturn.setDocumentUrl(url);
             }
+            return documentToReturn;
         }
-        return documentToReturn;
+        return null;
     }
 }

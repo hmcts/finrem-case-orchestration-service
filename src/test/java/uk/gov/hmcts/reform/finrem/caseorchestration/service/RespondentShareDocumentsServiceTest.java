@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.ChronologiesDocumentSharer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.CorrespondenceDocumentSharer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.DocumentSharer;
@@ -72,7 +74,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_STATEMENTS_EXHIBITS_COLLECTION;
 
 @ExtendWith(MockitoExtension.class)
-class RespondentShareDocumentsServiceTest {
+public class RespondentShareDocumentsServiceTest {
 
     private RespondentShareDocumentsService service;
     private IntervenerShareDocumentsService intervenerShareDocumentsService;
@@ -84,9 +86,14 @@ class RespondentShareDocumentsServiceTest {
 
     private final ThreadLocal<UUID> uuid = new ThreadLocal<>();
 
+    @MockBean
+    private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+
+
     @BeforeEach
     void beforeEach() {
         service = new RespondentShareDocumentsService();
+
         documentSharers = List.of(new ChronologiesDocumentSharer(featureToggleService),
             new CorrespondenceDocumentSharer(featureToggleService),
             new ExpertEvidenceDocumentSharer(featureToggleService),
@@ -97,8 +104,10 @@ class RespondentShareDocumentsServiceTest {
             new QuestionnaireAnswersDocumentSharer(featureToggleService),
             new StatementExhibitsDocumentSharer(featureToggleService),
             new SummariesDocumentSharer(featureToggleService));
+
         ShareSelectedDocumentService shareSelectedDocumentService = new ShareSelectedDocumentService(documentSharers);
-        intervenerShareDocumentsService = new IntervenerShareDocumentsService(shareSelectedDocumentService);
+        intervenerShareDocumentsService = new IntervenerShareDocumentsService(selectablePartiesCorrespondenceService, shareSelectedDocumentService);
+
         uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
 
