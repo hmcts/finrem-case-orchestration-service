@@ -33,9 +33,7 @@ public class ConsentOrderPrintService {
     private final DocumentHelper documentHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public FinremCaseDetails sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-
+    public void sendConsentOrderToBulkPrint(FinremCaseDetails finremCaseDetails, String authorisationToken) {
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
             log.info("Sending approved order for applicant to bulk print for Case ID {}", finremCaseDetails.getId());
             UUID applicantLetterId = shouldPrintOrderApprovedDocuments(finremCaseDetails, authorisationToken)
@@ -50,7 +48,11 @@ public class ConsentOrderPrintService {
             log.info("Sending approved order for respondent to bulk print for Case ID: {}", finremCaseDetails.getId());
             generateCoversheetForRespondentAndSendOrders(finremCaseDetails, authorisationToken);
         }
+    }
 
+    public FinremCaseDetails sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        sendConsentOrderToBulkPrint(finremCaseDetails, authorisationToken);
         return finremCaseDetails;
     }
 
@@ -74,9 +76,10 @@ public class ConsentOrderPrintService {
     }
 
     private UUID printApplicantConsentOrderApprovedDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
-        List<BulkPrintDocument> applicantDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
+        List<BulkPrintDocument> bulkPrintDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
-        return bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, applicantDocuments);
+        getOrderDocuments(caseDetails, authorisationToken, bulkPrintDocuments);
+        return bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, bulkPrintDocuments);
     }
 
     private UUID printApplicantConsentOrderNotApprovedDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
@@ -91,12 +94,21 @@ public class ConsentOrderPrintService {
 
     private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet, FinremCaseDetails caseDetails, String authorisationToken) {
         log.info("Sending order documents to recipient / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
-
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverSheet));
+        getOrderDocuments(caseDetails, authorisationToken, bulkPrintDocuments);
 
+        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            caseDetails.getId(),
+            RESPONDENT,
+            bulkPrintDocuments,
+            authorisationToken);
+    }
+
+    private void getOrderDocuments(FinremCaseDetails caseDetails,
+                                   String authorisationToken,
+                                   List<BulkPrintDocument> bulkPrintDocuments) {
         FinremCaseData caseData = caseDetails.getData();
-
         List<CaseDocument> orderDocuments = caseDataService.isOrderApprovedCollectionPresent(caseData)
             ? consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, authorisationToken)
             : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails);
@@ -116,12 +128,6 @@ public class ConsentOrderPrintService {
         } else {
             bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
         }
-
-        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
-            caseDetails.getId(),
-            RESPONDENT,
-            bulkPrintDocuments,
-            authorisationToken);
     }
 
     public boolean shouldPrintOrderApprovedDocuments(FinremCaseDetails caseDetails, String authorisationToken) {

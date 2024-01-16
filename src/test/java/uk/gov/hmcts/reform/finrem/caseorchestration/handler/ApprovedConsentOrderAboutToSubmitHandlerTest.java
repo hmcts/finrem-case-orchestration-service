@@ -111,7 +111,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
         verify(consentOrderApprovedDocumentService).generateApprovedConsentOrderLetter(any(), any());
         verify(genericDocumentService).annexStampDocument(any(), any(), any(), any());
         verify(documentHelper, times(2)).getPensionDocumentsData(any(Map.class));
-        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(CaseDetails.class), any());
     }
 
     @Test
@@ -149,7 +149,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
         assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
 
-        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(CaseDetails.class), any());
     }
 
     @Test
@@ -162,7 +162,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
         assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
 
-        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(CaseDetails.class), any());
     }
 
     private CallbackRequest doValidCaseDataSetUp(final String path) {

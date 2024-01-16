@@ -150,9 +150,6 @@ public class ConsentOrderApprovedDocumentService {
             bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter));
         }
 
-        bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(
-            approvedOrderDocuments(caseDetails, authorisationToken)));
-
         return bulkPrintDocuments;
     }
 

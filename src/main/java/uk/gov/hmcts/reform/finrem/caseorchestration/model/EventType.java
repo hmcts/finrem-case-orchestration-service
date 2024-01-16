@@ -82,6 +82,7 @@ public enum EventType {
 
     MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
 
+    CONSENT_SEND_ORDER_FOR_APPROVED_ORDER("FR_sendOrderForApproved"),
 
     @JsonEnumDefaultValue
     NONE("");
