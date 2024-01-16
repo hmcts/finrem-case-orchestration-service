@@ -41,6 +41,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_ADDRESS_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
@@ -149,13 +150,13 @@ public class GeneralOrderService {
         return caseDetails.getData();
     }
 
-    public Map<String, Object> populateGeneralOrderCollection(CaseDetails caseDetails) {
+    public Map<String, Object> populateGeneralOrderCollection(CaseDetails caseDetails, String eventId) {
         caseDetails.getData().put(GENERAL_ORDER_LATEST_DOCUMENT,
             documentHelper.convertToCaseDocument(caseDetails.getData().get(GENERAL_ORDER_PREVIEW_DOCUMENT)));
         if (caseDataService.isConsentedApplication(caseDetails)) {
             return populateGeneralOrderCollectionConsented(caseDetails);
         } else {
-            return populateGeneralOrderCollectionContested(caseDetails);
+            return populateGeneralOrderCollectionContested(caseDetails, eventId);
         }
     }
 
@@ -178,7 +179,7 @@ public class GeneralOrderService {
         return caseData;
     }
 
-    private Map<String, Object> populateGeneralOrderCollectionContested(CaseDetails caseDetails) {
+    private Map<String, Object> populateGeneralOrderCollectionContested(CaseDetails caseDetails, String eventId) {
 
         Map<String, Object> caseData = caseDetails.getData();
         ContestedGeneralOrder order = ContestedGeneralOrder
@@ -192,7 +193,8 @@ public class GeneralOrderService {
             .value(order)
             .build();
 
-        if (caseDataService.isConsentedInContestedCase(caseDetails)) {
+        if (caseDataService.isConsentedInContestedCase(caseDetails)
+            && GENERAL_ORDER_CONSENT_IN_CONTESTED.getCcdType().equals(eventId)) {
             List<ContestedGeneralOrderCollection> generalOrderList
                 = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED))
                 .map(this::convertToGeneralOrderContestedList)

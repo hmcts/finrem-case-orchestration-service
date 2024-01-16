@@ -72,7 +72,7 @@ public class GeneralOrderController extends BaseController {
         log.info("Received request for storing general order with Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        Map<String, Object> caseData = service.populateGeneralOrderCollection(caseDetails);
+        Map<String, Object> caseData = service.populateGeneralOrderCollection(caseDetails, callback.getEventId());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

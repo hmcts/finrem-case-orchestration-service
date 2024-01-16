@@ -115,7 +115,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     @Test
     public void submitContestedGeneralOrder() throws Exception {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(contestedCaseDetails());
+        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(contestedCaseDetails(),
+            EventType.GENERAL_ORDER.getCcdType());
 
         List<ContestedGeneralOrderCollection> generalOrders = convertToList(documentMap.get(GENERAL_ORDER_COLLECTION_CONTESTED));
         assertThat(generalOrders, hasSize(2));
@@ -157,7 +158,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     @Test
     public void submitConsentedInContestedGeneralOrder() throws Exception {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedInContestedCaseDetails());
+        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedInContestedCaseDetails(),
+            EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED.getCcdType());
 
         List<ContestedGeneralOrderCollection> generalOrders = convertToList(documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED));
         assertThat(generalOrders, hasSize(2));
@@ -190,7 +192,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void submitConsentedGeneralOrder() throws Exception {
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedCaseDetails());
+        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedCaseDetails(),
+            EventType.GENERAL_ORDER.getCcdType());
         List<GeneralOrderConsentedData> generalOrders = convertToConsentList(documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED));
         assertThat(generalOrders, hasSize(2));
         assertThat(generalOrders.get(0).getId(), is("1234"));
@@ -227,7 +230,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             try {
                 CaseDetails details = consentedCaseDetails();
                 details.getData().put(GENERAL_ORDER_ADDRESS_TO, key);
-                Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
+                Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details,
+                    EventType.GENERAL_ORDER.getCcdType());
                 List<GeneralOrderConsentedData> generalOrders = convertToConsentList(documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED));
                 assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is(value));
             } catch (Exception e) {
@@ -258,7 +262,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenRequestedOrderList_and_notshared_before_returnList() throws Exception {
+    public void whenRequestedOrderList_and_notshared_before_returnList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();

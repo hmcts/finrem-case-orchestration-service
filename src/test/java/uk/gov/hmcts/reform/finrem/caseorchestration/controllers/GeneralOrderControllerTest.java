@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 
 import java.util.Map;
@@ -96,7 +97,8 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
-        verify(documentService, times(1)).populateGeneralOrderCollection(any(CaseDetails.class));
+        verify(documentService, times(1)).populateGeneralOrderCollection(any(CaseDetails.class),
+            any(String.class));
     }
 
     private OngoingStubbing<Map<String, Object>> whenServiceGeneratesDocument() {
@@ -104,6 +106,7 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
     }
 
     private OngoingStubbing<Map<String, Object>> whenServicePopulatesCollection() {
-        return when(documentService.populateGeneralOrderCollection(isA(CaseDetails.class)));
+        return when(documentService.populateGeneralOrderCollection(isA(CaseDetails.class),
+            eq(EventType.GENERAL_ORDER.getCcdType())));
     }
 }
