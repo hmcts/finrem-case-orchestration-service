@@ -50,7 +50,7 @@ public class GeneralApplicationRejectionLetterGenerator extends BaseContestedLet
                 .applicantName(caseDataService.buildFullApplicantName(caseDetails))
                 .respondentName(caseDataService.buildFullRespondentName(caseDetails))
                 .addressee(getAddressee(caseDetails, recipient))
-                .caseNumber(caseDetails.getId().toString())
+                .caseNumber(String.valueOf(caseDetails.getId()))
                 .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
                 .courtDetails(getCourtDetails(caseDetails))
                 .generalApplicationRejectionReason((String) caseDetails.getData().get(GENERAL_APPLICATION_REJECT_REASON))

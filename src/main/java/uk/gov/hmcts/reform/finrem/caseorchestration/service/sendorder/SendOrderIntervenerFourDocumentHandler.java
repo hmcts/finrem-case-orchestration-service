@@ -88,4 +88,9 @@ public class SendOrderIntervenerFourDocumentHandler extends SendOrderPartyDocume
         caseData.getOrderWrapper().setIntv4OrderCollections(orders);
         caseData.getOrderWrapper().setIntv4OrderCollection(null);
     }
+
+    protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getOrderWrapper().getIntv4OrderCollections())
+                .orElse(new ArrayList<>());
+    }
 }

@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ContestedListForHearingCorrespondenceService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -71,6 +72,9 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
     private CaseDataService caseDataService;
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private ContestedListForHearingCorrespondenceService contestedListForHearingCorrespondenceService;
     @InjectMocks
     private ListForHearingContestedAboutToSubmitHandler aboutToSubmitHandler;
     @InjectMocks
@@ -175,6 +179,7 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(coverSheetService).generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
         verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
+        verify(contestedListForHearingCorrespondenceService).sendHearingCorrespondence(any(), anyString());
 
     }
 
@@ -220,6 +225,7 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(coverSheetService).generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
         verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
+        verify(contestedListForHearingCorrespondenceService).sendHearingCorrespondence(any(), anyString());
     }
 
     @Test

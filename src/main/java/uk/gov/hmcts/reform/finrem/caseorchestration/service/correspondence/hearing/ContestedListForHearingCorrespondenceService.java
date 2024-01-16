@@ -1,46 +1,35 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
+@Component
 @Slf4j
-@Service
-public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandler {
+public class ContestedListForHearingCorrespondenceService {
 
     private final HearingDocumentService hearingDocumentService;
+
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
 
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
-    public ListForHearingContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
-                                                   AdditionalHearingDocumentService additionalHearingDocumentService,
-                                                   SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService) {
-        super(finremCaseDetailsMapper);
+    public ContestedListForHearingCorrespondenceService(HearingDocumentService hearingDocumentService,
+                                                        AdditionalHearingDocumentService additionalHearingDocumentService,
+                                                        SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService) {
         this.hearingDocumentService = hearingDocumentService;
         this.additionalHearingDocumentService = additionalHearingDocumentService;
         this.selectablePartiesCorrespondenceService = selectablePartiesCorrespondenceService;
     }
 
-    @Override
-    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.SUBMITTED.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.LIST_FOR_HEARING.equals(eventType);
-    }
 
-    @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest,
+                                          String userAuthorisation) {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Handling contested event {} submit callback for Case ID: {}",
@@ -59,9 +48,5 @@ public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandl
             log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse
-            .<FinremCaseData>builder()
-            .data(caseDetails.getData())
-            .build();
     }
 }

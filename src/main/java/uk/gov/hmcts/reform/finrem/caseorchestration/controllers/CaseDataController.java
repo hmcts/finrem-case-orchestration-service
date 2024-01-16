@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -154,33 +153,6 @@ public class CaseDataController extends BaseController {
         callbackRequest.getCaseDetails().getData().putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
         callbackRequest.getCaseDetails().getData().putIfAbsent(TYPE_OF_APPLICATION, TYPE_OF_APPLICATION_DEFAULT_TO);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
-    }
-
-    @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> moveValues(
-        @RequestBody final CallbackRequest callbackRequest,
-        @PathVariable("source") final String source,
-        @PathVariable("destination") final String destination) {
-
-        validateCaseData(callbackRequest);
-
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseDataService.moveCollection(caseData, source, destination);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    @PostMapping(path = "/default-values", consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(description = "Default application state")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> defaultValue(
-        @RequestBody final CallbackRequest callbackRequest) {
-
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
-        caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(path = "/org-policies", consumes = MediaType.APPLICATION_JSON_VALUE,
