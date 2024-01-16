@@ -93,4 +93,9 @@ public class SendOrderIntervenerThreeDocumentHandler extends SendOrderPartyDocum
         caseData.getOrderWrapper().setIntv3OrderCollections(orders);
         caseData.getOrderWrapper().setIntv3OrderCollection(null);
     }
+
+    protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getOrderWrapper().getIntv3OrderCollections())
+                .orElse(new ArrayList<>());
+    }
 }

@@ -92,4 +92,9 @@ public class SendOrderIntervenerOneDocumentHandler extends SendOrderPartyDocumen
         caseData.getOrderWrapper().setIntv1OrderCollections(orders);
         caseData.getOrderWrapper().setIntv1OrderCollection(null);
     }
+
+    protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getOrderWrapper().getIntv1OrderCollections())
+                .orElse(new ArrayList<>());
+    }
 }
