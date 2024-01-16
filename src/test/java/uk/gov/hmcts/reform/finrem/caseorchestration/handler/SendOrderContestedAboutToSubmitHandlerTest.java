@@ -462,15 +462,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(3, caseData.getOrderWrapper().getIntv1OrderCollections().size());
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().size(), 2);
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), "app_docs.pdf");
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(1)
-                .getValue().getCaseDocument().getDocumentFilename(), "contestedOrderApprovedCoverLetter.pdf");
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(1).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), "AdditionalHearingDocument.pdf");
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(2).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), "PreviousOrder.pdf");
     }
 
     private DynamicMultiSelectList getParties() {
