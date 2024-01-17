@@ -8,4 +8,15 @@
         <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
         <cve>CVE-2023-35116</cve>
     </suppress>
+    <suppress base="true" until="2024-01-31">
+        <packageUrl regex="true">^pkg:maven/ch.qos\.logback/logback-classic@.*$</packageUrl>
+        <cpe>cpe:/qos:logback</cpe>
+        <cve>CVE-2023-6378</cve>
+    </suppress>
+    <suppress base="true" until="2024-01-31">
+        <packageUrl regex="true">^pkg:maven/ch.qos\.logback/logback-core@.*$</packageUrl>
+        <cpe>cpe:/qos:logback</cpe>
+        <cve>CVE-2023-6378</cve>
+    </suppress>
 </suppressions>
+

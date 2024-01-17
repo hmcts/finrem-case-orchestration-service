@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerFourDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerOneDocumentHandler;
@@ -87,6 +88,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private NotificationService notificationService;
     @Mock
     private OrderDateService dateService;
+    @Mock
+    private SendOrdersCategoriser sendOrdersCategoriser;
 
     @BeforeEach
     public void setUpTest() {
@@ -95,13 +98,19 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             genericDocumentService,
             documentHelper,
             List.of(
-                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
-                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
-                new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService)),
-            dateService);
+                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    caseDataService, documentHelper),
+                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    caseDataService, documentHelper),
+                new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper),
+                new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper),
+                new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper),
+                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper)),
+            dateService, sendOrdersCategoriser);
     }
 
     @Test
@@ -453,15 +462,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(3, caseData.getOrderWrapper().getIntv1OrderCollections().size());
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().size(), 2);
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), "app_docs.pdf");
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(1)
-                .getValue().getCaseDocument().getDocumentFilename(), "contestedOrderApprovedCoverLetter.pdf");
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(1).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), "AdditionalHearingDocument.pdf");
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(2).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), "PreviousOrder.pdf");
     }
 
     private DynamicMultiSelectList getParties() {

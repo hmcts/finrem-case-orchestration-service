@@ -55,6 +55,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     private IdamService idamService;
     private AssignCaseAccessService accessService;
+    @Mock
     private GeneralApplicationsCategoriser generalApplicationsCategoriser;
 
     @Mock
