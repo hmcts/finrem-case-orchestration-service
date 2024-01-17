@@ -122,13 +122,17 @@ public abstract class SendOrderPartyDocumentHandler {
     protected boolean shouldAddDocumentToOrderColl(CaseDocument document,
                                                    List<ApprovedOrderConsolidateCollection> orderCollForRole) {
         List<ApprovedOrderConsolidateCollection> existingCollection = Optional.ofNullable(orderCollForRole)
-                .orElse(new ArrayList<>());
+            .orElse(new ArrayList<>());
         if (existingCollection.isEmpty()) {
             return true;
         }
-        return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order ->
-                order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
-                        && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl())
+        return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order -> {
+                if (order.getValue().getCaseDocument() != null) {
+                    return order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
+                        && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl());
+                }
+                return false;
+            }
         ));
     }
 
