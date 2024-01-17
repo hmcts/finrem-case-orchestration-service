@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 
 import java.time.LocalDateTime;
@@ -41,20 +42,22 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private final DocumentHelper documentHelper;
     private final List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList;
     private final OrderDateService dateService;
-
+    private final SendOrdersCategoriser sendOrdersCategoriser;
 
     public SendOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                   GeneralOrderService generalOrderService,
                                                   GenericDocumentService genericDocumentService,
                                                   DocumentHelper documentHelper,
                                                   List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
-                                                  OrderDateService dateService) {
+                                                  OrderDateService dateService,
+                                                  SendOrdersCategoriser sendOrdersCategoriser) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
         this.sendOrderPartyDocumentList = sendOrderPartyDocumentList;
         this.dateService =  dateService;
+        this.sendOrdersCategoriser = sendOrdersCategoriser;
     }
 
     @Override
@@ -111,6 +114,8 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
         }
+
+        sendOrdersCategoriser.categorise(caseDetails.getData());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData()).build();
