@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 @Slf4j
 public abstract class SendOrderPartyDocumentHandler {
@@ -122,25 +121,31 @@ public abstract class SendOrderPartyDocumentHandler {
 
     protected boolean shouldAddDocumentToOrderColl(CaseDocument document,
                                                    List<ApprovedOrderConsolidateCollection> orderCollForRole) {
+        List<ApprovedOrderConsolidateCollection> existingCollection = orderCollectionForParty(orderCollForRole);
+        if (existingCollection.isEmpty()) {
+            return true;
+        }
+        return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order ->
+                order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
+                        && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl())
+        ));
+    }
+
+    protected List<ApprovedOrderConsolidateCollection> orderCollectionForParty(List<ApprovedOrderConsolidateCollection> orderCollForRole) {
         List<ApprovedOrderConsolidateCollection> existingCollection = Optional.ofNullable(orderCollForRole)
             .orElse(new ArrayList<>());
 
-        return existingCollection.isEmpty() || isDocumentMatch(document, existingCollection);
-    }
+        List<ApprovedOrderConsolidateCollection> returnCollection = new ArrayList<>();
 
-    private boolean isDocumentMatch(CaseDocument document, List<ApprovedOrderConsolidateCollection> existingCollection) {
-        return existingCollection.stream().noneMatch(isDocumentAlreadyInConsolidateCollection(document));
-    }
-
-    private Predicate<ApprovedOrderConsolidateCollection> isDocumentAlreadyInConsolidateCollection(CaseDocument document) {
-        return doc -> doc.getValue().getApproveOrders().stream().anyMatch(order -> {
-                if (order.getValue().getCaseDocument() != null) {
-                    return order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
-                        && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl());
+        existingCollection.forEach(aocc -> {
+            ApproveOrdersHolder aoccValue = aocc.getValue();
+            aoccValue.getApproveOrders().forEach(obj -> {
+                if (obj.getValue().getCaseDocument() != null) {
+                    returnCollection.add(getConsolidateCollection(List.of(obj)));
                 }
-                return false;
-            }
-        );
+            });
+        });
+        return returnCollection;
     }
 
     protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {

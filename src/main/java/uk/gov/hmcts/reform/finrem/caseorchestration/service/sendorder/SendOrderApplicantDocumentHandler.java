@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,19 +25,16 @@ public class SendOrderApplicantDocumentHandler extends SendOrderPartyDocumentHan
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final CaseDataService caseDataService;
     private final NotificationService notificationService;
-    private final DocumentHelper documentHelper;
 
     public SendOrderApplicantDocumentHandler(
                                              ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
                                              NotificationService notificationService,
-                                             CaseDataService caseDataService,
-                                             DocumentHelper documentHelper) {
+                                             CaseDataService caseDataService) {
 
         super(CaseRole.APP_SOLICITOR.getCcdCode());
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.caseDataService = caseDataService;
         this.notificationService = notificationService;
-        this.documentHelper = documentHelper;
     }
 
     @Override
@@ -100,11 +97,9 @@ public class SendOrderApplicantDocumentHandler extends SendOrderPartyDocumentHan
     }
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
-        List<ApprovedOrderCollection> orderCollectionCopy = documentHelper.deepCopyArray(orderCollection,
-            new TypeReference<List<ApprovedOrderCollection>>() {});
-        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getOrderWrapper().getAppOrderCollections())
-            .orElse(new ArrayList<>());
-        orders.add(getConsolidateCollection(orderCollectionCopy));
+        List<ApprovedOrderCollection> newOrderCollection = new ArrayList<>(orderCollection);
+        List<ApprovedOrderConsolidateCollection> orders = orderCollectionForParty(caseData.getOrderWrapper().getAppOrderCollections());
+        orders.add(getConsolidateCollection(newOrderCollection));
         orders.sort((m1, m2) -> m2.getValue().getOrderReceivedAt().compareTo(m1.getValue().getOrderReceivedAt()));
         caseData.getOrderWrapper().setAppOrderCollections(orders);
         caseData.getOrderWrapper().setAppOrderCollection(null);

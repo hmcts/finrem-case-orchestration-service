@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -26,18 +25,15 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final NotificationService notificationService;
     private final CaseDataService caseDataService;
-    private final DocumentHelper documentHelper;
 
     public SendOrderRespondentDocumentHandler(ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
                                               NotificationService notificationService,
-                                              CaseDataService caseDataService,
-                                              DocumentHelper documentHelper) {
+                                              CaseDataService caseDataService) {
 
         super(CaseRole.RESP_SOLICITOR.getCcdCode());
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.notificationService = notificationService;
         this.caseDataService = caseDataService;
-        this.documentHelper = documentHelper;
     }
 
     @Override
@@ -101,11 +97,9 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
     }
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
-        List<ApprovedOrderCollection> orderCollectionCopy = documentHelper.deepCopyArray(orderCollection,
-            new TypeReference<List<ApprovedOrderCollection>>() {});
-        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getOrderWrapper().getRespOrderCollections())
-            .orElse(new ArrayList<>());
-        orders.add(getConsolidateCollection(orderCollectionCopy));
+        List<ApprovedOrderCollection> newOrderCollection = new ArrayList<>(orderCollection);
+        List<ApprovedOrderConsolidateCollection> orders = orderCollectionForParty(caseData.getOrderWrapper().getRespOrderCollections());
+        orders.add(getConsolidateCollection(newOrderCollection));
         orders.sort((m1, m2) -> m2.getValue().getOrderReceivedAt().compareTo(m1.getValue().getOrderReceivedAt()));
         caseData.getOrderWrapper().setRespOrderCollections(orders);
         caseData.getOrderWrapper().setRespOrderCollection(null);
