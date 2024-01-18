@@ -124,10 +124,8 @@ public abstract class SendOrderPartyDocumentHandler {
                                                    List<ApprovedOrderConsolidateCollection> orderCollForRole) {
         List<ApprovedOrderConsolidateCollection> existingCollection = Optional.ofNullable(orderCollForRole)
             .orElse(new ArrayList<>());
-        if (existingCollection.isEmpty()) {
-            return true;
-        }
-        return isDocumentMatch(document, existingCollection);
+
+        return existingCollection.isEmpty() || isDocumentMatch(document, existingCollection);
     }
 
     private boolean isDocumentMatch(CaseDocument document, List<ApprovedOrderConsolidateCollection> existingCollection) {
