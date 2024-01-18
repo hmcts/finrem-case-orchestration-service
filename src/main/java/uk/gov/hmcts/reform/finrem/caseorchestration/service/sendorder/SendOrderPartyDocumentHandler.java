@@ -121,31 +121,46 @@ public abstract class SendOrderPartyDocumentHandler {
 
     protected boolean shouldAddDocumentToOrderColl(CaseDocument document,
                                                    List<ApprovedOrderConsolidateCollection> orderCollForRole) {
-        List<ApprovedOrderConsolidateCollection> existingCollection = orderCollectionForParty(orderCollForRole);
+        List<ApprovedOrderConsolidateCollection> existingCollection
+            = Optional.ofNullable(orderCollForRole).orElse(new ArrayList<>());
         if (existingCollection.isEmpty()) {
             return true;
         }
-        return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order ->
-                order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
-                        && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl())
+        return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order -> {
+                if (order.getValue() != null && order.getValue().getCaseDocument() != null) {
+                    return order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
+                        && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl());
+                }
+                return false;
+            }
         ));
     }
 
-    protected List<ApprovedOrderConsolidateCollection> orderCollectionForParty(List<ApprovedOrderConsolidateCollection> orderCollForRole) {
-        List<ApprovedOrderConsolidateCollection> existingCollection = Optional.ofNullable(orderCollForRole)
-            .orElse(new ArrayList<>());
 
-        List<ApprovedOrderConsolidateCollection> returnCollection = new ArrayList<>();
+    protected List<ApprovedOrderConsolidateCollection> getPartyConsolidateCollection(List<ApprovedOrderConsolidateCollection> list) {
+        List<ApprovedOrderConsolidateCollection> approvedOrderConsolidateCollections = Optional.ofNullable(list).orElse(new ArrayList<>());
+        List<ApprovedOrderConsolidateCollection> returnList = new ArrayList<>();
 
-        existingCollection.forEach(aocc -> {
-            ApproveOrdersHolder aoccValue = aocc.getValue();
-            aoccValue.getApproveOrders().forEach(obj -> {
-                if (obj.getValue().getCaseDocument() != null) {
-                    returnCollection.add(getConsolidateCollection(List.of(obj)));
-                }
-            });
+        approvedOrderConsolidateCollections.forEach(orders -> {
+            ApproveOrdersHolder value = orders.getValue();
+            List<ApprovedOrderCollection> approveOrders = value.getApproveOrders();
+            List<ApprovedOrderCollection> orderCollections = new ArrayList<>();
+            if (approveOrders != null) {
+                orderCollections
+                    = approveOrders.stream().filter(doc -> doc.getValue().getCaseDocument() != null).toList();
+            }
+
+            if (!orderCollections.isEmpty()) {
+                returnList.add(getConsolidateCollection(value, orderCollections));
+            }
         });
-        return returnCollection;
+        return returnList;
+    }
+
+    private ApprovedOrderConsolidateCollection getConsolidateCollection(ApproveOrdersHolder value,
+                                                                          List<ApprovedOrderCollection> orderCollection) {
+        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
+            .approveOrders(orderCollection).orderReceivedAt(value.getOrderReceivedAt()).build()).build();
     }
 
     protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {

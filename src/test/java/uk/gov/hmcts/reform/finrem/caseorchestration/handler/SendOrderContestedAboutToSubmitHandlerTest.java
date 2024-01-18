@@ -272,7 +272,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
-        assertEquals(4, caseData.getOrderWrapper().getIntv1OrderCollections().size());
+        assertEquals(2, caseData.getOrderWrapper().getIntv1OrderCollections().size());
         List<ApprovedOrderConsolidateCollection> intv1OrderCollections = caseData.getOrderWrapper().getIntv1OrderCollections();
         LocalDateTime orderReceivedAt1 = intv1OrderCollections.get(0).getValue().getOrderReceivedAt();
         LocalDateTime orderReceivedAt2 = intv1OrderCollections.get(1).getValue().getOrderReceivedAt();
@@ -280,7 +280,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertTrue(orderReceivedAt1.isAfter(orderReceivedAt2));
 
         assertNull(caseData.getOrderWrapper().getAppOrderCollection());
-        assertEquals(4, caseData.getOrderWrapper().getAppOrderCollections().size());
+        assertEquals(2, caseData.getOrderWrapper().getAppOrderCollections().size());
         List<ApprovedOrderConsolidateCollection> appOrderCollections = caseData.getOrderWrapper().getAppOrderCollections();
         LocalDateTime orderReceivedAt1a = appOrderCollections.get(0).getValue().getOrderReceivedAt();
         LocalDateTime orderReceivedAt2a = appOrderCollections.get(1).getValue().getOrderReceivedAt();
@@ -289,7 +289,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
 
-        assertEquals(4, caseData.getOrderWrapper().getRespOrderCollections().size());
+        assertEquals(2, caseData.getOrderWrapper().getRespOrderCollections().size());
         List<ApprovedOrderConsolidateCollection> respOrderCollections = caseData.getOrderWrapper().getRespOrderCollections();
         LocalDateTime orderReceivedAtR1 = respOrderCollections.get(0).getValue().getOrderReceivedAt();
         LocalDateTime orderReceivedAtR2 = respOrderCollections.get(1).getValue().getOrderReceivedAt();

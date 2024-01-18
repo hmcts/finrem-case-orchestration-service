@@ -80,7 +80,8 @@ public class SendOrderIntervenerOneDocumentHandler extends SendOrderPartyDocumen
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
         List<ApprovedOrderCollection> newOrderCollection = new ArrayList<>(orderCollection);
-        List<ApprovedOrderConsolidateCollection> orders = orderCollectionForParty(caseData.getOrderWrapper().getIntv1OrderCollections());
+        List<ApprovedOrderConsolidateCollection> orders
+            = getPartyConsolidateCollection(caseData.getOrderWrapper().getIntv1OrderCollections());
         orders.add(getConsolidateCollection(newOrderCollection));
         orders.sort((m1, m2) -> m2.getValue().getOrderReceivedAt().compareTo(m1.getValue().getOrderReceivedAt()));
         caseData.getOrderWrapper().setIntv1OrderCollections(orders);
