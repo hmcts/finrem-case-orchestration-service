@@ -126,14 +126,21 @@ public abstract class SendOrderPartyDocumentHandler {
         if (existingCollection.isEmpty()) {
             return true;
         }
-        return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order -> {
-                if (order.getValue() != null && order.getValue().getCaseDocument() != null) {
-                    return order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
-                        && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl());
-                }
-                return false;
-            }
-        ));
+        return existingCollection.stream().noneMatch(doc -> checkIfDocumentAlreadyInCollectionElement(document, doc));
+    }
+
+    private boolean checkIfDocumentAlreadyInCollectionElement(CaseDocument document, ApprovedOrderConsolidateCollection doc) {
+        return doc.getValue().getApproveOrders().stream().anyMatch(order ->
+            isAdditionalDocumentAlreadyInCollection(document, order)
+        );
+    }
+
+    private  boolean isAdditionalDocumentAlreadyInCollection(CaseDocument document, ApprovedOrderCollection order) {
+        if (order.getValue() != null && order.getValue().getCaseDocument() != null) {
+            return order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
+                && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl());
+        }
+        return false;
     }
 
 
