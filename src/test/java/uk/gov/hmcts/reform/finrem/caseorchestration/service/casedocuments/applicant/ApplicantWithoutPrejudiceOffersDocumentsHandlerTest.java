@@ -1,15 +1,17 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant;
 
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,24 +19,21 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
+public class ApplicantWithoutPrejudiceOffersDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
-    FdrDocumentsHandler handler;
+    ApplicantWithoutPrejudiceOffersDocumentHandler collectionService;
 
-
-    private List<UploadCaseDocumentCollection> uploadDocumentList = new ArrayList<>();
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            null, YesOrNo.NO, YesOrNo.YES, "Other Example"));
-
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS,
+            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, "Other Example"));
     }
 
     @Override
     public DocumentHandler getDocumentHandler() {
-        return handler;
+        return collectionService;
     }
 
     @Override
@@ -54,9 +53,8 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
-            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE)
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS)
         );
     }
-
 }

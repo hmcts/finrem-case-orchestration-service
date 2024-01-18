@@ -24,22 +24,7 @@ public class FdrDocumentsHandler extends DocumentHandler {
     protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 
-        return allManagedDocumentCollections.stream().filter(this::isWithoutPrejudiceOrFdr).toList();
-    }
-
-    private boolean isWithoutPrejudiceOrFdr(UploadCaseDocumentCollection uploadCaseDocumentCollection) {
-        return isWithoutPrejudice(uploadCaseDocumentCollection) || isFdr(uploadCaseDocumentCollection);
-    }
-
-    private boolean isWithoutPrejudice(UploadCaseDocumentCollection managedDocumentCollection) {
-        UploadCaseDocument uploadedCaseDocument = managedDocumentCollection.getUploadCaseDocument();
-        if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(uploadedCaseDocument.getCaseDocumentType())) {
-            uploadedCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
-            uploadedCaseDocument.setCaseDocumentFdr(YesOrNo.YES);
-            uploadedCaseDocument.setCaseDocumentParty(null);
-            return true;
-        }
-        return false;
+        return allManagedDocumentCollections.stream().filter(this::isFdr).toList();
     }
 
     private boolean isFdr(UploadCaseDocumentCollection managedDocumentCollection) {

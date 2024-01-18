@@ -24,7 +24,6 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
         CaseDocumentType.HOUSING_PARTICULARS,
         CaseDocumentType.MORTGAGE_CAPACITIES,
         CaseDocumentType.PRE_HEARING_DRAFT_ORDER,
-        CaseDocumentType.WITHOUT_PREJUDICE_OFFERS,
         CaseDocumentType.PENSION_REPORT,
         CaseDocumentType.BILL_OF_COSTS
     );
@@ -65,9 +64,6 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
             case MORTGAGE_CAPACITIES -> {
                 return getHearingDocumentsCategoryMortgageCapacities();
             }
-            case WITHOUT_PREJUDICE_OFFERS -> {
-                return getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory();
-            }
             case PENSION_REPORT -> {
                 return DocumentCategory.REPORTS_PENSION_REPORTS;
             }
@@ -95,8 +91,6 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
     protected abstract DocumentCategory getHearingDocumentsCategoryES2();
 
     protected abstract DocumentCategory getHearingDocumentsCategoryMortgageCapacities();
-
-    protected abstract DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory();
 
     protected abstract DocumentCategory getDefaultPartyCategory();
 

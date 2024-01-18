@@ -46,12 +46,6 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
         return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_MORTGAGE_CAPACITIES;
     }
 
-
-    @Override
-    protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
-    }
-
     @Override
     protected DocumentCategory getDefaultPartyCategory() {
         return DocumentCategory.APPLICANT_DOCUMENTS;

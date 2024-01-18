@@ -447,6 +447,20 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
 
+    @Test
+    public void shouldSetDefaultsForWithoutPrejudiceOffersCorrectly() {
+        UploadCaseDocument uploadCaseDocument = UploadCaseDocument.builder()
+            .caseDocuments(new CaseDocument())
+            .caseDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS)
+            .caseDocumentParty(CaseDocumentParty.APPLICANT)
+            .build();
+        UploadCaseDocumentCollection uploadCaseDocumentCollection =
+            UploadCaseDocumentCollection.builder().uploadCaseDocument(uploadCaseDocument).build();
+        uploadContestedCaseDocumentsHandler.setDefaultsForWithoutPrejudiceDocumentType(uploadCaseDocumentCollection);
+        assertThat(uploadCaseDocument.getCaseDocumentConfidentiality(), is(YesOrNo.NO));
+        assertThat(uploadCaseDocument.getCaseDocumentFdr(), is(YesOrNo.NO));
+    }
+
     private FinremCallbackRequest buildCallbackRequest() {
         FinremCaseData data = FinremCaseData.builder().build();
         FinremCaseDetails caseDetails =

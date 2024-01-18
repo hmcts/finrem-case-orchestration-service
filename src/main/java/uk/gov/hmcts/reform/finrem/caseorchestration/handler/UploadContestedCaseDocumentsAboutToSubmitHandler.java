@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
@@ -88,7 +89,10 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
             getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
 
 
-        managedCollections.forEach(doc -> doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole));
+        managedCollections.forEach(doc -> {
+            doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole);
+            setDefaultsForWithoutPrejudiceDocumentType(doc);
+        });
 
 
         documentHandlers.forEach(documentCollectionService ->
@@ -187,5 +191,13 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
             return INTERVENER_FOUR;
         }
         return CASE;
+    }
+
+    protected void setDefaultsForWithoutPrejudiceDocumentType(UploadCaseDocumentCollection document) {
+        UploadCaseDocument uploadCaseDocument = document.getUploadCaseDocument();
+        if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(uploadCaseDocument.getCaseDocumentType())) {
+            uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
+            uploadCaseDocument.setCaseDocumentFdr(YesOrNo.NO);
+        }
     }
 }

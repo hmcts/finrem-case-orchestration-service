@@ -18,7 +18,8 @@ public class IntervenerOneFdrHandler extends PartyDocumentsHandler {
 
     @Override
     protected boolean canHandleDocument(UploadCaseDocument uploadCaseDocument) {
-        return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.YES);
+        YesOrNo caseDocumentFdr = uploadCaseDocument.getCaseDocumentFdr();
+        return caseDocumentFdr != null && caseDocumentFdr.equals(YesOrNo.YES);
     }
 
 

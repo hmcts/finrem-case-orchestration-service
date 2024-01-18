@@ -108,11 +108,6 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS),
-            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS)
-        );
-
-        assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT),
             is(DocumentCategory.REPORTS_PENSION_REPORTS)
         );

@@ -153,8 +153,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
             uploadCaseDocument.setCaseDocumentFdr(YesOrNo.NO);
         } else if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(uploadCaseDocument.getCaseDocumentType())) {
             uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
-            uploadCaseDocument.setCaseDocumentFdr(YesOrNo.YES);
-            uploadCaseDocument.setCaseDocumentParty(null);
+            uploadCaseDocument.setCaseDocumentFdr(YesOrNo.NO);
+            uploadCaseDocument.setCaseDocumentParty(CaseDocumentParty.CASE);
         }
 
     }

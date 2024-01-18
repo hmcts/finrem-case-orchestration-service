@@ -96,11 +96,6 @@ public class IntervenerOneOtherDocumentsHandlerTest extends BaseManageDocumentsH
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS),
-            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_1_WITHOUT_PREJUDICE_OFFERS)
-        );
-
-        assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT),
             is(DocumentCategory.REPORTS_PENSION_REPORTS)
         );
