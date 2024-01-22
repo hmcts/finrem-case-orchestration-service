@@ -105,7 +105,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     public void givenContestedCallbackRequest_whenHandledForIntervener1Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
-        setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper());
+        setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerOne());
         verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_1);
     }
 
@@ -113,7 +113,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     public void givenContestedCallbackRequest_whenHandledForIntervener2Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
-        setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerTwoWrapper());
+        setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerTwo());
         verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_2);
     }
 
@@ -121,7 +121,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     public void givenContestedCallbackRequest_whenHandledForIntervener3Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
-        setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerThreeWrapper());
+        setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerThree());
         verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_3);
     }
 
@@ -129,7 +129,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     public void givenContestedCallbackRequest_whenHandledForIntervener4Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
-        setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerFourWrapper());
+        setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerFour());
         verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_4);
     }
 

@@ -92,10 +92,10 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
         return switch (recipient) {
             case RESPONDENT_SOLICITOR -> caseData.getContactDetailsWrapper().getRespondentSolicitorReference();
             case APPLICANT_SOLICITOR -> caseData.getContactDetailsWrapper().getSolicitorReference();
-            case INTERVENER1_SOLICITOR -> caseData.getIntervenerOneWrapper().getIntervenerSolicitorReference();
-            case INTERVENER2_SOLICITOR -> caseData.getIntervenerTwoWrapper().getIntervenerSolicitorReference();
-            case INTERVENER3_SOLICITOR -> caseData.getIntervenerThreeWrapper().getIntervenerSolicitorReference();
-            case INTERVENER4_SOLICITOR -> caseData.getIntervenerFourWrapper().getIntervenerSolicitorReference();
+            case INTERVENER1_SOLICITOR -> caseData.getIntervenerOne().getIntervenerSolicitorReference();
+            case INTERVENER2_SOLICITOR -> caseData.getIntervenerTwo().getIntervenerSolicitorReference();
+            case INTERVENER3_SOLICITOR -> caseData.getIntervenerThree().getIntervenerSolicitorReference();
+            case INTERVENER4_SOLICITOR -> caseData.getIntervenerFour().getIntervenerSolicitorReference();
             default -> null;
         };
     }
@@ -109,10 +109,10 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
             case RESPONDENT_SOLICITOR -> data.getRespondentSolicitorName();
             case RESPONDENT -> data.getRespondentFullName();
             case OTHER_RECIPIENT -> data.getGeneralLetterWrapper().getGeneralLetterRecipient();
-            case INTERVENER1, INTERVENER1_SOLICITOR -> getIntervenerAddressee(data.getIntervenerOneWrapper(), generalLetterAddressee);
-            case INTERVENER2, INTERVENER2_SOLICITOR -> getIntervenerAddressee(data.getIntervenerTwoWrapper(), generalLetterAddressee);
-            case INTERVENER3, INTERVENER3_SOLICITOR -> getIntervenerAddressee(data.getIntervenerThreeWrapper(), generalLetterAddressee);
-            case INTERVENER4, INTERVENER4_SOLICITOR -> getIntervenerAddressee(data.getIntervenerFourWrapper(), generalLetterAddressee);
+            case INTERVENER1, INTERVENER1_SOLICITOR -> getIntervenerAddressee(data.getIntervenerOne(), generalLetterAddressee);
+            case INTERVENER2, INTERVENER2_SOLICITOR -> getIntervenerAddressee(data.getIntervenerTwo(), generalLetterAddressee);
+            case INTERVENER3, INTERVENER3_SOLICITOR -> getIntervenerAddressee(data.getIntervenerThree(), generalLetterAddressee);
+            case INTERVENER4, INTERVENER4_SOLICITOR -> getIntervenerAddressee(data.getIntervenerFour(), generalLetterAddressee);
             default -> null;
         };
     }
@@ -133,10 +133,10 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
             case RESPONDENT -> data.getContactDetailsWrapper().getRespondentAddress();
             case APPLICANT -> data.getContactDetailsWrapper().getApplicantAddress();
             case OTHER_RECIPIENT -> data.getGeneralLetterWrapper().getGeneralLetterRecipientAddress();
-            case INTERVENER1, INTERVENER1_SOLICITOR -> data.getIntervenerOneWrapper().getIntervenerAddress();
-            case INTERVENER2, INTERVENER2_SOLICITOR -> data.getIntervenerTwoWrapper().getIntervenerAddress();
-            case INTERVENER3, INTERVENER3_SOLICITOR -> data.getIntervenerThreeWrapper().getIntervenerAddress();
-            case INTERVENER4, INTERVENER4_SOLICITOR -> data.getIntervenerFourWrapper().getIntervenerAddress();
+            case INTERVENER1, INTERVENER1_SOLICITOR -> data.getIntervenerOne().getIntervenerAddress();
+            case INTERVENER2, INTERVENER2_SOLICITOR -> data.getIntervenerTwo().getIntervenerAddress();
+            case INTERVENER3, INTERVENER3_SOLICITOR -> data.getIntervenerThree().getIntervenerAddress();
+            case INTERVENER4, INTERVENER4_SOLICITOR -> data.getIntervenerFour().getIntervenerAddress();
             default -> null;
         };
     }

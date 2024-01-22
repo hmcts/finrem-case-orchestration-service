@@ -1,11 +1,20 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimRegionWrapper;
+
+import java.time.LocalDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -13,74 +22,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InterimHearingItem {
-    @JsonProperty("interimHearingDate")
-    public String interimHearingDate;
-    @JsonProperty("interimHearingTime")
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    public LocalDate interimHearingDate;
     public String interimHearingTime;
-    @JsonProperty("interimHearingType")
-    public String interimHearingType;
-    @JsonProperty("interim_regionList")
-    public String interimRegionList;
-    @JsonProperty("interim_cfcCourtList")
-    public String interimCfcCourtList;
-    @JsonProperty("interim_walesFRCList")
-    public String interimWalesFRCList;
-    @JsonProperty("interim_londonFRCList")
-    public String interimLondonFRCList;
-    @JsonProperty("interim_devonCourtList")
-    public String interimDevonCourtList;
-    @JsonProperty("interim_dorsetCourtList")
-    public String interimDorsetCourtList;
-    @JsonProperty("interim_humberCourtList")
-    public String interimHumberCourtList;
-    @JsonProperty("interim_midlandsFRCList")
-    public String interimMidlandsFRCList;
-    @JsonProperty("interim_bristolCourtList")
-    public String interimBristolCourtList;
-    @JsonProperty("interim_newportCourtList")
-    public String interimNewportCourtList;
-    @JsonProperty("interim_northEastFRCList")
-    public String interimNorthEastFRCList;
-    @JsonProperty("interim_northWestFRCList")
-    public String interimNorthWestFRCList;
-    @JsonProperty("interim_southEastFRCList")
-    public String interimSouthEastFRCList;
-    @JsonProperty("interim_southWestFRCList")
-    public String interimSouthWestFRCList;
-    @JsonProperty("interim_highCourtFRCList")
-    public String interimHighCourtFRCList;
-    @JsonProperty("interim_swanseaCourtList")
-    public String interimSwanseaCourtList;
-    @JsonProperty("interimHearingTimeEstimate")
+    public InterimTypeOfHearing interimHearingType;
+    public YesOrNo interimPromptForAnyDocument;
     public String interimHearingTimeEstimate;
-    @JsonProperty("interim_liverpoolCourtList")
-    public String interimLiverpoolCourtList;
-    @JsonProperty("interimPromptForAnyDocument")
-    public String interimPromptForAnyDocument;
-    @JsonProperty("interim_birminghamCourtList")
-    public String interimBirminghamCourtList;
-    @JsonProperty("interim_cleavelandCourtList")
-    public String interimCleavelandCourtList;
-    @JsonProperty("interim_kentSurreyCourtList")
-    public String interimKentSurreyCourtList;
-    @JsonProperty("interim_lancashireCourtList")
-    public String interimLancashireCourtList;
-    @JsonProperty("interim_manchesterCourtList")
-    public String interimManchesterCourtList;
-    @JsonProperty("interim_northWalesCourtList")
-    public String interimNorthWalesCourtList;
-    @JsonProperty("interim_nottinghamCourtList")
-    public String interimNottinghamCourtList;
-    @JsonProperty("interim_nwyorkshireCourtList")
-    public String interimNwyorkshireCourtList;
-    @JsonProperty("interim_bedfordshireCourtList")
-    public String interimBedfordshireCourtList;
-    @JsonProperty("interim_thamesvalleyCourtList")
-    public String interimThamesvalleyCourtList;
-    @JsonProperty("interim_highCourtList")
-    public String interimHighCourtList;
-    @JsonProperty("interimUploadAdditionalDocument")
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    InterimRegionWrapper interimRegionWrapper;
+
     public CaseDocument interimUploadAdditionalDocument;
-    @JsonProperty("interimAdditionalInformationAboutHearing")
     public String interimAdditionalInformationAboutHearing;
+
+    @JsonIgnore
+    public InterimRegionWrapper getInterimRegionWrapper() {
+        if (interimRegionWrapper == null) {
+            this.interimRegionWrapper = new InterimRegionWrapper();
+        }
+        return interimRegionWrapper;
+    }
 }

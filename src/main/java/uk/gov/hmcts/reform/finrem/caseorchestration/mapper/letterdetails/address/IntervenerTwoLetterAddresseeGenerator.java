@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 
 @Component
 @Slf4j
-public class IntervenerTwoLetterAddresseeGenerator extends IntervenerLetterAddresseeGenerator<IntervenerTwoWrapper> {
+public class IntervenerTwoLetterAddresseeGenerator extends IntervenerLetterAddresseeGenerator<IntervenerTwo> {
 
     @Autowired
     public IntervenerTwoLetterAddresseeGenerator(ObjectMapper objectMapper) {
@@ -25,13 +25,13 @@ public class IntervenerTwoLetterAddresseeGenerator extends IntervenerLetterAddre
     }
 
     @Override
-    protected IntervenerTwoWrapper getIntervenerWrapper(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getIntervenerTwoWrapper();
+    protected IntervenerTwo getIntervenerWrapper(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getIntervenerTwo();
     }
 
     @Override
-    protected IntervenerTwoWrapper getIntervenerWrapper(CaseDetails caseDetails) {
-        IntervenerTwoWrapper intervenerWrapper =
+    protected IntervenerTwo getIntervenerWrapper(CaseDetails caseDetails) {
+        IntervenerTwo intervenerWrapper =
             objectMapper.convertValue(caseDetails.getData().get(getIntervenerFieldName()), new TypeReference<>() {
             });
         return intervenerWrapper;

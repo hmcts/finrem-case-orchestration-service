@@ -11,10 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContested
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +77,7 @@ public class SendOrderIntervenerFourDocumentHandler extends SendOrderPartyDocume
     @Override
     protected void addCoverSheetToPartyField(FinremCaseDetails caseDetails, CaseDocument bulkPrintSheet) {
         FinremCaseData caseData = caseDetails.getData();
-        IntervenerFourWrapper wrapper = caseData.getIntervenerFourWrapper();
+        IntervenerFour wrapper = caseData.getIntervenerFour();
         if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(wrapper, caseDetails)) {
             caseData.setBulkPrintCoverSheetIntv4(bulkPrintSheet);
         }

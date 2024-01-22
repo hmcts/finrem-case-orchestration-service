@@ -29,19 +29,19 @@ public class SelectablePartiesCorrespondenceService {
             data.setRespondentCorrespondenceEnabled(
                 isCorrespondenceShareableWithParties(selectedParties,
                     List.of(CaseRole.RESP_SOLICITOR.getCcdCode(), CaseRole.RESP_BARRISTER.getCcdCode())));
-            data.getIntervenerOneWrapper()
+            data.getIntervenerOne()
                 .setIntervenerCorrespondenceEnabled(
                     isCorrespondenceShareableWithParties(selectedParties,
                         List.of(CaseRole.INTVR_SOLICITOR_1.getCcdCode(), CaseRole.INTVR_BARRISTER_1.getCcdCode())));
-            data.getIntervenerTwoWrapper()
+            data.getIntervenerTwo()
                 .setIntervenerCorrespondenceEnabled(
                     isCorrespondenceShareableWithParties(selectedParties,
                         List.of(CaseRole.INTVR_SOLICITOR_2.getCcdCode(), CaseRole.INTVR_BARRISTER_2.getCcdCode())));
-            data.getIntervenerThreeWrapper()
+            data.getIntervenerThree()
                 .setIntervenerCorrespondenceEnabled(
                     isCorrespondenceShareableWithParties(selectedParties,
                         List.of(CaseRole.INTVR_SOLICITOR_3.getCcdCode(), CaseRole.INTVR_BARRISTER_3.getCcdCode())));
-            data.getIntervenerFourWrapper()
+            data.getIntervenerFour()
                 .setIntervenerCorrespondenceEnabled(
                     isCorrespondenceShareableWithParties(selectedParties,
                         List.of(CaseRole.INTVR_SOLICITOR_4.getCcdCode(), CaseRole.INTVR_BARRISTER_4.getCcdCode())));
@@ -74,25 +74,25 @@ public class SelectablePartiesCorrespondenceService {
     public boolean shouldSendIntervenerOneCorrespondence(CaseDetails caseDetails) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-        return finremCaseDetails.getData().getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled();
+        return finremCaseDetails.getData().getIntervenerOne().getIntervenerCorrespondenceEnabled();
     }
 
     public boolean shouldSendIntervenerTwoCorrespondence(CaseDetails caseDetails) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-        return finremCaseDetails.getData().getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled();
+        return finremCaseDetails.getData().getIntervenerTwo().getIntervenerCorrespondenceEnabled();
     }
 
     public boolean shouldSendIntervenerThreeCorrespondence(CaseDetails caseDetails) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-        return finremCaseDetails.getData().getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled();
+        return finremCaseDetails.getData().getIntervenerThree().getIntervenerCorrespondenceEnabled();
     }
 
     public boolean shouldSendIntervenerFourCorrespondence(CaseDetails caseDetails) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-        return finremCaseDetails.getData().getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled();
+        return finremCaseDetails.getData().getIntervenerFour().getIntervenerCorrespondenceEnabled();
     }
 
     public boolean isCorrespondenceShareableWithParties(List<String> selectedParties, List<String> partyRoles) {
@@ -112,6 +112,5 @@ public class SelectablePartiesCorrespondenceService {
         }
         return errors;
     }
-
 
 }

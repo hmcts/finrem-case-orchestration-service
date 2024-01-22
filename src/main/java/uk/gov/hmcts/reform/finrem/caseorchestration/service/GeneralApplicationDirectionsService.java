@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -138,14 +138,14 @@ public class GeneralApplicationDirectionsService {
         String caseId = String.valueOf(caseDetails.getId());
         List<BulkPrintDocument> documents = new ArrayList<>();
         CaseDocument interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails, authorisationToken);
-        documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(interimDocument));
+        documents.add(documentHelper.mapToBulkPrintDocument(interimDocument));
 
         if (!isNull(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT))) {
             log.warn("Additional uploaded interim document found for printing for case");
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments =
                 genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
-            documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
+            documents.add(documentHelper.mapToBulkPrintDocument(additionalUploadedDocuments));
             caseData.put(INTERIM_HEARING_UPLOADED_DOCUMENT, additionalUploadedDocuments);
         }
 
@@ -225,16 +225,16 @@ public class GeneralApplicationDirectionsService {
     private void sendIntervenerDocuments(FinremCaseDetails caseDetails, String authorisationToken,
                                          List<BulkPrintDocument> documents, String referDetail) {
         if (referDetail.contains(INTERVENER1.toLowerCase()) || referDetail.contains(INTERVENER1)) {
-            IntervenerOneWrapper intervenerWrapper = caseDetails.getData().getIntervenerOneWrapper();
+            IntervenerOne intervenerWrapper = caseDetails.getData().getIntervenerOne();
             sendToBulkprintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
         } else if (referDetail.contains(INTERVENER2.toLowerCase()) || referDetail.contains(INTERVENER2)) {
-            IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerTwoWrapper();
+            IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerTwo();
             sendToBulkprintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
         } else if (referDetail.contains(INTERVENER3.toLowerCase()) || referDetail.contains(INTERVENER3)) {
-            IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerThreeWrapper();
+            IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerThree();
             sendToBulkprintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
         } else if (referDetail.contains(INTERVENER4.toLowerCase()) || referDetail.contains(INTERVENER4)) {
-            IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerFourWrapper();
+            IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerFour();
             sendToBulkprintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
         }
     }
