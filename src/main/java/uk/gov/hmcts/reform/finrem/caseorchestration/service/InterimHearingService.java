@@ -74,7 +74,6 @@ public class InterimHearingService {
                         .interimHearingType(caseData.getInterimWrapper().getInterimHearingType())
                         .interimHearingDate(caseData.getInterimWrapper().getInterimHearingDate())
                         .interimHearingTime(caseData.getInterimWrapper().getInterimHearingTime())
-                        .interimHearingTimeEstimate(caseData.getInterimWrapper().getInterimHearingTimeEstimate())
                         .interimAdditionalInformationAboutHearing(
                             caseData.getInterimWrapper().getInterimAdditionalInformationAboutHearing())
                         .interimPromptForAnyDocument(caseData.getInterimWrapper().getInterimPromptForAnyDocument())
@@ -374,7 +373,6 @@ public class InterimHearingService {
         interimWrapper.setInterimHearingType(null);
         interimWrapper.setInterimHearingDate(null);
         interimWrapper.setInterimHearingTime(null);
-        interimWrapper.setInterimHearingTimeEstimate(null);
         interimWrapper.setInterimAdditionalInformationAboutHearing(null);
         interimWrapper.setInterimPromptForAnyDocument(null);
         InterimRegionWrapper interimRegionWrapper = caseData.getRegionWrapper().getInterimRegionWrapper();

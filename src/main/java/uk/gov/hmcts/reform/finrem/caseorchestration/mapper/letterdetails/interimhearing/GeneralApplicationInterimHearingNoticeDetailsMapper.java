@@ -42,7 +42,6 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapper extends Abstrac
             .interimHearingTime(interimWrapper.getInterimHearingTime())
             .interimHearingType(nullToEmpty(getHearingType(interimWrapper)))
             .interimAdditionalInformationAboutHearing(interimWrapper.getInterimAdditionalInformationAboutHearing())
-            .interimTimeEstimate(interimWrapper.getInterimHearingTimeEstimate())
             .build();
     }
 
