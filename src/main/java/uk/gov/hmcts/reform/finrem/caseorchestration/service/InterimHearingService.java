@@ -68,19 +68,49 @@ public class InterimHearingService {
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     public List<InterimHearingCollection> getLegacyInterimHearingAsInterimHearingCollection(FinremCaseData caseData) {
+        InterimWrapper interimWrapper = caseData.getInterimWrapper();
+        InterimRegionWrapper interimRegionWrapper = caseData.getRegionWrapper().getInterimRegionWrapper();
+        InterimCourtListWrapper courtListWrapper = interimRegionWrapper.getCourtListWrapper();
         return List.of(
             InterimHearingCollection.builder().value(
                     InterimHearingItem.builder()
-                        .interimHearingType(caseData.getInterimWrapper().getInterimHearingType())
-                        .interimHearingDate(caseData.getInterimWrapper().getInterimHearingDate())
-                        .interimHearingTime(caseData.getInterimWrapper().getInterimHearingTime())
-                        .interimHearingTimeEstimate(caseData.getInterimWrapper().getInterimTimeEstimate())
+                        .interimHearingType(interimWrapper.getInterimHearingType())
+                        .interimHearingDate(interimWrapper.getInterimHearingDate())
+                        .interimHearingTime(interimWrapper.getInterimHearingTime())
+                        .interimHearingTimeEstimate(interimWrapper.getInterimTimeEstimate())
                         .interimAdditionalInformationAboutHearing(
-                            caseData.getInterimWrapper().getInterimAdditionalInformationAboutHearing())
-                        .interimPromptForAnyDocument(caseData.getInterimWrapper().getInterimPromptForAnyDocument())
-                        .interimRegionWrapper(caseData.getRegionWrapper().getInterimRegionWrapper())
+                            interimWrapper.getInterimAdditionalInformationAboutHearing())
+                        .interimPromptForAnyDocument(interimWrapper.getInterimPromptForAnyDocument())
+                        .interimRegionList(interimRegionWrapper.getInterimRegionList())
+                        .interimMidlandsFrcList(interimRegionWrapper.getInterimMidlandsFrcList())
+                        .interimLondonFrcList(interimRegionWrapper.getInterimLondonFrcList())
+                        .interimNorthWestFrcList(interimRegionWrapper.getInterimNorthWestFrcList())
+                        .interimNorthEastFrcList(interimRegionWrapper.getInterimNorthEastFrcList())
+                        .interimSouthEastFrcList(interimRegionWrapper.getInterimSouthEastFrcList())
+                        .interimSouthWestFrcList(interimRegionWrapper.getInterimSouthWestFrcList())
+                        .interimWalesFrcList(interimRegionWrapper.getInterimWalesFrcList())
+                        .interimHighCourtFrcList(interimRegionWrapper.getInterimHighCourtFrcList())
+                        .interimNottinghamCourtList(courtListWrapper.getInterimNottinghamCourtList())
+                        .interimCfcCourtList(courtListWrapper.getInterimCfcCourtList())
+                        .interimBirminghamCourtList(courtListWrapper.getInterimBirminghamCourtList())
+                        .interimLiverpoolCourtList(courtListWrapper.getInterimLiverpoolCourtList())
+                        .interimManchesterCourtList(courtListWrapper.getInterimManchesterCourtList())
+                        .interimLancashireCourtList(courtListWrapper.getInterimLancashireCourtList())
+                        .interimClevelandCourtList(courtListWrapper.getInterimClevelandCourtList())
+                        .interimNwYorkshireCourtList(courtListWrapper.getInterimNwYorkshireCourtList())
+                        .interimHumberCourtList(courtListWrapper.getInterimHumberCourtList())
+                        .interimKentSurreyCourtList(courtListWrapper.getInterimKentSurreyCourtList())
+                        .interimBedfordshireCourtList(courtListWrapper.getInterimBedfordshireCourtList())
+                        .interimThamesValleyCourtList(courtListWrapper.getInterimThamesValleyCourtList())
+                        .interimDevonCourtList(courtListWrapper.getInterimDevonCourtList())
+                        .interimDorsetCourtList(courtListWrapper.getInterimDorsetCourtList())
+                        .interimBristolCourtList(courtListWrapper.getInterimBristolCourtList())
+                        .interimNewportCourtList(courtListWrapper.getInterimNewportCourtList())
+                        .interimSwanseaCourtList(courtListWrapper.getInterimSwanseaCourtList())
+                        .interimNorthWalesCourtList(courtListWrapper.getInterimNorthWalesCourtList())
+                        .interimHighCourtList(courtListWrapper.getInterimHighCourtList())
                         .interimUploadAdditionalDocument(
-                            caseData.getInterimWrapper().getInterimUploadAdditionalDocument())
+                            interimWrapper.getInterimUploadAdditionalDocument())
                         .build())
                 .build());
     }
