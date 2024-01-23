@@ -81,7 +81,7 @@ public class InterimHearingContestedAboutToStartHandlerTest extends BaseHandlerT
             is(InterimTypeOfHearing.MPS));
         assertThat(migratedItem.getInterimHearingTime(),
             is("12:00"));
-        assertThat(migratedItem.getInterimRegionWrapper().getInterimRegionList().getValue(),
+        assertThat(migratedItem.getInterimRegionList().getValue(),
             is("southwest"));
     }
 }
