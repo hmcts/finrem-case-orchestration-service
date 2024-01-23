@@ -24,6 +24,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
@@ -250,6 +253,52 @@ public class InterimHearingServiceTest {
         assertThat(legacyCollection.size(), is(1));
         assertThat(legacyCollection.get(0).getValue().getInterimHearingTime(), is("5 hour"));
         assertThat(legacyCollection.get(0).getValue().getInterimHearingTimeEstimate(), is("Test"));
+    }
+
+    @Test
+    public void givenCaseWithLegacyInterim_whenClearLegacyInterimData_thenLegacyFieldsCleared() {
+
+        FinremCaseDetails caseDetails = buildFinremCaseDetails(LEGACY_INTERIM_HEARING);
+
+        FinremCaseData data = caseDetails.getData();
+        interimHearingService.clearLegacyInterimData(data);
+
+        InterimWrapper interimWrapper = data.getInterimWrapper();
+        assertThat(interimWrapper.getInterimHearingDate(), is(nullValue()));
+        assertThat(interimWrapper.getInterimHearingType(), is(nullValue()));
+        assertThat(interimWrapper.getInterimHearingTime(), is(nullValue()));
+        assertThat(interimWrapper.getInterimAdditionalInformationAboutHearing(), is(nullValue()));
+        assertThat(interimWrapper.getInterimHearingDirectionsDocument(), is(nullValue()));
+        assertThat(interimWrapper.getInterimPromptForAnyDocument(), is(nullValue()));
+        assertThat(interimWrapper.getInterimTimeEstimate(), is(nullValue()));
+        InterimRegionWrapper interimRegionWrapper = data.getRegionWrapper().getInterimRegionWrapper();
+        assertThat(interimRegionWrapper.getInterimRegionList(), is(nullValue()));
+        assertThat(interimRegionWrapper.getInterimLondonFrcList(), is(nullValue()));
+        assertThat(interimRegionWrapper.getInterimHighCourtFrcList(), is(nullValue()));
+        assertThat(interimRegionWrapper.getInterimNorthEastFrcList(), is(nullValue()));
+        assertThat(interimRegionWrapper.getInterimNorthWestFrcList(), is(nullValue()));
+        assertThat(interimRegionWrapper.getInterimSouthEastFrcList(), is(nullValue()));
+        assertThat(interimRegionWrapper.getInterimSouthWestFrcList(), is(nullValue()));
+        assertThat(interimRegionWrapper.getInterimWalesFrcList(), is(nullValue()));
+        InterimCourtListWrapper courtListWrapper = interimRegionWrapper.getCourtListWrapper();
+        assertThat(courtListWrapper.getInterimNottinghamCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimCfcCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimBirminghamCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimLiverpoolCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimManchesterCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimLancashireCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimClevelandCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimNwYorkshireCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimHumberCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimKentSurreyCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimBedfordshireCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimThamesValleyCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimDevonCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimDorsetCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimBristolCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimNewportCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimSwanseaCourtList(), is(nullValue()));
+        assertThat(courtListWrapper.getInterimNorthWalesCourtList(), is(nullValue()));
     }
 
     protected FinremCaseDetails buildFinremCaseDetails(String testJson) {
