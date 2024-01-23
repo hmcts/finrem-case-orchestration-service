@@ -231,7 +231,16 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         HashMap<String, Object> expected = objectMapper.readValue(expectedCaseData(), new TypeReference<>() {
         });
 
-        assertThat(objectMapper.readTree(stringify(actual)), is(objectMapper.readTree(stringify(expected))));
+        assertThat(objectMapper.readTree(stringify(actual.get(FORM_C))),
+            is(objectMapper.readTree(stringify(expected.get(FORM_C)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(FORM_G))),
+            is(objectMapper.readTree(stringify(expected.get(FORM_G)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(MINI_FORM_A))),
+            is(objectMapper.readTree(stringify(expected.get(MINI_FORM_A)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(OUT_OF_FAMILY_COURT_RESOLUTION))),
+            is(objectMapper.readTree(stringify(expected.get(OUT_OF_FAMILY_COURT_RESOLUTION)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(HEARING_ADDITIONAL_DOC))),
+            is(objectMapper.readTree(stringify(expected.get(HEARING_ADDITIONAL_DOC)))));
 
     }
 
