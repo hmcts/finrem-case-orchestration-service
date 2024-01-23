@@ -47,7 +47,7 @@ public class GeneralApplicationOutcomeAboutToStartHandler extends FinremCallback
         FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = caseDetails.getId().toString();
+        String caseId = String.valueOf(caseDetails.getId());
         log.info("Received on start request to outcome general application for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
         helper.populateGeneralApplicationSender(
@@ -57,13 +57,13 @@ public class GeneralApplicationOutcomeAboutToStartHandler extends FinremCallback
         AtomicInteger index = new AtomicInteger(0);
         if (referredList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             String outcome = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome(), null);
-            log.info("general application has outcomed {} while existing ga not moved to collection for Case ID: {}",
+            log.info("General application has outcomed {} while existing general application not moved to collection for Case ID: {}",
                 outcome, caseId);
             if (referredList.isEmpty() && outcome != null) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of("There are no general application available for decision.")).build();
             }
-            log.info("setting outcome list if existing ga not moved to collection for Case ID: {}", caseId);
+            log.info("Setting outcome list if existing general application not moved to collection for Case ID: {}", caseId);
             setOutcomeListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
         } else {
             if (referredList.isEmpty()) {

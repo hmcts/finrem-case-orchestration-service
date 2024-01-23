@@ -65,13 +65,13 @@ public class RejectGeneralApplicationAboutToSubmitHandler
             final List<GeneralApplicationCollectionData> applicationCollectionDataList
                 = existingList.stream().filter(ga -> !ga.getId().equals(valueCode)).sorted(helper::getCompareTo).toList();
             log.info("applicationCollectionDataList : {}", applicationCollectionDataList.size());
-            generalApplicationService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
+            generalApplicationService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseDetails);
             caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
                 ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
         }
         String previousState = Objects.toString(caseDetails.getData().getGeneralApplicationWrapper()
             .getGeneralApplicationPreState(), caseDetails.getState().getStateId());
-        log.info("Previous state : {} for caseId {}", previousState, caseDetails.getId());
+        log.info("Previous state : {} for Case ID: {}", previousState, caseDetails.getId());
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).state(previousState).build();
     }
 }

@@ -33,7 +33,7 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandler implements
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
-        log.info("Received request for {} caseId {}", EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED,
+        log.info("Received request for {} Case ID: {}", EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED,
             callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (Objects.isNull(caseData.get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME))) {

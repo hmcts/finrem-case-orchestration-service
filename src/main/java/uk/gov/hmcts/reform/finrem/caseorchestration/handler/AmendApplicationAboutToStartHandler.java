@@ -35,20 +35,20 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Handling amend application about to start callback for case id: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Handling amend application about to start callback for Case ID: {}", callbackRequest.getCaseDetails().getId());
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to set nature of application for consented case with Case ID: {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         final Intention intention = caseData.getApplicantIntendsTo();
-        log.info("Applicant intends to {} for case id: {}", intention, caseDetails.getId());
+        log.info("Applicant intends to {} for Case ID: {}", intention, caseDetails.getId());
 
         if (Intention.APPLY_TO_VARY.equals(intention)) {
-            log.info("Add applicant intends to {} to nature of application", intention.getValue());
+            log.info("Add applicant intends to {} to nature of application for Case ID: {}", intention.getValue(), caseDetails.getId());
             List<NatureApplication> natureApplicationList =
                 Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
             natureApplicationList.add(NatureApplication.VARIATION_ORDER);
             caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureApplicationList);
-            log.info("paper case {} marked as variation order", caseDetails.getId());
+            log.info("Paper Case ID: {} marked as variation order", caseDetails.getId());
         }
 
         if (caseData.getCivilPartnership() == null) {

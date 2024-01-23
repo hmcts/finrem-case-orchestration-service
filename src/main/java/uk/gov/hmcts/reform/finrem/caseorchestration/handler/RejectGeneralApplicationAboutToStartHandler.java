@@ -47,7 +47,7 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
         FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = caseDetails.getId().toString();
+        String caseId = String.valueOf(caseDetails.getId());
         log.info("Received on start request to reject general application for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
@@ -68,7 +68,7 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
             }
 
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
-            log.info("collection dynamicList {} for case id {}", dynamicList, caseId);
+            log.info("collection dynamicList {} for Case ID {}", dynamicList, caseId);
             caseData.getGeneralApplicationWrapper().setGeneralApplicationList(dynamicList);
         }
 

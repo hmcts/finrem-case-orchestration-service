@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ContestedListForHearingCorrespondenceService;
 
 import java.util.List;
 
@@ -34,14 +35,15 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
     private final ObjectMapper objectMapper;
     private final NotificationService notificationService;
     private final GenerateCoverSheetService coverSheetService;
-
+    private final ContestedListForHearingCorrespondenceService contestedListForHearingCorrespondenceService;
 
     public ListForHearingContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
                                                        AdditionalHearingDocumentService additionalHearingDocumentService,
                                                        CaseDataService caseDataService,
                                                        ValidateHearingService validateHearingService, ObjectMapper objectMapper,
                                                        NotificationService notificationService,
-                                                       GenerateCoverSheetService coverSheetService) {
+                                                       GenerateCoverSheetService coverSheetService,
+                                                       ContestedListForHearingCorrespondenceService contestedListForHearingCorrespondenceService) {
         super(finremCaseDetailsMapper);
         this.hearingDocumentService = hearingDocumentService;
         this.additionalHearingDocumentService = additionalHearingDocumentService;
@@ -51,6 +53,8 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
         this.objectMapper = objectMapper;
         this.notificationService = notificationService;
         this.coverSheetService = coverSheetService;
+        this.contestedListForHearingCorrespondenceService = contestedListForHearingCorrespondenceService;
+
     }
 
     @Override
@@ -78,7 +82,7 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
 
         if (finremCaseData.getAdditionalListOfHearingDocuments() != null) {
             CaseDocument caseDocument = objectMapper.convertValue(finremCaseData.getAdditionalListOfHearingDocuments(),
-                    CaseDocument.class);
+                CaseDocument.class);
             CaseDocument pdfDocument = additionalHearingDocumentService.convertToPdf(caseDocument, userAuthorisation, caseId);
             finremCaseData.setAdditionalListOfHearingDocuments(pdfDocument);
         }
@@ -94,6 +98,8 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
         } else {
             caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(userAuthorisation, caseDetails));
         }
+
+
         finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         finremCaseData = finremCaseDetails.getData();
         List<String> warnings = validateHearingService.validateHearingWarnings(finremCaseDetails);
@@ -101,38 +107,40 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
 
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
             CaseDocument coverSheet = coverSheetService.generateApplicantCoverSheet(finremCaseDetails, userAuthorisation);
-            log.info("Applicant coversheet generated and attach to case {}  for case Id {}", caseId, coverSheet);
+            log.info("Applicant coversheet generated and attach to case {}  for Case ID: {}", caseId, coverSheet);
             populateApplicantBulkPrintFieldsWithCoverSheet(finremCaseData, caseId, coverSheet);
         }
 
         if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
             CaseDocument coverSheet = coverSheetService.generateRespondentCoverSheet(finremCaseDetails, userAuthorisation);
-            log.info("Respondent coversheet generated and attach to case {}  for case Id {}", caseId, coverSheet);
+            log.info("Respondent coversheet generated and attach to case {}  for Case ID: {}", caseId, coverSheet);
             populateRespondentBulkPrintFieldsWithCoverSheet(finremCaseData, coverSheet, caseId);
         }
+        callbackRequest.getCaseDetails().setData(finremCaseData);
+        contestedListForHearingCorrespondenceService.sendHearingCorrespondence(callbackRequest, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(finremCaseData).warnings(warnings).build();
+            .data(finremCaseData).warnings(warnings).build();
     }
 
     private void populateApplicantBulkPrintFieldsWithCoverSheet(FinremCaseData finremCaseData, String caseId, CaseDocument coverSheet) {
         if (caseDataService.isApplicantAddressConfidential(finremCaseData)) {
-            log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseId);
+            log.info("Applicant has been marked as confidential, adding coversheet to confidential field for Case ID: {}", caseId);
             finremCaseData.setBulkPrintCoverSheetApp(null);
             finremCaseData.setBulkPrintCoverSheetAppConfidential(coverSheet);
         } else {
-            log.info("Applicant adding coversheet to coversheet field for caseId {}", caseId);
+            log.info("Applicant adding coversheet to coversheet field for Case ID: {}", caseId);
             finremCaseData.setBulkPrintCoverSheetApp(coverSheet);
         }
     }
 
     private void populateRespondentBulkPrintFieldsWithCoverSheet(FinremCaseData finremCaseData, CaseDocument coverSheet, String caseId) {
         if (caseDataService.isRespondentAddressConfidential(finremCaseData)) {
-            log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseId);
+            log.info("Respondent has been marked as confidential, adding coversheet to confidential field for Case ID: {}", caseId);
             finremCaseData.setBulkPrintCoverSheetRes(null);
             finremCaseData.setBulkPrintCoverSheetResConfidential(coverSheet);
         } else {
-            log.info("Respondent adding coversheet to coversheet field for caseId {}", caseId);
+            log.info("Respondent adding coversheet to coversheet field for Case ID: {}", caseId);
             finremCaseData.setBulkPrintCoverSheetRes(coverSheet);
         }
     }

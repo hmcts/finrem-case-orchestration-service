@@ -34,7 +34,7 @@ public class GeneralEmailAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Handling general email about to start callback for case id: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Handling general email about to start callback for Case ID: {}", callbackRequest.getCaseDetails().getId());
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to pre populate general email fields for Case ID: {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();

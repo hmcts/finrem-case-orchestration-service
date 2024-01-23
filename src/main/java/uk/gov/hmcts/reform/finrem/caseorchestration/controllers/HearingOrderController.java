@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-
-import javax.validation.constraints.NotNull;
 
 import java.util.Map;
 import java.util.Optional;
@@ -60,7 +59,7 @@ public class HearingOrderController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to start event storing hearing order for case: {}", caseDetails.getId());
+        log.info("Received request to start event storing hearing order for Case ID: {}", caseDetails.getId());
 
         prepareFieldsForOrderApprovedCoverLetter(caseDetails, authorisationToken);
 
@@ -78,7 +77,7 @@ public class HearingOrderController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to store hearing order for case: {}", caseDetails.getId());
+        log.info("Received request to store hearing order for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 

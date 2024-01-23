@@ -26,14 +26,14 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
-public abstract class BaseManageDocumentsHandlerTest {
+public abstract class BaseManageDocumentsHandlerTest<H extends DocumentHandler> {
 
     public static final String AUTH_TOKEN = "AuthTokien";
     protected List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
     protected FinremCaseDetails caseDetails;
     protected FinremCaseDetails caseDetailsBefore;
     protected FinremCaseData caseData;
-    protected DocumentHandler handler;
+    protected H handler;
 
     @Mock
     protected FeatureToggleService featureToggleService;
@@ -50,7 +50,7 @@ public abstract class BaseManageDocumentsHandlerTest {
 
     public abstract void setUpscreenUploadDocumentList();
 
-    public abstract DocumentHandler getDocumentHandler();
+    public abstract H getDocumentHandler();
 
     public abstract void assertExpectedCollectionType();
 
@@ -91,7 +91,7 @@ public abstract class BaseManageDocumentsHandlerTest {
 
         handler.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+            screenUploadDocumentList, true);
 
         assertExpectedCollectionType();
         assertDocumentCategoryIdAppliedForDocumentCollection();

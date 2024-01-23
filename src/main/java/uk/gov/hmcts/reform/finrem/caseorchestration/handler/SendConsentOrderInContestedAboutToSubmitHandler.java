@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApproved
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderNotApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     private final List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList;
+    private final SendOrdersCategoriser sendOrdersCategoriser;
 
 
     public SendConsentOrderInContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -41,13 +43,15 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
                                                            GenericDocumentService genericDocumentService,
                                                            ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
                                                            ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
-                                                           List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList) {
+                                                           List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
+                                                           SendOrdersCategoriser sendOrdersCategoriser) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.genericDocumentService = genericDocumentService;
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
         this.sendOrderPartyDocumentList = sendOrderPartyDocumentList;
+        this.sendOrdersCategoriser = sendOrdersCategoriser;
     }
 
     @Override
@@ -62,13 +66,13 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {}, callback {} for case id {}",
+        log.info("Invoking contested event {}, callback {} for Case ID: {}",
             callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
 
         try {
             FinremCaseData caseData = caseDetails.getData();
             List<String> parties = generalOrderService.getParties(caseDetails);
-            log.info("Selected parties {} on case id {}", parties, caseId);
+            log.info("Selected parties {} on Case ID: {}", parties, caseId);
 
             List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
 
@@ -78,6 +82,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
                                       parties);
 
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
+            sendOrdersCategoriser.categorise(caseDetails.getData());
         } catch (RuntimeException e) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();

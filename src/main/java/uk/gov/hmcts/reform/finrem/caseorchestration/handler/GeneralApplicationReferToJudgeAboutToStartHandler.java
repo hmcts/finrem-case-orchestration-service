@@ -48,7 +48,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
         FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = caseDetails.getId().toString();
+        String caseId = String.valueOf(caseDetails.getId());
         log.info("Received on start request to refer general application for Case ID: {}", caseId);
 
         FinremCaseData caseData = caseDetails.getData();
@@ -60,7 +60,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
         AtomicInteger index = new AtomicInteger(0);
         if (existingGeneralApplicationList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             String judgeEmail = Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationReferToJudgeEmail(), null);
-            log.info("general application has referred to judge while existing ga not moved to collection for Case ID: {}",
+            log.info("General application has referred to judge while existing general application not moved to collection for Case ID: {}",
                 caseDetails.getId());
             if (existingGeneralApplicationList.isEmpty() && judgeEmail != null) {
                 List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
@@ -69,12 +69,12 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
                         .errors(List.of("There are no general application available to refer.")).build();
                 }
             }
-            log.info("setting refer list if existing ga not moved to collection for Case ID: {}", caseDetails.getId());
+            log.info("Setting refer list if existing general application not moved to collection for Case ID: {}", caseDetails.getId());
 
             setReferListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
 
         } else {
-            log.info("setting refer list for Case ID: {}", caseDetails.getId());
+            log.info("Setting refer list for Case ID: {}", caseDetails.getId());
             List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
             if (dynamicListElements.isEmpty()) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)

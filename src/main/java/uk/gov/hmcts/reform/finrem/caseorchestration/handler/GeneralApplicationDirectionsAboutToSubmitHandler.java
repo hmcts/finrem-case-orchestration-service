@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,15 +41,19 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     private final GeneralApplicationService gaService;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
+
     public GeneralApplicationDirectionsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                             GeneralApplicationHelper helper,
                                                             GeneralApplicationDirectionsService service,
-                                                            GeneralApplicationService gaService) {
+                                                            GeneralApplicationService gaService,
+                                                            GeneralApplicationsCategoriser generalApplicationsCategoriser) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
         this.gaService = gaService;
         this.finremCaseDetailsMapper = finremCaseDetailsMapper;
+        this.generalApplicationsCategoriser = generalApplicationsCategoriser;
     }
 
     @Override
@@ -88,11 +93,13 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
 
         String postState = service.getEventPostState(caseDetails, userAuthorisation);
 
-        log.info("Post state {} for caseId {}", postState, caseDetails.getId());
+        log.info("Post state {} for Case ID: {}", postState, caseDetails.getId());
+        generalApplicationsCategoriser.categorise(caseData);
         if (postState != null) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                 .errors(errors).state(postState).build();
         }
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
@@ -103,7 +110,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         String caseId = caseDetails.getId().toString();
-        log.info("Map existing general application to collection for case id {}", caseId);
+        log.info("Map existing general application to collection for Case ID: {}", caseId);
         GeneralApplicationCollectionData data = helper.mapExistingGeneralApplicationToData(
             caseData, userAuthorisation, caseId);
         if (data != null) {
@@ -114,7 +121,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             setStatusForNonCollAndBulkPrintDocuments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
-            gaService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
+            gaService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseDetails);
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
@@ -139,7 +146,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             .sorted(helper::getCompareTo).toList();
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
-        gaService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
+        gaService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseDetails);
         caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
             ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
@@ -166,7 +173,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         items.setGeneralApplicationDirectionsDocument(caseDocument);
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
-        String caseId = caseDetails.getId().toString();
+        String caseId = String.valueOf(caseDetails.getId());
         log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
             EventType.GENERAL_APPLICATION_DIRECTIONS);
 
@@ -184,7 +191,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             .build();
         bulkPrintDocuments.add(bpDoc);
 
-        log.info("items getGeneralApplicationDocument {}, for caseId {}",
+        log.info("items getGeneralApplicationDocument {}, for case ID: {}",
             items.getGeneralApplicationDocument(), caseId);
 
         if (items.getGeneralApplicationDocument() != null) {
@@ -194,7 +201,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
                 .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
                 .fileName(items.getGeneralApplicationDocument().getDocumentFilename())
                 .build();
-            log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for caseId {}",
+            log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for Case ID: {}",
                 items.getGeneralApplicationDocument(), genDoc, caseId);
             bulkPrintDocuments.add(genDoc);
         }
@@ -215,6 +222,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
             gaService.updateIntervenerDirectionsOrders(items, finremCaseDetails);
         }
+
         return data;
     }
 }

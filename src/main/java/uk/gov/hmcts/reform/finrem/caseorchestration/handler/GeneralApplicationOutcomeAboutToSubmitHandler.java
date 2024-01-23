@@ -47,13 +47,13 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
         FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final String caseId = caseDetails.getId().toString();
+        final String caseId = String.valueOf(caseDetails.getId());
         log.info("Received on start request to outcome decision general application for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         if (existingList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
-            log.info("outcome stage migrate existing general application for Case ID: {}", caseId);
+            log.info("Outcome stage migrate existing general application for Case ID: {}", caseId);
             migrateExistingApplication(caseDetails, userAuthorisation);
         } else {
             DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcomeList());
@@ -67,8 +67,8 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
             final List<GeneralApplicationCollectionData> applicationCollectionDataList
                 = existingList.stream().map(ga -> setStatusForElement(caseData, ga, valueCode, outcome)).sorted(helper::getCompareTo).toList();
 
-            log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseId);
-            service.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseData);
+            log.info("applicationCollectionDataList : {} CaseId {}", applicationCollectionDataList.size(), caseId);
+            service.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseDetails);
             caseData.getGeneralApplicationWrapper().setGeneralApplications(
                 helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
             if (caseData.getGeneralApplicationWrapper().getGeneralApplications() != null
@@ -84,7 +84,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
     }
 
     private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation)  {
-        String caseId = caseDetails.getId().toString();
+        String caseId = String.valueOf(caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         GeneralApplicationCollectionData data =
             helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
@@ -97,7 +97,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
                 status, caseId, EventType.GENERAL_APPLICATION_OUTCOME);
             updateStatus(caseData, data, status);
             existingGeneralApplication.add(data);
-            service.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
+            service.updateGeneralApplicationCollectionData(existingGeneralApplication, caseDetails);
             if (caseData.getGeneralApplicationWrapper().getGeneralApplications() != null
                 && !caseData.getGeneralApplicationWrapper().getGeneralApplications().isEmpty()) {
                 caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(

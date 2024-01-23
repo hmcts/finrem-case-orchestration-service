@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
-public class ExpertEvidenceHandler extends PartyDocumentsHandler {
+public abstract class ExpertEvidenceHandler extends PartyDocumentsHandler {
 
     public ExpertEvidenceHandler(CaseDocumentCollectionType caseDocumentCollectionType,
                                  CaseDocumentParty party, FeatureToggleService featureToggleService) {
@@ -28,7 +28,7 @@ public class ExpertEvidenceHandler extends PartyDocumentsHandler {
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
             case VALUATION_REPORT -> {
-                return DocumentCategory.REPORTS;
+                return getHearingDocumentsFamilyHomeValuation();
             }
             case EXPERT_EVIDENCE -> {
                 return DocumentCategory.REPORTS_EXPERT_REPORTS;
@@ -38,4 +38,6 @@ public class ExpertEvidenceHandler extends PartyDocumentsHandler {
             }
         }
     }
+
+    protected abstract DocumentCategory getHearingDocumentsFamilyHomeValuation();
 }

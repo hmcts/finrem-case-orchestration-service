@@ -43,7 +43,7 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandler extends FinremCa
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("About to Submit callback event type {} for case id: {}", EventType.UPDATE_CONTESTED_GENERAL_APPLICATION, caseDetails.getId());
+        log.info("About to Submit callback event type {} for Case ID: {}", EventType.UPDATE_CONTESTED_GENERAL_APPLICATION, caseDetails.getId());
 
         FinremCaseData caseData
             = service.updateGeneralApplications(callbackRequest, userAuthorisation);
@@ -52,7 +52,7 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandler extends FinremCa
         helper.populateGeneralApplicationDataSender(caseData, generalApplicationList);
         if (!generalApplicationList.isEmpty()) {
             List<GeneralApplicationCollectionData> list = generalApplicationList.stream().map(this::updateStatus).toList();
-            service.updateGeneralApplicationCollectionData(list, caseData);
+            service.updateGeneralApplicationCollectionData(list, caseDetails);
             caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
                 ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
 

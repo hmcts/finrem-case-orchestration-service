@@ -1,15 +1,14 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -22,14 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.List.of;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ListForHearingContestedSubmittedHandlerTest {
+public class ContestedListForHearingCorrespondenceServiceTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     @Mock
@@ -41,37 +38,7 @@ class ListForHearingContestedSubmittedHandlerTest {
     private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     @InjectMocks
-    private ListForHearingContestedSubmittedHandler handler;
-
-    @Test
-    void givenACcdCallbackContestedCase_WhenASubmittedEvent_thenCanHandle() {
-        assertThat(handler.canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                is(true));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenCaseTypeIsConsented_thenCanNotHandle() {
-        assertThat(handler.canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
-                is(false));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenEventIsClose_thenCanNotHandle() {
-        assertThat(handler.canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CLOSE),
-                is(false));
-    }
-
-    @Test
-    void givenACcdCallbackContestedCase_WhenAAboutToSubmitEvent_thenCanNotHandle() {
-        assertThat(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                is(false));
-    }
-
-    @Test
-    void givenACcdCallbackContestedCase_WhenAAboutToStartEvent_thenCanNotHandle() {
-        assertThat(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                is(false));
-    }
+    private ContestedListForHearingCorrespondenceService contestedListForHearingCorrespondenceService;
 
     @Test
     void givenCase_whenSchedulingFirstTime_thenSendInitialCorrespondence() {
@@ -80,7 +47,7 @@ class ListForHearingContestedSubmittedHandlerTest {
             FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
 
-        handler.handle(callbackRequest, AUTH_TOKEN);
+        contestedListForHearingCorrespondenceService.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         verify(hearingDocumentService).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
         verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
@@ -93,7 +60,7 @@ class ListForHearingContestedSubmittedHandlerTest {
             FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().formC(CaseDocument.builder().build()).build()).build();
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
 
-        handler.handle(callbackRequest, AUTH_TOKEN);
+        contestedListForHearingCorrespondenceService.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
         verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
@@ -103,7 +70,7 @@ class ListForHearingContestedSubmittedHandlerTest {
     void givenCase_whenCaseDetailsBeforeDoNotExist_thenSendInitialCorrespondence() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
-        handler.handle(callbackRequest, AUTH_TOKEN);
+        contestedListForHearingCorrespondenceService.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         verify(hearingDocumentService).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
         verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
@@ -143,5 +110,6 @@ class ListForHearingContestedSubmittedHandlerTest {
             .label(role)
             .build();
     }
+
 
 }

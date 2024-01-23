@@ -53,7 +53,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getId().toString();
-        log.info("Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseId);
+        log.info("Start callback event type {} for Case ID: {}", EventType.GENERAL_APPLICATION, caseId);
         FinremCaseData caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplication =
@@ -62,7 +62,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
             helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
-        log.info("Logged in user case role type {} on case {}", loggedInUserCaseRole, caseId);
+        log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         if (data != null) {
@@ -75,7 +75,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
 
         helper.populateGeneralApplicationDataSender(caseData, existingGeneralApplication);
 
-        generalApplicationService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseData);
+        generalApplicationService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseDetails);
 
         if (loggedInUserCaseRole.equalsIgnoreCase("Case")) {
             List<GeneralApplicationsCollection> generalApplications = caseData.getGeneralApplicationWrapper()

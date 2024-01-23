@@ -28,7 +28,7 @@ public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEma
     @Override
     protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
         if (caseDetails.getData().isApplicantCorrespondenceEnabled()) {
-            log.info("Sending email notification to Applicant Solicitor for 'Contest Order Approved' for case: {}", caseDetails.getId());
+            log.info("Sending email notification to Applicant Solicitor for 'Contest Order Approved' for Case ID: {}", caseDetails.getId());
             notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
         }
     }
@@ -36,14 +36,14 @@ public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEma
     @Override
     protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
         if (caseDetails.getData().isRespondentCorrespondenceEnabled()) {
-            log.info("Sending email notification to Respondent Solicitor for 'Contest Order Approved' for case: {}", caseDetails.getId());
+            log.info("Sending email notification to Respondent Solicitor for 'Contest Order Approved' for Case ID: {}", caseDetails.getId());
             notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
         }
     }
 
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
-        log.info("Sending email notification to Intervener type {} Solicitor for 'Order Approved' for case: {}",
+        log.info("Sending email notification to Intervener type {} Solicitor for 'Order Approved' for Case ID: {}",
             intervenerWrapper.getIntervenerType(), caseDetails.getId());
         notificationService.sendContestOrderApprovedEmailIntervener(caseDetails,
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));

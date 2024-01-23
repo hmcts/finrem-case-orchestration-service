@@ -37,7 +37,7 @@ public class UploadApprovedOrderConsentedAboutToStartHandler extends FinremCallb
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Handling Upload Approved Order Consented application about to start callback for case id: {}",
+        log.info("Handling Upload Approved Order Consented application about to start callback for Case ID: {}",
             callbackRequest.getCaseDetails().getId());
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();

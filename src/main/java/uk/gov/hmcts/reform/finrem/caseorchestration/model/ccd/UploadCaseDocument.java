@@ -27,6 +27,12 @@ public class UploadCaseDocument {
     private YesOrNo caseDocumentFdr;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime caseDocumentUploadDateTime;
+    private String fileName;
+    private String scannedFileName;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime scannedDate;
+
+    private String exceptionRecordReference;
 
     public UploadCaseDocument(UploadCaseDocument uploadCaseDocument) {
         this.setCaseDocuments(new CaseDocument(uploadCaseDocument.getCaseDocuments()));
@@ -37,5 +43,8 @@ public class UploadCaseDocument {
         this.setHearingDetails(uploadCaseDocument.getHearingDetails());
         this.setCaseDocumentFdr(uploadCaseDocument.getCaseDocumentFdr());
         this.setCaseDocumentUploadDateTime(uploadCaseDocument.getCaseDocumentUploadDateTime());
+        this.setFileName(uploadCaseDocument.getFileName());
+        this.setScannedDate(uploadCaseDocument.getScannedDate());
+        this.setExceptionRecordReference(uploadCaseDocument.getExceptionRecordReference());
     }
 }

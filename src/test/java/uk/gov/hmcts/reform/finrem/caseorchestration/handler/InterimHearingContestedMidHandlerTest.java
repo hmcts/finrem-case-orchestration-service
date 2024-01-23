@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -22,11 +21,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
 class InterimHearingContestedMidHandlerTest extends BaseHandlerTestSetup {
@@ -48,39 +48,31 @@ class InterimHearingContestedMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void canHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.INTERIM_HEARING),
-            is(true));
+        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.INTERIM_HEARING));
     }
 
     @Test
     void canNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.INTERIM_HEARING),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.INTERIM_HEARING));
     }
 
     @Test
     void canNotHandleWrongEventType() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE));
     }
 
     @Test
     void canNotHandleWrongCallbackType() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.INTERIM_HEARING),
-            is(false));
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.INTERIM_HEARING));
     }
 
 
     @Test
-    void givenContestedCase_whenInterimHearingAdditionalUploadedButNonEncryptedFileShouldNotGetError() throws Exception {
+    void givenContestedCase_whenInterimHearingAdditionalUploadedButNonEncryptedFileShouldNotGetError() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.INTERIM_HEARING);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
-        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
 
         List<InterimHearingCollection> interimHearings = new  ArrayList<>();
 
@@ -94,5 +86,29 @@ class InterimHearingContestedMidHandlerTest extends BaseHandlerTestSetup {
 
         assertTrue(response.getErrors().isEmpty());
         verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenThereAreAlreadyExistingHearing_thenDoNotcheckDocumentForExisting()  {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.INTERIM_HEARING);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+
+        List<InterimHearingCollection> interimHearings = new  ArrayList<>();
+
+        InterimHearingItem hearingItem = InterimHearingItem.builder()
+            .interimPromptForAnyDocument("Yes").interimUploadAdditionalDocument(caseDocument).build();
+
+        interimHearings.add(InterimHearingCollection.builder().value(hearingItem).build());
+        caseData.getInterimWrapper().setInterimHearings(interimHearings);
+
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        caseDataBefore.getInterimWrapper().setInterimHearings(interimHearings);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertTrue(response.getErrors().isEmpty());
+        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 }

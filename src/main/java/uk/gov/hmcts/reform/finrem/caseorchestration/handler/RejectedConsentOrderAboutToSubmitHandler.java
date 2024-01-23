@@ -7,9 +7,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.RefusedConsentOrderDocumentCategoriser;
 
 import java.util.Map;
 
@@ -19,6 +22,8 @@ import java.util.Map;
 public class RejectedConsentOrderAboutToSubmitHandler implements CallbackHandler<Map<String, Object>> {
 
     private final RefusalOrderDocumentService refusalOrderDocumentService;
+    private final RefusedConsentOrderDocumentCategoriser refusalConsentOrderDocumentCategoriser;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Override
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
@@ -36,7 +41,10 @@ public class RejectedConsentOrderAboutToSubmitHandler implements CallbackHandler
         log.info("Received request to generate 'Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
 
         Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(userAuthorisation, caseDetails);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+        caseDetails.setData(caseData);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        refusalConsentOrderDocumentCategoriser.categorise(finremCaseDetails.getData());
+        Map<String, Object> mappedCaseData = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails).getData();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(mappedCaseData).build();
     }
 }

@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDe
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ApprovedOrderNoticeOfHearingCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.HearingNoticesCategoriser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -49,6 +50,7 @@ public class ApprovedOrderNoticeOfHearingService {
     private final DocumentConfiguration documentConfiguration;
     private final ObjectMapper objectMapper;
     private final ApprovedOrderNoticeOfHearingCorresponder approvedOrderNoticeOfHearingCorresponder;
+    private final FeatureToggleService featureToggleService;
 
 
     public void createAndStoreHearingNoticeDocumentPack(FinremCaseDetails caseDetails,
@@ -60,16 +62,32 @@ public class ApprovedOrderNoticeOfHearingService {
 
         FinremCaseData caseData = caseDetails.getData();
         List<DocumentCollection> documentCollections = Optional.ofNullable(caseData.getHearingNoticesDocumentCollection()).orElse(new ArrayList<>());
-        documentCollections.add(DocumentCollection.builder().value(noticeOfHearingDocument).build());
+
+        documentCollections.add(DocumentCollection.builder().value(
+            buildCaseDocumentWithExistingDocBreakingReferences(noticeOfHearingDocument)
+        ).build());
 
         documentCollections.forEach(docColl -> addAdditionalHearingDocument(caseData, docColl.getValue()));
 
         Optional<CaseDocument> latestDraftHearingOrder = Optional.ofNullable(caseData.getLatestDraftHearingOrder());
-        if (latestDraftHearingOrder.isPresent()) {
-            hearingNoticePack.add(getDocumentCollectionObj(caseData.getLatestDraftHearingOrder()));
-        }
+        latestDraftHearingOrder.ifPresent(latestDraftHearingOrderDocument -> hearingNoticePack.add(getDocumentCollectionObj(
+            buildCaseDocumentWithExistingDocBreakingReferences(latestDraftHearingOrderDocument)
+        )));
 
         caseData.setHearingNoticeDocumentPack(hearingNoticePack);
+
+        HearingNoticesCategoriser hearingNoticesCategoriser = new HearingNoticesCategoriser(featureToggleService);
+        hearingNoticesCategoriser.categorise(caseData);
+    }
+
+    private static CaseDocument buildCaseDocumentWithExistingDocBreakingReferences(CaseDocument caseDocument) {
+        // CaseDocument builder has been used as the document is duplicated and when assigning categories due to Java's pass by reference all versions
+        // of the document are updated. This is a workaround to ensure that each document is categorised separately.
+        return CaseDocument.builder()
+            .documentUrl(caseDocument.getDocumentUrl())
+            .documentFilename(caseDocument.getDocumentFilename())
+            .documentBinaryUrl(caseDocument.getDocumentBinaryUrl())
+            .build();
     }
 
 
@@ -104,7 +122,7 @@ public class ApprovedOrderNoticeOfHearingService {
             = Optional.ofNullable(data.getHearingDirectionDetailsCollection());
 
         if (hearingDirectionDetailsCollection.isEmpty()) {
-            throw new IllegalStateException("Invalid Case Data - hearing direction is empty for caseId " + caseDetails.getId());
+            throw new IllegalStateException("Invalid Case Data - hearing direction is empty for Case iD: " + caseDetails.getId());
         }
         List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollections = hearingDirectionDetailsCollection.get();
         HearingDirectionDetailsCollection directionDetailsCollection
