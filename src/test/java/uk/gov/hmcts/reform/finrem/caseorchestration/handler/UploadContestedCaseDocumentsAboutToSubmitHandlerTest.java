@@ -458,7 +458,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             UploadCaseDocumentCollection.builder().uploadCaseDocument(uploadCaseDocument).build();
         uploadContestedCaseDocumentsHandler.setDefaultsForWithoutPrejudiceDocumentType(uploadCaseDocumentCollection);
         assertThat(uploadCaseDocument.getCaseDocumentConfidentiality(), is(YesOrNo.NO));
-        assertThat(uploadCaseDocument.getCaseDocumentFdr(), is(YesOrNo.NO));
+        assertThat(uploadCaseDocument.getCaseDocumentFdr(), is(YesOrNo.YES));
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
