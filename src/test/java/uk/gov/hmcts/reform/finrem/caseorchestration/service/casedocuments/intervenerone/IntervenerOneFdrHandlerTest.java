@@ -32,9 +32,9 @@ public class IntervenerOneFdrHandlerTest extends BaseManageDocumentsHandlerTest 
 
     public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType() {
         screenUploadDocumentList = new ArrayList<>();
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.INTERVENER_ONE, YesOrNo.NO, YesOrNo.YES, null));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
@@ -64,7 +64,7 @@ public class IntervenerOneFdrHandlerTest extends BaseManageDocumentsHandlerTest 
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.INTERVENER_ONE, YesOrNo.NO, YesOrNo.YES, null));
     }
 
@@ -90,7 +90,7 @@ public class IntervenerOneFdrHandlerTest extends BaseManageDocumentsHandlerTest 
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
             is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_1)
         );
     }

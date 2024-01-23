@@ -25,7 +25,7 @@ public class IntervenerTwoHearingBundleHandlerTest extends HearingBundleHandlerT
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
 
     }

@@ -15,7 +15,7 @@ public abstract class HearingBundleHandlerTest extends BaseManageDocumentsHandle
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            hearingBundleHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE),
+            hearingBundleHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
             is(DocumentCategory.HEARING_BUNDLE)
         );
     }

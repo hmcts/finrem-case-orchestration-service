@@ -19,8 +19,7 @@ public class HearingBundleHandler extends PartyDocumentsHandler {
     protected boolean canHandleDocument(UploadCaseDocument uploadCaseDocument) {
 
         CaseDocumentType caseDocumentType = uploadCaseDocument.getCaseDocumentType();
-        return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.NO)
-            && (caseDocumentType.equals(CaseDocumentType.TRIAL_BUNDLE));
+        return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.NO);
     }
 
     @Override

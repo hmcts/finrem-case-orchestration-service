@@ -211,12 +211,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, "Other Example");
         beforeEventDocList.add(removedDoc);
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_B,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_F,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.CARE_PLAN,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()

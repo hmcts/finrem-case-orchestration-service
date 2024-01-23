@@ -31,7 +31,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.TRIAL_BUNDLE;
 
 @Slf4j
 @Service
@@ -126,8 +125,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
             GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
         if (!isAnyDocumentPresent(caseData)) {
             response.getErrors().add(NO_DOCUMENT_ERROR);
-        } else if (isAnyTrialBundleDocumentPresent(caseData)) {
-            response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
         }
         validateManageCaseDocumentsTypes(caseData, response.getErrors());
         return response;
@@ -135,13 +132,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
 
     private boolean isAnyDocumentPresent(FinremCaseData caseData) {
         return CollectionUtils.isNotEmpty(caseData.getManageCaseDocumentCollection());
-    }
-
-    private boolean isAnyTrialBundleDocumentPresent(FinremCaseData caseData) {
-        return caseData.getManageCaseDocumentCollection().stream()
-            .map(uploadCaseDocumentCollection ->
-                uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType())
-            .anyMatch(caseDocumentType -> caseDocumentType.equals(TRIAL_BUNDLE));
     }
 
     private CaseDocumentParty getActiveUserCaseDocumentParty(String caseId, String userAuthorisation) {

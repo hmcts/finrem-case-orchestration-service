@@ -373,7 +373,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             null, YesOrNo.YES, YesOrNo.NO, "Other Example"));
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
