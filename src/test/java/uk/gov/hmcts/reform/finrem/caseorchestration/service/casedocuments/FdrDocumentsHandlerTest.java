@@ -56,7 +56,7 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.RESPONDENT),
-            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE)
+            is(DocumentCategory.FDR_BUNDLE)
         );
     }
 

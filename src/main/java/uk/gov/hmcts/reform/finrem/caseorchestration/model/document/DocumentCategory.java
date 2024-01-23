@@ -39,6 +39,7 @@ public enum DocumentCategory {
     RESPONDENT_DOCUMENTS_PENSION_PLAN("respondentDocumentsPensionPlan"),
     LIP_OR_SCANNED_DOCUMENTS("lipOrScannedDocuments"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE("fdrDocumentsAndFdrBundle"),
+    FDR_BUNDLE("fdrBundle"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT("fdrDocumentsAndFdrBundleApplicant"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_FDR_BUNDLE("fdrDocumentsAndFdrBundleApplicantFdrBundle"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS("fdrDocumentsAndFdrBundleApplicantPositionStatements"),

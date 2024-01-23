@@ -58,6 +58,6 @@ public class FdrDocumentsHandler extends DocumentHandler {
                 }
             }
         }
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
+        return DocumentCategory.FDR_BUNDLE;
     }
 }
