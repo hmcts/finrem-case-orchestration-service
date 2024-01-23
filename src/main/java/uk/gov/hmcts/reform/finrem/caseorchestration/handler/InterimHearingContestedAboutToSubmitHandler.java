@@ -67,6 +67,6 @@ public class InterimHearingContestedAboutToSubmitHandler extends FinremCallbackH
         interimHearings.addAll(interimWrapper.getInterimHearingsScreenField());
         interimWrapper.setInterimHearings(interimHearings.stream()
             .sorted(Comparator.nullsLast(Comparator.comparing(e -> e.getValue().getInterimHearingDate())))
-            .collect(Collectors.toList()));
+            .toList());
     }
 }

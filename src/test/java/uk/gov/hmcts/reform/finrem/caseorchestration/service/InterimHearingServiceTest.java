@@ -14,8 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -24,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
@@ -32,7 +31,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Selec
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -47,40 +45,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BIRMINGHAM_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BRISTOL_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CFC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CLEAVELAND_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DEVON_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DORSET_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_HUMBER_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_KENT_SURREY_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_LANCASHIRE_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_LIVERPOOL_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_LONDON_FRC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_MANCHESTER_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_MIDLANDS_FRC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NEWPORT_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NORTHEAST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NORTHWALES_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NORTHWEST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NOTTINGHAM_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NWYORKSHIRE_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_PROMPT_FOR_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_REGION_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_SOUTHEAST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_SOUTHWEST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_SWANSEA_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_THAMESVALLEY_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME_ESTIMATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_WALES_FRC_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -125,7 +89,7 @@ public class InterimHearingServiceTest {
         "/fixtures/contested/interim-hearing-two-old-two-new-collections.json";
     private static final String ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON =
         "/fixtures/contested/interim-hearing-two-collection-modified.json";
-    private static final String TEST_NEW_JSON = "/fixtures/contested/interim-hearing-three-collection-no-track.json";
+    private static final String LEGACY_INTERIM_HEARING = "/fixtures/contested/interim-hearing-three-collection-no-track.json";
 
     @BeforeAll
     public void setUp() {
@@ -156,7 +120,7 @@ public class InterimHearingServiceTest {
 
     @Test
     public void given3NewInterimHearing1UploadedDoc_whenAddHearingNotices_then6BulkprintDocs() {
-        FinremCaseDetails caseDetails = buildFinremCaseDetails(TEST_NEW_JSON);
+        FinremCaseDetails caseDetails = buildFinremCaseDetails(LEGACY_INTERIM_HEARING);
 
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
@@ -199,7 +163,7 @@ public class InterimHearingServiceTest {
     @Test
     public void givenContestedMultipleHearing_WhenNoConsentToEmail_ThenItShouldSendAllToBulkPrint() {
 
-        FinremCaseDetails caseDetails = buildFinremCaseDetails(TEST_NEW_JSON);
+        FinremCaseDetails caseDetails = buildFinremCaseDetails(LEGACY_INTERIM_HEARING);
 
         IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
@@ -225,7 +189,7 @@ public class InterimHearingServiceTest {
 
     @Test
     public void givenContestedCase_ThenItShouldSendNotification() {
-        FinremCaseDetails caseDetails = buildFinremCaseDetails(TEST_NEW_JSON);
+        FinremCaseDetails caseDetails = buildFinremCaseDetails(LEGACY_INTERIM_HEARING);
 
         IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerCorrespondenceEnabled(Boolean.TRUE).build();
@@ -276,49 +240,17 @@ public class InterimHearingServiceTest {
         assertThat(data.getIntv4HearingNoticesCollection(), is(nullValue()));
     }
 
-    private CaseDetails buildCaseDetails(String path) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+    @Test
+    public void givenCaseWithLegacyInterim_whenGetLegacyInterimAsInterimCollection_thenNewInterimCollection() {
 
-    private void verifyNonCollectionData(Map<String, Object> data) {
-        assertNull(data.get(INTERIM_HEARING_TYPE));
-        assertNull(data.get(INTERIM_HEARING_DATE));
-        assertNull(data.get(INTERIM_HEARING_TIME));
-        assertNull(data.get(INTERIM_HEARING_TIME_ESTIMATE));
-        assertNull(data.get(INTERIM_HEARING_REGION_LIST));
-        assertNull(data.get(INTERIM_HEARING_CFC_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_WALES_FRC_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_LONDON_FRC_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_DEVON_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_DORSET_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_HUMBER_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_MIDLANDS_FRC_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_BRISTOL_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NEWPORT_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NORTHEAST_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NORTHWEST_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_SOUTHEAST_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_SOUTHWEST_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_SWANSEA_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_LIVERPOOL_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_BIRMINGHAM_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_CLEAVELAND_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_KENT_SURREY_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_LANCASHIRE_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_MANCHESTER_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NORTHWALES_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NOTTINGHAM_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NWYORKSHIRE_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_THAMESVALLEY_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_ADDITIONAL_INFO));
-        assertNull(data.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
-        assertNull(data.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
-        assertNull(data.get(INTERIM_HEARING_DOCUMENT));
+        FinremCaseDetails caseDetails = buildFinremCaseDetails(LEGACY_INTERIM_HEARING);
+
+        List<InterimHearingCollection> legacyCollection =
+            interimHearingService.getLegacyInterimHearingAsInterimHearingCollection(caseDetails.getData());
+
+        assertThat(legacyCollection.size(), is(1));
+        assertThat(legacyCollection.get(0).getValue().getInterimHearingTime(), is("5 hour"));
+        assertThat(legacyCollection.get(0).getValue().getInterimHearingTimeEstimate(), is("Test"));
     }
 
     protected FinremCaseDetails buildFinremCaseDetails(String testJson) {
