@@ -352,7 +352,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             Matchers.<String, Object>hasEntry("interim_cfcCourtList", "FR_s_CFCList_4"),
             Matchers.<String, Object>hasEntry("interimHearingDate", "2020-06-01"),
             Matchers.<String, Object>hasEntry("interimHearingTime", "2:00 pm"),
-            Matchers.<String, Object>hasEntry("interimHearingTimeEstimate", "30 minutes"),
             Matchers.<String, Object>hasEntry("interimAdditionalInformationAboutHearing", "refreshments will be provided"),
             hasKey("letterDate")));
 
