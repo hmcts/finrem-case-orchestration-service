@@ -53,7 +53,7 @@ public class ApplicantFormEExhibitsCollectionServiceTest extends BaseManageDocum
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.APPLICANT_FORM_E),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.APPLICANT_FORM_E, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.APPLICANT_DOCUMENTS_FORM_E)
         );
     }

@@ -52,7 +52,7 @@ public class ConfidentialDocumentsHandlerTest extends BaseManageDocumentsHandler
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.CONFIDENTIAL_DOCUMENTS)
         );
     }

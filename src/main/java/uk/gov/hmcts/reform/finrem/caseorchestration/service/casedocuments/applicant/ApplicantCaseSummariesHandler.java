@@ -19,7 +19,7 @@ public class ApplicantCaseSummariesHandler extends CaseSummariesHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
             case POSITION_STATEMENT:
                 return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_POSITION_STATEMENT;

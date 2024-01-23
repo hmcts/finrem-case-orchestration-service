@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.IntervenerFourFdrHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +77,7 @@ public class IntervenerFourFdrHandlerTest extends BaseManageDocumentsHandlerTest
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE, CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_4)
         );
     }

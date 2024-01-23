@@ -55,17 +55,17 @@ public class ApplicantCaseSummariesHandlerTest extends CaseSummariesHandlerTest<
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_POSITION_STATEMENT)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.SKELETON_ARGUMENT),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.SKELETON_ARGUMENT, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_SKELETON_ARGUMENT)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CASE_SUMMARY)
         );
     }

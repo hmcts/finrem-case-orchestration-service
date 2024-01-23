@@ -61,47 +61,47 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.RESPONDENT_DOCUMENTS_MISCELLANEOUS_OR_OTHER)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.RESPONDENT_DOCUMENTS_PENSION_PLAN)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.RESPONDENT_DOCUMENTS_CERTIFICATES_OF_SERVICE)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_ES1)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.REPORTS_PENSION_REPORTS)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.RESPONDENT_DOCUMENTS)
         );
     }

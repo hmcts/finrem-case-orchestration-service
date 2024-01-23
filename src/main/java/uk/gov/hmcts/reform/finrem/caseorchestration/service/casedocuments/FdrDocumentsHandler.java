@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
+
 @Component
 @Order(1)
 public class FdrDocumentsHandler extends DocumentHandler {
@@ -29,9 +31,9 @@ public class FdrDocumentsHandler extends DocumentHandler {
 
     private boolean isFdr(UploadCaseDocumentCollection managedDocumentCollection) {
         UploadCaseDocument uploadedCaseDocument = managedDocumentCollection.getUploadCaseDocument();
-        return !isIntervener(uploadedCaseDocument.getCaseDocumentParty())
+        return (!isIntervener(uploadedCaseDocument.getCaseDocumentParty())
             && YesOrNo.isNoOrNull(uploadedCaseDocument.getCaseDocumentConfidentiality())
-            && YesOrNo.isYes(uploadedCaseDocument.getCaseDocumentFdr());
+            && YesOrNo.isYes(uploadedCaseDocument.getCaseDocumentFdr()));
     }
 
     private boolean isIntervener(CaseDocumentParty caseDocumentParty) {
@@ -42,7 +44,20 @@ public class FdrDocumentsHandler extends DocumentHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
+        if (caseDocumentType.equals(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS)) {
+            switch (caseDocumentParty) {
+                case APPLICANT -> {
+                    return FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
+                }
+                case RESPONDENT -> {
+                    return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS;
+                }
+                default -> {
+                    return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
+                }
+            }
+        }
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
     }
 }

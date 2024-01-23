@@ -58,17 +58,17 @@ public class IntervenerOneCaseSummariesHandlerTest extends CaseSummariesHandlerT
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT, CaseDocumentParty.INTERVENER_ONE),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_POSITION_STATEMENT)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.SKELETON_ARGUMENT),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.SKELETON_ARGUMENT, CaseDocumentParty.INTERVENER_ONE),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_SKELETON_ARGUMENT)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY, CaseDocumentParty.INTERVENER_ONE),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_CASE_SUMMARY)
         );
     }

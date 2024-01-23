@@ -197,7 +197,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         UploadCaseDocument uploadCaseDocument = document.getUploadCaseDocument();
         if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(uploadCaseDocument.getCaseDocumentType())) {
             uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
-            uploadCaseDocument.setCaseDocumentFdr(YesOrNo.NO);
+            uploadCaseDocument.setCaseDocumentFdr(YesOrNo.YES);
         }
     }
 }

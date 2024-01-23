@@ -31,10 +31,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.IntervenerOneFdrHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerfour.IntervenerFourChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneFdrHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerthree.IntervenerThreeChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenertwo.IntervenerTwoChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
