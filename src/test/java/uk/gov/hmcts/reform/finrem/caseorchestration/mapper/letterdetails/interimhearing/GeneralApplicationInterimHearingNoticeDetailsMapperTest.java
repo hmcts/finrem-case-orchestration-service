@@ -41,6 +41,7 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends Abs
         CourtDetailsTemplateFields courtDetails = getCourtDetails(CfcCourt.KINGSTON_UPON_THAMES_COUNTY_COURT_AND_FAMILY_COURT);
         return GeneralApplicationInterimHearingNoticeDetails.builder()
             .letterDate(String.valueOf(LocalDate.now()))
+            .interimTimeEstimate("30 minutes")
             .interimHearingType("Directions (DIR)")
             .interimHearingTime("2:00 pm")
             .interimHearingDate("2020-06-01")
