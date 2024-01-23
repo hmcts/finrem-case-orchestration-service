@@ -92,5 +92,9 @@ public class IntervenerOneFdrHandlerTest extends BaseManageDocumentsHandlerTest 
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE, CaseDocumentParty.INTERVENER_ONE),
             is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_1)
         );
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS, CaseDocumentParty.INTERVENER_ONE),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_1_WITHOUT_PREJUDICE_OFFERS)
+        );
     }
 }

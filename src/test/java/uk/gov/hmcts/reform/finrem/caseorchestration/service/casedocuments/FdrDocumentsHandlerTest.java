@@ -58,6 +58,14 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.FDR_BUNDLE)
         );
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS, CaseDocumentParty.RESPONDENT),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS)
+        );
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS)
+        );
     }
 
 }

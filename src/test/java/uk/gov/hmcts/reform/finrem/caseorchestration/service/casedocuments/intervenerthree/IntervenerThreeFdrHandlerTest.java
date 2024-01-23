@@ -79,5 +79,9 @@ public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTes
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE, CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3)
         );
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS, CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_WITHOUT_PREJUDICE_OFFERS)
+        );
     }
 }
