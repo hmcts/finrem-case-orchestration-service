@@ -46,11 +46,13 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.APPLICANT_FORM_E;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.ATTENDANCE_SHEETS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CHRONOLOGY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.EXPERT_EVIDENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.FORM_H;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.OTHER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.PRE_HEARING_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.QUESTIONNAIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.STATEMENT_AFFIDAVIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
@@ -127,11 +129,13 @@ public class ApplicantShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setAppChronologiesCollection(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setAppStatementsExhibitsCollection(getTestDocument(STATEMENT_AFFIDAVIT));
+        data.getUploadCaseDocumentWrapper().setAppHearingBundlesCollection(getTestDocument(PRE_HEARING_DRAFT_ORDER));
         data.getUploadCaseDocumentWrapper().setAppFormEExhibitsCollection(getTestDocument(APPLICANT_FORM_E));
         data.getUploadCaseDocumentWrapper().setAppQaCollection(getTestDocument(QUESTIONNAIRE));
         data.getUploadCaseDocumentWrapper().setAppCaseSummariesCollection(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setAppFormsHCollection(getTestDocument(FORM_H));
         data.getUploadCaseDocumentWrapper().setAppExpertEvidenceCollection(getTestDocument(EXPERT_EVIDENCE));
+        data.getUploadCaseDocumentWrapper().setAppCorrespondenceDocsCollection(getTestDocument(ATTENDANCE_SHEETS));
 
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
         List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getAppOtherCollection();
