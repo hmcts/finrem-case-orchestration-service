@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
@@ -21,9 +22,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderAddressTo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderDocumentCategoriser;
 
@@ -150,6 +155,56 @@ public class GeneralOrderService {
         return caseDetails.getData();
     }
 
+    public void addConsentedGeneralOrderToCollection(FinremCaseData caseData) {
+        GeneralOrderWrapper generalOrderWrapper = caseData.getGeneralOrderWrapper();
+        generalOrderWrapper.setGeneralOrderLatestDocument(generalOrderWrapper.getGeneralOrderPreviewDocument());
+
+        GeneralOrder generalOrder = new GeneralOrder();
+        generalOrder.setGeneralOrderAddressTo(getAddressToFormatted(generalOrderWrapper.getGeneralOrderAddressTo()));
+        generalOrder.setGeneralOrderDocumentUpload(generalOrderWrapper.getGeneralOrderPreviewDocument());
+
+        GeneralOrderCollectionItem item = new GeneralOrderCollectionItem();
+        item.setId(UUID.randomUUID().toString());
+        item.setGeneralOrder(generalOrder);
+
+        if (generalOrderWrapper.getGeneralOrderCollection() == null) {
+            generalOrderWrapper.setGeneralOrderCollection(new ArrayList<>());
+        }
+
+        generalOrderWrapper.getGeneralOrderCollection().add(item);
+    }
+
+    public void addContestedGeneralOrderToCollection(FinremCaseData caseData, EventType eventId) {
+        GeneralOrderWrapper generalOrderWrapper = caseData.getGeneralOrderWrapper();
+        generalOrderWrapper.setGeneralOrderLatestDocument(generalOrderWrapper.getGeneralOrderPreviewDocument());
+
+        ContestedGeneralOrder contestedGeneralOrder = ContestedGeneralOrder
+            .builder()
+            .dateOfOrder(generalOrderWrapper.getGeneralOrderDate())
+            .additionalDocument(generalOrderWrapper.getGeneralOrderPreviewDocument())
+            .generalOrderAddressTo(getAddressToFormatted(generalOrderWrapper.getGeneralOrderAddressTo()))
+            .build();
+        ContestedGeneralOrderCollection contestedGeneralOrderCollection = ContestedGeneralOrderCollection.builder()
+            .value(contestedGeneralOrder)
+            .build();
+
+        if (GENERAL_ORDER_CONSENT_IN_CONTESTED.equals(eventId)
+            && caseDataService.hasConsentOrder(caseData)) {
+            if (generalOrderWrapper.getGeneralOrdersConsent() == null) {
+                generalOrderWrapper.setGeneralOrdersConsent(new ArrayList<>());
+            }
+            generalOrderWrapper.getGeneralOrdersConsent().add(contestedGeneralOrderCollection);
+        } else {
+            if (generalOrderWrapper.getGeneralOrders() == null) {
+                generalOrderWrapper.setGeneralOrders(new ArrayList<>());
+            }
+            generalOrderWrapper.getGeneralOrders().add(contestedGeneralOrderCollection);
+        }
+
+        generalOrderDocumentCategoriser.categorise(caseData);
+    }
+
+    @Deprecated
     public Map<String, Object> populateGeneralOrderCollection(CaseDetails caseDetails, String eventId) {
         caseDetails.getData().put(GENERAL_ORDER_LATEST_DOCUMENT,
             documentHelper.convertToCaseDocument(caseDetails.getData().get(GENERAL_ORDER_PREVIEW_DOCUMENT)));
@@ -236,17 +291,25 @@ public class GeneralOrderService {
         });
     }
 
-    private String getAddressToFormatted(Map<String, Object> caseData) {
-        String storedValue = String.valueOf(caseData.get(GENERAL_ORDER_ADDRESS_TO));
-        if ("applicant".equals(storedValue)) {
+    private String getAddressToFormatted(GeneralOrderAddressTo addressTo) {
+        return addressTo != null ? addressTo.getText() : "";
+    }
+
+    private String getAddressToFormatted(String addressTo) {
+        if ("applicant".equals(addressTo)) {
             return "Applicant";
-        } else if ("applicantSolicitor".equals(storedValue)) {
+        } else if ("applicantSolicitor".equals(addressTo)) {
             return "Applicant Solicitor";
-        } else if ("respondentSolicitor".equals(storedValue)) {
+        } else if ("respondentSolicitor".equals(addressTo)) {
             return "Respondent Solicitor";
         } else {
             return "";
         }
+    }
+
+    private String getAddressToFormatted(Map<String, Object> caseData) {
+        String storedValue = String.valueOf(caseData.get(GENERAL_ORDER_ADDRESS_TO));
+        return getAddressToFormatted(storedValue);
     }
 
     public void setOrderList(FinremCaseDetails caseDetails) {
