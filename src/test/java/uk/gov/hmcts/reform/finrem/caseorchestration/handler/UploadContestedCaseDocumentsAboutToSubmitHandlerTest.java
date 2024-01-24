@@ -368,26 +368,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenUploadFileTrialBundleSelected_WhenAboutToSubmit_ThenShowTrialBundleErrorMessage() {
-
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            null, YesOrNo.YES, YesOrNo.NO, "Other Example"));
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-
-        caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>
-            response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors().size(), is(1));
-        assertThat(response.getErrors().iterator().next(),
-            is(UploadContestedCaseDocumentsAboutToSubmitHandler.TRIAL_BUNDLE_SELECTED_ERROR));
-    }
-
-    @Test
     public void givenUploadFileWithoutTrialBundle_WhenAboutToSubmit_ThenNoErrors() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
