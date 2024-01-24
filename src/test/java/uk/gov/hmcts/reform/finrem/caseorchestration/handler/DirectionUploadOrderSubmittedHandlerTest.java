@@ -10,10 +10,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
@@ -110,7 +113,9 @@ class DirectionUploadOrderSubmittedHandlerTest {
 
     private FinremCallbackRequest buildCallbackRequest() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L)
-            .data(FinremCaseData.builder().partiesOnCase(getParties()).build()).build();
+            .data(FinremCaseData.builder().directionDetailsCollection(of(DirectionDetailCollection.builder()
+                .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build()))
+                .partiesOnCase(getParties()).build()).build();
         return FinremCallbackRequest.builder().eventType(EventType.SEND_ORDER)
             .caseDetails(caseDetails).build();
     }
