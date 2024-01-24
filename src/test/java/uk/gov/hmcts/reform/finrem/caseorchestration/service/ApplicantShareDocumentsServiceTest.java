@@ -200,11 +200,13 @@ public class ApplicantShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setAppChronologiesCollection(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setAppStatementsExhibitsCollection(getTestDocument(STATEMENT_AFFIDAVIT));
+        data.getUploadCaseDocumentWrapper().setAppHearingBundlesCollection(getTestDocument(PRE_HEARING_DRAFT_ORDER));
         data.getUploadCaseDocumentWrapper().setAppFormEExhibitsCollection(getTestDocument(APPLICANT_FORM_E));
         data.getUploadCaseDocumentWrapper().setAppQaCollection(getTestDocument(QUESTIONNAIRE));
         data.getUploadCaseDocumentWrapper().setAppCaseSummariesCollection(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setAppFormsHCollection(getTestDocument(FORM_H));
         data.getUploadCaseDocumentWrapper().setAppExpertEvidenceCollection(getTestDocument(EXPERT_EVIDENCE));
+        data.getUploadCaseDocumentWrapper().setAppCorrespondenceDocsCollection(getTestDocument(ATTENDANCE_SHEETS));
 
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
 
