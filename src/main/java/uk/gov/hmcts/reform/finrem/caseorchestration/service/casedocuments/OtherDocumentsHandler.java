@@ -69,7 +69,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
                 return getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory();
             }
             case PENSION_REPORT -> {
-                return DocumentCategory.REPORTS_PENSION_REPORTS;
+                return DocumentCategory.REPORTS;
             }
             case HOUSING_PARTICULARS -> {
                 return getHouseParticularsDocumentCategory();

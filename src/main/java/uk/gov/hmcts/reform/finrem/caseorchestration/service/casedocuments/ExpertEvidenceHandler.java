@@ -31,7 +31,7 @@ public abstract class ExpertEvidenceHandler extends PartyDocumentsHandler {
                 return getHearingDocumentsFamilyHomeValuation();
             }
             case EXPERT_EVIDENCE -> {
-                return DocumentCategory.REPORTS_EXPERT_REPORTS;
+                return DocumentCategory.REPORTS;
             }
             default -> {
                 return DocumentCategory.UNCATEGORISED;

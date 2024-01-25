@@ -58,6 +58,7 @@ public class FdrDocumentsHandler extends DocumentHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
+        return CaseDocumentType.VALUATION_REPORT.equals(caseDocumentType)
+            ? DocumentCategory.REPORTS : DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
     }
 }
