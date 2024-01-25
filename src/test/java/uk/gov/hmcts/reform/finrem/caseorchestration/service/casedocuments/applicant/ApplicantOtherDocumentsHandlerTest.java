@@ -43,7 +43,7 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(5));
+            hasSize(2));
 
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
