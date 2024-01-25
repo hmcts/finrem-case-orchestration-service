@@ -27,10 +27,6 @@ public class RespondentCaseSummariesCollectionServiceTest extends CaseSummariesH
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.SKELETON_ARGUMENT,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
 
@@ -44,7 +40,7 @@ public class RespondentCaseSummariesCollectionServiceTest extends CaseSummariesH
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(3));
+            hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -57,15 +53,6 @@ public class RespondentCaseSummariesCollectionServiceTest extends CaseSummariesH
 
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
-        assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT),
-            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT)
-        );
-
-        assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.SKELETON_ARGUMENT),
-            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_SKELETON_ARGUMENT)
-        );
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY),

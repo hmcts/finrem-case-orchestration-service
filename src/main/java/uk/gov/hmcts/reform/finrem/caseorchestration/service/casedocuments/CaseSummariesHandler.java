@@ -19,8 +19,7 @@ public abstract class CaseSummariesHandler extends PartyDocumentsHandler {
 
         CaseDocumentType caseDocumentType = uploadCaseDocument.getCaseDocumentType();
         return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.NO)
-            && (caseDocumentType.equals(CaseDocumentType.POSITION_STATEMENT)
-            || caseDocumentType.equals(CaseDocumentType.SKELETON_ARGUMENT)
+            && (caseDocumentType.equals(CaseDocumentType.STATEMENT_SKELETON_ARGUMENT)
             || caseDocumentType.equals(CaseDocumentType.CASE_SUMMARY));
     }
 

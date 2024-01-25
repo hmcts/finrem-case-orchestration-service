@@ -28,10 +28,6 @@ public class IntervenerThreeCaseSummariesHandlerTest extends CaseSummariesHandle
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT,
-            CaseDocumentParty.INTERVENER_THREE, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.SKELETON_ARGUMENT,
-            CaseDocumentParty.INTERVENER_THREE, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.INTERVENER_THREE, YesOrNo.NO, YesOrNo.NO, null));
     }
@@ -44,7 +40,7 @@ public class IntervenerThreeCaseSummariesHandlerTest extends CaseSummariesHandle
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(3));
+            hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -57,15 +53,6 @@ public class IntervenerThreeCaseSummariesHandlerTest extends CaseSummariesHandle
 
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT),
-            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_POSITION_STATEMENT)
-        );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.SKELETON_ARGUMENT),
-            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_SKELETON_ARGUMENT)
-        );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY),

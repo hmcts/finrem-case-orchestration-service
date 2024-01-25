@@ -21,10 +21,6 @@ public class IntervenerTwoCaseSummariesHandler extends CaseSummariesHandler {
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
-            case POSITION_STATEMENT:
-                return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_POSITION_STATEMENT;
-            case SKELETON_ARGUMENT:
-                return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_SKELETON_ARGUMENT;
             case CASE_SUMMARY:
                 return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_CASE_SUMMARY;
             default:
