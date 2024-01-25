@@ -330,7 +330,7 @@
               "document_binary_url": "http://document-management-store:8080/documents/0cb4fca0-9402-401b-a322-9f82ee5bf21d/binary"
             },
             "hearingDetails": null,
-            "caseDocumentType": "Pre hearing draft order",
+            "caseDocumentType": "Trial Bundle",
             "caseDocumentOther": null,
             "caseDocumentParty": "applicant",
             "caseDocumentConfidential": null
@@ -430,7 +430,7 @@
               "document_binary_url": "http://document-management-store:8080/documents/0cb4fca0-9402-401b-a322-9f82ee5bf21d/binary"
             },
             "hearingDetails": null,
-            "caseDocumentType": "Pre hearing draft order",
+            "caseDocumentType": "Trial Bundle",
             "caseDocumentOther": null,
             "caseDocumentParty": "applicant",
             "caseDocumentConfidential": null

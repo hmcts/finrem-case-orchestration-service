@@ -55,9 +55,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.EXPERT_EVIDENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.FORM_H;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.OTHER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.PRE_HEARING_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.QUESTIONNAIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.STATEMENT_AFFIDAVIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.TRIAL_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -125,7 +125,7 @@ public class IntervenerShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setIntv1Other(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setIntv1Chronologies(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setIntv1StmtsExhibits(getTestDocument(STATEMENT_AFFIDAVIT));
-        data.getUploadCaseDocumentWrapper().setIntv1HearingBundles(getTestDocument(PRE_HEARING_DRAFT_ORDER));
+        data.getUploadCaseDocumentWrapper().setIntv1HearingBundles(getTestDocument(TRIAL_BUNDLE));
         data.getUploadCaseDocumentWrapper().setIntv1FormEsExhibits(getTestDocument(APPLICANT_FORM_E));
         data.getUploadCaseDocumentWrapper().setIntv1Qa(getTestDocument(QUESTIONNAIRE));
         data.getUploadCaseDocumentWrapper().setIntv1Summaries(getTestDocument(CASE_SUMMARY));
@@ -158,7 +158,7 @@ public class IntervenerShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setIntv2Other(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setIntv2Chronologies(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setIntv2StmtsExhibits(getTestDocument(STATEMENT_AFFIDAVIT));
-        data.getUploadCaseDocumentWrapper().setIntv2HearingBundles(getTestDocument(PRE_HEARING_DRAFT_ORDER));
+        data.getUploadCaseDocumentWrapper().setIntv2HearingBundles(getTestDocument(TRIAL_BUNDLE));
         data.getUploadCaseDocumentWrapper().setIntv2FormEsExhibits(getTestDocument(APPLICANT_FORM_E));
         data.getUploadCaseDocumentWrapper().setIntv2Qa(getTestDocument(QUESTIONNAIRE));
         data.getUploadCaseDocumentWrapper().setIntv2Summaries(getTestDocument(CASE_SUMMARY));
@@ -190,7 +190,7 @@ public class IntervenerShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setIntv3Other(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setIntv3Chronologies(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setIntv3StmtsExhibits(getTestDocument(STATEMENT_AFFIDAVIT));
-        data.getUploadCaseDocumentWrapper().setIntv3HearingBundles(getTestDocument(PRE_HEARING_DRAFT_ORDER));
+        data.getUploadCaseDocumentWrapper().setIntv3HearingBundles(getTestDocument(TRIAL_BUNDLE));
         data.getUploadCaseDocumentWrapper().setIntv3FormEsExhibits(getTestDocument(APPLICANT_FORM_E));
         data.getUploadCaseDocumentWrapper().setIntv3Qa(getTestDocument(QUESTIONNAIRE));
         data.getUploadCaseDocumentWrapper().setIntv3Summaries(getTestDocument(CASE_SUMMARY));
@@ -223,7 +223,7 @@ public class IntervenerShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setIntv4Other(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setIntv4Chronologies(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setIntv4StmtsExhibits(getTestDocument(STATEMENT_AFFIDAVIT));
-        data.getUploadCaseDocumentWrapper().setIntv4HearingBundles(getTestDocument(PRE_HEARING_DRAFT_ORDER));
+        data.getUploadCaseDocumentWrapper().setIntv4HearingBundles(getTestDocument(TRIAL_BUNDLE));
         data.getUploadCaseDocumentWrapper().setIntv4FormEsExhibits(getTestDocument(APPLICANT_FORM_E));
         data.getUploadCaseDocumentWrapper().setIntv4Qa(getTestDocument(QUESTIONNAIRE));
         data.getUploadCaseDocumentWrapper().setIntv4Summaries(getTestDocument(CASE_SUMMARY));

@@ -29,9 +29,9 @@ public class ApplicantHearingBundleCollectionServiceTest extends HearingBundleHa
     public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType() {
         screenUploadDocumentList = new ArrayList<>();
 
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
             CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
@@ -49,7 +49,7 @@ public class ApplicantHearingBundleCollectionServiceTest extends HearingBundleHa
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
     }
 

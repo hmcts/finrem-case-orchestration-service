@@ -24,6 +24,7 @@ public enum CaseDocumentType {
     STATEMENT_AFFIDAVIT("Statement/Affidavit"),
     WITNESS_STATEMENT_AFFIDAVIT("Witness Statement/Affidavit"),
     OFFERS("Offers"),
+    TRIAL_BUNDLE("Trial Bundle"),
     CONDITIONAL_ORDER("Conditional order"),
     FINAL_ORDER("Final order"),
     OTHER("other"),

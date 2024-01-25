@@ -124,7 +124,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION),
-            hasSize(2));
+            hasSize(4));
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(3));
@@ -132,7 +132,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(1));
+            hasSize(0));
     }
 
 
@@ -211,12 +211,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, "Other Example");
         beforeEventDocList.add(removedDoc);
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.PRE_HEARING_DRAFT_ORDER,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.ATTENDANCE_SHEETS,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_H,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()

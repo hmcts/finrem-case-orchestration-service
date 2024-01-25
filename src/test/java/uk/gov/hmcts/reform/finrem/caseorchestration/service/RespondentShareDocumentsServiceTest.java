@@ -52,9 +52,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.EXPERT_EVIDENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.FORM_H;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.OTHER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.PRE_HEARING_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.QUESTIONNAIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.STATEMENT_AFFIDAVIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.TRIAL_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
@@ -133,7 +133,7 @@ public class RespondentShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setRespOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setRespChronologiesCollection(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setRespStatementsExhibitsCollection(getTestDocument(STATEMENT_AFFIDAVIT));
-        data.getUploadCaseDocumentWrapper().setRespHearingBundlesCollection(getTestDocument(PRE_HEARING_DRAFT_ORDER));
+        data.getUploadCaseDocumentWrapper().setRespHearingBundlesCollection(getTestDocument(TRIAL_BUNDLE));
         data.getUploadCaseDocumentWrapper().setRespFormEExhibitsCollection(getTestDocument(APPLICANT_FORM_E));
         data.getUploadCaseDocumentWrapper().setRespQaCollection(getTestDocument(QUESTIONNAIRE));
         data.getUploadCaseDocumentWrapper().setRespCaseSummariesCollection(getTestDocument(CASE_SUMMARY));
@@ -212,7 +212,7 @@ public class RespondentShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setRespOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setRespChronologiesCollection(getTestDocument(CHRONOLOGY));
         data.getUploadCaseDocumentWrapper().setRespStatementsExhibitsCollection(getTestDocument(STATEMENT_AFFIDAVIT));
-        data.getUploadCaseDocumentWrapper().setRespHearingBundlesCollection(getTestDocument(PRE_HEARING_DRAFT_ORDER));
+        data.getUploadCaseDocumentWrapper().setRespHearingBundlesCollection(getTestDocument(TRIAL_BUNDLE));
         data.getUploadCaseDocumentWrapper().setRespFormEExhibitsCollection(getTestDocument(APPLICANT_FORM_E));
         data.getUploadCaseDocumentWrapper().setRespQaCollection(getTestDocument(QUESTIONNAIRE));
         data.getUploadCaseDocumentWrapper().setRespCaseSummariesCollection(getTestDocument(CASE_SUMMARY));
