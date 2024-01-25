@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER;
@@ -32,7 +33,7 @@ public class CreateGeneralOrderAboutToStartHandler extends FinremCallbackHandler
     @Autowired
     public CreateGeneralOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                  IdamService idamService) {
-        this(finremCaseDetailsMapper, idamService, Clock.systemDefaultZone());
+        this(finremCaseDetailsMapper, idamService, Clock.system(ZoneId.of("Europe/London")));
     }
 
     public CreateGeneralOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,

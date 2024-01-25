@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrd
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -491,23 +492,20 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     private FinremCaseDetails contestedFinremCaseDetails() throws Exception {
-        String filename = "/fixtures/general-order-contested.json";
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(filename)) {
-            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-        }
+        return readRequestJson("/fixtures/general-order-contested.json").getCaseDetails();
     }
 
     private FinremCaseDetails consentedInContestedFinremCaseDetails() throws Exception {
-        String filename = "/fixtures/general-order-consented-in-contested.json";
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(filename)) {
-            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-        }
+        return readRequestJson("/fixtures/general-order-consented-in-contested.json").getCaseDetails();
     }
 
     private FinremCaseDetails consentedFinremCaseDetails() throws Exception {
-        String filename = "/fixtures/general-order-consented.json";
+        return readRequestJson("/fixtures/general-order-consented.json").getCaseDetails();
+    }
+
+    private FinremCallbackRequest readRequestJson(String filename) throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(filename)) {
-            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class);
         }
     }
 
