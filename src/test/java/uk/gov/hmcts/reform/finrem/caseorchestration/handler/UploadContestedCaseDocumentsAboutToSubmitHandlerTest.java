@@ -32,12 +32,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDo
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerfour.IntervenerFourChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneFdrHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerthree.IntervenerThreeChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenertwo.IntervenerTwoChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentFdrDocumentCategoriser;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -65,6 +67,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     private CaseAssignedRoleService caseAssignedRoleService;
     @Mock
     private FeatureToggleService featureToggleService;
+
+    @Mock
+    private ApplicantFdrDocumentCategoriser applicantFdrDocumentCategoriser;
+    @Mock
+    private RespondentFdrDocumentCategoriser respondentFdrDocumentCategoriser;
 
     private ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
     private RespondentChronologiesStatementHandler respondentChronologiesStatementHandler;
@@ -100,7 +107,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         intervenerFourChronologiesStatementHandler = new IntervenerFourChronologiesStatementHandler(featureToggleService);
         intervenerOneFdrHandler = new IntervenerOneFdrHandler(featureToggleService);
         caseDocumentHandler = new CaseDocumentsHandler(featureToggleService);
-        fdrDocumentsHandler = new FdrDocumentsHandler(featureToggleService);
+        fdrDocumentsHandler = new FdrDocumentsHandler(featureToggleService, applicantFdrDocumentCategoriser, respondentFdrDocumentCategoriser);
 
 
         List<DocumentHandler> documentHandlers =

@@ -10,17 +10,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantFdrDocumentCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentFdrDocumentCategoriser;
 
 import java.util.List;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
 
 @Component
 @Order(1)
 public class FdrDocumentsHandler extends DocumentHandler {
 
-    public FdrDocumentsHandler(FeatureToggleService featureToggleService) {
+    private final ApplicantFdrDocumentCategoriser applicantFdrDocumentCategoriser;
+    private final RespondentFdrDocumentCategoriser respondentFdrDocumentCategoriser;
+
+    public FdrDocumentsHandler(FeatureToggleService featureToggleService, ApplicantFdrDocumentCategoriser applicantFdrDocumentCategoriser,
+                               RespondentFdrDocumentCategoriser respondentFdrDocumentCategoriser) {
         super(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION, featureToggleService);
+        this.applicantFdrDocumentCategoriser = applicantFdrDocumentCategoriser;
+        this.respondentFdrDocumentCategoriser = respondentFdrDocumentCategoriser;
     }
 
     protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(
@@ -45,19 +51,17 @@ public class FdrDocumentsHandler extends DocumentHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
-        if (caseDocumentType.equals(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS)) {
-            switch (caseDocumentParty) {
-                case APPLICANT -> {
-                    return FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
-                }
-                case RESPONDENT -> {
-                    return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS;
-                }
-                default -> {
-                    return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
-                }
+        switch (caseDocumentParty) {
+            case APPLICANT -> {
+                return applicantFdrDocumentCategoriser.getDocumentCategory(caseDocumentType);
+            }
+            case RESPONDENT -> {
+                return respondentFdrDocumentCategoriser.getDocumentCategory(caseDocumentType);
+            }
+            default -> {
+                return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
             }
         }
-        return DocumentCategory.FDR_BUNDLE;
+
     }
 }
