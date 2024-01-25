@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +8,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -25,8 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderAddressTo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -48,11 +42,7 @@ import java.util.function.UnaryOperator;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_ADDRESS_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_JUDGE_TYPE;
@@ -69,11 +59,9 @@ public class GeneralOrderService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
     private final PartyService partyService;
     private final GeneralOrderDocumentCategoriser generalOrderDocumentCategoriser;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
@@ -204,112 +192,8 @@ public class GeneralOrderService {
         generalOrderDocumentCategoriser.categorise(caseData);
     }
 
-    @Deprecated
-    public Map<String, Object> populateGeneralOrderCollection(CaseDetails caseDetails, String eventId) {
-        caseDetails.getData().put(GENERAL_ORDER_LATEST_DOCUMENT,
-            documentHelper.convertToCaseDocument(caseDetails.getData().get(GENERAL_ORDER_PREVIEW_DOCUMENT)));
-        if (caseDataService.isConsentedApplication(caseDetails)) {
-            return populateGeneralOrderCollectionConsented(caseDetails);
-        } else {
-            return populateGeneralOrderCollectionContested(caseDetails, eventId);
-        }
-    }
-
-    private Map<String, Object> populateGeneralOrderCollectionConsented(CaseDetails caseDetails) {
-
-        Map<String, Object> caseData = caseDetails.getData();
-
-        GeneralOrderConsented generalOrder =
-            new GeneralOrderConsented(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_PREVIEW_DOCUMENT)),
-                getAddressToFormatted(caseData));
-
-        GeneralOrderConsentedData consentedData = new GeneralOrderConsentedData(UUID.randomUUID().toString(), generalOrder);
-
-        List<GeneralOrderConsentedData> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONSENTED))
-            .map(this::convertToGeneralOrderConsentedList)
-            .orElse(new ArrayList<>());
-        generalOrderList.add(consentedData);
-
-        caseData.put(GENERAL_ORDER_COLLECTION_CONSENTED, generalOrderList);
-        return caseData;
-    }
-
-    private Map<String, Object> populateGeneralOrderCollectionContested(CaseDetails caseDetails, String eventId) {
-
-        Map<String, Object> caseData = caseDetails.getData();
-        ContestedGeneralOrder order = ContestedGeneralOrder
-            .builder()
-            .dateOfOrder(objectToDate(caseData.get("generalOrderDate")))
-            .additionalDocument(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_PREVIEW_DOCUMENT)))
-            .generalOrderAddressTo(getAddressToFormatted(caseData))
-            .build();
-        ContestedGeneralOrderCollection generalOrderObj = ContestedGeneralOrderCollection
-            .builder()
-            .value(order)
-            .build();
-
-        if (caseDataService.isConsentedInContestedCase(caseDetails)
-            && GENERAL_ORDER_CONSENT_IN_CONTESTED.getCcdType().equals(eventId)) {
-            List<ContestedGeneralOrderCollection> generalOrderList
-                = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED))
-                .map(this::convertToGeneralOrderContestedList)
-                .orElse(new ArrayList<>());
-            generalOrderList.add(generalOrderObj);
-
-            caseData.put(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED, generalOrderList);
-
-        } else {
-            List<ContestedGeneralOrderCollection> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONTESTED))
-                .map(this::convertToGeneralOrderContestedList)
-                .orElse(new ArrayList<>());
-            generalOrderList.add(generalOrderObj);
-
-            caseData.put(GENERAL_ORDER_COLLECTION_CONTESTED, generalOrderList);
-        }
-
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        generalOrderDocumentCategoriser.categorise(finremCaseDetails.getData());
-        CaseDetails mappedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-
-        return mappedCaseDetails.getData();
-    }
-
-    private LocalDate objectToDate(Object object) {
-        if (object != null) {
-            return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, LocalDate.class);
-        }
-        return null;
-    }
-
-    private List<GeneralOrderConsentedData> convertToGeneralOrderConsentedList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralOrderConsentedData>>() {
-        });
-    }
-
-    private List<ContestedGeneralOrderCollection> convertToGeneralOrderContestedList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<ContestedGeneralOrderCollection>>() {
-        });
-    }
-
     private String getAddressToFormatted(GeneralOrderAddressTo addressTo) {
         return addressTo != null ? addressTo.getText() : "";
-    }
-
-    private String getAddressToFormatted(String addressTo) {
-        if ("applicant".equals(addressTo)) {
-            return "Applicant";
-        } else if ("applicantSolicitor".equals(addressTo)) {
-            return "Applicant Solicitor";
-        } else if ("respondentSolicitor".equals(addressTo)) {
-            return "Respondent Solicitor";
-        } else {
-            return "";
-        }
-    }
-
-    private String getAddressToFormatted(Map<String, Object> caseData) {
-        String storedValue = String.valueOf(caseData.get(GENERAL_ORDER_ADDRESS_TO));
-        return getAddressToFormatted(storedValue);
     }
 
     public void setOrderList(FinremCaseDetails caseDetails) {
