@@ -607,6 +607,14 @@ public class DocumentHelper {
         }
     }
 
+    public <T> T deepCopyArray(T object, TypeReference<T> typeReference) {
+        try {
+            return objectMapper.readValue(objectMapper.writeValueAsString(object), typeReference);
+        } catch (IOException e) {
+            throw new IllegalStateException();
+        }
+    }
+
     public String formatAddressForLetterPrinting(Map<String, Object> address) {
         if (address != null) {
             return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")

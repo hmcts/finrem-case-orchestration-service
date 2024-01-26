@@ -160,8 +160,6 @@ public class GeneralApplicationService {
 
         generalApplicationsCategoriser.categorise(caseData);
 
-        generalApplicationsCategoriser.uncategoriseDuplicatedCollections(caseData);
-
         return caseData;
     }
 
@@ -436,6 +434,8 @@ public class GeneralApplicationService {
         convertToGeneralApplicationsCollections(generalApplicationWrapper, appRespGeneralApplications,
             intervener1GeneralApplications, intervener2GeneralApplications,
             intervener3GeneralApplications, intervener4GeneralApplications);
+
+        generalApplicationsCategoriser.uncategoriseDuplicatedCollections(caseData);
     }
 
 
