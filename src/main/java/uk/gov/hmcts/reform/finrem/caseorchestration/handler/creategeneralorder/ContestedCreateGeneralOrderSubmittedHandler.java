@@ -18,25 +18,25 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENER
 
 @Service
 @Slf4j
-public class CreateGeneralOrderSubmittedHandler extends FinremCallbackHandler {
+public class ContestedCreateGeneralOrderSubmittedHandler extends FinremCallbackHandler {
 
     private final FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
 
-    public CreateGeneralOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                              FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder) {
+    public ContestedCreateGeneralOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                       FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder) {
         super(finremCaseDetailsMapper);
         this.generalOrderRaisedCorresponder = generalOrderRaisedCorresponder;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return SUBMITTED.equals(callbackType) && GENERAL_ORDER.equals(eventType);
+        return SUBMITTED.equals(callbackType) && CaseType.CONTESTED.equals(caseType) && GENERAL_ORDER.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
         FinremCallbackRequest callbackRequestWithFinremCaseDetails, String userAuthorisation) {
-        log.info("Create General Order submitted callback for case id: {}",
+        log.info("Contested Create General Order submitted callback for case id: {}",
             callbackRequestWithFinremCaseDetails.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = callbackRequestWithFinremCaseDetails.getCaseDetails();

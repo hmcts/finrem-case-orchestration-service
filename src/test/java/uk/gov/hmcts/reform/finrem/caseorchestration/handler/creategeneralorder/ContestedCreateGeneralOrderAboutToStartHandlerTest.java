@@ -14,11 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderAddressTo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FinremDateUtils;
 
@@ -30,20 +26,15 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.ASSIGN_DOCUMENT_CATEGORIES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.*;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
-class CreateGeneralOrderAboutToStartHandlerTest {
+class ContestedCreateGeneralOrderAboutToStartHandlerTest {
     @InjectMocks
-    private CreateGeneralOrderAboutToStartHandler handler;
+    private ContestedCreateGeneralOrderAboutToStartHandler handler;
 
     @Mock
     private FinremCaseDetailsMapper mapper;
@@ -73,7 +64,7 @@ class CreateGeneralOrderAboutToStartHandlerTest {
             Arguments.of(SUBMITTED, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
 
             // Consented
-            Arguments.of(ABOUT_TO_START, CONSENTED, GENERAL_ORDER, true),
+            Arguments.of(ABOUT_TO_START, CONSENTED, GENERAL_ORDER, false),
             Arguments.of(MID_EVENT, CONSENTED, GENERAL_ORDER, false),
             Arguments.of(ABOUT_TO_SUBMIT, CONSENTED, GENERAL_ORDER, false),
             Arguments.of(SUBMITTED, CONSENTED, GENERAL_ORDER, false),

@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
@@ -35,10 +36,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
-class CreateGeneralOrderAboutToSubmitHandlerTest {
+class ContestedCreateGeneralOrderAboutToSubmitHandlerTest {
 
     @InjectMocks
-    private CreateGeneralOrderAboutToSubmitHandler handler;
+    private ContestedCreateGeneralOrderAboutToSubmitHandler handler;
 
     @Mock
     private FinremCaseDetailsMapper mapper;
@@ -67,31 +68,13 @@ class CreateGeneralOrderAboutToSubmitHandlerTest {
             // Consented
             Arguments.of(ABOUT_TO_START, CONSENTED, GENERAL_ORDER, false),
             Arguments.of(MID_EVENT, CONSENTED, GENERAL_ORDER, false),
-            Arguments.of(ABOUT_TO_SUBMIT, CONSENTED, GENERAL_ORDER, true),
+            Arguments.of(ABOUT_TO_SUBMIT, CONSENTED, GENERAL_ORDER, false),
             Arguments.of(SUBMITTED, CONSENTED, GENERAL_ORDER, false),
 
             Arguments.of(ABOUT_TO_SUBMIT, CONSENTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
             Arguments.of(ABOUT_TO_SUBMIT, CONTESTED, ASSIGN_DOCUMENT_CATEGORIES, false),
             Arguments.of(ABOUT_TO_SUBMIT, CONSENTED, ASSIGN_DOCUMENT_CATEGORIES, false)
         );
-    }
-
-    @Test
-    void testHandleConsentedCase() {
-        FinremCaseData caseData = new FinremCaseData();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .caseType(CONSENTED)
-            .data(caseData)
-            .build();
-        FinremCallbackRequest request = FinremCallbackRequest.builder()
-            .eventType(GENERAL_ORDER)
-            .caseDetails(caseDetails)
-            .build();
-
-        var response = handler.handle(request, "some-token");
-        assertThat(response).isNotNull();
-        verify(generalOrderService, times(1))
-            .addConsentedGeneralOrderToCollection(caseData);
     }
 
     @Test
@@ -110,6 +93,7 @@ class CreateGeneralOrderAboutToSubmitHandlerTest {
         assertThat(response).isNotNull();
         verify(generalOrderService, times(1))
             .addContestedGeneralOrderToCollection(caseData, GENERAL_ORDER);
+        verifyNoMoreInteractions(generalOrderService);
     }
 
     @Test
@@ -128,6 +112,7 @@ class CreateGeneralOrderAboutToSubmitHandlerTest {
         assertThat(response).isNotNull();
         verify(generalOrderService, times(1))
             .addContestedGeneralOrderToCollection(caseData, GENERAL_ORDER_CONSENT_IN_CONTESTED);
+        verifyNoMoreInteractions(generalOrderService);
     }
 
     private FinremCaseData createCaseWithConsentOrder() {
