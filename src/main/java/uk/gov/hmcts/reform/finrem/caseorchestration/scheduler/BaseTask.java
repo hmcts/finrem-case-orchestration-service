@@ -83,7 +83,7 @@ public abstract class BaseTask implements Runnable {
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
-                    log.error("Error processing caseRef {} and error is ", caseReference.getCaseReference(), e);
+                    log.error("Error processing caseRef {} and error is ", caseReference.getCaseReference(), e.getMessage());
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }
