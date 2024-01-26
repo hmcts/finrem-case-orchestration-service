@@ -95,7 +95,7 @@ public abstract class BaseTask implements Runnable {
 
     protected String getSystemUserToken() {
         log.info("Getting system user token");
-        return systemUserService.getSysUserToken();
+        return systemUserService.getSysUserTokenNoCache();
     }
 
     protected abstract List<CaseReference> getCaseReferences();

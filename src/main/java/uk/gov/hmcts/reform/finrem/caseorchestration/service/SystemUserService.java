@@ -23,4 +23,9 @@ public class SystemUserService {
         log.info("Getting system update user token for user {}", systemUpdateUserConfiguration.getUserName());
         return idamAuthService.getAccessToken(systemUpdateUserConfiguration.getUserName(), systemUpdateUserConfiguration.getPassword());
     }
+
+    public String getSysUserTokenNoCache() {
+        log.info("Getting system update user token for user {}", systemUpdateUserConfiguration.getUserName());
+        return idamAuthService.getAccessToken(systemUpdateUserConfiguration.getUserName(), systemUpdateUserConfiguration.getPassword());
+    }
 }
