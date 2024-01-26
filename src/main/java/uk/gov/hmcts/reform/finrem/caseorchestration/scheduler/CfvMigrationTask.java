@@ -33,7 +33,37 @@ public class CfvMigrationTask extends BaseTask {
     private static final String CASE_DATA_CFV_CATEGORIES_APPLIED_FLAG = String.format("data.%s", CFV_CATEGORIES_APPLIED_FLAG_FIELD);
 
     private static List<State> STATES_TO_CATEGORISE =
-        List.of(State.PREPARE_FOR_HEARING, State.ORDER_MADE, State.AWAITING_RESPONSE, State.APPLICATION_ISSUED);
+        List.of(
+            State.PREPARE_FOR_HEARING,
+            State.CASE_FILE_SUBMITTED,
+            State.GATE_KEEPING_AND_ALLOCATION,
+            State.GENERAL_APPLICATION_AWAITING_JUDICIARY_RESPONSE,
+            State.REVIEW_ORDER,
+            State.APPLICATION_SUBMITTED,
+            State.AWAITING_JUDICIARY_RESPONSE,
+            State.AWAITING_JUDICIARY_RESPONSE_CONSENT,
+            State.CONSENTED_ORDER_ASSIGN_JUDGE,
+            State.AWAITING_RESPONSE,
+            State.AWAITING_HWF_DECISION,
+            State.APPLICATION_ISSUED,
+            State.AWAITING_PAYMENT_RESPONSE,
+            State.AWAITING_PAYMENT,
+            State.CASE_ADDED,
+            State.CONSENT_ORDER_APPROVED,
+            State.CONSENT_ORDER_NOT_APPROVED,
+            State.CONSENTED_ORDER_SUBMITTED,
+            State.DRAFT_ORDER_NOT_APPROVED,
+            State.GENERAL_APPLICATION,
+            State.GENERAL_APPLICATION_OUTCOME,
+            State.JUDGE_DRAFT_ORDER,
+            State.ORDER_DRAWN,
+            State.ORDER_MADE,
+            State.ORDER_SENT,
+            State.PAPER_CASE_ADDED,
+            State.RESPONSE_RECEIVED,
+            State.SCHEDULE_RAISE_DIRECTIONS_ORDER,
+            State.SCHEDULING_AND_HEARING
+            );
 
     @Value("${cron.cfvCategorisation.task.enabled:true}")
     private boolean isCfvMigrationTaskEnabled;
