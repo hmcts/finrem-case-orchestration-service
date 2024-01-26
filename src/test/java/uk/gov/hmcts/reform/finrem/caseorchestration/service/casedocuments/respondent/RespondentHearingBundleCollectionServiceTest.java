@@ -24,7 +24,7 @@ public class RespondentHearingBundleCollectionServiceTest extends HearingBundleH
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
     }
 
