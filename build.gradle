@@ -355,6 +355,9 @@ bootWithCCD {
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
     environment("FEATURE_SEND_LETTER_RECIPIENT_CHECK", "false")
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
+
+    // ccd-definition-store-api
+    environment("WELSH_TRANSLATION_ENABLED", "false")
 }
 
 dependencyManagement {
