@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderAddressTo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -91,7 +92,7 @@ class ConsentedCreateGeneralOrderAboutToStartHandlerTest {
         String authorisationToken = "some-token";
         when(idamService.getIdamFullName(authorisationToken)).thenReturn(judgeFullName);
         when(idamService.getIdamSurname(authorisationToken)).thenReturn(judgeSurname);
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.from(createCaseData());
+        FinremCallbackRequest callbackRequest = createRequest(createCaseData());
 
         var response = handler.handle(callbackRequest, authorisationToken);
 
@@ -120,5 +121,14 @@ class ConsentedCreateGeneralOrderAboutToStartHandlerTest {
         caseData.getGeneralOrderWrapper().setGeneralOrderAddressTo(mock(GeneralOrderAddressTo.class));
 
         return caseData;
+    }
+
+    private FinremCallbackRequest createRequest(FinremCaseData caseData) {
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .caseType(CONSENTED)
+                .data(caseData)
+                .build())
+            .build();
     }
 }

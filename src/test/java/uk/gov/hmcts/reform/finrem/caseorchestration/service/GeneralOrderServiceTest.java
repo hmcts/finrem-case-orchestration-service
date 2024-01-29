@@ -116,7 +116,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = contestedFinremCaseDetails();
 
-        generalOrderService.addContestedGeneralOrderToCollection(caseDetails.getData(), EventType.GENERAL_ORDER);
+        generalOrderService.addContestedGeneralOrderToCollection(caseDetails.getData());
 
         GeneralOrderWrapper generalOrderWrapper = caseDetails.getData().getGeneralOrderWrapper();
         List<ContestedGeneralOrderCollection> generalOrders = generalOrderWrapper.getGeneralOrders();
@@ -147,12 +147,11 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testAddContestedGeneralOrderInCollection_ConsentedInContested() throws Exception {
+    public void testAddConsentedInContestedGeneralOrderInCollection() throws Exception {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = consentedInContestedFinremCaseDetails();
 
-        generalOrderService.addContestedGeneralOrderToCollection(caseDetails.getData(),
-            EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED);
+        generalOrderService.addConsentedInContestedGeneralOrderToCollection(caseDetails.getData());
 
         GeneralOrderWrapper generalOrderWrapper = caseDetails.getData().getGeneralOrderWrapper();
         List<ContestedGeneralOrderCollection> generalOrders = generalOrderWrapper.getGeneralOrdersConsent();

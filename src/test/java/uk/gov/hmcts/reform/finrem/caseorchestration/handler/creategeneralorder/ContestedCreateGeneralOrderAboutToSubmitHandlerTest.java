@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 
 import java.util.stream.Stream;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
@@ -43,6 +45,9 @@ class ContestedCreateGeneralOrderAboutToSubmitHandlerTest {
 
     @Mock
     private FinremCaseDetailsMapper mapper;
+
+    @Mock
+    private CaseDataService caseDataService;
 
     @Mock
     private GeneralOrderService generalOrderService;
@@ -92,7 +97,7 @@ class ContestedCreateGeneralOrderAboutToSubmitHandlerTest {
         var response = handler.handle(request, "some-token");
         assertThat(response).isNotNull();
         verify(generalOrderService, times(1))
-            .addContestedGeneralOrderToCollection(caseData, GENERAL_ORDER);
+            .addContestedGeneralOrderToCollection(caseData);
         verifyNoMoreInteractions(generalOrderService);
     }
 
@@ -107,11 +112,12 @@ class ContestedCreateGeneralOrderAboutToSubmitHandlerTest {
             .eventType(GENERAL_ORDER_CONSENT_IN_CONTESTED)
             .caseDetails(caseDetails)
             .build();
+        when(caseDataService.hasConsentOrder(caseData)).thenReturn(true);
 
         var response = handler.handle(request, "some-token");
         assertThat(response).isNotNull();
         verify(generalOrderService, times(1))
-            .addContestedGeneralOrderToCollection(caseData, GENERAL_ORDER_CONSENT_IN_CONTESTED);
+            .addConsentedInContestedGeneralOrderToCollection(caseData);
         verifyNoMoreInteractions(generalOrderService);
     }
 

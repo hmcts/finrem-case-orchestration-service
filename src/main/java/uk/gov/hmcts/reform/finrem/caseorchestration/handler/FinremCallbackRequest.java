@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 @Data
@@ -23,10 +22,4 @@ public class FinremCallbackRequest {
 
     @JsonProperty("event_id")
     private EventType eventType;
-
-    public static FinremCallbackRequest from(FinremCaseData caseData) {
-        return FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder().data(caseData).build())
-            .build();
-    }
 }

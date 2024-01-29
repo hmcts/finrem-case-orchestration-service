@@ -82,7 +82,7 @@ class ContestedCreateGeneralOrderAboutToStartHandlerTest {
         String authorisationToken = "some-token";
         when(idamService.getIdamFullName(authorisationToken)).thenReturn(judgeFullName);
         when(idamService.getIdamSurname(authorisationToken)).thenReturn(judgeSurname);
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.from(createCaseData());
+        FinremCallbackRequest callbackRequest = createRequest(createCaseData());
 
         var response = handler.handle(callbackRequest, authorisationToken);
 
@@ -111,5 +111,14 @@ class ContestedCreateGeneralOrderAboutToStartHandlerTest {
         caseData.getGeneralOrderWrapper().setGeneralOrderAddressTo(mock(GeneralOrderAddressTo.class));
 
         return caseData;
+    }
+
+    private FinremCallbackRequest createRequest(FinremCaseData caseData) {
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .caseType(CONTESTED)
+                .data(caseData)
+                .build())
+            .build();
     }
 }
