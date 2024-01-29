@@ -530,6 +530,7 @@ class FinremCaseDetailMapperTest {
             AdditionalHearingDocumentCollection.builder()
                 .value(AdditionalHearingDocument.builder()
                     .document(getTestDocument())
+                    .additionalHearingDocumentDate(LocalDateTime.now())
                     .build())
                 .build()
         );
