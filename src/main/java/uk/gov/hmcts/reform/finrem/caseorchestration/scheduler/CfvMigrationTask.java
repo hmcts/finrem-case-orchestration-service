@@ -28,7 +28,6 @@ import java.util.List;
 @Slf4j
 public class CfvMigrationTask extends BaseTask {
 
-
     public static final String CFV_CATEGORIES_APPLIED_FLAG_FIELD = "isCfvCategoriesAppliedFlag";
     private static final String CASE_DATA_CFV_CATEGORIES_APPLIED_FLAG = String.format("data.%s", CFV_CATEGORIES_APPLIED_FLAG_FIELD);
 
@@ -63,7 +62,7 @@ public class CfvMigrationTask extends BaseTask {
             State.RESPONSE_RECEIVED,
             State.SCHEDULE_RAISE_DIRECTIONS_ORDER,
             State.SCHEDULING_AND_HEARING
-            );
+        );
 
     @Value("${cron.cfvCategorisation.task.enabled:true}")
     private boolean isCfvMigrationTaskEnabled;
@@ -153,7 +152,7 @@ public class CfvMigrationTask extends BaseTask {
 
     @Override
     protected boolean isTaskEnabled() {
-        return true;
+        return isCfvMigrationTaskEnabled;
     }
 
     @Override
@@ -168,12 +167,11 @@ public class CfvMigrationTask extends BaseTask {
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
-
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
-        log.info("Executing {} for case id {}", getTaskName(), finremCaseDetails.getId());
-        documentCategoryAssigner.assignDocumentCategories(finremCaseData);
-        finremCaseData.setIsCfvCategoriesAppliedFlag(YesOrNo.YES);
-        log.info("Executed {} for case id {}", getTaskName(), finremCaseDetails.getId());
+            FinremCaseData finremCaseData = finremCaseDetails.getData();
+            log.info("Executing {} for case id {}", getTaskName(), finremCaseDetails.getId());
+            documentCategoryAssigner.assignDocumentCategories(finremCaseData);
+            finremCaseData.setIsCfvCategoriesAppliedFlag(YesOrNo.YES);
+            log.info("Executed {} for case id {}", getTaskName(), finremCaseDetails.getId());
 
     }
 }
