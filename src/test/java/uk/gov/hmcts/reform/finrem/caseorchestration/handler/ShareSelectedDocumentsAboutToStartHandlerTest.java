@@ -180,7 +180,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
         when(intervenerShareDocumentsService.intervenerSourceDocumentList(caseDetails, "[INTVRSOLICITOR1]")).thenReturn(getDynamicList(data));
         when(intervenerShareDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(getCaseRoles(data));
-        when(applicantDocumentsService.getIntervenerRoles(any())).thenReturn(true);
+        when(applicantDocumentsService.isIntervenerRole(any())).thenReturn(true);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -202,7 +202,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         when(intervenerShareDocumentsService.intervenerSourceDocumentList(caseDetails,
             "[INTVRSOLICITOR1]")).thenReturn(getDynamicList(data));
         when(intervenerShareDocumentsService.getOtherSolicitorRoleList(any(), any(), any())).thenReturn(new DynamicMultiSelectList());
-        when(applicantDocumentsService.getIntervenerRoles(any())).thenReturn(true);
+        when(applicantDocumentsService.isIntervenerRole(any())).thenReturn(true);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -223,7 +223,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         when(accessService.getAllCaseRole(any())).thenReturn(getAllCaseRole());
         when(intervenerShareDocumentsService.intervenerSourceDocumentList(caseDetails,
             "[INTVRSOLICITOR1]")).thenReturn(new DynamicMultiSelectList());
-        when(applicantDocumentsService.getIntervenerRoles(any())).thenReturn(true);
+        when(applicantDocumentsService.isIntervenerRole(any())).thenReturn(true);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 

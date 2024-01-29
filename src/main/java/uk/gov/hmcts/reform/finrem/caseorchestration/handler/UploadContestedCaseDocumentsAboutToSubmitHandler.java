@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -35,6 +36,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 @Slf4j
 @Service
 public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCallbackHandler {
+
+    private static List<CaseDocumentType> administrativeCaseDocumentTypes = List.of(
+        CaseDocumentType.ATTENDANCE_SHEETS,
+        CaseDocumentType.JUDICIAL_NOTES,
+        CaseDocumentType.JUDGMENT,
+        CaseDocumentType.WITNESS_SUMMONS,
+        CaseDocumentType.TRANSCRIPT,
+        CaseDocumentType.BILL_OF_COSTS
+    );
 
     public static final String TRIAL_BUNDLE_SELECTED_ERROR =
         "To upload a hearing bundle please use the Manage hearing "
@@ -68,15 +78,15 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = getValidatedResponse(caseData);
+
+        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
         if (response.hasErrors()) {
             return response;
         }
 
-
-        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
-
         CaseDocumentParty loggedInUserRole =
             getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
+
 
         managedCollections.forEach(doc -> doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole));
 
@@ -95,6 +105,22 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         return response;
     }
 
+    private void validateManageCaseDocumentsTypes(FinremCaseData finremCaseData, List<String> errors) {
+        List<UploadCaseDocumentCollection> managedCollections =
+            finremCaseData.getManageCaseDocumentCollection();
+
+        if (CollectionUtils.isEmpty(managedCollections)) {
+            return;
+        }
+        managedCollections.stream().forEach(uploadCaseDocumentCollection -> {
+            CaseDocumentType caseDocumentType = uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType();
+            if (administrativeCaseDocumentTypes.contains(caseDocumentType)) {
+                errors.add(caseDocumentType.getId() + " cannot be uploaded using this event");
+            }
+        });
+    }
+
+
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> getValidatedResponse(FinremCaseData caseData) {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
@@ -103,6 +129,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         } else if (isAnyTrialBundleDocumentPresent(caseData)) {
             response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
         }
+        validateManageCaseDocumentsTypes(caseData, response.getErrors());
         return response;
     }
 

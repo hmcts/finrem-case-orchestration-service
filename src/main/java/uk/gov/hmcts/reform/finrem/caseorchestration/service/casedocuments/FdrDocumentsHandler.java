@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
-import org.springframework.stereotype.Service;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
@@ -12,7 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 
 import java.util.List;
 
-@Service
+@Component
+@Order(1)
 public class FdrDocumentsHandler extends DocumentHandler {
 
     public FdrDocumentsHandler(FeatureToggleService featureToggleService) {
@@ -22,7 +24,22 @@ public class FdrDocumentsHandler extends DocumentHandler {
     protected List<UploadCaseDocumentCollection> getAlteredCollectionForType(
         List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
 
-        return allManagedDocumentCollections.stream().filter(this::isFdr).toList();
+        return allManagedDocumentCollections.stream().filter(this::isWithoutPrejudiceOrFdr).toList();
+    }
+
+    private boolean isWithoutPrejudiceOrFdr(UploadCaseDocumentCollection uploadCaseDocumentCollection) {
+        return isWithoutPrejudice(uploadCaseDocumentCollection) || isFdr(uploadCaseDocumentCollection);
+    }
+
+    private boolean isWithoutPrejudice(UploadCaseDocumentCollection managedDocumentCollection) {
+        UploadCaseDocument uploadedCaseDocument = managedDocumentCollection.getUploadCaseDocument();
+        if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(uploadedCaseDocument.getCaseDocumentType())) {
+            uploadedCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
+            uploadedCaseDocument.setCaseDocumentFdr(YesOrNo.YES);
+            uploadedCaseDocument.setCaseDocumentParty(null);
+            return true;
+        }
+        return false;
     }
 
     private boolean isFdr(UploadCaseDocumentCollection managedDocumentCollection) {

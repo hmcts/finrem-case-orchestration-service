@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.document;
 
 import lombok.RequiredArgsConstructor;
 
+
 @RequiredArgsConstructor
 public enum DocumentCategory {
     APPLICATIONS("applications"),
@@ -183,6 +184,7 @@ public enum DocumentCategory {
     HEARING_DOCUMENTS_INTERVENER_4_COSTS_ESTIMATES_OR_FORM_H_OR_FORM_H1("hearingDocumentsIntervener4CostsEstimatesOrFormHOrFormH1"),
     HEARING_DOCUMENTS_INTERVENER_4_PRE_HEARING_DRAFT_ORDER("hearingDocumentsIntervener4PreHearingDraftOrder"),
     HEARING_DOCUMENTS_INTERVENER_4_SKELETON_ARGUMENT("hearingDocumentsIntervener4SkeletonArgument"),
+    HEARING_DOCUMENTS_WITNESS_SUMMONS("hearingDocumentsWitnessSummons"),
     HEARING_BUNDLE("hearingBundle"),
     REPORTS("reports"),
     REPORTS_EXPERT_REPORTS("reportsExpertReports"),
@@ -271,7 +273,35 @@ public enum DocumentCategory {
     APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_9("applicationsGeneralApplicationsapp9"),
     APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_10("applicationsGeneralApplicationsapp10"),
     DUPLICATED_GENERAL_ORDERS("duplicatedGeneralOrders"),
+    SYSTEM_DUPLICATES("systemDuplicates"),
     APPLICATIONS_GENERAL_APPLICATIONS_OVERFLOW("applicationsGeneralApplicationsOverflow"),
+
+    APPLICANT_DOCUMENTS_SEND_ORDERS("applicantDocumentsSendOrders"),
+    APPLICANT_DOCUMENTS_SEND_ORDERS_OVERFLOW("applicantDocumentsSendOrdersOverflow"),
+    RESPONDENT_DOCUMENTS_SEND_ORDERS("respondentDocumentsSendOrders"),
+    RESPONDENT_DOCUMENTS_SEND_ORDERS_OVERFLOW("respondentDocumentsSendOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS("intervenerDocumentsIntervener1SendOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS_OVERFLOW("intervenerDocumentsIntervener1SendOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS("intervenerDocumentsIntervener2SendOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS_OVERFLOW("intervenerDocumentsIntervener2SendOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS("intervenerDocumentsIntervener3SendOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS_OVERFLOW("intervenerDocumentsIntervener3SendOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS("intervenerDocumentsIntervener4SendOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS_OVERFLOW("intervenerDocumentsIntervener4SendOrdersOverflow"),
+
+    APPLICANT_DOCUMENTS_CONSENT_ORDERS("applicantDocumentsConsentOrders"),
+    APPLICANT_DOCUMENTS_CONSENT_ORDERS_OVERFLOW("applicantDocumentsConsentOrdersOverflow"),
+    RESPONDENT_DOCUMENTS_CONSENT_ORDERS("respondentDocumentsConsentOrders"),
+    RESPONDENT_DOCUMENTS_CONSENT_ORDERS_OVERFLOW("respondentDocumentsConsentOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_1_CONSENT_ORDERS("intervenerDocumentsIntervener1ConsentOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_1_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener1ConsentOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_2_CONSENT_ORDERS("intervenerDocumentsIntervener2ConsentOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_2_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener2ConsentOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_3_CONSENT_ORDERS("intervenerDocumentsIntervener3ConsentOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_3_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener3ConsentOrdersOverflow"),
+    INTERVENER_DOCUMENTS_INTERVENER_4_CONSENT_ORDERS("intervenerDocumentsIntervener4ConsentOrders"),
+    INTERVENER_DOCUMENTS_INTERVENER_4_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener4ConsentOrdersOverflow"),
+
     UNCATEGORISED(null);
 
     private final String documentCategoryId;

@@ -28,7 +28,6 @@ public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTes
     @InjectMocks
     IntervenerThreeFdrHandler collectionService;
 
-
     @Test
     public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType() {
         screenUploadDocumentList = new ArrayList<>();
@@ -41,7 +40,7 @@ public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTes
 
         collectionService.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
-            screenUploadDocumentList);
+            screenUploadDocumentList, true);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_THREE_FDR_DOCS_COLLECTION),

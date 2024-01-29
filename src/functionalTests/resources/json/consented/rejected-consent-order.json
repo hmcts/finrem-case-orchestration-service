@@ -1,18 +1,16 @@
 {
-  "token" : "token_test",
-  "event_id" : "FR_orderRefusal",
-  "case_details" : {
-    "id" : "123",
-    "jurisdiction" : "DIVORCE",
-    "state" : "caseAdded",
-    "case_type_id" : "FinancialRemedyMVP2",
-    "case_data" : {
-      "divorceCaseNumber" : "DD12D12345",
-      "divorceStageReached" : "Decree Nisi",
-      "divorceUploadEvidence1" : {
-        "document_url" : "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
-        "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url" : "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
+  "token": "FR_orderRefusal",
+  "event_id": "FR_orderRefusal",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "referredToJudge",
+    "case_type_id": "FinancialRemedyMVP2",
+    "case_data": {
+      "latestConsentOrder": {
+        "document_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f",
+        "document_filename": "sample.pdf",
+        "document_binary_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f/binary"
       },
       "authorisationName" : "test",
       "authorisationFirm" : "test",
@@ -39,41 +37,145 @@
         "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
         "document_binary_url" : "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
       },
-      "pensionCollection" : [
+      "applicantRepresented": "No",
+      "authorisation2b": "test",
+      "otherCollection": [
         {
-          "id" : "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
-          "value" : {
-            "typeOfDocument" : "Form P2",
-            "uploadedDocument" : {
-              "document_url" : "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589",
-              "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-              "document_binary_url" : "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589/binary"
+          "id": "1",
+          "value": {
+            "typeOfDocument": "Other",
+            "uploadedDocument": {
+              "document_url": "http://file1",
+              "document_filename": "file1",
+              "document_binary_url": "http://file1.binary"
             }
           }
         }
       ],
-      "helpWithFeesQuestion" : "No",
-      "orderRefusalCollection" : [
+      "respondentEmail": "test@test.com",
+      "respondentPhone": "9963472494",
+      "appRespondentRep": "No",
+      "consentOrderText": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "authorisationFirm": "test",
+      "authorisationName": "test",
+      "divorceCaseNumber": "DD12D12345",
+      "pensionCollection": [
         {
-          "value" : {
-            "orderRefusalAfterText" : "testAfterText",
-            "orderRefusal" : [
+          "id": "1",
+          "value": {
+            "typeOfDocument": "Form P1",
+            "uploadedDocument": {
+              "document_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f",
+              "document_filename": "sample.pdf",
+              "document_binary_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f/binary"
+            }
+          }
+        }
+      ],
+      "respondentAddress": {
+        "County": "essex",
+        "Country": "UK",
+        "PostCode": "b1 1ab",
+        "PostTown": "london",
+        "AddressLine1": "line1",
+        "AddressLine2": "line2",
+        "AddressLine3": "line3"
+      },
+      "appRespondentLName": "smith",
+      "appRespondentFMName": "john",
+      "divorceStageReached": "Decree Nisi",
+      "helpWithFeesQuestion": "No",
+      "natureOfApplication2": [
+        "Variation Order"
+      ],
+      "natureOfApplication5": "No",
+      "natureOfApplication6": [
+        "Other"
+      ],
+      "natureOfApplication7": "test",
+      "natureOfApplication3a": "test",
+      "natureOfApplication3b": "test",
+      "divorceUploadEvidence1": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "divorceDecreeNisiDate": "2010-01-01",
+      "divorceUploadEvidence2": {
+        "document_url": "http://file2",
+        "document_filename": "file2",
+        "document_binary_url": "http://file2.binary"
+      },
+      "divorceDecreeAbsoluteDate": "2010-01-01",
+      "orderForChildrenQuestion1": "Yes",
+      "orderDirection": "Order Accepted as drafted",
+      "orderDirectionOpt1": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "approvedConsentOrderLetter": {
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d9e63738-f2ff-4cca-adbe-e2a983cdbd8b/binary",
+        "document_filename": "ApprovedConsentOrderLetter.pdf",
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d9e63738-f2ff-4cca-adbe-e2a983cdbd8b"
+      },
+      "orderDirectionAbsolute": "Yes",
+      "orderDirectionJudge": "District Judge",
+      "orderDirectionJudgeName": "test",
+      "orderDirectionDate": "2010-01-01",
+      "dueDate": "2010-01-01",
+      "issueDate": "2010-01-01",
+      "orderDirectionAddComments": "test",
+      "orderDirectionOpt2": "test",
+      "assignedToJudgeReason": "Draft consent order",
+      "assignedToJudge": "judge1",
+      "referToJudgeDate": "2010-01-01",
+      "referToJudgeText": "test",
+      "referToJudgeDateFromAwaitingResponse": "2010-01-01",
+      "referToJudgeTextFromAwaitingResponse": "test",
+      "referToJudgeDateFromOrderMade": "2010-01-01",
+      "referToJudgeTextFromOrderMade": "test",
+      "referToJudgeDateFromConsOrdApproved": "2010-01-01",
+      "referToJudgeTextFromConsOrdApproved": "test",
+      "referToJudgeDateFromConsOrdMade": "2010-01-01",
+      "referToJudgeTextFromConsOrdMade": "test",
+      "referToJudgeDateFromClose": "2010-01-01",
+      "referToJudgeTextFromClose": "test",
+      "referToJudgeDateFromRespondToOrder": "2010-01-01",
+      "referToJudgeTextFromRespondToOrder": "test",
+      "orderRefusalCollection": [
+        {
+          "id": "1",
+          "value": {
+            "orderRefusal": [
               "Insufficient information provided – A",
               "Insufficient information provided – B",
               "Transferred to Applicant’s home Court",
               "Transferred to Applicant's home Court",
-              "Other (please specify)"
+              "Pension annex"
             ],
-            "orderRefusalOther" : "test1",
-            "orderRefusalDocs" : {
-              "document_url" : "http://doc1",
-              "document_filename" : "doc1",
-              "document_binary_url" : "http://doc1.binary"
+            "orderRefusalDate": "2003-02-01",
+            "orderRefusalDocs": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             },
-            "orderRefusalJudgeName" : "test3",
-            "orderRefusalDate" : "2003-02-01",
-            "orderRefusalAddComments" : "comment1",
-            "orderRefusalJudge" : "District Judge"
+            "orderRefusalJudge": "District Judge",
+            "orderRefusalOther": "test1",
+            "otherHearingDetails": "test2",
+            "orderRefusalJudgeName": "test3",
+            "orderRefusalNotEnough": [
+              "reason1"
+            ],
+            "estimateLengthOfHearing": "10",
+            "orderRefusalAddComments": "comment1",
+            "orderRefusalNotEnoughOther": "test",
+            "whenShouldHearingTakePlace": "today",
+            "whereShouldHearingTakePlace": "EZ801"
           }
         }
       ],
@@ -84,7 +186,7 @@
           "Insufficient information provided – B",
           "Transferred to Applicant home Court - A",
           "Transferred to Applicant home Court - B",
-          "Other (please specify)"
+          "Pension annex"
         ],
         "orderRefusalOther" : "test1",
         "orderRefusalDocs" : {
@@ -97,101 +199,89 @@
         "orderRefusalAddComments" : "comment1",
         "orderRefusalJudge" : "District Judge"
       },
-      "uploadOrder" : [
+      "uploadConsentOrderDocuments": [
         {
-          "value" : {
-            "DocumentType" : "generalOrder",
-            "DocumentLink" : {
-              "document_url" : "http://doc1",
-              "document_filename" : "doc1",
-              "document_binary_url" : "http://doc1.binary"
+          "id": "1",
+          "value": {
+            "DocumentType": "Other",
+            "DocumentLink": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             },
-            "DocumentEmailContent" : "email-content",
-            "DocumentDateAdded" : "2010-01-02",
-            "DocumentComment" : "doc-comment",
-            "DocumentFileName" : "file1"
-          },
-          "id" : "1"
-        }
-      ],
-      "applicantRepresented" : "Yes",
-      "solicitorReference" : "LL01",
-      "respondentAddress" : {
-        "AddressLine1" : "252 Marvels Lane",
-        "AddressLine2" : "AddressGlobalUK",
-        "AddressLine3" : "London",
-        "County" : "Essex",
-        "Country" : "United Kingdom",
-        "PostTown" : "London",
-        "PostCode" : "SE12 9SE"
-      },
-      "respondentPhone" : "9963472494",
-      "solicitorName" : "Solictor",
-      "solicitorFirm" : "Mr",
-      "solicitorAddress" : {
-        "AddressLine1" : "House no: 6-354-2, Gandhi Street",
-        "AddressLine2" : "Srikalahasti, Chittor District",
-        "AddressLine3" : "test",
-        "County" : "test",
-        "Country" : "United Kingdom",
-        "PostTown" : "SRIKALAHASTI",
-        "PostCode" : "b1 1ab"
-      },
-      "solicitorPhone" : "9963472494",
-      "solicitorEmail" : "test@admin.com",
-      "solicitorAgreeToReceiveEmails" : "Yes",
-      "appRespondentLName" : "Korivi",
-      "applicantFMName" : "Poor",
-      "applicantLName" : "Guy",
-      "appRespondentFMName" : "test",
-      "appRespondentRep" : "No",
-      "natureOfApplication2" : [
-        "Lump Sum Order",
-        "Periodical Payment Order",
-        "Pension Sharing Order",
-        "Pension Attachment Order",
-        "Pension Compensation Sharing Order",
-        "Pension Compensation Attachment Order",
-        "A settlement or a transfer of property",
-        "Property Adjustment Order"
-      ],
-      "natureOfApplication3a" : "test",
-      "natureOfApplication3b" : "test",
-      "orderForChildrenQuestion1" : "Yes",
-      "natureOfApplication5" : "No",
-      "natureOfApplication6" : [
-        "Step Child or Step Children",
-        "disability expenses",
-        "In addition to child support",
-        "training",
-        "When not habitually resident"
-      ],
-      "natureOfApplication7" : "test",
-      "otherCollection" : [
-        {
-          "value" : {
-            "typeOfDocument" : "ScheduleOfAssets",
-            "uploadedDocument" : {
-              "document_url" : "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
-              "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-              "document_binary_url" : "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
-            }
+            "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentComment": "doc-comment",
+            "DocumentFileName": "file1"
           }
         }
       ],
-      "PBANumber" : "PBA123456",
-      "PBAreference" : "ABCD",
-      "ApplicantName" : "Poor Guy",
-      "RefusalOrderHeader" : "Sitting in the Family Court",
-      "RespondentName" : "test Korivi",
-      "CourtName" : "SITTING in private",
-      "courtDetails" : {
-        "courtName" : "Family Court at the Courts and Tribunal Service Centre",
-        "courtAddress" : "PO Box 12746, Harlow, CM20 9QZ",
-        "phoneNumber" : "0300 303 0642",
-        "email" : "contactFinancialRemedy@justice.gov.uk"
-      },
-      "orderType" : "consent"
+      "uploadOrder": [
+        {
+          "id": "1",
+          "value": {
+            "DocumentType": "Other",
+            "DocumentLink": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentComment": "doc-comment",
+            "DocumentFileName": "file1"
+          }
+        }
+      ],
+      "uploadDocuments": [
+        {
+          "id": "1",
+          "value": {
+            "DocumentType": "Other",
+            "DocumentLink": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentComment": "doc-comment",
+            "DocumentFileName": "file1"
+          }
+        }
+      ],
+      "generalOrderCollection": [
+        {
+          "id": "1",
+          "value": {
+            "generalOrder_order": "order1",
+            "generalOrder_documentUpload": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "generalOrder_judgeList": "District Judge",
+            "generalOrder_judgeName": "judge1",
+            "generalOrder_dateOfOrder": "2010-01-02",
+            "generalOrder_comments": "comment1"
+          }
+        }
+      ],
+      "respondToOrderDocuments": [
+        {
+          "id": "1",
+          "value": {
+            "DocumentType": "AmendedConsentOrder",
+            "DocumentLink": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1/binary"
+            },
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentFileName": "file1"
+          }
+        }
+      ]
     }
   }
 }

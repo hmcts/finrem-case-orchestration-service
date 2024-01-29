@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.sendletter.api.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
@@ -97,7 +98,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/cases/documents";
     private static final String IDAM_SERVICE_USER_INFO = "/o/userinfo";
     protected static final String SEND_LETTER_CONTEXT_PATH = "/letters";
-    private static final String SUBMITTED_HANDLER_URL = "/case-orchestration/ccdSubmittedEvent";
     private static final String ABOUTTOSUBMIT_HANDLER_URL = "/case-orchestration/ccdAboutToSubmitEvent";
 
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
@@ -213,7 +213,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
                 sleep(100);
             }
 
-            mvcResult = webClient.perform(MockMvcRequestBuilders.post(SUBMITTED_HANDLER_URL)
+            mvcResult = webClient.perform(MockMvcRequestBuilders.post(ABOUTTOSUBMIT_HANDLER_URL)
                     .content(objectMapper.writeValueAsString(request))
                     .header(AUTHORIZATION, AUTH_TOKEN)
                     .contentType(APPLICATION_JSON_VALUE)
@@ -296,6 +296,12 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         caseDetails.getData().put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
         caseDetails.getData().put("bulkPrintCoverSheetApp", caseDocument());
         caseDetails.getData().put("bulkPrintCoverSheetRes", caseDocument());
+        List<AdditionalHearingDocumentData> additionalHearingDocumentDataList = List.of(AdditionalHearingDocumentData.builder()
+            .additionalHearingDocument(AdditionalHearingDocument.builder()
+                .document(caseDocument())
+                .build())
+            .build());
+        caseDetails.getData().put("additionalHearingDocuments", additionalHearingDocumentDataList);
 
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()

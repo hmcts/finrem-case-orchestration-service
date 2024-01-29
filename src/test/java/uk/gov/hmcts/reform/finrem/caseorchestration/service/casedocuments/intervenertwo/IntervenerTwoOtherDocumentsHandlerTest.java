@@ -83,5 +83,26 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_PENSION_PLAN)
         );
+
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_CERTIFICATES_OF_SERVICE)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_ES1)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2_WITHOUT_PREJUDICE_OFFERS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT),
+            is(DocumentCategory.REPORTS_PENSION_REPORTS)
+        );
     }
 }

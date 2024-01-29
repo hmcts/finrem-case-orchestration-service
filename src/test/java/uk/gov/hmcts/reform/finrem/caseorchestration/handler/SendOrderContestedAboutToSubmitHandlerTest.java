@@ -11,6 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrdersHolder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -31,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerFourDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerOneDocumentHandler;
@@ -40,8 +44,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderR
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.List.of;
@@ -82,6 +88,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private NotificationService notificationService;
     @Mock
     private OrderDateService dateService;
+    @Mock
+    private SendOrdersCategoriser sendOrdersCategoriser;
 
     @BeforeEach
     public void setUpTest() {
@@ -90,13 +98,19 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             genericDocumentService,
             documentHelper,
             List.of(
-                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
-                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
-                new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService)),
-            dateService);
+                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    caseDataService, documentHelper),
+                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    caseDataService, documentHelper),
+                new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper),
+                new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper),
+                new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper),
+                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    documentHelper)),
+            dateService, sendOrdersCategoriser);
     }
 
     @Test
@@ -383,6 +397,71 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper, never()).getStampType(caseData);
 
+    }
+
+    @Test
+    void givenContestedCase_whenAdditionalHearingDocumentAlreadyDisplayed_thenDoesNotAddAdditionalHearingDocumentToNewColl() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        String additionalHearingDocumentUrl = "http://dm-store:8080/documents/123456-654321-123456-654321";
+
+        String additionalHearingDocumentFilename = "AdditionalHearingDocument.pdf";
+
+        String previousOrderDocumentUrl = "http://dm-store:8080/documents/929756-654321-123456-654381";
+        String previousOrderDocumentFilename = "PreviousOrder.pdf";
+        data.setPartiesOnCase(getParties());
+        ApproveOrder additionalHearingOrder = ApproveOrder.builder().orderReceivedAt(
+            LocalDateTime.of(LocalDate.of(2019, 12, 31),
+            LocalTime.of(6, 30, 45)))
+            .caseDocument(caseDocument(additionalHearingDocumentUrl,
+                                       additionalHearingDocumentFilename,
+                              additionalHearingDocumentUrl + "/binary"))
+            .build();
+        ApproveOrder previousOrder = ApproveOrder.builder().orderReceivedAt(LocalDateTime.now())
+            .caseDocument(caseDocument(previousOrderDocumentUrl, previousOrderDocumentFilename, previousOrderDocumentUrl + "/binary")).build();
+        ApproveOrdersHolder approveOrdersHolder = ApproveOrdersHolder.builder().orderReceivedAt(LocalDateTime.now())
+            .approveOrders(of(ApprovedOrderCollection.builder().value(additionalHearingOrder).build())
+            ).build();
+        ApproveOrdersHolder previousOrdersHolder = ApproveOrdersHolder.builder().orderReceivedAt(LocalDateTime.now().minusDays(2))
+            .approveOrders(of(ApprovedOrderCollection.builder().value(previousOrder).build())
+            ).build();
+        ApprovedOrderConsolidateCollection existingCollection1 = ApprovedOrderConsolidateCollection.builder().value(approveOrdersHolder).build();
+        ApprovedOrderConsolidateCollection existingCollection2 = ApprovedOrderConsolidateCollection.builder().value(previousOrdersHolder).build();
+        List<ApprovedOrderConsolidateCollection> mutableList = new ArrayList<>();
+        mutableList.add(existingCollection1);
+        mutableList.add(existingCollection2);
+        data.getOrderWrapper().setIntv1OrderCollections(mutableList);
+        String coverLetterDocumentFilename = "contestedOrderApprovedCoverLetter.pdf";
+        String coverLetterUrl = "http://dm-store:8080/documents/129456-654321-123456-654321";
+        data.setOrderApprovedCoverLetter(caseDocument(coverLetterUrl, coverLetterDocumentFilename, "http://dm-store:8080/documents/129456-654321-123456-654321/binary"));
+
+        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder().value(List.of(DynamicMultiSelectListElement.builder()
+            .code(uuid).label("app_docs.pdf").build())).listItems(List.of(DynamicMultiSelectListElement.builder()
+            .code(uuid).label("app_docs.pdf").build())).build();
+
+        data.setOrdersToShare(selectedDocs);
+
+        when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
+        when(documentHelper.hasAnotherHearing(any(FinremCaseData.class))).thenReturn(true);
+        when(documentHelper.getLatestAdditionalHearingDocument(any(FinremCaseData.class)))
+                .thenReturn(Optional.of(Optional.of(caseDocument(additionalHearingDocumentUrl,
+                            additionalHearingDocumentFilename,
+                            additionalHearingDocumentUrl + "/binary"))
+                .orElse(null)));
+        when(genericDocumentService.stampDocument(
+                any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
+            .thenReturn(caseDocument());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
+            = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+        assertEquals(1, caseData.getFinalOrderCollection().size());
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertEquals(3, caseData.getOrderWrapper().getIntv1OrderCollections().size());
     }
 
     private DynamicMultiSelectList getParties() {
