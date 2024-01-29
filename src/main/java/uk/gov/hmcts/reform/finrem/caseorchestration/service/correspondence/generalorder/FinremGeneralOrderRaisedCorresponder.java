@@ -30,7 +30,7 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
         }
 
         caseDetails.getData().getInterveners().stream()
-            .filter(i -> shouldSendIntervenerSolicitorEmail(caseDetails, i))
+            .filter(i -> isEmailToIntervenerSolicitorRequired(caseDetails, i))
             .forEach(i -> emailIntervenerSolicitor(caseDetails, i));
     }
 

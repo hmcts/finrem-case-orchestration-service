@@ -35,8 +35,8 @@ public abstract class FinremEmailOnlyAllSolicitorsCorresponder extends EmailOnly
         return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
-    protected boolean shouldSendIntervenerSolicitorEmail(FinremCaseDetails caseDetails,
-                                                         IntervenerWrapper intervenerWrapper) {
+    protected boolean isEmailToIntervenerSolicitorRequired(FinremCaseDetails caseDetails,
+                                                           IntervenerWrapper intervenerWrapper) {
         return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
 
