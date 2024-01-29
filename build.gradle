@@ -357,7 +357,7 @@ bootWithCCD {
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
 
     // ccd-definition-store-api
-    environment 'WELSH_TRANSLATION_ENABLED', 'false'
+    environment("WELSH_TRANSLATION_ENABLED", "false")
 }
 
 dependencyManagement {
