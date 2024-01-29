@@ -154,44 +154,46 @@ public class GeneralOrderService {
         item.setId(UUID.randomUUID().toString());
         item.setGeneralOrder(generalOrder);
 
-        if (generalOrderWrapper.getGeneralOrderCollection() == null) {
-            generalOrderWrapper.setGeneralOrderCollection(new ArrayList<>());
-        }
-
-        generalOrderWrapper.getGeneralOrderCollection().add(item);
+        List<GeneralOrderCollectionItem> generalOrders =
+            Optional.ofNullable(generalOrderWrapper.getGeneralOrderCollection())
+                .orElse(new ArrayList<>());
+        generalOrders.add(item);
+        generalOrderWrapper.setGeneralOrderCollection(generalOrders);
     }
 
     public void addContestedGeneralOrderToCollection(FinremCaseData caseData) {
         GeneralOrderWrapper generalOrderWrapper = caseData.getGeneralOrderWrapper();
-        generalOrderWrapper.setGeneralOrderLatestDocument(generalOrderWrapper.getGeneralOrderPreviewDocument());
+        List<ContestedGeneralOrderCollection> generalOrders =
+            Optional.ofNullable(generalOrderWrapper.getGeneralOrders())
+                .orElse(new ArrayList<>());
+        generalOrderWrapper.setGeneralOrders(generalOrders);
 
-        ContestedGeneralOrderCollection contestedGeneralOrderCollection =
-            createContestedGeneralOrderCollection(generalOrderWrapper);
-
-        if (generalOrderWrapper.getGeneralOrders() == null) {
-            generalOrderWrapper.setGeneralOrders(new ArrayList<>());
-        }
-        generalOrderWrapper.getGeneralOrders().add(contestedGeneralOrderCollection);
-
-        generalOrderDocumentCategoriser.categorise(caseData);
+        updateContestedGeneralOrders(caseData, generalOrders);
     }
 
     public void addConsentedInContestedGeneralOrderToCollection(FinremCaseData caseData) {
         GeneralOrderWrapper generalOrderWrapper = caseData.getGeneralOrderWrapper();
-        generalOrderWrapper.setGeneralOrderLatestDocument(generalOrderWrapper.getGeneralOrderPreviewDocument());
+        List<ContestedGeneralOrderCollection> generalOrders =
+            Optional.ofNullable(generalOrderWrapper.getGeneralOrdersConsent())
+                .orElse(new ArrayList<>());
+        generalOrderWrapper.setGeneralOrdersConsent(generalOrders);
 
+        updateContestedGeneralOrders(caseData, generalOrders);
+    }
+
+    private void updateContestedGeneralOrders(FinremCaseData caseData,
+                                              List<ContestedGeneralOrderCollection> generalOrders) {
+        GeneralOrderWrapper generalOrderWrapper = caseData.getGeneralOrderWrapper();
+        generalOrderWrapper.setGeneralOrderLatestDocument(generalOrderWrapper.getGeneralOrderPreviewDocument());
         ContestedGeneralOrderCollection contestedGeneralOrderCollection =
             createContestedGeneralOrderCollection(generalOrderWrapper);
-
-        if (generalOrderWrapper.getGeneralOrdersConsent() == null) {
-            generalOrderWrapper.setGeneralOrdersConsent(new ArrayList<>());
-        }
-        generalOrderWrapper.getGeneralOrdersConsent().add(contestedGeneralOrderCollection);
+        generalOrders.add(contestedGeneralOrderCollection);
 
         generalOrderDocumentCategoriser.categorise(caseData);
     }
 
-    private ContestedGeneralOrderCollection createContestedGeneralOrderCollection(GeneralOrderWrapper generalOrderWrapper) {
+    private ContestedGeneralOrderCollection createContestedGeneralOrderCollection(
+        GeneralOrderWrapper generalOrderWrapper) {
         ContestedGeneralOrder contestedGeneralOrder = ContestedGeneralOrder
             .builder()
             .dateOfOrder(generalOrderWrapper.getGeneralOrderDate())
