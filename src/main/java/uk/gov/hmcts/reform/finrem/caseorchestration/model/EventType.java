@@ -21,6 +21,7 @@ public enum EventType {
     AMEND_APP_DETAILS("FR_amendApplicationDetails"),
     AMEND_CONTESTED_APP_DETAILS("FR_amendApplication"),
     AMEND_CONTESTED_PAPER_APP_DETAILS("FR_amendPaperApplication"),
+    AMEND_CONTESTED_APPROVED_CONSENT_ORDER("FR_amendApprovedFinalOrder"),
     AMEND_CONSENT_ORDER("FR_amendedConsentOrder"),
     SEND_CONSENT_IN_CONTESTED_ORDER("FR_consentSendOrder"),
     RESPOND_TO_ORDER("FR_respondToOrder"),
