@@ -62,9 +62,9 @@ public class GeneralOrderService {
     private final CaseDataService caseDataService;
     private final PartyService partyService;
     private final GeneralOrderDocumentCategoriser generalOrderDocumentCategoriser;
-    private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
-    private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
-    private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
+    private final Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
+    private final UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
+    private final BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
 
     public Map<String, Object> createGeneralOrder(String authorisationToken, CaseDetails caseDetails) {
         log.info("Generating General Order for Case ID: {}", caseDetails.getId());
@@ -147,9 +147,10 @@ public class GeneralOrderService {
         GeneralOrderWrapper generalOrderWrapper = caseData.getGeneralOrderWrapper();
         generalOrderWrapper.setGeneralOrderLatestDocument(generalOrderWrapper.getGeneralOrderPreviewDocument());
 
-        GeneralOrder generalOrder = new GeneralOrder();
-        generalOrder.setGeneralOrderAddressTo(getAddressToFormatted(generalOrderWrapper.getGeneralOrderAddressTo()));
-        generalOrder.setGeneralOrderDocumentUpload(generalOrderWrapper.getGeneralOrderPreviewDocument());
+        GeneralOrder generalOrder = GeneralOrder.builder()
+            .generalOrderAddressTo(getAddressToFormatted(generalOrderWrapper.getGeneralOrderAddressTo()))
+            .generalOrderDocumentUpload(generalOrderWrapper.getGeneralOrderPreviewDocument())
+            .build();
 
         GeneralOrderCollectionItem item = new GeneralOrderCollectionItem();
         item.setId(UUID.randomUUID().toString());
