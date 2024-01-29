@@ -113,18 +113,11 @@ public class ConsentOrderPrintService {
             ? consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, authorisationToken)
             : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails);
 
-        if (!isNull(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument())) {
-            CaseDocument generalOrder = documentHelper.getLatestGeneralOrder(caseDetails.getData());
+        CaseDocument generalOrder = documentHelper.getLatestGeneralOrder(caseDetails.getData());
 
-            if (orderDocuments.isEmpty()) {
-                bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
-            } else {
-                if (documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.get(0), authorisationToken)) {
-                    bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
-                } else {
-                    bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
-                }
-            }
+        if (!isNull(generalOrder) && !orderDocuments.isEmpty()
+            && documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.get(0), authorisationToken)) {
+            bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
         } else {
             bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
         }
