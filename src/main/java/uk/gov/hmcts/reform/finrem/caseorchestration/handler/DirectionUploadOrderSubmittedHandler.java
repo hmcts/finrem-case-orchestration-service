@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 @Slf4j
 @Service
@@ -22,15 +21,11 @@ public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler 
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
 
-    private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
-
     public DirectionUploadOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
-                                                AdditionalHearingDocumentService additionalHearingDocumentService,
-                                                SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService) {
+                                                AdditionalHearingDocumentService additionalHearingDocumentService) {
         super(finremCaseDetailsMapper);
         this.hearingDocumentService = hearingDocumentService;
         this.additionalHearingDocumentService = additionalHearingDocumentService;
-        this.selectablePartiesCorrespondenceService = selectablePartiesCorrespondenceService;
     }
 
     @Override
@@ -52,7 +47,6 @@ public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler 
         if (CollectionUtils.isNotEmpty(caseDetails.getData().getDirectionDetailsCollection())) {
             if (caseDetails.getData().getDirectionDetailsCollection().stream()
                 .anyMatch(dd -> dd.getValue().getIsAnotherHearingYN().equals(YesOrNo.YES))) {
-                selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails.getData());
 
                 if (caseDetailsBefore != null && caseDetailsBefore.getData() != null && caseDetailsBefore.getData().getFormC() != null) {
                     log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
