@@ -16,9 +16,4 @@ public class IntervenerThreeExpertEvidenceHandler extends ExpertEvidenceHandler 
     public IntervenerThreeExpertEvidenceHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_THREE_EXPERT_EVIDENCE_COLLECTION, INTERVENER_THREE, featureToggleService);
     }
-
-    @Override
-    protected DocumentCategory getHearingDocumentsFamilyHomeValuation() {
-        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_FAMILY_HOME_VALUATION;
-    }
 }

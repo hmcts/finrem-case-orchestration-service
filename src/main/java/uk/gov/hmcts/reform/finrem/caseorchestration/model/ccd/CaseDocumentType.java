@@ -38,7 +38,6 @@ public enum CaseDocumentType {
     CERTIFICATES_OF_SERVICE("Certificates of service"),
     ES1("ES1"),
     ES2("ES2"),
-    FAMILY_HOME_VALUATION("Family home valuation"),
     HOUSING_PARTICULARS("Housing particulars"),
     JUDICIAL_NOTES("Judicial notes"),
     JUDGMENT("Judgment"),

@@ -16,9 +16,4 @@ public class RespondentExpertEvidenceHandler extends ExpertEvidenceHandler {
         super(CaseDocumentCollectionType.RESP_EXPERT_EVIDENCE_COLLECTION,
             CaseDocumentParty.RESPONDENT, featureToggleService);
     }
-
-    @Override
-    protected DocumentCategory getHearingDocumentsFamilyHomeValuation() {
-        return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_FAMILY_HOME_VALUATION;
-    }
 }

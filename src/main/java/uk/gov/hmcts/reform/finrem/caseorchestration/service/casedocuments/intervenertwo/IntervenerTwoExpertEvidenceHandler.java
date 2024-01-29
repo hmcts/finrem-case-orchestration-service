@@ -16,9 +16,4 @@ public class IntervenerTwoExpertEvidenceHandler extends ExpertEvidenceHandler {
     public IntervenerTwoExpertEvidenceHandler(FeatureToggleService featureToggleService) {
         super(INTERVENER_TWO_EXPERT_EVIDENCE_COLLECTION, INTERVENER_TWO, featureToggleService);
     }
-
-    @Override
-    protected DocumentCategory getHearingDocumentsFamilyHomeValuation() {
-        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_FAMILY_HOME_VALUATION;
-    }
 }
