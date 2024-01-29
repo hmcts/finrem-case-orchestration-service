@@ -1,5 +1,5 @@
 {
-  "token": "FR_orderRefusal",
+  "token": "test_token",
   "event_id": "FR_orderRefusal",
   "case_details": {
     "id": "12345678",
@@ -12,30 +12,40 @@
         "document_filename": "sample.pdf",
         "document_binary_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f/binary"
       },
-      "authorisationName" : "test",
-      "authorisationFirm" : "test",
-      "authorisation2b" : "test",
-      "authorisation3" : "2010-01-01",
-      "consentOrder" : {
-        "document_url" : "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
-        "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url" : "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
+      "PBANumber": "PBA123456",
+      "d81Question": "No",
+      "PBAreference": "ABCD",
+      "consentOrder": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
       },
-      "consentOrderText" : {
-        "document_url" : "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
-        "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url" : "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
+      "d81Joint": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
       },
-      "d81Question" : "No",
-      "d81Applicant" : {
-        "document_url" : "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
-        "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url" : "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
+      "d81Applicant": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
       },
-      "d81Respondent" : {
-        "document_url" : "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
-        "document_filename" : "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url" : "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
+      "d81Respondent": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "authorisation3": "2010-01-01",
+      "applicantFMName": "Poor",
+      "applicantLName": "Guy",
+      "applicantAddress": {
+        "County": "essex",
+        "Country": "UK",
+        "PostCode": "b1 1ab",
+        "PostTown": "london",
+        "AddressLine1": "line1",
+        "AddressLine2": "line2",
+        "AddressLine3": "line3"
       },
       "applicantRepresented": "No",
       "authorisation2b": "test",
