@@ -11,18 +11,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.RefusedConsentOrderDocumentCategoriser;
 
 @Slf4j
 @Service
 public class RejectedConsentOrderInContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final RefusalOrderDocumentService service;
+    private final RefusedConsentOrderDocumentCategoriser categoriser;
 
     @Autowired
     public RejectedConsentOrderInContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                          RefusalOrderDocumentService service) {
+                                          RefusalOrderDocumentService service,
+                                                               RefusedConsentOrderDocumentCategoriser categoriser) {
         super(mapper);
         this.service = service;
+        this.categoriser = categoriser;
     }
 
     @Override
@@ -41,6 +45,8 @@ public class RejectedConsentOrderInContestedAboutToSubmitHandler extends FinremC
             EventType.CONSENT_ORDER_NOT_APPROVED, caseDetails.getId());
 
         FinremCaseData caseData = service.processConsentOrderNotApproved(caseDetails, userAuthorisation);
+        categoriser.categorise(caseData);
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData)
             .build();

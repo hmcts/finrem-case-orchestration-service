@@ -6,11 +6,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.RefusedConsentOrderDocumentCategoriser;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,6 +26,9 @@ class RejectedConsentOrderInContestedAboutToSubmitHandlerTest {
     private RejectedConsentOrderInContestedAboutToSubmitHandler handler;
     @Mock
     private RefusalOrderDocumentService refusalOrderDocumentService;
+
+    @Mock
+    private RefusedConsentOrderDocumentCategoriser categoriser;
 
     private static final String AUTH_TOKEN = "Token-:";
 
@@ -52,8 +57,9 @@ class RejectedConsentOrderInContestedAboutToSubmitHandlerTest {
     @Test
     void given_case_when_order_not_approved_then_reject_order() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         verify(refusalOrderDocumentService).processConsentOrderNotApproved(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(categoriser).categorise(handle.getData());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
