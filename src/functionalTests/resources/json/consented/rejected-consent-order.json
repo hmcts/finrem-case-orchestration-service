@@ -162,10 +162,6 @@
           "id": "1",
           "value": {
             "orderRefusal": [
-              "Insufficient information provided – A",
-              "Insufficient information provided – B",
-              "Transferred to Applicant’s home Court",
-              "Transferred to Applicant's home Court",
               "Pension annex"
             ],
             "orderRefusalDate": "2003-02-01",
@@ -189,26 +185,6 @@
           }
         }
       ],
-      "orderRefusalOnScreen" : {
-        "orderRefusalAfterText" : "testAfterText",
-        "orderRefusal" : [
-          "Insufficient information provided – A",
-          "Insufficient information provided – B",
-          "Transferred to Applicant home Court - A",
-          "Transferred to Applicant home Court - B",
-          "Pension annex"
-        ],
-        "orderRefusalOther" : "test1",
-        "orderRefusalDocs" : {
-          "document_url" : "http://doc1",
-          "document_filename" : "doc1",
-          "document_binary_url" : "http://doc1.binary"
-        },
-        "orderRefusalJudgeName" : "test3",
-        "orderRefusalDate" : "2003-02-01",
-        "orderRefusalAddComments" : "comment1",
-        "orderRefusalJudge" : "District Judge"
-      },
       "uploadConsentOrderDocuments": [
         {
           "id": "1",
