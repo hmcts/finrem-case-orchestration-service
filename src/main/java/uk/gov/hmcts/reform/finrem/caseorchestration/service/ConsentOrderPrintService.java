@@ -134,8 +134,8 @@ public class ConsentOrderPrintService {
             ? consentOrderApprovedDocumentService.approvedOrderDocuments(finremCaseDetails, authorisationToken)
             : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(finremCaseDetails);
 
-        CaseDocument generalOrderBefore = documentHelper.getLatestGeneralOrder(finremCaseDetailsBefore.getData());
-        CaseDocument generalOrder = documentHelper.getLatestGeneralOrder(finremCaseDetails.getData());
+        CaseDocument generalOrderBefore = finremCaseDetailsBefore.getData().getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+        CaseDocument generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
 
         if (eventType.getCcdType().equals(EventType.APPROVE_ORDER.getCcdType())) {
             bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
