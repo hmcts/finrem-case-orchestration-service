@@ -32,8 +32,16 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
         List<AdditionalHearingDocumentCollection> additionalHearingDocuments = caseDetails.getData().getAdditionalHearingDocuments();
 
         if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
-            Collections.sort(additionalHearingDocuments, (o1, o2) -> o2.getValue().getAdditionalHearingDocumentDate()
-                    .compareTo(o1.getValue().getAdditionalHearingDocumentDate()));
+            Collections.sort(additionalHearingDocuments, (o1, o2) -> {
+                if (o1.getValue() == null || o2.getValue() == null ||
+                    o1.getValue().getAdditionalHearingDocumentDate() == null ||
+                    o2.getValue().getAdditionalHearingDocumentDate() == null) {
+                    return -1;
+                } else {
+                    return o2.getValue().getAdditionalHearingDocumentDate()
+                        .compareTo(o1.getValue().getAdditionalHearingDocumentDate());
+                }
+            });
 
             AdditionalHearingDocumentCollection additionalHearingDocumentCollection =
                 additionalHearingDocuments.get(0);
