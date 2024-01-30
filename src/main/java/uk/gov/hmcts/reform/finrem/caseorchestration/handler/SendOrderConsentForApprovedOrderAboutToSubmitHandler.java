@@ -37,7 +37,9 @@ public class SendOrderConsentForApprovedOrderAboutToSubmitHandler extends Finrem
             EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, callbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, userAuthorisation);
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore,
+            EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }

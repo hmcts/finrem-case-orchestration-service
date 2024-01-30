@@ -56,7 +56,10 @@ class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
     void handle() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN).hasErrors();
-        verify(service).sendConsentOrderToBulkPrint(any(FinremCaseDetails.class), anyString());
+        verify(service).sendConsentOrderToBulkPrint(any(FinremCaseDetails.class),
+            any(FinremCaseDetails.class),
+            any(EventType.class),
+            anyString());
     }
 
 
@@ -64,6 +67,8 @@ class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
         return FinremCallbackRequest
             .builder()
             .caseDetails(FinremCaseDetails.builder().id(123L)
+                .data(new FinremCaseData()).build())
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L)
                 .data(new FinremCaseData()).build())
             .build();
     }

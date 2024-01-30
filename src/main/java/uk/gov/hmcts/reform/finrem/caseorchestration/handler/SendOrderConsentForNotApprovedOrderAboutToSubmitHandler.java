@@ -36,7 +36,8 @@ public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends Fin
             EventType.SEND_ORDER, callbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, userAuthorisation);
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore, EventType.SEND_ORDER, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
