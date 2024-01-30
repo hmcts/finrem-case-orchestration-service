@@ -215,7 +215,7 @@
         {
           "id" : "1",
           "value" : {
-            "DocumentType" : "Other",
+            "DocumentType" : "generalOrder",
             "DocumentLink" : {
               "document_url" : "http://doc1",
               "document_filename" : "doc1",
