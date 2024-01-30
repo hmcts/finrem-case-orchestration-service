@@ -19,9 +19,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -624,6 +627,22 @@ public class CaseDataServiceTest extends BaseServiceTest {
         assertEquals(
             "Yousef Luke Brown", caseDataService.buildFullIntervener4Name(caseDetails)
         );
+    }
+
+    @Test
+    public void testHasConsentOrderIsTrue() {
+        ConsentOrderWrapper consentOrderWrapper = new ConsentOrderWrapper();
+        consentOrderWrapper.setConsentD81Question(YesOrNo.YES);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .consentOrderWrapper(consentOrderWrapper)
+            .build();
+
+        assertTrue(caseDataService.hasConsentOrder(caseData));
+    }
+
+    @Test
+    public void testHasConsentOrderIsFalse() {
+        assertFalse(caseDataService.hasConsentOrder(new FinremCaseData()));
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {

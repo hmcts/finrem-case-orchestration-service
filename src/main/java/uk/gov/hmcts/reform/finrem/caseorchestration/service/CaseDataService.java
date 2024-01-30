@@ -235,6 +235,10 @@ public class CaseDataService {
         return isContestedApplication(caseDetails) && caseDetails.getData().getConsentOrderWrapper().getConsentD81Question() != null;
     }
 
+    public boolean hasConsentOrder(FinremCaseData caseData) {
+        return caseData.getConsentOrderWrapper().getConsentD81Question() != null;
+    }
+
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
     }

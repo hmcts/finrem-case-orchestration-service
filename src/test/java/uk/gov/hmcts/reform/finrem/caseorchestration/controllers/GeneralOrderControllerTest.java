@@ -6,17 +6,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -37,10 +33,6 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
 
     public String generateEndpoint() {
         return "/case-orchestration/documents/preview-general-order";
-    }
-
-    public String submitEndpoint() {
-        return "/case-orchestration/submit-general-order";
     }
 
     @Test
@@ -87,26 +79,7 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
             .andExpect(status().isInternalServerError());
     }
 
-    @Test
-    public void submitGeneralOrderSuccess() throws Exception {
-        doValidCaseDataSetUp();
-        whenServicePopulatesCollection().thenReturn(caseDataWithGeneralOrder());
-
-        mvc.perform(post(submitEndpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
-        verify(documentService, times(1)).populateGeneralOrderCollection(any(CaseDetails.class),
-            any(String.class));
-    }
-
     private OngoingStubbing<Map<String, Object>> whenServiceGeneratesDocument() {
         return when(documentService.createGeneralOrder(eq(AUTH_TOKEN), isA(CaseDetails.class)));
-    }
-
-    private OngoingStubbing<Map<String, Object>> whenServicePopulatesCollection() {
-        return when(documentService.populateGeneralOrderCollection(isA(CaseDetails.class),
-            eq(EventType.GENERAL_ORDER.getCcdType())));
     }
 }
