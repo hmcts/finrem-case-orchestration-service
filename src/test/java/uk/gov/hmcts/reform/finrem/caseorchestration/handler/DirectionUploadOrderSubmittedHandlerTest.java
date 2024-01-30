@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +38,6 @@ class DirectionUploadOrderSubmittedHandlerTest {
     private HearingDocumentService hearingDocumentService;
     @Mock
     private AdditionalHearingDocumentService additionalHearingDocumentService;
-
-    @Mock
-    private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     @InjectMocks
     private DirectionUploadOrderSubmittedHandler handler;
