@@ -287,6 +287,7 @@ public class AdditionalHearingDocumentService {
         AdditionalHearingDocumentCollection generatedDocumentData = AdditionalHearingDocumentCollection.builder()
             .value(AdditionalHearingDocument.builder()
                 .document(document)
+                .additionalHearingDocumentDate(LocalDateTime.now())
                 .build())
             .build();
 
@@ -304,6 +305,7 @@ public class AdditionalHearingDocumentService {
         AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
             .additionalHearingDocument(AdditionalHearingDocument.builder()
                 .document(document)
+                .additionalHearingDocumentDate(LocalDateTime.now())
                 .build())
             .build();
 
