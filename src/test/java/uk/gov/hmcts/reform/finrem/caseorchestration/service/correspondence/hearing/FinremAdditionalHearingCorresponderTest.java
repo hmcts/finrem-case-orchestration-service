@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,6 +39,7 @@ public class FinremAdditionalHearingCorresponderTest extends FinremHearingCorres
 
     @Test
     public void shouldGetDocumentsToPrintIfgetAdditionalHearingDocumentDateIsNull() {
+        List<AdditionalHearingDocumentCollection> additionalHearingDocumentCollections = new ArrayList<>();
         AdditionalHearingDocumentCollection document1 = AdditionalHearingDocumentCollection.builder()
             .value(AdditionalHearingDocument.builder()
                 .document(CaseDocument.builder().build())
@@ -53,8 +55,16 @@ public class FinremAdditionalHearingCorresponderTest extends FinremHearingCorres
                 .document(CaseDocument.builder().build())
                 .additionalHearingDocumentDate(LocalDateTime.now()).build())
             .build();
-
-        caseDetails.getData().setAdditionalHearingDocuments(List.of(document1, document2, document3));
+        AdditionalHearingDocumentCollection document4 = AdditionalHearingDocumentCollection.builder()
+            .value(AdditionalHearingDocument.builder()
+                .document(CaseDocument.builder().build())
+                .additionalHearingDocumentDate(LocalDateTime.now().minusDays(10)).build())
+            .build();
+        additionalHearingDocumentCollections.add(document1);
+        additionalHearingDocumentCollections.add(document2);
+        additionalHearingDocumentCollections.add(document3);
+        additionalHearingDocumentCollections.add(document4);
+        caseDetails.getData().setAdditionalHearingDocuments(additionalHearingDocumentCollections);
         List<CaseDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getCaseDocuments(caseDetails);
         assertEquals(2, documentsToPrint.size());
     }

@@ -33,10 +33,10 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
 
         if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
             Collections.sort(additionalHearingDocuments, (o1, o2) -> {
-                if (o1.getValue() == null || o2.getValue() == null ||
-                    o1.getValue().getAdditionalHearingDocumentDate() == null ||
-                    o2.getValue().getAdditionalHearingDocumentDate() == null) {
-                    return -1;
+                if (o1.getValue() == null || o2.getValue() == null
+                    || o1.getValue().getAdditionalHearingDocumentDate() == null
+                    || o2.getValue().getAdditionalHearingDocumentDate() == null) {
+                    return 1;
                 } else {
                     return o2.getValue().getAdditionalHearingDocumentDate()
                         .compareTo(o1.getValue().getAdditionalHearingDocumentDate());
