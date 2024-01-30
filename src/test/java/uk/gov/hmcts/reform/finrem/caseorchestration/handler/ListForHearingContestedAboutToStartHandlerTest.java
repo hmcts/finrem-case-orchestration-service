@@ -42,6 +42,7 @@ public class ListForHearingContestedAboutToStartHandlerTest {
             is(true));
     }
 
+
     @Test
     public void givenContestedCase_whenEventIsNotListForHearing_thenHandlerCanNotHandle() {
         assertThat(handler
