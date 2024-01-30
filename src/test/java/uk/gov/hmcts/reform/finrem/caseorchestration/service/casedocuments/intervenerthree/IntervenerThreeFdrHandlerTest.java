@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
@@ -20,12 +21,23 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTest {
 
+    @Mock
+    IntervenerThreeFdrDocumentCategoriser categoriser;
     @InjectMocks
     IntervenerThreeFdrHandler collectionService;
+
+    @Override
+    public void setUp() {
+        super.setUp();
+        when(categoriser.getDocumentCategory(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS)).thenReturn(
+            DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_WITHOUT_PREJUDICE_OFFERS);
+        when(categoriser.getDocumentCategory(CaseDocumentType.TRIAL_BUNDLE)).thenReturn(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3);
+    }
 
     @Test
     public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType() {

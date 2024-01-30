@@ -13,8 +13,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.PartyD
 @Component
 public class IntervenerTwoFdrHandler extends PartyDocumentsHandler {
 
-    public IntervenerTwoFdrHandler(FeatureToggleService featureToggleService) {
+    private final IntervenerTwoFdrDocumentCategoriser categoriser;
+
+    public IntervenerTwoFdrHandler(FeatureToggleService featureToggleService, IntervenerTwoFdrDocumentCategoriser categoriser) {
         super(CaseDocumentCollectionType.INTERVENER_TWO_FDR_DOCS_COLLECTION, CaseDocumentParty.INTERVENER_TWO, featureToggleService);
+        this.categoriser = categoriser;
     }
 
     @Override
@@ -25,9 +28,6 @@ public class IntervenerTwoFdrHandler extends PartyDocumentsHandler {
 
     @Override
     public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
-        if (caseDocumentType.equals(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS)) {
-            return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2_WITHOUT_PREJUDICE_OFFERS;
-        }
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2;
+        return categoriser.getDocumentCategory(caseDocumentType);
     }
 }

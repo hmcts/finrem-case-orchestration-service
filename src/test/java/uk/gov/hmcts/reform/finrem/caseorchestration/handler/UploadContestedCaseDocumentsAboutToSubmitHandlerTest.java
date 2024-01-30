@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applic
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerfour.IntervenerFourChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneFdrHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerthree.IntervenerThreeChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenertwo.IntervenerTwoChronologiesStatementHandler;
@@ -84,6 +85,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     private IntervenerFourChronologiesStatementHandler intervenerFourChronologiesStatementHandler;
 
     private IntervenerOneFdrHandler intervenerOneFdrHandler;
+    private IntervenerOneFdrDocumentCategoriser intervenerOneFdrDocumentCategoriser = new IntervenerOneFdrDocumentCategoriser();
 
     private CaseDocumentsHandler caseDocumentHandler;
     private FdrDocumentsHandler fdrDocumentsHandler;
@@ -105,7 +107,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         intervenerTwoChronologiesStatementHandler = new IntervenerTwoChronologiesStatementHandler(featureToggleService);
         intervenerThreeChronologiesStatementHandler = new IntervenerThreeChronologiesStatementHandler(featureToggleService);
         intervenerFourChronologiesStatementHandler = new IntervenerFourChronologiesStatementHandler(featureToggleService);
-        intervenerOneFdrHandler = new IntervenerOneFdrHandler(featureToggleService);
+        intervenerOneFdrHandler = new IntervenerOneFdrHandler(featureToggleService, intervenerOneFdrDocumentCategoriser);
         caseDocumentHandler = new CaseDocumentsHandler(featureToggleService);
         fdrDocumentsHandler = new FdrDocumentsHandler(featureToggleService, applicantFdrDocumentCategoriser, respondentFdrDocumentCategoriser);
 

@@ -40,6 +40,8 @@ public enum DocumentCategory {
     LIP_OR_SCANNED_DOCUMENTS("lipOrScannedDocuments"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE("fdrDocumentsAndFdrBundle"),
     FDR_BUNDLE("fdrBundle"),
+    FDR_JOINT_DOCUMENTS("fdrDocumentsJointDocuments"),
+    FDR_REPORTS("fdrDocumentsReports"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT("fdrDocumentsAndFdrBundleApplicant"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_FDR_BUNDLE("fdrDocumentsAndFdrBundleApplicantFdrBundle"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS("fdrDocumentsAndFdrBundleApplicantPositionStatements"),
@@ -304,6 +306,7 @@ public enum DocumentCategory {
     INTERVENER_DOCUMENTS_INTERVENER_4_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener4ConsentOrdersOverflow"),
 
     UNCATEGORISED(null);
+
 
     private final String documentCategoryId;
 
