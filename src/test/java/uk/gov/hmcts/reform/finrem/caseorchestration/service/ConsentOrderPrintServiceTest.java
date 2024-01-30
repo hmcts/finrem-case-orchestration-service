@@ -38,6 +38,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,9 +62,12 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     private final ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);
     private final CaseDocument caseDocument = caseDocument();
 
-    @Autowired private ObjectMapper mapper;
-    @Autowired private ConsentOrderPrintService consentOrderPrintService;
-    @MockBean private EvidenceManagementAuditService evidenceManagementAuditService;
+    @Autowired
+    private ObjectMapper mapper;
+    @Autowired
+    private ConsentOrderPrintService consentOrderPrintService;
+    @MockBean
+    private EvidenceManagementAuditService evidenceManagementAuditService;
 
     @MockBean
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
@@ -76,8 +80,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     @MockBean
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     @MockBean
-    private CaseDataService caseDataService;
-    @MockBean
     private DocumentOrderingService documentOrderingService;
 
     @Before
@@ -89,7 +91,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     @Test
     public void should_send_approve_order_when_no_general_order_available() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
-
+        CaseDataService caseDataService = mock(CaseDataService.class);
         when(caseDataService.isOrderApprovedCollectionPresent(caseDetails.getData())).thenReturn(true);
         when(caseDataService.isContestedOrderNotApprovedCollectionPresent(caseDetails.getData())).thenReturn(false);
 
@@ -118,7 +120,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
 
         caseDetails.getData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
-
+        CaseDataService caseDataService = mock(CaseDataService.class);
         when(caseDataService.isOrderApprovedCollectionPresent(caseDetails.getData())).thenReturn(true);
         when(caseDataService.isContestedOrderNotApprovedCollectionPresent(caseDetails.getData())).thenReturn(false);
 
@@ -147,7 +149,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         caseDetailsBefore.getData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
         caseDetails.getData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
-
+        CaseDataService caseDataService = mock(CaseDataService.class);
         when(caseDataService.isOrderApprovedCollectionPresent(caseDetails.getData())).thenReturn(true);
         when(caseDataService.isContestedOrderNotApprovedCollectionPresent(caseDetails.getData())).thenReturn(false);
 
@@ -184,7 +186,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(documentOrderingService.isDocumentModifiedLater(any(), any(), anyString())).thenReturn(true);
 
         when(consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, AUTH_TOKEN)).thenReturn(List.of(caseDocument()));
-
+        CaseDataService caseDataService = mock(CaseDataService.class);
         when(caseDataService.isOrderApprovedCollectionPresent(caseDetails.getData())).thenReturn(true);
         when(caseDataService.isContestedOrderNotApprovedCollectionPresent(caseDetails.getData())).thenReturn(false);
 
@@ -465,6 +467,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(APPLICANT_CONFIDENTIAL_ADDRESS, "Yes");
         caseDetails.getData().put(RESPONDENT_CONFIDENTIAL_ADDRESS, "Yes");
+
+
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
         when(coverSheetService.generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
