@@ -21,6 +21,8 @@ public class RespondentCaseSummariesHandler extends CaseSummariesHandler {
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
+            case STATEMENT_SKELETON_ARGUMENT:
+                return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT;
             case CASE_SUMMARY:
                 return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CASE_SUMMARY;
             default:

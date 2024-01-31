@@ -27,6 +27,8 @@ public class IntervenerFourCaseSummariesHandlerTest extends CaseSummariesHandler
 
     @Override
     public void setUpscreenUploadDocumentList() {
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_SKELETON_ARGUMENT,
+            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
     }
@@ -39,7 +41,7 @@ public class IntervenerFourCaseSummariesHandlerTest extends CaseSummariesHandler
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(1));
+            hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -52,6 +54,10 @@ public class IntervenerFourCaseSummariesHandlerTest extends CaseSummariesHandler
 
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_SKELETON_ARGUMENT),
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_POSITION_STATEMENT)
+        );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY),
