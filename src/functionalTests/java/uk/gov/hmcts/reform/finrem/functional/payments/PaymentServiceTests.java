@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.functional.payments;
 
 import net.serenitybdd.junit.runners.SerenityRunner;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +51,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
         utils.validatePostSuccess(pbaValidate, "pba-validate1.json", consentedDir);
     }
 
-    @Ignore
     @Test
     public void verifyPBAPaymentSuccessTestConsented() {
         validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Consented.json", consentedDir);
