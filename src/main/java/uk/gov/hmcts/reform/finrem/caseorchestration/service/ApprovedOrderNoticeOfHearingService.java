@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.heari
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.HearingNoticesCategoriser;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,7 +102,10 @@ public class ApprovedOrderNoticeOfHearingService {
 
         AdditionalHearingDocumentCollection hearingDocumentCollection
             = AdditionalHearingDocumentCollection.builder()
-            .value(AdditionalHearingDocument.builder().document(documentToAdd).build()).build();
+            .value(AdditionalHearingDocument.builder()
+                .document(documentToAdd)
+                .additionalHearingDocumentDate(LocalDateTime.now())
+                .build()).build();
         additionalHearingDocuments.add(hearingDocumentCollection);
 
         caseData.setAdditionalHearingDocuments(additionalHearingDocuments);
