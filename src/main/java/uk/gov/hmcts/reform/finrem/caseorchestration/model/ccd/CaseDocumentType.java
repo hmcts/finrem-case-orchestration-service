@@ -20,7 +20,7 @@ public enum CaseDocumentType {
     REPLY_TO_QUESTIONNAIRE("Reply to Questionnaire"),
     VALUATION_REPORT("Valuation Report"),
     PENSION_PLAN("Pension Plan"),
-    STATEMENT_SKELETON_ARGUMENT("Statement/Skeleton Argument"),
+    POSITION_STATEMENT_SKELETON_ARGUMENT("Position Statement"),
     EXPERT_EVIDENCE("Expert Evidence"),
     STATEMENT_AFFIDAVIT("Statement/Affidavit"),
     WITNESS_STATEMENT_AFFIDAVIT("Witness Statement/Affidavit"),

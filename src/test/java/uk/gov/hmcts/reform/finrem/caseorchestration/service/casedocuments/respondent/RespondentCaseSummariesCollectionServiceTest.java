@@ -27,7 +27,7 @@ public class RespondentCaseSummariesCollectionServiceTest extends CaseSummariesH
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_SKELETON_ARGUMENT,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
@@ -56,7 +56,7 @@ public class RespondentCaseSummariesCollectionServiceTest extends CaseSummariesH
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_SKELETON_ARGUMENT),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT),
             is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT)
         );
         assertThat(

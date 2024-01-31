@@ -25,7 +25,7 @@ public class CaseDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_SKELETON_ARGUMENT,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,
             CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
@@ -53,7 +53,7 @@ public class CaseDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_SKELETON_ARGUMENT),
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT),
             is(DocumentCategory.CASE_DOCUMENTS)
         );
 
