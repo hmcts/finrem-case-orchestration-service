@@ -18,7 +18,7 @@ def versions = [
         guava                : '32.1.3-jre',
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.9.2',
-        commonsIo            : '2.7',
+        commonsIo            : '2.15.1',
         commonsLang3         : '3.14.0',
         hmctsNotify          : '4.1.1-RELEASE',
         junit                : '4.13.2',
