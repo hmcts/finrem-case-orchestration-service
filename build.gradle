@@ -412,7 +412,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jacksonDatabind
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jacksonDatabind
 
-    implementation("org.apache.poi:poi:5.2.3") {
+    implementation("org.apache.poi:poi:5.2.5") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
     implementation("org.apache.poi:poi-ooxml:5.2.5") {
