@@ -1,10 +1,12 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.shareselecteddocuments;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
@@ -13,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApplicantShareDocumentsService;
@@ -116,7 +117,6 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
             }
         }
         if (applicantDocumentsService.isIntervenerRole(loggedInUserCaseRole)) {
-            List<DynamicMultiSelectListElement> defaultDynamicListElements = new ArrayList<>();
             DynamicMultiSelectList sourceDocumentList
                 = intervenerShareDocumentsService.intervenerSourceDocumentList(caseDetails, loggedInUserCaseRole);
             log.info("Intervener sourceDocumentList {} Case ID: {}", sourceDocumentList, caseId);
