@@ -73,7 +73,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.SHARE_SELECTED_DOCUMENTS.equals(eventType));
+            && EventType.SHARE_SELECTED_DOCUMENTS.equals(eventType);
     }
 
     @Override
