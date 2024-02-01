@@ -106,6 +106,11 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
         );
 
         assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES),
+            is(DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES)
+        );
+
+        assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS),
             is(DocumentCategory.RESPONDENT_DOCUMENTS)
         );
