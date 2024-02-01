@@ -41,8 +41,8 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
     }
 
     @Override
-    protected DocumentCategory getHearingDocumentsCategoryMortgageCapacities() {
-        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES;
+    protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES;
     }
 
     @Override

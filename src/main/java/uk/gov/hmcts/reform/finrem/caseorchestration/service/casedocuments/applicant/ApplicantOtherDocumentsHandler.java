@@ -42,8 +42,8 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getHearingDocumentsCategoryMortgageCapacities() {
-        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_MORTGAGE_CAPACITIES;
+    protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES;
     }
 
 
