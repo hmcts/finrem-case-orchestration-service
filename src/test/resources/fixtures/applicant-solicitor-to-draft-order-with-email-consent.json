@@ -4,7 +4,7 @@
   "case_details": {
     "id": "12345678",
     "jurisdiction": "divorce",
-    "state": "created",
+    "state": "responseReceived",
     "case_data": {
       "PBANumber": "PBA123456",
       "d81Question": "No",
@@ -43,7 +43,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "ScheduleOfAssets",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -76,7 +76,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "Form PPF2",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -189,7 +189,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "ScheduleOfAssets",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -206,7 +206,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "ScheduleOfAssets",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -223,7 +223,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "ScheduleOfAssets",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -257,7 +257,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "ScheduleOfAssets",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
