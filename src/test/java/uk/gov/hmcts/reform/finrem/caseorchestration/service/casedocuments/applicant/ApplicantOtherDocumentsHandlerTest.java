@@ -104,7 +104,7 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES),
-            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_MORTGAGE_CAPACITIES)
+            is(DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES)
         );
 
         assertThat(
