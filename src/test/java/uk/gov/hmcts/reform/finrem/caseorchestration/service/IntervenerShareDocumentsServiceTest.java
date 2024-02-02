@@ -301,8 +301,8 @@ class IntervenerShareDocumentsServiceTest {
             .listItems(createList(roleOptions))
             .build();
         List<String> expectedValue = expectedSelectedRoles.stream()
-                .map(CaseRole::getCcdCode)
-                    .toList();
+            .map(CaseRole::getCcdCode)
+            .toList();
 
         intervenerShareDocumentsService.preSelectOptionsIfBothPartiesPresent(list);
 
