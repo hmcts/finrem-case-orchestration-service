@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.shareselecteddocuments;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocum
 import java.util.List;
 
 @Service
+@Slf4j
 public class ShareSelectedDocumentsMidEventHandler extends FinremCallbackHandler {
 
     private final AssignCaseAccessService assignCaseAccessService;
@@ -39,8 +41,11 @@ public class ShareSelectedDocumentsMidEventHandler extends FinremCallbackHandler
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
         FinremCallbackRequest callbackRequestWithFinremCaseDetails, String userAuthorisation) {
         Long caseId = callbackRequestWithFinremCaseDetails.getCaseDetails().getId();
-        String activeUser = assignCaseAccessService.getActiveUserCaseRole(caseId.toString(), userAuthorisation);
 
+        log.info("Invoking contested {} mid-event callback for Case ID: {}",
+            callbackRequestWithFinremCaseDetails.getEventType(), caseId);
+
+        String activeUser = assignCaseAccessService.getActiveUserCaseRole(caseId.toString(), userAuthorisation);
         FinremCaseData caseData = callbackRequestWithFinremCaseDetails.getCaseDetails().getData();
         caseData.setCurrentUserCaseRoleType(activeUser);
         List<String> errors = intervenerShareDocumentsService.checkThatApplicantAndRespondentAreBothSelected(caseData);
