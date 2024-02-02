@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -42,8 +45,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNull;
@@ -58,37 +63,38 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.QUESTIONNAIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.STATEMENT_AFFIDAVIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.TRIAL_BUNDLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_ONE_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_THREE_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_OTHER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService.SHAREABLE_DOCS_WARNING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService.APP_RESP_SELECTION_WARNING;
 
 @ExtendWith(MockitoExtension.class)
-public class IntervenerShareDocumentsServiceTest {
+class IntervenerShareDocumentsServiceTest {
 
     private IntervenerShareDocumentsService intervenerShareDocumentsService;
     private final ThreadLocal<UUID> uuid = new ThreadLocal<>();
 
-    private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
-
     @Mock
     private FeatureToggleService featureToggleService;
-    private List<DocumentSharer> documentSharers;
 
     @MockBean
     ShareSelectedDocumentService shareSelectedDocumentService;
 
-
     @BeforeEach
     void beforeEach() {
-        selectablePartiesCorrespondenceService = new SelectablePartiesCorrespondenceService(new FinremCaseDetailsMapper(new ObjectMapper()));
+        SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService =
+            new SelectablePartiesCorrespondenceService(new FinremCaseDetailsMapper(new ObjectMapper()));
 
-
-        documentSharers = List.of(new ChronologiesDocumentSharer(featureToggleService),
+        List<DocumentSharer> documentSharers = List.of(new ChronologiesDocumentSharer(featureToggleService),
             new CorrespondenceDocumentSharer(featureToggleService),
             new ExpertEvidenceDocumentSharer(featureToggleService),
             new FormEDocumentSharer(featureToggleService),
@@ -99,7 +105,8 @@ public class IntervenerShareDocumentsServiceTest {
             new StatementExhibitsDocumentSharer(featureToggleService),
             new SummariesDocumentSharer(featureToggleService));
         ShareSelectedDocumentService shareSelectedDocumentService = new ShareSelectedDocumentService(documentSharers);
-        intervenerShareDocumentsService = new IntervenerShareDocumentsService(selectablePartiesCorrespondenceService, shareSelectedDocumentService);
+        intervenerShareDocumentsService = new IntervenerShareDocumentsService(selectablePartiesCorrespondenceService,
+            shareSelectedDocumentService);
         uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
 
@@ -269,7 +276,6 @@ public class IntervenerShareDocumentsServiceTest {
         FinremCaseDetails details = request.getCaseDetails();
         FinremCaseData data = details.getData();
 
-
         data.getUploadCaseDocumentWrapper().setIntv1Other(getTestDocument(OTHER));
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
         List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getIntv1Other();
@@ -278,7 +284,7 @@ public class IntervenerShareDocumentsServiceTest {
         data.setSourceDocumentList(sourceDocumentList);
 
         DynamicMultiSelectList roleList = new DynamicMultiSelectList();
-        roleList.setValue(singletonList(getSelectedParty(RESP_SOLICITOR)));
+        roleList.setValue(singletonList(getSelectedParty()));
         data.setSolicitorRoleList(roleList);
 
         intervenerShareDocumentsService.shareSelectedDocumentWithOtherSelectedSolicitors(data);
@@ -288,57 +294,134 @@ public class IntervenerShareDocumentsServiceTest {
             wrapper.getRespOtherCollectionShared().size());
     }
 
-    @Test
-    void shouldCheckThatWhenIntervenerLoggedInAndOneOfMainLititgantPartiesIsSelectedThenWarningIsReturned() {
-        FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails details = request.getCaseDetails();
-        FinremCaseData data = details.getData();
+    @ParameterizedTest
+    @MethodSource
+    void testPreSelectOptionsIfBothPartiesPresent(List<CaseRole> roleOptions, List<CaseRole> expectedSelectedRoles) {
+        DynamicMultiSelectList list = DynamicMultiSelectList.builder()
+            .listItems(createList(roleOptions))
+            .build();
+        List<String> expectedValue = expectedSelectedRoles.stream()
+                .map(CaseRole::getCcdCode)
+                    .toList();
 
-        DynamicMultiSelectList roleList = new DynamicMultiSelectList();
-        roleList.setValue(singletonList(getSelectedParty(RESP_SOLICITOR)));
-        data.setSolicitorRoleList(roleList);
-        data.setCurrentUserCaseRoleType("[INTVRSOLICITOR1]");
+        intervenerShareDocumentsService.preSelectOptionsIfBothPartiesPresent(list);
 
-        List<String> warnings = intervenerShareDocumentsService.checkThatApplicantAndRespondentAreBothSelected(data);
-
-        assertEquals("warning size for sharing", 1, warnings.size());
-        assertEquals("warning message for sharing", SHAREABLE_DOCS_WARNING, warnings.get(0));
-
+        if (expectedSelectedRoles.isEmpty()) {
+            assertThat(list.getValue()).isNull();
+        } else {
+            assertThat(list.getValue())
+                .hasSize(expectedSelectedRoles.size())
+                .extracting(DynamicMultiSelectListElement::getCode)
+                .hasSameElementsAs(expectedValue);
+        }
     }
 
-    @Test
-    void shouldNotCheckThatWhenIntervenerNotLoggedInAndOneOfMainLititgantPartiesIsSelectedThenWarningIsReturned() {
-        FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails details = request.getCaseDetails();
-        FinremCaseData data = details.getData();
-
-        DynamicMultiSelectList roleList = new DynamicMultiSelectList();
-        roleList.setValue(singletonList(getSelectedParty(RESP_SOLICITOR)));
-        data.setSolicitorRoleList(roleList);
-        data.setCurrentUserCaseRoleType("[APPBARRISTER]");
-
-        List<String> warnings = intervenerShareDocumentsService.checkThatApplicantAndRespondentAreBothSelected(data);
-
-        assertEquals("warning size for sharing", 0, warnings.size());
-
+    private static Stream<Arguments> testPreSelectOptionsIfBothPartiesPresent() {
+        List<String> emptyList = new ArrayList<>();
+        return Stream.of(
+            Arguments.of(emptyList, emptyList),
+            Arguments.of(List.of(APP_SOLICITOR), emptyList),
+            Arguments.of(List.of(APP_BARRISTER), emptyList),
+            Arguments.of(List.of(RESP_SOLICITOR), emptyList),
+            Arguments.of(List.of(RESP_BARRISTER), emptyList),
+            Arguments.of(List.of(INTVR_SOLICITOR_1), emptyList),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR), List.of(APP_SOLICITOR, RESP_SOLICITOR)),
+            Arguments.of(List.of(APP_BARRISTER, RESP_SOLICITOR), List.of(APP_BARRISTER, RESP_SOLICITOR)),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_BARRISTER), List.of(APP_SOLICITOR, RESP_BARRISTER)),
+            Arguments.of(List.of(APP_BARRISTER, RESP_BARRISTER), List.of(APP_BARRISTER, RESP_BARRISTER)),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_1),
+                List.of(APP_SOLICITOR, RESP_SOLICITOR)),
+            Arguments.of(List.of(APP_BARRISTER, RESP_BARRISTER, INTVR_SOLICITOR_1),
+                List.of(APP_BARRISTER, RESP_BARRISTER)),
+            Arguments.of(List.of(APP_SOLICITOR, APP_BARRISTER, RESP_SOLICITOR, RESP_BARRISTER, INTVR_SOLICITOR_1),
+                List.of(APP_SOLICITOR, APP_BARRISTER, RESP_SOLICITOR, RESP_BARRISTER))
+        );
     }
 
+    @ParameterizedTest
+    @MethodSource
+    void testCheckThatApplicantAndRespondentAreBothSelected(List<CaseRole> options,
+                                                            List<CaseRole> selectedOptions,
+                                                            CaseRole activeUser,
+                                                            boolean selectionValid) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .solicitorRoleList(createSelectList(options, selectedOptions))
+            .currentUserCaseRoleType(activeUser.getCcdCode())
+            .build();
 
-    @Test
-    void shouldNotReturnWarningWhenIntervenerNotLoggedInAndBothMainLititgantPartiesAreSelected() {
-        FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails details = request.getCaseDetails();
-        FinremCaseData data = details.getData();
+        List<String> errors = intervenerShareDocumentsService.checkThatApplicantAndRespondentAreBothSelected(caseData);
+        if (selectionValid) {
+            assertThat(errors).isEmpty();
+        } else {
+            assertThat(errors.size()).isEqualTo(1);
+            assertThat(errors.get(0)).isEqualTo(APP_RESP_SELECTION_WARNING);
+        }
+    }
 
-        DynamicMultiSelectList roleList = new DynamicMultiSelectList();
-        roleList.setValue(List.of(getSelectedParty(RESP_SOLICITOR), getSelectedParty(APP_SOLICITOR)));
-        data.setSolicitorRoleList(roleList);
-        data.setCurrentUserCaseRoleType("[INTVRSOLICITOR1]");
+    private static Stream<Arguments> testCheckThatApplicantAndRespondentAreBothSelected() {
+        List<CaseRole> emptyList = new ArrayList<>();
+        return Stream.of(
+            Arguments.of(emptyList, emptyList, INTVR_SOLICITOR_1, true),
 
-        List<String> warnings = intervenerShareDocumentsService.checkThatApplicantAndRespondentAreBothSelected(data);
+            // Only one party available and not selected
+            Arguments.of(List.of(APP_SOLICITOR), emptyList, INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(RESP_SOLICITOR), emptyList, INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(APP_BARRISTER), emptyList, INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(RESP_BARRISTER), emptyList, INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(INTVR_SOLICITOR_2), emptyList, INTVR_SOLICITOR_1, true),
 
-        assertEquals("warning size for sharing", 0, warnings.size());
+            // Only one party available and selected
+            Arguments.of(List.of(APP_SOLICITOR), List.of(APP_SOLICITOR), INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(RESP_SOLICITOR), List.of(RESP_SOLICITOR), INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(APP_BARRISTER), List.of(APP_BARRISTER), INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(RESP_BARRISTER), List.of(RESP_BARRISTER), INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(INTVR_SOLICITOR_2), List.of(INTVR_SOLICITOR_2), INTVR_SOLICITOR_1, true),
 
+            // Both parties available and neither selected
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR), emptyList, INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_BARRISTER), emptyList, INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(APP_BARRISTER, RESP_SOLICITOR), emptyList, INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(APP_BARRISTER, RESP_BARRISTER), emptyList, INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), emptyList, INTVR_SOLICITOR_1, true),
+
+            // Both parties available and both selected
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR), List.of(APP_SOLICITOR, RESP_SOLICITOR), INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_BARRISTER), List.of(APP_SOLICITOR, RESP_BARRISTER), INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(APP_BARRISTER, RESP_SOLICITOR), List.of(APP_BARRISTER, RESP_SOLICITOR), INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(APP_BARRISTER, RESP_BARRISTER), List.of(APP_BARRISTER, RESP_BARRISTER), INTVR_SOLICITOR_1, true),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), List.of(APP_SOLICITOR, RESP_SOLICITOR), INTVR_SOLICITOR_1, true),
+
+            // Both parties available and only one selected
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR), List.of(APP_SOLICITOR), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR), List.of(RESP_SOLICITOR), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_BARRISTER), List.of(APP_SOLICITOR), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_BARRISTER), List.of(RESP_BARRISTER), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_BARRISTER, RESP_SOLICITOR), List.of(APP_BARRISTER), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_BARRISTER, RESP_SOLICITOR), List.of(RESP_SOLICITOR), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_BARRISTER, RESP_BARRISTER), List.of(APP_BARRISTER), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_BARRISTER, RESP_BARRISTER), List.of(RESP_BARRISTER), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), List.of(APP_SOLICITOR), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), List.of(RESP_SOLICITOR), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), List.of(APP_SOLICITOR, INTVR_SOLICITOR_2), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), List.of(RESP_SOLICITOR, INTVR_SOLICITOR_2), INTVR_SOLICITOR_1, false),
+
+            // Both parties available and only one selected but user is not an intervener
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR), List.of(APP_SOLICITOR), CASEWORKER, true)
+        );
+    }
+
+    private DynamicMultiSelectList createSelectList(List<CaseRole> options,
+                                                    List<CaseRole> selectedOptions) {
+        return DynamicMultiSelectList.builder()
+            .listItems(createList(options))
+            .value(createList(selectedOptions))
+            .build();
+    }
+
+    private List<DynamicMultiSelectListElement> createList(List<CaseRole> roles) {
+        return roles.stream()
+            .map(role -> DynamicMultiSelectListElement.builder().code(role.getCcdCode()).build())
+            .toList();
     }
 
     private static DynamicMultiSelectListElement getSelectedDoc(List<UploadCaseDocumentCollection> coll,
@@ -350,9 +433,9 @@ public class IntervenerShareDocumentsServiceTest {
             .build();
     }
 
-    private DynamicMultiSelectListElement getSelectedParty(CaseRole role) {
+    private DynamicMultiSelectListElement getSelectedParty() {
         return DynamicMultiSelectListElement.builder()
-            .label(role.getCcdCode()).code(role.getCcdCode()).build();
+            .label(RESP_SOLICITOR.getCcdCode()).code(RESP_SOLICITOR.getCcdCode()).build();
     }
 
     private List<UploadCaseDocumentCollection> getTestDocument(CaseDocumentType documentType) {
@@ -381,14 +464,17 @@ public class IntervenerShareDocumentsServiceTest {
     }
 
     private List<CaseAssignmentUserRole> getCaseRoleList() {
-
         List<String> roleList = List.of("[APPSOLICITOR]", "[APPBARRISTER]", "[RESPSOLICITOR]",
             "[RESPBARRISTER]", "[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]",
             "[INTVRBARRISTER1]", "[INTVRBARRISTER2]", "[INTVRBARRISTER3]", "[INTVRBARRISTER4]");
         List<CaseAssignmentUserRole> caseAssignedUserRoleList = new ArrayList<>();
-        roleList.forEach(role -> {
-            caseAssignedUserRoleList.add(CaseAssignmentUserRole.builder().userId(role).caseRole(role).caseDataId(String.valueOf(123L)).build());
-        });
+        roleList.forEach(role ->
+            caseAssignedUserRoleList.add(CaseAssignmentUserRole.builder()
+                .userId(role)
+                .caseRole(role)
+                .caseDataId(String.valueOf(123L))
+                .build())
+        );
         return caseAssignedUserRoleList;
     }
 }
