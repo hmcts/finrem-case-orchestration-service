@@ -400,10 +400,14 @@ class IntervenerShareDocumentsServiceTest {
             Arguments.of(List.of(APP_BARRISTER, RESP_SOLICITOR), List.of(RESP_SOLICITOR), INTVR_SOLICITOR_1, false),
             Arguments.of(List.of(APP_BARRISTER, RESP_BARRISTER), List.of(APP_BARRISTER), INTVR_SOLICITOR_1, false),
             Arguments.of(List.of(APP_BARRISTER, RESP_BARRISTER), List.of(RESP_BARRISTER), INTVR_SOLICITOR_1, false),
-            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), List.of(APP_SOLICITOR), INTVR_SOLICITOR_1, false),
-            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), List.of(RESP_SOLICITOR), INTVR_SOLICITOR_1, false),
-            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), List.of(APP_SOLICITOR, INTVR_SOLICITOR_2), INTVR_SOLICITOR_1, false),
-            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), List.of(RESP_SOLICITOR, INTVR_SOLICITOR_2), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2),
+                List.of(APP_SOLICITOR), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2), List.of(RESP_SOLICITOR),
+                INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2),
+                List.of(APP_SOLICITOR, INTVR_SOLICITOR_2), INTVR_SOLICITOR_1, false),
+            Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR, INTVR_SOLICITOR_2),
+                List.of(RESP_SOLICITOR, INTVR_SOLICITOR_2), INTVR_SOLICITOR_1, false),
 
             // Both parties available and only one selected but user is not an intervener
             Arguments.of(List.of(APP_SOLICITOR, RESP_SOLICITOR), List.of(APP_SOLICITOR), CASEWORKER, true)
