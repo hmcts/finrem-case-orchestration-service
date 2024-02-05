@@ -6,10 +6,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
-/**
- * New version for the assets estimation list with updated values,
- * we must retain the old fixed list for old cases hence this new v2 one.
- */
 @RequiredArgsConstructor
 public enum EstimatedAssetV2 {
 
