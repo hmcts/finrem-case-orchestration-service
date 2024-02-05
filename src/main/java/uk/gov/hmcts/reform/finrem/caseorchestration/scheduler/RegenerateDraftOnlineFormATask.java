@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 
 @Component
 @Slf4j
-public class RegenerateDraftOnlineFormATask extends BaseTask {
+public class RegenerateDraftOnlineFormATask extends CsvFileProcessingTask {
 
 
     private final OnlineFormDocumentService onlineFormDocumentService;
