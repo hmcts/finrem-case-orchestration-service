@@ -205,7 +205,7 @@ public class FinremCaseData {
     private List<FastTrackReason> fastTrackDecisionReason;
     private Complexity addToComplexityListOfCourts;
     private List<EstimatedAsset> estimatedAssetsChecklist;
-    private EstimatedAsset2 estimatedAssetsChecklist2;
+    private EstimatedAssetV2 estimatedAssetsChecklist2;
     private String netValueOfHome;
     private List<PotentialAllegation> potentialAllegationChecklist;
     private String detailPotentialAllegation;

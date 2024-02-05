@@ -6,8 +6,12 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
+/**
+ * New version for the assets estimation list with updated values,
+ * we must retain the old fixed list for old cases hence this new v2 one.
+ */
 @RequiredArgsConstructor
-public enum EstimatedAsset2 {
+public enum EstimatedAssetV2 {
 
     OVER_FIFTEEN_MILLION_POUNDS("overFifteenMillionPounds"),
     BETWEEN_SEVEN_POINT_FIVE_TO_FIFTEEN_MILLION_POUNDS("betweenSevenPointFiveAndFifteenMillionPounds"),
@@ -21,8 +25,8 @@ public enum EstimatedAsset2 {
         return id;
     }
 
-    public static EstimatedAsset2 getEstimatedAsset(String ccdType) {
-        return Arrays.stream(EstimatedAsset2.values())
+    public static EstimatedAssetV2 getEstimatedAsset(String ccdType) {
+        return Arrays.stream(EstimatedAssetV2.values())
             .filter(option -> option.id.equals(ccdType))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
