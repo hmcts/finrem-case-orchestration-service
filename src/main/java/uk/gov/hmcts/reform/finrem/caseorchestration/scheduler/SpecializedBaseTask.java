@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.CustomRequestScopeAtt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceKeyValue;
@@ -69,11 +70,11 @@ public abstract class SpecializedBaseTask implements Runnable {
                             caseReference.getCaseReference(), getCaseType().getCcdType(), EventType.AMEND_CASE_CRON.getCcdType());
 
                         CaseDetails caseDetails = startEventResponse.getCaseDetails();
-
+                        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
                         log.info("Updating {} for Case ID: {}", getTaskName(), caseDetails.getId());
-                        executeTask(caseDetails, caseReference);
-
-                        startEventResponse.getCaseDetails().setData(caseDetails.getData());
+                        executeTask(finremCaseDetails, caseReference);
+                        CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+                        startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
                         ccdService.submitEventForCaseWorker(startEventResponse, getSystemUserToken(),
                             caseDetails.getId().toString(),
                             getCaseType().getCcdType(),
@@ -112,5 +113,5 @@ public abstract class SpecializedBaseTask implements Runnable {
 
     protected abstract String getSummary();
 
-    protected abstract void executeTask(CaseDetails caseDetails, CaseReferenceKeyValue caseReferenceKeyValue);
+    protected abstract void executeTask(FinremCaseDetails caseDetails, CaseReferenceKeyValue caseReferenceKeyValue);
 }
