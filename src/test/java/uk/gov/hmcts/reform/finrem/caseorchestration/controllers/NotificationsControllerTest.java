@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
@@ -97,7 +98,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
     IntervenerOneLetterAddresseeGenerator.class,
     IntervenerTwoLetterAddresseeGenerator.class,
     IntervenerThreeLetterAddresseeGenerator.class,
-    IntervenerFourLetterAddresseeGenerator.class
+    IntervenerFourLetterAddresseeGenerator.class,
+    InternationalPostalService.class
 })
 public class NotificationsControllerTest extends BaseControllerTest {
 
@@ -129,6 +131,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
     @MockBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @MockBean
+    private InternationalPostalService postalService;
 
     @Override
     @Before

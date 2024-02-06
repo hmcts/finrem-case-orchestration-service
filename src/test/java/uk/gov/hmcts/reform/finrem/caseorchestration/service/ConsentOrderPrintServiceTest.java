@@ -32,6 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -68,7 +69,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
     @Before
     public void init() {
-        when(genericDocumentService.bulkPrint(any(), any(), any())).thenReturn(LETTER_ID);
+        when(genericDocumentService.bulkPrint(any(), any(), anyBoolean(), any())).thenReturn(LETTER_ID);
     }
 
     @Test
@@ -92,7 +93,10 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
         verify(consentOrderNotApprovedDocumentService).prepareApplicantLetterPack(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
-        verify(genericDocumentService, times(2)).bulkPrint(any(), any(), any());
+        verify(genericDocumentService, times(2)).bulkPrint(any(BulkPrintRequest.class),
+            anyString(),
+            anyBoolean(),
+            any());
     }
 
     @Test
@@ -164,7 +168,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
+        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), anyBoolean(), eq(AUTH_TOKEN));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getBinaryFileUrl)
             .collect(Collectors.toList()), hasItem("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
@@ -221,7 +225,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
         verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
-        verify(genericDocumentService, times(2)).bulkPrint(any(), any(), any());
+        verify(genericDocumentService, times(2)).bulkPrint(any(), any(), anyBoolean(), any());
     }
 
     @Test
@@ -245,7 +249,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         assertNull(caseData.getBulkPrintLetterIdApp());
 
         verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
-        verify(genericDocumentService, times(1)).bulkPrint(any(), any(), any());
+        verify(genericDocumentService, times(1)).bulkPrint(any(), any(), anyBoolean(), any());
     }
 
     @Test
@@ -263,7 +267,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             "/fixtures/contested/bulk_print_consent_order_not_approved.json", mapper);
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService, times(2)).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
+        verify(genericDocumentService, times(2)).bulkPrint(bulkPrintRequestArgumentCaptor.capture(),
+            any(), anyBoolean(), eq(AUTH_TOKEN));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getBinaryFileUrl)
             .collect(Collectors.toList()), hasItem("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }

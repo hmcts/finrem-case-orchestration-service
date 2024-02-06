@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -18,7 +20,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.formatAddressForLetterPrinting;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER_RECIPIENT;
@@ -41,6 +42,10 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
 
     @Autowired
     private GeneralLetterDetailsMapper generalLetterDetailsMapper;
+    @Autowired
+    private InternationalPostalService postalService;
+    @Autowired
+    private DocumentHelper documentHelper;
 
     @Before
     public void setUp() throws Exception {
@@ -168,7 +173,7 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
     private Addressee buildAddressee(String name, String addressLine1) {
         return Addressee.builder()
             .name(name)
-            .formattedAddress(formatAddressForLetterPrinting(getAddress(addressLine1)))
+            .formattedAddress(generalLetterDetailsMapper.formatAddressForLetterPrinting(getAddress(addressLine1), false))
             .build();
     }
 

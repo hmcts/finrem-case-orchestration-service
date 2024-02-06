@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +12,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 
 @ExtendWith(MockitoExtension.class)
-public class RejectedConsentOrderAboutToSubmitHandlerTest {
+class RejectedConsentOrderAboutToSubmitHandlerTest {
 
     private RejectedConsentOrderAboutToSubmitHandler handler;
     @Mock
@@ -61,13 +61,11 @@ public class RejectedConsentOrderAboutToSubmitHandlerTest {
     @Mock
     private FeatureToggleService featureToggleService;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final DocumentHelper documentHelper = new DocumentHelper(objectMapper, caseDataService, genericDocumentService,
-        finremCaseDetailsMapper, letterAddresseeGeneratorMapper);
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
     private static final String REJECT_ORDER_VALID_JSON = "/fixtures/fee-lookup.json";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         RefusedConsentOrderDocumentCategoriser refusalConsentOrderDocumentCategoriser =
             new RefusedConsentOrderDocumentCategoriser(featureToggleService);
         handler = new RejectedConsentOrderAboutToSubmitHandler(refusalOrderDocumentService,
@@ -75,35 +73,35 @@ public class RejectedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void given_case_whenEventRejectedOrder_thenCanHandle() {
+    void given_case_whenEventRejectedOrder_thenCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.REJECT_ORDER),
             is(true));
     }
 
     @Test
-    public void given_contested_case_whenEventConsentOrderNotApproved_thenCanHandle() {
+    void given_contested_case_whenEventConsentOrderNotApproved_thenCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CONSENT_ORDER_NOT_APPROVED),
             is(true));
     }
 
     @Test
-    public void given_case_when_wrong_callback_then_case_can_not_handle() {
+    void given_case_when_wrong_callback_then_case_can_not_handle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.REJECT_ORDER),
             is(false));
     }
 
     @Test
-    public void given_case_when_wrong_event_type_then_case_can_not_handle() {
+    void given_case_when_wrong_event_type_then_case_can_not_handle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CLOSE),
             is(false));
     }
 
     @Test
-    public void given_case_when_order_not_approved_then_reject_order() {
+    void given_case_when_order_not_approved_then_reject_order() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         CallbackRequest callbackRequest = doValidCaseDataSetUp();
         CaseDetails mappedCaseDetails = prepareMappedCaseDetails(callbackRequest);
@@ -148,8 +146,13 @@ public class RejectedConsentOrderAboutToSubmitHandlerTest {
 
     private List<ContestedConsentOrderData> getNotApprovedConsentOrderData(Map<String, Object> caseData) {
         return Optional.ofNullable(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION))
-            .map(documentHelper::convertToContestedConsentOrderData)
+            .map(this::convertToContestedConsentOrderData)
             .orElse(new ArrayList<>(1));
+    }
+
+    private List<ContestedConsentOrderData> convertToContestedConsentOrderData(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
     }
 
     private CallbackRequest doValidCaseDataSetUp() {

@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.Map;
 
@@ -22,11 +23,14 @@ public class ApplicantAddresseeGenerator implements AddresseeGenerator {
 
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
+    private final InternationalPostalService postalService;
 
     public Addressee generate(CaseDetails caseDetails, ChangedRepresentative changedRepresentative, String party) {
-        log.info("In the generate addressee method for Applicant");
+        log.info("In the generate addressee method for Applicant for caseId {}", caseDetails.getId());
+        boolean applicantResideOutsideOfUK = postalService.isApplicantResideOutsideOfUK(caseDetails.getData());
         return Addressee.builder()
             .name(caseDataService.buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME))
-            .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) caseDetails.getData().get(APPLICANT_ADDRESS))).build();
+            .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) caseDetails.getData().get(APPLICANT_ADDRESS),
+                applicantResideOutsideOfUK)).build();
     }
 }

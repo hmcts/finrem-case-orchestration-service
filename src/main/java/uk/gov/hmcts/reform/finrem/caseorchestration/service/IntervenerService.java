@@ -52,7 +52,7 @@ public class IntervenerService {
                                                            FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         Long caseId = callbackRequest.getCaseDetails().getId();
-
+        validateIntervenerCountryOfResident(intervenerWrapper, errors);
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         intervenerChangeDetails.setIntervenerType(intervenerWrapper.getIntervenerType());
@@ -93,6 +93,16 @@ public class IntervenerService {
         }
         intervenerChangeDetails.setIntervenerDetails(intervenerWrapper);
         return intervenerChangeDetails;
+    }
+
+    private void validateIntervenerCountryOfResident(IntervenerWrapper intervenerWrapper, List<String> errors) {
+        if (intervenerWrapper.getIntervenerRepresented().equals(YesOrNo.NO)) {
+            YesOrNo intervenerResideOutsideUK = intervenerWrapper.getIntervenerResideOutsideUK();
+            String country = intervenerWrapper.getIntervenerAddress().getCountry();
+            if (ObjectUtils.isNotEmpty(intervenerResideOutsideUK) && intervenerResideOutsideUK.equals(YesOrNo.YES) && ObjectUtils.isEmpty(country)) {
+                errors.add("Intervener reside outside of UK. Please provide country of residence.");
+            }
+        }
     }
 
     private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore, String orgId,

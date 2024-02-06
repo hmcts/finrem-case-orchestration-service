@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.Map;
@@ -56,7 +58,8 @@ public class AddresseeGeneratorHelper {
     private static Addressee getApplicantAddressee(FinremCaseData caseData) {
         return Addressee.builder()
             .name(getAppName(caseData))
-            .formattedAddress(formatAddressForLetterPrinting(getAppAddress(caseData)))
+            .formattedAddress(formatAddressForLetterPrinting(getAppAddress(caseData),
+                isApplicantResideOutsideOfUK(caseData)))
             .build();
     }
 
@@ -76,7 +79,8 @@ public class AddresseeGeneratorHelper {
     private static Addressee getRespondentAddressee(FinremCaseData caseData) {
         return Addressee.builder()
             .name(getRespName(caseData))
-            .formattedAddress(formatAddressForLetterPrinting(getRespAddress(caseData)))
+            .formattedAddress(formatAddressForLetterPrinting(getRespAddress(caseData),
+                isRespondentResideOutsideOfUK(caseData)))
             .build();
     }
 
@@ -95,18 +99,20 @@ public class AddresseeGeneratorHelper {
     private static Addressee getIntervenerAddressee(IntervenerWrapper intervenerWrapper) {
         return Addressee.builder()
             .name(intervenerWrapper.getIntervenerName())
-            .formattedAddress(formatAddressForLetterPrinting(intervenerWrapper.getIntervenerAddress()))
+            .formattedAddress(formatAddressForLetterPrinting(intervenerWrapper.getIntervenerAddress(),
+                isIntervenerResideOutsideOfUK(intervenerWrapper)))
             .build();
     }
 
-    public static String formatAddressForLetterPrinting(Address address) {
-        return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class));
+    public static String formatAddressForLetterPrinting(Address address, boolean recipientResideOutsideOfUK) {
+        return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class), recipientResideOutsideOfUK);
     }
 
-    private static String formatAddressForLetterPrinting(Map<String, Object> address) {
+    private static String formatAddressForLetterPrinting(Map<String, Object> address, boolean isInternational) {
         if (address != null) {
-            return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")
-                .map(address::get)
+            Stream<String> addressLines = Stream.of("AddressLine1", "AddressLine2", "AddressLine3",
+                "County", "PostTown", "PostCode", isInternational ? "Country" : "");
+            return addressLines.map(address::get)
                 .filter(Objects::nonNull)
                 .map(Object::toString)
                 .filter(StringUtils::isNotEmpty)
@@ -137,5 +143,22 @@ public class AddresseeGeneratorHelper {
 
     public static Address getAddressOrNew(Address address) {
         return Optional.ofNullable(address).orElse(new Address());
+    }
+
+    private static boolean isApplicantResideOutsideOfUK(FinremCaseData caseData) {
+        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+        YesOrNo applicantResideOutsideUK = wrapper.getApplicantResideOutsideUK();
+        return applicantResideOutsideUK != null && applicantResideOutsideUK.equals(YesOrNo.YES);
+    }
+
+    private static boolean isRespondentResideOutsideOfUK(FinremCaseData caseData) {
+        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+        YesOrNo respondentResideOutsideUK = wrapper.getRespondentResideOutsideUK();
+        return respondentResideOutsideUK != null && respondentResideOutsideUK.equals(YesOrNo.YES);
+    }
+
+    private static boolean isIntervenerResideOutsideOfUK(IntervenerWrapper intervenerWrapper) {
+        YesOrNo intervenerResideOutsideUK = intervenerWrapper.getIntervenerResideOutsideUK();
+        return intervenerResideOutsideUK != null && intervenerResideOutsideUK.equals(YesOrNo.YES);
     }
 }

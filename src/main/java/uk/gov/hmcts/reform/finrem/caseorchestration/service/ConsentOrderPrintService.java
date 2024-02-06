@@ -32,6 +32,7 @@ public class ConsentOrderPrintService {
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final InternationalPostalService postalService;
 
     public FinremCaseDetails sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
@@ -121,6 +122,7 @@ public class ConsentOrderPrintService {
             caseDetails.getId(),
             RESPONDENT,
             bulkPrintDocuments,
+            postalService.isRespondentResideOutsideOfUK(caseData),
             authorisationToken);
     }
 
