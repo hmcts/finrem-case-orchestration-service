@@ -319,6 +319,61 @@ public class IntervenerServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenContestedCase_whenUpdatingIntervener1AndChangedRepresetationYesToNoAndCountryNotProvided_thenShowError() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
+            Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
+        ).build();
+        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+            .builder().intervenerName("One name").intervenerEmail("test@test.com")
+            .intervenerSolEmail("test@test.com")
+            .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
+            .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
+            .intervenerRepresented(YesOrNo.YES)
+            .intervenerDateAdded(LocalDate.of(2023, 1, 1))
+            .intervenerOrganisation(organisationPolicy).build();
+        finremCaseDataBefore.setIntervenerOneWrapper(oneWrapper);
+
+        IntervenerOneWrapper oneWrapper1 = IntervenerOneWrapper
+            .builder().intervenerName("One name").intervenerEmail("test@test.com")
+            .intervenerRepresented(YesOrNo.NO)
+            .intervenerResideOutsideUK(YesOrNo.YES)
+            .intervenerDateAdded(LocalDate.of(2023, 1, 1))
+            .intervenerOrganisation(organisationPolicy).build();
+        finremCaseData.setIntervenerOneWrapper(oneWrapper1);
+
+
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
+        finremCaseData.getIntervenersList().setValue(option1);
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        List<String> errors = new ArrayList<>();
+        IntervenerChangeDetails intervenerChangeDetails = service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
+
+        IntervenerOneWrapper intervenerOneWrapper = finremCaseData.getIntervenerOneWrapper();
+
+        assertNotNull(intervenerOneWrapper.getIntervenerDateAdded());
+        assertNull(intervenerOneWrapper.getIntervenerSolEmail());
+        assertNull(intervenerOneWrapper.getIntervenerSolName());
+        assertNull(intervenerOneWrapper.getIntervenerSolPhone());
+        assertNull(intervenerOneWrapper.getIntervenerSolicitorFirm());
+        assertNull(intervenerOneWrapper.getIntervenerSolicitorReference());
+        assertNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
+            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        assertFalse(errors.isEmpty());
+        assertTrue(errors.contains("Does the Intervener reside outside of the UK Please provide country of residence."));
+    }
+
+    @Test
     public void givenContestedCase_whenUpdatingIntervener1AndChangedRepresetationYesToNo_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();

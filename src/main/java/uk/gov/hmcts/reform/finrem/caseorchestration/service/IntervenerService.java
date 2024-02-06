@@ -98,9 +98,10 @@ public class IntervenerService {
     private void validateIntervenerCountryOfResident(IntervenerWrapper intervenerWrapper, List<String> errors) {
         if (intervenerWrapper.getIntervenerRepresented().equals(YesOrNo.NO)) {
             YesOrNo intervenerResideOutsideUK = intervenerWrapper.getIntervenerResideOutsideUK();
-            String country = intervenerWrapper.getIntervenerAddress().getCountry();
+            String country = intervenerWrapper.getIntervenerAddress() != null
+                ? intervenerWrapper.getIntervenerAddress().getCountry() : "";
             if (ObjectUtils.isNotEmpty(intervenerResideOutsideUK) && intervenerResideOutsideUK.equals(YesOrNo.YES) && ObjectUtils.isEmpty(country)) {
-                errors.add("Intervener reside outside of UK. Please provide country of residence.");
+                errors.add("Does the Intervener reside outside of the UK Please provide country of residence.");
             }
         }
     }
