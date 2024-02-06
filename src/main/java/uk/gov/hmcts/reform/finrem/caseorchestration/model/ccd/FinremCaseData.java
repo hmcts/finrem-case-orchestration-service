@@ -394,6 +394,8 @@ public class FinremCaseData {
 
     private YesOrNo isNocRejected;
 
+    private YesOrNo isCfvCategoriesAppliedFlag;
+
     @JsonIgnore
     private IntervenerChangeDetails currentIntervenerChangeDetails;
     @JsonIgnore
