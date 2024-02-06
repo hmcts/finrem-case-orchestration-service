@@ -150,7 +150,9 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
             Arguments.of(finremCaseData, INTERVENER1, false),
             Arguments.of(finremCaseData, INTERVENER2, false),
             Arguments.of(finremCaseData, INTERVENER3, false),
-            Arguments.of(finremCaseData, INTERVENER4, false)
+            Arguments.of(finremCaseData, INTERVENER4, false),
+            Arguments.of(finremCaseData, OTHER, false),
+            Arguments.of(finremCaseData, null, false)
         );
     }
 
