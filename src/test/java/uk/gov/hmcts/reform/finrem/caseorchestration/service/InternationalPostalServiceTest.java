@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_RESIDE_OUTSIDE_UK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -117,7 +118,9 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
             Arguments.of(finremCaseData, INTERVENER1, true),
             Arguments.of(finremCaseData, INTERVENER2, true),
             Arguments.of(finremCaseData, INTERVENER3, true),
-            Arguments.of(finremCaseData, INTERVENER4, true)
+            Arguments.of(finremCaseData, INTERVENER4, true),
+            Arguments.of(finremCaseData, OTHER, false),
+            Arguments.of(finremCaseData, null, false)
         );
     }
 

@@ -123,7 +123,8 @@ public class InternationalPostalService {
     }
 
     public boolean isRecipientResideOutsideOfUK(FinremCaseData caseData, String recipient) {
-        String addressee = ObjectUtils.isNotEmpty(recipient) ?  WordUtils.capitalizeFully(recipient) : recipient;
+        String party = String.valueOf(recipient);
+        String addressee = ObjectUtils.isNotEmpty(party) ?  WordUtils.capitalizeFully(party) : party;
         boolean isInternational;
         switch (addressee) {
             case APPLICANT -> isInternational = isApplicantResideOutsideOfUK(caseData);
