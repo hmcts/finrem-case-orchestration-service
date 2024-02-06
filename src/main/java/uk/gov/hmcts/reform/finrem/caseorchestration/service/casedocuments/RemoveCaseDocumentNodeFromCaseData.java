@@ -15,20 +15,21 @@ public class RemoveCaseDocumentNodeFromCaseData {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public void removeCaseDocumentFromFinremCaseDetails(FinremCaseDetails finremCaseDetails, String documentUrlToRemove)
+    public FinremCaseDetails removeCaseDocumentFromFinremCaseDetails(FinremCaseDetails finremCaseDetails, String documentUrlToRemove)
         throws JsonProcessingException {
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         String finRemCaseDetailsAsString = objectMapper.writeValueAsString(finremCaseDetails);
         try {
             JsonNode rootNode = objectMapper.readTree(finRemCaseDetailsAsString);
-            findCaseDocumentFromJson(rootNode, documentUrlToRemove);
+            finremCaseDetails = removeCaseDocumentFromJson(rootNode, documentUrlToRemove, finremCaseDetails);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+        return finremCaseDetails;
     }
 
-    public void findCaseDocumentFromJson(JsonNode rootNode, String documentNameToFind) throws JsonProcessingException {
-
+    public FinremCaseDetails removeCaseDocumentFromJson(JsonNode rootNode, String documentNameToFind, FinremCaseDetails originalFinremCaseDetails) throws JsonProcessingException {
+        FinremCaseDetails finremCaseDetails = originalFinremCaseDetails;
         try {
             // Search for the target value and remove the parent object
             boolean removed = removeParentObject(rootNode, null, documentNameToFind, new ArrayList<>());
@@ -36,6 +37,7 @@ public class RemoveCaseDocumentNodeFromCaseData {
             if (removed) {
                 // Convert the modified tree back to a JSON string
                 String updatedJsonString = objectMapper.writeValueAsString(rootNode);
+                finremCaseDetails = objectMapper.treeToValue(rootNode, FinremCaseDetails.class);
                 System.out.println("Updated JSON: " + updatedJsonString);
             } else {
                 System.out.println("Document URL not found.");
@@ -43,6 +45,7 @@ public class RemoveCaseDocumentNodeFromCaseData {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return finremCaseDetails;
     }
 
     private static boolean removeBobParentObject(JsonNode node, JsonNode parentNode, String targetValue, List<String> currentPath) {
@@ -129,6 +132,7 @@ public class RemoveCaseDocumentNodeFromCaseData {
             }
         }
         nodesToRemove.forEach(pNode -> {
+            System.out.println("Removing node: " + pNode.toString());
             if (pNode instanceof ObjectNode) {
                 ((ObjectNode) pNode).removeAll();
             } else if (pNode instanceof ArrayNode) {
