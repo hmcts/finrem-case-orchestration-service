@@ -148,17 +148,17 @@ public class AddresseeGeneratorHelper {
     private static boolean isApplicantResideOutsideOfUK(FinremCaseData caseData) {
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
         YesOrNo applicantResideOutsideUK = wrapper.getApplicantResideOutsideUK();
-        return applicantResideOutsideUK != null && applicantResideOutsideUK.equals(YesOrNo.YES);
+        return YesOrNo.YES.equals(applicantResideOutsideUK);
     }
 
     private static boolean isRespondentResideOutsideOfUK(FinremCaseData caseData) {
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
         YesOrNo respondentResideOutsideUK = wrapper.getRespondentResideOutsideUK();
-        return respondentResideOutsideUK != null && respondentResideOutsideUK.equals(YesOrNo.YES);
+        return YesOrNo.YES.equals(respondentResideOutsideUK);
     }
 
     private static boolean isIntervenerResideOutsideOfUK(IntervenerWrapper intervenerWrapper) {
         YesOrNo intervenerResideOutsideUK = intervenerWrapper.getIntervenerResideOutsideUK();
-        return intervenerResideOutsideUK != null && intervenerResideOutsideUK.equals(YesOrNo.YES);
+        return YesOrNo.YES.equals(intervenerResideOutsideUK);
     }
 }
