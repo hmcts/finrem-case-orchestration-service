@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -69,9 +68,6 @@ public class RemoveApplicantDetailsController extends BaseController {
     @Autowired
     private final OnlineFormDocumentService service;
 
-    @Autowired
-    private final FeatureToggleService featureToggleService;
-
     @PostMapping(path = "/remove-details", consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Removes applicant details or applicants solicitor details")
@@ -108,8 +104,7 @@ public class RemoveApplicantDetailsController extends BaseController {
                 ObjectUtils.nullSafeConciseToString(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), caseDetails.getId());
         }
 
-        if (featureToggleService.isCaseworkerNoCEnabled()
-            && Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+        if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
             && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
             CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,

@@ -82,8 +82,7 @@ public class UpdateConsentedCaseController extends BaseController {
         log.info("DEBUGGING NOC - updateApplicantOrSolicitorContactDetails entered and applicant name is still present",
             caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
 
-        if (featureToggleService.isCaseworkerNoCEnabled()
-            && ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+        if (ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
             && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
             CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
