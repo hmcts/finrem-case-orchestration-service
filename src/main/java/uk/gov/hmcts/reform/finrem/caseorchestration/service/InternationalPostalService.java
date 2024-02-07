@@ -96,7 +96,7 @@ public class InternationalPostalService {
      * @return True if the recipient resides outside of the UK, false otherwise.
      */
     public boolean isRecipientResideOutsideOfUK(Map<String, Object> caseData, String recipient) {
-        String addressee = ObjectUtils.isNotEmpty(recipient) ?  WordUtils.capitalizeFully(recipient) : recipient;
+        String addressee = WordUtils.capitalizeFully(String.valueOf(recipient));
         boolean isInternational;
         switch (addressee) {
             case APPLICANT -> isInternational = isApplicantResideOutsideOfUK(caseData);
@@ -123,8 +123,7 @@ public class InternationalPostalService {
     }
 
     public boolean isRecipientResideOutsideOfUK(FinremCaseData caseData, String recipient) {
-        String party = String.valueOf(recipient);
-        String addressee = ObjectUtils.isNotEmpty(party) ?  WordUtils.capitalizeFully(party) : party;
+        String addressee = WordUtils.capitalizeFully(String.valueOf(recipient));
         boolean isInternational;
         switch (addressee) {
             case APPLICANT -> isInternational = isApplicantResideOutsideOfUK(caseData);
@@ -153,24 +152,24 @@ public class InternationalPostalService {
     public boolean isApplicantResideOutsideOfUK(FinremCaseData caseData) {
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
         YesOrNo applicantResideOutsideUK = wrapper.getApplicantResideOutsideUK();
-        return applicantResideOutsideUK != null && applicantResideOutsideUK.equals(YesOrNo.YES);
+        return YesOrNo.YES.equals(applicantResideOutsideUK);
     }
 
     public boolean isApplicantResideOutsideOfUK(Map<String, Object> caseData) {
         String applicantResideOutsideUK = (String) caseData.get(APPLICANT_RESIDE_OUTSIDE_UK);
-        return applicantResideOutsideUK != null && applicantResideOutsideUK.equalsIgnoreCase("Yes");
+        return "Yes".equalsIgnoreCase(applicantResideOutsideUK);
     }
 
 
     public boolean isRespondentResideOutsideOfUK(FinremCaseData caseData) {
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
         YesOrNo respondentResideOutsideUK = wrapper.getRespondentResideOutsideUK();
-        return respondentResideOutsideUK != null && respondentResideOutsideUK.equals(YesOrNo.YES);
+        return YesOrNo.YES.equals(respondentResideOutsideUK);
     }
 
     public boolean isRespondentResideOutsideOfUK(Map<String, Object> caseData) {
         String respondentResideOutsideUK = (String) caseData.get(RESPONDENT_RESIDE_OUTSIDE_UK);
-        return respondentResideOutsideUK != null && respondentResideOutsideUK.equalsIgnoreCase("Yes");
+        return "Yes".equalsIgnoreCase(respondentResideOutsideUK);
     }
 
     public boolean isIntervenerResideOutsideOfUK(IntervenerWrapper intervenerWrapper) {
@@ -178,7 +177,7 @@ public class InternationalPostalService {
             return false;
         }
         YesOrNo intervenerResideOutsideUK = intervenerWrapper.getIntervenerResideOutsideUK();
-        return intervenerResideOutsideUK != null && intervenerResideOutsideUK.equals(YesOrNo.YES);
+        return YesOrNo.YES.equals(intervenerResideOutsideUK);
     }
 
     private IntervenerWrapper convertToIntervener1Wrapper(Object object) {
