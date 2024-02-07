@@ -84,6 +84,7 @@ public abstract class BaseTask implements Runnable {
 
                 } catch (InterruptedException | RuntimeException e) {
                     log.error("Error processing caseRef {} and error is ", caseReference.getCaseReference(), e.getMessage());
+                    e.printStackTrace();
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }
@@ -95,7 +96,7 @@ public abstract class BaseTask implements Runnable {
 
     protected String getSystemUserToken() {
         log.info("Getting system user token");
-        return systemUserService.getSysUserTokenNoCache();
+        return systemUserService.getSysUserToken();
     }
 
     protected abstract List<CaseReference> getCaseReferences();
