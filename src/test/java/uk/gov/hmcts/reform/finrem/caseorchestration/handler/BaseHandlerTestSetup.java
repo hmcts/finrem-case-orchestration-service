@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -76,6 +77,7 @@ public class BaseHandlerTestSetup {
 
     protected FinremCallbackRequest buildFinremCallbackRequest(String testJson) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
+            objectMapper.registerModule(new JavaTimeModule());
             FinremCaseDetails caseDetails =
                 objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
             return FinremCallbackRequest.builder().caseDetails(caseDetails).build();

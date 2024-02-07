@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 @Slf4j
 @Service
@@ -22,15 +23,18 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
     private final CaseFlagsService caseFlagsService;
+    private final UpdateRepresentationWorkflowService representationWorkflowService;
 
     public SolicitorCreateConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                 ConsentOrderService consentOrderService,
-                                                 IdamService idamService,
-                                                 CaseFlagsService caseFlagsService) {
+                                                        ConsentOrderService consentOrderService,
+                                                        IdamService idamService,
+                                                        CaseFlagsService caseFlagsService,
+                                                        UpdateRepresentationWorkflowService representationWorkflowService) {
         super(finremCaseDetailsMapper);
         this.consentOrderService = consentOrderService;
         this.idamService = idamService;
         this.caseFlagsService = caseFlagsService;
+        this.representationWorkflowService = representationWorkflowService;
     }
 
     @Override
@@ -55,6 +59,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
         if (!idamService.isUserRoleAdmin(userAuthorisation)) {
             caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         }
+        representationWorkflowService.persistDefaultOrganisationPolicy(caseData);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
     }

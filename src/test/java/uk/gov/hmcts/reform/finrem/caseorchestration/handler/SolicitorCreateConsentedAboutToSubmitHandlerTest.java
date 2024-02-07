@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,7 +33,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 class SolicitorCreateConsentedAboutToSubmitHandlerTest {
 
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
-    private static final String APPROVE_ORDER_VALID_JSON = "/fixtures/pba-validate.json";
 
     @InjectMocks
     private SolicitorCreateConsentedAboutToSubmitHandler handler;
@@ -42,6 +42,8 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
     private IdamService idamService;
     @Mock
     private CaseFlagsService caseFlagsService;
+    @Mock
+    private UpdateRepresentationWorkflowService representationWorkflowService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -79,6 +81,7 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         verify(idamService).isUserRoleAdmin(any());
         verify(consentOrderService).getLatestConsentOrderData(any(FinremCallbackRequest.class));
         verify(caseFlagsService).setCaseFlagInformation(callbackRequest.getCaseDetails());
+        verify(representationWorkflowService).persistDefaultOrganisationPolicy(callbackRequest.getCaseDetails().getData());
     }
 
 
@@ -95,6 +98,7 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         verify(idamService).isUserRoleAdmin(any());
         verify(consentOrderService).getLatestConsentOrderData(any(FinremCallbackRequest.class));
         verify(caseFlagsService).setCaseFlagInformation(callbackRequest.getCaseDetails());
+        verify(representationWorkflowService).persistDefaultOrganisationPolicy(callbackRequest.getCaseDetails().getData());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

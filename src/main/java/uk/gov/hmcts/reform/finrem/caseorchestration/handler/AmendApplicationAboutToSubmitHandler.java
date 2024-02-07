@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +26,15 @@ import java.util.Optional;
 public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ConsentOrderService consentOrderService;
+    private final UpdateRepresentationWorkflowService representationWorkflowService;
 
     @Autowired
     public AmendApplicationAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                ConsentOrderService consentOrderService) {
+                                                ConsentOrderService consentOrderService,
+                                                UpdateRepresentationWorkflowService representationWorkflowService) {
         super(mapper);
         this.consentOrderService = consentOrderService;
+        this.representationWorkflowService = representationWorkflowService;
     }
 
     @Override
@@ -55,7 +59,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         updateD81Details(caseData);
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(callbackRequest);
-
+        representationWorkflowService.persistDefaultOrganisationPolicy(caseData);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
