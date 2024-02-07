@@ -370,7 +370,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
         assertFalse(errors.isEmpty());
-        assertTrue(errors.contains("Does the Intervener reside outside of the UK, please provide country of residence."));
+        assertTrue(errors.contains("If intervener resides outside of UK, please provide the country of residence."));
     }
 
     @Test
