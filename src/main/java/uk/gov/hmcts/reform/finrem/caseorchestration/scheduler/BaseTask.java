@@ -99,6 +99,11 @@ public abstract class BaseTask implements Runnable {
         return systemUserService.getSysUserToken();
     }
 
+    protected String getSystemUserTokenNoCache() {
+        log.info("Getting system user token no cache");
+        return systemUserService.getSysUserTokenNoCache();
+    }
+
     protected abstract List<CaseReference> getCaseReferences();
 
     protected abstract String getTaskName();

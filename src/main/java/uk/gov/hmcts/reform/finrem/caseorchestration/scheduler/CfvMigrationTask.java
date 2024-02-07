@@ -85,7 +85,7 @@ public class CfvMigrationTask extends BaseTask {
     public List<CaseReference> getCaseReferences() {
         log.info("Getting case references for CFV migration");
         List<CaseReference> caseReferences = new ArrayList<>();
-        String systemUserToken = getSystemUserToken();
+        String systemUserToken = getSystemUserTokenNoCache();
         log.info("Getting case references for CFV migration with system user token {}", systemUserToken);
         for (State state : STATES_TO_CATEGORISE) {
             log.info("Getting case references for state {} with case reference size {}", state, caseReferences.size());
