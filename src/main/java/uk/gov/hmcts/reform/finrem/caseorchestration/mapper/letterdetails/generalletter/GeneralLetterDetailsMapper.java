@@ -77,7 +77,7 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
     }
 
     public String formatAddressForLetterPrinting(Address address, boolean isInternational) {
-        return documentHelper.formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class), isInternational);
+        return documentHelper.formatAddressForLetterPrinting(objectMapper.convertValue(address, Map.class), isInternational);
     }
 
     private String getSolicitorReference(FinremCaseData caseData) {

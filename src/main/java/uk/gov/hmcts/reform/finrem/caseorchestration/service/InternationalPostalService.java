@@ -38,7 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @RequiredArgsConstructor
 public class InternationalPostalService {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Validates the given FinremCaseData for any errors related to contact details.
@@ -54,14 +54,14 @@ public class InternationalPostalService {
             && applicantResideOutsideUK.equals(YesOrNo.YES)
             && wrapper.getApplicantAddress() != null
             && ObjectUtils.isEmpty(wrapper.getApplicantAddress().getCountry())) {
-            errors.add("If applicant resides outside of UK, Please provide the country of residence.");
+            errors.add("If applicant resides outside of UK, please provide the country of residence.");
         }
         YesOrNo respondentResideOutsideUK = wrapper.getRespondentResideOutsideUK();
         if (ObjectUtils.isNotEmpty(respondentResideOutsideUK)
             && respondentResideOutsideUK.equals(YesOrNo.YES)
             && wrapper.getRespondentAddress() != null
             && ObjectUtils.isEmpty(wrapper.getRespondentAddress().getCountry())) {
-            errors.add("If respondent resides outside of UK, Please provide the country of residence.");
+            errors.add("If respondent resides outside of UK, please provide the country of residence.");
         }
         return errors;
     }
@@ -74,7 +74,7 @@ public class InternationalPostalService {
         if (applicantOutsideUK.equals("Yes")
             && applicantAddress != null
             && ObjectUtils.isEmpty(applicantAddress.getCountry())) {
-            errors.add("If applicant resides outside of UK, Please provide the country of residence.");
+            errors.add("If applicant resides outside of UK, please provide the country of residence.");
         }
 
         String respondentOutsideUK = String.valueOf(caseData.get(RESPONDENT_RESIDE_OUTSIDE_UK));
@@ -83,7 +83,7 @@ public class InternationalPostalService {
         if (respondentOutsideUK.equals("Yes")
             && respondentAddress != null
             && ObjectUtils.isEmpty(respondentAddress.getCountry())) {
-            errors.add("If respondent resides outside of UK, Please provide the country of residence.");
+            errors.add("If respondent resides outside of UK, please provide the country of residence.");
         }
         return errors;
     }

@@ -68,8 +68,8 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
 
         validate = postalService.validate(finremCaseData);
         assertEquals(2, validate.size());
-        assertTrue(validate.contains("If applicant resides outside of UK, Please provide the country of residence."));
-        assertTrue(validate.contains("If respondent resides outside of UK, Please provide the country of residence."));
+        assertTrue(validate.contains("If applicant resides outside of UK, please provide the country of residence."));
+        assertTrue(validate.contains("If respondent resides outside of UK, please provide the country of residence."));
 
     }
 
@@ -89,8 +89,8 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
 
         validate = postalService.validate(caseData);
         assertEquals(2, validate.size());
-        assertTrue(validate.contains("If applicant resides outside of UK, Please provide the country of residence."));
-        assertTrue(validate.contains("If respondent resides outside of UK, Please provide the country of residence."));
+        assertTrue(validate.contains("If applicant resides outside of UK, please provide the country of residence."));
+        assertTrue(validate.contains("If respondent resides outside of UK, please provide the country of residence."));
     }
 
     @ParameterizedTest
