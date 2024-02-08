@@ -31,7 +31,7 @@ public class CcdService {
     private final CaseEventsApi caseEventsApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamAuthService idamAuthService;
-    private static final String LOGGER =  "Executing eventType {} on Case ID: {}";
+    private static final String LOGGER = "Executing eventType {} on Case ID: {}";
 
     public void executeCcdEventOnCase(String authorisation, String caseId, String caseTypeId,
                                       String eventType) {
@@ -57,7 +57,7 @@ public class CcdService {
     }
 
     public StartEventResponse startEventForCaseWorker(String authorisation, String caseId, String caseTypeId,
-                                               String eventType) {
+                                                      String eventType) {
         log.info(LOGGER, eventType, caseId);
 
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
@@ -115,7 +115,7 @@ public class CcdService {
     }
 
     public List<CaseEventDetail> getCcdEventDetailsOnCase(String authorisation, CaseDetails caseDetails,
-                                      String eventType) {
+                                                          String eventType) {
         Long caseId = caseDetails.getId();
         String caseTypeId = caseDetails.getCaseTypeId();
 
@@ -154,4 +154,12 @@ public class CcdService {
         return coreCaseDataApi.searchCases(idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(), caseType.getCcdType(), searchBuilder.toString());
     }
+
+
+    public SearchResult esSearchCases(CaseType caseType, String esQueryString, String authorisation) {
+        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
+        return coreCaseDataApi.searchCases(idamToken.getIdamOauth2Token(),
+            idamToken.getServiceAuthorization(), caseType.getCcdType(), esQueryString);
+    }
+
 }
