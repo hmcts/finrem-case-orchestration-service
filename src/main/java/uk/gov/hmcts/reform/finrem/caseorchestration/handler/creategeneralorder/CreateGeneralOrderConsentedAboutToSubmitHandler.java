@@ -11,39 +11,42 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER;
 
 @Service
 @Slf4j
-public class ContestedCreateGeneralOrderSubmittedHandler extends FinremCallbackHandler {
+public class CreateGeneralOrderConsentedAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
+    private final GeneralOrderService generalOrderService;
 
-    public ContestedCreateGeneralOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                       FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder) {
+    public CreateGeneralOrderConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                           GeneralOrderService generalOrderService) {
         super(finremCaseDetailsMapper);
-        this.generalOrderRaisedCorresponder = generalOrderRaisedCorresponder;
+        this.generalOrderService = generalOrderService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return SUBMITTED.equals(callbackType) && CaseType.CONTESTED.equals(caseType) && GENERAL_ORDER.equals(eventType);
+        return ABOUT_TO_SUBMIT.equals(callbackType) && CaseType.CONSENTED.equals(caseType)
+            && GENERAL_ORDER.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
         FinremCallbackRequest callbackRequestWithFinremCaseDetails, String userAuthorisation) {
-        log.info("Contested Create General Order submitted callback for case id: {}",
+
+        log.info("Consented Create General Order about to submit callback for case id: {}",
             callbackRequestWithFinremCaseDetails.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = callbackRequestWithFinremCaseDetails.getCaseDetails();
-        generalOrderRaisedCorresponder.sendCorrespondence(caseDetails);
+        FinremCaseData caseData = caseDetails.getData();
+        generalOrderService.addConsentedGeneralOrderToCollection(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseDetails.getData())
+            .data(caseData)
             .build();
     }
 }

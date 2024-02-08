@@ -41,9 +41,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
-class ContestedCreateGeneralOrderAboutToStartHandlerTest {
+class CreateGeneralOrderContestedAboutToStartHandlerTest {
     @InjectMocks
-    private ContestedCreateGeneralOrderAboutToStartHandler handler;
+    private CreateGeneralOrderContestedAboutToStartHandler handler;
 
     @Mock
     private FinremCaseDetailsMapper mapper;

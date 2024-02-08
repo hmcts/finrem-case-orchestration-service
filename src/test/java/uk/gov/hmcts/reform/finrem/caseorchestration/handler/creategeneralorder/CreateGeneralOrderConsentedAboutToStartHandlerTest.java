@@ -42,9 +42,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
-class ConsentedCreateGeneralOrderAboutToStartHandlerTest {
+class CreateGeneralOrderConsentedAboutToStartHandlerTest {
     @InjectMocks
-    private ConsentedCreateGeneralOrderAboutToStartHandler handler;
+    private CreateGeneralOrderConsentedAboutToStartHandler handler;
 
     @Mock
     private FinremCaseDetailsMapper mapper;

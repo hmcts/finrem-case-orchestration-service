@@ -23,15 +23,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @Service
 @Slf4j
-public class ContestedCreateGeneralOrderAboutToStartHandler extends CreateGeneralOrderAboutToStartHandler {
+public class CreateGeneralOrderContestedAboutToStartHandler extends CreateGeneralOrderAboutToStartHandler {
 
     @Autowired
-    public ContestedCreateGeneralOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public CreateGeneralOrderContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                           IdamService idamService) {
         this(finremCaseDetailsMapper, idamService, Clock.system(ZoneId.of("Europe/London")));
     }
 
-    public ContestedCreateGeneralOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public CreateGeneralOrderContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                           IdamService idamService, Clock clock) {
         super(finremCaseDetailsMapper, idamService, clock);
     }

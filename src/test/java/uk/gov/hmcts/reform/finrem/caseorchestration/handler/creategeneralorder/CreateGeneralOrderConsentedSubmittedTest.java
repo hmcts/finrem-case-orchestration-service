@@ -32,10 +32,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
-class ContestedCreateGeneralOrderSubmittedTest {
+class CreateGeneralOrderConsentedSubmittedTest {
 
     @InjectMocks
-    private ContestedCreateGeneralOrderSubmittedHandler handler;
+    private CreateGeneralOrderConsentedSubmittedHandler handler;
 
     @Mock
     private FinremCaseDetailsMapper mapper;
@@ -51,21 +51,21 @@ class ContestedCreateGeneralOrderSubmittedTest {
 
     private static Stream<Arguments> testCanHandle() {
         return Stream.of(
-            // Contested
-            Arguments.of(ABOUT_TO_START, CONTESTED, GENERAL_ORDER, false),
-            Arguments.of(MID_EVENT, CONTESTED, GENERAL_ORDER, false),
-            Arguments.of(ABOUT_TO_SUBMIT, CONTESTED, GENERAL_ORDER, false),
-            Arguments.of(SUBMITTED, CONTESTED, GENERAL_ORDER, true),
-            Arguments.of(ABOUT_TO_START, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
-            Arguments.of(MID_EVENT, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
-            Arguments.of(ABOUT_TO_SUBMIT, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
-            Arguments.of(SUBMITTED, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
-
             // Consented
             Arguments.of(ABOUT_TO_START, CONSENTED, GENERAL_ORDER, false),
             Arguments.of(MID_EVENT, CONSENTED, GENERAL_ORDER, false),
             Arguments.of(ABOUT_TO_SUBMIT, CONSENTED, GENERAL_ORDER, false),
-            Arguments.of(SUBMITTED, CONSENTED, GENERAL_ORDER, false),
+            Arguments.of(SUBMITTED, CONSENTED, GENERAL_ORDER, true),
+
+            // Contested
+            Arguments.of(ABOUT_TO_START, CONTESTED, GENERAL_ORDER, false),
+            Arguments.of(MID_EVENT, CONTESTED, GENERAL_ORDER, false),
+            Arguments.of(ABOUT_TO_SUBMIT, CONTESTED, GENERAL_ORDER, false),
+            Arguments.of(SUBMITTED, CONTESTED, GENERAL_ORDER, false),
+            Arguments.of(ABOUT_TO_START, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
+            Arguments.of(MID_EVENT, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
+            Arguments.of(ABOUT_TO_SUBMIT, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
+            Arguments.of(SUBMITTED, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
 
             Arguments.of(SUBMITTED, CONSENTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
             Arguments.of(SUBMITTED, CONTESTED, ASSIGN_DOCUMENT_CATEGORIES, false),

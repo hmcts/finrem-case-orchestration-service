@@ -21,12 +21,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @Service
 @Slf4j
-public class ContestedCreateGeneralOrderAboutToSubmitHandler extends FinremCallbackHandler {
+public class CreateGeneralOrderContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final CaseDataService caseDataService;
     private final GeneralOrderService generalOrderService;
 
-    public ContestedCreateGeneralOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public CreateGeneralOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            CaseDataService caseDataService,
                                                            GeneralOrderService generalOrderService) {
         super(finremCaseDetailsMapper);
