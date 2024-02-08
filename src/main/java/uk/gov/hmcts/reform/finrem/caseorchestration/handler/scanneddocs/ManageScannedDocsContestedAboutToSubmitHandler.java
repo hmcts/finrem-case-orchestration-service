@@ -15,7 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -35,7 +37,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
     public static final String INTERVENER_3 = "Intervener 3 ";
     public static final String INTERVENER_4 = "Intervener 4 ";
 
-    private static List<CaseDocumentType> administrativeCaseDocumentTypes = List.of(
+    private static final List<CaseDocumentType> administrativeCaseDocumentTypes = List.of(
         CaseDocumentType.ATTENDANCE_SHEETS,
         CaseDocumentType.JUDICIAL_NOTES,
         CaseDocumentType.JUDGMENT,
@@ -74,11 +76,10 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, manageScannedDocumentCollection, false));
 
-        Optional.ofNullable(caseData.getScannedDocuments()).ifPresent(List::clear);
-
+        removeProcessedScannedDocumentsFromCase(caseData);
+        caseData.setScannedDocsToUpdate(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
-
     }
 
     private void updateFileNames(List<UploadCaseDocumentCollection> manageScannedDocumentCollection) {
@@ -129,8 +130,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
     }
 
     private void addDefaultsToAdministrativeDocuments(List<UploadCaseDocumentCollection> managedCollections) {
-
-        managedCollections.stream().forEach(this::setDefaultsForDocumentTypes);
+        managedCollections.forEach(this::setDefaultsForDocumentTypes);
     }
 
     private void setDefaultsForDocumentTypes(UploadCaseDocumentCollection document) {
@@ -147,4 +147,17 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
 
     }
 
+    private void removeProcessedScannedDocumentsFromCase(FinremCaseData caseData) {
+        caseData.getScannedDocsToUpdate().getValue().stream()
+            .map(DynamicMultiSelectListElement::getCode)
+            .forEach(id -> removeScannedDocument(caseData, id));
+    }
+
+    private void removeScannedDocument(FinremCaseData caseData, String id) {
+        Optional<ScannedDocumentCollection> scannedDocument = caseData.getScannedDocuments().stream()
+            .filter(sdc -> sdc.getId().equals(id))
+            .findFirst();
+
+        scannedDocument.ifPresent(sdc -> caseData.getScannedDocuments().remove(sdc));
+    }
 }

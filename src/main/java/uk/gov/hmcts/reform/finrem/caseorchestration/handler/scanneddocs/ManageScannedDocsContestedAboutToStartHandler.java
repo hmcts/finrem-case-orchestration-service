@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.scanneddocs;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -9,21 +11,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocument;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
 public class ManageScannedDocsContestedAboutToStartHandler extends FinremCallbackHandler {
-
 
     @Autowired
     public ManageScannedDocsContestedAboutToStartHandler(
@@ -39,32 +37,36 @@ public class ManageScannedDocsContestedAboutToStartHandler extends FinremCallbac
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
 
-        log.info("Received request to manage scanned documents for Case ID : {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to manage scanned documents for Case ID : {}",
+            callbackRequest.getCaseDetails().getId());
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
-        finremCaseData.setManageScannedDocumentCollection(new ArrayList<>());
 
-        List<ScannedDocumentCollection> scannedDocumentCollections =
-            Optional.ofNullable(finremCaseData.getScannedDocuments()).orElse(new ArrayList<>());
-        scannedDocumentCollections.forEach(doc -> {
-            UploadCaseDocumentCollection scannedCaseDocumentCollectionItem = UploadCaseDocumentCollection.builder()
-                .uploadCaseDocument(UploadCaseDocument.builder()
-                    .fileName(doc.getValue().getFileName())
-                    .scannedDate(doc.getValue().getScannedDate())
-                    .caseDocuments(CaseDocument.builder()
-                        .documentUrl(doc.getValue().getUrl().getDocumentUrl())
-                        .documentBinaryUrl(doc.getValue().getUrl().getDocumentBinaryUrl())
-                        .documentFilename(doc.getValue().getUrl().getDocumentFilename())
-                        .build())
-                    .exceptionRecordReference(doc.getValue().getExceptionRecordReference())
-                    .build())
+        if (ObjectUtils.isEmpty(finremCaseData.getScannedDocuments())) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(finremCaseData)
+                .errors(List.of("There are no scanned documents available"))
                 .build();
-            finremCaseData.getManageScannedDocumentCollection().add(scannedCaseDocumentCollectionItem);
-        });
+        }
 
+        List<DynamicMultiSelectListElement> list = finremCaseData.getScannedDocuments().stream()
+            .map(sdc -> DynamicMultiSelectListElement.builder()
+                .code(sdc.getId())
+                .label(scannedDocumentListLabelFormat(sdc.getValue()))
+                .build())
+            .toList();
+        finremCaseData.setScannedDocsToUpdate(DynamicMultiSelectList.builder().listItems(list).build());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
+    }
+
+    private String scannedDocumentListLabelFormat(ScannedDocument scannedDocument) {
+        return String.format("**%s** [%s]<br/>%s",
+            scannedDocument.getControlNumber(),
+            scannedDocument.getUrl().getDocumentFilename(),
+            StringUtils.capitalize(scannedDocument.getType().getValue()));
     }
 }

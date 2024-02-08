@@ -374,6 +374,7 @@ public class FinremCaseData {
     private List<ScannedDocumentCollection> applicantScanDocuments;
     private List<ScannedDocumentCollection> respondentScanDocuments;
     private List<UploadCaseDocumentCollection> manageScannedDocumentCollection;
+    private DynamicMultiSelectList scannedDocsToUpdate;
     @JsonProperty("appBarristerCollection")
     private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")

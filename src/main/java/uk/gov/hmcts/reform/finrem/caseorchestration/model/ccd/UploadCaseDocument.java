@@ -34,6 +34,20 @@ public class UploadCaseDocument {
 
     private String exceptionRecordReference;
 
+    public static UploadCaseDocument from(ScannedDocumentCollection scannedDocumentCollection) {
+        ScannedDocument scannedDocument = scannedDocumentCollection.getValue();
+        return UploadCaseDocument.builder()
+            .fileName(scannedDocument.getFileName())
+            .scannedDate(scannedDocument.getScannedDate())
+            .caseDocuments(CaseDocument.builder()
+                .documentUrl(scannedDocument.getUrl().getDocumentUrl())
+                .documentBinaryUrl(scannedDocument.getUrl().getDocumentBinaryUrl())
+                .documentFilename(scannedDocument.getUrl().getDocumentFilename())
+                .build())
+            .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
+            .build();
+    }
+
     public UploadCaseDocument(UploadCaseDocument uploadCaseDocument) {
         this.setCaseDocuments(new CaseDocument(uploadCaseDocument.getCaseDocuments()));
         this.setCaseDocumentType(uploadCaseDocument.getCaseDocumentType());
