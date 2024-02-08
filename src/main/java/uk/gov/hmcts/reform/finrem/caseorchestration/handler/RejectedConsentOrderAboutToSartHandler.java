@@ -11,29 +11,25 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.RefusedConsentOrderDocumentCategoriser;
 
 @Slf4j
 @Service
-public class RejectedConsentOrderAboutToSubmitHandler extends FinremCallbackHandler {
+public class RejectedConsentOrderAboutToSartHandler extends FinremCallbackHandler {
 
     private final RefusalOrderDocumentService service;
-    private final RefusedConsentOrderDocumentCategoriser categoriser;
 
     @Autowired
-    public RejectedConsentOrderAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                    RefusalOrderDocumentService service,
-                                                    RefusedConsentOrderDocumentCategoriser categoriser) {
+    public RejectedConsentOrderAboutToSartHandler(FinremCaseDetailsMapper mapper,
+                                                  RefusalOrderDocumentService service) {
         super(mapper);
         this.service = service;
-        this.categoriser = categoriser;
     }
 
 
     @Override
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
                              final EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
             && EventType.REJECT_ORDER.equals(eventType);
     }
@@ -42,12 +38,11 @@ public class RejectedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to generate '{}' for Case ID: {}",
+        log.info("Received request for '{}' event '{}' for Case ID: {}",CallbackType.ABOUT_TO_START,
             EventType.REJECT_ORDER, caseDetails.getId());
-        FinremCaseData caseData = service.processConsentOrderNotApproved(caseDetails, userAuthorisation);
-        categoriser.categorise(caseData);
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData)
+            .data(service.setDefaults(caseDetails.getData(), userAuthorisation))
             .build();
     }
 }
