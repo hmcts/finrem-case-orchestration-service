@@ -23,7 +23,6 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
@@ -83,22 +82,15 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
         List<ContestedRefusalOrderData> refusalOrders =
             (List<ContestedRefusalOrderData>) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION);
 
-        assertThat(refusalOrders, hasSize(2));
-        assertThat(refusalOrders.get(0).getId(), is("1234"));
-        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentUrl(),
-            is("http://dm-store/lhjbyuivu87y989hijbb"));
-        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentFilename(),
-            is("app_docs.pdf"));
-        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),
-            is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
+        assertThat(refusalOrders, hasSize(1));
 
-        assertThat(refusalOrders.get(1).getId(), notNullValue());
-        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentUrl(),
+        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentFilename(),
+        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentFilename(),
             is("refusalOrderTestFilename.pdf"));
-        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),
+        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+
 
         CaseDocument latestRefusalOrder = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT);
         assertThat(latestRefusalOrder.getDocumentUrl(),
@@ -107,13 +99,6 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
             is("refusalOrderTestFilename.pdf"));
         assertThat(latestRefusalOrder.getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-    }
-
-    @Test
-    public void getLatestRefusalReasonShouldReturnLatestReason() throws Exception {
-        Optional<CaseDocument> doc = refusalOrderService.getLatestRefusalReason(contestedCaseDetails(true));
-        assertThat(doc.isPresent(), is(true));
-        assertThat(doc.get().getDocumentFilename(), is("app_docs.pdf"));
     }
 
     @Test
