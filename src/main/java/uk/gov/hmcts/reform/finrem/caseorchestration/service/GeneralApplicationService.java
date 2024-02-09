@@ -233,8 +233,8 @@ public class GeneralApplicationService {
     }
 
     private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(FinremCaseDetails caseDetails, String loggedInUserCaseRole,
-                                                                                       List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
-                                                                                       FinremCaseData caseData, FinremCaseData caseDataBefore) {
+         List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
+         FinremCaseData caseData, FinremCaseData caseDataBefore) {
         switch (loggedInUserCaseRole) {
             case INTERVENER1 -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
