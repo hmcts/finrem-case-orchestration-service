@@ -140,6 +140,10 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? miniFormHighCourtTemplate : miniFormTemplate;
     }
 
+    public String getRejectedOrderTemplate(FinremCaseDetails finremCaseDetails) {
+        return isHighCourtSelected(finremCaseDetails) ? rejectedOrderHighCourtTemplate : rejectedOrderTemplate;
+    }
+
     public String getRejectedOrderTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? rejectedOrderHighCourtTemplate : rejectedOrderTemplate;
     }
