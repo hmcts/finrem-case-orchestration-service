@@ -85,7 +85,6 @@ public enum EventType {
 
     MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
 
-
     @JsonEnumDefaultValue
     NONE("");
 

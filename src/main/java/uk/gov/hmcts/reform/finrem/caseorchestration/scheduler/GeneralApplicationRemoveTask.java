@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 
 @Component
 @Slf4j
-public class GeneralApplicationRemoveTask extends BaseTask {
+public class GeneralApplicationRemoveTask extends CsvFileProcessingTask {
 
     private final GeneralApplicationHelper generalApplicationHelper;
 

@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public abstract class BaseTask implements Runnable {
 
-    private final CaseReferenceCsvLoader csvLoader;
-    private final CcdService ccdService;
+
+    protected final CcdService ccdService;
     private final SystemUserService systemUserService;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
@@ -33,9 +32,8 @@ public abstract class BaseTask implements Runnable {
     @Value("${cron.wait-time-mins:10}")
     private int bulkPrintWaitTime;
 
-    protected BaseTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService, SystemUserService systemUserService,
+    protected BaseTask(CcdService ccdService, SystemUserService systemUserService,
                        FinremCaseDetailsMapper finremCaseDetailsMapper) {
-        this.csvLoader = csvLoader;
         this.ccdService = ccdService;
         this.systemUserService = systemUserService;
         this.finremCaseDetailsMapper = finremCaseDetailsMapper;
@@ -85,7 +83,8 @@ public abstract class BaseTask implements Runnable {
                     }
 
                 } catch (InterruptedException | RuntimeException e) {
-                    log.error("Error processing caseRef {} and error is ", caseReference.getCaseReference(), e);
+                    log.error("Error processing caseRef {} and error is ", caseReference.getCaseReference(), e.getMessage());
+                    e.printStackTrace();
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }
@@ -94,16 +93,18 @@ public abstract class BaseTask implements Runnable {
         }
     }
 
+
     protected String getSystemUserToken() {
+        log.info("Getting system user token");
         return systemUserService.getSysUserToken();
     }
 
-    private List<CaseReference> getCaseReferences() {
-        List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(getCaseListFileName());
-        return caseReferences;
+    protected String getSystemUserTokenNoCache() {
+        log.info("Getting system user token no cache");
+        return systemUserService.getSysUserTokenNoCache();
     }
 
-    protected abstract String getCaseListFileName();
+    protected abstract List<CaseReference> getCaseReferences();
 
     protected abstract String getTaskName();
 
