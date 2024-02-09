@@ -151,6 +151,19 @@ To run all mutation tests execute the following command:
 ```bash
 ./gradlew pitest
 ```
+### Crons
+
+You can manually run a cron task from the cli:
+
+```
+TASK_NAME=[task] java -jar finrem-case-orchestration-service.jar run
+
+# E.g.
+TASK_NAME=AddApplicationTypeTask java -jar finrem-case-orchestration-service.jar
+
+# or
+TASK_NAME=AddApplicationTypeTask ./gradlew bootRun
+```
 
 ### Running functional tests locally pointing to AAT
 
