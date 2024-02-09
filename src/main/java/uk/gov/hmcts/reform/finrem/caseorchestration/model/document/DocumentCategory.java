@@ -203,7 +203,8 @@ public enum DocumentCategory {
     INTERVENER_DOCUMENTS_INTERVENER_1_FORM_E("intervenerDocumentsIntervener1FormE"),
     INTERVENER_DOCUMENTS_INTERVENER_1_FORM_G("intervenerDocumentsIntervener1FormG"),
     INTERVENER_DOCUMENTS_INTERVENER_1_REPLIES_TO_QUESTIONNAIRE("intervenerDocumentsIntervener1RepliesToQuestionnaire"),
-    INTERVENER_DOCUMENTS_INTERVENER_1_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS("intervenerDocumentsIntervener1MortgageCapacitiesOrHousingParticulars"),
+    INTERVENER_DOCUMENTS_INTERVENER_1_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS(
+        "intervenerDocumentsIntervener1MortgageCapacitiesOrHousingParticulars"),
     INTERVENER_DOCUMENTS_INTERVENER_1_OPEN_OFFERS("intervenerDocumentsIntervener1OpenOffers"),
     INTERVENER_DOCUMENTS_INTERVENER_1_S25_STATEMENT("intervenerDocumentsIntervener1S25Statement"),
     INTERVENER_DOCUMENTS_INTERVENER_1_WITNESS_STATEMENTS("intervenerDocumentsIntervener1WitnessStatements"),
@@ -214,7 +215,8 @@ public enum DocumentCategory {
     INTERVENER_DOCUMENTS_INTERVENER_2_FORM_E("intervenerDocumentsIntervener2FormE"),
     INTERVENER_DOCUMENTS_INTERVENER_2_FORM_G("intervenerDocumentsIntervener2FormG"),
     INTERVENER_DOCUMENTS_INTERVENER_2_REPLIES_TO_QUESTIONNAIRE("intervenerDocumentsIntervener2RepliesToQuestionnaire"),
-    INTERVENER_DOCUMENTS_INTERVENER_2_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS("intervenerDocumentsIntervener2MortgageCapacitiesOrHousingParticulars"),
+    INTERVENER_DOCUMENTS_INTERVENER_2_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS(
+        "intervenerDocumentsIntervener2MortgageCapacitiesOrHousingParticulars"),
     INTERVENER_DOCUMENTS_INTERVENER_2_OPEN_OFFERS("intervenerDocumentsIntervener2OpenOffers"),
     INTERVENER_DOCUMENTS_INTERVENER_2_S25_STATEMENT("intervenerDocumentsIntervener2S25Statement"),
     INTERVENER_DOCUMENTS_INTERVENER_2_WITNESS_STATEMENTS("intervenerDocumentsIntervener2WitnessStatements"),
@@ -225,7 +227,8 @@ public enum DocumentCategory {
     INTERVENER_DOCUMENTS_INTERVENER_3_FORM_E("intervenerDocumentsIntervener3FormE"),
     INTERVENER_DOCUMENTS_INTERVENER_3_FORM_G("intervenerDocumentsIntervener3FormG"),
     INTERVENER_DOCUMENTS_INTERVENER_3_REPLIES_TO_QUESTIONNAIRE("intervenerDocumentsIntervener3RepliesToQuestionnaire"),
-    INTERVENER_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS("intervenerDocumentsIntervener3MortgageCapacitiesOrHousingParticulars"),
+    INTERVENER_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS(
+        "intervenerDocumentsIntervener3MortgageCapacitiesOrHousingParticulars"),
     INTERVENER_DOCUMENTS_INTERVENER_3_OPEN_OFFERS("intervenerDocumentsIntervener3OpenOffers"),
     INTERVENER_DOCUMENTS_INTERVENER_3_S25_STATEMENT("intervenerDocumentsIntervener3S25Statement"),
     INTERVENER_DOCUMENTS_INTERVENER_3_WITNESS_STATEMENTS("intervenerDocumentsIntervener3WitnessStatements"),
@@ -236,7 +239,8 @@ public enum DocumentCategory {
     INTERVENER_DOCUMENTS_INTERVENER_4_FORM_E("intervenerDocumentsIntervener4FormE"),
     INTERVENER_DOCUMENTS_INTERVENER_4_FORM_G("intervenerDocumentsIntervener4FormG"),
     INTERVENER_DOCUMENTS_INTERVENER_4_REPLIES_TO_QUESTIONNAIRE("intervenerDocumentsIntervener4RepliesToQuestionnaire"),
-    INTERVENER_DOCUMENTS_INTERVENER_4_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS("intervenerDocumentsIntervener4MortgageCapacitiesOrHousingParticulars"),
+    INTERVENER_DOCUMENTS_INTERVENER_4_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS(
+        "intervenerDocumentsIntervener4MortgageCapacitiesOrHousingParticulars"),
     INTERVENER_DOCUMENTS_INTERVENER_4_OPEN_OFFERS("intervenerDocumentsIntervener4OpenOffers"),
     INTERVENER_DOCUMENTS_INTERVENER_4_S25_STATEMENT("intervenerDocumentsIntervener4S25Statement"),
     INTERVENER_DOCUMENTS_INTERVENER_4_WITNESS_STATEMENTS("intervenerDocumentsIntervener4WitnessStatements"),
