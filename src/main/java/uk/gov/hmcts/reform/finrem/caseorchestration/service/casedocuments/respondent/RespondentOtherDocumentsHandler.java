@@ -43,17 +43,12 @@ public class RespondentOtherDocumentsHandler extends OtherDocumentsHandler {
 
     @Override
     protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
-        return DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES;
+        return DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS;
     }
 
     @Override
     protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS;
-    }
-
-    @Override
-    protected DocumentCategory getHouseParticularsDocumentCategory() {
-        return DocumentCategory.RESPONDENT_DOCUMENTS_HOUSING_PARTICULARS;
     }
 
     @Override

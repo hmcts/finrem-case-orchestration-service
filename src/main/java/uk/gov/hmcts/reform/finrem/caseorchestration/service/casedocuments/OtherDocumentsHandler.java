@@ -62,7 +62,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
             case ES2 -> {
                 return getHearingDocumentsCategoryES2();
             }
-            case MORTGAGE_CAPACITIES -> {
+            case MORTGAGE_CAPACITIES, HOUSING_PARTICULARS -> {
                 return getPartyDocumentsCategoryMortgageCapacities();
             }
             case WITHOUT_PREJUDICE_OFFERS -> {
@@ -70,9 +70,6 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
             }
             case PENSION_REPORT -> {
                 return DocumentCategory.REPORTS_PENSION_REPORTS;
-            }
-            case HOUSING_PARTICULARS -> {
-                return getHouseParticularsDocumentCategory();
             }
             case PRE_HEARING_DRAFT_ORDER -> {
                 return getPreHearingDraftOrderDocumentCategory();
@@ -99,8 +96,6 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
     protected abstract DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory();
 
     protected abstract DocumentCategory getDefaultPartyCategory();
-
-    protected abstract DocumentCategory getHouseParticularsDocumentCategory();
 
     protected abstract DocumentCategory getPreHearingDraftOrderDocumentCategory();
 
