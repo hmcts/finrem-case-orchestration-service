@@ -6,7 +6,7 @@ plugins {
     id 'org.springframework.boot' version '3.2.2'
     id 'com.github.ben-manes.versions' version '0.50.0'
     id 'uk.gov.hmcts.java' version '0.12.55'
-    id 'au.com.dius.pact' version '4.6.5'
+    id 'au.com.dius.pact' version '4.6.6'
     id "info.solidsoft.pitest" version "1.15.0"
     id 'com.github.hmcts.rse-cft-lib' version '0.19.1015'
 }
@@ -33,23 +33,24 @@ def versions = [
         wiremock             : '3.0.1',
         apacheLogging        : '2.22.1',
         idamClient           : '3.0.3',
-        jjwt                 : '0.12.4',
+        jjwt                 : '0.12.5',
         skyscreamer          : '1.5.1',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
         tika                 : '2.9.1',
         amClient             : '1.7.3',
         sendLetterClient     : '4.0.3',
-        elasticSearch        : '7.17.16',
+        elasticSearch        : '7.17.17',
         jacksonDatabind      : '2.16.1',
         retry                : '1.3.4',
-        snakeyaml            : '2.2'
+        snakeyaml            : '2.2',
+        loadbalancer         : '3.1.4'
 ]
 
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
     springCloudBomVersion = "2023.0.0"
-    restAssuredBomVersion = "5.3.2"
+    restAssuredBomVersion = "5.4.0"
 }
 
 group = 'uk.gov.hmcts.reform.finrem'
@@ -411,6 +412,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jacksonDatabind
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jacksonDatabind
+    developmentOnly group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.loadbalancer
 
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"

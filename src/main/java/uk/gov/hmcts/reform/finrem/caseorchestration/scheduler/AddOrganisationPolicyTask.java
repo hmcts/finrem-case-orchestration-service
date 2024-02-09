@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 
 @Component
 @Slf4j
-public class AddOrganisationPolicyTask extends BaseTask {
+public class AddOrganisationPolicyTask extends CsvFileProcessingTask {
 
     @Value("${cron.addOrganisationPolicy.enabled:false}")
     private boolean isAddOrganisationPolicyTaskEnabled;
