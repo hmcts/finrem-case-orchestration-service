@@ -159,8 +159,21 @@ public class GeneralApplicationService {
             helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
 
         generalApplicationsCategoriser.categorise(caseData);
+        int generalApplicationsCreated = getGeneralApplicationsCreated(caseData, caseDataBefore);
+        log.info("{} general applications created from event on case id {}", generalApplicationsCreated, caseId);
 
         return caseData;
+    }
+
+    private static int getGeneralApplicationsCreated(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+        int generalApplicationsCreated = 0;
+        List<GeneralApplicationsCollection> generalApplicationsEndEvent = caseData.getGeneralApplicationWrapper().getGeneralApplications();
+        List<GeneralApplicationsCollection> generalApplicationsBeforeEvent = caseDataBefore.getGeneralApplicationWrapper().getGeneralApplications();
+        if (generalApplicationsBeforeEvent != null && generalApplicationsEndEvent != null
+        ) {
+            generalApplicationsCreated = generalApplicationsEndEvent.size() - generalApplicationsBeforeEvent.size();
+        }
+        return generalApplicationsCreated;
     }
 
     private void processGeneralApplicationsForLitigants(String userAuthorisation, FinremCaseDetails caseDetails,

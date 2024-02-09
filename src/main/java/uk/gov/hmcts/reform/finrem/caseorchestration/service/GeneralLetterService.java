@@ -102,7 +102,12 @@ public class GeneralLetterService {
         prepareCaseDetailsForDocumentGeneration(caseDetailsCopy);
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getGeneralLetterTemplate(), documentConfiguration.getGeneralLetterFileName());
+            getGeneralLetterTemplate(caseDetails.getData()), documentConfiguration.getGeneralLetterFileName());
+    }
+
+    private String getGeneralLetterTemplate(FinremCaseData caseData) {
+        return caseData.isContestedApplication() ? documentConfiguration.getContestedGeneralLetterTemplate()
+            : documentConfiguration.getConsentGeneralLetterTemplate();
     }
 
     private void prepareCaseDetailsForDocumentGeneration(CaseDetails caseDetails) {

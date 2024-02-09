@@ -53,7 +53,8 @@ public class DocumentConfiguration {
     private String contestedDraftMiniFormTemplateSchedule;
     private String contestedDraftMiniFormTemplate;
     private String contestedDraftMiniFormFileName;
-    private String generalLetterTemplate;
+    private String contestedGeneralLetterTemplate;
+    private String consentGeneralLetterTemplate;
     private String generalLetterFileName;
     @Getter(AccessLevel.NONE)
     private String approvedConsentOrderTemplate;
