@@ -5,13 +5,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Intention;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -66,7 +66,7 @@ public class AmendApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenIntendsToIsApplyToVary_thenShouldAddToNatureList() {
-        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.fromId(123L);
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
@@ -86,7 +86,7 @@ public class AmendApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenIntendsToIsNotApplyToVary_thenShouldNotDoAnything() {
-        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.fromId(123L);
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
@@ -107,7 +107,7 @@ public class AmendApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenNatureListIsEmptyAndIntendsToIsApplyToVary_thenShouldAddToNatureList() {
-        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.fromId(123L);
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.setApplicantIntendsTo(Intention.APPLY_TO_VARY);
@@ -120,13 +120,5 @@ public class AmendApplicationAboutToStartHandlerTest {
         assertThat(natureOfApplication2, hasItems(NatureApplication.VARIATION_ORDER));
         assertThat(natureOfApplication2, hasSize(1));
         assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
-    }
-
-    private FinremCallbackRequest callbackRequest() {
-        return FinremCallbackRequest
-            .<FinremCaseDetails>builder()
-            .caseDetails(FinremCaseDetails.builder().id(123L)
-                .data(new FinremCaseData()).build())
-            .build();
     }
 }
