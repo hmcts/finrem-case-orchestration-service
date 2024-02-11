@@ -72,7 +72,7 @@ public class GetUserRolesConsumerTest extends BaseTest {
     public RequestResponsePact generatePactFragment(PactDslWithProvider builder) throws IOException {
         // @formatter:off
         return builder
-            .given("User roles exists for a case")
+            .given("A User Role exists for a Case")
             .uponReceiving("A Request to get user roles")
             .method("GET")
             .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
@@ -98,7 +98,6 @@ public class GetUserRolesConsumerTest extends BaseTest {
             o.array("case_users", a -> {
                 a.object(b -> {
                     b.stringType("case_id", "1583841721773828");
-                    b.stringType("case_type_id", "FinancialRemedyMVP2");
                     b.stringType("user_id", "0a5874a4-3f38-4bbd-ba4c");
                     b.stringType("case_role", "[CREATOR]");
                 });
