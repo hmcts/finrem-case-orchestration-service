@@ -24,18 +24,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.mockito.BDDMockito.given;
 
 
-@SpringBootTest({"ccd.data-store.api.baseurl: http://localhost:8981"})
+@SpringBootTest({"ccd.data-store.api.baseurl=http://localhost:8981"})
 @TestPropertySource(locations = "classpath:application.properties")
 public class GetUserRolesConsumerTest extends BaseTest {
 
-    protected static final String CASE_REFERENCE = "1583841721773828";
     @Autowired
     AssignCaseAccessService assignCaseAccessService;
     @Autowired
@@ -69,7 +67,7 @@ public class GetUserRolesConsumerTest extends BaseTest {
     public PactProviderRule mockProvider = new PactProviderRule("ccdDataStoreAPI_caseAssignedUserRoles", "localhost", 8981, this);
 
     @Pact(provider = "ccdDataStoreAPI_caseAssignedUserRoles", consumer = "fr_caseOrchestratorService")
-    public RequestResponsePact generatePactFragment(PactDslWithProvider builder) throws IOException {
+    public RequestResponsePact generatePactFragment(PactDslWithProvider builder) {
         // @formatter:off
         return builder
             .given("A User Role exists for a Case")
@@ -92,7 +90,6 @@ public class GetUserRolesConsumerTest extends BaseTest {
         caseAssignedRoleService.getCaseAssignedUserRole(caseDetails.getId().toString(), AUTHORIZATION_TOKEN);
     }
 
-
     private DslPart buildCaseAssignedRolesResponse() {
         return newJsonBody(o -> {
             o.array("case_users", a -> {
@@ -103,9 +100,5 @@ public class GetUserRolesConsumerTest extends BaseTest {
                 });
             });
         }).build();
-    }
-
-    private String createJsonObject(Object obj) throws IOException {
-        return objectMapper.writeValueAsString(obj);
     }
 }
