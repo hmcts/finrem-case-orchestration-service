@@ -19,13 +19,15 @@ public class HearingNoticesCategoriser extends DocumentCategoriser {
     @Override
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
         List<DocumentCollection> hearingNoticeDocumentPack = finremCaseData.getHearingNoticeDocumentPack();
-        hearingNoticeDocumentPack.forEach(documentCollection -> {
-            CaseDocument value = documentCollection.getValue();
-            if (value.getDocumentFilename().equals("AdditionalHearingDocument.pdf")) {
-                value.setCategoryId(DocumentCategory.SYSTEM_DUPLICATES.getDocumentCategoryId());
-            } else {
-                value.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
-            }
-        });
+        if (hearingNoticeDocumentPack != null && !hearingNoticeDocumentPack.isEmpty()) {
+            hearingNoticeDocumentPack.forEach(documentCollection -> {
+                CaseDocument value = documentCollection.getValue();
+                if (value.getDocumentFilename().equals("AdditionalHearingDocument.pdf")) {
+                    value.setCategoryId(DocumentCategory.SYSTEM_DUPLICATES.getDocumentCategoryId());
+                } else {
+                    value.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
+                }
+            });
+        }
     }
 }
