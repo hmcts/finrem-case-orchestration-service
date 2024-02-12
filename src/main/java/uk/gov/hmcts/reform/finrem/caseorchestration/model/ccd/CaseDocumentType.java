@@ -9,9 +9,7 @@ import java.util.Arrays;
 public enum CaseDocumentType {
     STATEMENT_OF_ISSUES("Statement of Issues"),
     CHRONOLOGY("Chronology"),
-    FORM_B("Form B"),
     APPLICANT_FORM_E("Applicant - Form E"),
-    FORM_F("Form F"),
     FORM_G("Form G"),
     FORM_H("Form H"),
     LETTER_FROM_APPLICANT("Letter from Applicant"),
@@ -24,7 +22,6 @@ public enum CaseDocumentType {
     EXPERT_EVIDENCE("Expert Evidence"),
     STATEMENT_AFFIDAVIT("Statement/Affidavit"),
     WITNESS_STATEMENT_AFFIDAVIT("Witness Statement/Affidavit"),
-    CARE_PLAN("Care Plan"),
     OFFERS("Offers"),
     TRIAL_BUNDLE("Trial Bundle"),
     CONDITIONAL_ORDER("Conditional order"),
