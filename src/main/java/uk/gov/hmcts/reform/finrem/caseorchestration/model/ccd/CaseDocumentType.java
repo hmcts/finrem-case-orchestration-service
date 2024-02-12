@@ -19,6 +19,7 @@ public enum CaseDocumentType {
     VALUATION_REPORT("Valuation Report"),
     PENSION_PLAN("Pension Plan"),
     POSITION_STATEMENT_SKELETON_ARGUMENT("Position Statement"),
+    SKELETON_ARGUMENT("Skeleton Argument"),
     EXPERT_EVIDENCE("Expert Evidence"),
     STATEMENT_AFFIDAVIT("Statement/Affidavit"),
     WITNESS_STATEMENT_AFFIDAVIT("Witness Statement/Affidavit"),
