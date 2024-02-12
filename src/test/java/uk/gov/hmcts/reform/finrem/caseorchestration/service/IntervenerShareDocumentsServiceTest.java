@@ -49,7 +49,7 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.APPLICANT_FORM_E;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CARE_PLAN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.ATTENDANCE_SHEETS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CHRONOLOGY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.EXPERT_EVIDENCE;
@@ -131,7 +131,7 @@ public class IntervenerShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setIntv1Summaries(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setIntv1FormHs(getTestDocument(FORM_H));
         data.getUploadCaseDocumentWrapper().setIntv1ExpertEvidence(getTestDocument(EXPERT_EVIDENCE));
-        data.getUploadCaseDocumentWrapper().setIntv1CorrespDocs(getTestDocument(CARE_PLAN));
+        data.getUploadCaseDocumentWrapper().setIntv1CorrespDocs(getTestDocument(ATTENDANCE_SHEETS));
 
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
         List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getIntv1Other();
@@ -164,7 +164,7 @@ public class IntervenerShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setIntv2Summaries(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setIntv2FormHs(getTestDocument(FORM_H));
         data.getUploadCaseDocumentWrapper().setIntv2ExpertEvidence(getTestDocument(EXPERT_EVIDENCE));
-        data.getUploadCaseDocumentWrapper().setIntv2CorrespDocs(getTestDocument(CARE_PLAN));
+        data.getUploadCaseDocumentWrapper().setIntv2CorrespDocs(getTestDocument(ATTENDANCE_SHEETS));
 
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
         List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getIntv2Other();
@@ -196,7 +196,7 @@ public class IntervenerShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setIntv3Summaries(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setIntv3FormHs(getTestDocument(FORM_H));
         data.getUploadCaseDocumentWrapper().setIntv3ExpertEvidence(getTestDocument(EXPERT_EVIDENCE));
-        data.getUploadCaseDocumentWrapper().setIntv3CorrespDocs(getTestDocument(CARE_PLAN));
+        data.getUploadCaseDocumentWrapper().setIntv3CorrespDocs(getTestDocument(ATTENDANCE_SHEETS));
 
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
         List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getIntv3Other();
@@ -229,7 +229,7 @@ public class IntervenerShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setIntv4Summaries(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setIntv4FormHs(getTestDocument(FORM_H));
         data.getUploadCaseDocumentWrapper().setIntv4ExpertEvidence(getTestDocument(EXPERT_EVIDENCE));
-        data.getUploadCaseDocumentWrapper().setIntv4CorrespDocs(getTestDocument(CARE_PLAN));
+        data.getUploadCaseDocumentWrapper().setIntv4CorrespDocs(getTestDocument(ATTENDANCE_SHEETS));
 
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
         List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getIntv4Other();
