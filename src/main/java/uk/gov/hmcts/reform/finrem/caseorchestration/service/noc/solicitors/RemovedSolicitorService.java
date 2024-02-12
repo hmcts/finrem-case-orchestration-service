@@ -61,7 +61,6 @@ public class RemovedSolicitorService {
     }
 
     public ChangedRepresentative getRemovedSolicitorAsCaseworker(CaseDetails caseDetails, final boolean isApplicant) {
-        Map<String, Object> caseData = caseDetails.getData();
 
         final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 

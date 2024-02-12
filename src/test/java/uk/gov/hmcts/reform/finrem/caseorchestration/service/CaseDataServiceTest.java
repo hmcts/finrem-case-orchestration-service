@@ -19,9 +19,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -624,6 +627,44 @@ public class CaseDataServiceTest extends BaseServiceTest {
         assertEquals(
             "Yousef Luke Brown", caseDataService.buildFullIntervener4Name(caseDetails)
         );
+    }
+
+    @Test
+    public void givenRepresentedFlagOnApplicant_whenIsLitigantRepresented_thenTrue() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APPLICANT_REPRESENTED, "Yes");
+        CaseDetails finremCaseDetails
+            = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).build();
+
+        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, true);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void givenContestedRepresentedFlagOnRespondent_whenIsLitigantRepresented_thenTrue() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APPLICANT_REPRESENTED, "No");
+        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, "Yes");
+        CaseDetails finremCaseDetails
+            = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).build();
+
+        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, false);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void givenConsentedRepresentedFlagOnRespondent_whenIsLitigantRepresented_thenTrue() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APPLICANT_REPRESENTED, "No");
+        caseData.put(CONSENTED_RESPONDENT_REPRESENTED, "Yes");
+        CaseDetails finremCaseDetails
+            = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONSENTED.getCcdType()).id(123L).build();
+
+        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, false);
+
+        assertThat(result, is(true));
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {
