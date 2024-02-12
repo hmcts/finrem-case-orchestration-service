@@ -57,7 +57,7 @@ public class CreateGeneralLetterDocumentCategoriser extends DocumentCategoriser 
                 CaseDocument generatedLetter = generalLetter.getValue().getGeneratedLetter();
                 if (generatedLetter != null && generatedLetter.getCategoryId() == null) {
                     generatedLetter.setCategoryId(getGeneratedLetterCategoryId(
-                        wrapper.getGeneralLetterAddressee() !=null ? wrapper.getGeneralLetterAddressee().getValue().getCode() : ""));
+                        wrapper.getGeneralLetterAddressee() != null ? wrapper.getGeneralLetterAddressee().getValue().getCode() : ""));
                 }
             }
         }
