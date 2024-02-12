@@ -39,6 +39,7 @@ public class CreateGeneralLetterAboutToSubmitHandler extends FinremCallbackHandl
         validateCaseData(callbackRequest);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
+            generalLetterService.addFrcCourtFields(caseDetails);
             generalLetterService.createGeneralLetter(userAuthorisation, caseDetails);
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
         } else {

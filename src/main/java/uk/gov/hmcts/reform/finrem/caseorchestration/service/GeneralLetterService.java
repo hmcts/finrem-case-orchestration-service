@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -246,5 +247,17 @@ public class GeneralLetterService {
                     .collect(Collectors.joining("\n"));
         }
         return "";
+    }
+
+    public FinremCaseDetails addFrcCourtFields(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        data.setCourtDetails(buildFrcCourtDetails(data));
+        return caseDetails;
+    }
+
+    public FinremCaseDetails removeFrcCourtFields(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        data.setCourtDetails(null);
+        return caseDetails;
     }
 }
