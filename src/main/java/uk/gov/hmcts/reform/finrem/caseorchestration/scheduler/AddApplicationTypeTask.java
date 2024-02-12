@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 
 @Component
 @Slf4j
-public class AddApplicationTypeTask extends BaseTask {
+public class AddApplicationTypeTask extends CsvFileProcessingTask {
 
     @Value("${cron.applicationTypeAdd.enabled:false}")
     private boolean isApplicationTypeAddTaskEnabled;
