@@ -26,11 +26,12 @@ public class JsonRemoveParentObjectExampleTest {
 
         FinremCaseDetails finremCaseDetails = buildCaseDetailsFromJson(RESOURCE);
 
-        RemoveCaseDocumentNodeFromCaseData removeCaseDocumentNodeFromCaseData = new RemoveCaseDocumentNodeFromCaseData();
+        RemoveReplaceCaseDocumentNodeFromCaseData removeReplaceCaseDocumentNodeFromCaseData = new RemoveReplaceCaseDocumentNodeFromCaseData();
         objectMapper.convertValue(requestContent, JsonNode.class);
 //        caseDocumentJsonFinder.removeCaseDocumentFromJson(requestContent, "http://dm-store-aat.service.core-compute-aat.internal/documents/03413320-c0bb-4571-a7bf-8078417ac556", finremCaseDetails);
-        removeCaseDocumentNodeFromCaseData.removeCaseDocumentFromFinremCaseDetails(finremCaseDetails,
-            "http://dm-store-aat.service.core-compute-aat.internal/documents/7f87da57-fb57-4307-bc9f-79ce9b2496d6");
+        removeReplaceCaseDocumentNodeFromCaseData.removeOrReplaceCaseDocumentFromFinremCaseDetails(finremCaseDetails,
+            "http://dm-store-aat.service.core-compute-aat.internal/documents/7f87da57-fb57-4307-bc9f-79ce9b2496d6",
+            "http://dm-store-aat.service.core-compute-aat.internal/documents/03413320-c0bb-4571-a7bf-8078417ac556");
 
     }
 
