@@ -14,13 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
@@ -53,7 +49,7 @@ public class RemovedSolicitorService {
         final boolean isApplicant = changeRequest.getCaseRoleId() != null
             && changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
 
-        if (!isLitigantRepresented(caseDetails, isApplicant)) {
+        if (!caseDataService.isLitigantRepresented(caseDetails, isApplicant)) {
             return null;
         }
 
@@ -69,7 +65,7 @@ public class RemovedSolicitorService {
 
         final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
-        if (YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(getLitigantRepresentedKey(caseDetails, isApplicant))))) {
+        if (caseDataService.isLitigantRepresented(caseDetails, isApplicant)) {
             return ChangedRepresentative.builder()
                 .name(getSolicitorName(caseDetails, isApplicant))
                 .email(getSolicitorEmail(caseDetails, isApplicant))
@@ -78,12 +74,6 @@ public class RemovedSolicitorService {
         }
 
         return null;
-    }
-
-    private boolean isLitigantRepresented(CaseDetails caseDetails, boolean isApplicant) {
-        String isRepresented = nullToEmpty(caseDetails.getData().get(getLitigantRepresentedKey(caseDetails, isApplicant)));
-
-        return YES_VALUE.equalsIgnoreCase(isRepresented);
     }
 
     private boolean isSolicitorDigital(CaseDetails caseDetails, boolean isApplicant) {
@@ -134,15 +124,6 @@ public class RemovedSolicitorService {
         Map<String, Object> caseData = caseDetails.getData();
         return caseDataService.isConsentedApplication(caseDetails)
             ? (String) caseData.get(SOLICITOR_EMAIL) : (String) caseData.get(CONTESTED_SOLICITOR_EMAIL);
-    }
-
-    private String getLitigantRepresentedKey(CaseDetails caseDetails, boolean isApplicant) {
-        return isApplicant ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails);
-    }
-
-    private String getRespondentRepresentedKey(CaseDetails caseDetails) {
-        return caseDataService.isConsentedApplication(caseDetails)
-            ? CONSENTED_RESPONDENT_REPRESENTED : CONTESTED_RESPONDENT_REPRESENTED;
     }
 
     private Organisation getRemovedOrganisation(CaseDetails caseDetails,

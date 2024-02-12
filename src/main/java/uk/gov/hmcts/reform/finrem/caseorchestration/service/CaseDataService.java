@@ -353,4 +353,19 @@ public class CaseDataService {
         }
         return notificationRequestPayload;
     }
+
+    public boolean isLitigantRepresented(CaseDetails caseDetails, boolean isApplicant) {
+        String isRepresented = nullToEmpty(caseDetails.getData().get(getLitigantRepresentedKey(caseDetails, isApplicant)));
+
+        return YES_VALUE.equalsIgnoreCase(isRepresented);
+    }
+
+    private String getLitigantRepresentedKey(CaseDetails caseDetails, boolean isApplicant) {
+        return isApplicant ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails);
+    }
+
+    private String getRespondentRepresentedKey(CaseDetails caseDetails) {
+        return isConsentedApplication(caseDetails)
+            ? CONSENTED_RESPONDENT_REPRESENTED : CONTESTED_RESPONDENT_REPRESENTED;
+    }
 }

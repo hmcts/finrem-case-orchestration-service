@@ -300,12 +300,10 @@ public class NotificationsController extends BaseController {
         }
         log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
-        log.info("DEBUGGING NOC - sendNoticeOfChangeEmailCaseworker executed and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
-        log.info("DEBUGGING NOC - sendNoticeOfChangeLetters executed and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+
         caseDetails.getData().put(INCLUDES_REPRESENTATIVE_UPDATE, null);
         caseDetails.getData().put(NOC_PARTY, null);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
