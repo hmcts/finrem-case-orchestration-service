@@ -14,9 +14,6 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
 
     private static List<CaseDocumentType> otherDocuments = List.of(
         CaseDocumentType.OTHER,
-        CaseDocumentType.FORM_B,
-        CaseDocumentType.FORM_F,
-        CaseDocumentType.CARE_PLAN,
         CaseDocumentType.PENSION_PLAN,
         CaseDocumentType.CERTIFICATES_OF_SERVICE,
         CaseDocumentType.ES1,
@@ -50,9 +47,6 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
             case PENSION_PLAN -> {
                 return getPensionPlanDocumentCategory();
             }
-            case FORM_B, FORM_F, CARE_PLAN -> {
-                return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER;
-            }
             case CERTIFICATES_OF_SERVICE -> {
                 return getCertificatesOfServiceDocumentCategory();
             }
@@ -83,7 +77,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
         }
 
     }
-    
+
     protected abstract DocumentCategory getMiscellaneousOrOtherDocumentCategory();
 
     protected abstract DocumentCategory getPensionPlanDocumentCategory();
