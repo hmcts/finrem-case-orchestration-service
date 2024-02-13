@@ -9,8 +9,12 @@ public abstract class PartyFdrDocumentCategoriser {
         switch (caseDocumentType) {
             case POSITION_STATEMENT:
                 return getPositionStatementsDocumentCategory();
-            case ES1, ES2, CHRONOLOGY:
-                return DocumentCategory.FDR_JOINT_DOCUMENTS;
+            case ES1:
+                return DocumentCategory.FDR_JOINT_DOCUMENTS_ES1;
+            case ES2:
+                return DocumentCategory.FDR_JOINT_DOCUMENTS_ES2;
+            case CHRONOLOGY:
+                return DocumentCategory.FDR_JOINT_DOCUMENTS_CHRONOLOGY;
             case WITHOUT_PREJUDICE_OFFERS:
                 return getWithoutPrejudiceDocumentCategory();
             case QUESTIONNAIRE:

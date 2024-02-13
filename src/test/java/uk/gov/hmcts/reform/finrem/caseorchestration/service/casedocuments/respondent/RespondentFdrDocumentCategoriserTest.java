@@ -13,16 +13,16 @@ public class RespondentFdrDocumentCategoriserTest {
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_POSITION_STATEMENTS,
             categoriser.getDocumentCategory(CaseDocumentType.POSITION_STATEMENT));
 
-        assertEquals(DocumentCategory.FDR_JOINT_DOCUMENTS,
+        assertEquals(DocumentCategory.FDR_JOINT_DOCUMENTS_ES1,
             categoriser.getDocumentCategory(CaseDocumentType.ES1));
 
-        assertEquals(DocumentCategory.FDR_JOINT_DOCUMENTS,
+        assertEquals(DocumentCategory.FDR_JOINT_DOCUMENTS_ES2,
             categoriser.getDocumentCategory(CaseDocumentType.ES2));
 
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS,
             categoriser.getDocumentCategory(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS));
 
-        assertEquals(DocumentCategory.FDR_JOINT_DOCUMENTS,
+        assertEquals(DocumentCategory.FDR_JOINT_DOCUMENTS_CHRONOLOGY,
             categoriser.getDocumentCategory(CaseDocumentType.CHRONOLOGY));
 
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_QUESTIONNAIRES,
