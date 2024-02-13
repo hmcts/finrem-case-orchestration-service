@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
@@ -411,6 +416,21 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
             DocumentCategory.CORRESPONDENCE_OTHER.getDocumentCategoryId());
         verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), any());
+    }
+
+    @Test
+    public void whenFRCCourtDetailsAddedOrRemoved_thenFieldsUpdated() {
+        Map<String, Object> courtDetails = new HashMap<>();
+        courtDetails.put(COURT_DETAILS_PHONE_KEY, "0207 421 8594");
+        courtDetails.put(COURT_DETAILS_NAME_KEY, "Central Family Court");
+        courtDetails.put(COURT_DETAILS_EMAIL_KEY, "cfc.fru@justice.gov.uk");
+        courtDetails.put(COURT_DETAILS_ADDRESS_KEY, "Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP");
+        courtDetails.put("openingHours", "from 8am to 6pm, Monday to Friday");
+        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter.json");
+        generalLetterService.addFrcCourtFields(caseDetails);
+        assertThat(caseDetails.getData().getCourtDetails(), is(courtDetails));
+        generalLetterService.removeFrcCourtFields(caseDetails);
+        assertNull(caseDetails.getData().getCourtDetails());
     }
 
     private List<DynamicRadioListElement> getDynamicRadioListItems(boolean addIntervenerListElements) {

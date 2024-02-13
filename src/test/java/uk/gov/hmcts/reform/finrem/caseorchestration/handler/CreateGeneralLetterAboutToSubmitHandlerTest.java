@@ -20,8 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +29,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 public class CreateGeneralLetterAboutToSubmitHandlerTest {
 
     private CreateGeneralLetterAboutToSubmitHandler handler;
+    public FinremCallbackRequest callbackRequest;
+    public FinremCaseDetails caseDetails;
 
     @Mock
     private GeneralLetterService generalLetterService;
@@ -40,6 +40,8 @@ public class CreateGeneralLetterAboutToSubmitHandlerTest {
     @Before
     public void setup() {
         handler =  new CreateGeneralLetterAboutToSubmitHandler(finremCaseDetailsMapper, generalLetterService);
+        callbackRequest = buildFinremCallbackRequest();
+        caseDetails = callbackRequest.getCaseDetails();
     }
 
     @Test
@@ -65,20 +67,19 @@ public class CreateGeneralLetterAboutToSubmitHandlerTest {
 
     @Test
     public void givenACcdCallbackCallbackCreateGeneralLetterAboutToSubmitHandler_WhenHandle_thenCreateLetter() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(generalLetterService).getCaseDataErrorsForCreatingPreviewOrFinalLetter(any(FinremCaseDetails.class));
-        verify(generalLetterService).createGeneralLetter(anyString(), any(FinremCaseDetails.class));
+        verify(generalLetterService).getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
+        verify(generalLetterService).createGeneralLetter(AUTH_TOKEN, caseDetails);
+        verify(generalLetterService).addFrcCourtFields(caseDetails);
     }
 
     @Test
     public void givenACcdCallbackCallbackCreateGeneralLetterAboutToSubmitHandler_WhenHandle_thenCreateError() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setSolicitorAddress(null);
-        when(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(callbackRequest.getCaseDetails()))
+        caseDetails.getData().getContactDetailsWrapper().setSolicitorAddress(null);
+        when(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails))
             .thenReturn(asList("Address is missing for recipient type"));
         handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(generalLetterService, times(2)).getCaseDataErrorsForCreatingPreviewOrFinalLetter(any(FinremCaseDetails.class));
+        verify(generalLetterService, times(2)).getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
