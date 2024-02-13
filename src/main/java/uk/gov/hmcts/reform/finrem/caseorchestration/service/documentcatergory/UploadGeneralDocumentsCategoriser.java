@@ -12,7 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT_SOLICITOR;
 
 @Configuration
 public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
