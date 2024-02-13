@@ -7,7 +7,7 @@ public abstract class PartyFdrDocumentCategoriser {
 
     public DocumentCategory getDocumentCategory(CaseDocumentType caseDocumentType) {
         switch (caseDocumentType) {
-            case POSITION_STATEMENT:
+            case POSITION_STATEMENT_SKELETON_ARGUMENT:
                 return getPositionStatementsDocumentCategory();
             case ES1:
                 return DocumentCategory.FDR_JOINT_DOCUMENTS_ES1;
@@ -23,16 +23,12 @@ public abstract class PartyFdrDocumentCategoriser {
                 return DocumentCategory.FDR_REPORTS;
             case PRE_HEARING_DRAFT_ORDER:
                 return getHearingDraftOrderDocumentCategory();
-            case SKELETON_ARGUMENT:
-                return getSkeletonArgumentDocumentCategory();
             default:
                 return getDefaultDocumentCategory();
         }
     }
 
     protected abstract DocumentCategory getDefaultDocumentCategory();
-
-    protected abstract DocumentCategory getSkeletonArgumentDocumentCategory();
 
     protected abstract DocumentCategory getHearingDraftOrderDocumentCategory();
 

@@ -56,11 +56,13 @@ public class RespondentCaseSummariesCollectionServiceTest extends CaseSummariesH
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,
+                CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT)
         );
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY, CaseDocumentParty.RESPONDENT),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY,
+                CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CASE_SUMMARY)
         );
     }

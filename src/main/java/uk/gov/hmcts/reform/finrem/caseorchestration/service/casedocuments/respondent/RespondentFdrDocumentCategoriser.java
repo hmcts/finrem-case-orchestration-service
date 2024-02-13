@@ -12,10 +12,6 @@ public class RespondentFdrDocumentCategoriser extends PartyFdrDocumentCategorise
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT;
     }
 
-    @Override
-    protected DocumentCategory getSkeletonArgumentDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_SKELETON_ARGUMENT;
-    }
 
     @Override
     protected DocumentCategory getHearingDraftOrderDocumentCategory() {

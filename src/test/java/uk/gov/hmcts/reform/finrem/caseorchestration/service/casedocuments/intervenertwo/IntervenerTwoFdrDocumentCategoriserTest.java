@@ -14,7 +14,7 @@ public class IntervenerTwoFdrDocumentCategoriserTest {
     @Test
     public void testGetDocumentCategory() {
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2_POSITION_STATEMENTS,
-            categoriser.getDocumentCategory(CaseDocumentType.POSITION_STATEMENT));
+            categoriser.getDocumentCategory(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT));
 
         assertEquals(DocumentCategory.FDR_JOINT_DOCUMENTS_ES1,
             categoriser.getDocumentCategory(CaseDocumentType.ES1));
@@ -36,9 +36,6 @@ public class IntervenerTwoFdrDocumentCategoriserTest {
 
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2_PRE_HEARING_DRAFT_ORDER,
             categoriser.getDocumentCategory(CaseDocumentType.PRE_HEARING_DRAFT_ORDER));
-
-        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2_SKELETON_ARGUMENT,
-            categoriser.getDocumentCategory(CaseDocumentType.SKELETON_ARGUMENT));
 
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2,
             categoriser.getDocumentCategory(CaseDocumentType.OTHER));

@@ -12,11 +12,6 @@ public class IntervenerOneFdrDocumentCategoriser extends PartyFdrDocumentCategor
     }
 
     @Override
-    protected DocumentCategory getSkeletonArgumentDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_1_SKELETON_ARGUMENT;
-    }
-
-    @Override
     protected DocumentCategory getHearingDraftOrderDocumentCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_1_PRE_HEARING_DRAFT_ORDER;
     }

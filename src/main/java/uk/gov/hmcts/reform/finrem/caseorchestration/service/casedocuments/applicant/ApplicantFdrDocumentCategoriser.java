@@ -13,11 +13,6 @@ public class ApplicantFdrDocumentCategoriser extends PartyFdrDocumentCategoriser
     }
 
     @Override
-    protected DocumentCategory getSkeletonArgumentDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_SKELETON_ARGUMENT;
-    }
-
-    @Override
     protected DocumentCategory getHearingDraftOrderDocumentCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_PRE_HEARING_DRAFT_ORDER;
     }

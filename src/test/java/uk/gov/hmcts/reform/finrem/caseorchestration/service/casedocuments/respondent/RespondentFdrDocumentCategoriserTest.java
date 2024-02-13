@@ -11,7 +11,7 @@ public class RespondentFdrDocumentCategoriserTest {
     @org.junit.Test
     public void getDocumentCategory() {
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_POSITION_STATEMENTS,
-            categoriser.getDocumentCategory(CaseDocumentType.POSITION_STATEMENT));
+            categoriser.getDocumentCategory(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT));
 
         assertEquals(DocumentCategory.FDR_JOINT_DOCUMENTS_ES1,
             categoriser.getDocumentCategory(CaseDocumentType.ES1));
@@ -34,8 +34,6 @@ public class RespondentFdrDocumentCategoriserTest {
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_PRE_HEARING_DRAFT_ORDER,
             categoriser.getDocumentCategory(CaseDocumentType.PRE_HEARING_DRAFT_ORDER));
 
-        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_SKELETON_ARGUMENT,
-            categoriser.getDocumentCategory(CaseDocumentType.SKELETON_ARGUMENT));
 
     }
 
