@@ -14,8 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.Organisat
 import java.util.Optional;
 
 import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.APPLICATION_SCOPED_CACHE_MANAGER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.BARRISTER_USER_CACHE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.MaskHelper.maskEmail;
 
 @Service
@@ -44,7 +44,7 @@ public class PrdOrganisationService {
         return organisationApi.findOrganisationByOrgId(userToken, authTokenGenerator.generate(), orgId);
     }
 
-    @Cacheable(cacheManager = REQUEST_SCOPED_CACHE_MANAGER, cacheNames = BARRISTER_USER_CACHE)
+    @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = BARRISTER_USER_CACHE)
     public Optional<String> findUserByEmail(String email, String authToken) {
         try {
             log.info("finding user by email {}", maskEmail(email));
