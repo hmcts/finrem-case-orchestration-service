@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @EqualsAndHashCode
-@JsonPropertyOrder(value = {"caseReference"})
+@JsonPropertyOrder(value = {"caseReference", "previousFRCKey", "previousFRCValue", "previousCourtListKey", "previousCourtListValue"})
 @AllArgsConstructor
 @NoArgsConstructor
 @SuppressWarnings("java:S1700")

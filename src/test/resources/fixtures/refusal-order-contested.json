@@ -132,38 +132,47 @@
         "previousMIAMattendance",
         "other"
       ],
-      "orderRefusalCollectionNew": [
+      "orderRefusalCollectionNew": [],
+      "orderRefusalOnScreen": {
+        "orderRefusalAfterText" : "testAfterText",
+        "orderRefusal" : [
+          "Transferred to Applicant’s home Court",
+          "Insufficient information provided – A",
+          "Insufficient information provided – C",
+          "Order does not appear fair"
+        ],
+        "orderRefusalOther" : null,
+        "orderRefusalDocs" : {
+          "document_url" : "http://doc1",
+          "document_filename" : "doc1",
+          "document_binary_url" : "http://doc1.binary"
+        },
+        "orderRefusalJudge" : "His Honour Judge",
+        "orderRefusalJudgeName" : "Contested",
+        "orderRefusalDate" : "2022-01-01",
+        "orderRefusalAddComments" : "testComment"
+      },
+      "orderRefusalCollection" : [
         {
-          "value": {
+          "value" : {
             "orderRefusalAfterText": "testAfterText",
-            "orderRefusal": [
-              "Transferred to Applicant’s home Court",
+            "orderRefusal" : [
               "Insufficient information provided – A",
-              "Insufficient information provided – C",
-              "Order does not appear fair"
+              "Insufficient information provided – B",
+              "Transferred to Applicant’s home Court",
+              "Transferred to Applicant's home Court",
+              "Other (please specify)"
             ],
-            "orderRefusalOther": "testOther",
-            "orderRefusalDocs": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
+            "orderRefusalOther" : "test1",
+            "orderRefusalDocs" : {
+              "document_url" : "http://doc1",
+              "document_filename" : "doc1",
+              "document_binary_url" : "http://doc1.binary"
             },
-            "orderRefusalJudge": "His Honour Judge",
-            "orderRefusalJudgeName": "Contested",
-            "orderRefusalDate": "2022-01-01",
-            "orderRefusalAddComments": "testComment"
-          }
-        }
-      ],
-      "refusalOrderCollection": [
-        {
-          "id": "1234",
-          "value": {
-            "refusalOrderAdditionalDocument": {
-              "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
-              "document_filename": "app_docs.pdf",
-              "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
-            }
+            "orderRefusalJudgeName" : "test3",
+            "orderRefusalDate" : "2003-02-01",
+            "orderRefusalAddComments" : "comment1",
+            "orderRefusalJudge" : "District Judge"
           }
         }
       ]
