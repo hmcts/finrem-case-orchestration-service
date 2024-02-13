@@ -21,10 +21,8 @@ public class ApplicantCaseSummariesHandler extends CaseSummariesHandler {
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
-            case POSITION_STATEMENT:
+            case POSITION_STATEMENT_SKELETON_ARGUMENT:
                 return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_POSITION_STATEMENT;
-            case SKELETON_ARGUMENT:
-                return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_SKELETON_ARGUMENT;
             case CASE_SUMMARY:
                 return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CASE_SUMMARY;
             default:

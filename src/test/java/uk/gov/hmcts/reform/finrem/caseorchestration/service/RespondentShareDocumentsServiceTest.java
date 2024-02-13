@@ -46,7 +46,7 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.APPLICANT_FORM_E;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CARE_PLAN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.ATTENDANCE_SHEETS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CHRONOLOGY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.EXPERT_EVIDENCE;
@@ -139,7 +139,7 @@ public class RespondentShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setRespCaseSummariesCollection(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setRespFormsHCollection(getTestDocument(FORM_H));
         data.getUploadCaseDocumentWrapper().setRespExpertEvidenceCollection(getTestDocument(EXPERT_EVIDENCE));
-        data.getUploadCaseDocumentWrapper().setRespCorrespondenceDocsColl(getTestDocument(CARE_PLAN));
+        data.getUploadCaseDocumentWrapper().setRespCorrespondenceDocsColl(getTestDocument(ATTENDANCE_SHEETS));
 
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
         List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getRespOtherCollection();
@@ -218,7 +218,7 @@ public class RespondentShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setRespCaseSummariesCollection(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setRespFormsHCollection(getTestDocument(FORM_H));
         data.getUploadCaseDocumentWrapper().setRespExpertEvidenceCollection(getTestDocument(EXPERT_EVIDENCE));
-        data.getUploadCaseDocumentWrapper().setRespCorrespondenceDocsColl(getTestDocument(CARE_PLAN));
+        data.getUploadCaseDocumentWrapper().setRespCorrespondenceDocsColl(getTestDocument(ATTENDANCE_SHEETS));
 
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
 

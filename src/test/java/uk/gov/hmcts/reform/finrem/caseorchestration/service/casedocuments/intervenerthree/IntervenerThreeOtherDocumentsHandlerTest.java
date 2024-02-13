@@ -29,12 +29,6 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.INTERVENER_THREE, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_B,
-            CaseDocumentParty.INTERVENER_THREE, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_F,
-            CaseDocumentParty.INTERVENER_THREE, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CARE_PLAN,
-            CaseDocumentParty.INTERVENER_THREE, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.INTERVENER_THREE, YesOrNo.NO, YesOrNo.NO, null));
     }
@@ -47,7 +41,7 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(5));
+            hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -63,21 +57,6 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER)
-        );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B, CaseDocumentParty.INTERVENER_THREE),
-            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
-        );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F, CaseDocumentParty.INTERVENER_THREE),
-            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
-        );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN, CaseDocumentParty.INTERVENER_THREE),
-            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
