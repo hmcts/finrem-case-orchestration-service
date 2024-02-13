@@ -10,9 +10,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
+import java.util.List;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.*;
+
 @Configuration
 public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
 
+    private static final List<UploadGeneralDocumentType> APPLICANT_DOC_TYPES = List.of(LETTER_EMAIL_FROM_APPLICANT,
+        LETTER_EMAIL_FROM_APPLICANT_SOLICITOR);
+
+    private static final List<UploadGeneralDocumentType> RESPONDENT_DOC_TYPES = List.of(LETTER_EMAIL_FROM_RESPONDENT,
+        LETTER_EMAIL_FROM_RESPONDENT_SOLICITOR, LETTER_EMAIL_FROM_RESPONDENT_CONTESTED);
     private final DocumentHelper documentHelper;
 
     public UploadGeneralDocumentsCategoriser(FeatureToggleService featureToggleService, DocumentHelper documentHelper) {
@@ -31,14 +40,11 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
 
     private void checkTypeAndSetCategory(UploadGeneralDocument document) {
         if (document != null && document.getDocumentLink() != null) {
-            if (UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT.equals(document.getDocumentType())
-                || UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT_SOLICITOR.equals(document.getDocumentType())) {
+            if (APPLICANT_DOC_TYPES.contains(document.getDocumentType())) {
                 CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
                 setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
                 document.setDocumentLink(documentCopy);
-            } else if (UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT.equals(document.getDocumentType())
-                || UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT_SOLICITOR.equals(document.getDocumentType())
-                || UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT_CONTESTED.equals(document.getDocumentType())) {
+            } else if (RESPONDENT_DOC_TYPES.contains(document.getDocumentType())) {
                 CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
                 setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.CORRESPONDENCE_RESPONDENT.getDocumentCategoryId());
                 document.setDocumentLink(documentCopy);
