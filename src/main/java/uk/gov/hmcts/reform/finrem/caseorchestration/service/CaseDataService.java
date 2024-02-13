@@ -355,7 +355,7 @@ public class CaseDataService {
     }
 
     public boolean isLitigantRepresented(CaseDetails caseDetails, boolean isApplicant) {
-        String isRepresented = nullToEmpty(caseDetails.getData().get(getLitigantRepresentedKey(caseDetails, isApplicant)));
+        String isRepresented = (String) caseDetails.getData().get(getLitigantRepresentedKey(caseDetails, isApplicant));
 
         return YES_VALUE.equalsIgnoreCase(isRepresented);
     }
