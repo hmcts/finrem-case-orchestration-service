@@ -33,10 +33,12 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         if (CollectionUtils.isNotEmpty(finremCaseData.getOrdersSentToPartiesCollection())) {
             finremCaseData.getOrdersSentToPartiesCollection().forEach(
                 order -> {
-                    CaseDocument documentCopy = new CaseDocument(order.getValue().getCaseDocument());
-                    setCategoryToAllOrdersDocs(documentCopy,
-                        DocumentCategory.ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId());
-                    order.getValue().setCaseDocument(documentCopy);
+                    if (order.getValue().getCaseDocument() != null) {
+                        CaseDocument documentCopy = new CaseDocument(order.getValue().getCaseDocument());
+                        setCategoryToAllOrdersDocs(documentCopy,
+                            DocumentCategory.ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId());
+                        order.getValue().setCaseDocument(documentCopy);
+                    }
                 });
         }
 
@@ -184,7 +186,8 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
 
         if (CollectionUtils.isNotEmpty(approvedOrder.getAdditionalConsentDocuments())) {
             List<DocumentCollection> additionalConsentDocumentsCopy = documentHelper.deepCopyArray(approvedOrder.getAdditionalConsentDocuments(),
-                new TypeReference<List<DocumentCollection>>() {});
+                new TypeReference<List<DocumentCollection>>() {
+                });
             additionalConsentDocumentsCopy.forEach(ad ->
                 setCategoryToAllOrdersDocs(ad.getValue(), categoryToApply));
             approvedOrder.setAdditionalConsentDocuments(additionalConsentDocumentsCopy);
@@ -192,7 +195,8 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
 
         if (CollectionUtils.isNotEmpty(approvedOrder.getPensionDocuments())) {
             List<PensionTypeCollection> pensionDocumentsCopy = documentHelper.deepCopyArray(approvedOrder.getPensionDocuments(),
-                new TypeReference<List<PensionTypeCollection>>() {});
+                new TypeReference<List<PensionTypeCollection>>() {
+                });
             pensionDocumentsCopy.forEach(pd ->
                 setCategoryToAllOrdersDocs(pd.getTypedCaseDocument().getPensionDocument(), categoryToApply));
             approvedOrder.setPensionDocuments(pensionDocumentsCopy);
