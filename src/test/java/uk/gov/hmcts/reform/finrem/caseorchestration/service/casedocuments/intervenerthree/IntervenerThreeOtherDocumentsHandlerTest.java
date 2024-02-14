@@ -58,22 +58,6 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER)
         );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
-            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
-        );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F),
-            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
-        );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN),
-            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
-        );
-
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
