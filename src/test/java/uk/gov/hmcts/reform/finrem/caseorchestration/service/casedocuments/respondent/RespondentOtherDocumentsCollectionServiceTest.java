@@ -29,12 +29,6 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, "Other Example"));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_B,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_F,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CARE_PLAN,
-            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
     }
@@ -47,7 +41,7 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(5));
+            hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -63,21 +57,6 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
             is(DocumentCategory.RESPONDENT_DOCUMENTS_MISCELLANEOUS_OR_OTHER)
-        );
-
-        assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
-            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
-        );
-
-        assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F),
-            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
-        );
-
-        assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN),
-            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
@@ -103,6 +82,16 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT),
             is(DocumentCategory.REPORTS_PENSION_REPORTS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES),
+            is(DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS),
+            is(DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
         );
 
         assertThat(
