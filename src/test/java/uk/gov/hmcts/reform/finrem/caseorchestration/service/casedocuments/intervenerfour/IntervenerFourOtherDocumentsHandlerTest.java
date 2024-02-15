@@ -58,7 +58,15 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MISCELLANEOUS_OR_OTHER)
         );
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS, CaseDocumentParty.INTERVENER_FOUR),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+        );
 
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES, CaseDocumentParty.INTERVENER_FOUR),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+        );
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN, CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_PENSION_PLAN)
