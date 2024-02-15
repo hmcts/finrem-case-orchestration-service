@@ -85,6 +85,16 @@ public class IntervenerOneOtherDocumentsHandlerTest extends BaseManageDocumentsH
         );
 
         assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+        );
+
+        assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1)
         );

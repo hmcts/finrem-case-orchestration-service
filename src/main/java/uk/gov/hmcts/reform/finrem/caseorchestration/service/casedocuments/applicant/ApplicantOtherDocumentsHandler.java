@@ -42,8 +42,8 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getHearingDocumentsCategoryMortgageCapacities() {
-        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_MORTGAGE_CAPACITIES;
+    protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS;
     }
 
 
@@ -55,11 +55,6 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     @Override
     protected DocumentCategory getDefaultPartyCategory() {
         return DocumentCategory.APPLICANT_DOCUMENTS;
-    }
-
-    @Override
-    protected DocumentCategory getHouseParticularsDocumentCategory() {
-        return DocumentCategory.APPLICANT_DOCUMENTS_HOUSING_PARTICULARS;
     }
 
     @Override

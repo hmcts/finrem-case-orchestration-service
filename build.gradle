@@ -44,7 +44,7 @@ def versions = [
         jacksonDatabind      : '2.16.1',
         retry                : '1.3.4',
         snakeyaml            : '2.2',
-        loadbalancer         : '3.1.4'
+        loadbalancer         : '3.1.8'
 ]
 
 project.ext {
@@ -202,7 +202,8 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/correspondence/FinremSingleLetterOrEmailApplicantCorresponder.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReference.java',
-                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReferenceKeyValue.java'
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReferenceKeyValue.java',
+                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/SystemUserService.java'
     ]
 
     properties {
