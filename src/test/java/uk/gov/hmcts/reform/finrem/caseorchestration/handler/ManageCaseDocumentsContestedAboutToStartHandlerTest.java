@@ -116,7 +116,7 @@ public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
         legacyConfidentialDocList.add(ConfidentialUploadedDocumentData.builder()
             .id("Legacy doc id")
             .value(UploadConfidentialDocument.builder()
-                .documentType(CaseDocumentType.ATTENDANCE_SHEETS)
+                .documentType(CaseDocumentType.CARE_PLAN)
                 .documentComment("Legacy doc comment")
                 .confidentialDocumentUploadDateTime(now).build()).build());
         FinremCallbackRequest callbackRequest =
