@@ -29,6 +29,12 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_B,
+            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_F,
+            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CARE_PLAN,
+            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
     }
@@ -41,7 +47,7 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(2));
+            hasSize(5));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -58,15 +64,22 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MISCELLANEOUS_OR_OTHER)
         );
+
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_PENSION_PLAN)
