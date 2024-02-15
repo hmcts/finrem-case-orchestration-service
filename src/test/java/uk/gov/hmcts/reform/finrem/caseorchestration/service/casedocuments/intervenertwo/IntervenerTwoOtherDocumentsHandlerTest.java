@@ -58,23 +58,27 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_MISCELLANEOUS_OR_OTHER)
         );
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES,
+                CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS,
+                CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN, CaseDocumentParty.INTERVENER_TWO),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN,
+                CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_PENSION_PLAN)
         );
 
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE, CaseDocumentParty.INTERVENER_TWO),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE,
+                CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_CERTIFICATES_OF_SERVICE)
         );
 
@@ -85,7 +89,8 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
 
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT, CaseDocumentParty.INTERVENER_TWO),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT,
+                CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.REPORTS_PENSION_REPORTS)
         );
     }
