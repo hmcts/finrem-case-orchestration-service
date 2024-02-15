@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -30,10 +32,12 @@ class FinremGeneralOrderRaisedCorresponderTest {
     private CaseDataService caseDataService;
 
     private FinremCaseDetails caseDetails;
+    private FinremCallbackRequest callbackRequest;
 
     @BeforeEach
     void setup() {
         caseDetails = FinremCaseDetails.builder().build();
+        callbackRequest = FinremCallbackRequest.builder().build();
     }
 
     @Test
@@ -51,12 +55,15 @@ class FinremGeneralOrderRaisedCorresponderTest {
 
     @Test
     void shouldSendContestedConsentGeneralOrderEmailToRespondentInConsentedInContestedCase() {
+        callbackRequest.setEventType(EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED);
+        EventType eventId = callbackRequest.getEventType();
+        when(caseDataService.isConsentInContestedGeneralOrderEvent(eventId)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
         when(caseDataService.isConsentedInContestedCase(caseDetails)).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        corresponder.sendCorrespondence(caseDetails);
+        corresponder.sendCorrespondence(caseDetails, eventId);
 
         verify(notificationService).sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(caseDetails);
@@ -65,7 +72,6 @@ class FinremGeneralOrderRaisedCorresponderTest {
 
     @Test
     void shouldNotSendGeneralOrderEmail() {
-        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
 
@@ -78,23 +84,27 @@ class FinremGeneralOrderRaisedCorresponderTest {
 
     @Test
     void shouldSendContestedConsentGeneralOrderEmail() {
+        callbackRequest.setEventType(EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED);
+        EventType eventId = callbackRequest.getEventType();
+        when(caseDataService.isConsentInContestedGeneralOrderEvent(eventId)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
         when(caseDataService.isConsentedInContestedCase(caseDetails)).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        corresponder.sendCorrespondence(caseDetails);
+        corresponder.sendCorrespondence(caseDetails, eventId);
 
         verify(notificationService).sendContestedConsentGeneralOrderEmailApplicantSolicitor(caseDetails);
     }
 
     @Test
     void shouldSendContestedGeneralOrderEmails() {
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
-        when(caseDataService.isConsentedInContestedCase(caseDetails)).thenReturn(false);
+        callbackRequest.setEventType(EventType.GENERAL_ORDER);
+        EventType eventId = callbackRequest.getEventType();
+        when(caseDataService.isConsentInContestedGeneralOrderEvent(eventId)).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        corresponder.sendCorrespondence(caseDetails);
+        corresponder.sendCorrespondence(caseDetails, eventId);
 
         verify(notificationService).sendContestedGeneralOrderEmailApplicant(caseDetails);
         verify(notificationService).sendContestedGeneralOrderEmailRespondent(caseDetails);
@@ -112,8 +122,6 @@ class FinremGeneralOrderRaisedCorresponderTest {
 
     @Test
     void shouldNotSendContestedGeneralOrderEmailToIntervener_ThenTheEmailIsNotIssued() {
-        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(false);
-
         corresponder.sendCorrespondence(caseDetails);
 
         verify(notificationService, never()).sendContestedGeneralOrderEmailIntervener(any(FinremCaseDetails.class),

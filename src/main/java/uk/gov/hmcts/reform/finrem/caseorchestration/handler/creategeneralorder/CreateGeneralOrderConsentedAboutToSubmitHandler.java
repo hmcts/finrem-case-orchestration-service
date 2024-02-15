@@ -22,7 +22,7 @@ public class CreateGeneralOrderConsentedAboutToSubmitHandler extends FinremCallb
 
     private final GeneralOrderService generalOrderService;
 
-    public CreateGeneralOrderConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    protected CreateGeneralOrderConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            GeneralOrderService generalOrderService) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;

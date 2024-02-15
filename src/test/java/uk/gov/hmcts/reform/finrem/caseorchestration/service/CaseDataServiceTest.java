@@ -41,6 +41,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMEND_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -643,6 +644,11 @@ public class CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void testHasConsentOrderIsFalse() {
         assertFalse(caseDataService.hasConsentOrder(new FinremCaseData()));
+    }
+
+    @Test
+    public void shouldReturnTrueIfConsentInContestedEvent() {
+        assertTrue(caseDataService.isConsentInContestedGeneralOrderEvent(GENERAL_ORDER_CONSENT_IN_CONTESTED));
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {

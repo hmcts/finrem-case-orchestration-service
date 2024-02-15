@@ -13,7 +13,7 @@ abstract class CreateGeneralOrderAboutToStartHandler extends FinremCallbackHandl
     private final IdamService idamService;
     private final Clock clock;
 
-    public CreateGeneralOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    protected CreateGeneralOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                  IdamService idamService, Clock clock) {
         super(finremCaseDetailsMapper);
         this.idamService = idamService;

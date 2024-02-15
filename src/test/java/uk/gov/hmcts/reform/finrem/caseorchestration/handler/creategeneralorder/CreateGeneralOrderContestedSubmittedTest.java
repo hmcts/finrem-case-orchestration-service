@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
-class CreateGeneralOrderContestedSubmittedTest {
+class  CreateGeneralOrderContestedSubmittedTest {
 
     @InjectMocks
     private CreateGeneralOrderContestedSubmittedHandler handler;
@@ -56,10 +56,10 @@ class CreateGeneralOrderContestedSubmittedTest {
             Arguments.of(MID_EVENT, CONTESTED, GENERAL_ORDER, false),
             Arguments.of(ABOUT_TO_SUBMIT, CONTESTED, GENERAL_ORDER, false),
             Arguments.of(SUBMITTED, CONTESTED, GENERAL_ORDER, true),
+            Arguments.of(SUBMITTED, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, true),
             Arguments.of(ABOUT_TO_START, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
             Arguments.of(MID_EVENT, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
             Arguments.of(ABOUT_TO_SUBMIT, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
-            Arguments.of(SUBMITTED, CONTESTED, GENERAL_ORDER_CONSENT_IN_CONTESTED, false),
 
             // Consented
             Arguments.of(ABOUT_TO_START, CONSENTED, GENERAL_ORDER, false),
@@ -83,6 +83,6 @@ class CreateGeneralOrderContestedSubmittedTest {
         var response = handler.handle(request, "some-token");
 
         assertThat(response).isNotNull();
-        verify(corresponder, times(1)).sendCorrespondence(caseDetails);
+        verify(corresponder, times(1)).sendCorrespondence(caseDetails, request.getEventType());
     }
 }

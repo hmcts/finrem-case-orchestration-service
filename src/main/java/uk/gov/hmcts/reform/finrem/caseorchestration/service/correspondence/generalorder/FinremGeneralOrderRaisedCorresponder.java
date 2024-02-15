@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Finre
 public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSolicitorsCorresponder {
 
     private final CaseDataService caseDataService;
+    private boolean isConsentInContested;
 
     public FinremGeneralOrderRaisedCorresponder(NotificationService notificationService,
                                                 CaseDataService caseDataService) {
@@ -19,7 +21,8 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
         this.caseDataService = caseDataService;
     }
 
-    public void sendCorrespondence(FinremCaseDetails caseDetails) {
+    public void sendCorrespondence(FinremCaseDetails caseDetails, EventType eventId) {
+        this.isConsentInContested = caseDataService.isConsentInContestedGeneralOrderEvent(eventId);
         super.sendCorrespondence(caseDetails);
         sendIntervenerCorrespondence(caseDetails);
     }
@@ -39,7 +42,7 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
         if (caseDataService.isConsentedApplication(caseDetails)) {
             notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(caseDetails);
         } else {
-            if (caseDataService.isConsentedInContestedCase(caseDetails)) {
+            if (isConsentInContested && caseDataService.isConsentedInContestedCase(caseDetails)) {
                 notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(caseDetails);
             } else {
                 notificationService.sendContestedGeneralOrderEmailApplicant(caseDetails);
@@ -52,7 +55,7 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
         if (caseDataService.isConsentedApplication(caseDetails)) {
             notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(caseDetails);
         } else {
-            if (caseDataService.isConsentedInContestedCase(caseDetails)) {
+            if (isConsentInContested && caseDataService.isConsentedInContestedCase(caseDetails)) {
                 notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
             } else {
                 notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
@@ -64,7 +67,7 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
         SolicitorCaseDataKeysWrapper caseDataKeysWrapper =
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper);
 
-        if (caseDataService.isConsentedInContestedCase(caseDetails)) {
+        if (isConsentInContested && caseDataService.isConsentedInContestedCase(caseDetails)) {
             notificationService.sendContestedConsentGeneralOrderEmailIntervenerSolicitor(caseDetails,
                 caseDataKeysWrapper);
         } else {
