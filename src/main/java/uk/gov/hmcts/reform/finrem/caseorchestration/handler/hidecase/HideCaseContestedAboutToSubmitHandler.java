@@ -33,7 +33,8 @@ public class HideCaseContestedAboutToSubmitHandler extends FinremCallbackHandler
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = caseDetails.getData();
-        finremCaseData.setPreviousState(caseDetails.getState().getStateId());
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        finremCaseData.setPreviousState(caseDetailsBefore.getState().getStateId());
         log.info("Previous state : {} for Case ID: {}", finremCaseData.getPreviousState(), caseDetails.getId());
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }

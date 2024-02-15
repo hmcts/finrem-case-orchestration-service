@@ -66,7 +66,10 @@ public class HideCaseContestedAboutToSubmitHandlerTest {
             .build();
         FinremCaseDetails caseDetails =
             FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED).state(State.APPLICATION_ISSUED).data(caseData).build();
-        return FinremCallbackRequest.builder().eventType(EventType.CREATE_GENERAL_LETTER).caseDetails(caseDetails).build();
+        FinremCaseDetails caseDetailsBefore =
+            FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED).state(State.APPLICATION_ISSUED).data(caseData).build();
+        return FinremCallbackRequest.builder().eventType(EventType.CREATE_GENERAL_LETTER).caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore).build();
     }
 
 }
