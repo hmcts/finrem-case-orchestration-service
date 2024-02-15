@@ -25,12 +25,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 public class CreateGeneralOrderConsentedAboutToStartHandler extends CreateGeneralOrderAboutToStartHandler {
 
     @Autowired
-    protected CreateGeneralOrderConsentedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public CreateGeneralOrderConsentedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                           IdamService idamService) {
         this(finremCaseDetailsMapper, idamService, Clock.system(ZoneId.of("Europe/London")));
     }
 
-    protected CreateGeneralOrderConsentedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public CreateGeneralOrderConsentedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                           IdamService idamService, Clock clock) {
         super(finremCaseDetailsMapper, idamService, clock);
     }

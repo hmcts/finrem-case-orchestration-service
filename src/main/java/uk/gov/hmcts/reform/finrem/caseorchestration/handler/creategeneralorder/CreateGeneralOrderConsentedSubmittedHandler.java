@@ -22,7 +22,7 @@ public class CreateGeneralOrderConsentedSubmittedHandler extends FinremCallbackH
 
     private final FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
 
-    protected CreateGeneralOrderConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public CreateGeneralOrderConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                        FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder) {
         super(finremCaseDetailsMapper);
         this.generalOrderRaisedCorresponder = generalOrderRaisedCorresponder;

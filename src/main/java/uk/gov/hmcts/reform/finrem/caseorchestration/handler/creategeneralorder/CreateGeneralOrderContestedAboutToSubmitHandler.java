@@ -26,7 +26,7 @@ public class CreateGeneralOrderContestedAboutToSubmitHandler extends FinremCallb
     private final CaseDataService caseDataService;
     private final GeneralOrderService generalOrderService;
 
-    protected CreateGeneralOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public CreateGeneralOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            CaseDataService caseDataService,
                                                            GeneralOrderService generalOrderService) {
         super(finremCaseDetailsMapper);
