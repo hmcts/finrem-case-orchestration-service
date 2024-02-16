@@ -421,6 +421,8 @@ public class FinremCaseData {
     @Getter(AccessLevel.NONE)
     private CaseFlagsWrapper caseFlagsWrapper;
 
+    private String previousState;
+
 
     @JsonIgnore
     public CaseFlagsWrapper getCaseFlagsWrapper() {
