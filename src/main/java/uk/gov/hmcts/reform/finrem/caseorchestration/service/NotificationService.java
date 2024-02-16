@@ -462,7 +462,7 @@ public class NotificationService {
     }
 
     public void sendContestOrderApprovedEmailRespondent(FinremCaseDetails caseDetails) {
-        log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}",
+        log.info("Sending notification email to Respondent for 'Contest Order Approved'. Case ID : {}",
             caseDetails.getId());
         NotificationRequest notificationRequest =
             finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails);
