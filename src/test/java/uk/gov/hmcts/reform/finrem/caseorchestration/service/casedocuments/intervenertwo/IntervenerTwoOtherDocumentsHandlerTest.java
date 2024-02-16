@@ -28,6 +28,12 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_B,
+            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_F,
+            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CARE_PLAN,
+            CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
     }
@@ -40,7 +46,7 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(2));
+            hasSize(5));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -57,6 +63,23 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_MISCELLANEOUS_OR_OTHER)
         );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B, CaseDocumentParty.INTERVENER_TWO),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F, CaseDocumentParty.INTERVENER_TWO),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN, CaseDocumentParty.INTERVENER_TWO),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES,
                 CaseDocumentParty.INTERVENER_TWO),
@@ -91,7 +114,7 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT,
                 CaseDocumentParty.INTERVENER_TWO),
-            is(DocumentCategory.REPORTS_PENSION_REPORTS)
+            is(DocumentCategory.REPORTS)
         );
     }
 }

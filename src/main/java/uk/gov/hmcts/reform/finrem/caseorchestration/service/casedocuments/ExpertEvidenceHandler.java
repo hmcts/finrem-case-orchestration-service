@@ -26,18 +26,10 @@ public abstract class ExpertEvidenceHandler extends PartyDocumentsHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
-        switch (caseDocumentType) {
-            case VALUATION_REPORT -> {
-                return getHearingDocumentsFamilyHomeValuation();
+            if (CaseDocumentType.VALUATION_REPORT.equals(caseDocumentType)
+                || CaseDocumentType.EXPERT_EVIDENCE.equals(caseDocumentType)) {
+                return DocumentCategory.REPORTS;
             }
-            case EXPERT_EVIDENCE -> {
-                return DocumentCategory.REPORTS_EXPERT_REPORTS;
-            }
-            default -> {
-                return DocumentCategory.UNCATEGORISED;
-            }
-        }
+            return DocumentCategory.UNCATEGORISED;
     }
-
-    protected abstract DocumentCategory getHearingDocumentsFamilyHomeValuation();
 }

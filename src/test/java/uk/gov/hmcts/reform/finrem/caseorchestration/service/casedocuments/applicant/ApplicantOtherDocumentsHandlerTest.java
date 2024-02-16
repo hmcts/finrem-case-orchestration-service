@@ -29,6 +29,12 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, "Other Example"));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_B,
+            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_F,
+            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CARE_PLAN,
+            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
 
@@ -62,6 +68,21 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
         );
 
         assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.APPLICANT_DOCUMENTS_PENSION_PLAN)
         );
@@ -84,6 +105,11 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS)
         );
 
         assertThat(
