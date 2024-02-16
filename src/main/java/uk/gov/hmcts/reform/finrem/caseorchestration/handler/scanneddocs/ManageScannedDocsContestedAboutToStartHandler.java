@@ -9,12 +9,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ManageScannedDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ManageScannedDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,6 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class ManageScannedDocsContestedAboutToStartHandler extends FinremCallbackHandler {
-
 
     @Autowired
     public ManageScannedDocsContestedAboutToStartHandler(
@@ -48,21 +48,17 @@ public class ManageScannedDocsContestedAboutToStartHandler extends FinremCallbac
         List<ScannedDocumentCollection> scannedDocumentCollections =
             Optional.ofNullable(finremCaseData.getScannedDocuments()).orElse(new ArrayList<>());
         scannedDocumentCollections.forEach(doc -> {
-            UploadCaseDocumentCollection scannedCaseDocumentCollectionItem = UploadCaseDocumentCollection.builder()
-                .uploadCaseDocument(UploadCaseDocument.builder()
-                    .fileName(doc.getValue().getFileName())
-                    .scannedDate(doc.getValue().getScannedDate())
-                    .caseDocuments(CaseDocument.builder()
-                        .documentUrl(doc.getValue().getUrl().getDocumentUrl())
-                        .documentBinaryUrl(doc.getValue().getUrl().getDocumentBinaryUrl())
-                        .documentFilename(doc.getValue().getUrl().getDocumentFilename())
-                        .build())
-                    .exceptionRecordReference(doc.getValue().getExceptionRecordReference())
+
+            ManageScannedDocumentCollection item = ManageScannedDocumentCollection.builder()
+                .id(doc.getId())
+                .manageScannedDocument(ManageScannedDocument.builder()
+                    .selectForUpdate(YesOrNo.NO)
+                    .uploadCaseDocument(UploadCaseDocument.from(doc))
                     .build())
                 .build();
-            finremCaseData.getManageScannedDocumentCollection().add(scannedCaseDocumentCollectionItem);
-        });
 
+            finremCaseData.getManageScannedDocumentCollection().add(item);
+        });
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
