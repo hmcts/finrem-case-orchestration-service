@@ -81,6 +81,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
@@ -437,9 +439,12 @@ public class NotificationService {
     }
 
     public void sendContestOrderApprovedEmailApplicant(FinremCaseDetails caseDetails) {
+        log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}",
+            caseDetails.getId());
+        NotificationRequest notificationRequest =
+            finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails)));
+            emailService.sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_APPLICANT));
     }
 
     /**
@@ -457,9 +462,12 @@ public class NotificationService {
     }
 
     public void sendContestOrderApprovedEmailRespondent(FinremCaseDetails caseDetails) {
+        log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}",
+            caseDetails.getId());
+        NotificationRequest notificationRequest =
+            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails);
         CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails)));
+            emailService.sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_RESPONDENT));
     }
 
     /**

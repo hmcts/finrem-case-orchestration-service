@@ -26,6 +26,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
@@ -52,6 +54,8 @@ public class EmailTemplateNamesTest {
             .put(FR_CONTESTED_PREPARE_FOR_HEARING, "FR_CONTESTED_PREPARE_FOR_HEARING")
             .put(FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL, "FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL")
             .put(FR_CONTEST_ORDER_APPROVED, "FR_CONTEST_ORDER_APPROVED")
+            .put(FR_CONTEST_ORDER_APPROVED_APPLICANT, "FR_CONTEST_ORDER_APPROVED_APPLICANT")
+            .put(FR_CONTEST_ORDER_APPROVED_RESPONDENT, "FR_CONTEST_ORDER_APPROVED_RESPONDENT")
             .put(FR_CONTEST_ORDER_NOT_APPROVED, "FR_CONTEST_ORDER_NOT_APPROVED")
             .put(FR_CONTESTED_CONSENT_ORDER_APPROVED, "FR_CONTESTED_CONSENT_ORDER_APPROVED")
             .put(FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED, "FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED")
