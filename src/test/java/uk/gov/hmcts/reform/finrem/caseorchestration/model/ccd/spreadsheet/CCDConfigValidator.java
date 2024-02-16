@@ -186,7 +186,7 @@ public class CCDConfigValidator {
         for (Class clazz : finremCaseDataClasses) {
             for (Field field : clazz.getDeclaredFields()) {
                 if (finremCaseDataFieldsToIgnore.contains(field.getName())) {
-                    break;
+                    continue;
                 }
                 log.info("Looking for FinremCaseData Field Id: {} and Field Type: {}", field.getName(), field.getType());
                 boolean found = false;
