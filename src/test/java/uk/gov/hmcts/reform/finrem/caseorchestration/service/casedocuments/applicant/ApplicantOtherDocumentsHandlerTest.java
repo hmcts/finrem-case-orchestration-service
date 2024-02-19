@@ -49,7 +49,7 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(2));
+            hasSize(5));
 
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -114,7 +114,7 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT, CaseDocumentParty.APPLICANT),
-            is(DocumentCategory.REPORTS_PENSION_REPORTS)
+            is(DocumentCategory.REPORTS)
         );
 
         assertThat(

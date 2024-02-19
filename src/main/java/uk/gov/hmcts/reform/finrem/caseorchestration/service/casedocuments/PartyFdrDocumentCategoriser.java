@@ -19,7 +19,7 @@ public abstract class PartyFdrDocumentCategoriser {
                 return getWithoutPrejudiceDocumentCategory();
             case QUESTIONNAIRE:
                 return getQuestionnairesDocumentCategory();
-            case FAMILY_HOME_VALUATION, PENSION_REPORT, EXPERT_EVIDENCE:
+            case PENSION_REPORT, EXPERT_EVIDENCE:
                 return DocumentCategory.FDR_REPORTS;
             case PRE_HEARING_DRAFT_ORDER:
                 return getHearingDraftOrderDocumentCategory();

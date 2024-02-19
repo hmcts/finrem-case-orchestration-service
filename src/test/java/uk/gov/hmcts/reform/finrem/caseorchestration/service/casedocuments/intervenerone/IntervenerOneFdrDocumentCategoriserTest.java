@@ -33,8 +33,6 @@ public class IntervenerOneFdrDocumentCategoriserTest {
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_1_QUESTIONNAIRES,
             categoriser.getDocumentCategory(CaseDocumentType.QUESTIONNAIRE));
 
-        assertEquals(DocumentCategory.FDR_REPORTS,
-            categoriser.getDocumentCategory(CaseDocumentType.FAMILY_HOME_VALUATION));
 
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_1_PRE_HEARING_DRAFT_ORDER,
             categoriser.getDocumentCategory(CaseDocumentType.PRE_HEARING_DRAFT_ORDER));

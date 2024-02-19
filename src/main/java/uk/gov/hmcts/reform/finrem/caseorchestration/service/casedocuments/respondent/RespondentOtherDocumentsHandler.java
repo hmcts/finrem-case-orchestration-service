@@ -52,6 +52,11 @@ public class RespondentOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
+    protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS;
+    }
+
+    @Override
     protected DocumentCategory getDefaultPartyCategory() {
         return DocumentCategory.RESPONDENT_DOCUMENTS;
     }

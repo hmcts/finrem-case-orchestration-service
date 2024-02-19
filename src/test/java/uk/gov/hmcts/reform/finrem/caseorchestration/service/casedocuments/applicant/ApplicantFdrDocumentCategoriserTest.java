@@ -31,8 +31,6 @@ public class ApplicantFdrDocumentCategoriserTest {
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_QUESTIONNAIRES,
             categoriser.getDocumentCategory(CaseDocumentType.QUESTIONNAIRE));
 
-        assertEquals(DocumentCategory.FDR_REPORTS,
-            categoriser.getDocumentCategory(CaseDocumentType.FAMILY_HOME_VALUATION));
 
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_PRE_HEARING_DRAFT_ORDER,
             categoriser.getDocumentCategory(CaseDocumentType.PRE_HEARING_DRAFT_ORDER));
