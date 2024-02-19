@@ -69,9 +69,7 @@ public class CreateGeneralLetterMidHandlerTest {
     public void givenACcdCallbackCallbackCreateGeneralLetterAboutToSubmitHandler_WhenHandle_thenCreatePreviewLetter() {
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(generalLetterService).getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
-        verify(generalLetterService).addFrcCourtFields(caseDetails);
         verify(generalLetterService).previewGeneralLetter(AUTH_TOKEN, caseDetails);
-        verify(generalLetterService).removeFrcCourtFields(caseDetails);
     }
 
     @Test

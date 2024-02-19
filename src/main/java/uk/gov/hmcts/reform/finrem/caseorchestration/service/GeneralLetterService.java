@@ -73,13 +73,17 @@ public class GeneralLetterService {
 
     public void previewGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
+        FinremCaseData caseData = caseDetails.getData();
+        addFrcCourtFields(caseData);
         CaseDocument generalLetterDocument = generateGeneralLetterDocument(caseDetails, authorisationToken);
-        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterPreview(generalLetterDocument);
+        caseData.getGeneralLetterWrapper().setGeneralLetterPreview(generalLetterDocument);
+        removeFrcCourtFields(caseData);
     }
 
     public void createGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         Long caseId = caseDetails.getId();
         FinremCaseData caseData = caseDetails.getData();
+        addFrcCourtFields(caseData);
         GeneralLetterWrapper wrapper = caseData.getGeneralLetterWrapper();
         log.info("Generating General letter for Case ID: {}", caseId);
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
@@ -92,6 +96,7 @@ public class GeneralLetterService {
         addGeneralLetterToCaseData(caseDetails, document,
             wrapper.getGeneralLetterUploadedDocument());
         printLatestGeneralLetter(caseDetails, authorisationToken);
+        removeFrcCourtFields(caseData);
         if (caseData.isContestedApplication()) {
             createGeneralLetterDocumentCategoriser.categorise(caseData);
         }
@@ -249,15 +254,11 @@ public class GeneralLetterService {
         return "";
     }
 
-    public FinremCaseDetails addFrcCourtFields(FinremCaseDetails caseDetails) {
-        FinremCaseData data = caseDetails.getData();
+    private void addFrcCourtFields(FinremCaseData data) {
         data.setCourtDetails(buildFrcCourtDetails(data));
-        return caseDetails;
     }
 
-    public FinremCaseDetails removeFrcCourtFields(FinremCaseDetails caseDetails) {
-        FinremCaseData data = caseDetails.getData();
+    private void removeFrcCourtFields(FinremCaseData data) {
         data.setCourtDetails(null);
-        return caseDetails;
     }
 }

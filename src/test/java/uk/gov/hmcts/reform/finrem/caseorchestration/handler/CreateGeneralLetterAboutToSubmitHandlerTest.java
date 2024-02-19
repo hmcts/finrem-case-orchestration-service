@@ -70,7 +70,6 @@ public class CreateGeneralLetterAboutToSubmitHandlerTest {
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(generalLetterService).getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
         verify(generalLetterService).createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verify(generalLetterService).addFrcCourtFields(caseDetails);
     }
 
     @Test

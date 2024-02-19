@@ -42,9 +42,7 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
         validateCaseData(callbackRequest);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
-            generalLetterService.addFrcCourtFields(caseDetails);
             generalLetterService.previewGeneralLetter(userAuthorisation, caseDetails);
-            generalLetterService.removeFrcCourtFields(caseDetails);
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
         } else {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
