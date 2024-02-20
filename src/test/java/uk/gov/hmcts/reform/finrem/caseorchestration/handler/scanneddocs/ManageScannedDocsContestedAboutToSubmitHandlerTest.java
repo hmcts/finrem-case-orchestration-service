@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -23,6 +22,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
@@ -33,17 +34,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respon
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
@@ -53,31 +50,23 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
 
     private ManageScannedDocsContestedAboutToSubmitHandler handler;
 
-    @Mock
-    RespondentChronologiesStatementHandler respondentChronologiesStatementCollectionService;
-    @Mock
-    ApplicantOtherDocumentsHandler applicantOtherDocumentsCollectionService;
-    @Mock
-    FdrDocumentsHandler fdrDocumentsCollectionService;
-    @Mock
-    RespondentQuestionnairesAnswersHandler respondentQuestionnairesAnswersCollectionService;
-    @Mock
-    ApplicantChronologiesStatementHandler applicantChronologiesStatementCollectionService;
-
-    private List<DocumentHandler> documentHandlers;
-
     @Before
     public void setUp() {
-        documentHandlers = Stream.of(respondentChronologiesStatementCollectionService, applicantOtherDocumentsCollectionService,
-                fdrDocumentsCollectionService, respondentQuestionnairesAnswersCollectionService,
-                applicantChronologiesStatementCollectionService)
-            .collect(Collectors.toList());
+        FeatureToggleService featureToggleService = mock(FeatureToggleService.class);
+        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
 
-        FinremCaseDetailsMapper finremCaseDetailsMapper =
-            new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler =
-            new ManageScannedDocsContestedAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentHandlers);
+        List<DocumentHandler> documentHandlers = List.of(
+            new RespondentChronologiesStatementHandler(featureToggleService),
+            new ApplicantOtherDocumentsHandler(featureToggleService),
+            new FdrDocumentsHandler(featureToggleService),
+            new RespondentQuestionnairesAnswersHandler(featureToggleService),
+            new ApplicantChronologiesStatementHandler(featureToggleService),
+            new CaseDocumentsHandler(featureToggleService)
+        );
+
+        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(
+            new ObjectMapper().registerModule(new JavaTimeModule()));
+        handler = new ManageScannedDocsContestedAboutToSubmitHandler(finremCaseDetailsMapper, documentHandlers);
     }
 
     @Test
@@ -101,10 +90,6 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        documentHandlers.forEach(documentCollectionService ->
-            verify(documentCollectionService)
-                .replaceManagedDocumentsInCollectionType(any(FinremCallbackRequest.class), anyList(), anyBoolean()));
-
         assertThat(caseDetails.getData().getScannedDocuments(), empty());
         assertThat(caseDetails.getData().getManageScannedDocumentCollection(), nullValue());
     }
@@ -116,10 +101,6 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        documentHandlers.forEach(documentCollectionService ->
-            verify(documentCollectionService)
-                .replaceManagedDocumentsInCollectionType(any(FinremCallbackRequest.class), anyList(), anyBoolean()));
-
         assertThat(caseDetails.getData().getScannedDocuments(), empty());
         assertThat(caseDetails.getData().getManageScannedDocumentCollection(), nullValue());
     }
@@ -130,10 +111,6 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(caseDetails).build();
 
         handler.handle(callbackRequest, AUTH_TOKEN);
-
-        documentHandlers.forEach(documentCollectionService ->
-            verify(documentCollectionService)
-                .replaceManagedDocumentsInCollectionType(any(FinremCallbackRequest.class), anyList(), anyBoolean()));
 
         assertThat(caseDetails.getData().getScannedDocuments().size(), is(1));
         assertThat(caseDetails.getData().getManageScannedDocumentCollection(), nullValue());

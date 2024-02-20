@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.scanneddocs;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -69,24 +70,23 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
         List<String> warnings = new ArrayList<>();
         getValidatedResponse(caseData, warnings);
 
-        // Collect to a mutable list because DocumentHandler has a side effect of removing all elements
-        // see DocumentHandler.addUploadedDocumentToDocumentCollectionType
         List<UploadCaseDocumentCollection> manageScannedDocumentCollection =
             caseData.getManageScannedDocumentCollection().stream()
                 .filter(msdc -> YesOrNo.YES == msdc.getManageScannedDocument().getSelectForUpdate())
                 .map(ManageScannedDocumentCollection::toUploadCaseDocumentCollection)
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toCollection(Lists::newArrayList));
 
         updateFileNames(manageScannedDocumentCollection);
         addDefaultsToAdministrativeDocuments(manageScannedDocumentCollection);
 
         List<String> processedScannedDocumentIds = manageScannedDocumentCollection.stream()
             .map(UploadCaseDocumentCollection::getId)
-                .toList();
+            .collect(Collectors.toCollection(Lists::newArrayList));
 
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, manageScannedDocumentCollection, false));
 
+        manageScannedDocumentCollection.forEach(sd -> processedScannedDocumentIds.remove(sd.getId()));
         removeProcessedScannedDocumentsFromCase(caseData, processedScannedDocumentIds);
         caseData.setManageScannedDocumentCollection(null);
 
