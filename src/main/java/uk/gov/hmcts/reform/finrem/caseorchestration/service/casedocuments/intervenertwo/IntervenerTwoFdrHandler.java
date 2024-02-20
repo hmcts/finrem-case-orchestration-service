@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenertwo;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
@@ -8,12 +8,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.PartyDocumentsHandler;
 
 @Component
-public class IntervenerFourFdrHandler extends PartyDocumentsHandler {
+public class IntervenerTwoFdrHandler extends PartyDocumentsHandler {
 
-    public IntervenerFourFdrHandler(FeatureToggleService featureToggleService) {
-        super(CaseDocumentCollectionType.INTERVENER_FOUR_FDR_DOCS_COLLECTION, CaseDocumentParty.INTERVENER_FOUR, featureToggleService);
+    private final IntervenerTwoFdrDocumentCategoriser categoriser;
+
+    public IntervenerTwoFdrHandler(FeatureToggleService featureToggleService, IntervenerTwoFdrDocumentCategoriser categoriser) {
+        super(CaseDocumentCollectionType.INTERVENER_TWO_FDR_DOCS_COLLECTION, CaseDocumentParty.INTERVENER_TWO, featureToggleService);
+        this.categoriser = categoriser;
     }
 
     @Override
@@ -23,7 +27,7 @@ public class IntervenerFourFdrHandler extends PartyDocumentsHandler {
 
 
     @Override
-    public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_4;
+    public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
+        return categoriser.getDocumentCategory(caseDocumentType);
     }
 }

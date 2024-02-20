@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.mockito.InjectMocks;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
@@ -15,7 +16,7 @@ public abstract class HearingBundleHandlerTest extends BaseManageDocumentsHandle
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            hearingBundleHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE),
+            hearingBundleHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.HEARING_BUNDLE)
         );
     }
