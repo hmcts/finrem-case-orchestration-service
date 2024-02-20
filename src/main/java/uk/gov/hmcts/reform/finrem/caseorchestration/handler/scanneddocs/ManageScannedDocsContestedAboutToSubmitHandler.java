@@ -21,13 +21,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ManageScannedDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
 
 @Slf4j
 @Service
@@ -72,7 +74,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
 
         List<UploadCaseDocumentCollection> manageScannedDocumentCollection =
             caseData.getManageScannedDocumentCollection().stream()
-                .filter(msdc -> YesOrNo.YES == msdc.getManageScannedDocument().getSelectForUpdate())
+                .filter(msdc -> YES == msdc.getManageScannedDocument().getSelectForUpdate())
                 .map(ManageScannedDocumentCollection::toUploadCaseDocumentCollection)
                 .collect(Collectors.toCollection(Lists::newArrayList));
 
@@ -149,11 +151,11 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
         UploadCaseDocument uploadCaseDocument = document.getUploadCaseDocument();
         if (ADMINISTRATIVE_CASE_DOCUMENT_TYPES.contains(uploadCaseDocument.getCaseDocumentType())) {
             uploadCaseDocument.setCaseDocumentParty(CaseDocumentParty.CASE);
-            uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
-            uploadCaseDocument.setCaseDocumentFdr(YesOrNo.NO);
+            uploadCaseDocument.setCaseDocumentConfidentiality(NO);
+            uploadCaseDocument.setCaseDocumentFdr(NO);
         } else if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(uploadCaseDocument.getCaseDocumentType())) {
-            uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
-            uploadCaseDocument.setCaseDocumentFdr(YesOrNo.YES);
+            uploadCaseDocument.setCaseDocumentConfidentiality(NO);
+            uploadCaseDocument.setCaseDocumentFdr(YES);
             uploadCaseDocument.setCaseDocumentParty(null);
         }
 
@@ -167,7 +169,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
     private void removeScannedDocumentFromCase(FinremCaseData caseData, String id) {
         Optional<ScannedDocumentCollection> scannedDocument = caseData.getScannedDocuments().stream()
             .filter(sdc -> sdc.getId().equals(id))
-            .findFirst();
+            .findAny();
 
         scannedDocument.ifPresent(sdc -> caseData.getScannedDocuments().remove(sdc));
     }
