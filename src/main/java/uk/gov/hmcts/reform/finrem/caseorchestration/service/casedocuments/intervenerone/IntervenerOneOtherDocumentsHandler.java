@@ -17,7 +17,7 @@ public class IntervenerOneOtherDocumentsHandler extends OtherDocumentsHandler {
 
     @Override
     protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_MISCELLANEOUS_OR_OTHER;
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_OTHER;
     }
 
     @Override

@@ -61,7 +61,7 @@ public class ApplicantCorrespondenceCollectionServiceTest extends Correspondence
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT),
-            is(DocumentCategory.CORRESPONDENCE_APPLICANT)
+            is(DocumentCategory.COURT_CORRESPONDENCE_APPLICANT)
         );
     }
 }

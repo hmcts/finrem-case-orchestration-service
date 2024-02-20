@@ -63,7 +63,7 @@ public class IntervenerTwoCorrespondenceHandlerTest extends CorrespondenceHandle
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT),
-            is(DocumentCategory.CORRESPONDENCE_INTERVENER_2)
+            is(DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2)
         );
     }
 }

@@ -62,7 +62,7 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_OTHER)
         );
 
         assertThat(

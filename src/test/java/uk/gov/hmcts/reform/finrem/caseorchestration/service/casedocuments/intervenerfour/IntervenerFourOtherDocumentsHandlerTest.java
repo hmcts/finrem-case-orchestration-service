@@ -62,7 +62,7 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MISCELLANEOUS_OR_OTHER)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_OTHER)
         );
 
         assertThat(
@@ -94,11 +94,6 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_ES1)
-        );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS),
-            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_4_WITHOUT_PREJUDICE_OFFERS)
         );
 
         assertThat(

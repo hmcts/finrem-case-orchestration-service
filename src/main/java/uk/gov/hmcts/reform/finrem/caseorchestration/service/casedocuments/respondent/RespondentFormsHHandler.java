@@ -20,6 +20,6 @@ public class RespondentFormsHHandler extends FormsHHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_ESTIMATES_OR_FORM_H_OR_FORM_H1;
+        return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260;
     }
 }
