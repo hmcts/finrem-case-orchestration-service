@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.scanneddocs;
 
-import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -65,9 +64,11 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
 
-        log.info("Received request to manage scanned documents for Case ID : {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to manage scanned documents for Case ID : {}",
+            callbackRequest.getCaseDetails().getId());
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         List<String> warnings = new ArrayList<>();
         getValidatedResponse(caseData, warnings);
@@ -76,24 +77,24 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
             caseData.getManageScannedDocumentCollection().stream()
                 .filter(msdc -> YES == msdc.getManageScannedDocument().getSelectForUpdate())
                 .map(ManageScannedDocumentCollection::toUploadCaseDocumentCollection)
-                .collect(Collectors.toCollection(Lists::newArrayList));
+                .collect(Collectors.toList());
 
         updateFileNames(manageScannedDocumentCollection);
         addDefaultsToAdministrativeDocuments(manageScannedDocumentCollection);
 
         List<String> processedScannedDocumentIds = manageScannedDocumentCollection.stream()
             .map(UploadCaseDocumentCollection::getId)
-            .collect(Collectors.toCollection(Lists::newArrayList));
+            .collect(Collectors.toList());
 
         documentHandlers.forEach(documentCollectionService ->
-            documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, manageScannedDocumentCollection, false));
+            documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest,
+                manageScannedDocumentCollection, false));
 
         manageScannedDocumentCollection.forEach(sd -> processedScannedDocumentIds.remove(sd.getId()));
         removeProcessedScannedDocumentsFromCase(caseData, processedScannedDocumentIds);
         caseData.setManageScannedDocumentCollection(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
-
     }
 
     private void updateFileNames(List<UploadCaseDocumentCollection> manageScannedDocumentCollection) {
@@ -113,7 +114,8 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
     }
 
     private void getValidatedResponse(FinremCaseData caseData, List<String> warnings) {
-        List<ManageScannedDocumentCollection> manageScannedDocumentCollection = caseData.getManageScannedDocumentCollection();
+        List<ManageScannedDocumentCollection> manageScannedDocumentCollection =
+            caseData.getManageScannedDocumentCollection();
 
         if (StringUtils.isBlank(caseData.getIntervenerOneWrapper().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageScannedDocumentCollection)) {
@@ -137,7 +139,8 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
                                               List<ManageScannedDocumentCollection> manageScannedDocumentCollection) {
         return manageScannedDocumentCollection.stream().anyMatch(documentCollection -> {
             if (documentCollection.getManageScannedDocument().getUploadCaseDocument().getCaseDocumentParty() != null) {
-                return caseDocumentParty.equals(documentCollection.getManageScannedDocument().getUploadCaseDocument().getCaseDocumentParty());
+                return caseDocumentParty.equals(
+                    documentCollection.getManageScannedDocument().getUploadCaseDocument().getCaseDocumentParty());
             }
             return false;
         });
