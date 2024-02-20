@@ -54,7 +54,7 @@ public class IntervenerThreeCorrespondenceHandlerTest extends CorrespondenceHand
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OFFERS),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OFFERS, CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_OPEN_OFFERS)
         );
 

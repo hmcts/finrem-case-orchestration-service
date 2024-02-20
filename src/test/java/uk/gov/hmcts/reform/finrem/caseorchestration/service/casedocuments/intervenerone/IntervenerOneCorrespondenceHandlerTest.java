@@ -58,7 +58,7 @@ public class IntervenerOneCorrespondenceHandlerTest extends CorrespondenceHandle
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OFFERS),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OFFERS, CaseDocumentParty.INTERVENER_ONE),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_OPEN_OFFERS)
         );
 

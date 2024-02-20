@@ -39,6 +39,12 @@ public enum DocumentCategory {
     RESPONDENT_DOCUMENTS_PENSION_PLAN("respondentDocumentsPensionPlan"),
     LIP_OR_SCANNED_DOCUMENTS("lipOrScannedDocuments"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE("fdrDocumentsAndFdrBundle"),
+    FDR_BUNDLE("fdrBundle"),
+    FDR_JOINT_DOCUMENTS("fdrDocumentsJointDocuments"),
+    FDR_JOINT_DOCUMENTS_ES1("fdrDocumentsJointDocumentsEs1"),
+    FDR_JOINT_DOCUMENTS_ES2("fdrDocumentsJointDocumentsEs2"),
+    FDR_JOINT_DOCUMENTS_CHRONOLOGY("fdrDocumentsJointDocumentsChronology"),
+    FDR_REPORTS("fdrDocumentsReports"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT("fdrDocumentsAndFdrBundleApplicant"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS("fdrDocumentsAndFdrBundleApplicantPositionStatements"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS("fdrDocumentsAndFdrBundleApplicantWithoutPrejudiceOffers"),
@@ -313,6 +319,7 @@ public enum DocumentCategory {
     INTERVENER_DOCUMENTS_INTERVENER_4_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener4ConsentOrdersOverflow"),
 
     UNCATEGORISED(null);
+
 
     private final String documentCategoryId;
 

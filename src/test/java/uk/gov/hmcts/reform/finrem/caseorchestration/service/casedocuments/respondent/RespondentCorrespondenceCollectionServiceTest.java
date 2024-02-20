@@ -54,7 +54,7 @@ public class RespondentCorrespondenceCollectionServiceTest extends Correspondenc
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OFFERS),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OFFERS, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.RESPONDENT_DOCUMENTS_OPEN_OFFERS)
         );
 
