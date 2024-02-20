@@ -52,6 +52,6 @@ public class IntervenerTwoExpertEvidenceHandlerTest extends ExpertEvidenceHandle
 
     @Override
     protected DocumentCategory getValuationReportCategory() {
-        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_FAMILY_HOME_VALUATION;
+        return DocumentCategory.REPORTS;
     }
 }

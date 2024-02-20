@@ -46,12 +46,6 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
         return DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS;
     }
 
-
-    @Override
-    protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
-    }
-
     @Override
     protected DocumentCategory getDefaultPartyCategory() {
         return DocumentCategory.APPLICANT_DOCUMENTS;
@@ -61,4 +55,10 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     protected DocumentCategory getPreHearingDraftOrderDocumentCategory() {
         return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
     }
+
+    @Override
+    protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
+    }
+
 }

@@ -84,6 +84,10 @@ public enum EventType {
     MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
     UPDATE_CONTACT_DETAILS("FR_updateContactDetails"),
 
+    HIDE_CASE("FR_hideCase"),
+
+    UNHIDE_CASE("FR_unhideCase"),
+
     @JsonEnumDefaultValue
     NONE("");
 
