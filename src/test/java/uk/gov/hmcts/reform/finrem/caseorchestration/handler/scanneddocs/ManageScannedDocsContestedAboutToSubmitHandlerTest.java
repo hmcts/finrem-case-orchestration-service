@@ -27,8 +27,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDo
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantOtherDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentQuestionnairesAnswersHandler;
 
 import java.time.LocalDateTime;
@@ -58,7 +60,8 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerTest {
         List<DocumentHandler> documentHandlers = List.of(
             new RespondentChronologiesStatementHandler(featureToggleService),
             new ApplicantOtherDocumentsHandler(featureToggleService),
-            new FdrDocumentsHandler(featureToggleService),
+            new FdrDocumentsHandler(featureToggleService, new ApplicantFdrDocumentCategoriser(),
+                new RespondentFdrDocumentCategoriser()),
             new RespondentQuestionnairesAnswersHandler(featureToggleService),
             new ApplicantChronologiesStatementHandler(featureToggleService),
             new CaseDocumentsHandler(featureToggleService)
