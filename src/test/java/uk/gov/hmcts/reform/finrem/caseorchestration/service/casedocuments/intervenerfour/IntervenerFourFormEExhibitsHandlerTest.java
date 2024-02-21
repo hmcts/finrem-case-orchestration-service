@@ -53,7 +53,7 @@ public class IntervenerFourFormEExhibitsHandlerTest extends BaseManageDocumentsH
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.APPLICANT_FORM_E),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.APPLICANT_FORM_E, CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_FORM_E)
         );
     }

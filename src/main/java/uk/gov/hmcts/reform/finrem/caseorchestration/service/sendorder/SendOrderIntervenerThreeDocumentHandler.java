@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
@@ -23,16 +22,13 @@ import java.util.Optional;
 public class SendOrderIntervenerThreeDocumentHandler extends SendOrderPartyDocumentHandler {
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final NotificationService notificationService;
-    private final DocumentHelper documentHelper;
 
     public SendOrderIntervenerThreeDocumentHandler(ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
-                                                   NotificationService notificationService,
-                                                   DocumentHelper documentHelper) {
+                                                   NotificationService notificationService) {
 
         super(CaseRole.INTVR_SOLICITOR_3.getCcdCode());
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.notificationService = notificationService;
-        this.documentHelper = documentHelper;
     }
 
     @Override
@@ -84,11 +80,10 @@ public class SendOrderIntervenerThreeDocumentHandler extends SendOrderPartyDocum
     }
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
-        List<ApprovedOrderCollection> orderCollectionCopy = documentHelper.deepCopyArray(orderCollection,
-            new TypeReference<List<ApprovedOrderCollection>>() {});
-        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getOrderWrapper().getIntv3OrderCollections())
-            .orElse(new ArrayList<>());
-        orders.add(getConsolidateCollection(orderCollectionCopy));
+        List<ApprovedOrderCollection> newOrderCollection = new ArrayList<>(orderCollection);
+        List<ApprovedOrderConsolidateCollection> orders
+            = getPartyConsolidateCollection(caseData.getOrderWrapper().getIntv3OrderCollections());
+        orders.add(getConsolidateCollection(newOrderCollection));
         orders.sort((m1, m2) -> m2.getValue().getOrderReceivedAt().compareTo(m1.getValue().getOrderReceivedAt()));
         caseData.getOrderWrapper().setIntv3OrderCollections(orders);
         caseData.getOrderWrapper().setIntv3OrderCollection(null);

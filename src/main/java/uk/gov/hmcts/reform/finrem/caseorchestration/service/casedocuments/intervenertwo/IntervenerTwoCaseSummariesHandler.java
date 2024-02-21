@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -19,12 +20,10 @@ public class IntervenerTwoCaseSummariesHandler extends CaseSummariesHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
-            case POSITION_STATEMENT:
+            case POSITION_STATEMENT_SKELETON_ARGUMENT:
                 return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_POSITION_STATEMENT;
-            case SKELETON_ARGUMENT:
-                return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_SKELETON_ARGUMENT;
             case CASE_SUMMARY:
                 return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_CASE_SUMMARY;
             default:

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -28,7 +29,23 @@ public class ConfidentialDocumentsHandler extends DocumentHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
-        return DocumentCategory.CONFIDENTIAL_DOCUMENTS;
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
+
+        switch (caseDocumentParty) {
+            case APPLICANT:
+                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_APPLICANT;
+            case RESPONDENT:
+                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_RESPONDENT;
+            case INTERVENER_ONE:
+                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_1;
+            case INTERVENER_TWO:
+                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_2;
+            case INTERVENER_THREE:
+                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_3;
+            case INTERVENER_FOUR:
+                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_4;
+            default:
+                return DocumentCategory.CONFIDENTIAL_DOCUMENTS;
+        }
     }
 }

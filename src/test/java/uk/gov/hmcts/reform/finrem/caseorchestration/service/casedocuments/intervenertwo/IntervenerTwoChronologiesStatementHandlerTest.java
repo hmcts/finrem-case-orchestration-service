@@ -58,22 +58,22 @@ public class IntervenerTwoChronologiesStatementHandlerTest extends BaseManageDoc
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_OF_ISSUES),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_OF_ISSUES, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_CONCISE_STATEMENT_OF_ISSUES)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CHRONOLOGY),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CHRONOLOGY, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_CHRONOLOGY)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_FORM_G)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.UNCATEGORISED)
         );
     }

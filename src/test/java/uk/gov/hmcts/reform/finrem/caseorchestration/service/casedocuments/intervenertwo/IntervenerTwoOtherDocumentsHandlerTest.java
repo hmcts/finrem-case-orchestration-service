@@ -60,49 +60,61 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_MISCELLANEOUS_OR_OTHER)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
+
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES,
+                CaseDocumentParty.INTERVENER_TWO),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS,
+                CaseDocumentParty.INTERVENER_TWO),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN,
+                CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_PENSION_PLAN)
         );
 
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE,
+                CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_CERTIFICATES_OF_SERVICE)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_ES1)
         );
 
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS),
-            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2_WITHOUT_PREJUDICE_OFFERS)
-        );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT),
-            is(DocumentCategory.REPORTS_PENSION_REPORTS)
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT,
+                CaseDocumentParty.INTERVENER_TWO),
+            is(DocumentCategory.REPORTS)
         );
     }
 }

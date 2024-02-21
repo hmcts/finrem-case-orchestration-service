@@ -55,17 +55,17 @@ public class IntervenerTwoStatementsExhibitsHandlerTest extends BaseManageDocume
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_AFFIDAVIT),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_AFFIDAVIT, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_S25_STATEMENT)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_WITNESS_STATEMENTS)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.UNCATEGORISED)
         );
     }
