@@ -124,6 +124,9 @@
       "natureOfApplication7": "test",
       "natureOfApplication3a": "test",
       "natureOfApplication3b": "test",
+      "hearing_midlandsFRCList": "nottingham",
+      "hearing_regionList": "midlands",
+      "hearing_nottinghamCourtList": "FR_s_NottinghamList_6",
       "divorceUploadEvidence1": {
         "document_url": "http://dm-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
