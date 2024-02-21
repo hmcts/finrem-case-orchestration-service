@@ -52,7 +52,7 @@ public class IntervenerOneFormsHHandlerTest extends FormsHHandlerTest {
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_H),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_H, CaseDocumentParty.INTERVENER_ONE),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260)
         );
     }

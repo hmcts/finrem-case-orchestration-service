@@ -59,7 +59,7 @@ public class IntervenerThreeCorrespondenceHandlerTest extends CorrespondenceHand
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT, CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3)
         );
     }

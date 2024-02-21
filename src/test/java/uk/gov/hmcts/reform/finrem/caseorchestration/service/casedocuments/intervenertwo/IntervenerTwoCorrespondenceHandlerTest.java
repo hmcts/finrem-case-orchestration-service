@@ -24,7 +24,7 @@ public class IntervenerTwoCorrespondenceHandlerTest extends CorrespondenceHandle
     @InjectMocks
     IntervenerTwoCorrespondenceHandler handler;
 
-   
+
 
     @Override
     public void setUpscreenUploadDocumentList() {
@@ -62,7 +62,7 @@ public class IntervenerTwoCorrespondenceHandlerTest extends CorrespondenceHandle
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2)
         );
     }

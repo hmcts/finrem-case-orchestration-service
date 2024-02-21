@@ -59,7 +59,7 @@ public class IntervenerFourCorrespondenceHandlerTest extends CorrespondenceHandl
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT, CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4)
         );
     }

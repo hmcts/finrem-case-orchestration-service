@@ -61,7 +61,7 @@ public class IntervenerOneOtherDocumentsHandlerTest extends BaseManageDocumentsH
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_ONE),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_OTHER)
         );
 

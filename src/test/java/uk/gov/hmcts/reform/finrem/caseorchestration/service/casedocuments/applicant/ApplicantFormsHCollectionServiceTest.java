@@ -52,7 +52,7 @@ public class ApplicantFormsHCollectionServiceTest extends FormsHHandlerTest {
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_H),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260)
         );
     }

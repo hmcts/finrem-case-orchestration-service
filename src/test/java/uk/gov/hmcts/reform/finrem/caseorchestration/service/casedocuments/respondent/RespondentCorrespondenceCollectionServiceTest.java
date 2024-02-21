@@ -59,7 +59,7 @@ public class RespondentCorrespondenceCollectionServiceTest extends Correspondenc
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT)
         );
     }
