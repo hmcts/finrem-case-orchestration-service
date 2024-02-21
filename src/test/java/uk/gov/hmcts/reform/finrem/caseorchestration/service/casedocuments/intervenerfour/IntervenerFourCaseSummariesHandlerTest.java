@@ -27,9 +27,7 @@ public class IntervenerFourCaseSummariesHandlerTest extends CaseSummariesHandler
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT,
-            CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.SKELETON_ARGUMENT,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,
             CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.INTERVENER_FOUR, YesOrNo.NO, YesOrNo.NO, null));
@@ -43,7 +41,7 @@ public class IntervenerFourCaseSummariesHandlerTest extends CaseSummariesHandler
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(3));
+            hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -57,17 +55,13 @@ public class IntervenerFourCaseSummariesHandlerTest extends CaseSummariesHandler
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,
+                CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_POSITION_STATEMENT)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.SKELETON_ARGUMENT),
-            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_SKELETON_ARGUMENT)
-        );
-
-        assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CASE_SUMMARY, CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_CASE_SUMMARY)
         );
     }

@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerFourDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerOneDocumentHandler;
@@ -87,6 +88,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private NotificationService notificationService;
     @Mock
     private OrderDateService dateService;
+    @Mock
+    private SendOrdersCategoriser sendOrdersCategoriser;
 
     @BeforeEach
     public void setUpTest() {
@@ -95,13 +98,15 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             genericDocumentService,
             documentHelper,
             List.of(
-                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
-                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
+                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    caseDataService),
+                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    caseDataService),
                 new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService),
                 new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService),
                 new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService),
                 new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService)),
-            dateService);
+            dateService, sendOrdersCategoriser);
     }
 
     @Test
@@ -403,14 +408,14 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         String previousOrderDocumentFilename = "PreviousOrder.pdf";
         data.setPartiesOnCase(getParties());
         ApproveOrder additionalHearingOrder = ApproveOrder.builder().orderReceivedAt(
-            LocalDateTime.of(LocalDate.of(2019, 12, 31),
-            LocalTime.of(6, 30, 45)))
+                LocalDateTime.of(LocalDate.of(2019, 12, 31),
+                    LocalTime.of(6, 30, 45)))
             .caseDocument(caseDocument(additionalHearingDocumentUrl,
-                                       additionalHearingDocumentFilename,
-                              additionalHearingDocumentUrl + "/binary"))
+                additionalHearingDocumentFilename,
+                additionalHearingDocumentUrl + "/binary"))
             .build();
         ApproveOrder previousOrder = ApproveOrder.builder().orderReceivedAt(LocalDateTime.now())
-            .caseDocument(caseDocument(previousOrderDocumentUrl, previousOrderDocumentFilename, previousOrderDocumentUrl + "/binary")).build();
+            .build();
         ApproveOrdersHolder approveOrdersHolder = ApproveOrdersHolder.builder().orderReceivedAt(LocalDateTime.now())
             .approveOrders(of(ApprovedOrderCollection.builder().value(additionalHearingOrder).build())
             ).build();
@@ -438,12 +443,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.hasAnotherHearing(any(FinremCaseData.class))).thenReturn(true);
         when(documentHelper.getLatestAdditionalHearingDocument(any(FinremCaseData.class)))
-                .thenReturn(Optional.of(Optional.of(caseDocument(additionalHearingDocumentUrl,
-                            additionalHearingDocumentFilename,
-                            additionalHearingDocumentUrl + "/binary"))
+            .thenReturn(Optional.of(Optional.of(caseDocument(additionalHearingDocumentUrl,
+                    additionalHearingDocumentFilename,
+                    additionalHearingDocumentUrl + "/binary"))
                 .orElse(null)));
         when(genericDocumentService.stampDocument(
-                any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
+            any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
@@ -452,16 +457,16 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
-        assertEquals(3, caseData.getOrderWrapper().getIntv1OrderCollections().size());
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().size(), 2);
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), "app_docs.pdf");
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(1)
-                .getValue().getCaseDocument().getDocumentFilename(), "contestedOrderApprovedCoverLetter.pdf");
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(1).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), "AdditionalHearingDocument.pdf");
-        assertEquals(caseData.getOrderWrapper().getIntv1OrderCollections().get(2).getValue().getApproveOrders().get(0)
-                .getValue().getCaseDocument().getDocumentFilename(), "PreviousOrder.pdf");
+        assertEquals(2, caseData.getOrderWrapper().getIntv1OrderCollections().size());
+        assertEquals(2, caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().size());
+        assertEquals("app_docs.pdf", caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(0)
+            .getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("contestedOrderApprovedCoverLetter.pdf",
+            caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(1)
+            .getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("AdditionalHearingDocument.pdf",
+            caseData.getOrderWrapper().getIntv1OrderCollections().get(1).getValue().getApproveOrders().get(0)
+            .getValue().getCaseDocument().getDocumentFilename());
     }
 
     private DynamicMultiSelectList getParties() {

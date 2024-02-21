@@ -121,15 +121,53 @@ public abstract class SendOrderPartyDocumentHandler {
 
     protected boolean shouldAddDocumentToOrderColl(CaseDocument document,
                                                    List<ApprovedOrderConsolidateCollection> orderCollForRole) {
-        List<ApprovedOrderConsolidateCollection> existingCollection = Optional.ofNullable(orderCollForRole)
-                .orElse(new ArrayList<>());
+        List<ApprovedOrderConsolidateCollection> existingCollection
+            = Optional.ofNullable(orderCollForRole).orElse(new ArrayList<>());
         if (existingCollection.isEmpty()) {
             return true;
         }
-        return existingCollection.stream().noneMatch(doc -> doc.getValue().getApproveOrders().stream().anyMatch(order ->
-                order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
-                        && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl())
-        ));
+        return existingCollection.stream().noneMatch(doc -> checkIfDocumentAlreadyInCollectionElement(document, doc));
+    }
+
+    private boolean checkIfDocumentAlreadyInCollectionElement(CaseDocument document, ApprovedOrderConsolidateCollection doc) {
+        return doc.getValue().getApproveOrders().stream().anyMatch(order ->
+            isAdditionalDocumentAlreadyInCollection(document, order)
+        );
+    }
+
+    private  boolean isAdditionalDocumentAlreadyInCollection(CaseDocument document, ApprovedOrderCollection order) {
+        if (order.getValue() != null && order.getValue().getCaseDocument() != null) {
+            return order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
+                && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl());
+        }
+        return false;
+    }
+
+
+    protected List<ApprovedOrderConsolidateCollection> getPartyConsolidateCollection(List<ApprovedOrderConsolidateCollection> list) {
+        List<ApprovedOrderConsolidateCollection> approvedOrderConsolidateCollections = Optional.ofNullable(list).orElse(new ArrayList<>());
+        List<ApprovedOrderConsolidateCollection> returnList = new ArrayList<>();
+
+        approvedOrderConsolidateCollections.forEach(orders -> {
+            ApproveOrdersHolder value = orders.getValue();
+            List<ApprovedOrderCollection> approveOrders = value.getApproveOrders();
+            List<ApprovedOrderCollection> orderCollections = new ArrayList<>();
+            if (approveOrders != null) {
+                orderCollections
+                    = approveOrders.stream().filter(doc -> doc.getValue().getCaseDocument() != null).toList();
+            }
+
+            if (!orderCollections.isEmpty()) {
+                returnList.add(getConsolidateCollection(value, orderCollections));
+            }
+        });
+        return returnList;
+    }
+
+    private ApprovedOrderConsolidateCollection getConsolidateCollection(ApproveOrdersHolder value,
+                                                                          List<ApprovedOrderCollection> orderCollection) {
+        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
+            .approveOrders(orderCollection).orderReceivedAt(value.getOrderReceivedAt()).build()).build();
     }
 
     protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {

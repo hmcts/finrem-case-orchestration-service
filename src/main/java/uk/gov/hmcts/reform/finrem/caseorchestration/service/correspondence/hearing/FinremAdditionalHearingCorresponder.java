@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -31,8 +32,19 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
         List<AdditionalHearingDocumentCollection> additionalHearingDocuments = caseDetails.getData().getAdditionalHearingDocuments();
 
         if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
+            Collections.sort(additionalHearingDocuments, (o1, o2) -> {
+                if (o1.getValue() == null || o2.getValue() == null
+                    || o1.getValue().getAdditionalHearingDocumentDate() == null
+                    || o2.getValue().getAdditionalHearingDocumentDate() == null) {
+                    return 1;
+                } else {
+                    return o2.getValue().getAdditionalHearingDocumentDate()
+                        .compareTo(o1.getValue().getAdditionalHearingDocumentDate());
+                }
+            });
+
             AdditionalHearingDocumentCollection additionalHearingDocumentCollection =
-                additionalHearingDocuments.get(additionalHearingDocuments.size() - 1);
+                additionalHearingDocuments.get(0);
             documents.add(additionalHearingDocumentCollection.getValue().getDocument());
         }
 

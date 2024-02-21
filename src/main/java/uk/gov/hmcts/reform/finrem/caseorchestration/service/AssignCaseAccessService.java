@@ -31,7 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.APPLICATION_SCOPED_CACHE_MANAGER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.USER_ROLES_CACHE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
@@ -217,7 +217,7 @@ public class AssignCaseAccessService {
         return allRoleAssignments.stream().anyMatch(isBarristerRepresentingOpposingLitigant);
     }
 
-    @Cacheable(cacheManager = REQUEST_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
+    @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
     public CaseAssignmentUserRolesResource getUserRoles(String caseId) {
         return caseDataApi.getUserRoles(
             systemUserService.getSysUserToken(),

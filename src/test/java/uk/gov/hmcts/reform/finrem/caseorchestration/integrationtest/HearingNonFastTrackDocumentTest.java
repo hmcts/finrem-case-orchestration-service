@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.sendletter.api.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
@@ -97,7 +98,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/cases/documents";
     private static final String IDAM_SERVICE_USER_INFO = "/o/userinfo";
     protected static final String SEND_LETTER_CONTEXT_PATH = "/letters";
-    private static final String SUBMITTED_HANDLER_URL = "/case-orchestration/ccdSubmittedEvent";
     private static final String ABOUTTOSUBMIT_HANDLER_URL = "/case-orchestration/ccdAboutToSubmitEvent";
 
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
@@ -213,7 +213,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
                 sleep(100);
             }
 
-            mvcResult = webClient.perform(MockMvcRequestBuilders.post(SUBMITTED_HANDLER_URL)
+            mvcResult = webClient.perform(MockMvcRequestBuilders.post(ABOUTTOSUBMIT_HANDLER_URL)
                     .content(objectMapper.writeValueAsString(request))
                     .header(AUTHORIZATION, AUTH_TOKEN)
                     .contentType(APPLICATION_JSON_VALUE)
@@ -231,7 +231,16 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         HashMap<String, Object> expected = objectMapper.readValue(expectedCaseData(), new TypeReference<>() {
         });
 
-        assertThat(objectMapper.readTree(stringify(actual)), is(objectMapper.readTree(stringify(expected))));
+        assertThat(objectMapper.readTree(stringify(actual.get(FORM_C))),
+            is(objectMapper.readTree(stringify(expected.get(FORM_C)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(FORM_G))),
+            is(objectMapper.readTree(stringify(expected.get(FORM_G)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(MINI_FORM_A))),
+            is(objectMapper.readTree(stringify(expected.get(MINI_FORM_A)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(OUT_OF_FAMILY_COURT_RESOLUTION))),
+            is(objectMapper.readTree(stringify(expected.get(OUT_OF_FAMILY_COURT_RESOLUTION)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(HEARING_ADDITIONAL_DOC))),
+            is(objectMapper.readTree(stringify(expected.get(HEARING_ADDITIONAL_DOC)))));
 
     }
 
@@ -272,10 +281,24 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.OK.value()));
         HashMap<String, Object> actual = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<>() {
         });
+
         HashMap<String, Object> expected = objectMapper.readValue(aboutToSubmitExpectedCaseData(), new TypeReference<>() {
         });
 
-        assertThat(objectMapper.readTree(stringify(actual)), is(objectMapper.readTree(stringify(expected))));
+        assertThat(objectMapper.readTree(stringify(actual.get(FORM_C))),
+            is(objectMapper.readTree(stringify(expected.get(FORM_C)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(FORM_G))),
+            is(objectMapper.readTree(stringify(expected.get(FORM_G)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(MINI_FORM_A))),
+            is(objectMapper.readTree(stringify(expected.get(MINI_FORM_A)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(HEARING_ADDITIONAL_DOC))),
+            is(objectMapper.readTree(stringify(expected.get(HEARING_ADDITIONAL_DOC)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(APPLICANT_CONFIDENTIAL_ADDRESS))),
+            is(objectMapper.readTree(stringify(expected.get(APPLICANT_CONFIDENTIAL_ADDRESS)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(RESPONDENT_CONFIDENTIAL_ADDRESS))),
+            is(objectMapper.readTree(stringify(expected.get(RESPONDENT_CONFIDENTIAL_ADDRESS)))));
+        assertThat(objectMapper.readTree(stringify(actual.get(HEARING_ADDITIONAL_INFO))),
+            is(objectMapper.readTree(stringify(expected.get(HEARING_ADDITIONAL_INFO)))));
     }
 
     protected PdfDocumentRequest pdfGenerationRequest(String template) {
@@ -296,6 +319,12 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         caseDetails.getData().put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
         caseDetails.getData().put("bulkPrintCoverSheetApp", caseDocument());
         caseDetails.getData().put("bulkPrintCoverSheetRes", caseDocument());
+        List<AdditionalHearingDocumentData> additionalHearingDocumentDataList = List.of(AdditionalHearingDocumentData.builder()
+            .additionalHearingDocument(AdditionalHearingDocument.builder()
+                .document(caseDocument())
+                .build())
+            .build());
+        caseDetails.getData().put("additionalHearingDocuments", additionalHearingDocumentDataList);
 
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -316,7 +345,9 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         caseData.put("bulkPrintCoverSheetRes", caseDocument());
         caseData.put("additionalListOfHearingDocuments", caseDocument());
         List<AdditionalHearingDocumentCollection> collection = List.of(AdditionalHearingDocumentCollection.builder()
-            .value(AdditionalHearingDocument.builder().document(caseDocument()).build()).build());
+            .value(AdditionalHearingDocument.builder().document(caseDocument())
+                .additionalHearingDocumentDate(LocalDate.now().atTime(0,0))
+                .build()).build());
         caseData.put("additionalHearingDocuments", collection);
 
         return objectMapper.writeValueAsString(

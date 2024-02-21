@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -96,9 +97,10 @@ public class SendOrderApplicantDocumentHandler extends SendOrderPartyDocumentHan
     }
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
-        List<ApprovedOrderConsolidateCollection> orders = Optional.ofNullable(caseData.getOrderWrapper().getAppOrderCollections())
-            .orElse(new ArrayList<>());
-        orders.add(getConsolidateCollection(orderCollection));
+        List<ApprovedOrderCollection> newOrderCollection = new ArrayList<>(orderCollection);
+        List<ApprovedOrderConsolidateCollection> orders
+            = getPartyConsolidateCollection(caseData.getOrderWrapper().getAppOrderCollections());
+        orders.add(getConsolidateCollection(newOrderCollection));
         orders.sort((m1, m2) -> m2.getValue().getOrderReceivedAt().compareTo(m1.getValue().getOrderReceivedAt()));
         caseData.getOrderWrapper().setAppOrderCollections(orders);
         caseData.getOrderWrapper().setAppOrderCollection(null);

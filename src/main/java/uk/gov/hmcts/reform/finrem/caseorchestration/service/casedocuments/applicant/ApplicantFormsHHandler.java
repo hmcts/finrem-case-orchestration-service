@@ -18,7 +18,7 @@ public class ApplicantFormsHHandler extends FormsHHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_COSTS_ESTIMATES_OR_FORM_H_OR_FORM_H1;
     }
 }

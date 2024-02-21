@@ -25,9 +25,7 @@ public class CaseDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT,
-            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.SKELETON_ARGUMENT,
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,
             CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
@@ -41,7 +39,7 @@ public class CaseDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(3));
+            hasSize(2));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -55,32 +53,38 @@ public class CaseDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT),
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,
+                CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.CASE_DOCUMENTS)
         );
 
         assertThat(
-            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS),
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS,
+                CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_ATTENDANCE_SHEETS)
         );
 
         assertThat(
-            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.JUDICIAL_NOTES),
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.JUDICIAL_NOTES,
+                CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_JUDICIAL_NOTES)
         );
 
         assertThat(
-            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_SUMMONS),
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_SUMMONS,
+                CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.HEARING_DOCUMENTS_WITNESS_SUMMONS)
         );
 
         assertThat(
-            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.JUDGMENT),
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.JUDGMENT,
+                CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.JUDGMENT_OR_TRANSCRIPT)
         );
 
         assertThat(
-            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.TRANSCRIPT),
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.TRANSCRIPT,
+                CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.JUDGMENT_OR_TRANSCRIPT)
         );
 

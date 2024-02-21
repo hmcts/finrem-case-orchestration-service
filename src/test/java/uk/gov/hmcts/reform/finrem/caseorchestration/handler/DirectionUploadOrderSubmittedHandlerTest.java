@@ -10,13 +10,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +31,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ListForHearingContestedSubmittedHandlerTest {
+class DirectionUploadOrderSubmittedHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     @Mock
@@ -37,40 +39,36 @@ class ListForHearingContestedSubmittedHandlerTest {
     @Mock
     private AdditionalHearingDocumentService additionalHearingDocumentService;
 
-    @Mock
-    private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
-
     @InjectMocks
-    private ListForHearingContestedSubmittedHandler handler;
+    private DirectionUploadOrderSubmittedHandler handler;
+
 
     @Test
-    void givenACcdCallbackContestedCase_WhenASubmittedEvent_thenCanHandle() {
-        assertThat(handler.canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                is(true));
+    void givenACcdCallbackContestedCase_WhenASubmitEventDirectionUploadOrder_thenHandlerCanHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER),
+            is(true));
     }
 
     @Test
-    void givenACcdCallbackConsentedCase_WhenCaseTypeIsConsented_thenCanNotHandle() {
-        assertThat(handler.canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
-                is(false));
+    void givenACcdCallbackConsentedCase_WhenCaseTypeIsConsented_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.DIRECTION_UPLOAD_ORDER),
+            is(false));
     }
 
     @Test
-    void givenACcdCallbackConsentedCase_WhenEventIsClose_thenCanNotHandle() {
-        assertThat(handler.canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CLOSE),
-                is(false));
+    void givenACcdCallbackConsentedCase_WhenASubmitEventListForHearing_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.DIRECTION_UPLOAD_ORDER),
+            is(false));
     }
 
     @Test
-    void givenACcdCallbackContestedCase_WhenAAboutToSubmitEvent_thenCanNotHandle() {
-        assertThat(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                is(false));
-    }
-
-    @Test
-    void givenACcdCallbackContestedCase_WhenAAboutToStartEvent_thenCanNotHandle() {
-        assertThat(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                is(false));
+    void givenACcdCallbackConsentedCase_WhenEventIsClose_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CLOSE),
+            is(false));
     }
 
     @Test
@@ -111,8 +109,10 @@ class ListForHearingContestedSubmittedHandlerTest {
 
     private FinremCallbackRequest buildCallbackRequest() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L)
-            .data(FinremCaseData.builder().partiesOnCase(getParties()).build()).build();
-        return FinremCallbackRequest.builder().eventType(EventType.LIST_FOR_HEARING)
+            .data(FinremCaseData.builder().directionDetailsCollection(of(DirectionDetailCollection.builder()
+                .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build()))
+                .partiesOnCase(getParties()).build()).build();
+        return FinremCallbackRequest.builder().eventType(EventType.SEND_ORDER)
             .caseDetails(caseDetails).build();
     }
 

@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PdfStampingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerFourDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerOneDocumentHandler;
@@ -89,6 +90,8 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
     private PdfStampingService pdfStampingService;
     @Mock
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @Mock
+    private SendOrdersCategoriser sendOrdersCategoriser;
 
     @BeforeEach
     public void setUpTest() {
@@ -96,12 +99,15 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
             finremCaseDetailsMapper,
             generalOrderService,
             genericDocumentService, consentOrderApprovedDocumentService, consentOrderNotApprovedDocumentService, List.of(
-                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
-                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService, caseDataService),
+                new SendOrderApplicantDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    caseDataService),
+                new SendOrderRespondentDocumentHandler(consentOrderApprovedDocumentService, notificationService,
+                    caseDataService),
                 new SendOrderIntervenerOneDocumentHandler(consentOrderApprovedDocumentService, notificationService),
                 new SendOrderIntervenerTwoDocumentHandler(consentOrderApprovedDocumentService, notificationService),
                 new SendOrderIntervenerThreeDocumentHandler(consentOrderApprovedDocumentService, notificationService),
-                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService))
+                new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService)),
+            sendOrdersCategoriser
         );
     }
 

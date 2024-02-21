@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-    <suppress base="true" until="2024-01-31">
+    <suppress base="true" until="2024-03-31">
         <notes><![CDATA[
    FP per issue #5779
    ]]></notes>
@@ -9,3 +9,4 @@
         <cve>CVE-2023-35116</cve>
     </suppress>
 </suppressions>
+
