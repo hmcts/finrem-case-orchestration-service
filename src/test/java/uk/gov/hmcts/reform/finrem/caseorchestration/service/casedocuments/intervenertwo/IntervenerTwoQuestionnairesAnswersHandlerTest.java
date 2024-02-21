@@ -56,17 +56,17 @@ public class IntervenerTwoQuestionnairesAnswersHandlerTest extends BaseManageDoc
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.QUESTIONNAIRE),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.QUESTIONNAIRE, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_QUESTIONNAIRES)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.REPLY_TO_QUESTIONNAIRE),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.REPLY_TO_QUESTIONNAIRE, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_REPLIES_TO_QUESTIONNAIRE)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.UNCATEGORISED)
         );
     }

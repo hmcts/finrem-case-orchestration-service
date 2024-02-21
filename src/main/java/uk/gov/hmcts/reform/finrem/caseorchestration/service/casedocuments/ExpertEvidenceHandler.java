@@ -25,7 +25,7 @@ public abstract class ExpertEvidenceHandler extends PartyDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         if (CaseDocumentType.VALUATION_REPORT.equals(caseDocumentType)
             || CaseDocumentType.EXPERT_EVIDENCE.equals(caseDocumentType)) {
             return DocumentCategory.REPORTS;
