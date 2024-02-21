@@ -20,7 +20,7 @@ public class IntervenerFourFormsHHandler extends FormsHHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260;
     }
 }

@@ -14,7 +14,7 @@ public class ApplicantFdrDocumentCategoriser extends PartyFdrDocumentCategoriser
 
     @Override
     protected DocumentCategory getHearingDraftOrderDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_PRE_HEARING_DRAFT_ORDER;
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_DRAFT_ORDER;
     }
 
 
