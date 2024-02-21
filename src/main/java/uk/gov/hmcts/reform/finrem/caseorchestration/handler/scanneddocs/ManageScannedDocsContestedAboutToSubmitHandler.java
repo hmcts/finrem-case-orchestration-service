@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Docume
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
@@ -170,10 +169,11 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
     }
 
     private void removeScannedDocumentFromCase(FinremCaseData caseData, String id) {
-        Optional<ScannedDocumentCollection> scannedDocument = caseData.getScannedDocuments().stream()
+        ScannedDocumentCollection scannedDocument = caseData.getScannedDocuments().stream()
             .filter(sdc -> sdc.getId().equals(id))
-            .findAny();
+            .findAny()
+            .orElseThrow(() -> new IllegalStateException(String.format("Scanned document %s not found", id)));
 
-        scannedDocument.ifPresent(sdc -> caseData.getScannedDocuments().remove(sdc));
+        caseData.getScannedDocuments().remove(scannedDocument);
     }
 }
