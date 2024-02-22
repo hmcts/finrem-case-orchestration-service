@@ -99,7 +99,7 @@ public class InterimHearingServiceTest {
     }
 
     @Test
-    public void given2Old2NewInterimHearing1UploadedDoc_whenAddHearingNotices_then3BulkprintDocs() {
+    public void given2Old2NewInterimHearing1UploadedDoc_whenAddHearingNotices_then2InterimHearingDocs() {
         FinremCaseDetails caseDetails = buildFinremCaseDetails(TWO_OLD_TWO_NEW_INTERIM_HEARING);
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
@@ -117,11 +117,11 @@ public class InterimHearingServiceTest {
         List<InterimHearingBulkPrintDocumentsData> interimHearingBulkPrintDocumentList =
             caseDetails.getData().getInterimWrapper().getInterimHearingDocuments();
 
-        assertEquals(3, interimHearingBulkPrintDocumentList.size());
+        assertEquals(2, interimHearingBulkPrintDocumentList.size());
     }
 
     @Test
-    public void given3NewInterimHearing1UploadedDoc_whenAddHearingNotices_then6BulkprintDocs() {
+    public void given3NewInterimHearing1UploadedDoc_whenAddHearingNotices_then3InterimHearingDocs() {
         FinremCaseDetails caseDetails = buildFinremCaseDetails(LEGACY_INTERIM_HEARING);
 
 
@@ -140,7 +140,7 @@ public class InterimHearingServiceTest {
         List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
             caseDetails.getData().getInterimWrapper().getInterimHearingDocuments();
 
-        assertEquals(6, bulkPrintDocumentsList.size());
+        assertEquals(3, bulkPrintDocumentsList.size());
     }
 
 
@@ -236,8 +236,8 @@ public class InterimHearingServiceTest {
 
         interimHearingService.addHearingNoticesToCase(caseDetails, AUTH_TOKEN);
 
-        assertThat(data.getIntv1HearingNoticesCollection().size(), is(3));
-        assertThat(data.getIntv2HearingNoticesCollection().size(), is(3));
+        assertThat(data.getIntv1HearingNoticesCollection().size(), is(2));
+        assertThat(data.getIntv2HearingNoticesCollection().size(), is(2));
         assertThat(data.getIntv3HearingNoticesCollection(), is(nullValue()));
         assertThat(data.getIntv4HearingNoticesCollection(), is(nullValue()));
     }
