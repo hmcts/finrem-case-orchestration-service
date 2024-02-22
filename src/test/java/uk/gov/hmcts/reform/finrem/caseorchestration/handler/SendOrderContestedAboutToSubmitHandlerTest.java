@@ -209,6 +209,57 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
+    void givenContestedCase_whenOrderAvailableButNoParty_thenHandlerHandleRequest_edgeCaseWhereGeneralOrderAvailableButNotDoc() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setPartiesOnCase(new DynamicMultiSelectList());
+
+        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build(), DynamicMultiSelectListElement.builder()
+                .code("app_docs.pdf")
+                .label("app_docs.pdf")
+                .build()))
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .build();
+
+        data.setOrdersToShare(selectedDocs);
+        data.setAdditionalDocument(caseDocument());
+        data.setOrderApprovedCoverLetter(caseDocument());
+        List<CaseDocument> caseDocuments = new ArrayList<>();
+        caseDocuments.add(caseDocument());
+
+        data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollectionWithoutDoc());
+
+
+        when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(caseDocuments);
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(caseDocument());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
+            = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+        assertNull(caseData.getPartiesOnCase().getValue());
+        assertEquals(1, caseData.getFinalOrderCollection().size());
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertNull(caseData.getOrderWrapper().getAppOrderCollection());
+        assertNull(caseData.getOrderWrapper().getRespOrderCollection());
+        assertNull(caseData.getAdditionalDocument());
+        verify(genericDocumentService).stampDocument(any(), any(), any(), any());
+        verify(documentHelper).getStampType(caseData);
+        verify(generalOrderService, never()).isSelectedOrderMatches(any(DynamicMultiSelectList.class), any(ContestedGeneralOrder.class));
+    }
+
+    @Test
     @SuppressWarnings("java:S5961")
     void givenContestedCase_whenOrderAvailableToShareWithParties_thenHandlerHandleRequest() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
@@ -493,6 +544,20 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .code(role)
             .label(role)
             .build();
+    }
+
+    private List<ContestedGeneralOrderCollection> getGeneralOrderCollectionWithoutDoc() {
+        ContestedGeneralOrder generalOrder = ContestedGeneralOrder
+            .builder()
+            .dateOfOrder(LocalDate.of(2002, 2, 5))
+            .judge("Moj")
+            .generalOrderText("general order")
+            .build();
+
+        ContestedGeneralOrderCollection collection = ContestedGeneralOrderCollection.builder().value(generalOrder).build();
+        List<ContestedGeneralOrderCollection> collections = new ArrayList<>();
+        collections.add(collection);
+        return collections;
     }
 
     private List<ContestedGeneralOrderCollection> getGeneralOrderCollection() {
