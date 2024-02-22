@@ -42,7 +42,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
     }
 
     @Override
-    public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
             case OTHER -> {
                 return getMiscellaneousOrOtherDocumentCategory();

@@ -56,20 +56,20 @@ public class ApplicantChronologiesStatementCollectionServiceTest extends BaseMan
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_OF_ISSUES),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_OF_ISSUES, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CONCISE_STATEMENT_OF_ISSUES)
         );
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CHRONOLOGY),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CHRONOLOGY)
         );
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.APPLICANT_DOCUMENTS_FORM_G)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.UNCATEGORISED)
         );
     }

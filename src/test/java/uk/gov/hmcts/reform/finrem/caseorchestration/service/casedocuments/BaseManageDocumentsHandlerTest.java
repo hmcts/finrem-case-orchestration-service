@@ -73,18 +73,6 @@ public abstract class BaseManageDocumentsHandlerTest<H extends DocumentHandler> 
         }
     }
 
-    private void assertAssignDocumentCategoryForDocumentCollection() {
-        if (featureToggleService.isCaseFileViewEnabled()) {
-            for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
-                assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), not(nullValue()));
-            }
-        } else {
-            for (UploadCaseDocumentCollection collection : getDocumentCollection()) {
-                assertThat(collection.getUploadCaseDocument().getCaseDocuments().getCategoryId(), nullValue());
-            }
-        }
-    }
-
     private void handleDocumentCollectionsCorrectly(Boolean cfvSwitch) {
 
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(cfvSwitch);

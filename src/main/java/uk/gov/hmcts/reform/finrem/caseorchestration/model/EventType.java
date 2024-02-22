@@ -85,6 +85,10 @@ public enum EventType {
 
     MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
 
+    HIDE_CASE("FR_hideCase"),
+
+    UNHIDE_CASE("FR_unhideCase"),
+
     @JsonEnumDefaultValue
     NONE("");
 

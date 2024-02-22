@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
@@ -27,8 +28,7 @@ public abstract class DocumentHandler {
         List<UploadCaseDocumentCollection> allManagedDocumentCollections);
 
     protected abstract DocumentCategory getDocumentCategoryFromDocumentType(
-        CaseDocumentType caseDocumentType
-    );
+        CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty);
 
     public void replaceManagedDocumentsInCollectionType(FinremCallbackRequest callbackRequest,
                                                         List<UploadCaseDocumentCollection> screenCollection,
@@ -72,7 +72,8 @@ public abstract class DocumentHandler {
                 CaseDocument caseDocument = uploadCaseDocumentCollection.getUploadCaseDocument()
                     .getCaseDocuments();
                 caseDocument.setCategoryId(getDocumentCategoryFromDocumentType(
-                        uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType()
+                        uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType(),
+                        uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentParty()
                     ).getDocumentCategoryId()
                 );
             }
