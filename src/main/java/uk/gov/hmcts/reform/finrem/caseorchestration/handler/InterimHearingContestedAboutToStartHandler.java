@@ -49,9 +49,6 @@ public class InterimHearingContestedAboutToStartHandler extends FinremCallbackHa
         Optional.ofNullable(
                 finremCaseData.getInterimWrapper().getInterimHearingsScreenField())
             .orElse(new ArrayList<>()).clear();
-        Optional.ofNullable(
-                finremCaseData.getInterimWrapper().getInterimHearingDocuments())
-            .orElse(new ArrayList<>()).clear();
 
         migrateLegacyFields(finremCaseData);
 

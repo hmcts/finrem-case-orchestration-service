@@ -191,31 +191,34 @@ public class InterimHearingService {
 
     @SuppressWarnings("java:S6204")
     private CaseDocumentsHolder prepareDocumentsForPrint(FinremCaseDetails caseDetails,
-                                                         List<InterimHearingCollection> interimHearingList,
+                                                         List<InterimHearingCollection> newInterimHearingList,
                                                          String authorisationToken) {
 
 
         String caseId = caseDetails.getId().toString();
         log.info("preparing for bulk print document for Case ID: {}", caseId);
-        List<CaseDocument> interimHearingNotices = prepareInterimHearingRequiredNoticeDocument(caseDetails,
-            interimHearingList, authorisationToken);
+        List<CaseDocument> newInterimHearingNotices = prepareInterimHearingRequiredNoticeDocument(caseDetails,
+            newInterimHearingList, authorisationToken);
 
         CaseDocumentsHolder caseDocumentsHolder = CaseDocumentsHolder.builder()
             .caseDocuments(new ArrayList<>())
             .bulkPrintDocuments(new ArrayList<>())
             .build();
-        caseDocumentsHolder.getCaseDocuments().addAll(interimHearingNotices);
+        caseDocumentsHolder.getCaseDocuments().addAll(newInterimHearingNotices);
 
-        List<BulkPrintDocument> documents = interimHearingNotices.stream()
+        List<BulkPrintDocument> documents = newInterimHearingNotices.stream()
             .map(documentHelper::mapToBulkPrintDocument).collect(Collectors.toList());
         caseDocumentsHolder.getBulkPrintDocuments().addAll(documents);
 
-        addUploadedDocumentsToBulkPrintList(caseId, interimHearingList, caseDocumentsHolder, authorisationToken);
+        addUploadedDocumentsToBulkPrintList(caseId, newInterimHearingList, caseDocumentsHolder, authorisationToken);
 
         List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = new ArrayList<>();
         bulkPrintDocumentsList.addAll(
             caseDocumentsHolder.getCaseDocuments().stream().map(this::loadBulkPrintDocument).toList());
-        caseDetails.getData().getInterimWrapper().setInterimHearingDocuments(bulkPrintDocumentsList);
+        if (caseDetails.getData().getInterimWrapper().getInterimHearingDocuments() == null) {
+            caseDetails.getData().getInterimWrapper().setInterimHearingDocuments(new ArrayList<>());
+        }
+        caseDetails.getData().getInterimWrapper().getInterimHearingDocuments().addAll(bulkPrintDocumentsList);
         return caseDocumentsHolder;
     }
 
@@ -255,10 +258,10 @@ public class InterimHearingService {
     }
 
     private List<CaseDocument> prepareInterimHearingRequiredNoticeDocument(FinremCaseDetails caseDetails,
-                                                                           List<InterimHearingCollection> interimHearingList,
+                                                                           List<InterimHearingCollection> newInterimHearingList,
                                                                            String authorisationToken) {
 
-        List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
+        List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(newInterimHearingList);
 
         return interimCaseData.stream()
             .map(interimHearingCaseData -> generateInterimHearingNotice(interimHearingCaseData, caseDetails, authorisationToken))
