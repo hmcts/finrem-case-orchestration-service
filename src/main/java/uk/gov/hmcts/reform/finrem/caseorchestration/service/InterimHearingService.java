@@ -241,7 +241,6 @@ public class InterimHearingService {
                 genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
             caseDocumentsHolder.getBulkPrintDocuments().add(
                 documentHelper.mapToBulkPrintDocument(additionalUploadedDocuments));
-            caseDocumentsHolder.getCaseDocuments().add(additionalUploadedDocuments);
         }
     }
 
