@@ -18,7 +18,7 @@ public class ApplicantStatementsExhibitsHandler extends StatementExhibitsHandler
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
             case STATEMENT_AFFIDAVIT -> {
                 return DocumentCategory.APPLICANT_DOCUMENTS_S25_STATEMENT;

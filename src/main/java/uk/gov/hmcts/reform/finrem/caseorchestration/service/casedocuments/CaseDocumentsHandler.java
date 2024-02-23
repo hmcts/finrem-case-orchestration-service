@@ -23,7 +23,7 @@ public class CaseDocumentsHandler extends PartyDocumentsHandler {
 
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
             case ATTENDANCE_SHEETS -> {
                 return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_ATTENDANCE_SHEETS;

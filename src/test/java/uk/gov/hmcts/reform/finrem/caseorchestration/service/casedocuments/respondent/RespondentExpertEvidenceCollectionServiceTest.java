@@ -53,6 +53,6 @@ public class RespondentExpertEvidenceCollectionServiceTest extends ExpertEvidenc
 
     @Override
     protected DocumentCategory getValuationReportCategory() {
-        return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_FAMILY_HOME_VALUATION;
+        return DocumentCategory.REPORTS;
     }
 }

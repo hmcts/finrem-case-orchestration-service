@@ -1,14 +1,19 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
-import org.junit.Test;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantFdrDocumentCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentFdrDocumentCategoriser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +21,15 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
+
+    @Mock
+    private ApplicantFdrDocumentCategoriser applicantFdrDocumentCategoriser;
+    @Mock
+    private RespondentFdrDocumentCategoriser respondentFdrDocumentCategoriser;
 
     @InjectMocks
     FdrDocumentsHandler handler;
@@ -26,10 +37,18 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
     private List<UploadCaseDocumentCollection> uploadDocumentList = new ArrayList<>();
 
+    @Before
+    public void setUpTest() {
+        when(applicantFdrDocumentCategoriser.getDocumentCategory(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS))
+            .thenReturn(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS);
+        when(respondentFdrDocumentCategoriser.getDocumentCategory(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS))
+            .thenReturn(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS);
+    }
+
     @Override
     public void setUpscreenUploadDocumentList() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            null, YesOrNo.NO, YesOrNo.YES, "Other Example"));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS,
+            CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.YES, "Other Example"));
 
     }
 
@@ -54,23 +73,17 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
+        when(applicantFdrDocumentCategoriser.getDocumentCategory(CaseDocumentType.OTHER))
+            .thenReturn(DocumentCategory.FDR_BUNDLE);
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
-            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE)
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.FDR_BUNDLE)
         );
+
+        handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS, CaseDocumentParty.RESPONDENT);
+        Mockito.verify(respondentFdrDocumentCategoriser).getDocumentCategory(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS);
+        handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS, CaseDocumentParty.APPLICANT);
+        Mockito.verify(applicantFdrDocumentCategoriser).getDocumentCategory(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS);
     }
 
-    @Test
-    public void shouldAddWithoutPrejudiceOffersToCollection() {
-        uploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS,
-            null, null, null, null));
-
-
-        List<UploadCaseDocumentCollection> alteredCollectionForType = handler.getAlteredCollectionForType(uploadDocumentList);
-
-        assertThat(alteredCollectionForType, hasSize(1));
-        assertThat(alteredCollectionForType.get(0).getUploadCaseDocument().getCaseDocumentType(), is(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS));
-        assertThat(alteredCollectionForType.get(0).getUploadCaseDocument().getCaseDocumentFdr(), is(YesOrNo.YES));
-        assertThat(alteredCollectionForType.get(0).getUploadCaseDocument().getCaseDocumentConfidentiality(), is(YesOrNo.NO));
-    }
 }

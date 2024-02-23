@@ -28,8 +28,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDo
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantOtherDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentQuestionnairesAnswersHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.validation.ManageDocumentsHandlerValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
@@ -59,6 +61,12 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     private ManageDocumentsHandlerValidator manageDocumentsHandlerValidator;
     @Mock
     private FeatureToggleService featureToggleService;
+
+    @Mock
+    private ApplicantFdrDocumentCategoriser applicantFdrDocumentCategoriser;
+    @Mock
+    private RespondentFdrDocumentCategoriser respondentFdrDocumentCategoriser;
+
     private ManageCaseDocumentsContestedAboutToSubmitHandler manageCaseDocumentsAboutToSubmitCaseHandler;
     private FinremCaseDetails caseDetails;
     private FinremCaseDetails caseDetailsBefore;
@@ -77,7 +85,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         ApplicantOtherDocumentsHandler applicantOtherDocumentsCollectionService =
             new ApplicantOtherDocumentsHandler(featureToggleService);
         FdrDocumentsHandler fdrDocumentsCollectionService =
-            new FdrDocumentsHandler(featureToggleService);
+            new FdrDocumentsHandler(featureToggleService, applicantFdrDocumentCategoriser, respondentFdrDocumentCategoriser);
         RespondentQuestionnairesAnswersHandler respondentQuestionnairesAnswersCollectionService =
             new RespondentQuestionnairesAnswersHandler(featureToggleService);
         ApplicantChronologiesStatementHandler applicantChronologiesStatementCollectionService =

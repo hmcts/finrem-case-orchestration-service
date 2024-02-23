@@ -42,7 +42,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
     }
 
     @Override
-    public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
             case OTHER -> {
                 return getMiscellaneousOrOtherDocumentCategory();
@@ -62,17 +62,14 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
             case ES2 -> {
                 return getHearingDocumentsCategoryES2();
             }
-            case MORTGAGE_CAPACITIES -> {
-                return getHearingDocumentsCategoryMortgageCapacities();
+            case MORTGAGE_CAPACITIES, HOUSING_PARTICULARS -> {
+                return getPartyDocumentsCategoryMortgageCapacities();
             }
             case WITHOUT_PREJUDICE_OFFERS -> {
                 return getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory();
             }
             case PENSION_REPORT -> {
-                return DocumentCategory.REPORTS_PENSION_REPORTS;
-            }
-            case HOUSING_PARTICULARS -> {
-                return getHouseParticularsDocumentCategory();
+                return DocumentCategory.REPORTS;
             }
             case PRE_HEARING_DRAFT_ORDER -> {
                 return getPreHearingDraftOrderDocumentCategory();
@@ -83,7 +80,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
         }
 
     }
-    
+
     protected abstract DocumentCategory getMiscellaneousOrOtherDocumentCategory();
 
     protected abstract DocumentCategory getPensionPlanDocumentCategory();
@@ -94,13 +91,11 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
 
     protected abstract DocumentCategory getHearingDocumentsCategoryES2();
 
-    protected abstract DocumentCategory getHearingDocumentsCategoryMortgageCapacities();
+    protected abstract DocumentCategory getPartyDocumentsCategoryMortgageCapacities();
 
     protected abstract DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory();
 
     protected abstract DocumentCategory getDefaultPartyCategory();
-
-    protected abstract DocumentCategory getHouseParticularsDocumentCategory();
 
     protected abstract DocumentCategory getPreHearingDraftOrderDocumentCategory();
 

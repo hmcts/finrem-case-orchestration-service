@@ -44,11 +44,11 @@ public class HearingBundleDocumentCategoriserTest {
         HearingUploadBundleHolder hearingUploadBundleHolder = finremCaseData.getFdrHearingBundleCollections().get(0).getValue();
         assertThat(hearingUploadBundleHolder.getHearingBundleDocuments().get(0).getValue()
             .getBundleDocuments().getCategoryId(), is(
-            DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE.getDocumentCategoryId()
+            DocumentCategory.FDR_BUNDLE.getDocumentCategoryId()
         ));
         assertThat(hearingUploadBundleHolder.getHearingBundleDocuments().get(1).getValue()
             .getBundleDocuments().getCategoryId(), is(
-            DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE.getDocumentCategoryId()
+            DocumentCategory.FDR_BUNDLE.getDocumentCategoryId()
         ));
 
 
