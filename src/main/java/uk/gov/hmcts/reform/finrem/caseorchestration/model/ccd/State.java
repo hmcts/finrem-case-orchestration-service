@@ -51,7 +51,8 @@ public enum State {
     AWAITING_JUDICIARY_RESPONSE("awaitingJudiciaryResponse"),
     CASE_WORKER_REVIEW("caseWorkerReview"),
     PAPER_CASE_ADDED("paperCaseAdded"),
-    READY_FOR_HEARING("readyForHearing");
+    READY_FOR_HEARING("readyForHearing"),
+    CASE_HIDDEN("caseHidden");
 
     private final String stateId;
 

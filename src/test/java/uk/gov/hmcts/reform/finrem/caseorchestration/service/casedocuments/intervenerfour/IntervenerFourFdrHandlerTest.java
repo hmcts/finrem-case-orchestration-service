@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.BaseManageDocumentsHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.IntervenerFourFdrHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +21,23 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class IntervenerFourFdrHandlerTest extends BaseManageDocumentsHandlerTest {
 
+    @Mock
+    IntervenerFourFdrDocumentCategoriser categoriser;
     @InjectMocks
     IntervenerFourFdrHandler collectionService;
 
+    @Override
+    public void setUp() {
+        super.setUp();
+        when(categoriser.getDocumentCategory(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS)).thenReturn(
+            DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_4_WITHOUT_PREJUDICE_OFFERS);
+        when(categoriser.getDocumentCategory(CaseDocumentType.TRIAL_BUNDLE)).thenReturn(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_4);
+    }
 
     @Test
     public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType() {
@@ -78,8 +88,12 @@ public class IntervenerFourFdrHandlerTest extends BaseManageDocumentsHandlerTest
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.TRIAL_BUNDLE, CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_4)
+        );
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS, CaseDocumentParty.INTERVENER_FOUR),
+            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_4_WITHOUT_PREJUDICE_OFFERS)
         );
     }
 }

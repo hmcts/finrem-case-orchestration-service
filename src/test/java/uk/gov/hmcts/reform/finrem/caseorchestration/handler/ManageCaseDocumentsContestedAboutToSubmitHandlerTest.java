@@ -28,8 +28,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDo
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantOtherDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentQuestionnairesAnswersHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.validation.ManageDocumentsHandlerValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
@@ -59,6 +61,12 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     private ManageDocumentsHandlerValidator manageDocumentsHandlerValidator;
     @Mock
     private FeatureToggleService featureToggleService;
+
+    @Mock
+    private ApplicantFdrDocumentCategoriser applicantFdrDocumentCategoriser;
+    @Mock
+    private RespondentFdrDocumentCategoriser respondentFdrDocumentCategoriser;
+
     private ManageCaseDocumentsContestedAboutToSubmitHandler manageCaseDocumentsAboutToSubmitCaseHandler;
     private FinremCaseDetails caseDetails;
     private FinremCaseDetails caseDetailsBefore;
@@ -77,7 +85,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         ApplicantOtherDocumentsHandler applicantOtherDocumentsCollectionService =
             new ApplicantOtherDocumentsHandler(featureToggleService);
         FdrDocumentsHandler fdrDocumentsCollectionService =
-            new FdrDocumentsHandler(featureToggleService);
+            new FdrDocumentsHandler(featureToggleService, applicantFdrDocumentCategoriser, respondentFdrDocumentCategoriser);
         RespondentQuestionnairesAnswersHandler respondentQuestionnairesAnswersCollectionService =
             new RespondentQuestionnairesAnswersHandler(featureToggleService);
         ApplicantChronologiesStatementHandler applicantChronologiesStatementCollectionService =
@@ -124,7 +132,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION),
-            hasSize(2));
+            hasSize(4));
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(3));
@@ -132,7 +140,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
-            hasSize(1));
+            hasSize(0));
     }
 
 
@@ -211,11 +219,11 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, "Other Example");
         beforeEventDocList.add(removedDoc);
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.PRE_HEARING_DRAFT_ORDER,
+        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_B,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.ATTENDANCE_SHEETS,
+        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_F,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_H,
+        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.CARE_PLAN,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));

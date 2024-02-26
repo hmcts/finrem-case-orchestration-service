@@ -58,13 +58,14 @@ public abstract class BaseTask implements Runnable {
                         count = 0;
                         batchCount++;
                     }
-
+                    String systemUserToken = getSystemUserToken();
                     log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
+
                     SearchResult searchResult =
-                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), getCaseType(), getSystemUserToken());
+                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), getCaseType(), systemUserToken);
                     log.info("SearchResult count {}", searchResult.getTotal());
                     if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
-                        StartEventResponse startEventResponse = ccdService.startEventForCaseWorker(getSystemUserToken(),
+                        StartEventResponse startEventResponse = ccdService.startEventForCaseWorker(systemUserToken,
                             caseReference.getCaseReference(), getCaseType().getCcdType(), EventType.AMEND_CASE_CRON.getCcdType());
 
                         CaseDetails caseDetails = startEventResponse.getCaseDetails();
@@ -73,7 +74,7 @@ public abstract class BaseTask implements Runnable {
                         executeTask(finremCaseDetails);
                         CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
                         startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
-                        ccdService.submitEventForCaseWorker(startEventResponse, getSystemUserToken(),
+                        ccdService.submitEventForCaseWorker(startEventResponse, systemUserToken,
                             caseDetails.getId().toString(),
                             getCaseType().getCcdType(),
                             EventType.AMEND_CASE_CRON.getCcdType(),
@@ -97,11 +98,6 @@ public abstract class BaseTask implements Runnable {
     protected String getSystemUserToken() {
         log.info("Getting system user token");
         return systemUserService.getSysUserToken();
-    }
-
-    protected String getSystemUserTokenNoCache() {
-        log.info("Getting system user token no cache");
-        return systemUserService.getSysUserTokenNoCache();
     }
 
     protected abstract List<CaseReference> getCaseReferences();
