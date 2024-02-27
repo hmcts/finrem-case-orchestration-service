@@ -3,12 +3,12 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.sonarqube' version '4.4.1.3373'
-    id 'org.springframework.boot' version '3.2.2'
+    id 'org.springframework.boot' version '3.2.3'
     id 'com.github.ben-manes.versions' version '0.50.0'
     id 'uk.gov.hmcts.java' version '0.12.56'
     id 'au.com.dius.pact' version '4.6.7'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1063'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1070'
 }
 
 apply plugin: 'com.github.ben-manes.versions'

@@ -114,5 +114,15 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.RESPONDENT_DOCUMENTS)
         );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE, CaseDocumentParty.RESPONDENT),
+            is(DocumentCategory.RESPONDENT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FM5, CaseDocumentParty.RESPONDENT),
+            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_FM5)
+        );
     }
 }
