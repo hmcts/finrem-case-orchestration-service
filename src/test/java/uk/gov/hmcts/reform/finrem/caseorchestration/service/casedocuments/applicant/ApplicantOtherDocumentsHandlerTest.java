@@ -132,5 +132,15 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
             is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER)
         );
 
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FM5, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FM5)
+        );
+
     }
 }
