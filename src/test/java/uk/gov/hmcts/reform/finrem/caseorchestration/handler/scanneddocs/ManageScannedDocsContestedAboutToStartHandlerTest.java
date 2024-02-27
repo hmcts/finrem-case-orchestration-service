@@ -88,4 +88,25 @@ public class ManageScannedDocsContestedAboutToStartHandlerTest {
         assertThat(uploadCaseDocument.getCaseDocuments().getDocumentBinaryUrl(), is(documentBinaryUrl));
         assertThat(uploadCaseDocument.getCaseDocuments().getDocumentFilename(), is(documentFilename));
     }
+
+    @Test
+    public void givenScannedDocWithNoFileExists_whenEventIsManageScannedDocument_thenReturnsError() {
+        ScannedDocumentCollection scannedDocumentCollection = ScannedDocumentCollection.builder()
+            .value(ScannedDocument.builder()
+                .scannedDate(LocalDateTime.of(2020, 1, 1, 1, 1))
+                .fileName("file.pdf")
+                .build()
+            )
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .scannedDocuments(List.of(scannedDocumentCollection))
+            .build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors(), hasSize(1));
+        assertThat(response.getErrors().get(0),
+            is("A scanned document record exists that is missing a file. Please amend this in Attach scanned docs"));
+    }
 }

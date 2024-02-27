@@ -25,6 +25,9 @@ import java.util.Optional;
 @Service
 public class ManageScannedDocsContestedAboutToStartHandler extends FinremCallbackHandler {
 
+    private static final String SCANNED_DOCUMENT_MISSING_FILE_MESSAGE =
+        "A scanned document record exists that is missing a file. Please amend this in Attach scanned docs";
+
     @Autowired
     public ManageScannedDocsContestedAboutToStartHandler(
         FinremCaseDetailsMapper finremCaseDetailsMapper) {
@@ -47,6 +50,14 @@ public class ManageScannedDocsContestedAboutToStartHandler extends FinremCallbac
 
         List<ScannedDocumentCollection> scannedDocumentCollections =
             Optional.ofNullable(finremCaseData.getScannedDocuments()).orElse(new ArrayList<>());
+
+        if (isScannedDocumentExistsWithoutFile(scannedDocumentCollections)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .errors(List.of(SCANNED_DOCUMENT_MISSING_FILE_MESSAGE))
+                .data(finremCaseData)
+                .build();
+        }
+
         scannedDocumentCollections.forEach(doc -> {
 
             ManageScannedDocumentCollection item = ManageScannedDocumentCollection.builder()
@@ -62,5 +73,10 @@ public class ManageScannedDocsContestedAboutToStartHandler extends FinremCallbac
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
+    }
+
+    private boolean isScannedDocumentExistsWithoutFile(List<ScannedDocumentCollection> scannedDocumentCollections) {
+        return scannedDocumentCollections.stream()
+            .anyMatch(sdc -> sdc.getValue().getUrl() == null);
     }
 }
