@@ -116,5 +116,15 @@ public class IntervenerTwoOtherDocumentsHandlerTest extends BaseManageDocumentsH
                 CaseDocumentParty.INTERVENER_TWO),
             is(DocumentCategory.REPORTS)
         );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE, CaseDocumentParty.INTERVENER_TWO),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_POINTS_OF_CLAIM_OR_DEFENCE)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FM5, CaseDocumentParty.INTERVENER_TWO),
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_FM5)
+        );
     }
 }
