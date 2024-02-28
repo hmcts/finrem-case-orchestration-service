@@ -58,17 +58,17 @@ public class RespondentStatementsExhibitsCollectionServiceTest extends BaseManag
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_AFFIDAVIT),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.STATEMENT_AFFIDAVIT, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.RESPONDENT_DOCUMENTS_S25_STATEMENT)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.UNCATEGORISED)
         );
     }

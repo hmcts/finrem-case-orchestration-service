@@ -17,7 +17,7 @@ public class ApplicantFormEExhibitsHandler extends FormEExhibitsHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         return DocumentCategory.APPLICANT_DOCUMENTS_FORM_E;
     }
 

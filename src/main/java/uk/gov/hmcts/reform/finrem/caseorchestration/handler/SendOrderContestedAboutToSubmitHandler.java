@@ -184,11 +184,13 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         if (generalOrders != null && !generalOrders.isEmpty()) {
             generalOrders.forEach(go -> {
                 ContestedGeneralOrder contestedGeneralOrder = go.getValue();
-                CaseDocument generalOrder = contestedGeneralOrder.getAdditionalDocument();
-                if (generalOrderService.isSelectedOrderMatches(selectedOrders, contestedGeneralOrder)) {
-                    sendOrderPartyDocumentList.forEach(
-                        handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, List.of(generalOrder)));
-                    printOrderCollection.add(addToPrintOrderCollection(generalOrder));
+                if (contestedGeneralOrder != null && contestedGeneralOrder.getAdditionalDocument() != null) {
+                    CaseDocument generalOrder = contestedGeneralOrder.getAdditionalDocument();
+                    if (generalOrderService.isSelectedOrderMatches(selectedOrders, contestedGeneralOrder)) {
+                        sendOrderPartyDocumentList.forEach(
+                            handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, List.of(generalOrder)));
+                        printOrderCollection.add(addToPrintOrderCollection(generalOrder));
+                    }
                 }
             });
         }

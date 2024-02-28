@@ -29,6 +29,12 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, "Other Example"));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_B,
+            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_F,
+            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CARE_PLAN,
+            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.PENSION_PLAN,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
 
@@ -43,7 +49,7 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
     @Override
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
-            hasSize(2));
+            hasSize(5));
 
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
@@ -57,58 +63,83 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.APPLICANT_DOCUMENTS_MISCELLANEOUS_OR_OTHER)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.APPLICANT_DOCUMENTS_PENSION_PLAN)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES1)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES2),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ES2, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES2)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES),
-            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_MORTGAGE_CAPACITIES)
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT),
-            is(DocumentCategory.REPORTS_PENSION_REPORTS)
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.REPORTS)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.APPLICANT_DOCUMENTS)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS),
-            is(DocumentCategory.APPLICANT_DOCUMENTS_HOUSING_PARTICULARS)
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PRE_HEARING_DRAFT_ORDER),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PRE_HEARING_DRAFT_ORDER, CaseDocumentParty.APPLICANT),
             is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE)
+        );
+
+        assertThat(
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FM5, CaseDocumentParty.APPLICANT),
+            is(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FM5)
         );
 
     }

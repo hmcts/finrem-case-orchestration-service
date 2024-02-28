@@ -14,7 +14,7 @@ import java.util.List;
 @Configuration
 public class CacheConfiguration {
 
-    public static final String REQUEST_SCOPED_CACHE_MANAGER = "requestScopeCacheManager";
+    public static final String APPLICATION_SCOPED_CACHE_MANAGER = "applicationScopeCacheManager";
 
     public static final String ORGANISATION_CACHE = "organisationCache";
     public static final String SYS_USER_CACHE = "systemUserCache";
@@ -22,8 +22,8 @@ public class CacheConfiguration {
     public static final String USER_ROLES_CACHE = "userRolesCache";
 
     @Bean
-    @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-    public CacheManager requestScopeCacheManager() {
+    @Scope(value = WebApplicationContext.SCOPE_APPLICATION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+    public CacheManager applicationScopeCacheManager() {
         final SimpleCacheManager simpleCacheManager = new SimpleCacheManager();
         simpleCacheManager.setCaches(List.of(
             new ConcurrentMapCache(ORGANISATION_CACHE),
