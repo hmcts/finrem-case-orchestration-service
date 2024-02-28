@@ -114,5 +114,15 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ATTENDANCE_SHEETS, CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4)
         );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE, CaseDocumentParty.INTERVENER_FOUR),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_POINTS_OF_CLAIM_OR_DEFENCE)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FM5, CaseDocumentParty.INTERVENER_FOUR),
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_FM5)
+        );
     }
 }

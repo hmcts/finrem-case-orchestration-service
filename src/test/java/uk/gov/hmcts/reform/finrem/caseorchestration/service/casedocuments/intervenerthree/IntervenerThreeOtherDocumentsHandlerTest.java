@@ -115,5 +115,15 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
                 CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.REPORTS)
         );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE, CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_POINTS_OF_CLAIM_OR_DEFENCE)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FM5, CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_FM5)
+        );
     }
 }
