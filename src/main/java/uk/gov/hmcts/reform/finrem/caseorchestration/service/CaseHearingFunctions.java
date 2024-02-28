@@ -352,6 +352,7 @@ public final class CaseHearingFunctions {
                 .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
                 .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
                 .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .openingHours(CTSC_OPENING_HOURS)
                 .build(), Map.class);
         } catch (IOException | NullPointerException e) {
             return Collections.emptyMap();

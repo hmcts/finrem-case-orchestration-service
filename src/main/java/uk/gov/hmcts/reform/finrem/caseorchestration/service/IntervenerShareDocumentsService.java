@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments.Shar
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_FOUR_CORRESPONDENCE_COLLECTION;
@@ -74,8 +75,8 @@ public class IntervenerShareDocumentsService implements SharedService {
     public static final String QUESTIONNAIRES_ANSWERS = "QUESTIONNAIRES_ANSWERS";
     public static final String STATEMENTS_EXHIBITS = "STATEMENTS_EXHIBITS";
 
-    protected static final String SHAREABLE_DOCS_WARNING =
-        "Both the applicant and respondent solicitors will be able to access selected shared documents";
+    protected static final String APP_RESP_SELECTION_WARNING =
+        "Documents must be shared with either both applicant and respondent or neither";
 
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
@@ -468,7 +469,6 @@ public class IntervenerShareDocumentsService implements SharedService {
         return null;
     }
 
-
     public void shareSelectedDocumentWithOtherSelectedSolicitors(FinremCaseData caseData) {
         DynamicMultiSelectList sourceDocumentList = caseData.getSourceDocumentList();
         DynamicMultiSelectList solicitorRoleList = caseData.getSolicitorRoleList();
@@ -484,20 +484,68 @@ public class IntervenerShareDocumentsService implements SharedService {
         }
     }
 
-
     public List<String> checkThatApplicantAndRespondentAreBothSelected(FinremCaseData data) {
-        List<String> warnings = new ArrayList<>();
-        if (isLoggedInUSerIntervenerType(data.getCurrentUserCaseRoleType())) {
-            selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(data, data.getSelectedParties(data.getSolicitorRoleList()));
-            if ((data.isApplicantCorrespondenceEnabled() || data.isRespondentCorrespondenceEnabled())
-                && data.isApplicantCorrespondenceEnabled() != data.isRespondentCorrespondenceEnabled()) {
-                warnings.add(SHAREABLE_DOCS_WARNING);
-            }
+        if (!isLoggedInUserIntervenerType(data.getCurrentUserCaseRoleType())) {
+            return Collections.emptyList();
         }
-        return warnings;
+
+        DynamicMultiSelectList solicitorRoles = data.getSolicitorRoleList();
+        List<String> selectedParties = data.getSelectedParties(solicitorRoles);
+        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(data, selectedParties);
+
+        if (isEitherPartyNotAnOption(solicitorRoles.getListItems())) {
+            return Collections.emptyList();
+        }
+
+        if ((data.isApplicantCorrespondenceEnabled() || data.isRespondentCorrespondenceEnabled())
+            && data.isApplicantCorrespondenceEnabled() != data.isRespondentCorrespondenceEnabled()) {
+            return List.of(APP_RESP_SELECTION_WARNING);
+        } else {
+            return Collections.emptyList();
+        }
     }
 
-    private boolean isLoggedInUSerIntervenerType(String role) {
+    public void preSelectOptionsIfBothPartiesPresent(DynamicMultiSelectList list) {
+        List<DynamicMultiSelectListElement> itemsToSelect = list.getListItems().stream()
+            .filter(i -> isApplicantPartyRole(i.getCode()) || isRespondentPartyRole(i.getCode()))
+            .toList();
+
+        if (isApplicantAndRespondentOptionsPresent(itemsToSelect)) {
+            list.setValue(itemsToSelect);
+        }
+    }
+
+    private boolean isLoggedInUserIntervenerType(String role) {
         return role.startsWith("[INTVR");
+    }
+
+    private boolean isEitherPartyNotAnOption(List<DynamicMultiSelectListElement> options) {
+        return isPartyNotAnOption(options, this::isApplicantPartyRole)
+            || isPartyNotAnOption(options, this::isRespondentPartyRole);
+    }
+
+    private boolean isPartyNotAnOption(List<DynamicMultiSelectListElement> options, Predicate<String> partyRoleCheck) {
+        return options.stream()
+            .map(DynamicMultiSelectListElement::getCode)
+            .noneMatch(partyRoleCheck);
+    }
+
+    private boolean isApplicantPartyRole(String code) {
+        return CaseRole.APP_SOLICITOR.getCcdCode().equals(code) || CaseRole.APP_BARRISTER.getCcdCode().equals(code);
+    }
+
+    private boolean isRespondentPartyRole(String role) {
+        return CaseRole.RESP_SOLICITOR.getCcdCode().equals(role) || CaseRole.RESP_BARRISTER.getCcdCode().equals(role);
+    }
+
+    private boolean isApplicantAndRespondentOptionsPresent(List<DynamicMultiSelectListElement> list) {
+        boolean isApplicantPresent = list.stream()
+            .anyMatch(i -> isApplicantPartyRole(i.getCode()));
+        if (!isApplicantPresent) {
+            return false;
+        }
+
+        return list.stream()
+            .anyMatch(i -> isRespondentPartyRole(i.getCode()));
     }
 }
