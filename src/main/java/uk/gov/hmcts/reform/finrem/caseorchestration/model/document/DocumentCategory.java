@@ -203,7 +203,7 @@ public enum DocumentCategory {
     HEARING_DOCUMENTS_WITNESS_SUMMONS("hearingDocumentsWitnessSummons"),
     HEARING_BUNDLE("hearingBundle"),
     REPORTS("reports"),
-    COURT_CORRESPONDENCE("courtCorrespondenc"),
+    COURT_CORRESPONDENCE("courtCorrespondence"),
     COURT_CORRESPONDENCE_APPLICANT("courtCorrespondenceApplicant"),
     COURT_CORRESPONDENCE_RESPONDENT("courtCorrespondenceRespondent"),
     COURT_CORRESPONDENCE_INTERVENER_1("courtCorrespondenceIntervener1"),
