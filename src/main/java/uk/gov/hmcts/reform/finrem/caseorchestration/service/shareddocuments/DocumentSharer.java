@@ -30,9 +30,11 @@ public abstract class DocumentSharer {
         log.info("Sharing documents for case {} and case role {} and collection name {} and collection id {}",
             caseData.getCcdCaseId(), caseRole, collName, collId);
         if (caseRole.equals(CaseRole.RESP_SOLICITOR.getCcdCode()) || caseRole.equals(CaseRole.RESP_BARRISTER.getCcdCode())) {
+            log.info("Inside RESP_SOLICITOR OR RESP_BARRISTER");
             setRespondentSharedCollection(caseData, getAndAddToExistingSharedCollection(collId, documentCollectionToShare,
                 getRespondentSharedCollection(caseData)));
         } else if (caseRole.equals(CaseRole.APP_SOLICITOR.getCcdCode()) || caseRole.equals(CaseRole.APP_BARRISTER.getCcdCode())) {
+            log.info("Inside APP_SOLICITOR OR APP_BARRISTER");
             setApplicantSharedCollection(caseData, getAndAddToExistingSharedCollection(collId, documentCollectionToShare,
                 getApplicantSharedCollection(caseData)));
         } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || caseRole.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
