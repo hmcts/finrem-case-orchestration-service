@@ -127,15 +127,15 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get("RespondentName"), is("Name Respondent"));
 
         assertThat(data.get("HearingType"), is("Directions (DIR)"));
-        assertThat(data.get("HearingVenue"), is("Nottingham County Court And Family Court"));
+        assertThat(data.get("HearingVenue"), is("Chesterfield County Court"));
         assertThat(data.get("HearingDate"), is("2021-01-01"));
         assertThat(data.get("HearingTime"), is("12:00"));
         assertThat(data.get("HearingLength"), is("30 minutes"));
         assertThat(data.get("AnyOtherDirections"), is("N/A"));
         assertThat(data.get("AdditionalHearingDated"), is(notNullValue()));
 
-        assertThat(data.get("CourtName"), is("Nottingham County Court And Family Court"));
-        assertThat(data.get("CourtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));
+        assertThat(data.get("CourtName"), is("Chesterfield County Court"));
+        assertThat(data.get("CourtAddress"), is("Tapton Lane, Chesterfield S41 7TW"));
         assertThat(data.get("CourtPhone"), is("0115 910 3504"));
         assertThat(data.get("CourtEmail"), is("FRCNottingham@justice.gov.uk"));
 
