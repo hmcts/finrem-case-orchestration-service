@@ -305,6 +305,7 @@ public enum DocumentCategory {
     INTERVENER_DOCUMENTS_INTERVENER_4_CERTIFICATES_OF_SERVICE("intervenerDocumentsIntervener4CertificatesOfService"),
     INTERVENER_DOCUMENTS_INTERVENER_4_OTHER("intervenerDocumentsIntervener4MiscellaneousOrOther"),
     INTERVENER_DOCUMENTS_INTERVENER_4_PENSION_PLAN("intervenerDocumentsIntervener4PensionPlan"),
+    INTERVENER_DOCUMENTS_INTERVENER_4_POINTS_OF_CLAIM_OR_DEFENCE("intervenerDocumentsIntervener1PointOfClaimOrDefence"),
     INTERVENER_DOCUMENTS_INTERVENER_4_COSTS_STATEMENT("intervenerDocumentsIntervener4CostsStatement"),
     DIVORCE_DOCUMENTS("divorceDocuments"),
     DIVORCE_DOCUMENTS_APPLICATION_OR_PETITION("divorceDocumentsApplicationOrPetition"),
