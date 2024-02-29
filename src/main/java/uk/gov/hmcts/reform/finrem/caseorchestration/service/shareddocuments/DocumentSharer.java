@@ -37,7 +37,8 @@ public abstract class DocumentSharer {
             log.info("Inside APP_SOLICITOR OR APP_BARRISTER");
             setApplicantSharedCollection(caseData, getAndAddToExistingSharedCollection(collId, documentCollectionToShare,
                 getApplicantSharedCollection(caseData)));
-        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || caseRole.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode())) {
+            log.info("Inside INTVR_SOLICITOR_1 OR INTVR_SOLICITOR_1");
             setIntervenerOneSharedCollection(caseData, getAndAddToExistingSharedCollection(collId, documentCollectionToShare,
                 getIntervenerOneSharedCollection(caseData)));
         } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getCcdCode()) || caseRole.equals(CaseRole.INTVR_BARRISTER_2.getCcdCode())) {
