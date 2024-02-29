@@ -91,7 +91,7 @@ public abstract class DocumentSharer {
     }
 
     private UploadCaseDocumentCollection copyUploadCaseDocumentCollection(UploadCaseDocumentCollection sd) {
-        log.info("copyUploadCaseDocumentCollection {}" + sd );
+        log.info("copyUploadCaseDocumentCollection {}", sd);
         UploadCaseDocument uploadCaseDocument = sd.getUploadCaseDocument();
         UploadCaseDocument uploadCaseDocumentToCopy = new UploadCaseDocument(uploadCaseDocument);
         if (featureToggleService.isCaseFileViewEnabled()) {
