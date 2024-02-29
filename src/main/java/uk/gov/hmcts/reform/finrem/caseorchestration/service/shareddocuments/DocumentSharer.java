@@ -29,6 +29,7 @@ public abstract class DocumentSharer {
 
         log.info("Sharing documents for case {} and case role {} and collection name {} and collection id {}",
             caseData.getCcdCaseId(), caseRole, collName, collId);
+        log.info("Document to share ------------- {}", documentCollectionToShare);
         if (caseRole.equals(CaseRole.RESP_SOLICITOR.getCcdCode()) || caseRole.equals(CaseRole.RESP_BARRISTER.getCcdCode())) {
             log.info("Inside RESP_SOLICITOR OR RESP_BARRISTER");
             setRespondentSharedCollection(caseData, getAndAddToExistingSharedCollection(collId, documentCollectionToShare,

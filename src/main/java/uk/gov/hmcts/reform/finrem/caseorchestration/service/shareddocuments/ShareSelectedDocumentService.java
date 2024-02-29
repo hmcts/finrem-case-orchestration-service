@@ -24,7 +24,7 @@ public class ShareSelectedDocumentService {
             String[] collectionIdAndFilename = doc.getCode().split("#");
             String collId = collectionIdAndFilename[0];
             String collName = collectionIdAndFilename[1];
-            log.info("Inside copySharedDocumentsToSharedCollection");
+            log.info("Inside copySharedDocumentsToSharedCollection {}, {}",collId, collName);
             documentCollectionSharers.stream()
                 .forEach(sharer -> sharer.shareDocumentsToSharedPartyCollection(caseData, collId, collName, role));
 
