@@ -29,17 +29,13 @@ public abstract class DocumentSharer {
 
         log.info("Sharing documents for case {} and case role {} and collection name {} and collection id {}",
             caseData.getCcdCaseId(), caseRole, collName, collId);
-        log.info("Document to share ------------- {}", documentCollectionToShare);
         if (caseRole.equals(CaseRole.RESP_SOLICITOR.getCcdCode()) || caseRole.equals(CaseRole.RESP_BARRISTER.getCcdCode())) {
-            log.info("Inside RESP_SOLICITOR OR RESP_BARRISTER");
             setRespondentSharedCollection(caseData, getAndAddToExistingSharedCollection(collId, documentCollectionToShare,
                 getRespondentSharedCollection(caseData)));
         } else if (caseRole.equals(CaseRole.APP_SOLICITOR.getCcdCode()) || caseRole.equals(CaseRole.APP_BARRISTER.getCcdCode())) {
-            log.info("Inside APP_SOLICITOR OR APP_BARRISTER");
             setApplicantSharedCollection(caseData, getAndAddToExistingSharedCollection(collId, documentCollectionToShare,
                 getApplicantSharedCollection(caseData)));
-        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode())) {
-            log.info("Inside INTVR_SOLICITOR_1 OR INTVR_SOLICITOR_1");
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getCcdCode()) || caseRole.equals(CaseRole.INTVR_BARRISTER_1.getCcdCode())) {
             setIntervenerOneSharedCollection(caseData, getAndAddToExistingSharedCollection(collId, documentCollectionToShare,
                 getIntervenerOneSharedCollection(caseData)));
         } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getCcdCode()) || caseRole.equals(CaseRole.INTVR_BARRISTER_2.getCcdCode())) {
@@ -77,7 +73,6 @@ public abstract class DocumentSharer {
     private List<UploadCaseDocumentCollection> getAndAddToExistingSharedCollection(String collId,
                                                                                    List<UploadCaseDocumentCollection> documentCollectionToShare,
                                                                                    List<UploadCaseDocumentCollection> sharedCollection) {
-        log.info("Document to share ------{}", documentCollectionToShare);
         List<UploadCaseDocumentCollection> list =
             Optional.ofNullable(sharedCollection)
                 .orElse(new ArrayList<>());
@@ -88,12 +83,10 @@ public abstract class DocumentSharer {
                 }
             });
         }
-        log.info("Document to share final list ------{}", list);
         return list;
     }
 
     private UploadCaseDocumentCollection copyUploadCaseDocumentCollection(UploadCaseDocumentCollection sd) {
-        log.info("copyUploadCaseDocumentCollection {}", sd);
         UploadCaseDocument uploadCaseDocument = sd.getUploadCaseDocument();
         UploadCaseDocument uploadCaseDocumentToCopy = new UploadCaseDocument(uploadCaseDocument);
         if (featureToggleService.isCaseFileViewEnabled()) {

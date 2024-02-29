@@ -117,7 +117,7 @@ public class SummariesDocumentSharer extends DocumentSharer {
 
     @Override
     protected List<UploadCaseDocumentCollection> getApplicantCollection(UploadCaseDocumentWrapper documentWrapper) {
-        log.info("inside getApplicantCollection ---- {}", documentWrapper.getAppOtherCollection());
+        log.info("inside getApplicantCollection ---- {}", documentWrapper.getAppCaseSummariesCollection());
         return documentWrapper.getAppCaseSummariesCollection();
     }
 
