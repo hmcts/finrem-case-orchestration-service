@@ -40,6 +40,15 @@ public class CcdService {
         submitEventForCaseWorker(startEventResponse, authorisation, caseId, caseTypeId, eventType, "", "");
     }
 
+    /**
+     * Start a CCD event.
+     * <p>The event should be submitted by a subsequent call to {@link #submitEventForCaseWorker}.</p>
+     * @param authorisation auth token
+     * @param caseId case id
+     * @param caseTypeId case type id
+     * @param eventType case event to start
+     * @return StartEventResponse
+     */
     public StartEventResponse startEventForCaseWorker(String authorisation, String caseId, String caseTypeId,
                                                       String eventType) {
         log.info(LOGGER, eventType, caseId);
@@ -56,6 +65,19 @@ public class CcdService {
                 eventType);
     }
 
+    /**
+     * Submit an event to CCD.
+     * <p>The case data in {@code startEventResponse} should be from the return value of the initial call to
+     * {@link #startEventForCaseWorker}. Do not use case data from another source to avoid data loss due to concurrent
+     * case data updates.</p>
+     * @param startEventResponse case data
+     * @param authorisation auth token
+     * @param caseId case id
+     * @param caseTypeId case type id
+     * @param eventType case event to submit
+     * @param summary event summary
+     * @param description event description
+     */
     public void submitEventForCaseWorker(StartEventResponse startEventResponse, String authorisation, String caseId, String caseTypeId,
                                          String eventType, String summary, String description) {
         log.info(LOGGER, eventType, caseId);
