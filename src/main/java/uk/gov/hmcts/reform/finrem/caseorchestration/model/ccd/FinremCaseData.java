@@ -226,6 +226,7 @@ public class FinremCaseData {
     private List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollection;
     private List<DocumentCollection> hearingNoticeDocumentPack;
     private List<DocumentCollection> hearingNoticesDocumentCollection;
+    private Map<String, Object> courtDetails;
 
     private HearingTypeDirection hearingType;
     private String timeEstimate;
@@ -419,6 +420,8 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private CaseFlagsWrapper caseFlagsWrapper;
+
+    private String previousState;
 
 
     @JsonIgnore

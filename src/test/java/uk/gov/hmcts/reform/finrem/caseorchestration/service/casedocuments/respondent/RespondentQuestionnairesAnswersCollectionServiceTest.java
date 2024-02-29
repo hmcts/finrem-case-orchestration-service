@@ -83,17 +83,17 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.QUESTIONNAIRE),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.QUESTIONNAIRE, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_QUESTIONNAIRES)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.REPLY_TO_QUESTIONNAIRE),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.REPLY_TO_QUESTIONNAIRE, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.RESPONDENT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE)
         );
 
         assertThat(
-            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G),
+            collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_G, CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.UNCATEGORISED)
         );
     }

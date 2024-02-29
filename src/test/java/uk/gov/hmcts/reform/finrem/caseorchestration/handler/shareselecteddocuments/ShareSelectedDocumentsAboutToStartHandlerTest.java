@@ -46,7 +46,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.APPLICANT_FORM_E;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.ATTENDANCE_SHEETS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CARE_PLAN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.CHRONOLOGY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.EXPERT_EVIDENCE;
@@ -209,7 +209,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertNull(handle.getData().getSolicitorRoleList());
-        assertTrue(handle.getErrors().contains("\nThere is/are no party/parties available to share documents."));
+        assertTrue(handle.getErrors().contains("\nThere are no parties available to share documents."));
 
         verify(intervenerShareDocumentsService).intervenerSourceDocumentList(any(), any());
         verify(intervenerShareDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
@@ -272,7 +272,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertNull(handle.getData().getSolicitorRoleList());
-        assertTrue(handle.getErrors().contains("\nThere is/are no party/parties available to share documents."));
+        assertTrue(handle.getErrors().contains("\nThere are no parties available to share documents."));
 
         verify(applicantDocumentsService).applicantSourceDocumentList(any());
         verify(applicantDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
@@ -313,7 +313,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertNull(handle.getData().getSolicitorRoleList());
-        assertTrue(handle.getErrors().contains("\nThere is/are no party/parties available to share documents."));
+        assertTrue(handle.getErrors().contains("\nThere are no parties available to share documents."));
 
         verify(respondentShareDocumentsService).respondentSourceDocumentList(any());
         verify(respondentShareDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
@@ -416,7 +416,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
         data.getUploadCaseDocumentWrapper().setAppCaseSummariesCollection(getTestDocument(CASE_SUMMARY));
         data.getUploadCaseDocumentWrapper().setAppFormsHCollection(getTestDocument(FORM_H));
         data.getUploadCaseDocumentWrapper().setAppExpertEvidenceCollection(getTestDocument(EXPERT_EVIDENCE));
-        data.getUploadCaseDocumentWrapper().setAppCorrespondenceDocsCollection(getTestDocument(ATTENDANCE_SHEETS));
+        data.getUploadCaseDocumentWrapper().setAppCorrespondenceDocsCollection(getTestDocument(CARE_PLAN));
 
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
 

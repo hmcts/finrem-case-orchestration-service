@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
@@ -33,10 +34,12 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         if (CollectionUtils.isNotEmpty(finremCaseData.getOrdersSentToPartiesCollection())) {
             finremCaseData.getOrdersSentToPartiesCollection().forEach(
                 order -> {
-                    CaseDocument documentCopy = new CaseDocument(order.getValue().getCaseDocument());
-                    setCategoryToAllOrdersDocs(documentCopy,
-                        DocumentCategory.ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId());
-                    order.getValue().setCaseDocument(documentCopy);
+                    if (order.getValue().getCaseDocument() != null) {
+                        CaseDocument documentCopy = new CaseDocument(order.getValue().getCaseDocument());
+                        setCategoryToAllOrdersDocs(documentCopy,
+                            DocumentCategory.ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId());
+                        order.getValue().setCaseDocument(documentCopy);
+                    }
                 });
         }
 
@@ -54,7 +57,7 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
                     DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS,
                     DocumentCategory.APPLICANT_DOCUMENTS_SEND_ORDERS_OVERFLOW);
                 orderWrapper.getAppOrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
-                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+                    copyAndSetCategory(order, categoryToApply));
             });
         }
         if (orderWrapper.getRespOrderCollections() != null) {
@@ -63,7 +66,7 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
                     DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS,
                     DocumentCategory.RESPONDENT_DOCUMENTS_SEND_ORDERS_OVERFLOW);
                 orderWrapper.getRespOrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
-                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+                    copyAndSetCategory(order, categoryToApply));
             });
         }
         if (orderWrapper.getIntv1OrderCollections() != null) {
@@ -72,7 +75,7 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
                     DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS,
                     DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SEND_ORDERS_OVERFLOW);
                 orderWrapper.getIntv1OrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
-                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+                    copyAndSetCategory(order, categoryToApply));
             });
         }
         if (orderWrapper.getIntv2OrderCollections() != null) {
@@ -81,7 +84,7 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
                     DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS,
                     DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SEND_ORDERS_OVERFLOW);
                 orderWrapper.getIntv2OrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
-                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+                    copyAndSetCategory(order, categoryToApply));
             });
         }
         if (orderWrapper.getIntv3OrderCollections() != null) {
@@ -90,7 +93,7 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
                     DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS,
                     DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SEND_ORDERS_OVERFLOW);
                 orderWrapper.getIntv3OrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
-                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+                    copyAndSetCategory(order, categoryToApply));
             });
         }
         if (orderWrapper.getIntv4OrderCollections() != null) {
@@ -99,10 +102,11 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
                     DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS,
                     DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SEND_ORDERS_OVERFLOW);
                 orderWrapper.getIntv4OrderCollections().get(idx).getValue().getApproveOrders().forEach(order ->
-                    setCategoryToAllOrdersDocs(order.getValue().getCaseDocument(), categoryToApply));
+                    copyAndSetCategory(order, categoryToApply));
             });
         }
     }
+
 
     private void categoryToAllPartiesOrders(ConsentOrderWrapper orderWrapper) {
 
@@ -184,7 +188,8 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
 
         if (CollectionUtils.isNotEmpty(approvedOrder.getAdditionalConsentDocuments())) {
             List<DocumentCollection> additionalConsentDocumentsCopy = documentHelper.deepCopyArray(approvedOrder.getAdditionalConsentDocuments(),
-                new TypeReference<List<DocumentCollection>>() {});
+                new TypeReference<List<DocumentCollection>>() {
+                });
             additionalConsentDocumentsCopy.forEach(ad ->
                 setCategoryToAllOrdersDocs(ad.getValue(), categoryToApply));
             approvedOrder.setAdditionalConsentDocuments(additionalConsentDocumentsCopy);
@@ -192,12 +197,21 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
 
         if (CollectionUtils.isNotEmpty(approvedOrder.getPensionDocuments())) {
             List<PensionTypeCollection> pensionDocumentsCopy = documentHelper.deepCopyArray(approvedOrder.getPensionDocuments(),
-                new TypeReference<List<PensionTypeCollection>>() {});
+                new TypeReference<List<PensionTypeCollection>>() {
+                });
             pensionDocumentsCopy.forEach(pd ->
                 setCategoryToAllOrdersDocs(pd.getTypedCaseDocument().getPensionDocument(), categoryToApply));
             approvedOrder.setPensionDocuments(pensionDocumentsCopy);
         }
 
+    }
+
+    private void copyAndSetCategory(ApprovedOrderCollection order, String categoryToApply) {
+        if (order.getValue().getCaseDocument() != null) {
+            CaseDocument documentCopy = new CaseDocument(order.getValue().getCaseDocument());
+            setCategoryToAllOrdersDocs(documentCopy, categoryToApply);
+            order.getValue().setCaseDocument(documentCopy);
+        }
     }
 
     private void setCategoryToAllOrdersDocs(CaseDocument document, String categoryToApply) {

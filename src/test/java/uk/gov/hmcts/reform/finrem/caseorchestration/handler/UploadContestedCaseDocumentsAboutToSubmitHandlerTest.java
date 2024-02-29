@@ -31,13 +31,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.IntervenerOneFdrHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerfour.IntervenerFourChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneFdrDocumentCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone.IntervenerOneFdrHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerthree.IntervenerThreeChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenertwo.IntervenerTwoChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentFdrDocumentCategoriser;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -66,6 +69,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     @Mock
     private FeatureToggleService featureToggleService;
 
+    @Mock
+    private ApplicantFdrDocumentCategoriser applicantFdrDocumentCategoriser;
+    @Mock
+    private RespondentFdrDocumentCategoriser respondentFdrDocumentCategoriser;
+
     private ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
     private RespondentChronologiesStatementHandler respondentChronologiesStatementHandler;
 
@@ -77,6 +85,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     private IntervenerFourChronologiesStatementHandler intervenerFourChronologiesStatementHandler;
 
     private IntervenerOneFdrHandler intervenerOneFdrHandler;
+    private IntervenerOneFdrDocumentCategoriser intervenerOneFdrDocumentCategoriser = new IntervenerOneFdrDocumentCategoriser();
 
     private CaseDocumentsHandler caseDocumentHandler;
     private FdrDocumentsHandler fdrDocumentsHandler;
@@ -98,9 +107,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         intervenerTwoChronologiesStatementHandler = new IntervenerTwoChronologiesStatementHandler(featureToggleService);
         intervenerThreeChronologiesStatementHandler = new IntervenerThreeChronologiesStatementHandler(featureToggleService);
         intervenerFourChronologiesStatementHandler = new IntervenerFourChronologiesStatementHandler(featureToggleService);
-        intervenerOneFdrHandler = new IntervenerOneFdrHandler(featureToggleService);
+        intervenerOneFdrHandler = new IntervenerOneFdrHandler(featureToggleService, intervenerOneFdrDocumentCategoriser);
         caseDocumentHandler = new CaseDocumentsHandler(featureToggleService);
-        fdrDocumentsHandler = new FdrDocumentsHandler(featureToggleService);
+        fdrDocumentsHandler = new FdrDocumentsHandler(featureToggleService, applicantFdrDocumentCategoriser, respondentFdrDocumentCategoriser);
 
 
         List<DocumentHandler> documentHandlers =
@@ -446,6 +455,20 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             is(UploadContestedCaseDocumentsAboutToSubmitHandler.NO_DOCUMENT_ERROR));
     }
 
+
+    @Test
+    public void shouldSetDefaultsForWithoutPrejudiceOffersCorrectly() {
+        UploadCaseDocument uploadCaseDocument = UploadCaseDocument.builder()
+            .caseDocuments(new CaseDocument())
+            .caseDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS)
+            .caseDocumentParty(CaseDocumentParty.APPLICANT)
+            .build();
+        UploadCaseDocumentCollection uploadCaseDocumentCollection =
+            UploadCaseDocumentCollection.builder().uploadCaseDocument(uploadCaseDocument).build();
+        uploadContestedCaseDocumentsHandler.setDefaultsForWithoutPrejudiceDocumentType(uploadCaseDocumentCollection);
+        assertThat(uploadCaseDocument.getCaseDocumentConfidentiality(), is(YesOrNo.NO));
+        assertThat(uploadCaseDocument.getCaseDocumentFdr(), is(YesOrNo.YES));
+    }
 
     private FinremCallbackRequest buildCallbackRequest() {
         FinremCaseData data = FinremCaseData.builder().build();

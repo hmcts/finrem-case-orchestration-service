@@ -9,7 +9,9 @@ import java.util.Arrays;
 public enum CaseDocumentType {
     STATEMENT_OF_ISSUES("Statement of Issues"),
     CHRONOLOGY("Chronology"),
+    FORM_B("Form B"),
     APPLICANT_FORM_E("Applicant - Form E"),
+    FORM_F("Form F"),
     FORM_G("Form G"),
     FORM_H("Form H"),
     LETTER_FROM_APPLICANT("Letter from Applicant"),
@@ -23,6 +25,7 @@ public enum CaseDocumentType {
     EXPERT_EVIDENCE("Expert Evidence"),
     STATEMENT_AFFIDAVIT("Statement/Affidavit"),
     WITNESS_STATEMENT_AFFIDAVIT("Witness Statement/Affidavit"),
+    CARE_PLAN("Care Plan"),
     OFFERS("Offers"),
     TRIAL_BUNDLE("Trial Bundle"),
     CONDITIONAL_ORDER("Conditional order"),
@@ -35,7 +38,6 @@ public enum CaseDocumentType {
     CERTIFICATES_OF_SERVICE("Certificates of service"),
     ES1("ES1"),
     ES2("ES2"),
-    FAMILY_HOME_VALUATION("Family home valuation"),
     HOUSING_PARTICULARS("Housing particulars"),
     JUDICIAL_NOTES("Judicial notes"),
     JUDGMENT("Judgment"),
@@ -44,7 +46,10 @@ public enum CaseDocumentType {
     PRE_HEARING_DRAFT_ORDER("Pre hearing draft order"),
     TRANSCRIPT("Transcript"),
     WITHOUT_PREJUDICE_OFFERS("Without Prejudice offers"),
-    WITNESS_SUMMONS("Witness Summons");
+    WITNESS_SUMMONS("Witness Summons"),
+    POINTS_OF_CLAIM_OR_DEFENCE("Points of claim/defence"),
+
+    FM5("FM5");
 
 
     private final String id;

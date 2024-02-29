@@ -7,6 +7,9 @@
     "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
+      "cfcCourtList": "FR_s_CFCList_9",
+      "regionList": "london",
+      "londonFRCList": "cfc",
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",

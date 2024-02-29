@@ -36,7 +36,7 @@ public class LegacyConfidentialDocumentsServiceTest {
                     .documentComment(LEGACY_CONFIDENTIAL_COMMENT)
                     .confidentialDocumentUploadDateTime(now)
                     .documentLink(CaseDocument.builder().documentFilename(LEGACY_CONFIDENTIAL_FILENAME).build())
-                    .documentType(CaseDocumentType.ATTENDANCE_SHEETS)
+                    .documentType(CaseDocumentType.CARE_PLAN)
                     .build())
                 .build();
 
@@ -48,6 +48,8 @@ public class LegacyConfidentialDocumentsServiceTest {
             equalTo(LEGACY_CONFIDENTIAL_COMMENT));
         assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocumentConfidentiality(),
             is(YesOrNo.YES));
+        assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocumentType(),
+            is(CaseDocumentType.CARE_PLAN));
         assertThat(uploadCaseDocumentCollections.get(0).getUploadCaseDocument().getCaseDocuments().getDocumentFilename(),
             equalTo(LEGACY_CONFIDENTIAL_FILENAME));
     }

@@ -22,7 +22,7 @@ public class HearingBundleDocumentCategoriser extends DocumentCategoriser {
     @Override
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
         if (finremCaseData.getFdrHearingBundleCollections() != null) {
-            applyBundleCategory(finremCaseData.getFdrHearingBundleCollections(), DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE);
+            applyBundleCategory(finremCaseData.getFdrHearingBundleCollections(), DocumentCategory.FDR_BUNDLE);
         }
         if (finremCaseData.getHearingUploadBundle() != null) {
             applyBundleCategory(finremCaseData.getHearingUploadBundle(), DocumentCategory.HEARING_BUNDLE);
