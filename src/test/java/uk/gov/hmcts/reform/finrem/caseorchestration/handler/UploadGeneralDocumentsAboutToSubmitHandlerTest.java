@@ -5,63 +5,61 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadGeneralDocumentsCategoriser;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_UPLOADED_DOCUMENTS;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
+    public static final String CASE_ID = "1234567890";
+    private FinremCaseDetails caseDetails;
+    private FinremCaseDetails caseDetailsBefore;
 
+    private FinremCaseData caseData;
     ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    @Mock
+    private UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser;
     private UploadGeneralDocumentsAboutToSubmitHandler uploadGeneralDocumentsAboutToSubmitHandler;
 
-    private final List<GeneralUploadedDocumentData> uploadDocumentList = new ArrayList<>();
-    private final List<GeneralUploadedDocumentData> existingDocumentList = new ArrayList<>();
-    private final List<String> expectedDocumentIdList = new ArrayList<>();
-    List<GeneralUploadedDocumentData> handledDocumentList = new ArrayList<>();
-    List<String> handledDocumentIdList = new ArrayList<>();
+    private final List<UploadGeneralDocumentCollection> uploadDocumentList = new ArrayList<>();
+    private final List<UploadGeneralDocumentCollection> existingDocumentList = new ArrayList<>();
+    private final List<UploadGeneralDocumentCollection> expectedDocumentIdList = new ArrayList<>();
+    List<UploadGeneralDocumentCollection> handledDocumentIdList = new ArrayList<>();
 
-    private final UploadedGeneralDocumentService uploadedGeneralDocumentHelper = new UploadedGeneralDocumentService(objectMapper);
-
-    protected GeneralUploadedDocumentData createGeneralUploadDocumentItem(String type, String emailContent,
-                                                                          CaseDocument link, String dateAdded, String comment,
-                                                                          String fileName) {
-        return GeneralUploadedDocumentData.builder()
-            .id(UUID.randomUUID().toString())
-            .generalUploadedDocument(GeneralUploadedDocument
-                .builder()
-                .documentType(type)
-                .documentEmailContent(emailContent)
-                .documentLink(link)
-                .documentDateAdded(dateAdded)
-                .documentComment(comment)
-                .documentFileName(fileName)
-                .build())
-            .build();
-    }
+    private UploadedGeneralDocumentService uploadedGeneralDocumentHelper;
 
     @Before
     public void setUpTest() {
-        uploadGeneralDocumentsAboutToSubmitHandler = new UploadGeneralDocumentsAboutToSubmitHandler(objectMapper, uploadedGeneralDocumentHelper);
+        caseDetails = buildCaseDetails();
+        caseDetailsBefore = buildCaseDetails();
+        caseData = caseDetails.getData();
+        FinremCaseDetailsMapper finremCaseDetailsMapper =
+            new FinremCaseDetailsMapper(objectMapper);
+        uploadedGeneralDocumentHelper = new UploadedGeneralDocumentService(objectMapper);
+        uploadGeneralDocumentsAboutToSubmitHandler =
+            new UploadGeneralDocumentsAboutToSubmitHandler(finremCaseDetailsMapper,
+                uploadedGeneralDocumentHelper, uploadGeneralDocumentsCategoriser);
     }
 
     @Test
@@ -80,41 +78,54 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
 
     @Test
     public void givenValidCaseData_whenHandleUploadGeneralDocument_thenSortCollectionByDate() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension", "/binaryUrl", "");
 
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        GeneralUploadedDocumentData oldDoc = createGeneralUploadDocumentItem(
-            "Old", "Old email content", documentLink, "", "Old Example", "oldDocument.filename");
+        CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension",
+            "/binaryUrl", "");
+
+        UploadGeneralDocumentCollection oldDoc = createGeneralUploadDocumentItem(
+            UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT,
+            "Old email content", documentLink, LocalDate.now().minusDays(1),
+            "Old Example", "oldDocument.filename");
         existingDocumentList.add(oldDoc);
-        caseDetailsBefore.getData().put(GENERAL_UPLOADED_DOCUMENTS, existingDocumentList);
+        caseDetailsBefore.getData().setUploadGeneralDocuments(existingDocumentList);
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        GeneralUploadedDocumentData newDoc = createGeneralUploadDocumentItem(
-            "New", "New email content", documentLink, "", "New Example", "newDocument.filename");
+        UploadGeneralDocumentCollection newDoc = createGeneralUploadDocumentItem(
+            UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT, "New email content",
+            documentLink, LocalDate.now(), "New Example", "newDocument.filename");
         uploadDocumentList.addAll(List.of(newDoc, oldDoc));
-        caseDetails.getData().put(GENERAL_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetails.getData().setUploadGeneralDocuments(uploadDocumentList);
 
-        expectedDocumentIdList.add(newDoc.getId());
-        expectedDocumentIdList.add(oldDoc.getId());
+        expectedDocumentIdList.add(newDoc);
+        expectedDocumentIdList.add(oldDoc);
 
-        handledDocumentList.addAll(
-            (List<GeneralUploadedDocumentData>) uploadGeneralDocumentsAboutToSubmitHandler.handle(
-                callbackRequest, AUTH_TOKEN).getData().get(GENERAL_UPLOADED_DOCUMENTS));
-
-        handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));
+        handledDocumentIdList.addAll(uploadGeneralDocumentsAboutToSubmitHandler.handle(
+                FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+                AUTH_TOKEN).getData().getUploadGeneralDocuments());
 
         assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
     }
 
-    private CallbackRequest buildCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        Map<String, Object> caseDataBefore = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
-        caseDetails.setData(caseData);
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
-        caseDetailsBefore.setData(caseDataBefore);
-        return CallbackRequest.builder().eventId(EventType.UPLOAD_GENERAL_DOCUMENT.getCcdType())
-            .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
+    protected FinremCaseDetails buildCaseDetails() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder().build())
+            .build();
+        return FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CaseType.CONTESTED)
+            .data(finremCaseData).build();
+    }
+
+    protected UploadGeneralDocumentCollection createGeneralUploadDocumentItem(UploadGeneralDocumentType type, String emailContent,
+                                                                              CaseDocument link, LocalDate dateAdded, String comment,
+                                                                              String fileName) {
+        return UploadGeneralDocumentCollection.builder()
+            .value(UploadGeneralDocument
+                .builder()
+                .documentType(type)
+                .documentEmailContent(emailContent)
+                .documentLink(link)
+                .documentDateAdded(dateAdded)
+                .documentComment(comment)
+                .documentFileName(fileName)
+                .build())
+            .build();
     }
 }
