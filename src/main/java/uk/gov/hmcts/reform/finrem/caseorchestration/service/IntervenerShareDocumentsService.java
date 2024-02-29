@@ -469,15 +469,13 @@ public class IntervenerShareDocumentsService implements SharedService {
         return null;
     }
 
+
     public void shareSelectedDocumentWithOtherSelectedSolicitors(FinremCaseData caseData) {
         DynamicMultiSelectList sourceDocumentList = caseData.getSourceDocumentList();
         DynamicMultiSelectList solicitorRoleList = caseData.getSolicitorRoleList();
 
-        log.info("Inside shareSelectedDocumentWithOtherSelectedSolicitors sourceDocumentList {} and solicitorRoleList",
-            sourceDocumentList, solicitorRoleList);
         if (ObjectUtils.isNotEmpty(sourceDocumentList) && ObjectUtils.isNotEmpty(solicitorRoleList)) {
             List<DynamicMultiSelectListElement> roleList = solicitorRoleList.getValue();
-            log.info("Inside if condition of shareSelectedDocumentWithOtherSelectedSolicitors");
             roleList.forEach(role -> {
                 List<DynamicMultiSelectListElement> documentList = sourceDocumentList.getValue();
                 shareSelectedDocumentService.copySharedDocumentsToSharedCollection(caseData, role.getCode(), documentList);

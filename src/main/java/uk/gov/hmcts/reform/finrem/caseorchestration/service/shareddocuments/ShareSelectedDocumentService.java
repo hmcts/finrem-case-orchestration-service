@@ -19,12 +19,10 @@ public class ShareSelectedDocumentService {
     public void copySharedDocumentsToSharedCollection(FinremCaseData caseData,
                                                        String role,
                                                        List<DynamicMultiSelectListElement> documentList) {
-        log.info("DocumentList ----> {}", documentList);
         documentList.forEach(doc -> {
             String[] collectionIdAndFilename = doc.getCode().split("#");
             String collId = collectionIdAndFilename[0];
             String collName = collectionIdAndFilename[1];
-            log.info("Inside copySharedDocumentsToSharedCollection {}, {}",collId, collName);
             documentCollectionSharers.stream()
                 .forEach(sharer -> sharer.shareDocumentsToSharedPartyCollection(caseData, collId, collName, role));
 

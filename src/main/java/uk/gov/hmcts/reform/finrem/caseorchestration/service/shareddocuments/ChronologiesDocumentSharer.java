@@ -36,7 +36,6 @@ public class ChronologiesDocumentSharer extends DocumentSharer {
 
     @Override
     protected void setApplicantSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list) {
-
         caseData.getUploadCaseDocumentWrapper().setAppChronologiesCollectionShared(list);
     }
 

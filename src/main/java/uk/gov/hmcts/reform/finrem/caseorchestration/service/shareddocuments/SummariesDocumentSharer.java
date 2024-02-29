@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.shareddocuments;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -17,7 +16,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.INTERVENER_TWO_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType.RESP_CASE_SUMMARIES_COLLECTION;
 
-@Slf4j
 @Component
 public class SummariesDocumentSharer extends DocumentSharer {
 
@@ -39,7 +37,6 @@ public class SummariesDocumentSharer extends DocumentSharer {
 
     @Override
     protected void setApplicantSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list) {
-        log.info("setApplicantSharedCollection method called");
         caseData.getUploadCaseDocumentWrapper().setAppCaseSummariesCollectionShared(list);
     }
 
@@ -50,7 +47,6 @@ public class SummariesDocumentSharer extends DocumentSharer {
 
     @Override
     protected void setIntervenerOneSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list) {
-        log.info("setIntervenerOneSharedCollection method called");
         caseData.getUploadCaseDocumentWrapper().setIntv1SummariesShared(list);
     }
 
@@ -117,7 +113,6 @@ public class SummariesDocumentSharer extends DocumentSharer {
 
     @Override
     protected List<UploadCaseDocumentCollection> getApplicantCollection(UploadCaseDocumentWrapper documentWrapper) {
-        log.info("inside getApplicantCollection ---- {}", documentWrapper.getAppCaseSummariesCollection());
         return documentWrapper.getAppCaseSummariesCollection();
     }
 
