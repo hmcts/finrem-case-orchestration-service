@@ -75,6 +75,7 @@ public abstract class DocumentSharer {
     private List<UploadCaseDocumentCollection> getAndAddToExistingSharedCollection(String collId,
                                                                                    List<UploadCaseDocumentCollection> documentCollectionToShare,
                                                                                    List<UploadCaseDocumentCollection> sharedCollection) {
+        log.info("Document to share ------{}", documentCollectionToShare);
         List<UploadCaseDocumentCollection> list =
             Optional.ofNullable(sharedCollection)
                 .orElse(new ArrayList<>());
@@ -85,10 +86,12 @@ public abstract class DocumentSharer {
                 }
             });
         }
+        log.info("Document to share final list ------{}", list);
         return list;
     }
 
     private UploadCaseDocumentCollection copyUploadCaseDocumentCollection(UploadCaseDocumentCollection sd) {
+        log.info("copyUploadCaseDocumentCollection {}" + sd );
         UploadCaseDocument uploadCaseDocument = sd.getUploadCaseDocument();
         UploadCaseDocument uploadCaseDocumentToCopy = new UploadCaseDocument(uploadCaseDocument);
         if (featureToggleService.isCaseFileViewEnabled()) {
