@@ -26,13 +26,10 @@ public class RespondentFdrDocumentCategoriserTest {
             categoriser.getDocumentCategory(CaseDocumentType.CHRONOLOGY));
 
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER,
-            categoriser.getDocumentCategory(CaseDocumentType.QUESTIONNAIRE));
-
+            categoriser.getDocumentCategory(CaseDocumentType.OTHER));
 
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_DRAFT_ORDER,
             categoriser.getDocumentCategory(CaseDocumentType.PRE_HEARING_DRAFT_ORDER));
-
-
     }
 
 }
