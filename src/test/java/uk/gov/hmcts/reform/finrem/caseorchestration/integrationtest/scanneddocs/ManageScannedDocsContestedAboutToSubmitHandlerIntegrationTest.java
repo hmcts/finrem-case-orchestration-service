@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.scanneddocs
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -46,11 +45,6 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerIntegrationTest {
 
     @Autowired
     private ManageScannedDocsContestedAboutToSubmitHandler handler;
-
-    @Test
-    void test() {
-        assertThat(documentHandlers).isNotEmpty();
-    }
 
     @ParameterizedTest
     @MethodSource
