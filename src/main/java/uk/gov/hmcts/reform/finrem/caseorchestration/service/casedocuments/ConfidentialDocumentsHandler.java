@@ -30,6 +30,9 @@ public class ConfidentialDocumentsHandler extends DocumentHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
+        if (caseDocumentParty == null) {
+            return DocumentCategory.CONFIDENTIAL_DOCUMENTS;
+        }
 
         switch (caseDocumentParty) {
             case APPLICANT:
