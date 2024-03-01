@@ -34,21 +34,14 @@ public class ConfidentialDocumentsHandler extends DocumentHandler {
             return DocumentCategory.CONFIDENTIAL_DOCUMENTS;
         }
 
-        switch (caseDocumentParty) {
-            case APPLICANT:
-                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_APPLICANT;
-            case RESPONDENT:
-                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_RESPONDENT;
-            case INTERVENER_ONE:
-                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_1;
-            case INTERVENER_TWO:
-                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_2;
-            case INTERVENER_THREE:
-                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_3;
-            case INTERVENER_FOUR:
-                return DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_4;
-            default:
-                return DocumentCategory.CONFIDENTIAL_DOCUMENTS;
-        }
+        return switch (caseDocumentParty) {
+            case APPLICANT -> DocumentCategory.CONFIDENTIAL_DOCUMENTS_APPLICANT;
+            case RESPONDENT -> DocumentCategory.CONFIDENTIAL_DOCUMENTS_RESPONDENT;
+            case INTERVENER_ONE -> DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_1;
+            case INTERVENER_TWO -> DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_2;
+            case INTERVENER_THREE -> DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_3;
+            case INTERVENER_FOUR -> DocumentCategory.CONFIDENTIAL_DOCUMENTS_INTERVENER_4;
+            default -> DocumentCategory.CONFIDENTIAL_DOCUMENTS;
+        };
     }
 }
