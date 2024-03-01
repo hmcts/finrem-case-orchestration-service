@@ -28,11 +28,11 @@ public class ApplicantFdrDocumentCategoriserTest {
         assertEquals(DocumentCategory.FDR_JOINT_DOCUMENTS_CHRONOLOGY,
             categoriser.getDocumentCategory(CaseDocumentType.CHRONOLOGY));
 
-        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_QUESTIONNAIRES,
+        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER,
             categoriser.getDocumentCategory(CaseDocumentType.QUESTIONNAIRE));
 
 
-        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_PRE_HEARING_DRAFT_ORDER,
+        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_DRAFT_ORDER,
             categoriser.getDocumentCategory(CaseDocumentType.PRE_HEARING_DRAFT_ORDER));
 
 

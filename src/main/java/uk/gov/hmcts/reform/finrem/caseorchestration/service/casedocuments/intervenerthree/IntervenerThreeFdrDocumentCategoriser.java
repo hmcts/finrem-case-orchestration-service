@@ -17,8 +17,8 @@ public class IntervenerThreeFdrDocumentCategoriser extends PartyFdrDocumentCateg
     }
 
     @Override
-    protected DocumentCategory getQuestionnairesDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_QUESTIONNAIRES;
+    protected DocumentCategory getOtherDocumentCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_OTHER;
     }
 
     @Override

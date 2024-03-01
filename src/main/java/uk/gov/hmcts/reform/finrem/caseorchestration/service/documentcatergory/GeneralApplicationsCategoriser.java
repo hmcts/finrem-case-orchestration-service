@@ -17,16 +17,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GeneralApplicationsCategoriser extends DocumentCategoriser {
 
     private static final Map<Integer, DocumentCategory> gaNumberToCategory = Map.of(
-        1, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_1,
-        2, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_2,
-        3, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_3,
-        4, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_4,
-        5, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_5,
-        6, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_6,
-        7, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_7,
-        8, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_8,
-        9, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_9,
-        10, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_10);
+        1, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1,
+        2, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_2,
+        3, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3,
+        4, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_4,
+        5, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_5,
+        6, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_6,
+        7, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_7,
+        8, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_8,
+        9, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_9,
+        10, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_10);
 
     public GeneralApplicationsCategoriser(FeatureToggleService featureToggleService) {
         super(featureToggleService);
@@ -42,7 +42,7 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
                     DocumentCategory categoryToApply;
 
                     if (generalApplicationCounter.get() > 10) {
-                        categoryToApply = (DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_OVERFLOW);
+                        categoryToApply = (DocumentCategory.APPLICATIONS_OTHER_APPLICATION_OVERFLOW);
                     } else {
                         categoryToApply = (gaNumberToCategory.get(generalApplicationCounter.get()));
                     }

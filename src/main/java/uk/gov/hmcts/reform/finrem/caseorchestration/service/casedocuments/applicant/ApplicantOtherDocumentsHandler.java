@@ -16,7 +16,7 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
+    protected DocumentCategory getOtherDocumentCategory() {
         return DocumentCategory.APPLICANT_DOCUMENTS_MISCELLANEOUS_OR_OTHER;
     }
 

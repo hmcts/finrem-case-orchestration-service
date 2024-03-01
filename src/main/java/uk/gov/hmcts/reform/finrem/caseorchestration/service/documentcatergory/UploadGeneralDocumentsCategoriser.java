@@ -46,11 +46,11 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
         if (document != null && document.getDocumentLink() != null) {
             if (APPLICANT_DOC_TYPES.contains(document.getDocumentType())) {
                 CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
-                setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
+                setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
                 document.setDocumentLink(documentCopy);
             } else if (RESPONDENT_DOC_TYPES.contains(document.getDocumentType())) {
                 CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
-                setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.CORRESPONDENCE_RESPONDENT.getDocumentCategoryId());
+                setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT.getDocumentCategoryId());
                 document.setDocumentLink(documentCopy);
             } else {
                 CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
