@@ -6,7 +6,6 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CaseEventsApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -41,28 +40,22 @@ public class CcdService {
         submitEventForCaseWorker(startEventResponse, authorisation, caseId, caseTypeId, eventType, "", "");
     }
 
-    @Retryable
-    public void executeCcdEventOnCase(CaseDetails caseDetails, String authorisation, String caseId, String caseTypeId,
-                                      String eventType, String summary, String description) {
-
-        log.info(LOGGER, eventType, caseId);
-
-        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
-
-        StartEventResponse startEventResponse = startEventForCaseWorker(authorisation, caseId, caseTypeId, eventType);
-
-        startEventResponse.getCaseDetails().setData(caseDetails.getData());
-
-        submitEventForCaseWorker(startEventResponse, authorisation, caseId, caseTypeId, eventType, summary, description);
-    }
-
+    /**
+     * Start a CCD event.
+     * <p>The event should be submitted by a subsequent call to {@link #submitEventForCaseWorker}.</p>
+     * @param authorisation auth token
+     * @param caseId case id
+     * @param caseTypeId case type id
+     * @param eventType case event to start
+     * @return StartEventResponse
+     */
     public StartEventResponse startEventForCaseWorker(String authorisation, String caseId, String caseTypeId,
                                                       String eventType) {
         log.info(LOGGER, eventType, caseId);
 
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
 
-        StartEventResponse startEventResponse = coreCaseDataApi
+        return coreCaseDataApi
             .startEventForCaseWorker(idamToken.getIdamOauth2Token(),
                 idamToken.getServiceAuthorization(),
                 idamToken.getUserId(),
@@ -70,9 +63,21 @@ public class CcdService {
                 caseTypeId,
                 caseId,
                 eventType);
-        return startEventResponse;
     }
 
+    /**
+     * Submit an event to CCD.
+     * <p>The case data in {@code startEventResponse} should be from the return value of the initial call to
+     * {@link #startEventForCaseWorker}. Do not use case data from another source to avoid data loss due to concurrent
+     * case data updates.</p>
+     * @param startEventResponse case data
+     * @param authorisation auth token
+     * @param caseId case id
+     * @param caseTypeId case type id
+     * @param eventType case event to submit
+     * @param summary event summary
+     * @param description event description
+     */
     public void submitEventForCaseWorker(StartEventResponse startEventResponse, String authorisation, String caseId, String caseTypeId,
                                          String eventType, String summary, String description) {
         log.info(LOGGER, eventType, caseId);
@@ -88,17 +93,6 @@ public class CcdService {
             caseId,
             true,
             getCaseDataContent(startEventResponse.getCaseDetails().getData(), summary, description, startEventResponse));
-    }
-
-    private CaseDataContent getCaseDataContent(Object caseData,
-                                               StartEventResponse startEventResponse) {
-        return CaseDataContent.builder()
-            .eventToken(startEventResponse.getToken())
-            .event(Event.builder()
-                .id(startEventResponse.getEventId())
-                .build())
-            .data(caseData)
-            .build();
     }
 
     private CaseDataContent getCaseDataContent(Object caseData, String summary, String description,
@@ -154,7 +148,6 @@ public class CcdService {
         return coreCaseDataApi.searchCases(idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(), caseType.getCcdType(), searchBuilder.toString());
     }
-
 
     public SearchResult esSearchCases(CaseType caseType, String esQueryString, String authorisation) {
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);

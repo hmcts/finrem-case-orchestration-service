@@ -39,7 +39,6 @@ import java.util.Optional;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
@@ -300,12 +299,10 @@ public class NotificationsController extends BaseController {
         }
         log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
-        log.info("DEBUGGING NOC - sendNoticeOfChangeEmailCaseworker executed and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
-        log.info("DEBUGGING NOC - sendNoticeOfChangeLetters executed and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+
         caseDetails.getData().put(INCLUDES_REPRESENTATIVE_UPDATE, null);
         caseDetails.getData().put(NOC_PARTY, null);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
@@ -334,8 +331,7 @@ public class NotificationsController extends BaseController {
     private boolean requiresNotifications(CallbackRequest callbackRequest) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        return featureToggleService.isCaseworkerNoCEnabled()
-            && Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATIVE_UPDATE))
+        return Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATIVE_UPDATE))
             .map(updateField -> updateField.equals(YES_VALUE)).orElse(false);
     }
 }

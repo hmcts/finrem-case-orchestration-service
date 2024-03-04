@@ -49,18 +49,25 @@ public class AddedSolicitorService {
         final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
         final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
-        if (!isSolicitorDigital(caseDetails, isApplicant)) {
+        if (caseDataService.isLitigantRepresented(caseDetails, isApplicant)
+            && !isSolicitorDigital(caseDetails, isApplicant)) {
             return getAddedSolicitor(caseDetails, isApplicant, null);
         }
 
-        return Optional.ofNullable(getOrgPolicy(caseDetails, litigantOrgPolicy).getOrganisation())
+        return getChangedRepresentative(caseDetails, isApplicant, litigantOrgPolicy);
+    }
+
+    private ChangedRepresentative getChangedRepresentative(CaseDetails caseDetails, boolean isApplicant, String litigantOrgPolicy) {
+
+        return getOrgPolicy(caseDetails, litigantOrgPolicy)
+            .map(OrganisationPolicy::getOrganisation)
             .map(organisation -> getAddedSolicitor(caseDetails, isApplicant, organisation))
             .orElse(null);
     }
 
-    private OrganisationPolicy getOrgPolicy(CaseDetails caseDetails, String orgPolicy) {
-        return new ObjectMapper().convertValue(caseDetails.getData().get(orgPolicy),
-            OrganisationPolicy.class);
+    private Optional<OrganisationPolicy> getOrgPolicy(CaseDetails caseDetails, String orgPolicy) {
+        return Optional.ofNullable(new ObjectMapper().convertValue(caseDetails.getData().get(orgPolicy),
+            OrganisationPolicy.class));
     }
 
     private String getSolicitorName(CaseDetails caseDetails, boolean isApplicant) {
