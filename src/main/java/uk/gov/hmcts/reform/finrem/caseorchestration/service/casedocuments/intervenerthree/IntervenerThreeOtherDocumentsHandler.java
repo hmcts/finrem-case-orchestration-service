@@ -51,6 +51,16 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
     }
 
     @Override
+    protected DocumentCategory getPointsOfClaimOrDefenceDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_POINTS_OF_CLAIM_OR_DEFENCE;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryFM5() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_FM5;
+    }
+
+    @Override
     protected DocumentCategory getDefaultPartyCategory() {
         return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3;
     }
