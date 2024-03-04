@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter;
 
 public class FinremDateUtils {
 
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
+
     private FinremDateUtils() {
 
     }
@@ -19,5 +21,9 @@ public class FinremDateUtils {
         } else {
             return LocalDateTime.parse(dateInString);
         }
+    }
+
+    public static DateTimeFormatter getDateFormatter() {
+        return DateTimeFormatter.ofPattern(DATE_FORMAT);
     }
 }
