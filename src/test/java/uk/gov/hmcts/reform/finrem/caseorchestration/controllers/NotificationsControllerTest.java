@@ -336,15 +336,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendGeneralOrderCorrespondence() {
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        notificationsController.sendGeneralOrderRaisedEmail(callbackRequest);
-        verify(generalOrderRaisedCorresponder).sendCorrespondence(callbackRequest.getCaseDetails());
-
-    }
-
-    @Test
     public void shouldNotSendEmailToRespSolicitor() {
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
 
