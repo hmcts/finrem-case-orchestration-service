@@ -307,7 +307,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
         createRequest(PATH + "no-org-policies.json");
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
-        when(featureToggleService.isSolicitorNoticeOfChangeEnabled()).thenReturn(true);
         mvc.perform(post("/case-orchestration/org-policies")
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -326,7 +325,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
         createRequest(PATH + "no-orgs-is-represented.json");
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        when(featureToggleService.isSolicitorNoticeOfChangeEnabled()).thenReturn(true);
         mvc.perform(post("/case-orchestration/org-policies")
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -335,19 +333,5 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist())
             .andExpect(jsonPath("$.data.RespondentOrganisationPolicy").doesNotExist())
             .andExpect(jsonPath("$.data.changeOrganisationRequestField").exists());
-    }
-
-    @Test
-    public void shouldNotSetChangeRequestFieldWhenFeatureToggleDisabled() throws Exception {
-        createRequest(PATH + "no-orgs-is-represented.json");
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        when(featureToggleService.isSolicitorNoticeOfChangeEnabled()).thenReturn(false);
-        mvc.perform(post("/case-orchestration/org-policies")
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.changeOrganisationRequestField").doesNotExist());
     }
 }
