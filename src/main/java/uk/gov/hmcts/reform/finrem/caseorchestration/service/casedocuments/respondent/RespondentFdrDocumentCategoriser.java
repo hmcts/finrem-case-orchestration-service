@@ -15,13 +15,13 @@ public class RespondentFdrDocumentCategoriser extends PartyFdrDocumentCategorise
 
     @Override
     protected DocumentCategory getHearingDraftOrderDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_DRAFT_ORDER;
     }
 
 
     @Override
-    protected DocumentCategory getQuestionnairesDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_QUESTIONNAIRES;
+    protected DocumentCategory getOtherDocumentCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER;
     }
 
 

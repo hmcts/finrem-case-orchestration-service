@@ -30,12 +30,12 @@ public class ApprovedConsentOrderDocumentCategoriser extends DocumentCategoriser
                 CaseDocument orderLetter = approvedOrder.getApprovedOrder().getOrderLetter();
                 if (orderLetter != null && orderLetter.getCategoryId() == null) {
                     orderLetter.setCategoryId(
-                        DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId());
+                        DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId());
                 }
                 CaseDocument consentOrder = approvedOrder.getApprovedOrder().getConsentOrder();
                 if (consentOrder != null && consentOrder.getCategoryId() == null) {
                     consentOrder.setCategoryId(
-                        DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId());
+                        DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId());
                 }
             }
         }

@@ -42,17 +42,17 @@ class UploadGeneralDocumentsCategoriserTest extends BaseHandlerTestSetup {
 
         List<UploadGeneralDocumentCollection> documents = finremCaseData.getUploadGeneralDocuments();
 
-        assertEquals(DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId(),
             documents.get(0).getValue().getDocumentLink().getCategoryId());
-        assertEquals(DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId(),
             documents.get(1).getValue().getDocumentLink().getCategoryId());
 
-        assertEquals(DocumentCategory.CORRESPONDENCE_RESPONDENT.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT.getDocumentCategoryId(),
             documents.get(2).getValue().getDocumentLink().getCategoryId());
-        assertEquals(DocumentCategory.CORRESPONDENCE_RESPONDENT.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT.getDocumentCategoryId(),
             documents.get(3).getValue().getDocumentLink().getCategoryId());
 
-        assertEquals(DocumentCategory.CORRESPONDENCE_RESPONDENT.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT.getDocumentCategoryId(),
             documents.get(4).getValue().getDocumentLink().getCategoryId());
 
         assertNull(documents.get(5).getValue().getDocumentLink().getCategoryId());
