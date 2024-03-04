@@ -163,9 +163,9 @@ public class CaseDataController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (featureToggleService.isSolicitorNoticeOfChangeEnabled()) {
-            addDefaultChangeOrganisationRequest(caseData);
-        }
+
+        addDefaultChangeOrganisationRequest(caseData);
+
         addOrganisationPoliciesIfPartiesNotRepresented(caseData);
         List<String> errors = new ArrayList<>();
         Map<String, Object> caseDataBefore = new HashMap<>();
