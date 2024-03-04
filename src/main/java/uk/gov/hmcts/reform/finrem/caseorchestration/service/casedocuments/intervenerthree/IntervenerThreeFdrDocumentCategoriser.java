@@ -13,7 +13,7 @@ public class IntervenerThreeFdrDocumentCategoriser extends PartyFdrDocumentCateg
 
     @Override
     protected DocumentCategory getHearingDraftOrderDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_PRE_HEARING_DRAFT_ORDER;
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_DRAFT_ORDER;
     }
 
     @Override
