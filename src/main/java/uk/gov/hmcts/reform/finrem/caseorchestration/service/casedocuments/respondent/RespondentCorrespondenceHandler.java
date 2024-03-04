@@ -21,10 +21,10 @@ public class RespondentCorrespondenceHandler extends CorrespondenceHandler {
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         if (Objects.requireNonNull(caseDocumentType) == CaseDocumentType.OFFERS) {
             return DocumentCategory.RESPONDENT_DOCUMENTS_OPEN_OFFERS;
         }
-        return DocumentCategory.CORRESPONDENCE_RESPONDENT;
+        return DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT;
     }
 }

@@ -30,7 +30,7 @@ public class RefusedConsentOrderDocumentCategoriser extends DocumentCategoriser 
                 CaseDocument refusedConsentOrder = refusedOrder.getApprovedOrder().getConsentOrder();
                 if (refusedConsentOrder != null && refusedConsentOrder.getCategoryId() == null) {
                     refusedConsentOrder.setCategoryId(
-                        DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId());
+                        DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId());
                 }
             }
         }

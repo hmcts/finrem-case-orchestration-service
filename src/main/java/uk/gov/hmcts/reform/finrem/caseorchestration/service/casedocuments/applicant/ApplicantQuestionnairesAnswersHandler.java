@@ -17,7 +17,7 @@ public class ApplicantQuestionnairesAnswersHandler extends QuestionnairesAnswers
     }
 
     @Override
-    public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
             case REPLY_TO_QUESTIONNAIRE -> {
                 return DocumentCategory.APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE;

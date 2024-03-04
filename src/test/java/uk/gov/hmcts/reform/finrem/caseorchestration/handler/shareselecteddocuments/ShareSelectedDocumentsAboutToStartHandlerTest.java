@@ -209,7 +209,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertNull(handle.getData().getSolicitorRoleList());
-        assertTrue(handle.getErrors().contains("\nThere is/are no party/parties available to share documents."));
+        assertTrue(handle.getErrors().contains("\nThere are no parties available to share documents."));
 
         verify(intervenerShareDocumentsService).intervenerSourceDocumentList(any(), any());
         verify(intervenerShareDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
@@ -272,7 +272,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertNull(handle.getData().getSolicitorRoleList());
-        assertTrue(handle.getErrors().contains("\nThere is/are no party/parties available to share documents."));
+        assertTrue(handle.getErrors().contains("\nThere are no parties available to share documents."));
 
         verify(applicantDocumentsService).applicantSourceDocumentList(any());
         verify(applicantDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
@@ -313,7 +313,7 @@ class ShareSelectedDocumentsAboutToStartHandlerTest {
 
         assertEquals(10, handle.getData().getSourceDocumentList().getListItems().size());
         assertNull(handle.getData().getSolicitorRoleList());
-        assertTrue(handle.getErrors().contains("\nThere is/are no party/parties available to share documents."));
+        assertTrue(handle.getErrors().contains("\nThere are no parties available to share documents."));
 
         verify(respondentShareDocumentsService).respondentSourceDocumentList(any());
         verify(respondentShareDocumentsService).getOtherSolicitorRoleList(any(), any(), any());
