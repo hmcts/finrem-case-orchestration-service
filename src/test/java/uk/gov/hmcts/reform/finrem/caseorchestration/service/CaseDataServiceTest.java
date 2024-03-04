@@ -626,6 +626,44 @@ public class CaseDataServiceTest extends BaseServiceTest {
         );
     }
 
+    @Test
+    public void givenRepresentedFlagOnApplicant_whenIsLitigantRepresented_thenTrue() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APPLICANT_REPRESENTED, "Yes");
+        CaseDetails finremCaseDetails
+            = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).build();
+
+        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, true);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void givenContestedRepresentedFlagOnRespondent_whenIsLitigantRepresented_thenTrue() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APPLICANT_REPRESENTED, "No");
+        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, "Yes");
+        CaseDetails finremCaseDetails
+            = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).build();
+
+        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, false);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void givenConsentedRepresentedFlagOnRespondent_whenIsLitigantRepresented_thenTrue() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APPLICANT_REPRESENTED, "No");
+        caseData.put(CONSENTED_RESPONDENT_REPRESENTED, "Yes");
+        CaseDetails finremCaseDetails
+            = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONSENTED.getCcdType()).id(123L).build();
+
+        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, false);
+
+        assertThat(result, is(true));
+    }
+
     private static RespondToOrderData getRespondToOrderData(String s) {
         RespondToOrderData data = new RespondToOrderData();
         RespondToOrder respondToOrder = new RespondToOrder();
