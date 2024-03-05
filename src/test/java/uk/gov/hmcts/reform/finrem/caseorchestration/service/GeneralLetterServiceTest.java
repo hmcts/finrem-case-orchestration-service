@@ -141,7 +141,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener1Solicitor() {
-        testGenerateGeneralLetterForIntervener(INTERVENER1_SOLICITOR, INTV1_SOLICITOR_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1, "intvr1sol");
+        testGenerateGeneralLetterForIntervener(INTERVENER1_SOLICITOR, INTV1_SOLICITOR_LABEL,
+            DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1, "intvr1sol");
     }
 
     @Test
@@ -151,7 +152,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener2Solicitor() {
-        testGenerateGeneralLetterForIntervener(INTERVENER2_SOLICITOR, INTV2_SOLICITOR_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2, "intvr2sol");
+        testGenerateGeneralLetterForIntervener(INTERVENER2_SOLICITOR, INTV2_SOLICITOR_LABEL,
+            DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2, "intvr2sol");
     }
 
     @Test
@@ -161,7 +163,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener3Solicitor() {
-        testGenerateGeneralLetterForIntervener(INTERVENER3_SOLICITOR, INTV3_SOLICITOR_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3, "intvr3sol");
+        testGenerateGeneralLetterForIntervener(INTERVENER3_SOLICITOR, INTV3_SOLICITOR_LABEL,
+            DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3, "intvr3sol");
     }
 
     @Test
@@ -171,7 +174,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener4Solicitor() {
-        testGenerateGeneralLetterForIntervener(INTERVENER4_SOLICITOR, INTV4_SOLICITOR_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4, "intvr4sol");
+        testGenerateGeneralLetterForIntervener(INTERVENER4_SOLICITOR, INTV4_SOLICITOR_LABEL,
+            DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4, "intvr4sol");
     }
 
     @Test
@@ -369,11 +373,12 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         verify(caseDataService).buildFullRespondentName((CaseDetails) any());
     }
 
-    private static void verifyDocumentFieldCategorisation(List<GeneralLetterCollection> generalLetterData, String CORRESPONDENCE_APPLICANT) {
+    private static void verifyDocumentFieldCategorisation(List<GeneralLetterCollection> generalLetterData,
+                                                          String categoryId) {
         verifyDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
-            CORRESPONDENCE_APPLICANT, caseDocument());
+            categoryId, caseDocument());
         verifyDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(),
-            CORRESPONDENCE_APPLICANT, caseDocument());
+            categoryId, caseDocument());
     }
 
     private FinremCaseDetails getCaseDetailsWithGeneralLetterData(String path) {
@@ -415,7 +420,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         verifyCaseServiceCalls();
     }
 
-    private void testGenerateGeneralLetterForIntervener(String intervenerCode, String intervenerLabel, DocumentCategory category, String intervenerName) {
+    private void testGenerateGeneralLetterForIntervener(String intervenerCode, String intervenerLabel,
+                                                        DocumentCategory category, String intervenerName) {
         generalLetterContestedCaseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_CONTESTED_PATH);
         generalLetterContestedCaseDetails.getData().setCcdCaseType(CaseType.CONTESTED);
         addIntervenerWrapper(intervenerCode);

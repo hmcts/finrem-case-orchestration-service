@@ -49,7 +49,8 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
             GeneralLetterWrapper wrapper = caseDetails.getData().getGeneralLetterWrapper();
             Optional.ofNullable(wrapper.getGeneralLetterUploadedDocuments())
                 .filter(list -> !list.isEmpty())
-                .ifPresent(list -> generalLetterService.validateEncryptionOnUploadedDocuments(list, userAuthorisation, String.valueOf(caseDetails.getId())));
+                .ifPresent(list -> generalLetterService.validateEncryptionOnUploadedDocuments(
+                    list, userAuthorisation, String.valueOf(caseDetails.getId())));
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
         } else {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
