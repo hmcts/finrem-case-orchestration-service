@@ -47,11 +47,11 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         generalApplicationsCategoriser.categorise(finremCaseData);
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(0).getValue()
             .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_1.getDocumentCategoryId()
+                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId()
             );
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(2).getValue()
             .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_3.getDocumentCategoryId()
+                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3.getDocumentCategoryId()
             );
     }
 
@@ -61,42 +61,42 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         generalApplicationsCategoriser.categorise(finremCaseData);
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(0).getValue()
             .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_1.getDocumentCategoryId()
+                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId()
             );
 
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(1).getValue()
             .getGeneralApplicationDraftOrder().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_2.getDocumentCategoryId()
+                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_2.getDocumentCategoryId()
             );
 
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(2).getValue()
             .getGeneralApplicationDirectionsDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_3.getDocumentCategoryId()
+                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3.getDocumentCategoryId()
             );
 
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(3).getValue()
             .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_4.getDocumentCategoryId()
+                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_4.getDocumentCategoryId()
             );
 
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(4).getValue()
             .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_5.getDocumentCategoryId()
+                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_5.getDocumentCategoryId()
             );
 
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(8).getValue()
             .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_9.getDocumentCategoryId()
+                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_9.getDocumentCategoryId()
             );
 
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(9).getValue()
             .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_10.getDocumentCategoryId()
+                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_10.getDocumentCategoryId()
             );
 
         assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(10).getValue()
             .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_OVERFLOW.getDocumentCategoryId()
+                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_OVERFLOW.getDocumentCategoryId()
             );
     }
 

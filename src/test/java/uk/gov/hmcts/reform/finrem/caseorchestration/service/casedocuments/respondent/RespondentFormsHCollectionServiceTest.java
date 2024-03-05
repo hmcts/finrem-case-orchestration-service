@@ -53,7 +53,7 @@ public class RespondentFormsHCollectionServiceTest extends FormsHHandlerTest {
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT),
-            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_ESTIMATES_OR_FORM_H_OR_FORM_H1)
+            is(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260)
         );
     }
 }

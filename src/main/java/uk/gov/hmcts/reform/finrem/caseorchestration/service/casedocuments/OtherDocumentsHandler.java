@@ -47,7 +47,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
     public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
             case OTHER -> {
-                return getMiscellaneousOrOtherDocumentCategory();
+                return getOtherDocumentCategory();
             }
             case PENSION_PLAN -> {
                 return getPensionPlanDocumentCategory();
@@ -89,7 +89,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
 
     }
 
-    protected abstract DocumentCategory getMiscellaneousOrOtherDocumentCategory();
+    protected abstract DocumentCategory getOtherDocumentCategory();
 
     protected abstract DocumentCategory getPensionPlanDocumentCategory();
 

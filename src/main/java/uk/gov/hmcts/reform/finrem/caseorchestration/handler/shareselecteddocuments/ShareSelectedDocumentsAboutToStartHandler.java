@@ -53,7 +53,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
     private final CaseAssignedRoleService caseAssignedRoleService;
     private final AssignCaseAccessService accessService;
     private static final String DOC_ERROR = "\nThere are no documents available to share.";
-    private static final String PARTY_ERROR = "\nThere is/are no party/parties available to share documents.";
+    private static final String PARTY_ERROR = "\nThere are no parties available to share documents.";
 
     public ShareSelectedDocumentsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      ApplicantShareDocumentsService applicantDocumentsService,
@@ -96,6 +96,8 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                 .errors(List.of("Logged in user does not have sufficient role access to execute this event")).build();
         }
+
+        resetEventData(caseData);
 
         List<CaseAssignmentUserRole> allCaseRole = getUniqueRoleList(accessService.getAllCaseRole(String.valueOf(caseId)));
 
@@ -147,8 +149,15 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                     .errors(List.of(PARTY_ERROR)).build();
             }
+
+            intervenerShareDocumentsService.preSelectOptionsIfBothPartiesPresent(roleList);
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+    }
+
+    private void resetEventData(FinremCaseData caseData) {
+        caseData.setSourceDocumentList(null);
+        caseData.setSolicitorRoleList(null);
     }
 
     private List<CaseAssignmentUserRole> getUniqueRoleList(List<CaseAssignmentUserRole> allCaseRole) {

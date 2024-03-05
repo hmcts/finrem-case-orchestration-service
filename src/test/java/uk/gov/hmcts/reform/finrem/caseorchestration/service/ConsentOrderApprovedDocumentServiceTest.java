@@ -203,7 +203,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             resultingCaseDetails.getData());
         CaseDocument latestOrderLetter = approvedOrders.get(approvedOrders.size() - 1).getValue().getOrderLetter();
         assertCaseDocument(latestOrderLetter);
-        assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
             latestOrderLetter.getCategoryId());
     }
 
