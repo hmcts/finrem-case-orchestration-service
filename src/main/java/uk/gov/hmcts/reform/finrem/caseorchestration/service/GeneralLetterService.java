@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
@@ -65,6 +66,7 @@ public class GeneralLetterService {
 
     private final GenericDocumentService genericDocumentService;
     private final BulkPrintService bulkPrintService;
+    private final BulkPrintDocumentService bulkPrintDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
@@ -87,14 +89,30 @@ public class GeneralLetterService {
         GeneralLetterWrapper wrapper = caseData.getGeneralLetterWrapper();
         log.info("Generating General letter for Case ID: {}", caseId);
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
-        CaseDocument generalLetterUploadedDocument = wrapper.getGeneralLetterUploadedDocument();
-        if (generalLetterUploadedDocument != null) {
-            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalLetterUploadedDocument,
-                authorisationToken, caseId.toString());
+        Optional<CaseDocument> generalLetterUploadedDocument = Optional.ofNullable(wrapper.getGeneralLetterUploadedDocument());
+        Optional<List<DocumentCollection>> generalLetterUploadedDocuments = Optional.ofNullable(wrapper.getGeneralLetterUploadedDocuments());
+
+        List<DocumentCollection> pdfGeneralLetterUploadedDocuments = new ArrayList<>();
+        generalLetterUploadedDocument.ifPresent(uploadedDocument -> {
+            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
+                uploadedDocument, authorisationToken, caseId.toString());
             wrapper.setGeneralLetterUploadedDocument(pdfDocument);
-        }
+        });
+
+        generalLetterUploadedDocuments.ifPresent(uploadedDocuments -> {
+            if (!uploadedDocuments.isEmpty()) {
+                uploadedDocuments.forEach(generalLetterUploadedDocumentCollection -> {
+                    CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
+                        generalLetterUploadedDocumentCollection.getValue(),
+                        authorisationToken, caseId.toString());
+                    pdfGeneralLetterUploadedDocuments.add(DocumentCollection.builder().value(pdfDocument).build());
+                });
+                wrapper.setGeneralLetterUploadedDocuments(pdfGeneralLetterUploadedDocuments);
+            }
+        });
+
         addGeneralLetterToCaseData(caseDetails, document,
-            wrapper.getGeneralLetterUploadedDocument());
+            generalLetterUploadedDocument.orElse(null), pdfGeneralLetterUploadedDocuments);
         printLatestGeneralLetter(caseDetails, authorisationToken);
         removeFrcCourtFields(caseData);
         if (caseData.isContestedApplication()) {
@@ -109,6 +127,17 @@ public class GeneralLetterService {
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             getGeneralLetterTemplate(caseDetails.getData()), documentConfiguration.getGeneralLetterFileName());
+    }
+
+    public void validateEncryptionOnUploadedDocuments(List<DocumentCollection> caseDocuments, String caseId,
+                                                      String auth) {
+        List<String> errors = new ArrayList<>();
+        caseDocuments.forEach(doc -> {
+            if (doc != null && doc.getValue() != null) {
+                bulkPrintDocumentService.validateEncryptionOnUploadedDocument(
+                    doc.getValue(), caseId, errors, auth);
+            }
+        });
     }
 
     private String getGeneralLetterTemplate(FinremCaseData caseData) {
@@ -133,13 +162,15 @@ public class GeneralLetterService {
     }
 
     private void addGeneralLetterToCaseData(FinremCaseDetails caseDetails, CaseDocument document,
-                                            CaseDocument generalLetterUploadedDocument) {
+                                            CaseDocument generalLetterUploadedDocument,
+                                            List<DocumentCollection> generalLetterUploadedDocuments) {
         List<GeneralLetterCollection> generalLetterCollection = Optional.ofNullable(caseDetails.getData()
             .getGeneralLetterWrapper().getGeneralLetterCollection())
             .orElse(new ArrayList<>(1));
         generalLetterCollection.add(GeneralLetterCollection.builder().value(GeneralLetter.builder()
                 .generatedLetter(document)
                 .generalLetterUploadedDocument(generalLetterUploadedDocument)
+                .generalLetterUploadedDocuments(generalLetterUploadedDocuments)
                 .build())
             .build());
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterCollection(generalLetterCollection);
@@ -228,10 +259,15 @@ public class GeneralLetterService {
         List<GeneralLetterCollection> generalLettersData = generalLetterWrapper.getGeneralLetterCollection();
         GeneralLetterCollection latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
         bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(latestGeneralLetterData.getValue().getGeneratedLetter()));
-        CaseDocument generalLetterUploadedDocument = generalLetterWrapper.getGeneralLetterUploadedDocument();
-        if (generalLetterUploadedDocument != null) {
-            bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalLetterUploadedDocument));
-        }
+        Optional.ofNullable(generalLetterWrapper.getGeneralLetterUploadedDocument())
+            .ifPresent(uploadedDocument -> bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(uploadedDocument)));
+
+        Optional.ofNullable(generalLetterWrapper.getGeneralLetterUploadedDocuments())
+            .ifPresent(uploadedDocuments -> uploadedDocuments.forEach(
+                generalLetterUploadedDocumentCollection -> bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(
+                    generalLetterUploadedDocumentCollection.getValue())
+                )
+            ));
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(),
             generalLetterWrapper.getGeneralLetterAddressee().getValue().getCode(),
             bulkPrintDocuments, authorisationToken);
