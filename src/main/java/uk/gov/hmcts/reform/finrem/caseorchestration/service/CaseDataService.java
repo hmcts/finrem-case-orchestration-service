@@ -8,6 +8,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -26,6 +27,7 @@ import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.LINE_1;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMEND_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -235,6 +237,14 @@ public class CaseDataService {
         return isContestedApplication(caseDetails) && caseDetails.getData().getConsentOrderWrapper().getConsentD81Question() != null;
     }
 
+    public boolean hasConsentOrder(FinremCaseData caseData) {
+        return caseData.getConsentOrderWrapper().getConsentD81Question() != null;
+    }
+
+    public boolean isConsentInContestedGeneralOrderEvent(EventType eventId) {
+        return GENERAL_ORDER_CONSENT_IN_CONTESTED.equals(eventId);
+    }
+
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
     }
@@ -352,5 +362,20 @@ public class CaseDataService {
             throw new RuntimeException("Error while converting finrem case details pojo into map payload", e);
         }
         return notificationRequestPayload;
+    }
+
+    public boolean isLitigantRepresented(CaseDetails caseDetails, boolean isApplicant) {
+        String isRepresented = (String) caseDetails.getData().get(getLitigantRepresentedKey(caseDetails, isApplicant));
+
+        return YES_VALUE.equalsIgnoreCase(isRepresented);
+    }
+
+    private String getLitigantRepresentedKey(CaseDetails caseDetails, boolean isApplicant) {
+        return isApplicant ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails);
+    }
+
+    private String getRespondentRepresentedKey(CaseDetails caseDetails) {
+        return isConsentedApplication(caseDetails)
+            ? CONSENTED_RESPONDENT_REPRESENTED : CONTESTED_RESPONDENT_REPRESENTED;
     }
 }

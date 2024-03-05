@@ -8,14 +8,14 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.56'
     id 'au.com.dius.pact' version '4.6.7'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1079'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1091'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'io.spring.dependency-management'
 
 def versions = [
-        guava                : '32.1.3-jre',
+        guava                : '33.0.0-jre',
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.9.2',
         commonsIo            : '2.7',
@@ -351,7 +351,7 @@ bootWithCCD {
         }
     }
 
-    //AAT or Local (IDAM and S2S Simulators)
+    // AAT (Local cftlib not currently supported)
     authMode = uk.gov.hmcts.rse.AuthMode.AAT
 
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
