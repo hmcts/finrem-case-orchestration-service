@@ -136,42 +136,42 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener1() {
-        testGenerateGeneralLetterForIntervener(INTERVENER1, INTV1_LABEL, DocumentCategory.CORRESPONDENCE_INTERVENER_1, "intvr1");
+        testGenerateGeneralLetterForIntervener(INTERVENER1, INTV1_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1, "intvr1");
     }
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener1Solicitor() {
-        testGenerateGeneralLetterForIntervener(INTERVENER1_SOLICITOR, INTV1_SOLICITOR_LABEL, DocumentCategory.CORRESPONDENCE_INTERVENER_1, "intvr1sol");
+        testGenerateGeneralLetterForIntervener(INTERVENER1_SOLICITOR, INTV1_SOLICITOR_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1, "intvr1sol");
     }
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener2() {
-        testGenerateGeneralLetterForIntervener(INTERVENER2, INTV2_LABEL, DocumentCategory.CORRESPONDENCE_INTERVENER_2, "intvr2");
+        testGenerateGeneralLetterForIntervener(INTERVENER2, INTV2_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2, "intvr2");
     }
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener2Solicitor() {
-        testGenerateGeneralLetterForIntervener(INTERVENER2_SOLICITOR, INTV2_SOLICITOR_LABEL, DocumentCategory.CORRESPONDENCE_INTERVENER_2, "intvr2sol");
+        testGenerateGeneralLetterForIntervener(INTERVENER2_SOLICITOR, INTV2_SOLICITOR_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2, "intvr2sol");
     }
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener3() {
-        testGenerateGeneralLetterForIntervener(INTERVENER3, INTV3_LABEL, DocumentCategory.CORRESPONDENCE_INTERVENER_3, "intvr3");
+        testGenerateGeneralLetterForIntervener(INTERVENER3, INTV3_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3, "intvr3");
     }
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener3Solicitor() {
-        testGenerateGeneralLetterForIntervener(INTERVENER3_SOLICITOR, INTV3_SOLICITOR_LABEL, DocumentCategory.CORRESPONDENCE_INTERVENER_3, "intvr3sol");
+        testGenerateGeneralLetterForIntervener(INTERVENER3_SOLICITOR, INTV3_SOLICITOR_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3, "intvr3sol");
     }
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener4() {
-        testGenerateGeneralLetterForIntervener(INTERVENER4, INTV4_LABEL, DocumentCategory.CORRESPONDENCE_INTERVENER_4, "intvr4");
+        testGenerateGeneralLetterForIntervener(INTERVENER4, INTV4_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4, "intvr4");
     }
 
     @Test
     public void shouldGenerateGeneralLetterForIntervener4Solicitor() {
-        testGenerateGeneralLetterForIntervener(INTERVENER4_SOLICITOR, INTV4_SOLICITOR_LABEL, DocumentCategory.CORRESPONDENCE_INTERVENER_4, "intvr4sol");
+        testGenerateGeneralLetterForIntervener(INTERVENER4_SOLICITOR, INTV4_SOLICITOR_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4, "intvr4sol");
     }
 
     @Test
@@ -236,9 +236,9 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         List<GeneralLetterCollection> generalLetterData = wrapper.getGeneralLetterCollection();
         assertNull(generalLetterCaseDetails.getData().getCourtDetails());
         verifyDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
-            DocumentCategory.CORRESPONDENCE_OTHER.getDocumentCategoryId(), caseDocument());
+            DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), caseDocument());
         wrapper.getGeneralLetterUploadedDocuments().forEach(doc -> verifyDocumentFields(doc.getValue(),
-            DocumentCategory.CORRESPONDENCE_OTHER.getDocumentCategoryId(), uploadedDocument));
+            DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), uploadedDocument));
         verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), any());
     }
 
