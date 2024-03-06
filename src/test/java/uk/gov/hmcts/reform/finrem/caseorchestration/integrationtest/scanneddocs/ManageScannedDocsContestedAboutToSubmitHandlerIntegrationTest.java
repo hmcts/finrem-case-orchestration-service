@@ -17,10 +17,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ManageScannedDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ManageScannedDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantFdrDocumentCategoriser;
@@ -136,6 +137,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerIntegrationTest {
     private FinremCaseData createCaseData(CaseDocumentType caseDocumentType, boolean isConfidential,
                                           boolean isFdr, CaseDocumentParty caseDocumentParty, String other) {
         ScannedDocumentCollection scannedDocumentCollection = ScannedDocumentCollection.builder()
+            .id("1")
             .value(ScannedDocument.builder()
                 .url(CaseDocument.builder().build())
                 .build())
@@ -150,9 +152,14 @@ public class ManageScannedDocsContestedAboutToSubmitHandlerIntegrationTest {
             .caseDocumentOther(other)
             .build();
 
-        UploadCaseDocumentCollection manageScannedDocumentCollection = UploadCaseDocumentCollection.builder()
-            .id("1")
+        ManageScannedDocument manageScannedDocument = ManageScannedDocument.builder()
+            .selectForUpdate(YesOrNo.YES)
             .uploadCaseDocument(uploadCaseDocument)
+            .build();
+
+        ManageScannedDocumentCollection manageScannedDocumentCollection = ManageScannedDocumentCollection.builder()
+            .id("1")
+            .manageScannedDocument(manageScannedDocument)
             .build();
 
         return FinremCaseData.builder()
