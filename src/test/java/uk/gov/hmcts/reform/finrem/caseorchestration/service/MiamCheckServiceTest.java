@@ -18,6 +18,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class MiamCheckServiceTest {
 
     private MiamCheckService service = new MiamCheckService();
+    private static final String MIAM_EXEMPT_ERROR = "You cannot make this application to court unless the applicant has " +
+        "either attended, or is exempt from attending a MIAM. Please refer to " +
+        "https://www.familymediationcouncil.org.uk/family-mediation/assessment-meeting-miam/ " +
+        "for further information on what to do next and how to arrange a MIAM.";
 
     @Test
     public void miamCheckFailError() {
@@ -25,7 +29,7 @@ public class MiamCheckServiceTest {
         List<String> errors = service.miamExemptAttendCheck(CaseDetails.builder().data(caseData).build());
         assertThat(errors, hasSize(1));
         assertThat(errors,
-            hasItems("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM"));
+            hasItems(MIAM_EXEMPT_ERROR));
     }
 
     @Test
