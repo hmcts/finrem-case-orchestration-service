@@ -81,10 +81,8 @@ public class UpdateRepresentationController extends BaseController {
         Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
         validateCaseData(ccdRequest);
 
-        if (featureToggleService.isCaseworkerNoCEnabled()) {
-            caseData.put(NOC_PARTY, null);
-            caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, null);
-        }
+        caseData.put(NOC_PARTY, null);
+        caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, null);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
