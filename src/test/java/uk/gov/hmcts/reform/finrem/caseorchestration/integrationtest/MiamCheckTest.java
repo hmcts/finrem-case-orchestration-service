@@ -38,10 +38,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 public class MiamCheckTest extends BaseTest {
 
     private static final String API_URL = "/case-orchestration/miam-attend-exempt-check";
-    private static final String ERROR_MSG = "You cannot make this application to court unless the applicant has " +
-        "either attended, or is exempt from attending a MIAM. Please refer to " +
-        "https://www.familymediationcouncil.org.uk/family-mediation/assessment-meeting-miam/ " +
-        "for further information on what to do next and how to arrange a MIAM.";
+    private static final String ERROR_MSG = "You cannot make this application to court unless the applicant has "
+        + "either attended, or is exempt from attending a MIAM. Please refer to "
+        + "https://www.familymediationcouncil.org.uk/family-mediation/assessment-meeting-miam/ "
+        + "for further information on what to do next and how to arrange a MIAM.";
 
     @Autowired
     protected ObjectMapper objectMapper;
