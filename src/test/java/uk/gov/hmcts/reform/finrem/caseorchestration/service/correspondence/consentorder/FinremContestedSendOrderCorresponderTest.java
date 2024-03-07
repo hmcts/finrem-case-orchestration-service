@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToParties
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -76,7 +77,7 @@ class FinremContestedSendOrderCorresponderTest {
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
-        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
+        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper, IntervenerType.INTERVENER_ONE);
     }
 
     @Test
@@ -89,7 +90,7 @@ class FinremContestedSendOrderCorresponderTest {
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().solicitorEmailKey(TEST_SOLICITOR_EMAIL).build();
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
-        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
+        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper, IntervenerType.INTERVENER_TWO);
     }
 
     @Test
@@ -102,7 +103,7 @@ class FinremContestedSendOrderCorresponderTest {
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().solicitorEmailKey(TEST_SOLICITOR_EMAIL).build();
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
-        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
+        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper, IntervenerType.INTERVENER_THREE);
     }
 
     @Test
@@ -117,7 +118,7 @@ class FinremContestedSendOrderCorresponderTest {
             = SolicitorCaseDataKeysWrapper.builder().solicitorEmailKey(wrapper.getIntervenerEmail()).build();
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
-        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
+        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper, IntervenerType.INTERVENER_FOUR);
     }
 
     @Test
