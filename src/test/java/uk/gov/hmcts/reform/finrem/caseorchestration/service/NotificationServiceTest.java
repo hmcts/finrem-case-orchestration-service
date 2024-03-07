@@ -427,7 +427,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendContestOrderApprovedEmailApplicant(finremCallbackRequest.getCaseDetails());
 
         verify(finremNotificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForRespondentSolicitor(finremCallbackRequest.getCaseDetails());
+            .getNotificationRequestForApplicantSolicitor(finremCallbackRequest.getCaseDetails());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_APPLICANT);
     }
 
