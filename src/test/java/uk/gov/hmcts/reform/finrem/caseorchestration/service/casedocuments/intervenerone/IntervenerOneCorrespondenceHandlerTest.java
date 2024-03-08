@@ -64,7 +64,7 @@ public class IntervenerOneCorrespondenceHandlerTest extends CorrespondenceHandle
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.LETTER_FROM_APPLICANT, CaseDocumentParty.INTERVENER_ONE),
-            is(DocumentCategory.CORRESPONDENCE_INTERVENER_1)
+            is(DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1)
         );
     }
 }

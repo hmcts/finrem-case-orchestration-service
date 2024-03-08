@@ -45,7 +45,6 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyRemoveApplicantSolicitorDetails() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details.json").toURI()));
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
         mvc.perform(post(REMOVE_DETAILS_URL)
@@ -78,7 +77,6 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyRemoveApplicantSolicitorDetails_respondentConfidentialAddressNotAmended() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details-res-untouched.json").toURI()));
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
         mvc.perform(post(REMOVE_DETAILS_URL)
@@ -110,7 +108,6 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyRemoveApplicantSolicitorDetails_applicantConfidentialAddressNotAmended() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details-app-untouched.json").toURI()));
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
         mvc.perform(post(REMOVE_DETAILS_URL)
@@ -142,7 +139,6 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyRemoveApplicantSolicitorDetails_bothConfidentialAddressNotAmended() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details-both-untouched.json").toURI()));
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
 
         mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
