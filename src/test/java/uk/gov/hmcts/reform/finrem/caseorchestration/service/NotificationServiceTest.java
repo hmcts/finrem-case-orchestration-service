@@ -423,64 +423,6 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendFinremContestOrderApprovedEmailApplicantSolicitor() {
-        notificationService.sendContestOrderApprovedEmailApplicant(finremCallbackRequest.getCaseDetails());
-
-        verify(finremNotificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForApplicantSolicitor(finremCallbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_APPLICANT);
-    }
-
-    @Test
-    public void sendFinremContestOrderApprovedEmailRespondentSolicitor() {
-        notificationService.sendContestOrderApprovedEmailRespondent(finremCallbackRequest.getCaseDetails());
-
-        verify(finremNotificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForRespondentSolicitor(finremCallbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_RESPONDENT);
-    }
-
-    @Test
-    public void sendFinremContestOrderApprovedEmailIntervener1Solicitor() {
-        notificationService.sendContestOrderApprovedEmailIntervener(finremCallbackRequest.getCaseDetails(),
-            dataKeysWrapper, IntervenerType.INTERVENER_ONE);
-
-        verify(finremNotificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER1);
-    }
-
-    @Test
-    public void sendFinremContestOrderApprovedEmailIntervener2Solicitor() {
-        notificationService.sendContestOrderApprovedEmailIntervener(finremCallbackRequest.getCaseDetails(),
-            dataKeysWrapper, IntervenerType.INTERVENER_TWO);
-
-        verify(finremNotificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER2);
-    }
-
-    @Test
-    public void sendFinremContestOrderApprovedEmailIntervener3Solicitor() {
-        notificationService.sendContestOrderApprovedEmailIntervener(finremCallbackRequest.getCaseDetails(),
-            dataKeysWrapper, IntervenerType.INTERVENER_THREE);
-
-        verify(finremNotificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER3);
-    }
-
-    @Test
-    public void sendFinremContestOrderApprovedEmailIntervener4Solicitor() {
-        notificationService.sendContestOrderApprovedEmailIntervener(finremCallbackRequest.getCaseDetails(),
-            dataKeysWrapper, IntervenerType.INTERVENER_FOUR);
-
-        verify(finremNotificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER4);
-    }
-
-    @Test
     public void sendSolicitorToDraftOrderEmailRespondent() {
         notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest.getCaseDetails());
 
