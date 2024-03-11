@@ -73,7 +73,9 @@ public class UpdateRepresentationService {
 
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
         log.info("{} Found the solicitor to add {}", caseDetails.getId(), solicitorToAdd.getId());
-        solicitorToAdd.getRoles().forEach(role -> log.info("{} Role: {}", caseDetails.getId(), role));
+        if (solicitorToAdd.getRoles() != null && !solicitorToAdd.getRoles().isEmpty()) {
+            solicitorToAdd.getRoles().forEach(role -> log.info("{} Role: {}", caseDetails.getId(), role));
+        }
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
         log.info("{} Found the changeRequest with case role {}, organisation {}", caseDetails.getId(),
             changeRequest.getCaseRoleId(), changeRequest.getOrganisationToAdd());
@@ -97,8 +99,15 @@ public class UpdateRepresentationService {
             addedSolicitor.getName());
         final ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
-        log.info("{} Removed solicitor email: {}, organisation {}, name {} ", caseDetails.getId(),
-            removedSolicitor.getEmail(), removedSolicitor.getOrganisation().getOrganisationID(),
+        if (removedSolicitor != null && removedSolicitor.getOrganisation() != null) {
+            log.info("{} Removed solicitor organisation {}, name {} ", caseDetails.getId(),
+                removedSolicitor.getOrganisation().getOrganisationID(),
+                removedSolicitor.getName());
+        } else {
+            log.info("{} Removed solicitor is null", caseDetails.getId());
+        }
+        log.info("{} Removed solicitor organisation {}, name {} ", caseDetails.getId(),
+            removedSolicitor.getOrganisation().getOrganisationID(),
             removedSolicitor.getName());
         log.info("About to start updating solicitor details in the case data for Case ID: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
