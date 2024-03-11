@@ -61,48 +61,69 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER)
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_OTHER)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_B, CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_F, CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN, CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
+
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES,
+                CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS,
+                CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN,
+                CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_PENSION_PLAN)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE,
+                CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_CERTIFICATES_OF_SERVICE)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1),
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1, CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_ES1)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS),
-            is(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_WITHOUT_PREJUDICE_OFFERS)
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT,
+                CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.REPORTS)
         );
 
         assertThat(
-            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT),
-            is(DocumentCategory.REPORTS_PENSION_REPORTS)
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE, CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_POINTS_OF_CLAIM_OR_DEFENCE)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FM5, CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_FM5)
         );
     }
 }

@@ -43,6 +43,9 @@
       "natureOfApplicationChecklist": [
         "periodicalPaymentOrder"
       ],
+      "hearing_midlandsFRCList": "nottingham",
+      "hearing_regionList": "midlands",
+      "hearing_nottinghamCourtList": "FR_s_NottinghamList_6",
       "draftDirectionDetailsCollection": [
         {
           "value": {

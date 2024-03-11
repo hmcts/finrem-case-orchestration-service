@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -21,10 +22,10 @@ public class IntervenerThreeCorrespondenceHandler extends CorrespondenceHandler 
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         if (Objects.requireNonNull(caseDocumentType) == CaseDocumentType.OFFERS) {
             return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_OPEN_OFFERS;
         }
-        return DocumentCategory.CORRESPONDENCE_INTERVENER_3;
+        return DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3;
     }
 }

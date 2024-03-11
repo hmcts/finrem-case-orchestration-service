@@ -20,7 +20,7 @@ public enum CaseDocumentType {
     REPLY_TO_QUESTIONNAIRE("Reply to Questionnaire"),
     VALUATION_REPORT("Valuation Report"),
     PENSION_PLAN("Pension Plan"),
-    POSITION_STATEMENT("Position Statement"),
+    POSITION_STATEMENT_SKELETON_ARGUMENT("Position Statement"),
     SKELETON_ARGUMENT("Skeleton Argument"),
     EXPERT_EVIDENCE("Expert Evidence"),
     STATEMENT_AFFIDAVIT("Statement/Affidavit"),
@@ -38,7 +38,6 @@ public enum CaseDocumentType {
     CERTIFICATES_OF_SERVICE("Certificates of service"),
     ES1("ES1"),
     ES2("ES2"),
-    FAMILY_HOME_VALUATION("Family home valuation"),
     HOUSING_PARTICULARS("Housing particulars"),
     JUDICIAL_NOTES("Judicial notes"),
     JUDGMENT("Judgment"),
@@ -47,7 +46,10 @@ public enum CaseDocumentType {
     PRE_HEARING_DRAFT_ORDER("Pre hearing draft order"),
     TRANSCRIPT("Transcript"),
     WITHOUT_PREJUDICE_OFFERS("Without Prejudice offers"),
-    WITNESS_SUMMONS("Witness Summons");
+    WITNESS_SUMMONS("Witness Summons"),
+    POINTS_OF_CLAIM_OR_DEFENCE("Points of claim/defence"),
+
+    FM5("FM5");
 
 
     private final String id;

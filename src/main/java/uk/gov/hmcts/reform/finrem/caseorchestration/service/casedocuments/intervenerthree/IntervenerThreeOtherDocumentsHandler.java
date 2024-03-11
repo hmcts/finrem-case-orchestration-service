@@ -16,8 +16,8 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
     }
 
     @Override
-    protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER;
+    protected DocumentCategory getOtherDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_OTHER;
     }
 
     @Override
@@ -41,19 +41,8 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
     }
 
     @Override
-    protected DocumentCategory getHearingDocumentsCategoryMortgageCapacities() {
-        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES;
-    }
-
-    @Override
-    protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_WITHOUT_PREJUDICE_OFFERS;
-    }
-
-
-    @Override
-    protected DocumentCategory getHouseParticularsDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_HOUSING_PARTICULARS;
+    protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS;
     }
 
     @Override
@@ -62,7 +51,23 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
     }
 
     @Override
+    protected DocumentCategory getPointsOfClaimOrDefenceDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_POINTS_OF_CLAIM_OR_DEFENCE;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryFM5() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_FM5;
+    }
+
+    @Override
     protected DocumentCategory getDefaultPartyCategory() {
         return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3;
+    }
+
+
+    @Override
+    protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_WITHOUT_PREJUDICE_OFFERS;
     }
 }

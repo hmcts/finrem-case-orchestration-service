@@ -17,7 +17,7 @@ public class RespondentChronologiesStatementHandler extends ChronologiesStatemen
     }
 
     @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType) {
+    protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
             case CHRONOLOGY -> {
                 return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CHRONOLOGY;

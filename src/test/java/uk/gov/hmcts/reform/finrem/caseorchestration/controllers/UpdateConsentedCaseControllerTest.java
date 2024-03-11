@@ -55,7 +55,6 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
     public void givenValidData_whenUpdateCaseDetails_thenShouldPreserveOrgPolicies() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/updatecase/amend-divorce-details-d81-joint.json").toURI()));
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -72,7 +71,6 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/noticeOfChange/caseworkerNoc/consented-change-of-reps.json").toURI()));
         when(mockNocWorkflowService.handleNoticeOfChangeWorkflow(any(), any(), any()))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

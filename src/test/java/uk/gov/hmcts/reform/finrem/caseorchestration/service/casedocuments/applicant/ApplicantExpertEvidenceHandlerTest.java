@@ -52,6 +52,6 @@ public class ApplicantExpertEvidenceHandlerTest extends ExpertEvidenceHandlerTes
 
     @Override
     protected DocumentCategory getValuationReportCategory() {
-        return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FAMILY_HOME_VALUATION;
+        return DocumentCategory.REPORTS;
     }
 }

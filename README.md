@@ -1,158 +1,92 @@
 # Financial Remedy Case Orchestration Service
 
-This application orchestrates a workflow based on the requested business requirement.
 ## Overview
+`finrem-case-orchestration` is a [Spring Boot](https://spring.io/projects/spring-boot) application and is responsible for handling all CCD callbacks
+for Financial Remedy cases. It provides the business logic to enable Financial Remedy cases to be progressed through
+the justice system.
+
+The CCD definitions supported by this service can be found [here](https://github.com/hmcts/finrem-ccd-definitions).
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/hmcts/reform-api-docs/master/docs/c4/finrem/images/structurizr-finrem-overview.png" width="800"/>
 </p>
 
-## Getting started
+## Prerequisites
+- [JDK 17](https://www.oracle.com/java)
 
-### Prerequisites
-
-- [JDK 11](https://www.oracle.com/java)
+## Getting Started
 
 ### Building
-
-The project uses [Gradle](https://gradle.org) as a build tool but you don't have to install it locally since there is a
+The project uses [Gradle](https://gradle.org) as a build tool, but you don't have to install it locally since there is a
 `./gradlew` wrapper script.
 
-To build project please execute the following command:
+To build project execute the following command:
 
 ```bash
 ./gradlew build
 ```
 
+### IntelliJ IDEA
 To get the project to build in IntelliJ IDEA, you have to:
 
- - Install the Lombok plugin: Preferences -> Plugins
- - Enable Annotation Processing: Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processors
+- Install the Lombok plugin: Settings -> Plugins
+- Enable Annotation Processing: Settings -> Build, Execution, Deployment -> Compiler -> Annotation Processors
 
-### Running the service in isolation
-
-You can run the application by executing following command:
-
+### Running
+The service can be run with 
 ```bash
 ./gradlew bootRun
 ```
+The service listens on port 9000 `http://localhost:9000`
 
-The application will start locally on: `http://localhost:9000`
+However, in order to develop and test `fincase-case-orchestration` you should run the service with the
+[cftlib](https://github.com/hmcts/rse-cft-lib) plugin.
 
-### Running the service with CCD (and IDAM) locally (Developers and QAs)
+### Running with RSE CFT lib
+[cftlib](https://github.com/hmcts/rse-cft-lib) is a Gradle plugin that provides a local CCD/ExUI environment 
+in which `finrem-case-orchestration` can be developed and tested.
 
-The best way to develop and test services in Financial Remedy is to use `rse-cft-lib` plugin by running:
+The integration between the plugin and `finrem-case-orchestration` can be found in:
+- `build.gradle` - see `bootWithCCD`
+- src/cftlib
 
-```bash
-./gradlew bootWithCCD
-```
+cftlib can be configured to run either
+- using AAT services. See [cftlib AAT](docs/cftlib-aat.md)
+- in a pure local environment without any AAT dependencies. See [cftlib Local](docs/cftlib-local.md)
 
-This will spin up finrem-case-orchestration along with the base CCD services 
-and a few docker containers for Postgres, ES, LS and XUI:
-
-on `build.gradle` you can find our customisation for the plugin task on `bootWithCCD`:
-
-- if running it with `authMode = uk.gov.hmcts.rse.AuthMode.AAT`, 
-an `.aat-env` file is needed so the automated process can set up the environment variables
-to point the services to AAT. As these will contain service keys, we are not keeping these under source control, 
-ask a colleague to provide them or copy them from the pods running in AAT.
-(As AAT is heavily used on this setup you must be always on the VPN)
-
-- if running it with `authMode = uk.gov.hmcts.rse.AuthMode.Local` in addition to CCD services an IDAM and S2S simulators
-are also made available so there is no dependency on AAT. 
-
-  
-On both scenarios an automated process will generate and import the definitions directly from your checked out
-`finrem-ccd-definitions` project, which must be present on the same directory level as the `finrem-case-orchestration` folder.
-
-In case you are not logged in you must run the below commands 
-(only the first time you are spinning up the service) 
-to download the service images from Azure Registry.
-```bash
-az acr login --name hmctspublic --subscription DCD-CNP-Prod
-az acr login --name hmctsprivate --subscription DCD-CNP-Prod
-```
-
-- XUI can be accessed on localhost:3000
-
-(As AAT is heavily used on this setup you must be always on the VPN)
-
-#### Gotchas
-When Running for the first time ever the services, it's advised to run each service build with:
-
-```bash
-./gradlew clean build
-```
-
-and on finrem-ccd-definitions folder, please run:
-
-```bash
-yarn install && yarn reset-ccd-submodule
-```
-
-- You must have Docker Desktop running; the AAT setup requires 3GB memory minimum and the Local setup will vary depending on how many services you will be running locally
-
-on macOS:
-- The IDAM Simulator runs on port 5000, so it is necessary to disable macOS' AirPlay Receiver server in: 
-Settings > Sharing > AirPlay Receiver
-
-### API documentation
-
+## API documentation
 API documentation is provided with Swagger. This is available locally at: `http://localhost:9000/swagger-ui.html`
 
-## Setup User/Roles, CCD definition file
-
-### Create User/Roles
-
-To create the users/role run the following command:
-
-```bash
-./bin/create-roles-users.sh
-```
-### Import definition file
-
-To import the Financial Remedy CCD definition file, run the following command:
-
-```bash
-./bin/ccd-import-definition.sh <<Finrem_Definition_File_Path>>
-```
-
-### Load pba reference data using new endpoints of PRD
-
-To load reference data ( organisation, user and pba account: PBA0222), run the following command.
-
-Go to **bin** folder,
-
-```bash
-./load-pba-reference-data.sh
-```
-
 ## Testing
-
 ### Unit tests
-
-To run all unit tests and local functional tests please execute following command:
+To run all unit tests and local functional tests execute following command:
 
 ```bash
 ./gradlew test
 ```
 
 ### Coding style tests
-
-To run all checks (including unit tests) please execute following command:
+To run all checks (including unit tests) execute following command:
 
 ```bash
 ./gradlew check
 ```
 
 ### Mutation tests
-
 To run all mutation tests execute the following command:
 
 ```bash
 ./gradlew pitest
 ```
-### Crons
 
+### OWASP Dependency Vulnerability Checks
+To run the OWASP checks for vulnerabilities in dependencies:
+
+```bash
+./gradlew dependencyCheckAggregate
+```
+
+### Crons
 You can manually run a cron task from the cli:
 
 ```
@@ -166,7 +100,6 @@ TASK_NAME=AddApplicationTypeTask ./gradlew bootRun
 ```
 
 ### Running functional tests locally pointing to AAT
-
 1. Make a copy of `src/main/resources/example-application-aat.properties` as `src/main/resources/application-aat.properties`
 2. Make a copy of `src/functionalTests/resources/example-application-local.properties` as `src/functionalTests/resources/application-local.properties`
 3. Replace the `replace_me` secrets in both of the _newly created_ files.
@@ -175,7 +108,6 @@ TASK_NAME=AddApplicationTypeTask ./gradlew bootRun
 5. Start the test with AAT config using `./gradlew clean functional`
 
 ### Running additional tests in the Jenkins PR Pipeline
-
 1. Add one or more appropriate labels to your PR in GitHub. Valid labels are:
 
 - ```enable_security_scan```
@@ -186,10 +118,8 @@ TASK_NAME=AddApplicationTypeTask ./gradlew bootRun
 - As Fortify scans execute during the Static Checks/Container Build step, you will need to ensure this is triggered by making a minor change to the PR, such as bumping the chart version.
 
 ## Versioning
-
 We use [SemVer](http://semver.org/) for versioning.
 For the versions available, see the tags on this repository.
 
 ## License
-
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
