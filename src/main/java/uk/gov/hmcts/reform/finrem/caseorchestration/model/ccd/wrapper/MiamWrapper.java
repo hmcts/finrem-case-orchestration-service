@@ -40,11 +40,11 @@ public class MiamWrapper {
     @JsonProperty("MIAMOtherGroundsChecklist")
     private MiamOtherGrounds miamOtherGroundsChecklist;
     @JsonProperty("evidenceUnavailableDomesticAbuseMIAM")
-    private String evidenceUnavailableDomesticAbuseMIAM;
+    private String evidenceUnavailableDomesticAbuseMiam;
     @JsonProperty("evidenceUnavailableUrgencyMIAM")
-    private String evidenceUnavailableUrgencyMIAM;
+    private String evidenceUnavailableUrgencyMiam;
     @JsonProperty("evidenceUnavailablePreviousAttendanceMIAM")
-    private String evidenceUnavailablePreviousAttendanceMIAM;
+    private String evidenceUnavailablePreviousAttendanceMiam;
     @JsonProperty("evidenceUnavailableOtherGroundsMIAM")
-    private String evidenceUnavailableOtherGroundsMIAM;
+    private String evidenceUnavailableOtherGroundsMiam;
 }
