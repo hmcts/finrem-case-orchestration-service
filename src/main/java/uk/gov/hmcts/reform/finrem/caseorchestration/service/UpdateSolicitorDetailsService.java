@@ -79,6 +79,7 @@ public class UpdateSolicitorDetailsService {
                                                              Map<String, Object> caseData,
                                                              boolean isConsented,
                                                              boolean isApplicant) {
+        log.info("{} Updating solicitor contact details without id");
         if (isApplicant) {
             updateAppSolFields(caseData, isConsented, addedSolicitor);
         } else {
@@ -103,6 +104,7 @@ public class UpdateSolicitorDetailsService {
     private void updateAppSolFields(Map<String, Object> caseData,
                                     boolean isConsented,
                                     ChangedRepresentative addedSolicitor) {
+        log.info("updating app sol fields where added solicitor is {}", addedSolicitor.getName());
         caseData.put(isConsented ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME,
             addedSolicitor.getName());
         caseData.put(isConsented ? SOLICITOR_EMAIL : CONTESTED_SOLICITOR_EMAIL, addedSolicitor.getEmail());
