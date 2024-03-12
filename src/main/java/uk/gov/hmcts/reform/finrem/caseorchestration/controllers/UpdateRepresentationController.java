@@ -62,7 +62,15 @@ public class UpdateRepresentationController extends BaseController {
         assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
         log.info("{} Finished revoking creator role", caseDetails.getId());
         Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
+        log.info("{} Finished updating representation", caseDetails.getId());
         caseDetails.getData().putAll(caseData);
+        log.info("{} Finished adding to case data", caseDetails.getId());
+        if (assignCaseAccessService.applyDecision(authToken, caseDetails) != null) {
+            log.info("{} apply decision returns {}", caseDetails.getId(),
+                assignCaseAccessService.applyDecision(authToken, caseDetails));
+        } else {
+            log.info("{} apply decision returns null", caseDetails.getId());
+        }
         return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
     }
 
