@@ -73,12 +73,8 @@ public class UpdateRepresentationService {
 
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
         log.info("{} Found the solicitor to add {}", caseDetails.getId(), solicitorToAdd.getId());
-        if (solicitorToAdd.getRoles() != null && !solicitorToAdd.getRoles().isEmpty()) {
-            solicitorToAdd.getRoles().forEach(role -> log.info("{} Role: {}", caseDetails.getId(), role));
-        }
+
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
-        log.info("{} Found the changeRequest with case role {}, organisation {}", caseDetails.getId(),
-            changeRequest.getCaseRoleId(), changeRequest.getOrganisationToAdd());
 
         if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseDetails.getData(), solicitorToAdd)) {
             log.error("User has represented litigant as Barrister for Case ID: {}, REJECTING COR", caseDetails.getId());
@@ -89,14 +85,14 @@ public class UpdateRepresentationService {
             return caseData;
         }
 
-        log.info("{} has user been barrister {}", caseDetails.getId(),
-            barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseDetails.getData(), solicitorToAdd));
-
         final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd,
             changeRequest);
-        log.info("{} Added solicitor email: {}, organisation {}, name {} ", caseDetails.getId(),
-            addedSolicitor.getEmail(), addedSolicitor.getOrganisation().getOrganisationID(),
-            addedSolicitor.getName());
+        if (addedSolicitor != null) {
+            log.info("{} Added solicitor email: {}, organisation {}, name {} ", caseDetails.getId(),
+                addedSolicitor.getEmail(), addedSolicitor.getOrganisation().getOrganisationID(),
+                addedSolicitor.getName());
+        }
+
         final ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
         if (removedSolicitor != null && removedSolicitor.getOrganisation() != null) {
