@@ -162,6 +162,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .evidenceUnavailableUrgencyMiam(miamDetails.getEvidenceUnavailableUrgencyMiam())
             .evidenceUnavailablePreviousAttendanceMiam(miamDetails.getEvidenceUnavailablePreviousAttendanceMiam())
             .evidenceUnavailableOtherGroundsMiam(miamDetails.getEvidenceUnavailableOtherGroundsMiam())
+            .additionalInfoOtherGroundsMiam(miamDetails.getAdditionalInfoOtherGroundsMiam())
             .familyMediatorMiam(getYesOrNo(miamDetails.getFamilyMediatorMiam()))
             .applicantAttendedMiam(getYesOrNo(miamDetails.getApplicantAttendedMiam()))
             .mediatorRegistrationNumber(Objects.toString(caseData.getMediatorRegistrationNumber(), null))
