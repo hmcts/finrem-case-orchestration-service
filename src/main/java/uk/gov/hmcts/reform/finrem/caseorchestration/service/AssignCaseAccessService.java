@@ -91,8 +91,6 @@ public class AssignCaseAccessService {
     public AboutToStartOrSubmitCallbackResponse applyDecision(String authToken, CaseDetails caseDetails) {
         if (serviceAuthTokenGenerator.generate() != null) {
             log.info("{} serviceAuth {}", caseDetails.getId(), serviceAuthTokenGenerator.generate());
-        } else {
-            log.info("{} serviceAuth null", caseDetails.getId());
         }
         if (DecisionRequest.decisionRequest(caseDetails) != null) {
             log.info("{} decisionRequest {}", caseDetails.getId(), DecisionRequest.decisionRequest(caseDetails));
