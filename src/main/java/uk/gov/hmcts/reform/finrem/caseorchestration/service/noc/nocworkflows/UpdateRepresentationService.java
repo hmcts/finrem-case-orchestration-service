@@ -106,9 +106,6 @@ public class UpdateRepresentationService {
         } else {
             log.info("{} Removed solicitor is null", caseDetails.getId());
         }
-        log.info("{} Removed solicitor organisation {}, name {} ", caseDetails.getId(),
-            removedSolicitor.getOrganisation().getOrganisationID(),
-            removedSolicitor.getName());
         log.info("About to start updating solicitor details in the case data for Case ID: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
         log.info("About to update representation update history for Case ID: {}", caseDetails.getId());
