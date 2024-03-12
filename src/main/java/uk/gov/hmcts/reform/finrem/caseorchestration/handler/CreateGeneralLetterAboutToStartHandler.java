@@ -51,7 +51,7 @@ public class CreateGeneralLetterAboutToStartHandler extends FinremCallbackHandle
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to clear general letter fields for Case ID: {}", caseDetails.getId());
-        if (caseDetails.getData().getMiniFormA().getCategoryId() != null) {
+        if (caseDetails.getData().getMiniFormA() != null && caseDetails.getData().getMiniFormA().getCategoryId() != null) {
             log.info(" Case ID: {}, MiniFormA: {}", caseDetails.getId(), caseDetails.getData().getMiniFormA().getCategoryId());
         }
 
