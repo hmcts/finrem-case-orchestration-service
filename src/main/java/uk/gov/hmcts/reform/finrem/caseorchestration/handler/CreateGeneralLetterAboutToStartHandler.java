@@ -48,10 +48,27 @@ public class CreateGeneralLetterAboutToStartHandler extends FinremCallbackHandle
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to clear general letter fields for Case ID: {}", caseDetails.getId());
+        if (caseDetails.getData().getMiniFormA().getCategoryId() != null) {
+            log.info(" Case ID: {}, MiniFormA: {}", caseDetails.getId(), caseDetails.getData().getMiniFormA().getCategoryId());
+        }
+
+        if (caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationDocument() != null
+            && caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationDocument().getCategoryId() != null) {
+            log.info(" Case ID: {}, GA Document: {}", caseDetails.getId(), caseDetails.getData()
+                .getGeneralApplicationWrapper().getGeneralApplicationDocument().getCategoryId());
+        }
+
+        if (caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection() != null
+            && !caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection().isEmpty()
+            && caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection().get(0) != null
+            && caseDetails.getData().getGeneralLetterWrapper()
+            .getGeneralLetterCollection().get(0).getValue().getGeneratedLetter().getCategoryId() != null) {
+            log.info(" Case ID: {}, GL: {}", caseDetails.getId(),
+                caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection().get(0).getValue().getGeneratedLetter().getCategoryId());
+        }
 
         validateCaseData(callbackRequest);
 
