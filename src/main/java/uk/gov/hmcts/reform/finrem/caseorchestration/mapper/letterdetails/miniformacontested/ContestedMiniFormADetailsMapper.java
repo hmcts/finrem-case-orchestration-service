@@ -158,6 +158,10 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
         MiamWrapper miamDetails) {
         return builder
             .claimingExemptionMiam(getYesOrNo(miamDetails.getClaimingExemptionMiam()))
+            .evidenceUnavailableDomesticAbuseMiam(miamDetails.getEvidenceUnavailableDomesticAbuseMiam())
+            .evidenceUnavailableUrgencyMiam(miamDetails.getEvidenceUnavailableUrgencyMiam())
+            .evidenceUnavailablePreviousAttendanceMiam(miamDetails.getEvidenceUnavailablePreviousAttendanceMiam())
+            .evidenceUnavailableOtherGroundsMiam(miamDetails.getEvidenceUnavailableOtherGroundsMiam())
             .familyMediatorMiam(getYesOrNo(miamDetails.getFamilyMediatorMiam()))
             .applicantAttendedMiam(getYesOrNo(miamDetails.getApplicantAttendedMiam()))
             .mediatorRegistrationNumber(Objects.toString(caseData.getMediatorRegistrationNumber(), null))

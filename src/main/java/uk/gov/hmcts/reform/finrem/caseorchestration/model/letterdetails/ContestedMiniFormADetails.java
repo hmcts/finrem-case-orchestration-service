@@ -87,4 +87,12 @@ public class ContestedMiniFormADetails implements DocumentTemplateDetails {
     private String miamPreviousAttendanceChecklist;
     @JsonProperty("MIAMOtherGroundsChecklist")
     private String miamOtherGroundsChecklist;
+    @JsonProperty("evidenceUnavailableDomesticAbuseMIAM")
+    private String evidenceUnavailableDomesticAbuseMiam;
+    @JsonProperty("evidenceUnavailableUrgencyMIAM")
+    private String evidenceUnavailableUrgencyMiam;
+    @JsonProperty("evidenceUnavailablePreviousAttendanceMIAM")
+    private String evidenceUnavailablePreviousAttendanceMiam;
+    @JsonProperty("evidenceUnavailableOtherGroundsMIAM")
+    private String evidenceUnavailableOtherGroundsMiam;
 }
