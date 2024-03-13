@@ -145,6 +145,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -420,39 +422,20 @@ class FinremCaseDetailMapperTest {
 
     private void assertMiam(FinremCaseData caseData) {
         MiamWrapper miamValues = caseData.getMiamWrapper();
-
-        assertTrue(miamValues.getMiamExemptionsChecklist().containsAll(
-            List.of(
-                MiamExemption.DOMESTIC_VIOLENCE,
-                MiamExemption.URGENCY,
-                MiamExemption.PREVIOUS_MIAM_ATTENDANCE,
-                MiamExemption.OTHER
-            )
-        ));
-
-        assertTrue(miamValues.getMiamDomesticViolenceChecklist().containsAll(
-            List.of(
-                MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_1,
-                MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_9,
-                MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_18,
-                MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_22
-            )
-        ));
-
-        assertTrue(miamValues.getMiamUrgencyReasonChecklist().containsAll(
-            List.of(
-                MiamUrgencyReason.FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_1,
-                MiamUrgencyReason.FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_3,
-                MiamUrgencyReason.FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_5
-            )
-        ));
-
-        assertEquals(MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_2,
-            miamValues.getMiamPreviousAttendanceChecklist());
-
-        assertEquals(MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1, miamValues.getMiamOtherGroundsChecklist());
-
-
+        List<MiamExemption> expectedMiamExemptions = new ArrayList<>(Arrays.asList(MiamExemption.values()));
+        assertEquals(expectedMiamExemptions, miamValues.getMiamExemptionsChecklist());
+        List<MiamDomesticViolence> expectedMiamDomesticAbuse = List.of(MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_1,
+            MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_9,
+            MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_18,
+            MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_21);
+        assertEquals(expectedMiamDomesticAbuse, miamValues.getMiamDomesticViolenceChecklist());
+        List<MiamUrgencyReason> expectedMiamUrgencyReasons = List.of(MiamUrgencyReason.FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_1,
+            MiamUrgencyReason.FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_3, MiamUrgencyReason.FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_5);
+        assertEquals(expectedMiamUrgencyReasons, miamValues.getMiamUrgencyReasonChecklist());
+        MiamPreviousAttendance expectedMiamPreviousAttendance = MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_2;
+        assertEquals(expectedMiamPreviousAttendance, miamValues.getMiamPreviousAttendanceChecklist());
+        MiamOtherGrounds expectedMiamOtherGrounds = MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1;
+        assertEquals(expectedMiamOtherGrounds, miamValues.getMiamOtherGroundsChecklist());
     }
 
     private void assertChildrenInfo(FinremCaseData caseData) {

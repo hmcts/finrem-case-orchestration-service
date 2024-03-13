@@ -72,10 +72,9 @@
       "FR_ms_MIAMDomesticViolenceChecklist_Value_18",
       "FR_ms_MIAMDomesticViolenceChecklist_Value_19",
       "FR_ms_MIAMDomesticViolenceChecklist_Value_20",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_21",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_22"
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_21"
     ],
-    "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_3",
+    "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_2",
     "formCCreatedDate": "2019-05-07",
     "eventDatePlus21Days": "2019-05-28",
     "hearingDateLess35Days": "2019-06-05",
