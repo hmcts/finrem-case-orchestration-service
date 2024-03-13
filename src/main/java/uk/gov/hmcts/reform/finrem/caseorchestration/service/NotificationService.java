@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -438,18 +437,15 @@ public class NotificationService {
     }
 
     public void sendContestOrderApprovedEmailApplicant(CaseDetails caseDetails) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails), FR_CONTEST_ORDER_APPROVED_APPLICANT));
+        log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}", caseDetails.getId());
+        sendContestOrderApprovedEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_APPLICANT);
     }
 
     public void sendContestOrderApprovedEmailApplicant(FinremCaseDetails caseDetails) {
-        log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}",
-            caseDetails.getId());
-        NotificationRequest notificationRequest =
-            finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        CompletableFuture.runAsync(() ->
-            emailService.sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_APPLICANT));
+        log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}", caseDetails.getId());
+        emailService.sendConfirmationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_APPLICANT);
     }
 
     /**
@@ -461,19 +457,19 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     public void sendContestOrderApprovedEmailRespondent(CaseDetails caseDetails) {
-
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails), FR_CONTEST_ORDER_APPROVED_RESPONDENT));
+        log.info("Sending notification email to Respondent for 'Contest Order Approved'. Case ID : {}",
+            caseDetails.getId());
+        sendContestOrderApprovedEmail(
+            notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_RESPONDENT);
     }
 
     public void sendContestOrderApprovedEmailRespondent(FinremCaseDetails caseDetails) {
         log.info("Sending notification email to Respondent for 'Contest Order Approved'. Case ID : {}",
             caseDetails.getId());
-        NotificationRequest notificationRequest =
-            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails);
-        CompletableFuture.runAsync(() ->
-            emailService.sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_RESPONDENT));
+        sendContestOrderApprovedEmail(
+            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_RESPONDENT);
     }
 
     /**
@@ -493,7 +489,7 @@ public class NotificationService {
         NotificationRequest request = notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
             caseDetails, caseDataKeysWrapper);
         EmailTemplateNames template = getIntervenerSendOrderContestedTemplate(intervener);
-        CompletableFuture.runAsync(() -> sendContestOrderApprovedEmail(request, template));
+        sendContestOrderApprovedEmail(request, template);
     }
 
     public void sendContestOrderApprovedEmailIntervener(FinremCaseDetails caseDetails,
@@ -504,7 +500,7 @@ public class NotificationService {
         NotificationRequest request = finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
             caseDetails, caseDataKeysWrapper);
         EmailTemplateNames template = getIntervenerSendOrderContestedTemplate(intervener);
-        CompletableFuture.runAsync(() -> sendContestOrderApprovedEmail(request, template));
+        sendContestOrderApprovedEmail(request, template);
     }
 
     public void sendContestOrderApprovedEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {

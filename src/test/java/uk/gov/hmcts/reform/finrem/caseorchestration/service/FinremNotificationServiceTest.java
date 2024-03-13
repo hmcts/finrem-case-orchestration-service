@@ -35,7 +35,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -444,9 +443,9 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
     public void sendContestOrderApprovedEmailApplicantSolicitor() {
         notificationService.sendContestOrderApprovedEmailApplicant(newCallbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper, timeout(100).times(1))
+        verify(notificationRequestMapper)
             .getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
-        verify(emailService, timeout(100)).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_APPLICANT));
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_APPLICANT));
     }
 
     @Test
@@ -460,7 +459,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper, timeout(100).times(1))
+        verify(notificationRequestMapper)
             .getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
     }
 
@@ -468,9 +467,9 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
     public void sendContestOrderApprovedEmailRespondentSolicitor() {
         notificationService.sendContestOrderApprovedEmailRespondent(newCallbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper, timeout(100).times(1))
+        verify(notificationRequestMapper)
             .getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails());
-        verify(emailService, timeout(100)).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_RESPONDENT));
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_RESPONDENT));
     }
 
     @Test
@@ -484,7 +483,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper, timeout(100).times(1))
+        verify(notificationRequestMapper)
             .getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails());
     }
 
@@ -589,7 +588,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper, timeout(100).times(1))
+        verify(notificationRequestMapper)
             .getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
     }
 
