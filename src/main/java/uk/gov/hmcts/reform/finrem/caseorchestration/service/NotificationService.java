@@ -488,19 +488,23 @@ public class NotificationService {
     public void sendContestOrderApprovedEmailIntervener(CaseDetails caseDetails,
                                                         SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
                                                         IntervenerType intervener) {
-        EmailTemplateNames template = getIntervenerSendOrderContestedTemplate(intervener);
+        log.info("Sending notification email to {} for 'Contest Order Approved'. Case ID : {}",
+            intervener, caseDetails.getId());
         CompletableFuture.runAsync(() ->
             sendContestOrderApprovedEmail(
-                notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper), template));
+                notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper),
+                getIntervenerSendOrderContestedTemplate(intervener)));
     }
 
     public void sendContestOrderApprovedEmailIntervener(FinremCaseDetails caseDetails,
                                                         SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
                                                         IntervenerType intervener) {
-        EmailTemplateNames template = getIntervenerSendOrderContestedTemplate(intervener);
+        log.info("Sending notification email to {} for 'Contest Order Approved'. Case ID : {}",
+            intervener, caseDetails.getId());
         CompletableFuture.runAsync(() ->
             sendContestOrderApprovedEmail(
-                finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper), template));
+                finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper),
+                getIntervenerSendOrderContestedTemplate(intervener)));
     }
 
     public void sendContestOrderApprovedEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
