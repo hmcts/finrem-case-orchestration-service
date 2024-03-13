@@ -490,10 +490,10 @@ public class NotificationService {
                                                         IntervenerType intervener) {
         log.info("Sending notification email to {} for 'Contest Order Approved'. Case ID : {}",
             intervener, caseDetails.getId());
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper),
-                getIntervenerSendOrderContestedTemplate(intervener)));
+        NotificationRequest request = notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
+            caseDetails, caseDataKeysWrapper);
+        EmailTemplateNames template = getIntervenerSendOrderContestedTemplate(intervener);
+        CompletableFuture.runAsync(() -> sendContestOrderApprovedEmail(request, template));
     }
 
     public void sendContestOrderApprovedEmailIntervener(FinremCaseDetails caseDetails,
@@ -501,10 +501,10 @@ public class NotificationService {
                                                         IntervenerType intervener) {
         log.info("Sending notification email to {} for 'Contest Order Approved'. Case ID : {}",
             intervener, caseDetails.getId());
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper),
-                getIntervenerSendOrderContestedTemplate(intervener)));
+        NotificationRequest request = finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
+            caseDetails, caseDataKeysWrapper);
+        EmailTemplateNames template = getIntervenerSendOrderContestedTemplate(intervener);
+        CompletableFuture.runAsync(() -> sendContestOrderApprovedEmail(request, template));
     }
 
     public void sendContestOrderApprovedEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
