@@ -135,8 +135,7 @@ public class UpdateRepresentationService {
                 log.info("{} current client name is {}", caseDetails.getId(),
                     current.getRepresentationUpdateHistory().get(0).getValue().getClientName());
             }
-        }
-        else {
+        } else {
             log.info("{} current is null", caseDetails.getId());
         }
 
