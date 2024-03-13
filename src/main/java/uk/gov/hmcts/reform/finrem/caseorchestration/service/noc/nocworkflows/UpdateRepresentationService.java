@@ -124,6 +124,21 @@ public class UpdateRepresentationService {
 
         Map<String, Object> caseData = caseDetails.getData();
         RepresentationUpdateHistory current = getCurrentRepresentationUpdateHistory(caseData);
+        if (current != null) {
+            if (current.getRepresentationUpdateHistory() != null
+                && !current.getRepresentationUpdateHistory().isEmpty()) {
+                log.info("{} current party is {}", caseDetails.getId(),
+                    current.getRepresentationUpdateHistory().get(0).getValue().getParty());
+            }
+            if (current.getRepresentationUpdateHistory() != null
+                && !current.getRepresentationUpdateHistory().isEmpty()) {
+                log.info("{} current client name is {}", caseDetails.getId(),
+                    current.getRepresentationUpdateHistory().get(0).getValue().getClientName());
+            }
+        }
+        else {
+            log.info("{} current is null", caseDetails.getId());
+        }
 
         RepresentationUpdateHistory change = changeOfRepresentationService
             .generateRepresentationUpdateHistory(buildChangeOfRepresentationRequest(caseDetails,
@@ -224,6 +239,9 @@ public class UpdateRepresentationService {
                                                                              ChangedRepresentative removedSolicitor,
                                                                              RepresentationUpdateHistory current,
                                                                              ChangeOrganisationRequest changeRequest) {
+        if (changeRequest != null) {
+            log.info("{} change request {}", caseDetails.getId(), changeRequest);
+        }
         return ChangeOfRepresentationRequest.builder()
             .by(addedSolicitor.getName())
             .party(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY) ? APPLICANT : RESPONDENT)
