@@ -493,7 +493,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         notificationService.sendContestOrderApprovedEmailIntervener(newCallbackRequest.getCaseDetails(),
             dataKeysWrapper, IntervenerType.INTERVENER_ONE);
 
-        verify(notificationRequestMapper, timeout(100).times(1))
+        verify(notificationRequestMapper)
             .getNotificationRequestForIntervenerSolicitor(newCallbackRequest.getCaseDetails(), dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_INTERVENER1));
     }
@@ -503,7 +503,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         notificationService.sendContestOrderApprovedEmailIntervener(newCallbackRequest.getCaseDetails(),
             dataKeysWrapper, IntervenerType.INTERVENER_TWO);
 
-        verify(notificationRequestMapper, timeout(100).times(1))
+        verify(notificationRequestMapper)
             .getNotificationRequestForIntervenerSolicitor(newCallbackRequest.getCaseDetails(), dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_INTERVENER2));
     }
@@ -513,7 +513,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         notificationService.sendContestOrderApprovedEmailIntervener(newCallbackRequest.getCaseDetails(),
             dataKeysWrapper, IntervenerType.INTERVENER_THREE);
 
-        verify(notificationRequestMapper, timeout(100).times(1))
+        verify(notificationRequestMapper)
             .getNotificationRequestForIntervenerSolicitor(newCallbackRequest.getCaseDetails(), dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_INTERVENER3));
     }
@@ -523,7 +523,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         notificationService.sendContestOrderApprovedEmailIntervener(newCallbackRequest.getCaseDetails(),
             dataKeysWrapper, IntervenerType.INTERVENER_FOUR);
 
-        verify(notificationRequestMapper, timeout(100).times(1))
+        verify(notificationRequestMapper)
             .getNotificationRequestForIntervenerSolicitor(newCallbackRequest.getCaseDetails(), dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_INTERVENER4));
     }
