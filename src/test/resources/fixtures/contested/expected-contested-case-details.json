@@ -29,8 +29,8 @@
       "A child is one of the prospective parties.",
       "(i) the prospective applicant is not able to attend a MIAM online or by video-link and an explanation of why this is the case is provided to the court using the text field provided; cont...",
       "(i) the prospective applicant is not able to attend a MIAM online or by video-link and an explanation of why this is the case is provided to the court using the text field provided; cont...",
-      "(i) the prospective applicant is not able to attend a MIAM online or by video-link; and\n(ii) there is no authorised family mediator with an office within fifteen miles of the prospective applicant’s home; cont...",
-      "The prospective applicant cannot attend a MIAM because the prospective applicant is\n(i) in prison or any other institution in which the prospective applicant is required to be detained and facilities cannot be made available for them to attend a MIAM online or by video link; cont..."
+      "(i) the prospective applicant is not able to attend a MIAM online or by video-link; and \n(ii) there is no authorised family mediator with an office within fifteen miles of the prospective applicant’s home; cont...",
+      "The prospective applicant cannot attend a MIAM because the prospective applicant is \n(i) in prison or any other institution in which the prospective applicant is required to be detained and facilities cannot be made available for them to attend a MIAM online or by video link; cont..."
     ],
     "natureOfApplicationChecklist": [
       "Periodical Payment Order",
@@ -83,8 +83,8 @@
       "Evidence which demonstrates that a prospective party has been, or is at risk of being, the victim of domestic abuse by another prospective party in the form of abuse which relates to financial matters"
     ],
     "MIAMPreviousAttendanceChecklist": [
-      "In the 4 months prior to making the application, the person attended a MIAM or participated in another form of non-court dispute resolution relating to the same or substantially the same dispute",
-      "At the time of making the application, the person is participating in another form of non-court dispute resolution relating to the same or substantially the same dispute"
+      "In the 4 months prior to making the application, the person attended a MIAM or a non-court dispute resolution process relating to the same or substantially the same dispute; and where the applicant attended a non-court dispute resolution process, there is evidence of that attendance in the form of written confirmation from the dispute resolution provider. This evidence should be submitted alongside your application, and must include the signature of the provider; or",
+      "The application would be made in existing proceedings which are continuing and the prospective applicant attended a MIAM before initiating those proceedings"
     ],
     "formCCreatedDate": "2019-05-07",
     "eventDatePlus21Days": "2019-05-28",

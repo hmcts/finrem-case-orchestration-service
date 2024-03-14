@@ -37,8 +37,8 @@
     "FR_ms_MIAMUrgencyReasonChecklist_Value_5": "There is a significant risk that in the period necessary to schedule and attend a MIAM, proceedings relating to the dispute will be brought in another state in which a valid claim to jurisdiction may exist cont..."
   },
   "MIAMPreviousAttendanceChecklist": {
-    "FR_ms_MIAMPreviousAttendanceChecklist_Value_1": "In the 4 months prior to making the application, the person attended a MIAM or participated in another form of non-court dispute resolution relating to the same or substantially the same dispute",
-    "FR_ms_MIAMPreviousAttendanceChecklist_Value_2": "At the time of making the application, the person is participating in another form of non-court dispute resolution relating to the same or substantially the same dispute"
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_1": "In the 4 months prior to making the application, the person attended a MIAM or a non-court dispute resolution process relating to the same or substantially the same dispute; and where the applicant attended a non-court dispute resolution process, there is evidence of that attendance in the form of written confirmation from the dispute resolution provider. This evidence should be submitted alongside your application, and must include the signature of the provider; or",
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_2": "The application would be made in existing proceedings which are continuing and the prospective applicant attended a MIAM before initiating those proceedings"
   },
   "MIAMOtherGroundsChecklist": {
     "FR_ms_MIAMOtherGroundsChecklist_Value_1": "The application would be made without notice (Paragraph 5.1 of Practice Direction 18A sets out the circumstances in which applications may be made without notice.)",
