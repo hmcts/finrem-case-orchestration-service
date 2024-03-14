@@ -90,7 +90,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setApplicantEmail("test@gmail.com");
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_APPLICANT);
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_APPLICANT);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setRespondentSolicitorEmail("test@gmail.com");
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_RESPONDENT);
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerOne());
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_1);
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerTwo());
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_2);
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2);
     }
 
     @Test
@@ -122,7 +122,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerThree());
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_3);
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3);
     }
 
     @Test
@@ -130,14 +130,14 @@ public class GeneralEmailAboutToSubmitHandlerTest {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerFour());
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_4);
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4);
     }
 
     @Test
     public void givenContestedCallbackRequest_whenHandledForUnrecognisedRecipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_OTHER);
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_OTHER);
     }
 
     @Test

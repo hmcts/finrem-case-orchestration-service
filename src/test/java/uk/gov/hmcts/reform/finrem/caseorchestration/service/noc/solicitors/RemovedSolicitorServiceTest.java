@@ -110,6 +110,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(CONTESTED_SOLICITOR_EMAIL, APP_SOL_EMAIL);
 
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
+        when(caseDataService.isLitigantRepresented(caseDetails, true)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
@@ -129,6 +130,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(SOLICITOR_EMAIL, APP_SOL_EMAIL);
 
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
+        when(caseDataService.isLitigantRepresented(caseDetails, true)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
@@ -149,6 +151,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(SOLICITOR_EMAIL, APP_SOL_EMAIL);
 
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+        when(caseDataService.isLitigantRepresented(caseDetails, true)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
@@ -168,7 +171,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(RESP_SOLICITOR_EMAIL, RESP_SOL_EMAIL);
 
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
+        when(caseDataService.isLitigantRepresented(caseDetails, false)).thenReturn(true);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
@@ -188,7 +191,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(RESP_SOLICITOR_EMAIL, RESP_SOL_EMAIL);
 
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+        when(caseDataService.isLitigantRepresented(caseDetails, false)).thenReturn(true);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
@@ -208,7 +211,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(RESP_SOLICITOR_EMAIL, RESP_SOL_EMAIL);
 
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+        when(caseDataService.isLitigantRepresented(caseDetails, false)).thenReturn(true);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
@@ -227,6 +230,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(NOC_PARTY, APPLICANT);
 
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
+        when(caseDataService.isLitigantRepresented(caseDetails, true)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
@@ -246,6 +250,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(NOC_PARTY, APPLICANT);
 
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
+        when(caseDataService.isLitigantRepresented(caseDetails, true)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
@@ -266,6 +271,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(NOC_PARTY, APPLICANT);
 
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+        when(caseDataService.isLitigantRepresented(caseDetails, true)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
@@ -285,7 +291,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(NOC_PARTY, RESPONDENT);
 
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
+        when(caseDataService.isLitigantRepresented(caseDetails, false)).thenReturn(true);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
             false);
@@ -305,7 +311,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(NOC_PARTY, RESPONDENT);
 
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+        when(caseDataService.isLitigantRepresented(caseDetails, false)).thenReturn(true);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
             false);
@@ -325,7 +331,7 @@ public class RemovedSolicitorServiceTest {
         caseDetails.getData().put(NOC_PARTY, RESPONDENT);
 
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+        when(caseDataService.isLitigantRepresented(caseDetails, false)).thenReturn(true);
 
         ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
             false);

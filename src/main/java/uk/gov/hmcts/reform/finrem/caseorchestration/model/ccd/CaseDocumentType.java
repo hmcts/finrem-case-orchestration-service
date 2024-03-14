@@ -46,7 +46,10 @@ public enum CaseDocumentType {
     PRE_HEARING_DRAFT_ORDER("Pre hearing draft order"),
     TRANSCRIPT("Transcript"),
     WITHOUT_PREJUDICE_OFFERS("Without Prejudice offers"),
-    WITNESS_SUMMONS("Witness Summons");
+    WITNESS_SUMMONS("Witness Summons"),
+    POINTS_OF_CLAIM_OR_DEFENCE("Points of claim/defence"),
+
+    FM5("FM5");
 
 
     private final String id;

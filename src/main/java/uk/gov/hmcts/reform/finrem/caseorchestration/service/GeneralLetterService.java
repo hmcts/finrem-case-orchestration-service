@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -72,13 +73,17 @@ public class GeneralLetterService {
 
     public void previewGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
+        FinremCaseData caseData = caseDetails.getData();
+        addFrcCourtFields(caseData);
         CaseDocument generalLetterDocument = generateGeneralLetterDocument(caseDetails, authorisationToken);
-        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterPreview(generalLetterDocument);
+        caseData.getGeneralLetterWrapper().setGeneralLetterPreview(generalLetterDocument);
+        removeFrcCourtFields(caseData);
     }
 
     public void createGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         Long caseId = caseDetails.getId();
         FinremCaseData caseData = caseDetails.getData();
+        addFrcCourtFields(caseData);
         GeneralLetterWrapper wrapper = caseData.getGeneralLetterWrapper();
         log.info("Generating General letter for Case ID: {}", caseId);
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
@@ -91,6 +96,7 @@ public class GeneralLetterService {
         addGeneralLetterToCaseData(caseDetails, document,
             wrapper.getGeneralLetterUploadedDocument());
         printLatestGeneralLetter(caseDetails, authorisationToken);
+        removeFrcCourtFields(caseData);
         if (caseData.isContestedApplication()) {
             createGeneralLetterDocumentCategoriser.categorise(caseData);
         }
@@ -102,7 +108,12 @@ public class GeneralLetterService {
         prepareCaseDetailsForDocumentGeneration(caseDetailsCopy);
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getGeneralLetterTemplate(), documentConfiguration.getGeneralLetterFileName());
+            getGeneralLetterTemplate(caseDetails.getData()), documentConfiguration.getGeneralLetterFileName());
+    }
+
+    private String getGeneralLetterTemplate(FinremCaseData caseData) {
+        return caseData.isContestedApplication() ? documentConfiguration.getContestedGeneralLetterTemplate()
+            : documentConfiguration.getConsentGeneralLetterTemplate();
     }
 
     private void prepareCaseDetailsForDocumentGeneration(CaseDetails caseDetails) {
@@ -241,5 +252,13 @@ public class GeneralLetterService {
                     .collect(Collectors.joining("\n"));
         }
         return "";
+    }
+
+    private void addFrcCourtFields(FinremCaseData data) {
+        data.setCourtDetails(buildFrcCourtDetails(data));
+    }
+
+    private void removeFrcCourtFields(FinremCaseData data) {
+        data.setCourtDetails(null);
     }
 }
