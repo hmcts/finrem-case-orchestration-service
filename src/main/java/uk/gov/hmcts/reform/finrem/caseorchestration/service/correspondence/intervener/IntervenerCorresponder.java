@@ -33,13 +33,13 @@ public class IntervenerCorresponder extends FinremSingleLetterOrEmailAllPartiesC
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
         if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_ONE) {
-            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerOneWrapper(), caseDetails, authToken);
+            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerOne(), caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_TWO) {
-            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerTwoWrapper(), caseDetails, authToken);
+            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerTwo(), caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_THREE) {
-            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerThreeWrapper(), caseDetails, authToken);
+            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerThree(), caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_FOUR) {
-            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerFourWrapper(), caseDetails, authToken);
+            sendIntervenerCorrespondence(caseDetails.getData().getIntervenerFour(), caseDetails, authToken);
         }
     }
 

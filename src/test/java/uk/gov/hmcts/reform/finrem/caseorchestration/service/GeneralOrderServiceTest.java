@@ -634,13 +634,13 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             equalTo(generalOrderService.isOrderSharedWithApplicant(caseDetails)));
         assertThat(data.isRespondentCorrespondenceEnabled(),
             equalTo(generalOrderService.isOrderSharedWithRespondent(caseDetails)));
-        assertThat(data.getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled(),
+        assertThat(data.getIntervenerOne().getIntervenerCorrespondenceEnabled(),
             equalTo(generalOrderService.isOrderSharedWithIntervener1(caseDetails)));
-        assertThat(data.getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled(),
+        assertThat(data.getIntervenerTwo().getIntervenerCorrespondenceEnabled(),
             equalTo(generalOrderService.isOrderSharedWithIntervener2(caseDetails)));
-        assertThat(data.getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled(),
+        assertThat(data.getIntervenerThree().getIntervenerCorrespondenceEnabled(),
             equalTo(generalOrderService.isOrderSharedWithIntervener3(caseDetails)));
-        assertThat(data.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled(),
+        assertThat(data.getIntervenerFour().getIntervenerCorrespondenceEnabled(),
             equalTo(generalOrderService.isOrderSharedWithIntervener4(caseDetails)));
     }
 

@@ -125,7 +125,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         when(genericDocumentService.generateDocument(anyString(), any(CaseDetails.class), anyString(), anyString())).thenReturn(caseDocument);
         BulkPrintDocument bulkPrintDocument = BulkPrintDocument.builder().fileName("file1").binaryFileUrl("binurl1").build();
         BulkPrintDocument bulkPrintDocument2 = BulkPrintDocument.builder().fileName("file2").binaryFileUrl("binurl2").build();
-        when(documentHelper.getCaseDocumentAsBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
+        when(documentHelper.mapToBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
         when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any())).thenReturn(List.of(bulkPrintDocument2));
         when(documentOrderingService.isDocumentModifiedLater(any(), any(), anyString())).thenReturn(true);
         when(documentHelper.convertToContestedConsentOrderData(any())).thenReturn(convertToContestedConsentOrderData(List.of(collection2)));
@@ -153,7 +153,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
             any(FinremCaseDetails.class), any(DocumentHelper.PaperNotificationRecipient.class))).thenReturn(caseDetails);
         when(documentHelper.getLatestGeneralOrder(any(FinremCaseData.class))).thenReturn(null);
         when(genericDocumentService.generateDocument(anyString(), any(CaseDetails.class), anyString(), anyString())).thenReturn(caseDocument);
-        when(documentHelper.getCaseDocumentAsBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
+        when(documentHelper.mapToBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
         when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any())).thenReturn(List.of(bulkPrintDocument2));
         when(documentOrderingService.isDocumentModifiedLater(any(), any(), anyString())).thenReturn(true);
         when(documentHelper.convertToContestedConsentOrderData(any())).thenReturn(convertToContestedConsentOrderData(List.of(collection2)));
