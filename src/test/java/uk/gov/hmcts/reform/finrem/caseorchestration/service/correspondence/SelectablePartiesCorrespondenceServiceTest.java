@@ -48,10 +48,10 @@ public class SelectablePartiesCorrespondenceServiceTest {
 
         assertTrue(finremCaseData.isApplicantCorrespondenceEnabled());
         assertTrue(finremCaseData.isRespondentCorrespondenceEnabled());
-        assertTrue(finremCaseData.getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled());
-        assertTrue(finremCaseData.getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled());
-        assertTrue(finremCaseData.getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled());
-        assertTrue(finremCaseData.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled());
+        assertTrue(finremCaseData.getIntervenerOne().getIntervenerCorrespondenceEnabled());
+        assertTrue(finremCaseData.getIntervenerTwo().getIntervenerCorrespondenceEnabled());
+        assertTrue(finremCaseData.getIntervenerThree().getIntervenerCorrespondenceEnabled());
+        assertTrue(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
 
@@ -64,10 +64,10 @@ public class SelectablePartiesCorrespondenceServiceTest {
 
         assertTrue(finremCaseData.isApplicantCorrespondenceEnabled());
         assertFalse(finremCaseData.isRespondentCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerOne().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerTwo().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerThree().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
     @Test
@@ -79,10 +79,10 @@ public class SelectablePartiesCorrespondenceServiceTest {
 
         assertFalse(finremCaseData.isApplicantCorrespondenceEnabled());
         assertTrue(finremCaseData.isRespondentCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerOne().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerTwo().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerThree().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
 
@@ -95,10 +95,10 @@ public class SelectablePartiesCorrespondenceServiceTest {
 
         assertFalse(finremCaseData.isApplicantCorrespondenceEnabled());
         assertFalse(finremCaseData.isRespondentCorrespondenceEnabled());
-        assertTrue(finremCaseData.getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled());
+        assertTrue(finremCaseData.getIntervenerOne().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerTwo().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerThree().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
 
@@ -111,10 +111,10 @@ public class SelectablePartiesCorrespondenceServiceTest {
 
         assertFalse(finremCaseData.isApplicantCorrespondenceEnabled());
         assertFalse(finremCaseData.isRespondentCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled());
-        assertTrue(finremCaseData.getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerOne().getIntervenerCorrespondenceEnabled());
+        assertTrue(finremCaseData.getIntervenerTwo().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerThree().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
 
@@ -127,10 +127,10 @@ public class SelectablePartiesCorrespondenceServiceTest {
 
         assertFalse(finremCaseData.isApplicantCorrespondenceEnabled());
         assertFalse(finremCaseData.isRespondentCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled());
-        assertTrue(finremCaseData.getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerOne().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerTwo().getIntervenerCorrespondenceEnabled());
+        assertTrue(finremCaseData.getIntervenerThree().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
 
@@ -143,10 +143,10 @@ public class SelectablePartiesCorrespondenceServiceTest {
 
         assertFalse(finremCaseData.isApplicantCorrespondenceEnabled());
         assertFalse(finremCaseData.isRespondentCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerOneWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerTwoWrapper().getIntervenerCorrespondenceEnabled());
-        assertFalse(finremCaseData.getIntervenerThreeWrapper().getIntervenerCorrespondenceEnabled());
-        assertTrue(finremCaseData.getIntervenerFourWrapper().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerOne().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerTwo().getIntervenerCorrespondenceEnabled());
+        assertFalse(finremCaseData.getIntervenerThree().getIntervenerCorrespondenceEnabled());
+        assertTrue(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
 

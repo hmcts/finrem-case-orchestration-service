@@ -12,10 +12,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -73,19 +73,19 @@ public class IntervenersAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenUseManageIntervenersAndThereIsOneIntervnerAlready_thenPrepareIntervenersList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+        IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
-        IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
+        IntervenerTwo twoWrapper = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
-        IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
+        IntervenerThree threeWrapper = IntervenerThree
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
-        IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
+        IntervenerFour fourWrapper = IntervenerFour
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
 
-        finremCallbackRequest.getCaseDetails().getData().setIntervenerOneWrapper(oneWrapper);
-        finremCallbackRequest.getCaseDetails().getData().setIntervenerTwoWrapper(twoWrapper);
-        finremCallbackRequest.getCaseDetails().getData().setIntervenerThreeWrapper(threeWrapper);
-        finremCallbackRequest.getCaseDetails().getData().setIntervenerFourWrapper(fourWrapper);
+        finremCallbackRequest.getCaseDetails().getData().setIntervenerOne(oneWrapper);
+        finremCallbackRequest.getCaseDetails().getData().setIntervenerTwo(twoWrapper);
+        finremCallbackRequest.getCaseDetails().getData().setIntervenerThree(threeWrapper);
+        finremCallbackRequest.getCaseDetails().getData().setIntervenerFour(fourWrapper);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 

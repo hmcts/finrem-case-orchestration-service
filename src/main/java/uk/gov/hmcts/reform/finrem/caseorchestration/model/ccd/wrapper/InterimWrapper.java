@@ -29,7 +29,6 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InterimWrapper {
     private List<DirectionDetailInterimCollection> directionDetailsCollectionInterim;
-    @JsonProperty("interimHearingTimeEstimate")
     private String interimTimeEstimate;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -41,6 +40,7 @@ public class InterimWrapper {
     private CaseDocument interimUploadAdditionalDocument;
     private CaseDocument interimHearingDirectionsDocument;
     private List<InterimHearingCollection> interimHearings;
+    private List<InterimHearingCollection> interimHearingsScreenField;
     @JsonProperty("iHCollectionItemIds")
     private List<InterimHearingCollectionItemData> interimHearingCollectionItemIds;
     private List<InterimHearingBulkPrintDocumentsData> interimHearingDocuments;

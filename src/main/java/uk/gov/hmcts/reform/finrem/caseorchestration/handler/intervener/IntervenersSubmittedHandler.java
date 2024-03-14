@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerA
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerAddedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerRemovedCorresponder;
+
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_FOUR_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_ONE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_THREE_CODE;
@@ -80,21 +81,21 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
 
         switch (selectedOperationCode) {
             case ADD_INTERVENER_ONE_CODE ->
-                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerOneWrapper()));
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerOne()));
             case ADD_INTERVENER_TWO_CODE ->
-                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerTwoWrapper()));
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerTwo()));
             case ADD_INTERVENER_THREE_CODE ->
-                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerThreeWrapper()));
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerThree()));
             case ADD_INTERVENER_FOUR_CODE ->
-                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerFourWrapper()));
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerAddedChangeDetails(caseData.getIntervenerFour()));
             case DEL_INTERVENER_ONE_CODE ->
-                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerRemovedChangeDetails(caseDataBefore.getIntervenerOneWrapper()));
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerRemovedChangeDetails(caseDataBefore.getIntervenerOne()));
             case DEL_INTERVENER_TWO_CODE ->
-                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerRemovedChangeDetails(caseDataBefore.getIntervenerTwoWrapper()));
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerRemovedChangeDetails(caseDataBefore.getIntervenerTwo()));
             case DEL_INTERVENER_THREE_CODE ->
-                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerRemovedChangeDetails(caseDataBefore.getIntervenerThreeWrapper()));
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerRemovedChangeDetails(caseDataBefore.getIntervenerThree()));
             case DEL_INTERVENER_FOUR_CODE ->
-                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerRemovedChangeDetails(caseDataBefore.getIntervenerFourWrapper()));
+                caseData.setCurrentIntervenerChangeDetails(service.setIntervenerRemovedChangeDetails(caseDataBefore.getIntervenerFour()));
             default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
         }
 

@@ -18,10 +18,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
@@ -301,19 +301,19 @@ public class GeneralApplicationHelper {
             getDynamicListElements(RESPONDENT, RESPONDENT),
             getDynamicListElements(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         ));
-        IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapperIfPopulated();
+        IntervenerOne oneWrapper = caseData.getIntervenerOneWrapperIfPopulated();
         if (oneWrapper != null && oneWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER1, INTERVENER1));
         }
-        IntervenerTwoWrapper twoWrapper = caseData.getIntervenerTwoWrapperIfPopulated();
+        IntervenerTwo twoWrapper = caseData.getIntervenerTwoWrapperIfPopulated();
         if (twoWrapper != null && twoWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER2, INTERVENER2));
         }
-        IntervenerThreeWrapper threeWrapper = caseData.getIntervenerThreeWrapperIfPopulated();
+        IntervenerThree threeWrapper = caseData.getIntervenerThreeWrapperIfPopulated();
         if (threeWrapper != null && threeWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER3, INTERVENER3));
         }
-        IntervenerFourWrapper fourWrapper = caseData.getIntervenerFourWrapperIfPopulated();
+        IntervenerFour fourWrapper = caseData.getIntervenerFourWrapperIfPopulated();
         if (fourWrapper != null && fourWrapper.getIntervenerName() != null) {
             dynamicListElements.add(getDynamicListElements(INTERVENER4, INTERVENER4));
         }
