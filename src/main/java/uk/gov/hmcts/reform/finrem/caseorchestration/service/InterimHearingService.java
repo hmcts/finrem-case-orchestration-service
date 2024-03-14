@@ -16,11 +16,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNotice;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
@@ -29,49 +31,13 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ALL_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BIRMINGHAM_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BRISTOL_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CFC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CLEAVELAND_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DEVON_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DORSET_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_HUMBER_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_KENT_SURREY_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_LANCASHIRE_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_LIVERPOOL_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_LONDON_FRC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_MANCHESTER_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_MIDLANDS_FRC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NEWPORT_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NORTHEAST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NORTHWALES_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NORTHWEST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NOTTINGHAM_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NWYORKSHIRE_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_PROMPT_FOR_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_REGION_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_SOUTHEAST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_SOUTHWEST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_SWANSEA_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_THAMESVALLEY_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME_ESTIMATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_WALES_FRC_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildInterimHearingFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
@@ -95,75 +61,126 @@ public class InterimHearingService {
 
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
-    public List<String> submitInterimHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
+    public List<InterimHearingCollection> getLegacyInterimHearingAsInterimHearingCollection(FinremCaseData caseData) {
+        InterimWrapper interimWrapper = caseData.getInterimWrapper();
+        InterimRegionWrapper interimRegionWrapper = caseData.getRegionWrapper().getInterimRegionWrapper();
+        InterimCourtListWrapper courtListWrapper = interimRegionWrapper.getCourtListWrapper();
+        return List.of(
+            InterimHearingCollection.builder().value(
+                    InterimHearingItem.builder()
+                        .interimHearingType(interimWrapper.getInterimHearingType())
+                        .interimHearingDate(interimWrapper.getInterimHearingDate())
+                        .interimHearingTime(interimWrapper.getInterimHearingTime())
+                        .interimHearingTimeEstimate(interimWrapper.getInterimTimeEstimate())
+                        .interimAdditionalInformationAboutHearing(
+                            interimWrapper.getInterimAdditionalInformationAboutHearing())
+                        .interimPromptForAnyDocument(interimWrapper.getInterimPromptForAnyDocument())
+                        .interimRegionList(interimRegionWrapper.getInterimRegionList())
+                        .interimMidlandsFrcList(interimRegionWrapper.getInterimMidlandsFrcList())
+                        .interimLondonFrcList(interimRegionWrapper.getInterimLondonFrcList())
+                        .interimNorthWestFrcList(interimRegionWrapper.getInterimNorthWestFrcList())
+                        .interimNorthEastFrcList(interimRegionWrapper.getInterimNorthEastFrcList())
+                        .interimSouthEastFrcList(interimRegionWrapper.getInterimSouthEastFrcList())
+                        .interimSouthWestFrcList(interimRegionWrapper.getInterimSouthWestFrcList())
+                        .interimWalesFrcList(interimRegionWrapper.getInterimWalesFrcList())
+                        .interimHighCourtFrcList(interimRegionWrapper.getInterimHighCourtFrcList())
+                        .interimNottinghamCourtList(courtListWrapper.getInterimNottinghamCourtList())
+                        .interimCfcCourtList(courtListWrapper.getInterimCfcCourtList())
+                        .interimBirminghamCourtList(courtListWrapper.getInterimBirminghamCourtList())
+                        .interimLiverpoolCourtList(courtListWrapper.getInterimLiverpoolCourtList())
+                        .interimManchesterCourtList(courtListWrapper.getInterimManchesterCourtList())
+                        .interimLancashireCourtList(courtListWrapper.getInterimLancashireCourtList())
+                        .interimClevelandCourtList(courtListWrapper.getInterimClevelandCourtList())
+                        .interimNwYorkshireCourtList(courtListWrapper.getInterimNwYorkshireCourtList())
+                        .interimHumberCourtList(courtListWrapper.getInterimHumberCourtList())
+                        .interimKentSurreyCourtList(courtListWrapper.getInterimKentSurreyCourtList())
+                        .interimBedfordshireCourtList(courtListWrapper.getInterimBedfordshireCourtList())
+                        .interimThamesValleyCourtList(courtListWrapper.getInterimThamesValleyCourtList())
+                        .interimDevonCourtList(courtListWrapper.getInterimDevonCourtList())
+                        .interimDorsetCourtList(courtListWrapper.getInterimDorsetCourtList())
+                        .interimBristolCourtList(courtListWrapper.getInterimBristolCourtList())
+                        .interimNewportCourtList(courtListWrapper.getInterimNewportCourtList())
+                        .interimSwanseaCourtList(courtListWrapper.getInterimSwanseaCourtList())
+                        .interimNorthWalesCourtList(courtListWrapper.getInterimNorthWalesCourtList())
+                        .interimHighCourtList(courtListWrapper.getInterimHighCourtList())
+                        .interimUploadAdditionalDocument(
+                            interimWrapper.getInterimUploadAdditionalDocument())
+                        .build())
+                .build());
+    }
+
+    public void addHearingNoticesToCase(FinremCaseDetails caseDetails, String authorisationToken) {
         log.info("In submitInterimHearing for Case ID: {}", caseDetails.getId());
-        Map<String, Object> caseData = caseDetails.getData();
-        Map<String, Object> caseDataBefore = caseDetailsBefore.getData();
-        List<InterimHearingData> interimHearingList = filterInterimHearingToProcess(caseData, caseDataBefore);
+        List<InterimHearingCollection> newInterimHearingList =
+            caseDetails.getData().getInterimWrapper().getInterimHearingsScreenField();
+
+        if (!newInterimHearingList.isEmpty()) {
+            CaseDocumentsHolder caseDocumentsHolder =
+                prepareDocumentsForPrint(caseDetails, newInterimHearingList, authorisationToken);
+            sendToBulkPrint(caseDetails, authorisationToken, caseDocumentsHolder);
+        }
+
+    }
+
+    public List<String> getValidationErrors(FinremCaseData caseData) {
+        List<InterimHearingCollection> interimHearingList =
+            caseData.getInterimWrapper().getInterimHearingsScreenField();
 
         List<String> errors = new ArrayList<>();
         if (!interimHearingList.isEmpty()) {
-            final FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-            selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-            errors = selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseDetails.getData(),
-                HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
-            if (!errors.isEmpty()) {
-                return errors;
-            }
-            CaseDocumentsHolder caseDocumentsHolder = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
-            sendToBulkPrint(caseDetails, finremCaseDetails, authorisationToken, caseDocumentsHolder);
+            selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseData);
+            errors = selectablePartiesCorrespondenceService
+                .validateApplicantAndRespondentCorrespondenceAreSelected(
+                    caseData, HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
         }
 
-        //Need only for existing Interim Hearing
-        if (caseData.get(INTERIM_HEARING_TYPE) != null) {
-            removeNonCollectionInterimData(caseData);
-        }
-        caseDetails.setData(caseData);
         return errors;
     }
 
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
-    private void sendToBulkPrint(CaseDetails caseDetails, FinremCaseDetails finremCaseDetails, String authorisationToken,
+    private void sendToBulkPrint(FinremCaseDetails finremCaseDetails, String authorisationToken,
                                  CaseDocumentsHolder caseDocumentsHolder) {
 
-        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            log.info("Sending interim hearing documents to applicant - bulk print for Case ID: {}", caseDetails.getId());
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
+            log.info("Sending interim hearing documents to applicant - bulk print for Case ID: {}", finremCaseDetails.getId());
+            bulkPrintService.printApplicantDocuments(finremCaseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
         }
-        if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            log.info("Sending interim hearing documents to respondent - bulk print for Case ID: {}", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
+        if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
+            log.info("Sending interim hearing documents to respondent - bulk print for Case ID: {}", finremCaseDetails.getId());
+            bulkPrintService.printRespondentDocuments(finremCaseDetails, authorisationToken, caseDocumentsHolder.getBulkPrintDocuments());
         }
-        sendToBulkPrintForInterveners(authorisationToken, caseDetails, finremCaseDetails, caseDocumentsHolder);
+        sendToBulkPrintForInterveners(authorisationToken, finremCaseDetails, caseDocumentsHolder);
     }
 
     @SuppressWarnings("java:S1874")
-    private void sendToBulkPrintForInterveners(String authorisationToken, CaseDetails caseDetails, FinremCaseDetails finremCaseDetails,
+    private void sendToBulkPrintForInterveners(String authorisationToken, FinremCaseDetails finremCaseDetails,
                                                CaseDocumentsHolder caseDocumentsHolder) {
 
         final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
         interveners.forEach(intervenerWrapper -> {
             if (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null
                 && Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
-                addCaseDocumentsToIntervenerHearingNotices(intervenerWrapper, caseDocumentsHolder, finremCaseDetails.getData(),
-                    caseDetails.getData());
+                addCaseDocumentsToIntervenerHearingNotices(
+                    intervenerWrapper, caseDocumentsHolder, finremCaseDetails.getData());
                 if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, finremCaseDetails)) {
                     log.info("Sending letter correspondence to {} for Case ID: {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
-                        caseDetails.getId());
-                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken,
+                        finremCaseDetails.getId());
+                    bulkPrintService.printIntervenerDocuments(intervenerWrapper, finremCaseDetails, authorisationToken,
                         caseDocumentsHolder.getBulkPrintDocuments());
                 }
             }
         });
     }
 
-    private void addCaseDocumentsToIntervenerHearingNotices(IntervenerWrapper intervenerWrapper, CaseDocumentsHolder caseDocumentsHolder,
-                                                            FinremCaseData finremCaseData, Map<String, Object> caseData) {
-        List<IntervenerHearingNoticeCollection> hearingNotices = intervenerWrapper.getIntervenerHearingNoticesCollection(finremCaseData);
-        caseDocumentsHolder.getCaseDocuments().forEach(cd -> hearingNotices.add(getHearingNoticesDocumentCollection(cd)));
-        caseData.put(intervenerWrapper.getIntervenerHearingNoticesCollectionName(), hearingNotices);
+    private void addCaseDocumentsToIntervenerHearingNotices(IntervenerWrapper intervenerWrapper,
+                                                            CaseDocumentsHolder caseDocumentsHolder,
+                                                            FinremCaseData finremCaseData) {
+        List<IntervenerHearingNoticeCollection> intervenerHearingNoticesCollection =
+            intervenerWrapper.getIntervenerHearingNoticesCollection(finremCaseData);
+        caseDocumentsHolder.getCaseDocuments()
+            .forEach(cd -> intervenerHearingNoticesCollection.add(getHearingNoticesDocumentCollection(cd)));
     }
 
     private IntervenerHearingNoticeCollection getHearingNoticesDocumentCollection(CaseDocument hearingNotice) {
@@ -173,40 +190,40 @@ public class InterimHearingService {
     }
 
     @SuppressWarnings("java:S6204")
-    private CaseDocumentsHolder prepareDocumentsForPrint(CaseDetails caseDetails,
-                                                         List<InterimHearingData> interimHearingList,
+    private CaseDocumentsHolder prepareDocumentsForPrint(FinremCaseDetails caseDetails,
+                                                         List<InterimHearingCollection> newInterimHearingList,
                                                          String authorisationToken) {
 
 
         String caseId = caseDetails.getId().toString();
         log.info("preparing for bulk print document for Case ID: {}", caseId);
-        Map<String, Object> caseData = caseDetails.getData();
-        List<CaseDocument> interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails,
-            interimHearingList, authorisationToken);
-
-
-        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
-            interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseData);
-        caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
+        List<CaseDocument> newInterimHearingNotices = prepareInterimHearingRequiredNoticeDocument(caseDetails,
+            newInterimHearingList, authorisationToken);
 
         CaseDocumentsHolder caseDocumentsHolder = CaseDocumentsHolder.builder()
             .caseDocuments(new ArrayList<>())
             .bulkPrintDocuments(new ArrayList<>())
             .build();
-        interimDocument.forEach(doc -> bulkPrintDocumentsList.add(loadBulkPrintDocument(doc)));
-        caseDocumentsHolder.getCaseDocuments().addAll(interimDocument);
+        caseDocumentsHolder.getCaseDocuments().addAll(newInterimHearingNotices);
 
-        List<BulkPrintDocument> documents = interimDocument.stream()
-            .map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList());
+        List<BulkPrintDocument> documents = newInterimHearingNotices.stream()
+            .map(documentHelper::mapToBulkPrintDocument).collect(Collectors.toList());
         caseDocumentsHolder.getBulkPrintDocuments().addAll(documents);
 
-        addUploadedDocumentsToBulkPrintList(caseId, interimHearingList, caseDocumentsHolder, authorisationToken);
+        addUploadedDocumentsToBulkPrintList(caseId, newInterimHearingList, caseDocumentsHolder, authorisationToken);
 
+        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = new ArrayList<>();
+        bulkPrintDocumentsList.addAll(
+            caseDocumentsHolder.getCaseDocuments().stream().map(this::loadBulkPrintDocument).toList());
+        if (caseDetails.getData().getInterimWrapper().getInterimHearingDocuments() == null) {
+            caseDetails.getData().getInterimWrapper().setInterimHearingDocuments(new ArrayList<>());
+        }
+        caseDetails.getData().getInterimWrapper().getInterimHearingDocuments().addAll(bulkPrintDocumentsList);
         return caseDocumentsHolder;
     }
 
     private void addUploadedDocumentsToBulkPrintList(String caseId,
-                                                     List<InterimHearingData> interimHearingList,
+                                                     List<InterimHearingCollection> interimHearingList,
                                                      CaseDocumentsHolder caseDocumentsHolder,
                                                      String authorisationToken) {
         List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
@@ -222,8 +239,8 @@ public class InterimHearingService {
                 documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments =
                 genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
-            caseDocumentsHolder.getBulkPrintDocuments().add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
-            caseDocumentsHolder.getCaseDocuments().add(additionalUploadedDocuments);
+            caseDocumentsHolder.getBulkPrintDocuments().add(
+                documentHelper.mapToBulkPrintDocument(additionalUploadedDocuments));
         }
     }
 
@@ -239,31 +256,33 @@ public class InterimHearingService {
             .build();
     }
 
-    private List<CaseDocument> prepareInterimHearingRequiredNoticeDocument(CaseDetails caseDetails,
-                                                                           List<InterimHearingData> interimHearingList,
+    private List<CaseDocument> prepareInterimHearingRequiredNoticeDocument(FinremCaseDetails caseDetails,
+                                                                           List<InterimHearingCollection> newInterimHearingList,
                                                                            String authorisationToken) {
 
-        List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
+        List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(newInterimHearingList);
 
         return interimCaseData.stream()
-            .map(interimHearingCaseData -> generateCaseDocument(interimHearingCaseData, caseDetails, authorisationToken))
+            .map(interimHearingCaseData -> generateInterimHearingNotice(interimHearingCaseData, caseDetails, authorisationToken))
             .toList();
     }
 
     @SuppressWarnings("java:S6204")
-    public List<Map<String, Object>> convertInterimHearingCollectionDataToMap(List<InterimHearingData> interimHearingList) {
+    public List<Map<String, Object>> convertInterimHearingCollectionDataToMap(
+        List<InterimHearingCollection> interimHearingList) {
+
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+            = interimHearingList.stream().map(InterimHearingCollection::getValue).toList();
         return interimHearingItems.stream()
             .map(obj -> objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {
             })).toList();
     }
 
-    private CaseDocument generateCaseDocument(Map<String, Object> interimHearingCaseData,
-                                              CaseDetails caseDetails,
-                                              String authorisationToken) {
+    private CaseDocument generateInterimHearingNotice(Map<String, Object> interimHearingCaseData,
+                                                      FinremCaseDetails caseDetails,
+                                                      String authorisationToken) {
 
-        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        CaseDetails caseDetailsCopy = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
         caseData.put("ccdCaseNumber", caseDetailsCopy.getId());
@@ -276,7 +295,8 @@ public class InterimHearingService {
         caseData.put("interimHearingDate", interimHearingCaseData.get("interimHearingDate"));
         caseData.put("interimHearingTime", interimHearingCaseData.get("interimHearingTime"));
         caseData.put("interimTimeEstimate", interimHearingCaseData.get("interimHearingTimeEstimate"));
-        caseData.put("interimAdditionalInformationAboutHearing", interimHearingCaseData.get("interimAdditionalInformationAboutHearing"));
+        caseData.put("interimAdditionalInformationAboutHearing",
+            interimHearingCaseData.get("interimAdditionalInformationAboutHearing"));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetailsCopy),
@@ -302,141 +322,75 @@ public class InterimHearingService {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
     }
 
-    public List<InterimHearingData> filterInterimHearingToProcess(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
-        List<InterimHearingData> sortedInterimHearingList = sortEarliestHearingFirst(caseData);
-        caseData.put(INTERIM_HEARING_COLLECTION, sortedInterimHearingList);
+    public void clearLegacyInterimData(FinremCaseData caseData) {
 
-        List<InterimHearingCollectionItemData> trackingList = interimHearingHelper.getInterimHearingTrackingList(caseData);
-        if (trackingList == null || trackingList.isEmpty()) {
-            trackingList = sortEarliestHearingFirst(caseDataBefore).stream()
-                .map(obj -> interimHearingHelper.getTrackingObject(obj.getId())).toList();
-        }
+        InterimWrapper interimWrapper = caseData.getInterimWrapper();
+        interimWrapper.setInterimHearingType(null);
+        interimWrapper.setInterimHearingDate(null);
+        interimWrapper.setInterimHearingTime(null);
+        interimWrapper.setInterimTimeEstimate(null);
+        interimWrapper.setInterimAdditionalInformationAboutHearing(null);
+        interimWrapper.setInterimPromptForAnyDocument(null);
+        InterimRegionWrapper interimRegionWrapper = caseData.getRegionWrapper().getInterimRegionWrapper();
+        interimRegionWrapper.setInterimRegionList(null);
+        interimRegionWrapper.setInterimLondonFrcList(null);
+        interimRegionWrapper.setInterimHighCourtFrcList(null);
+        interimRegionWrapper.setInterimNorthEastFrcList(null);
+        interimRegionWrapper.setInterimMidlandsFrcList(null);
+        interimRegionWrapper.setInterimNorthWestFrcList(null);
+        interimRegionWrapper.setInterimSouthEastFrcList(null);
+        interimRegionWrapper.setInterimSouthWestFrcList(null);
+        interimRegionWrapper.setInterimWalesFrcList(null);
+        InterimCourtListWrapper courtListWrapper = interimRegionWrapper.getCourtListWrapper();
+        courtListWrapper.setInterimNottinghamCourtList(null);
+        courtListWrapper.setInterimCfcCourtList(null);
+        courtListWrapper.setInterimBirminghamCourtList(null);
+        courtListWrapper.setInterimLiverpoolCourtList(null);
+        courtListWrapper.setInterimManchesterCourtList(null);
+        courtListWrapper.setInterimLancashireCourtList(null);
+        courtListWrapper.setInterimClevelandCourtList(null);
+        courtListWrapper.setInterimNwYorkshireCourtList(null);
+        courtListWrapper.setInterimHumberCourtList(null);
+        courtListWrapper.setInterimKentSurreyCourtList(null);
+        courtListWrapper.setInterimBedfordshireCourtList(null);
+        courtListWrapper.setInterimThamesValleyCourtList(null);
+        courtListWrapper.setInterimDevonCourtList(null);
+        courtListWrapper.setInterimDorsetCourtList(null);
+        courtListWrapper.setInterimBristolCourtList(null);
+        courtListWrapper.setInterimNewportCourtList(null);
+        courtListWrapper.setInterimSwanseaCourtList(null);
+        courtListWrapper.setInterimNorthWalesCourtList(null);
 
-        List<String> dataToProcessList = compareCaseData(caseData, caseDataBefore);
-
-
-        log.info("filterInterimHearingToProcess :: trackingList {}", trackingList.size());
-        List<String> alreadyProcessedIds = trackingList.stream()
-            .map(existingCollectionId -> existingCollectionId.getValue().getIhItemIds()).collect(Collectors.toList());
-
-        alreadyProcessedIds.removeAll(dataToProcessList);
-
-        return sortedInterimHearingList.stream()
-            .filter(collectionId -> !alreadyProcessedIds.contains(collectionId.getId()))
-            .toList();
+        interimWrapper.setInterimHearingCollectionItemIds(null);
     }
 
-    private List<String> compareCaseData(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
-        Map<String, String> currentMap = new HashMap<>();
-        Map<String, String> beforeMap = new HashMap<>();
-        List<String> modifiedCollectionList = new ArrayList<>();
-
-        List<InterimHearingData> currentInterimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
-        List<InterimHearingData> beforeInterimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseDataBefore);
-
-        String beforeMigrationHearingDate = nullToEmpty(caseData.get(INTERIM_HEARING_DATE));
-        String beforeMigrationHearingTime = nullToEmpty(caseData.get(INTERIM_HEARING_TIME));
-
-        if (!currentInterimHearingList.isEmpty() && (!beforeInterimHearingList.isEmpty()
-            || !beforeMigrationHearingDate.isEmpty())) {
-            currentInterimHearingList.forEach(data -> currentMap.put(data.getId(), String.join("#",
-                data.getValue().getInterimHearingDate(), data.getValue().getInterimHearingTime())));
-
-            log.info("Non collection hearing date {} and time {}", beforeMigrationHearingDate, beforeMigrationHearingTime);
-            if (beforeMigrationHearingDate.isEmpty() && beforeMigrationHearingTime.isEmpty()) {
-                beforeInterimHearingList.forEach(data -> beforeMap.put(data.getId(), String.join("#",
-                    data.getValue().getInterimHearingDate(), data.getValue().getInterimHearingTime())));
-            } else {
-                currentInterimHearingList.forEach(data -> beforeMap.put(data.getId(), String.join("#",
-                    beforeMigrationHearingDate, beforeMigrationHearingTime)));
-            }
-            log.info("beforeMap::" + beforeMap.size());
-            currentMap.entrySet().forEach(currentData -> beforeMap.entrySet()
-                .forEach(beforeData -> setList(currentData, beforeData, modifiedCollectionList)));
-        }
-
-        log.info("Modified collection list::" + modifiedCollectionList);
-        return modifiedCollectionList;
-    }
-
-    private void setList(Map.Entry<String, String> currentDataMap, Map.Entry<String, String> beforeDataMap,
-                         List<String> modifiedCollectionList) {
-        if (currentDataMap.getKey().equals(beforeDataMap.getKey()) && !currentDataMap.getValue().equals(beforeDataMap.getValue())) {
-            modifiedCollectionList.add(currentDataMap.getKey());
-        }
-    }
-
-    private List<InterimHearingData> sortEarliestHearingFirst(Map<String, Object> caseData) {
-        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
-        return interimHearingList.stream()
-            .sorted(Comparator.nullsLast(Comparator.comparing(e -> e.getValue().getInterimHearingDate())))
-            .toList();
-    }
-
-    private void removeNonCollectionInterimData(Map<String, Object> caseData) {
-        caseData.remove(INTERIM_HEARING_TYPE);
-        caseData.remove(INTERIM_HEARING_DATE);
-        caseData.remove(INTERIM_HEARING_TIME);
-        caseData.remove(INTERIM_HEARING_TIME_ESTIMATE);
-        caseData.remove(INTERIM_HEARING_REGION_LIST);
-        caseData.remove(INTERIM_HEARING_CFC_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_WALES_FRC_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_LONDON_FRC_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_DEVON_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_DORSET_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_HUMBER_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_MIDLANDS_FRC_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_BRISTOL_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_NEWPORT_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_NORTHEAST_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_NORTHWEST_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_SOUTHEAST_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_SOUTHWEST_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_SWANSEA_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_LIVERPOOL_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_BIRMINGHAM_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_CLEAVELAND_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_KENT_SURREY_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_LANCASHIRE_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_MANCHESTER_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_NORTHWALES_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_NOTTINGHAM_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_NWYORKSHIRE_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_THAMESVALLEY_COURT_LIST);
-        caseData.remove(INTERIM_HEARING_ADDITIONAL_INFO);
-        caseData.remove(INTERIM_HEARING_PROMPT_FOR_DOCUMENT);
-        caseData.remove(INTERIM_HEARING_UPLOADED_DOCUMENT);
-        caseData.remove(INTERIM_HEARING_DOCUMENT);
-    }
-
-    public void sendNotification(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
+    public void sendNotification(FinremCaseDetails caseDetails) {
         log.info("Sending email notification for Case ID: {}", caseDetails.getId());
-        Map<String, Object> caseData = caseDetails.getData();
-        Map<String, Object> caseDataBefore = caseDetailsBefore.getData();
-        List<InterimHearingData> caseDataList = filterInterimHearingToProcess(caseData, caseDataBefore);
-        List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(caseDataList);
-        interimCaseData.forEach(interimHearingData -> notify(caseDetails, interimHearingData));
+        List<InterimHearingCollection> newInterimHearingsToSendNotifications =
+            caseDetails.getData().getInterimWrapper().getInterimHearingsScreenField();
+        List<Map<String, Object>> newInterimHearingsMap =
+            convertInterimHearingCollectionDataToMap(newInterimHearingsToSendNotifications);
+        newInterimHearingsMap.forEach(interimHearingData -> notify(caseDetails, interimHearingData));
 
     }
 
-    private void notify(CaseDetails caseDetails, Map<String, Object> interimHearingData) {
+    private void notify(FinremCaseDetails caseDetails, Map<String, Object> interimHearingData) {
 
-        final FinremCaseDetails finremCaseDetails = selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails);
+        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails.getData());
 
         if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
-            && finremCaseDetails.getData().isApplicantCorrespondenceEnabled()) {
+            && caseDetails.getData().isApplicantCorrespondenceEnabled()) {
             log.info("Sending email notification to Applicant Solicitor about interim hearing for Case ID: {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(caseDetails, interimHearingData);
         }
         if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
-            && finremCaseDetails.getData().isRespondentCorrespondenceEnabled()) {
+            && caseDetails.getData().isRespondentCorrespondenceEnabled()) {
             log.info("Sending email notification to Respondent Solicitor about interim hearing for Case ID: {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(caseDetails, interimHearingData);
         }
         if (notificationService.isContestedApplication(caseDetails)) {
 
-            final List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
+            final List<IntervenerWrapper> interveners = caseDetails.getData().getInterveners();
             interveners.forEach(intervenerWrapper -> {
                 if (notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails)
                     && (intervenerWrapper.getIntervenerCorrespondenceEnabled() != null

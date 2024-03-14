@@ -19,10 +19,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 import java.util.ArrayList;
@@ -455,27 +455,27 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     }
 
     private void addIntervenerOneWrapper(FinremCaseData caseData) {
-        IntervenerOneWrapper intervenerWrapper = IntervenerOneWrapper.builder().intervenerSolName("intvr1sol")
+        IntervenerOne intervenerWrapper = IntervenerOne.builder().intervenerSolName("intvr1sol")
             .intervenerName("intvr1").intervenerAddress(getAddress()).build();
-        caseData.setIntervenerOneWrapper(intervenerWrapper);
+        caseData.setIntervenerOne(intervenerWrapper);
     }
 
     private void addIntervenerTwoWrapper(FinremCaseData caseData) {
-        IntervenerTwoWrapper intervenerWrapper = IntervenerTwoWrapper.builder().intervenerSolName("intvr2sol")
+        IntervenerTwo intervenerWrapper = IntervenerTwo.builder().intervenerSolName("intvr2sol")
             .intervenerName("intvr2").intervenerAddress(getAddress()).build();
-        caseData.setIntervenerTwoWrapper(intervenerWrapper);
+        caseData.setIntervenerTwo(intervenerWrapper);
     }
 
     private void addIntervenerThreeWrapper(FinremCaseData caseData) {
-        IntervenerThreeWrapper intervenerWrapper = IntervenerThreeWrapper.builder().intervenerSolName("intvr3sol")
+        IntervenerThree intervenerWrapper = IntervenerThree.builder().intervenerSolName("intvr3sol")
             .intervenerName("intvr3").intervenerAddress(getAddress()).build();
-        caseData.setIntervenerThreeWrapper(intervenerWrapper);
+        caseData.setIntervenerThree(intervenerWrapper);
     }
 
     private void addIntervenerFourWrapper(FinremCaseData caseData) {
-        IntervenerFourWrapper intervenerWrapper = IntervenerFourWrapper.builder().intervenerSolName("intvr4sol")
+        IntervenerFour intervenerWrapper = IntervenerFour.builder().intervenerSolName("intvr4sol")
             .intervenerName("intvr4").intervenerAddress(getAddress()).build();
-        caseData.setIntervenerFourWrapper(intervenerWrapper);
+        caseData.setIntervenerFour(intervenerWrapper);
     }
 
     private static void verifyCaseDocumentFields(CaseDocument result, String category) {

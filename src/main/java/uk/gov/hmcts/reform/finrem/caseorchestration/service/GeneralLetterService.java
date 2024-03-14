@@ -18,10 +18,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CreateGeneralLetterDocumentCategoriser;
@@ -170,18 +170,18 @@ public class GeneralLetterService {
     private String getRecipientSolicitorReference(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         ContactDetailsWrapper wrapper = data.getContactDetailsWrapper();
-        IntervenerOneWrapper intervenerOneWrapper = data.getIntervenerOneWrapper();
-        IntervenerTwoWrapper intervenerTwoWrapper = data.getIntervenerTwoWrapper();
-        IntervenerThreeWrapper intervenerThreeWrapper = data.getIntervenerThreeWrapper();
-        IntervenerFourWrapper intervenerFourWrapper = data.getIntervenerFourWrapper();
+        IntervenerOne intervenerOne = data.getIntervenerOne();
+        IntervenerTwo intervenerTwo = data.getIntervenerTwo();
+        IntervenerThree intervenerThree = data.getIntervenerThree();
+        IntervenerFour intervenerFour = data.getIntervenerFour();
         String letterAddresseeType = data.getGeneralLetterWrapper().getGeneralLetterAddressee().getValue().getCode();
         return switch (letterAddresseeType) {
             case APPLICANT_SOLICITOR -> wrapper.getSolicitorReference();
             case RESPONDENT_SOLICITOR -> wrapper.getRespondentSolicitorReference();
-            case INTERVENER1_SOLICITOR -> intervenerOneWrapper.getIntervenerSolicitorReference();
-            case INTERVENER2_SOLICITOR -> intervenerTwoWrapper.getIntervenerSolicitorReference();
-            case INTERVENER3_SOLICITOR -> intervenerThreeWrapper.getIntervenerSolicitorReference();
-            case INTERVENER4_SOLICITOR -> intervenerFourWrapper.getIntervenerSolicitorReference();
+            case INTERVENER1_SOLICITOR -> intervenerOne.getIntervenerSolicitorReference();
+            case INTERVENER2_SOLICITOR -> intervenerTwo.getIntervenerSolicitorReference();
+            case INTERVENER3_SOLICITOR -> intervenerThree.getIntervenerSolicitorReference();
+            case INTERVENER4_SOLICITOR -> intervenerFour.getIntervenerSolicitorReference();
             default -> null;
         };
     }
@@ -196,10 +196,10 @@ public class GeneralLetterService {
             case RESPONDENT -> data.getRespondentFullName();
             case APPLICANT -> data.getFullApplicantName();
             case OTHER_RECIPIENT -> data.getGeneralLetterWrapper().getGeneralLetterRecipient();
-            case INTERVENER1, INTERVENER1_SOLICITOR -> getIntervenerAddressee(data.getIntervenerOneWrapper(), generalLetterAddressee);
-            case INTERVENER2, INTERVENER2_SOLICITOR -> getIntervenerAddressee(data.getIntervenerTwoWrapper(), generalLetterAddressee);
-            case INTERVENER3, INTERVENER3_SOLICITOR -> getIntervenerAddressee(data.getIntervenerThreeWrapper(), generalLetterAddressee);
-            case INTERVENER4, INTERVENER4_SOLICITOR -> getIntervenerAddressee(data.getIntervenerFourWrapper(), generalLetterAddressee);
+            case INTERVENER1, INTERVENER1_SOLICITOR -> getIntervenerAddressee(data.getIntervenerOne(), generalLetterAddressee);
+            case INTERVENER2, INTERVENER2_SOLICITOR -> getIntervenerAddressee(data.getIntervenerTwo(), generalLetterAddressee);
+            case INTERVENER3, INTERVENER3_SOLICITOR -> getIntervenerAddressee(data.getIntervenerThree(), generalLetterAddressee);
+            case INTERVENER4, INTERVENER4_SOLICITOR -> getIntervenerAddressee(data.getIntervenerFour(), generalLetterAddressee);
             default -> null;
         };
     }
@@ -214,10 +214,10 @@ public class GeneralLetterService {
             case RESPONDENT -> data.getContactDetailsWrapper().getRespondentAddress();
             case APPLICANT -> data.getContactDetailsWrapper().getApplicantAddress();
             case OTHER_RECIPIENT -> data.getGeneralLetterWrapper().getGeneralLetterRecipientAddress();
-            case INTERVENER1, INTERVENER1_SOLICITOR -> data.getIntervenerOneWrapper().getIntervenerAddress();
-            case INTERVENER2, INTERVENER2_SOLICITOR -> data.getIntervenerTwoWrapper().getIntervenerAddress();
-            case INTERVENER3, INTERVENER3_SOLICITOR -> data.getIntervenerThreeWrapper().getIntervenerAddress();
-            case INTERVENER4, INTERVENER4_SOLICITOR -> data.getIntervenerFourWrapper().getIntervenerAddress();
+            case INTERVENER1, INTERVENER1_SOLICITOR -> data.getIntervenerOne().getIntervenerAddress();
+            case INTERVENER2, INTERVENER2_SOLICITOR -> data.getIntervenerTwo().getIntervenerAddress();
+            case INTERVENER3, INTERVENER3_SOLICITOR -> data.getIntervenerThree().getIntervenerAddress();
+            case INTERVENER4, INTERVENER4_SOLICITOR -> data.getIntervenerFour().getIntervenerAddress();
             default -> null;
         };
     }
@@ -227,10 +227,10 @@ public class GeneralLetterService {
         GeneralLetterWrapper generalLetterWrapper = caseDetails.getData().getGeneralLetterWrapper();
         List<GeneralLetterCollection> generalLettersData = generalLetterWrapper.getGeneralLetterCollection();
         GeneralLetterCollection latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
-        bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(latestGeneralLetterData.getValue().getGeneratedLetter()));
+        bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(latestGeneralLetterData.getValue().getGeneratedLetter()));
         CaseDocument generalLetterUploadedDocument = generalLetterWrapper.getGeneralLetterUploadedDocument();
         if (generalLetterUploadedDocument != null) {
-            bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalLetterUploadedDocument));
+            bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalLetterUploadedDocument));
         }
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(),
             generalLetterWrapper.getGeneralLetterAddressee().getValue().getCode(),

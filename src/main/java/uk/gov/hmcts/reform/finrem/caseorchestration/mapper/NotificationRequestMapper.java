@@ -87,8 +87,7 @@ public class NotificationRequestMapper {
         return buildInterimHearingNotificationRequest(caseDetails, caseDataKeysWrapper);
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
-    public NotificationRequest getNotificationRequestForIntervenerSolicitor(CaseDetails caseDetails,
+    public NotificationRequest getNotificationRequestForIntervenerSolicitor(FinremCaseDetails caseDetails,
                                                                             Map<String, Object> interimHearingData,
                                                                             SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         return buildInterimHearingNotificationRequest(caseDetails, dataKeysWrapper, interimHearingData);
@@ -115,7 +114,7 @@ public class NotificationRequestMapper {
     }
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
-    public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails,
+    public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails,
                                                                            Map<String, Object> interimHearingData) {
         return buildInterimHearingNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(caseDetails.getData()),
             interimHearingData);

@@ -115,19 +115,19 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
         List<ManageScannedDocumentCollection> manageScannedDocumentCollection =
             caseData.getManageScannedDocumentCollection();
 
-        if (StringUtils.isBlank(caseData.getIntervenerOneWrapper().getIntervenerName())
+        if (StringUtils.isBlank(caseData.getIntervenerOne().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageScannedDocumentCollection)) {
             warnings.add(INTERVENER_1 + CHOOSE_A_DIFFERENT_PARTY);
         }
-        if (StringUtils.isBlank(caseData.getIntervenerTwoWrapper().getIntervenerName())
+        if (StringUtils.isBlank(caseData.getIntervenerTwo().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_TWO, manageScannedDocumentCollection)) {
             warnings.add(INTERVENER_2 + CHOOSE_A_DIFFERENT_PARTY);
         }
-        if (StringUtils.isBlank(caseData.getIntervenerThreeWrapper().getIntervenerName())
+        if (StringUtils.isBlank(caseData.getIntervenerThree().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_THREE, manageScannedDocumentCollection)) {
             warnings.add(INTERVENER_3 + CHOOSE_A_DIFFERENT_PARTY);
         }
-        if (StringUtils.isBlank(caseData.getIntervenerFourWrapper().getIntervenerName())
+        if (StringUtils.isBlank(caseData.getIntervenerFour().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_FOUR, manageScannedDocumentCollection)) {
             warnings.add(INTERVENER_4 + CHOOSE_A_DIFFERENT_PARTY);
         }

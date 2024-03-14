@@ -28,10 +28,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
@@ -296,14 +296,14 @@ public class GeneralApplicationHelperTest {
     public void givenIntervenersOnCase_ThenShouldAddToDynamicList() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper.builder().intervenerName("firstIntervener").build();
-        caseData.setIntervenerOneWrapper(oneWrapper);
-        IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper.builder().intervenerName("secondIntervener").build();
-        caseData.setIntervenerTwoWrapper(twoWrapper);
-        IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper.builder().intervenerName("thirdIntervener").build();
-        caseData.setIntervenerThreeWrapper(threeWrapper);
-        IntervenerFourWrapper fourWrapper = IntervenerFourWrapper.builder().intervenerName("fourthIntervener").build();
-        caseData.setIntervenerFourWrapper(fourWrapper);
+        IntervenerOne oneWrapper = IntervenerOne.builder().intervenerName("firstIntervener").build();
+        caseData.setIntervenerOne(oneWrapper);
+        IntervenerTwo twoWrapper = IntervenerTwo.builder().intervenerName("secondIntervener").build();
+        caseData.setIntervenerTwo(twoWrapper);
+        IntervenerThree threeWrapper = IntervenerThree.builder().intervenerName("thirdIntervener").build();
+        caseData.setIntervenerThree(threeWrapper);
+        IntervenerFour fourWrapper = IntervenerFour.builder().intervenerName("fourthIntervener").build();
+        caseData.setIntervenerFour(fourWrapper);
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         helper.buildDynamicIntervenerList(dynamicListElements, caseData);
