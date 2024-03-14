@@ -9,3 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 public class CaseSubmissionPbaValidateMidEventHandler extends FinremCallbackHandler {
 
 }
+    private final PBAValidationService pbaValidationService;
+
+    public CaseSubmissionPbaValidateMidEventHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                    PBAValidationService pbaValidationService) {
+        super(finremCaseDetailsMapper);
+        this.pbaValidationService = pbaValidationService;
+    }
