@@ -88,6 +88,7 @@ public class UpdateRepresentationService {
             changeRequest);
         final ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
+
         log.info("About to start updating solicitor details in the case data for Case ID: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
 

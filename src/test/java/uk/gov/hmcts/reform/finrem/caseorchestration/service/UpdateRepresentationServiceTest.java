@@ -303,13 +303,15 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .build();
         caseData.put("changeOrganisationRequestField", changeRequest);
         updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
-        assertEquals("org1", ((ChangeOrganisationRequest) caseData.get("changeOrganisationRequestField")).getOrganisationToRemove().getOrganisationID());
+        assertEquals("org1", ((ChangeOrganisationRequest) caseData.get("changeOrganisationRequestField"))
+            .getOrganisationToRemove().getOrganisationID());
 
         // Test when ChangeOrganisationRequest is not null and OrganisationToRemove is null
         changeRequest = ChangeOrganisationRequest.builder().build();
         caseData.put("changeOrganisationRequestField", changeRequest);
         updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
-        assertNull(((ChangeOrganisationRequest) caseData.get("changeOrganisationRequestField")).getOrganisationToRemove().getOrganisationID());
+        assertNull(((ChangeOrganisationRequest) caseData.get("changeOrganisationRequestField"))
+            .getOrganisationToRemove().getOrganisationID());
     }
 
     @Test
