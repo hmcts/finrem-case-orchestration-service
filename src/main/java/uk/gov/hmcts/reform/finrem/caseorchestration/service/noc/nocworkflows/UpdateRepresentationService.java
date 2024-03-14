@@ -73,8 +73,6 @@ public class UpdateRepresentationService {
         log.info("Updating representation for Case ID: {}", caseDetails.getId());
 
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
-        log.info("{} Found the solicitor to add {}", caseDetails.getId(), solicitorToAdd.getId());
-
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
 
         if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseDetails.getData(), solicitorToAdd)) {
@@ -88,24 +86,10 @@ public class UpdateRepresentationService {
 
         final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd,
             changeRequest);
-        if (addedSolicitor != null) {
-            log.info("{} Added solicitor email: {}, organisation {}, name {} ", caseDetails.getId(),
-                addedSolicitor.getEmail(), addedSolicitor.getOrganisation().getOrganisationID(),
-                addedSolicitor.getName());
-        }
-
         final ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
-        if (removedSolicitor != null && removedSolicitor.getOrganisation() != null) {
-            log.info("{} Removed solicitor organisation {}, name {} ", caseDetails.getId(),
-                removedSolicitor.getOrganisation().getOrganisationID(),
-                removedSolicitor.getName());
-        } else {
-            log.info("{} Removed solicitor is null", caseDetails.getId());
-        }
         log.info("About to start updating solicitor details in the case data for Case ID: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
-        log.info("About to update representation update history for Case ID: {}", caseDetails.getId());
 
         return updateRepresentationUpdateHistory(caseDetails, addedSolicitor,
             removedSolicitor, changeRequest);
@@ -142,23 +126,16 @@ public class UpdateRepresentationService {
                                                                 ChangedRepresentative addedSolicitor,
                                                                 ChangeOrganisationRequest changeRequest) {
 
-
+        Map<String, Object> caseData = caseDetails.getData();
         boolean isApplicant = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
-        log.info("{} Is applicant: {}", caseDetails.getId(), isApplicant);
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
-        log.info("{} Is consented: {}", caseDetails.getId(), isConsented);
         addSolicitorAddressToCaseData(addedSolicitor, caseDetails, changeRequest, isConsented);
 
-        log.info("{} changeRequest.getCaseRoleId().getValueCode() is {}", caseDetails.getId(),
-            changeRequest.getCaseRoleId().getValueCode());
-        Map<String, Object> caseData = caseDetails.getData();
         caseData.put(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
             ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails), YES_VALUE);
 
-
         Map<String, Object> updatedCaseData = updateSolicitorDetailsService.updateSolicitorContactDetails(
             addedSolicitor, caseData, isConsented, isApplicant);
-        log.info("{} about to remove solicitor fields", caseDetails.getId());
 
         updatedCaseData = updateSolicitorDetailsService.removeSolicitorFields(updatedCaseData, isConsented, isApplicant);
 
@@ -186,23 +163,16 @@ public class UpdateRepresentationService {
                                                ChangeOrganisationRequest changeRequest,
                                                boolean isConsented) {
         final boolean isApplicant = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
-        log.info("{} Is applicant: {}", caseDetails.getId(), isApplicant);
         String appSolicitorAddressField = isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
-        log.info("{} App solicitor address field: {}", caseDetails.getId(), appSolicitorAddressField);
         String solicitorAddressField = isApplicant ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
-        log.info("{} Solicitor address field: {}", caseDetails.getId(), solicitorAddressField);
+
         OrganisationsResponse organisationsResponse = organisationService
             .findOrganisationByOrgId(addedSolicitor.getOrganisation().getOrganisationID());
-        log.info("{} Found the organisation with ID: {} and name: {}", caseDetails.getId(),
-            organisationsResponse.getOrganisationIdentifier(),
-            organisationsResponse.getName());
         String firmName = organisationsResponse.getName();
-        log.info("{} Firm name: {}", caseDetails.getId(), firmName);
+
         caseDetails.getData().put(getSolicitorFirmNameKey(caseDetails, isApplicant), firmName);
-        log.info("{} contestedFirm: {}", caseDetails.getId(), caseDetails.getData().get(CONTESTED_SOLICITOR_FIRM));
         caseDetails.getData().put(solicitorAddressField,
             updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(organisationsResponse));
-        log.info("{} updated contested solicitor address to {}", caseDetails.getId(), caseDetails.getData().get(CONTESTED_SOLICITOR_ADDRESS));
     }
 
     private String getRespondentRepresentedKey(CaseDetails caseDetails) {
@@ -211,7 +181,6 @@ public class UpdateRepresentationService {
     }
 
     private String getSolicitorFirmNameKey(CaseDetails caseDetails, boolean isApplicant) {
-        log.info(getAppSolicitorFirmNameKey(caseDetails));
         return isApplicant
             ? getAppSolicitorFirmNameKey(caseDetails)
             : RESP_SOLICITOR_FIRM;
@@ -235,9 +204,6 @@ public class UpdateRepresentationService {
                                                                              ChangedRepresentative removedSolicitor,
                                                                              RepresentationUpdateHistory current,
                                                                              ChangeOrganisationRequest changeRequest) {
-        if (changeRequest != null) {
-            log.info("{} change request {}", caseDetails.getId(), changeRequest);
-        }
         return ChangeOfRepresentationRequest.builder()
             .by(addedSolicitor.getName())
             .party(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY) ? APPLICANT : RESPONDENT)

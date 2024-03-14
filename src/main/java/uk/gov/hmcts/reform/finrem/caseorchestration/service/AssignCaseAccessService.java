@@ -89,14 +89,6 @@ public class AssignCaseAccessService {
     }
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(String authToken, CaseDetails caseDetails) {
-        if (serviceAuthTokenGenerator.generate() != null) {
-            log.info("{} serviceAuth {}", caseDetails.getId(), serviceAuthTokenGenerator.generate());
-        }
-        if (DecisionRequest.decisionRequest(caseDetails) != null) {
-            log.info("{} decisionRequest {}", caseDetails.getId(), DecisionRequest.decisionRequest(caseDetails));
-        } else {
-            log.info("{} decisionRequest null", caseDetails.getId());
-        }
         return caseAssignmentApi.applyDecision(authToken, serviceAuthTokenGenerator.generate(),
             DecisionRequest.decisionRequest(caseDetails));
     }
