@@ -16,3 +16,9 @@ public class CaseSubmissionPbaValidateMidEventHandler extends FinremCallbackHand
         super(finremCaseDetailsMapper);
         this.pbaValidationService = pbaValidationService;
     }
+
+    @Override
+    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
+        return CallbackType.MID_EVENT.equals(callbackType)
+            && EventType.SHARE_SELECTED_DOCUMENTS.equals(eventType);
+    }
