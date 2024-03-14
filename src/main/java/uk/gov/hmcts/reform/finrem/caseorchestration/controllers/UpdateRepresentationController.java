@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
@@ -64,16 +63,9 @@ public class UpdateRepresentationController extends BaseController {
         log.info("{} Finished revoking creator role", caseDetails.getId());
         Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
         log.info("{} Finished updating representation", caseDetails.getId());
-        if (caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null) {
-            log.info("{} the case data field applicant fm name is {}", caseDetails.getId(),
-                caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME));
-        }
         caseDetails.getData().putAll(caseData);
         log.info("{} Finished adding to case data", caseDetails.getId());
-        if (caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null) {
-            log.info("{} the case data field applicant fm name is {}", caseDetails.getId(),
-                caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME));
-        }
+        updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
         if (assignCaseAccessService.applyDecision(authToken, caseDetails) != null) {
             log.info("{} apply decision returns {}", caseDetails.getId(),
                 assignCaseAccessService.applyDecision(authToken, caseDetails));

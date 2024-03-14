@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
@@ -182,6 +183,16 @@ public class UpdateRepresentationService {
 
         return objectMapper.convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST),
             ChangeOrganisationRequest.class);
+    }
+
+    public void addRemovedSolicitorOrganisationFieldToCaseData(CaseDetails caseDetails) {
+        ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
+        if (changeRequest != null && changeRequest.getOrganisationToRemove() == null) {
+            log.info("Adding the organisation field for the removed solicitor needed to process NOC on case {}",
+                caseDetails.getId());
+            changeRequest.setOrganisationToRemove(Organisation.builder().organisationID(null).build());
+            caseDetails.getData().put(CHANGE_ORGANISATION_REQUEST, changeRequest);
+        }
     }
 
     private void addSolicitorAddressToCaseData(ChangedRepresentative addedSolicitor,
