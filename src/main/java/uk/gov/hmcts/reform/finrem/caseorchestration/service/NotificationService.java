@@ -56,12 +56,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT_RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_SENT_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_SENT_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_APPLICATION_ISSUED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
@@ -313,11 +312,13 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     public void sendConsentOrderAvailableEmailToApplicantSolicitor(CaseDetails caseDetails) {
-        sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
+        sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails),
+            FR_CONSENT_ORDER_SENT_APPLICANT);
     }
 
     public void sendConsentOrderAvailableEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
-        sendConsentOrderAvailableEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
+        sendConsentOrderAvailableEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails
+        ), FR_CONSENT_ORDER_SENT_APPLICANT);
     }
 
     /**
@@ -329,41 +330,21 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     public void sendConsentOrderAvailableEmailToRespondentSolicitor(CaseDetails caseDetails) {
-        sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
+        sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails),
+            FR_CONSENT_ORDER_SENT_RESPONDENT);
     }
 
     public void sendConsentOrderAvailableEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequestForRespondentSolicitor = finremNotificationRequestMapper
             .getNotificationRequestForRespondentSolicitor(caseDetails);
-        sendConsentOrderAvailableEmail(notificationRequestForRespondentSolicitor);
+        sendConsentOrderAvailableEmail(notificationRequestForRespondentSolicitor,
+            FR_CONSENT_ORDER_SENT_RESPONDENT);
     }
 
-    /**
-     * No Return.
-     * <p>Please use @{@link #sendConsentOrderAvailableEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails     instance of CaseDetails
-     * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendConsentOrderAvailableEmailToIntervenerSolicitor(CaseDetails caseDetails,
-                                                                    SolicitorCaseDataKeysWrapper dataKeysWrapper) {
-        sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            dataKeysWrapper));
-    }
-
-    public void sendConsentOrderAvailableEmailToIntervenerSolicitor(FinremCaseDetails caseDetails,
-                                                                    SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        NotificationRequest notificationRequestForRespondentSolicitor = finremNotificationRequestMapper
-            .getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper);
-        sendConsentOrderAvailableEmail(notificationRequestForRespondentSolicitor);
-    }
-
-    private void sendConsentOrderAvailableEmail(NotificationRequest notificationRequest) {
+    private void sendConsentOrderAvailableEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         log.info("Received request for notification email for consent order available Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
+        emailService.sendConfirmationEmail(notificationRequest, template);
     }
 
     /**
@@ -1163,12 +1144,12 @@ public class NotificationService {
     @Deprecated(since = "15-june-2023")
     public void sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails),
-            FR_CONSENT_ORDER_NOT_APPROVED_SENT_APPLICANT);
+            FR_CONSENT_ORDER_SENT_APPLICANT);
     }
 
     public void sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
         sendConsentOrderNotApprovedSentEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails),
-            FR_CONSENT_ORDER_NOT_APPROVED_SENT_APPLICANT);
+            FR_CONSENT_ORDER_SENT_APPLICANT);
     }
 
     /**
@@ -1181,12 +1162,12 @@ public class NotificationService {
     @Deprecated(since = "15-june-2023")
     public void sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails),
-            FR_CONSENT_ORDER_NOT_APPROVED_SENT_RESPONDENT);
+            FR_CONSENT_ORDER_SENT_RESPONDENT);
     }
 
     public void sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {
         sendConsentOrderNotApprovedSentEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails),
-            FR_CONSENT_ORDER_NOT_APPROVED_SENT_RESPONDENT);
+            FR_CONSENT_ORDER_SENT_RESPONDENT);
     }
 
     public void sendInterimHearingNotificationEmailToApplicantSolicitor(CaseDetails caseDetails,

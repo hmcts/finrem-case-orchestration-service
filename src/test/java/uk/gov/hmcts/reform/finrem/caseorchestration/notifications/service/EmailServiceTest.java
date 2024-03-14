@@ -51,8 +51,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT_RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_SENT_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_SENT_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
@@ -343,16 +343,16 @@ public class EmailServiceTest {
         setConsentedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(
-            notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT_APPLICANT.name());
+            notificationRequest, FR_CONSENT_ORDER_SENT_APPLICANT.name());
 
 
         assertContestedTemplateVariablesAreAbsent(returnedTemplateVars);
-        returnedTemplateVars.putAll(emailTemplateVars.get(FR_CONSENT_ORDER_NOT_APPROVED_SENT_APPLICANT.name()));
+        returnedTemplateVars.putAll(emailTemplateVars.get(FR_CONSENT_ORDER_SENT_APPLICANT.name()));
 
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT_APPLICANT);
+        emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_SENT_APPLICANT);
 
         verify(mockClient).sendEmail(
-            eq(emailTemplates.get(FR_CONSENT_ORDER_NOT_APPROVED_SENT_APPLICANT.name())),
+            eq(emailTemplates.get(FR_CONSENT_ORDER_SENT_APPLICANT.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
             anyString());
@@ -363,16 +363,16 @@ public class EmailServiceTest {
         setConsentedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(
-            notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT_RESPONDENT.name());
+            notificationRequest, FR_CONSENT_ORDER_SENT_RESPONDENT.name());
 
 
         assertContestedTemplateVariablesAreAbsent(returnedTemplateVars);
-        returnedTemplateVars.putAll(emailTemplateVars.get(FR_CONSENT_ORDER_NOT_APPROVED_SENT_RESPONDENT.name()));
+        returnedTemplateVars.putAll(emailTemplateVars.get(FR_CONSENT_ORDER_SENT_RESPONDENT.name()));
 
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT_RESPONDENT);
+        emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_SENT_RESPONDENT);
 
         verify(mockClient).sendEmail(
-            eq(emailTemplates.get(FR_CONSENT_ORDER_NOT_APPROVED_SENT_RESPONDENT.name())),
+            eq(emailTemplates.get(FR_CONSENT_ORDER_SENT_RESPONDENT.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
             anyString());

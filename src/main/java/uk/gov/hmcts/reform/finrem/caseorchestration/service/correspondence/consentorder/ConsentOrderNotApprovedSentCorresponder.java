@@ -35,5 +35,6 @@ public class ConsentOrderNotApprovedSentCorresponder extends CaseDetailsEmailOnl
 
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
+        // there are no interveners on consented cases
     }
 }
