@@ -31,7 +31,7 @@ public class CaseSubmissionPbaValidateMidEventHandler extends FinremCallbackHand
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
-            && EventType.SHARE_SELECTED_DOCUMENTS.equals(eventType);
+            && EventType.APPLICATION_PAYMENT_SUBMISSION.equals(eventType);
     }
 
     @Override
