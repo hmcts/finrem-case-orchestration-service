@@ -174,7 +174,7 @@ public class BulkPrintService {
             caseDetails.getData().setBulkPrintCoverSheetApp(applicantCoverSheet);
         }
 
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(applicantCoverSheet);
+        return documentHelper.mapToBulkPrintDocument(applicantCoverSheet);
     }
 
     /**
@@ -198,7 +198,7 @@ public class BulkPrintService {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
         }
 
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(applicantCoverSheet);
+        return documentHelper.mapToBulkPrintDocument(applicantCoverSheet);
     }
 
     /**
@@ -221,7 +221,7 @@ public class BulkPrintService {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
         }
 
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(respondentCoverSheet);
+        return documentHelper.mapToBulkPrintDocument(respondentCoverSheet);
     }
 
     private BulkPrintDocument generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
@@ -236,7 +236,7 @@ public class BulkPrintService {
             caseDetails.getData().setBulkPrintCoverSheetRes(respondentCoverSheet);
         }
 
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(respondentCoverSheet);
+        return documentHelper.mapToBulkPrintDocument(respondentCoverSheet);
     }
 
     private BulkPrintDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails, String authorisationToken,
@@ -244,7 +244,7 @@ public class BulkPrintService {
         CaseDocument intervenerCoverSheet =
             coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
         log.info("Intervener cover sheet generated {}, for case Id {}", intervenerCoverSheet, caseDetails.getId());
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
+        return documentHelper.mapToBulkPrintDocument(intervenerCoverSheet);
     }
 
 
@@ -265,7 +265,7 @@ public class BulkPrintService {
         CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
         log.info("Intervener cover sheet generated {}, for case Id {}",
             intervenerCoverSheet, caseDetails.getId());
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(intervenerCoverSheet);
+        return documentHelper.mapToBulkPrintDocument(intervenerCoverSheet);
     }
 
     public String getRecipient(String text) {

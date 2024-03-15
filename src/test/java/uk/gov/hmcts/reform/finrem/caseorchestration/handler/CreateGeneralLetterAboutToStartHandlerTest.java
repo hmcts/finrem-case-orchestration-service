@@ -17,10 +17,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -133,17 +133,17 @@ public class CreateGeneralLetterAboutToStartHandlerTest {
 
     private void addIntervenerWrappers(FinremCaseData caseData) {
         List<IntervenerWrapper> intervenerWrappers = List.of(
-            IntervenerOneWrapper.builder().build(), IntervenerTwoWrapper.builder().build(),
-            IntervenerThreeWrapper.builder().build(), IntervenerFourWrapper.builder().build()
+            IntervenerOne.builder().build(), IntervenerTwo.builder().build(),
+            IntervenerThree.builder().build(), IntervenerFour.builder().build()
         );
         intervenerWrappers.forEach(wrapper -> {
             wrapper.setIntervenerName("intervener");
             wrapper.setIntervenerSolName("intervener sol");
         });
-        caseData.setIntervenerOneWrapper((IntervenerOneWrapper) intervenerWrappers.get(0));
-        caseData.setIntervenerTwoWrapper((IntervenerTwoWrapper) intervenerWrappers.get(1));
-        caseData.setIntervenerThreeWrapper((IntervenerThreeWrapper) intervenerWrappers.get(2));
-        caseData.setIntervenerFourWrapper((IntervenerFourWrapper) intervenerWrappers.get(3));
+        caseData.setIntervenerOne((IntervenerOne) intervenerWrappers.get(0));
+        caseData.setIntervenerTwo((IntervenerTwo) intervenerWrappers.get(1));
+        caseData.setIntervenerThree((IntervenerThree) intervenerWrappers.get(2));
+        caseData.setIntervenerFour((IntervenerFour) intervenerWrappers.get(3));
     }
 
     private List<DynamicRadioListElement> getDynamicRadioListItems(boolean addIntervenerListElements) {

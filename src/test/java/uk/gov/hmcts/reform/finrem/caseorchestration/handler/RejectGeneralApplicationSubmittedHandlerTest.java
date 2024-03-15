@@ -143,7 +143,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     @Test
     public void givenIntervenerSolicitorDigital_whenHandle_thenSendEmailToIntervenerSolicitor() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper().setIntervenerCorrespondenceEnabled(true);
+        callbackRequest.getCaseDetails().getData().getIntervenerOne().setIntervenerCorrespondenceEnabled(true);
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
             any(FinremCaseDetails.class))).thenReturn(true);
@@ -155,7 +155,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
             buildDynamicListForIntervener(INTERVENER1)));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(notificationService).sendGeneralApplicationRejectionEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
-            callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper());
+            callbackRequest.getCaseDetails().getData().getIntervenerOne());
     }
 
     @Test
@@ -196,7 +196,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     public void givenIntervenerSolicitorNotDigital_whenHandle_thenSendLetterToIntervenerSolicitor() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         DynamicRadioList dynamicRadioList = buildDynamicListForIntervener(INTERVENER1);
-        callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper().setIntervenerCorrespondenceEnabled(true);
+        callbackRequest.getCaseDetails().getData().getIntervenerOne().setIntervenerCorrespondenceEnabled(true);
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
             caseDetailsBefore(dynamicRadioList));
@@ -210,7 +210,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
             dynamicRadioList));
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(paperNotificationService).printIntervenerRejectionGeneralApplication(
-            caseDetailsBefore(dynamicRadioList), callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper(), AUTH_TOKEN);
+            caseDetailsBefore(dynamicRadioList), callbackRequest.getCaseDetails().getData().getIntervenerOne(), AUTH_TOKEN);
     }
 
     @Test

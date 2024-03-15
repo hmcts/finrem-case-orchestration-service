@@ -1170,7 +1170,7 @@ public class NotificationService {
             FR_CONSENT_ORDER_SENT_RESPONDENT);
     }
 
-    public void sendInterimHearingNotificationEmailToApplicantSolicitor(CaseDetails caseDetails,
+    public void sendInterimHearingNotificationEmailToApplicantSolicitor(FinremCaseDetails caseDetails,
                                                                         Map<String, Object> interimHearingData) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails,
             interimHearingData));
@@ -1242,13 +1242,13 @@ public class NotificationService {
     }
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
-    public void sendInterimHearingNotificationEmailToRespondentSolicitor(CaseDetails caseDetails,
+    public void sendInterimHearingNotificationEmailToRespondentSolicitor(FinremCaseDetails caseDetails,
                                                                          Map<String, Object> interimHearingData) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
             interimHearingData));
     }
 
-    public void sendInterimHearingNotificationEmailToIntervenerSolicitor(CaseDetails caseDetails,
+    public void sendInterimHearingNotificationEmailToIntervenerSolicitor(FinremCaseDetails caseDetails,
                                                                          Map<String, Object> interimHearingData,
                                                                          SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
@@ -1682,6 +1682,10 @@ public class NotificationService {
     }
 
     public boolean isContestedApplication(CaseDetails caseDetails) {
+        return caseDataService.isContestedApplication(caseDetails);
+    }
+
+    public boolean isContestedApplication(FinremCaseDetails caseDetails) {
         return caseDataService.isContestedApplication(caseDetails);
     }
 
