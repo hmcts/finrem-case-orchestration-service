@@ -50,8 +50,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_SENT_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 
 @RunWith(SpringRunner.class)
@@ -117,7 +117,7 @@ public class NotificationsTest extends BaseTest {
     @Test
     public void notifyConsentOrderAvailable() throws Exception {
         when(assignCaseAccessService.searchUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
-            .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
+            .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(RESP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_AVAILABLE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -126,7 +126,7 @@ public class NotificationsTest extends BaseTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
-        Mockito.verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_AVAILABLE));
+        Mockito.verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_SENT_RESPONDENT));
 
     }
 
