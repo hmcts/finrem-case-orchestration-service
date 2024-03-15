@@ -914,5 +914,15 @@ public class FinremCaseData {
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
 
+    @JsonIgnore
+    public String getPbaNumber() {
+        return pbaNumber;
+    }
+
+    @JsonIgnore
+    public YesOrNo getHelpWithFeesQuestion() {
+        return helpWithFeesQuestion;
+    }
+
 }
 
