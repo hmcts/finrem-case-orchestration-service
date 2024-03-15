@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollectionName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
@@ -16,7 +17,7 @@ import java.util.List;
 
 @SuperBuilder
 @NoArgsConstructor
-public class IntervenerOneWrapper extends IntervenerWrapper {
+public class IntervenerOne extends IntervenerWrapper {
 
     @Override
     @JsonIgnore
@@ -77,8 +78,8 @@ public class IntervenerOneWrapper extends IntervenerWrapper {
 
     @Override
     @JsonIgnore
-    public String getIntervenerHearingNoticesCollectionName() {
-        return "intv1HearingNoticesCollection";
+    public IntervenerHearingNoticeCollectionName getIntervenerHearingNoticesCollectionName() {
+        return IntervenerHearingNoticeCollectionName.INTV_1;
     }
 
     @Override
@@ -90,12 +91,12 @@ public class IntervenerOneWrapper extends IntervenerWrapper {
     @Override
     @JsonIgnore
     public IntervenerWrapper getIntervenerWrapperFromCaseData(FinremCaseData caseData) {
-        return caseData.getIntervenerOneWrapper();
+        return caseData.getIntervenerOne();
     }
 
     @Override
     @JsonIgnore
     public void removeIntervenerWrapperFromCaseData(FinremCaseData caseData) {
-        caseData.setIntervenerOneWrapper(null);
+        caseData.setIntervenerOne(null);
     }
 }

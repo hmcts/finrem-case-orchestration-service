@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDa
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
@@ -57,7 +57,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.ele
 public class NotificationRequestMapperTest extends BaseServiceTest {
 
     protected static final String EMPTY_STRING = "";
-    private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
+    private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-old-two-new-collections.json";
 
     private static final String CONSENTED_HEARING_JSON = "/fixtures/consented.listOfHearing/list-for-hearing-notification.json";
 
@@ -300,14 +300,15 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForAppSolicitorForContestedJourneyForInterimHearing() {
-        CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest callbackRequest = buildHearingFinremCallbackRequest(INTERIM_HEARING_JSON);
+        Map<String, Object> caseData =
+            finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails()).getData();
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
+        List<InterimHearingCollection> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+            = interimHearingList.stream().map(InterimHearingCollection::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
@@ -316,7 +317,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         interimDataMap.forEach(data -> verifyAppData(callbackRequest, data));
     }
 
-    private void verifyAppData(CallbackRequest callbackRequest, Map<String, Object> data) {
+    private void verifyAppData(FinremCallbackRequest callbackRequest, Map<String, Object> data) {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             callbackRequest.getCaseDetails(), data);
 
@@ -341,11 +342,11 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
+        List<InterimHearingCollection> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+            = interimHearingList.stream().map(InterimHearingCollection::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
@@ -358,11 +359,11 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         FinremCallbackRequest callbackRequest = buildHearingFinremCallbackRequest(INTERIM_HEARING_JSON);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.getInterimWrapper().getInterimHearings())
+        List<InterimHearingCollection> interimHearingList = Optional.ofNullable(caseData.getInterimWrapper().getInterimHearings())
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+            = interimHearingList.stream().map(InterimHearingCollection::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {

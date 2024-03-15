@@ -67,7 +67,7 @@ public class ConsentOrderNotApprovedDocumentService {
         if (useNotApprovedOrder) {
             existingList.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(notApprovedOrderDocuments));
         } else {
-            generalOrder.ifPresent(caseDocument -> existingList.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
+            generalOrder.ifPresent(caseDocument -> existingList.add(documentHelper.mapToBulkPrintDocument(caseDocument)));
         }
     }
 
@@ -86,7 +86,7 @@ public class ConsentOrderNotApprovedDocumentService {
             caseDetailsWithTemplateData,
             documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(),
             notApprovedOrderNotificationFileName);
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter);
+        return documentHelper.mapToBulkPrintDocument(coverLetter);
     }
 
     @SuppressWarnings("java:S3740")

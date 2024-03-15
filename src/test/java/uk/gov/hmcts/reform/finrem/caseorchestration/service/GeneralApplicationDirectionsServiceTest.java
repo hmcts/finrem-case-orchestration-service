@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,23 +19,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
@@ -51,9 +47,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
@@ -199,7 +192,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener1-referdetails").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        data.setIntervenerOneWrapper(IntervenerOneWrapper.builder()
+        data.setIntervenerOne(IntervenerOne.builder()
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .intervenerName("intervener1").build());
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
@@ -224,7 +217,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
             .data(data).build();
-        data.setIntervenerTwoWrapper(IntervenerTwoWrapper.builder()
+        data.setIntervenerTwo(IntervenerTwo.builder()
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .intervenerName("intervener1").build());
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
@@ -245,7 +238,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener3-referdetails").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        data.setIntervenerThreeWrapper(IntervenerThreeWrapper.builder()
+        data.setIntervenerThree(IntervenerThree.builder()
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .intervenerName("intervener1").build());
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
@@ -268,7 +261,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener4-referdetails").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        data.setIntervenerFourWrapper(IntervenerFourWrapper.builder()
+        data.setIntervenerFour(IntervenerFour.builder()
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .intervenerName("intervener1").build());
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
@@ -319,84 +312,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
         verify(bulkPrintService, never()).printIntervenerDocuments(
             any(IntervenerWrapper.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
-    }
-
-    @Test
-    public void givenPaperApplicationInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
-        caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing.json", objectMapper);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,
-            INTE_BINARY_URL));
-        generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
-
-        verify(genericDocumentService, times(1)).generateDocument(
-            eq(AUTH_TOKEN),
-            documentGenerationRequestCaseDetailsCaptor.capture(),
-            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetails)),
-            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
-            printDocumentsRequestDocumentListCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
-        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        assertThat(data, allOf(
-            hasEntry("courtDetails", ImmutableMap.of(
-                "courtName", "Kingston-Upon-Thames County Court And Family Court",
-                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
-                "phoneNumber", "0208 972 8700",
-                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
-            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
-            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
-            Matchers.<String, Object>hasEntry("applicantRepresented", "No"),
-            Matchers.<String, Object>hasEntry("respondentRepresented", "No"),
-            Matchers.<String, Object>hasEntry("interim_cfcCourtList", "FR_s_CFCList_4"),
-            Matchers.<String, Object>hasEntry("interimHearingDate", "2020-06-01"),
-            Matchers.<String, Object>hasEntry("interimHearingTime", "2:00 pm"),
-            Matchers.<String, Object>hasEntry("interimHearingTimeEstimate", "30 minutes"),
-            Matchers.<String, Object>hasEntry("interimAdditionalInformationAboutHearing", "refreshments will be provided"),
-            hasKey("letterDate")));
-
-        assertCaseDataHasInterimDocument();
-    }
-
-    @Test
-    public void givenApplicationIsNotPaperInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
-        caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing-nopaper.json", objectMapper);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,
-            INTE_BINARY_URL));
-        generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
-
-        verify(genericDocumentService, times(1)).generateDocument(
-            eq(AUTH_TOKEN),
-            documentGenerationRequestCaseDetailsCaptor.capture(),
-            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetails)),
-            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
-            printDocumentsRequestDocumentListCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
-        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        assertThat(data, allOf(
-            hasEntry("courtDetails", ImmutableMap.of(
-                "courtName", "Kingston-Upon-Thames County Court And Family Court",
-                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
-                "phoneNumber", "0208 972 8700",
-                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
-            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
-            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
-            Matchers.<String, Object>hasEntry("applicantRepresented", "No"),
-            Matchers.<String, Object>hasEntry("respondentRepresented", "No"),
-            Matchers.<String, Object>hasEntry("interim_cfcCourtList", "FR_s_CFCList_4"),
-            Matchers.<String, Object>hasEntry("interimHearingDate", "2020-06-01"),
-            Matchers.<String, Object>hasEntry("interimHearingTime", "2:00 pm"),
-            Matchers.<String, Object>hasEntry("interimHearingTimeEstimate", "30 minutes"),
-            Matchers.<String, Object>hasEntry("interimAdditionalInformationAboutHearing", "refreshments will be provided"),
-            Matchers.<String, Object>hasEntry("applicantSolicitorConsentForEmails", "No"),
-            Matchers.<String, Object>hasEntry("RespSolNotificationsEmailConsent", "No"),
-            hasKey("letterDate")));
-
-        assertCaseDataHasInterimDocument();
     }
 
     private void assertCaseDataHasInterimDocument() {

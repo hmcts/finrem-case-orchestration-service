@@ -30,10 +30,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -589,7 +589,7 @@ public class DocumentHelperTest {
         caseDetails.getData().getContactDetailsWrapper().setApplicantLname("Applicant");
 
         Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
-        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        IntervenerOne wrapper = new IntervenerOne();
         wrapper.setIntervenerName("name");
         wrapper.setIntervenerRepresented(YesOrNo.YES);
         wrapper.setIntervenerAddress(otherAddress);
@@ -612,7 +612,7 @@ public class DocumentHelperTest {
         caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
         Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
-        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        IntervenerOne wrapper = new IntervenerOne();
         wrapper.setIntervenerName("name");
         wrapper.setIntervenerRepresented(YesOrNo.YES);
         wrapper.setIntervenerAddress(otherAddress);
@@ -635,7 +635,7 @@ public class DocumentHelperTest {
         caseDetails.getData().getContactDetailsWrapper().setApplicantLname("Applicant");
 
         Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
-        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        IntervenerOne wrapper = new IntervenerOne();
         wrapper.setIntervenerName("name");
         wrapper.setIntervenerRepresented(YesOrNo.YES);
         wrapper.setIntervenerAddress(otherAddress);
@@ -658,7 +658,7 @@ public class DocumentHelperTest {
         caseDetails.getData().getContactDetailsWrapper().setRespondentLname("Respondent");
 
         Address otherAddress = Address.builder().addressLine1("Other Address").postCode("E14 6HL").build();
-        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        IntervenerOne wrapper = new IntervenerOne();
         wrapper.setIntervenerName("name");
         wrapper.setIntervenerRepresented(YesOrNo.YES);
         wrapper.setIntervenerAddress(otherAddress);
@@ -673,7 +673,7 @@ public class DocumentHelperTest {
     @Test
     public void whenRecipientIsIntervenerOne_AndIntervenerNotRepresented_setAddressee() {
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerOneWrapper wrapper = new IntervenerOneWrapper();
+        IntervenerOne wrapper = new IntervenerOne();
         wrapper.setIntervenerAddress(address);
         wrapper.setIntervenerName("Name");
         wrapper.setIntervenerRepresented(YesOrNo.NO);
@@ -691,7 +691,7 @@ public class DocumentHelperTest {
     @Test
     public void whenRecipientIsIntervenerTwo_AndIntervenerNotRepresented_setAddressee() {
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerTwoWrapper wrapper = new IntervenerTwoWrapper();
+        IntervenerTwo wrapper = new IntervenerTwo();
         wrapper.setIntervenerAddress(address);
         wrapper.setIntervenerName("Name");
         wrapper.setIntervenerRepresented(YesOrNo.NO);
@@ -709,7 +709,7 @@ public class DocumentHelperTest {
     @Test
     public void whenRecipientIsIntervenerThree_AndIntervenerNotRepresented_setAddressee() {
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerThreeWrapper wrapper = new IntervenerThreeWrapper();
+        IntervenerThree wrapper = new IntervenerThree();
         wrapper.setIntervenerAddress(address);
         wrapper.setIntervenerName("Name");
         wrapper.setIntervenerRepresented(YesOrNo.NO);
@@ -727,7 +727,7 @@ public class DocumentHelperTest {
     @Test
     public void whenRecipientIsIntervenerFour_AndIntervenerNotRepresented_setAddressee() {
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerFourWrapper wrapper = new IntervenerFourWrapper();
+        IntervenerFour wrapper = new IntervenerFour();
         wrapper.setIntervenerAddress(address);
         wrapper.setIntervenerName("Name");
         wrapper.setIntervenerRepresented(YesOrNo.NO);
@@ -865,29 +865,29 @@ public class DocumentHelperTest {
 
     @Test
     public void whenIntervenerOneOnCase_thenGetIntervenerOnePaperNotificationRecipient() {
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder().build();
-        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerOneWrapper);
+        IntervenerOne intervenerOne = IntervenerOne.builder().build();
+        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerOne);
         assertThat(recipient, is(INTERVENER_ONE));
     }
 
     @Test
     public void whenIntervenerTwoOnCase_thenGetIntervenerTwoPaperNotificationRecipient() {
-        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder().build();
-        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerTwoWrapper);
+        IntervenerTwo intervenerTwo = IntervenerTwo.builder().build();
+        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerTwo);
         assertThat(recipient, is(INTERVENER_TWO));
     }
 
     @Test
     public void whenIntervenerThreeOnCase_thenGetIntervenerThreePaperNotificationRecipient() {
-        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder().build();
-        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerThreeWrapper);
+        IntervenerThree intervenerThree = IntervenerThree.builder().build();
+        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerThree);
         assertThat(recipient, is(INTERVENER_THREE));
     }
 
     @Test
     public void whenIntervenerFourOnCase_thenGetIntervenerFourPaperNotificationRecipient() {
-        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder().build();
-        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerFourWrapper);
+        IntervenerFour intervenerFour = IntervenerFour.builder().build();
+        DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerFour);
         assertThat(recipient, is(INTERVENER_FOUR));
     }
 
