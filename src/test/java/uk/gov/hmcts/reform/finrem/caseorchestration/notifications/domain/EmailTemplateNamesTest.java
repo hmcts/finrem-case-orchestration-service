@@ -9,7 +9,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_SENT_APPLICANT;
@@ -52,7 +51,6 @@ public class EmailTemplateNamesTest {
             .put(FR_CONSENT_GENERAL_EMAIL, "FR_CONSENT_GENERAL_EMAIL")
             .put(FR_TRANSFER_TO_LOCAL_COURT, "FR_TRANSFER_TO_LOCAL_COURT")
             // contested
-            .put(FR_CONSENT_ORDER_AVAILABLE, "FR_CONSENT_ORDER_AVAILABLE")
             .put(FR_CONTESTED_DRAFT_ORDER, "FR_CONTESTED_DRAFT_ORDER")
             .put(FR_CONTESTED_HWF_SUCCESSFUL, "FR_CONTESTED_HWF_SUCCESSFUL")
             .put(FR_CONTESTED_APPLICATION_ISSUED, "FR_CONTESTED_APPLICATION_ISSUED")
