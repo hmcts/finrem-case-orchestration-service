@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.casesubmission;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
@@ -13,13 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerShareDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -47,14 +41,14 @@ public class CaseSubmissionPbaValidateMidEventHandler extends FinremCallbackHand
         FinremCaseDetails caseDetails = callbackRequestWithFinremCaseDetails.getCaseDetails();
 
         log.info("Received request to validate PBA number for Case ID: {}",
-            callbackRequestWithFinremCaseDetails.getCaseDetails().getId());
+            caseDetails.getId());
 
         validateCaseData(callbackRequestWithFinremCaseDetails);
 
         FinremCaseData caseData = caseDetails.getData();
-        boolean helpWithFeeQuestion = Objects.toString(caseDetails.getData().get("HELP_WITH_FEES_QUESTION")).equalsIgnoreCase("no");
+        boolean helpWithFeeQuestion = Objects.toString(caseData.getHelpWithFeesQuestion()).equalsIgnoreCase("no");
         if (helpWithFeeQuestion) {
-            String pbaNumber = Objects.toString(caseData.get("PBA_NUMBER"));
+            String pbaNumber = Objects.toString(caseData.getPbaNumber());
             log.info("Validating PBA Number: {}", pbaNumber);
             if (!pbaValidationService.isValidPBA(null, pbaNumber)) {
                 log.info("PBA number is invalid for Case ID: {}", caseDetails.getId());
