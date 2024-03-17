@@ -15,7 +15,7 @@ apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'io.spring.dependency-management'
 
 def versions = [
-        guava                : '33.0.0-jre',
+        guava                : '33.1.0-jre',
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.9.2',
         commonsIo            : '2.7',
