@@ -62,7 +62,7 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_THREE),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_OTHER)
         );
 
         assertThat(
@@ -114,6 +114,16 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT,
                 CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.REPORTS)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE, CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_POINTS_OF_CLAIM_OR_DEFENCE)
+        );
+
+        assertThat(
+            handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FM5, CaseDocumentParty.INTERVENER_THREE),
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_FM5)
         );
     }
 }

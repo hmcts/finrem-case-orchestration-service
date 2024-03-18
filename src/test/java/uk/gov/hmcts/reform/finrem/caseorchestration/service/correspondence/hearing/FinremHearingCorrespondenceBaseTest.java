@@ -5,7 +5,7 @@ import org.mockito.Mock;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -82,18 +82,18 @@ public abstract class FinremHearingCorrespondenceBaseTest {
     @Test
     public void shouldEmailInterveners() {
 
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+        IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
             .intervenerCorrespondenceEnabled(true)
             .build();
 
-        caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
+        caseDetails.getData().setIntervenerOne(intervenerOne);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOne.class),
             any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerOneWrapper))
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerOne))
             .thenReturn(SolicitorCaseDataKeysWrapper.builder().build());
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
@@ -107,26 +107,26 @@ public abstract class FinremHearingCorrespondenceBaseTest {
     @Test
     public void shouldSendLettersToInterveners() {
 
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+        IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
             .intervenerCorrespondenceEnabled(true)
             .build();
 
-        caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
+        caseDetails.getData().setIntervenerOne(intervenerOne);
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         FinremCaseDetails finremCaseDetails =
-            FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
+            FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOne(intervenerOne).build()).build();
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOne.class),
             any(FinremCaseDetails.class))).thenReturn(false);
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
-        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOneWrapper.class), any(FinremCaseDetails.class), anyString(), anyList());
+        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOne.class), any(FinremCaseDetails.class), anyString(), anyList());
     }
 
 

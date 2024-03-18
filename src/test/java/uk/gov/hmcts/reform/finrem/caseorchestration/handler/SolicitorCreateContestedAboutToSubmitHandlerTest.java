@@ -86,7 +86,7 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         finremCallbackRequest.getCaseDetails().getData().getUploadAdditionalDocument().forEach(ad ->
             ad.getValue().getAdditionalDocuments().setCategoryId(
-                DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B.getDocumentCategoryId()));
+                DocumentCategory.APPLICATIONS_MAIN_APPLICATION.getDocumentCategoryId()));
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
             .thenReturn(finremCallbackRequest.getCaseDetails());
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(true);
@@ -124,7 +124,7 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         assertEquals(YesOrNo.NO, responseCaseData.getPromptForUrgentCaseQuestion());
         assertNull(responseCaseData.getContactDetailsWrapper().getApplicantRepresented());
         assertEquals(caseDocument(), responseCaseData.getMiniFormA());
-        assertEquals(DocumentCategory.APPLICATIONS_FORM_A_OR_A1_OR_B.getDocumentCategoryId(),
+        assertEquals(DocumentCategory.APPLICATIONS_MAIN_APPLICATION.getDocumentCategoryId(),
             responseCaseData.getUploadAdditionalDocument().get(0).getValue().getAdditionalDocuments().getCategoryId()
         );
     }

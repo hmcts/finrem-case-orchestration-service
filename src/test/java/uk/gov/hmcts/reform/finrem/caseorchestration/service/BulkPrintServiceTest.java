@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 
@@ -308,9 +308,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), anyBoolean(), eq(AUTH_TOKEN))).thenReturn(letterId);
 
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        IntervenerOneWrapper intervenerOneWrapper = finremCaseDetails.getData().getIntervenerOneWrapper();
+        IntervenerOne intervenerOne = finremCaseDetails.getData().getIntervenerOne();
 
-        UUID uuid = bulkPrintService.printIntervenerDocuments(intervenerOneWrapper, caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        UUID uuid = bulkPrintService.printIntervenerDocuments(intervenerOne, caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
         assertThat(uuid, is(letterId));
 
@@ -334,9 +334,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
             .thenReturn(caseDocument);
         when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), anyBoolean(), eq(AUTH_TOKEN))).thenReturn(letterId);
 
-        IntervenerOneWrapper intervenerOneWrapper = caseDetails.getData().getIntervenerOneWrapper();
+        IntervenerOne intervenerOne = caseDetails.getData().getIntervenerOne();
 
-        UUID uuid = bulkPrintService.printIntervenerDocuments(intervenerOneWrapper, caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        UUID uuid = bulkPrintService.printIntervenerDocuments(intervenerOne, caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
         assertThat(uuid, is(letterId));
 

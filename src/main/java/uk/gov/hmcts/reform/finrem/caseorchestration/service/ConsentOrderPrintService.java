@@ -94,7 +94,7 @@ public class ConsentOrderPrintService {
         log.info("Sending order documents to recipient / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverSheet));
+        bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverSheet));
 
         FinremCaseData caseData = caseDetails.getData();
 
@@ -106,10 +106,10 @@ public class ConsentOrderPrintService {
             CaseDocument generalOrder = documentHelper.getLatestGeneralOrder(caseDetails.getData());
 
             if (orderDocuments.isEmpty()) {
-                bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
+                bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
             } else {
                 if (documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.get(0), authorisationToken)) {
-                    bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
+                    bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
                 } else {
                     bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
                 }

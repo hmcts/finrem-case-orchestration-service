@@ -7,9 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemIds;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class InterimHearingHelper {
 
     private final ObjectMapper objectMapper;
 
-    public List<InterimHearingData> isThereAnExistingInterimHearing(Map<String, Object> caseData) {
+    public List<InterimHearingCollection> getExistingInterimHearings(Map<String, Object> caseData) {
         return Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
             .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
 
@@ -45,7 +45,7 @@ public class InterimHearingHelper {
     }
 
 
-    public List<InterimHearingData> convertToInterimHearingDataList(Object object) {
+    public List<InterimHearingCollection> convertToInterimHearingDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }

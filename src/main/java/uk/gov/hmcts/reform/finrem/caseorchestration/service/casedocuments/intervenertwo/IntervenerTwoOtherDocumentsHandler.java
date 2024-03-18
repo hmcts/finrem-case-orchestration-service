@@ -17,8 +17,8 @@ public class IntervenerTwoOtherDocumentsHandler extends OtherDocumentsHandler {
 
 
     @Override
-    protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_MISCELLANEOUS_OR_OTHER;
+    protected DocumentCategory getOtherDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_OTHER;
     }
 
     @Override
@@ -49,6 +49,16 @@ public class IntervenerTwoOtherDocumentsHandler extends OtherDocumentsHandler {
     @Override
     protected DocumentCategory getPreHearingDraftOrderDocumentCategory() {
         return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_PRE_HEARING_DRAFT_ORDER;
+    }
+
+    @Override
+    protected DocumentCategory getPointsOfClaimOrDefenceDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_POINTS_OF_CLAIM_OR_DEFENCE;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryFM5() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_FM5;
     }
 
     @Override

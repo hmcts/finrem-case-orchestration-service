@@ -626,7 +626,7 @@ public class DocumentHelper {
         return "";
     }
 
-    public BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
+    public BulkPrintDocument mapToBulkPrintDocument(CaseDocument caseDocument) {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
             .fileName(caseDocument.getDocumentFilename())
             .build();
@@ -662,7 +662,7 @@ public class DocumentHelper {
                 .builder()
                 .value(pdfDocument)
                 .build());
-            bulkPrintDocuments.add(getCaseDocumentAsBulkPrintDocument(pdfDocument));
+            bulkPrintDocuments.add(mapToBulkPrintDocument(pdfDocument));
         });
 
         data.put(HEARING_ORDER_OTHER_COLLECTION, pdfDocuments);

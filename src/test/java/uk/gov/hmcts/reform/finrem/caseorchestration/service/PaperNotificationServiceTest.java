@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -120,7 +120,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
         caseDetails.getData().put("paperApplication", "YES");
         CaseDocument caseDocument = CaseDocument.builder().documentFilename("general_application_rejected").build();
-        IntervenerOneWrapper intervenerWrapper = IntervenerOneWrapper.builder().build();
+        IntervenerOne intervenerWrapper = IntervenerOne.builder().build();
         when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(INTERVENER_ONE)))
             .thenReturn(caseDocument);
         paperNotificationService.printIntervenerRejectionGeneralApplication(caseDetails, intervenerWrapper, AUTH_TOKEN);

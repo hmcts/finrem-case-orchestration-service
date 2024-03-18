@@ -16,14 +16,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASEWORKER_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASE_FILE_VIEW_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.INTERVENER_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SOLICITOR_NOTICE_OF_CHANGE;
 
 
 /**
@@ -62,9 +60,6 @@ public class FeatureToggleService {
         return isFeatureEnabled(PAYMENT_REQUEST_USING_CASE_TYPE);
     }
 
-    public boolean isSolicitorNoticeOfChangeEnabled() {
-        return isFeatureEnabled(SOLICITOR_NOTICE_OF_CHANGE);
-    }
 
     /*
      * Used for sending emails to FRC in Notification Service
@@ -73,10 +68,6 @@ public class FeatureToggleService {
      */
     public boolean isSendToFRCEnabled() {
         return isFeatureEnabled(SEND_TO_FRC);
-    }
-
-    public boolean isCaseworkerNoCEnabled() {
-        return isFeatureEnabled(CASEWORKER_NOTICE_OF_CHANGE);
     }
 
     public boolean isSendLetterDuplicateCheckEnabled() {

@@ -9,10 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 
 import java.util.Map;
 
@@ -93,7 +93,7 @@ class AddresseeGeneratorHelperTest {
     void givenIntervenerOneRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONTESTED);
-        caseData.setIntervenerTwoWrapper(IntervenerTwoWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
+        caseData.setIntervenerTwo(IntervenerTwo.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
             .addressLine1("2 Intervener Street")
             .addressLine2("Address Line 2")
             .postCode("SW1 1AA")
@@ -113,7 +113,7 @@ class AddresseeGeneratorHelperTest {
     void givenIntervenerTwoRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONTESTED);
-        caseData.setIntervenerOneWrapper(IntervenerOneWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
+        caseData.setIntervenerOne(IntervenerOne.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
             .addressLine1("1 Intervener Street")
             .addressLine2("Address Line 2")
             .postCode("SW1 1AA")
@@ -133,7 +133,7 @@ class AddresseeGeneratorHelperTest {
     void givenIntervenerThreeRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONTESTED);
-        caseData.setIntervenerThreeWrapper(IntervenerThreeWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
+        caseData.setIntervenerThree(IntervenerThree.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
             .addressLine1("3 Intervener Street")
             .addressLine2("Address Line 2")
             .postCode("SW1 1AA")
@@ -153,7 +153,7 @@ class AddresseeGeneratorHelperTest {
     void givenIntervenerFourRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONTESTED);
-        caseData.setIntervenerFourWrapper(IntervenerFourWrapper.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
+        caseData.setIntervenerFour(IntervenerFour.builder().intervenerName("Intervener Name").intervenerAddress(Address.builder()
             .addressLine1("4 Intervener Street")
             .addressLine2("Address Line 2")
             .postCode("SW1 1AA")

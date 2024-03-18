@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -23,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -36,7 +34,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
@@ -70,9 +67,6 @@ public class RemoveApplicantDetailsController extends BaseController {
     @Autowired
     private final OnlineFormDocumentService service;
 
-    @Autowired
-    private final FeatureToggleService featureToggleService;
-
     @PostMapping(path = "/remove-details", consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Removes applicant details or applicants solicitor details")
@@ -93,11 +87,7 @@ public class RemoveApplicantDetailsController extends BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         removeApplicantSolicitorDetails(caseData);
-        log.info("DEBUGGING NOC - removeApplicantDetails entered and applicant name is still present {} for Case ID: {}",
-            ObjectUtils.nullSafeConciseToString(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), caseDetails.getId());
         removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
-        log.info("DEBUGGING NOC - removeRespondentDetails entered and applicant name is still present {} for Case ID: {}",
-            ObjectUtils.nullSafeConciseToString(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), caseDetails.getId());
 
         String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);
         String respondentConfidentialAddress = Objects.toString(caseData.get(RESPONDENT_CONFIDENTIAL_ADDRESS), null);
@@ -105,12 +95,9 @@ public class RemoveApplicantDetailsController extends BaseController {
             || respondentConfidentialAddress != null && respondentConfidentialAddress.equalsIgnoreCase(YES_VALUE)) {
             CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
             caseData.put(MINI_FORM_A, document);
-            log.info("DEBUGGING NOC - generateContestedMiniFormA entered and applicant name is still present {} for Case ID: {}",
-                ObjectUtils.nullSafeConciseToString(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), caseDetails.getId());
         }
 
-        if (featureToggleService.isCaseworkerNoCEnabled()
-            && Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+        if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
             && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
             CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
@@ -118,8 +105,6 @@ public class RemoveApplicantDetailsController extends BaseController {
                 originalCaseDetails));
         }
         persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
-        log.info("DEBUGGING NOC - persistOrgPolicies entered and applicant name is still present {}  for Case ID: {}",
-            ObjectUtils.nullSafeConciseToString(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), caseDetails.getId());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -133,6 +118,7 @@ public class RemoveApplicantDetailsController extends BaseController {
             caseData.remove("applicantSolicitorEmail");
             caseData.remove("applicantSolicitorDXnumber");
             caseData.remove("applicantSolicitorConsentForEmails");
+            caseData.remove(APPLICANT_ORGANISATION_POLICY);
         }
     }
 
@@ -154,6 +140,7 @@ public class RemoveApplicantDetailsController extends BaseController {
             caseData.remove(RESP_SOLICITOR_EMAIL);
             caseData.remove(RESP_SOLICITOR_DX_NUMBER);
             caseData.remove(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT);
+            caseData.remove(RESPONDENT_ORGANISATION_POLICY);
         }
     }
 

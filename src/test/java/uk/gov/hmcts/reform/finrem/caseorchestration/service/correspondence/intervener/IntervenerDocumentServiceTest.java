@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
@@ -95,7 +95,7 @@ public class IntervenerDocumentServiceTest {
         contactDetailsWrapper.setSolicitorReference(REFERENCE);
         contactDetailsWrapper.setApplicantFmName(APPLICANT_NAME);
         contactDetailsWrapper.setRespondentFmName(RESPONDENT_NAME);
-        IntervenerWrapper intervenerDetails = IntervenerOneWrapper.builder()
+        IntervenerWrapper intervenerDetails = IntervenerOne.builder()
             .intervenerName(INTERVENER_NAME)
             .intervenerOrganisation(organisationPolicy).build();
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);

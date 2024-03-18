@@ -51,17 +51,12 @@ public class FdrDocumentsHandler extends DocumentHandler {
 
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
-        switch (caseDocumentParty) {
-            case APPLICANT -> {
-                return applicantFdrDocumentCategoriser.getDocumentCategory(caseDocumentType);
-            }
-            case RESPONDENT -> {
-                return respondentFdrDocumentCategoriser.getDocumentCategory(caseDocumentType);
-            }
-            default -> {
-                return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
-            }
+        if (CaseDocumentParty.APPLICANT.equals(caseDocumentParty)) {
+            return applicantFdrDocumentCategoriser.getDocumentCategory(caseDocumentType);
+        } else if (CaseDocumentParty.RESPONDENT.equals(caseDocumentParty)) {
+            return respondentFdrDocumentCategoriser.getDocumentCategory(caseDocumentType);
+        } else {
+            return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
         }
-
     }
 }

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollectionName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
@@ -30,6 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
 public abstract class IntervenerWrapper implements IntervenerDetails {
+
 
     private String intervenerName;
 
@@ -84,7 +86,7 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     public abstract List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData);
 
-    public abstract String getIntervenerHearingNoticesCollectionName();
+    public abstract IntervenerHearingNoticeCollectionName getIntervenerHearingNoticesCollectionName();
 
     public abstract DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient();
 

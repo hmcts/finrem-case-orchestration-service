@@ -43,13 +43,13 @@ public class AddresseeGeneratorHelper {
         } else if (recipient == DocumentHelper.PaperNotificationRecipient.RESPONDENT) {
             return getRespondentAddressee(caseData);
         } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE) {
-            return getIntervenerAddressee(caseData.getIntervenerOneWrapper());
+            return getIntervenerAddressee(caseData.getIntervenerOne());
         } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO) {
-            return getIntervenerAddressee(caseData.getIntervenerTwoWrapper());
+            return getIntervenerAddressee(caseData.getIntervenerTwo());
         } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE) {
-            return getIntervenerAddressee(caseData.getIntervenerThreeWrapper());
+            return getIntervenerAddressee(caseData.getIntervenerThree());
         } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR) {
-            return getIntervenerAddressee(caseData.getIntervenerFourWrapper());
+            return getIntervenerAddressee(caseData.getIntervenerFour());
         } else {
             return null;
         }

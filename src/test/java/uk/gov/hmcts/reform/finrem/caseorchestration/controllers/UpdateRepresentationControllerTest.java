@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -54,9 +53,6 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @MockBean
     private AssignCaseAccessService assignCaseAccessService;
-
-    @MockBean
-    private FeatureToggleService featureToggleService;
 
     @Autowired
     private UpdateRepresentationController updateRepresentationController;
@@ -170,7 +166,6 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @Test
     public void givenCaseworkerNocEnabled_whenSettingDefaults_thenNullifyFields() throws Exception {
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         loadRequestContentWith(PATH + NO_ORG_POLICIES_JSON);
 
         mvc.perform(post(setDefaultsEndpoint())
@@ -180,19 +175,5 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.updateIncludesRepresentativeChange", is(emptyOrNullString())))
             .andExpect(jsonPath("$.data.nocParty", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void givenCaseWorkerNocNotEnabled_whenSettingDefaults_thenDoNothing() throws Exception {
-        doRequestSetUp();
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(false);
-
-        mvc.perform(post(setDefaultsEndpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.updateIncludesRepresentativeChange", is("Yes")))
-            .andExpect(jsonPath("$.data.nocParty", is("applicant")));
     }
 }

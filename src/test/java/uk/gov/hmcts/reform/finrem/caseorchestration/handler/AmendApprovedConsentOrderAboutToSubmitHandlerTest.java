@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS;
 
 @ExtendWith(MockitoExtension.class)
 class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
@@ -76,7 +76,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
         callbackRequest.getCaseDetails().getData().getConsentOrderWrapper().setContestedConsentedApprovedOrders(List.of(getApprovedOrder("letter.pdf",
             "letterurl", "letterbinary")));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-        assertEquals(APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId(),
+        assertEquals(APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
             response.getData().getConsentOrderWrapper().getContestedConsentedApprovedOrders()
             .get(0).getApprovedOrder().getOrderLetter().getCategoryId());
     }
@@ -89,7 +89,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
             "letter2url", "letter2binary")));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         response.getData().getConsentOrderWrapper().getContestedConsentedApprovedOrders().forEach(order ->
-            assertEquals(APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId(),
+            assertEquals(APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
                 order.getApprovedOrder().getOrderLetter().getCategoryId()));
     }
 

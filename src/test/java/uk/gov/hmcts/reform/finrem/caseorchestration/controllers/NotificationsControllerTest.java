@@ -340,15 +340,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendGeneralOrderCorrespondence() {
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        notificationsController.sendGeneralOrderRaisedEmail(callbackRequest);
-        verify(generalOrderRaisedCorresponder).sendCorrespondence(callbackRequest.getCaseDetails());
-
-    }
-
-    @Test
     public void shouldNotSendEmailToRespSolicitor() {
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
 
@@ -439,7 +430,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoticeOfChangeAsCaseworker_whenSendNoCNotifications_ThenSendNoticeOfChangeServiceCalled() {
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         notificationsController.sendNoticeOfChangeNotificationsCaseworker("authtoken",
             buildNoCCaseworkerCallbackRequest());
 
