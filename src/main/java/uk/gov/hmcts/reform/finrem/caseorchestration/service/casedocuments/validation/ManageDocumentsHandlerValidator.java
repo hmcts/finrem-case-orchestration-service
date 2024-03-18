@@ -21,19 +21,19 @@ public class ManageDocumentsHandlerValidator {
     public void validateSelectedIntervenerParties(FinremCaseData caseData, List<UploadCaseDocumentCollection> manageCaseDocumentCollection,
                                                   List<String> warnings) {
 
-        if (StringUtils.isBlank(caseData.getIntervenerOneWrapper().getIntervenerName())
+        if (StringUtils.isBlank(caseData.getIntervenerOne().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageCaseDocumentCollection)) {
             warnings.add(INTERVENER_ONE_LABEL + CHOOSE_A_DIFFERENT_PARTY);
         }
-        if (StringUtils.isBlank(caseData.getIntervenerTwoWrapper().getIntervenerName())
+        if (StringUtils.isBlank(caseData.getIntervenerTwo().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_TWO, manageCaseDocumentCollection)) {
             warnings.add(INTERVENER_TWO_LABEL + CHOOSE_A_DIFFERENT_PARTY);
         }
-        if (StringUtils.isBlank(caseData.getIntervenerThreeWrapper().getIntervenerName())
+        if (StringUtils.isBlank(caseData.getIntervenerThree().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_THREE, manageCaseDocumentCollection)) {
             warnings.add(INTERVENER_THREE_LABEL + CHOOSE_A_DIFFERENT_PARTY);
         }
-        if (StringUtils.isBlank(caseData.getIntervenerFourWrapper().getIntervenerName())
+        if (StringUtils.isBlank(caseData.getIntervenerFour().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_FOUR, manageCaseDocumentCollection)) {
             warnings.add(INTERVENER_FOUR_LABEL + CHOOSE_A_DIFFERENT_PARTY);
         }

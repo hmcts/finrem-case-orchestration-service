@@ -68,7 +68,7 @@
         "document_binary_url": "http://document-management-store:8080/documents/ed0b6cc7-54fc-4932-bb20-91c42b47792c/binary"
       },
       "dateOfSepration": null,
-      "interimHearings": [
+      "interimHearingsScreenField": [
         {
           "id": "39cce085-9e41-43c0-b340-8cfe05e24002",
           "value": {
@@ -112,7 +112,7 @@
           }
         },
         {
-          "id": "39cce085-9e41-43c0-b340-8cfe05e24002",
+          "id": "39cce085-9e41-43c0-b340-8cfe05e24011",
           "value": {
             "interimHearingDate": "2020-10-10",
             "interimHearingTime": "12:00",

@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class ManageDocumentsHandlerValidatorTest {
     public void givenCorrectPartiesAreSelected_thenNoValidationError() {
         setUpAddedDocuments();
         FinremCaseData caseData = FinremCaseData.builder()
-            .intervenerOneWrapper(IntervenerOneWrapper.builder().intervenerName("Intervener 1").build())
+            .intervenerOne(IntervenerOne.builder().intervenerName("Intervener 1").build())
             .manageScannedDocumentCollection(screenUploadDocumentList).build();
         caseData.getManageScannedDocumentCollection().get(0).getUploadCaseDocument()
             .setCaseDocumentParty(CaseDocumentParty.INTERVENER_ONE);

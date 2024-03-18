@@ -16,10 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
@@ -81,15 +81,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
 
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+        IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
-        finremCaseData.setIntervenerOneWrapper(oneWrapper);
+        finremCaseData.setIntervenerOne(oneWrapper);
         List<String> errors = new ArrayList<>();
         service.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID);
 
-        assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerName());
-        assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerEmail());
-        assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerPhone());
+        assertNull(finremCaseData.getIntervenerOne().getIntervenerName());
+        assertNull(finremCaseData.getIntervenerOne().getIntervenerEmail());
+        assertNull(finremCaseData.getIntervenerOne().getIntervenerPhone());
         assertTrue(errors.isEmpty());
     }
 
@@ -101,7 +101,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+        IntervenerOne oneWrapper = IntervenerOne
             .builder()
             .intervenerName("One name")
             .intervenerEmail("test@test.com")
@@ -110,18 +110,18 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerOrganisation(organisationPolicy)
             .intervenerRepresented(YesOrNo.YES).build();
-        finremCaseData.setIntervenerOneWrapper(oneWrapper);
+        finremCaseData.setIntervenerOne(oneWrapper);
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         service.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID);
 
-        assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerName());
-        assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerEmail());
-        assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerPhone());
-        assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerSolicitorFirm());
-        assertNull(finremCaseData.getIntervenerOneWrapper().getIntervenerSolicitorReference());
+        assertNull(finremCaseData.getIntervenerOne().getIntervenerName());
+        assertNull(finremCaseData.getIntervenerOne().getIntervenerEmail());
+        assertNull(finremCaseData.getIntervenerOne().getIntervenerPhone());
+        assertNull(finremCaseData.getIntervenerOne().getIntervenerSolicitorFirm());
+        assertNull(finremCaseData.getIntervenerOne().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -133,16 +133,16 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
 
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
+        IntervenerTwo twoWrapper = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
-        finremCaseData.setIntervenerTwoWrapper(twoWrapper);
+        finremCaseData.setIntervenerTwo(twoWrapper);
         List<String> errors = new ArrayList<>();
         service.removeIntervenerDetails(twoWrapper, errors, finremCaseData, CASE_ID);
 
-        assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerName());
-        assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerEmail());
-        assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerSolicitorFirm());
-        assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerSolicitorReference());
+        assertNull(finremCaseData.getIntervenerTwo().getIntervenerName());
+        assertNull(finremCaseData.getIntervenerTwo().getIntervenerEmail());
+        assertNull(finremCaseData.getIntervenerTwo().getIntervenerSolicitorFirm());
+        assertNull(finremCaseData.getIntervenerTwo().getIntervenerSolicitorReference());
         verify(assignCaseAccessService, never()).removeCaseRoleToUser(any(), any(), any(), any());
         assertTrue(errors.isEmpty());
     }
@@ -155,7 +155,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
+        IntervenerTwo twoWrapper = IntervenerTwo
             .builder()
             .intervenerName("Two name")
             .intervenerEmail("test@test.com")
@@ -164,17 +164,17 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerOrganisation(organisationPolicy)
             .intervenerRepresented(YesOrNo.YES).build();
-        finremCaseData.setIntervenerTwoWrapper(twoWrapper);
+        finremCaseData.setIntervenerTwo(twoWrapper);
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         service.removeIntervenerDetails(twoWrapper, errors, finremCaseData, CASE_ID);
 
-        assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerName());
-        assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerEmail());
-        assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerSolicitorFirm());
-        assertNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerSolicitorReference());
+        assertNull(finremCaseData.getIntervenerTwo().getIntervenerName());
+        assertNull(finremCaseData.getIntervenerTwo().getIntervenerEmail());
+        assertNull(finremCaseData.getIntervenerTwo().getIntervenerSolicitorFirm());
+        assertNull(finremCaseData.getIntervenerTwo().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -185,17 +185,17 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
 
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
+        IntervenerThree threeWrapper = IntervenerThree
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
-        finremCaseData.setIntervenerThreeWrapper(threeWrapper);
+        finremCaseData.setIntervenerThree(threeWrapper);
 
         List<String> errors = new ArrayList<>();
         service.removeIntervenerDetails(threeWrapper, errors, finremCaseData, CASE_ID);
 
-        assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerName());
-        assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerEmail());
-        assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerSolicitorFirm());
-        assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerSolicitorReference());
+        assertNull(finremCaseData.getIntervenerThree().getIntervenerName());
+        assertNull(finremCaseData.getIntervenerThree().getIntervenerEmail());
+        assertNull(finremCaseData.getIntervenerThree().getIntervenerSolicitorFirm());
+        assertNull(finremCaseData.getIntervenerThree().getIntervenerSolicitorReference());
         assertTrue(errors.isEmpty());
 
     }
@@ -208,7 +208,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
+        IntervenerThree threeWrapper = IntervenerThree
             .builder().intervenerName("Three name").intervenerEmail("test@test.com")
             .intervenerSolEmail("test@test.com")
             .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
@@ -216,17 +216,17 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy)
             .build();
-        finremCaseData.setIntervenerThreeWrapper(threeWrapper);
+        finremCaseData.setIntervenerThree(threeWrapper);
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         service.removeIntervenerDetails(threeWrapper, errors, finremCaseData, CASE_ID);
 
-        assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerName());
-        assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerEmail());
-        assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerSolicitorFirm());
-        assertNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerSolicitorReference());
+        assertNull(finremCaseData.getIntervenerThree().getIntervenerName());
+        assertNull(finremCaseData.getIntervenerThree().getIntervenerEmail());
+        assertNull(finremCaseData.getIntervenerThree().getIntervenerSolicitorFirm());
+        assertNull(finremCaseData.getIntervenerThree().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -237,17 +237,17 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
 
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
+        IntervenerFour fourWrapper = IntervenerFour
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
-        finremCaseData.setIntervenerFourWrapper(fourWrapper);
+        finremCaseData.setIntervenerFour(fourWrapper);
 
         List<String> errors = new ArrayList<>();
         service.removeIntervenerDetails(fourWrapper, errors, finremCaseData, CASE_ID);
 
-        assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerName());
-        assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerEmail());
-        assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerSolicitorFirm());
-        assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerSolicitorReference());
+        assertNull(finremCaseData.getIntervenerFour().getIntervenerName());
+        assertNull(finremCaseData.getIntervenerFour().getIntervenerEmail());
+        assertNull(finremCaseData.getIntervenerFour().getIntervenerSolicitorFirm());
+        assertNull(finremCaseData.getIntervenerFour().getIntervenerSolicitorReference());
         assertTrue(errors.isEmpty());
     }
 
@@ -259,7 +259,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
+        IntervenerFour fourWrapper = IntervenerFour
             .builder().intervenerName("Four name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerSolEmail("test@test.com")
@@ -267,17 +267,17 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerOrganisation(organisationPolicy)
             .build();
-        finremCaseData.setIntervenerFourWrapper(fourWrapper);
+        finremCaseData.setIntervenerFour(fourWrapper);
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         service.removeIntervenerDetails(fourWrapper, errors, finremCaseData, CASE_ID);
 
-        assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerName());
-        assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerEmail());
-        assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerSolicitorFirm());
-        assertNull(finremCaseData.getIntervenerFourWrapper().getIntervenerSolicitorReference());
+        assertNull(finremCaseData.getIntervenerFour().getIntervenerName());
+        assertNull(finremCaseData.getIntervenerFour().getIntervenerEmail());
+        assertNull(finremCaseData.getIntervenerFour().getIntervenerSolicitorFirm());
+        assertNull(finremCaseData.getIntervenerFour().getIntervenerSolicitorReference());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -290,14 +290,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+        IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerSolEmail("test@test.com")
             .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerOneWrapper(oneWrapper);
+        finremCaseData.setIntervenerOne(oneWrapper);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -311,7 +311,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
 
-        assertNotNull(finremCaseData.getIntervenerOneWrapper().getIntervenerDateAdded());
+        assertNotNull(finremCaseData.getIntervenerOne().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -325,7 +325,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+        IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerSolEmail("test@test.com")
             .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
@@ -333,14 +333,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerOneWrapper(oneWrapper);
+        finremCaseDataBefore.setIntervenerOne(oneWrapper);
 
-        IntervenerOneWrapper oneWrapper1 = IntervenerOneWrapper
+        IntervenerOne oneWrapper1 = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerOneWrapper(oneWrapper1);
+        finremCaseData.setIntervenerOne(oneWrapper1);
 
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
@@ -355,16 +355,16 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
-        IntervenerOneWrapper intervenerOneWrapper = finremCaseData.getIntervenerOneWrapper();
+        IntervenerOne intervenerOne = finremCaseData.getIntervenerOne();
 
-        assertNotNull(intervenerOneWrapper.getIntervenerDateAdded());
-        assertNull(intervenerOneWrapper.getIntervenerSolEmail());
-        assertNull(intervenerOneWrapper.getIntervenerSolName());
-        assertNull(intervenerOneWrapper.getIntervenerSolPhone());
-        assertNull(intervenerOneWrapper.getIntervenerSolicitorFirm());
-        assertNull(intervenerOneWrapper.getIntervenerSolicitorReference());
-        assertNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        assertNotNull(intervenerOne.getIntervenerDateAdded());
+        assertNull(intervenerOne.getIntervenerSolEmail());
+        assertNull(intervenerOne.getIntervenerSolName());
+        assertNull(intervenerOne.getIntervenerSolPhone());
+        assertNull(intervenerOne.getIntervenerSolicitorFirm());
+        assertNull(intervenerOne.getIntervenerSolicitorReference());
+        assertNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -379,7 +379,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
 
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+        IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerSolEmail("test@test.com")
             .intervenerSolName("test test.com")
@@ -389,9 +389,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerOneWrapper(oneWrapper);
+        finremCaseDataBefore.setIntervenerOne(oneWrapper);
 
-        IntervenerOneWrapper oneWrapper1 = IntervenerOneWrapper
+        IntervenerOne oneWrapper1 = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerSolEmail(INTERVENER_TEST_EMAIL_CHANGE)
             .intervenerSolName("test test.com")
@@ -401,7 +401,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerOneWrapper(oneWrapper1);
+        finremCaseData.setIntervenerOne(oneWrapper1);
 
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
@@ -417,15 +417,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
-        IntervenerOneWrapper intervenerOneWrapper = finremCaseData.getIntervenerOneWrapper();
-        assertNotNull(intervenerOneWrapper.getIntervenerDateAdded());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolName());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolPhone());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerOne intervenerOne = finremCaseData.getIntervenerOne();
+        assertNotNull(intervenerOne.getIntervenerDateAdded());
+        assertNotNull(intervenerOne.getIntervenerSolEmail());
+        assertNotNull(intervenerOne.getIntervenerSolName());
+        assertNotNull(intervenerOne.getIntervenerSolPhone());
+        assertNotNull(intervenerOne.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerOne.getIntervenerSolicitorReference());
+        assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
@@ -445,7 +445,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicyChange = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(CHANGE_ORG_ID).organisationName(CHANGE_ORG_ID).build()
         ).build();
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+        IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerSolEmail(INTERVENER_TEST_EMAIL)
             .intervenerSolName("test test.com")
@@ -455,9 +455,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerOneWrapper(oneWrapper);
+        finremCaseDataBefore.setIntervenerOne(oneWrapper);
 
-        IntervenerOneWrapper oneWrapper1 = IntervenerOneWrapper
+        IntervenerOne oneWrapper1 = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerSolEmail(INTERVENER_TEST_EMAIL)
             .intervenerSolName("test test.com")
@@ -467,7 +467,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicyChange).build();
-        finremCaseData.setIntervenerOneWrapper(oneWrapper1);
+        finremCaseData.setIntervenerOne(oneWrapper1);
 
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
@@ -483,15 +483,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
-        IntervenerOneWrapper intervenerOneWrapper = finremCaseData.getIntervenerOneWrapper();
-        assertNotNull(intervenerOneWrapper.getIntervenerDateAdded());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolName());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolPhone());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerOne intervenerOne = finremCaseData.getIntervenerOne();
+        assertNotNull(intervenerOne.getIntervenerDateAdded());
+        assertNotNull(intervenerOne.getIntervenerSolEmail());
+        assertNotNull(intervenerOne.getIntervenerSolName());
+        assertNotNull(intervenerOne.getIntervenerSolPhone());
+        assertNotNull(intervenerOne.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerOne.getIntervenerSolicitorReference());
+        assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), CHANGE_ORG_ID);
@@ -509,14 +509,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+        IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerOneWrapper(oneWrapper);
+        finremCaseDataBefore.setIntervenerOne(oneWrapper);
 
-        IntervenerOneWrapper oneWrapper1 = IntervenerOneWrapper
+        IntervenerOne oneWrapper1 = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
@@ -527,7 +527,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .build();
-        finremCaseData.setIntervenerOneWrapper(oneWrapper1);
+        finremCaseData.setIntervenerOne(oneWrapper1);
 
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
@@ -543,13 +543,13 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
-        IntervenerOneWrapper intervenerOneWrapper = finremCaseData.getIntervenerOneWrapper();
-        assertNotNull(intervenerOneWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolName());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerOneWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerOne intervenerOne = finremCaseData.getIntervenerOne();
+        assertNotNull(intervenerOne.getIntervenerSolEmail());
+        assertNotNull(intervenerOne.getIntervenerSolName());
+        assertNotNull(intervenerOne.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerOne.getIntervenerSolicitorReference());
+        assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -562,11 +562,11 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(null).organisationName(null).build()
         ).build();
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+        IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerOneWrapper(oneWrapper);
+        finremCaseData.setIntervenerOne(oneWrapper);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -578,8 +578,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
 
-        assertNotNull(finremCaseData.getIntervenerOneWrapper().getIntervenerDateAdded());
-        assertNotNull(finremCaseData.getIntervenerOneWrapper().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
+        assertNotNull(finremCaseData.getIntervenerOne().getIntervenerDateAdded());
+        assertNotNull(finremCaseData.getIntervenerOne().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
         assertTrue(errors.isEmpty());
     }
 
@@ -590,11 +590,11 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(null).organisationName(null).build()
         ).build();
-        IntervenerTwoWrapper wrapper = IntervenerTwoWrapper
+        IntervenerTwo wrapper = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerTwoWrapper(wrapper);
+        finremCaseData.setIntervenerTwo(wrapper);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -606,8 +606,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
-        assertNotNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerDateAdded());
-        assertNotNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
+        assertNotNull(finremCaseData.getIntervenerTwo().getIntervenerDateAdded());
+        assertNotNull(finremCaseData.getIntervenerTwo().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
         assertTrue(errors.isEmpty());
     }
 
@@ -618,14 +618,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerTwoWrapper wrapper = IntervenerTwoWrapper
+        IntervenerTwo wrapper = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerTwoWrapper(wrapper);
+        finremCaseData.setIntervenerTwo(wrapper);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -639,7 +639,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
-        assertNotNull(finremCaseData.getIntervenerTwoWrapper().getIntervenerDateAdded());
+        assertNotNull(finremCaseData.getIntervenerTwo().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -653,7 +653,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerTwoWrapper wrapper = IntervenerTwoWrapper
+        IntervenerTwo wrapper = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail("test@test.com")
             .intervenerSolName("TwoSol name")
@@ -662,14 +662,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerTwoWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerTwo(wrapper);
 
-        IntervenerTwoWrapper current = IntervenerTwoWrapper
+        IntervenerTwo current = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerTwoWrapper(current);
+        finremCaseData.setIntervenerTwo(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -683,15 +683,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerTwoWrapper intervenerTwoWrapper = finremCaseData.getIntervenerTwoWrapper();
-        assertNotNull(intervenerTwoWrapper.getIntervenerDateAdded());
-        assertNull(intervenerTwoWrapper.getIntervenerSolEmail());
-        assertNull(intervenerTwoWrapper.getIntervenerSolName());
-        assertNull(intervenerTwoWrapper.getIntervenerSolPhone());
-        assertNull(intervenerTwoWrapper.getIntervenerSolicitorFirm());
-        assertNull(intervenerTwoWrapper.getIntervenerSolicitorReference());
-        assertNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerTwo intervenerTwo = finremCaseData.getIntervenerTwo();
+        assertNotNull(intervenerTwo.getIntervenerDateAdded());
+        assertNull(intervenerTwo.getIntervenerSolEmail());
+        assertNull(intervenerTwo.getIntervenerSolName());
+        assertNull(intervenerTwo.getIntervenerSolPhone());
+        assertNull(intervenerTwo.getIntervenerSolicitorFirm());
+        assertNull(intervenerTwo.getIntervenerSolicitorReference());
+        assertNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -708,7 +708,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicyChange = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(CHANGE_ORG_ID).organisationName(CHANGE_ORG_ID).build()
         ).build();
-        IntervenerTwoWrapper wrapper = IntervenerTwoWrapper
+        IntervenerTwo wrapper = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail(INTERVENER_TEST_EMAIL)
             .intervenerSolName("TwoSol name")
@@ -718,9 +718,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerTwoWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerTwo(wrapper);
 
-        IntervenerTwoWrapper current = IntervenerTwoWrapper
+        IntervenerTwo current = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail(INTERVENER_TEST_EMAIL)
             .intervenerSolName("TwoSol name")
@@ -730,7 +730,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicyChange).build();
-        finremCaseData.setIntervenerTwoWrapper(current);
+        finremCaseData.setIntervenerTwo(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -744,15 +744,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerTwoWrapper intervenerTwoWrapper = finremCaseData.getIntervenerTwoWrapper();
-        assertNotNull(intervenerTwoWrapper.getIntervenerDateAdded());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolName());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolPhone());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerTwo intervenerTwo = finremCaseData.getIntervenerTwo();
+        assertNotNull(intervenerTwo.getIntervenerDateAdded());
+        assertNotNull(intervenerTwo.getIntervenerSolEmail());
+        assertNotNull(intervenerTwo.getIntervenerSolName());
+        assertNotNull(intervenerTwo.getIntervenerSolPhone());
+        assertNotNull(intervenerTwo.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerTwo.getIntervenerSolicitorReference());
+        assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), CHANGE_ORG_ID);
@@ -771,7 +771,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
 
-        IntervenerTwoWrapper wrapper = IntervenerTwoWrapper
+        IntervenerTwo wrapper = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail("test@test.com")
             .intervenerSolName("TwoSol name")
@@ -781,9 +781,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerTwoWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerTwo(wrapper);
 
-        IntervenerTwoWrapper current = IntervenerTwoWrapper
+        IntervenerTwo current = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail(INTERVENER_TEST_EMAIL_CHANGE)
             .intervenerSolName("TwoSol name")
@@ -793,7 +793,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerTwoWrapper(current);
+        finremCaseData.setIntervenerTwo(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -809,15 +809,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerTwoWrapper intervenerTwoWrapper = finremCaseData.getIntervenerTwoWrapper();
-        assertNotNull(intervenerTwoWrapper.getIntervenerDateAdded());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolName());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolPhone());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerTwo intervenerTwo = finremCaseData.getIntervenerTwo();
+        assertNotNull(intervenerTwo.getIntervenerDateAdded());
+        assertNotNull(intervenerTwo.getIntervenerSolEmail());
+        assertNotNull(intervenerTwo.getIntervenerSolName());
+        assertNotNull(intervenerTwo.getIntervenerSolPhone());
+        assertNotNull(intervenerTwo.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerTwo.getIntervenerSolicitorReference());
+        assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
@@ -834,14 +834,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerTwoWrapper wrapper = IntervenerTwoWrapper
+        IntervenerTwo wrapper = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.NO)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerTwoWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerTwo(wrapper);
 
-        IntervenerTwoWrapper current = IntervenerTwoWrapper
+        IntervenerTwo current = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
@@ -851,7 +851,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolPhone("112333333")
             .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE).build();
-        finremCaseData.setIntervenerTwoWrapper(current);
+        finremCaseData.setIntervenerTwo(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -865,13 +865,13 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerTwoWrapper intervenerTwoWrapper = finremCaseData.getIntervenerTwoWrapper();
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolName());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerTwoWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerTwoWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerTwo intervenerTwo = finremCaseData.getIntervenerTwo();
+        assertNotNull(intervenerTwo.getIntervenerSolEmail());
+        assertNotNull(intervenerTwo.getIntervenerSolName());
+        assertNotNull(intervenerTwo.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerTwo.getIntervenerSolicitorReference());
+        assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -885,11 +885,11 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(null).organisationName(null).build()
         ).build();
-        IntervenerThreeWrapper wrapper = IntervenerThreeWrapper
+        IntervenerThree wrapper = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerThreeWrapper(wrapper);
+        finremCaseData.setIntervenerThree(wrapper);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -900,8 +900,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
-        assertNotNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerDateAdded());
-        assertNotNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
+        assertNotNull(finremCaseData.getIntervenerThree().getIntervenerDateAdded());
+        assertNotNull(finremCaseData.getIntervenerThree().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
         assertTrue(errors.isEmpty());
     }
 
@@ -912,14 +912,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerThreeWrapper wrapper = IntervenerThreeWrapper
+        IntervenerThree wrapper = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerThreeWrapper(wrapper);
+        finremCaseData.setIntervenerThree(wrapper);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -934,7 +934,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
-        assertNotNull(finremCaseData.getIntervenerThreeWrapper().getIntervenerDateAdded());
+        assertNotNull(finremCaseData.getIntervenerThree().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -948,7 +948,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerThreeWrapper wrapper = IntervenerThreeWrapper
+        IntervenerThree wrapper = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail("test@test.com")
             .intervenerSolName("three man")
@@ -958,14 +958,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerThreeWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerThree(wrapper);
 
-        IntervenerThreeWrapper current = IntervenerThreeWrapper
+        IntervenerThree current = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.NO)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerThreeWrapper(current);
+        finremCaseData.setIntervenerThree(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -980,15 +980,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerThreeWrapper intervenerThreeWrapper = finremCaseData.getIntervenerThreeWrapper();
-        assertNotNull(intervenerThreeWrapper.getIntervenerDateAdded());
-        assertNull(intervenerThreeWrapper.getIntervenerSolEmail());
-        assertNull(intervenerThreeWrapper.getIntervenerSolName());
-        assertNull(intervenerThreeWrapper.getIntervenerSolPhone());
-        assertNull(intervenerThreeWrapper.getIntervenerSolicitorFirm());
-        assertNull(intervenerThreeWrapper.getIntervenerSolicitorReference());
-        assertNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerThree intervenerThree = finremCaseData.getIntervenerThree();
+        assertNotNull(intervenerThree.getIntervenerDateAdded());
+        assertNull(intervenerThree.getIntervenerSolEmail());
+        assertNull(intervenerThree.getIntervenerSolName());
+        assertNull(intervenerThree.getIntervenerSolPhone());
+        assertNull(intervenerThree.getIntervenerSolicitorFirm());
+        assertNull(intervenerThree.getIntervenerSolicitorReference());
+        assertNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -1003,7 +1003,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
 
-        IntervenerThreeWrapper wrapper = IntervenerThreeWrapper
+        IntervenerThree wrapper = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail(INTERVENER_TEST_EMAIL)
             .intervenerSolName("three man")
@@ -1013,9 +1013,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerThreeWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerThree(wrapper);
 
-        IntervenerThreeWrapper current = IntervenerThreeWrapper
+        IntervenerThree current = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail(INTERVENER_TEST_EMAIL_CHANGE)
             .intervenerSolName("three man")
@@ -1025,7 +1025,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerThreeWrapper(current);
+        finremCaseData.setIntervenerThree(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -1041,15 +1041,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerThreeWrapper intervenerThreeWrapper = finremCaseData.getIntervenerThreeWrapper();
-        assertNotNull(intervenerThreeWrapper.getIntervenerDateAdded());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolName());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolPhone());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerThree intervenerThree = finremCaseData.getIntervenerThree();
+        assertNotNull(intervenerThree.getIntervenerDateAdded());
+        assertNotNull(intervenerThree.getIntervenerSolEmail());
+        assertNotNull(intervenerThree.getIntervenerSolName());
+        assertNotNull(intervenerThree.getIntervenerSolPhone());
+        assertNotNull(intervenerThree.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerThree.getIntervenerSolicitorReference());
+        assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
@@ -1069,7 +1069,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicyChange = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(CHANGE_ORG_ID).organisationName(CHANGE_ORG_ID).build()
         ).build();
-        IntervenerThreeWrapper wrapper = IntervenerThreeWrapper
+        IntervenerThree wrapper = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail(INTERVENER_TEST_EMAIL)
             .intervenerSolName("three man")
@@ -1079,9 +1079,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerThreeWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerThree(wrapper);
 
-        IntervenerThreeWrapper current = IntervenerThreeWrapper
+        IntervenerThree current = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerSolEmail(INTERVENER_TEST_EMAIL)
             .intervenerSolName("three man")
@@ -1091,7 +1091,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicyChange).build();
-        finremCaseData.setIntervenerThreeWrapper(current);
+        finremCaseData.setIntervenerThree(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -1106,15 +1106,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerThreeWrapper intervenerThreeWrapper = finremCaseData.getIntervenerThreeWrapper();
-        assertNotNull(intervenerThreeWrapper.getIntervenerDateAdded());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolName());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolPhone());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerThree intervenerThree = finremCaseData.getIntervenerThree();
+        assertNotNull(intervenerThree.getIntervenerDateAdded());
+        assertNotNull(intervenerThree.getIntervenerSolEmail());
+        assertNotNull(intervenerThree.getIntervenerSolName());
+        assertNotNull(intervenerThree.getIntervenerSolPhone());
+        assertNotNull(intervenerThree.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerThree.getIntervenerSolicitorReference());
+        assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), CHANGE_ORG_ID);
@@ -1131,14 +1131,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerThreeWrapper wrapper = IntervenerThreeWrapper
+        IntervenerThree wrapper = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerRepresented(YesOrNo.NO)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerThreeWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerThree(wrapper);
 
-        IntervenerThreeWrapper current = IntervenerThreeWrapper
+        IntervenerThree current = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerSolEmail("test@test.com")
@@ -1148,7 +1148,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerRepresented(YesOrNo.YES)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerThreeWrapper(current);
+        finremCaseData.setIntervenerThree(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -1163,13 +1163,13 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerThreeWrapper intervenerThreeWrapper = finremCaseData.getIntervenerThreeWrapper();
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolName());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerThreeWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerThreeWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerThree intervenerThree = finremCaseData.getIntervenerThree();
+        assertNotNull(intervenerThree.getIntervenerSolEmail());
+        assertNotNull(intervenerThree.getIntervenerSolName());
+        assertNotNull(intervenerThree.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerThree.getIntervenerSolicitorReference());
+        assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -1182,11 +1182,11 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(null).organisationName(null).build()
         ).build();
-        IntervenerFourWrapper wrapper = IntervenerFourWrapper
+        IntervenerFour wrapper = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerFourWrapper(wrapper);
+        finremCaseData.setIntervenerFour(wrapper);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -1198,8 +1198,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
-        assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervenerDateAdded());
-        assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
+        assertNotNull(finremCaseData.getIntervenerFour().getIntervenerDateAdded());
+        assertNotNull(finremCaseData.getIntervenerFour().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
         assertTrue(errors.isEmpty());
     }
 
@@ -1210,14 +1210,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerFourWrapper wrapper = IntervenerFourWrapper
+        IntervenerFour wrapper = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerSolEmail("test@test.com")
             .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerFourWrapper(wrapper);
+        finremCaseData.setIntervenerFour(wrapper);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -1232,7 +1232,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
-        assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervenerDateAdded());
+        assertNotNull(finremCaseData.getIntervenerFour().getIntervenerDateAdded());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -1246,7 +1246,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerFourWrapper wrapper = IntervenerFourWrapper
+        IntervenerFour wrapper = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
@@ -1255,14 +1255,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerFourWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerFour(wrapper);
 
-        IntervenerFourWrapper current = IntervenerFourWrapper
+        IntervenerFour current = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerFourWrapper(current);
+        finremCaseData.setIntervenerFour(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -1277,15 +1277,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerFourWrapper intervenerFourWrapper = finremCaseData.getIntervenerFourWrapper();
-        assertNotNull(intervenerFourWrapper.getIntervenerDateAdded());
-        assertNull(intervenerFourWrapper.getIntervenerSolEmail());
-        assertNull(intervenerFourWrapper.getIntervenerSolName());
-        assertNull(intervenerFourWrapper.getIntervenerSolPhone());
-        assertNull(intervenerFourWrapper.getIntervenerSolicitorFirm());
-        assertNull(intervenerFourWrapper.getIntervenerSolicitorReference());
-        assertNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerFour intervenerFour = finremCaseData.getIntervenerFour();
+        assertNotNull(intervenerFour.getIntervenerDateAdded());
+        assertNull(intervenerFour.getIntervenerSolEmail());
+        assertNull(intervenerFour.getIntervenerSolName());
+        assertNull(intervenerFour.getIntervenerSolPhone());
+        assertNull(intervenerFour.getIntervenerSolicitorFirm());
+        assertNull(intervenerFour.getIntervenerSolicitorReference());
+        assertNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
@@ -1300,14 +1300,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerFourWrapper wrapper = IntervenerFourWrapper
+        IntervenerFour wrapper = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerFourWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerFour(wrapper);
 
-        IntervenerFourWrapper current = IntervenerFourWrapper
+        IntervenerFour current = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerSolEmail("test@test.com")
@@ -1316,7 +1316,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerFourWrapper(current);
+        finremCaseData.setIntervenerFour(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -1330,14 +1330,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerFourWrapper intervenerFourWrapper = finremCaseData.getIntervenerFourWrapper();
-        assertNotNull(intervenerFourWrapper.getIntervenerDateAdded());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolName());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerFour intervenerFour = finremCaseData.getIntervenerFour();
+        assertNotNull(intervenerFour.getIntervenerDateAdded());
+        assertNotNull(intervenerFour.getIntervenerSolEmail());
+        assertNotNull(intervenerFour.getIntervenerSolName());
+        assertNotNull(intervenerFour.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerFour.getIntervenerSolicitorReference());
+        assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationName());
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
@@ -1352,7 +1352,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
 
-        IntervenerFourWrapper wrapper = IntervenerFourWrapper
+        IntervenerFour wrapper = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
@@ -1362,9 +1362,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerSolEmail("test@test.com")
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerFourWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerFour(wrapper);
 
-        IntervenerFourWrapper current = IntervenerFourWrapper
+        IntervenerFour current = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
@@ -1374,7 +1374,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerSolEmail(INTERVENER_TEST_EMAIL_CHANGE)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerFourWrapper(current);
+        finremCaseData.setIntervenerFour(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -1390,15 +1390,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerFourWrapper intervenerFourWrapper = finremCaseData.getIntervenerFourWrapper();
-        assertNotNull(intervenerFourWrapper.getIntervenerDateAdded());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolName());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolPhone());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerFour intervenerFour = finremCaseData.getIntervenerFour();
+        assertNotNull(intervenerFour.getIntervenerDateAdded());
+        assertNotNull(intervenerFour.getIntervenerSolEmail());
+        assertNotNull(intervenerFour.getIntervenerSolName());
+        assertNotNull(intervenerFour.getIntervenerSolPhone());
+        assertNotNull(intervenerFour.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerFour.getIntervenerSolicitorReference());
+        assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
@@ -1419,7 +1419,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             Organisation.builder().organisationID(CHANGE_ORG_ID).organisationName(CHANGE_ORG_ID).build()
         ).build();
 
-        IntervenerFourWrapper wrapper = IntervenerFourWrapper
+        IntervenerFour wrapper = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
@@ -1429,9 +1429,9 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerSolEmail(INTERVENER_TEST_EMAIL)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerFourWrapper(wrapper);
+        finremCaseDataBefore.setIntervenerFour(wrapper);
 
-        IntervenerFourWrapper current = IntervenerFourWrapper
+        IntervenerFour current = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
@@ -1441,7 +1441,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .intervenerSolEmail(INTERVENER_TEST_EMAIL)
             .intervenerOrganisation(organisationPolicyChange).build();
-        finremCaseData.setIntervenerFourWrapper(current);
+        finremCaseData.setIntervenerFour(current);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -1456,15 +1456,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
-        IntervenerFourWrapper intervenerFourWrapper = finremCaseData.getIntervenerFourWrapper();
-        assertNotNull(intervenerFourWrapper.getIntervenerDateAdded());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolEmail());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolName());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolPhone());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolicitorFirm());
-        assertNotNull(intervenerFourWrapper.getIntervenerSolicitorReference());
-        assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
-        assertNotNull(intervenerFourWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        IntervenerFour intervenerFour = finremCaseData.getIntervenerFour();
+        assertNotNull(intervenerFour.getIntervenerDateAdded());
+        assertNotNull(intervenerFour.getIntervenerSolEmail());
+        assertNotNull(intervenerFour.getIntervenerSolName());
+        assertNotNull(intervenerFour.getIntervenerSolPhone());
+        assertNotNull(intervenerFour.getIntervenerSolicitorFirm());
+        assertNotNull(intervenerFour.getIntervenerSolicitorReference());
+        assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
         verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), CHANGE_ORG_ID);
@@ -1480,12 +1480,12 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerFourWrapper wrapper = IntervenerFourWrapper
+        IntervenerFour wrapper = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail(INTERVENER_TEST_EMAIL)
             .intervenerRepresented(YesOrNo.YES)
             .intervenerSolEmail(INTERVENER_TEST_EMAIL)
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerFourWrapper(wrapper);
+        finremCaseData.setIntervenerFour(wrapper);
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -1504,51 +1504,51 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void whenCalled_setIntervenerChangeDetailsForIntervenerOneOnAdding() {
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+        IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerName("Intervener One")
             .build();
 
-        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerOneWrapper);
+        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerOne);
         Assert.assertEquals(IntervenerAction.ADDED.toString(), result.getIntervenerAction().toString());
         Assert.assertEquals(IntervenerType.INTERVENER_ONE.toString(), result.getIntervenerType().toString());
     }
 
     @Test
     public void whenCalled_setIntervenerChangeDetailsForIntervenerTwoOnAdding() {
-        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder()
+        IntervenerTwo intervenerTwo = IntervenerTwo.builder()
             .intervenerName("Intervener Two")
             .build();
 
-        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerTwoWrapper);
+        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerTwo);
         Assert.assertEquals(IntervenerAction.ADDED.toString(), result.getIntervenerAction().toString());
         Assert.assertEquals(IntervenerType.INTERVENER_TWO.toString(), result.getIntervenerType().toString());
     }
 
     @Test
     public void whenCalled_setIntervenerChangeDetailsForIntervenerThreeOnAdding() {
-        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder()
+        IntervenerThree intervenerThree = IntervenerThree.builder()
             .intervenerName("Intervener Three")
             .build();
 
-        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerThreeWrapper);
+        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerThree);
         Assert.assertEquals(IntervenerAction.ADDED.toString(), result.getIntervenerAction().toString());
         Assert.assertEquals(IntervenerType.INTERVENER_THREE.toString(), result.getIntervenerType().toString());
     }
 
     @Test
     public void whenCalled_setIntervenerChangeDetailsForIntervenerFourOnAdding() {
-        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder()
+        IntervenerFour intervenerFour = IntervenerFour.builder()
             .intervenerName("Intervener Four")
             .build();
 
-        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerFourWrapper);
+        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerFour);
         Assert.assertEquals(IntervenerAction.ADDED.toString(), result.getIntervenerAction().toString());
         Assert.assertEquals(IntervenerType.INTERVENER_FOUR.toString(), result.getIntervenerType().toString());
     }
 
     @Test
     public void whenCalled_setIntervenerChangeDetailsForIntervenerOnRemoval() {
-        IntervenerWrapper intervenerWrapper = IntervenerOneWrapper.builder()
+        IntervenerWrapper intervenerWrapper = IntervenerOne.builder()
             .intervenerName("Intervener One")
             .build();
 
@@ -1559,60 +1559,60 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
     @Test
     public void whenIntervenerOneSolicitorRemoved_ShouldReturnTrue() {
-        IntervenerOneWrapper intervenerOneWrapperBefore = new IntervenerOneWrapper();
-        intervenerOneWrapperBefore.setIntervenerRepresented(YesOrNo.YES);
-        IntervenerOneWrapper intervenerOneWrapper = new IntervenerOneWrapper();
-        intervenerOneWrapper.setIntervenerRepresented(YesOrNo.NO);
+        IntervenerOne intervenerOneBefore = new IntervenerOne();
+        intervenerOneBefore.setIntervenerRepresented(YesOrNo.YES);
+        IntervenerOne intervenerOne = new IntervenerOne();
+        intervenerOne.setIntervenerRepresented(YesOrNo.NO);
         FinremCaseData finremCaseData = FinremCaseData.builder()
-            .intervenerOneWrapper(intervenerOneWrapper)
+            .intervenerOne(intervenerOne)
             .build();
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
-            .intervenerOneWrapper(intervenerOneWrapperBefore)
+            .intervenerOne(intervenerOneBefore)
             .build();
         Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }
 
     @Test
     public void whenIntervenerTwoSolicitorRemoved_ShouldReturnTrue() {
-        IntervenerTwoWrapper intervenerTwoWrapperBefore = new IntervenerTwoWrapper();
-        intervenerTwoWrapperBefore.setIntervenerRepresented(YesOrNo.YES);
-        IntervenerTwoWrapper intervenerTwoWrapper = new IntervenerTwoWrapper();
-        intervenerTwoWrapper.setIntervenerRepresented(YesOrNo.NO);
+        IntervenerTwo intervenerTwoBefore = new IntervenerTwo();
+        intervenerTwoBefore.setIntervenerRepresented(YesOrNo.YES);
+        IntervenerTwo intervenerTwo = new IntervenerTwo();
+        intervenerTwo.setIntervenerRepresented(YesOrNo.NO);
         FinremCaseData finremCaseData = FinremCaseData.builder()
-            .intervenerTwoWrapper(intervenerTwoWrapper)
+            .intervenerTwo(intervenerTwo)
             .build();
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
-            .intervenerTwoWrapper(intervenerTwoWrapperBefore)
+            .intervenerTwo(intervenerTwoBefore)
             .build();
         Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }
 
     @Test
     public void whenIntervenerThreeSolicitorRemoved_ShouldReturnTrue() {
-        IntervenerThreeWrapper intervenerThreeWrapperBefore = new IntervenerThreeWrapper();
-        intervenerThreeWrapperBefore.setIntervenerRepresented(YesOrNo.YES);
-        IntervenerThreeWrapper intervenerThreeWrapper = new IntervenerThreeWrapper();
-        intervenerThreeWrapper.setIntervenerRepresented(YesOrNo.NO);
+        IntervenerThree intervenerThreeBefore = new IntervenerThree();
+        intervenerThreeBefore.setIntervenerRepresented(YesOrNo.YES);
+        IntervenerThree intervenerThree = new IntervenerThree();
+        intervenerThree.setIntervenerRepresented(YesOrNo.NO);
         FinremCaseData finremCaseData = FinremCaseData.builder()
-            .intervenerThreeWrapper(intervenerThreeWrapper)
+            .intervenerThree(intervenerThree)
             .build();
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
-            .intervenerThreeWrapper(intervenerThreeWrapperBefore)
+            .intervenerThree(intervenerThreeBefore)
             .build();
         Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }
 
     @Test
     public void whenIntervenerFourSolicitorRemoved_ShouldReturnTrue() {
-        IntervenerFourWrapper intervenerFourWrapperBefore = new IntervenerFourWrapper();
-        intervenerFourWrapperBefore.setIntervenerRepresented(YesOrNo.YES);
-        IntervenerFourWrapper intervenerFourWrapper = new IntervenerFourWrapper();
-        intervenerFourWrapper.setIntervenerRepresented(YesOrNo.NO);
+        IntervenerFour intervenerFourBefore = new IntervenerFour();
+        intervenerFourBefore.setIntervenerRepresented(YesOrNo.YES);
+        IntervenerFour intervenerFour = new IntervenerFour();
+        intervenerFour.setIntervenerRepresented(YesOrNo.NO);
         FinremCaseData finremCaseData = FinremCaseData.builder()
-            .intervenerFourWrapper(intervenerFourWrapper)
+            .intervenerFour(intervenerFour)
             .build();
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
-            .intervenerFourWrapper(intervenerFourWrapperBefore)
+            .intervenerFour(intervenerFourBefore)
             .build();
         Assert.assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }

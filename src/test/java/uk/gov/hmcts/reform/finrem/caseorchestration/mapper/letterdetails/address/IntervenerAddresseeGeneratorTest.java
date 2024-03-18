@@ -7,10 +7,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 
@@ -48,7 +48,7 @@ public class IntervenerAddresseeGeneratorTest {
     @Test
     public void shouldGenerateAddresseeFromCaseDetailsIntervener1() {
         AddresseeDetails addresseeDetails = intervenerOneAddresseeGenerator.generate(
-            buildCaseDetails("intervener1", IntervenerOneWrapper.builder().intervenerName("intervener1 name").intervenerAddress(
+            buildCaseDetails("intervener1", IntervenerOne.builder().intervenerName("intervener1 name").intervenerAddress(
                 Address.builder().addressLine1("intervener1 address line 1")
                     .addressLine2("intervener1 address line 2").postCode("intervener1 postcode").build()).build()));
         assertNotNull(addresseeDetails);
@@ -61,7 +61,7 @@ public class IntervenerAddresseeGeneratorTest {
     @Test
     public void shouldGenerateAddresseeFromCaseDetailsIntervener2() {
         AddresseeDetails addresseeDetails = intervenerTwoAddresseeGenerator.generate(
-            buildCaseDetails("intervener2", IntervenerTwoWrapper.builder().intervenerName("intervener2 name").intervenerAddress(
+            buildCaseDetails("intervener2", IntervenerTwo.builder().intervenerName("intervener2 name").intervenerAddress(
                 Address.builder().addressLine1("intervener2 address line 1")
                     .addressLine2("intervener2 address line 2").postCode("intervener2 postcode").build()).build()));
         assertNotNull(addresseeDetails);
@@ -75,7 +75,7 @@ public class IntervenerAddresseeGeneratorTest {
     @Test
     public void shouldGenerateAddresseeFromCaseDetailsIntervener3() {
         AddresseeDetails addresseeDetails = intervenerThreeAddresseeGenerator.generate(
-            buildCaseDetails("intervener3", IntervenerThreeWrapper.builder().intervenerName("intervener3 name").intervenerAddress(
+            buildCaseDetails("intervener3", IntervenerThree.builder().intervenerName("intervener3 name").intervenerAddress(
                 Address.builder().addressLine1("intervener3 address line 1")
                     .addressLine2("intervener3 address line 2").postCode("intervener3 postcode").build()).build()));
         assertNotNull(addresseeDetails);
@@ -88,7 +88,7 @@ public class IntervenerAddresseeGeneratorTest {
     @Test
     public void shouldGenerateAddresseeFromCaseDetailsIntervener4() {
         AddresseeDetails addresseeDetails = intervenerFourAddresseeGenerator.generate(
-            buildCaseDetails("intervener4", IntervenerThreeWrapper.builder().intervenerName("intervener4 name").intervenerAddress(
+            buildCaseDetails("intervener4", IntervenerThree.builder().intervenerName("intervener4 name").intervenerAddress(
                 Address.builder().addressLine1("intervener4 address line 1")
                     .addressLine2("intervener4 address line 2").postCode("intervener4 postcode").build()).build()));
         assertNotNull(addresseeDetails);
@@ -102,7 +102,7 @@ public class IntervenerAddresseeGeneratorTest {
     @Test
     public void shouldGenerateAddresseeFromFinremCaseDetailsIntervener1() {
         FinremCaseDetails finremCaseDetails = buildFinremCaseDetails();
-        finremCaseDetails.getData().setIntervenerOneWrapper(IntervenerOneWrapper.builder().intervenerName("intervener1 name").intervenerAddress(
+        finremCaseDetails.getData().setIntervenerOne(IntervenerOne.builder().intervenerName("intervener1 name").intervenerAddress(
             Address.builder().addressLine1("intervener1 address line 1")
                 .addressLine2("intervener1 address line 2").postCode("intervener1 postcode").build()).build());
         AddresseeDetails addresseeDetails = intervenerOneAddresseeGenerator.generate(finremCaseDetails);
@@ -116,7 +116,7 @@ public class IntervenerAddresseeGeneratorTest {
     @Test
     public void shouldGenerateAddresseeFromFinremCaseDetailsIntervener2() {
         FinremCaseDetails finremCaseDetails = buildFinremCaseDetails();
-        finremCaseDetails.getData().setIntervenerTwoWrapper(IntervenerTwoWrapper.builder().intervenerName("intervener2 name").intervenerAddress(
+        finremCaseDetails.getData().setIntervenerTwo(IntervenerTwo.builder().intervenerName("intervener2 name").intervenerAddress(
             Address.builder().addressLine1("intervener2 address line 1")
                 .addressLine2("intervener2 address line 2").postCode("intervener2 postcode").build()).build());
         AddresseeDetails addresseeDetails = intervenerTwoAddresseeGenerator.generate(finremCaseDetails);
@@ -131,7 +131,7 @@ public class IntervenerAddresseeGeneratorTest {
     @Test
     public void shouldGenerateAddresseeFromFinremCaseDetailsIntervener3() {
         FinremCaseDetails finremCaseDetails = buildFinremCaseDetails();
-        finremCaseDetails.getData().setIntervenerThreeWrapper(IntervenerThreeWrapper.builder().intervenerName("intervener3 name").intervenerAddress(
+        finremCaseDetails.getData().setIntervenerThree(IntervenerThree.builder().intervenerName("intervener3 name").intervenerAddress(
             Address.builder().addressLine1("intervener3 address line 1")
                 .addressLine2("intervener3 address line 2").postCode("intervener3 postcode").build()).build());
         AddresseeDetails addresseeDetails = intervenerThreeAddresseeGenerator.generate(finremCaseDetails);
@@ -146,7 +146,7 @@ public class IntervenerAddresseeGeneratorTest {
     @Test
     public void shouldGenerateAddresseeFromFinremCaseDetailsIntervener4() {
         FinremCaseDetails finremCaseDetails = buildFinremCaseDetails();
-        finremCaseDetails.getData().setIntervenerFourWrapper(IntervenerFourWrapper.builder().intervenerName("intervener4 name").intervenerAddress(
+        finremCaseDetails.getData().setIntervenerFour(IntervenerFour.builder().intervenerName("intervener4 name").intervenerAddress(
             Address.builder().addressLine1("intervener4 address line 1")
                 .addressLine2("intervener4 address line 2").postCode("intervener4 postcode").build()).build());
         AddresseeDetails addresseeDetails = intervenerFourAddresseeGenerator.generate(finremCaseDetails);
