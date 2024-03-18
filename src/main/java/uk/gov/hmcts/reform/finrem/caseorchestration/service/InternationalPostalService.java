@@ -11,10 +11,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.ArrayList;
@@ -129,19 +129,19 @@ public class InternationalPostalService {
             case APPLICANT -> isInternational = isApplicantResideOutsideOfUK(caseData);
             case RESPONDENT -> isInternational = isRespondentResideOutsideOfUK(caseData);
             case INTERVENER1 -> {
-                IntervenerWrapper intervenerWrapper = caseData.getIntervenerOneWrapper();
+                IntervenerWrapper intervenerWrapper = caseData.getIntervenerOne();
                 isInternational = isIntervenerResideOutsideOfUK(intervenerWrapper);
             }
             case INTERVENER2 -> {
-                IntervenerWrapper intervenerWrapper = caseData.getIntervenerTwoWrapper();
+                IntervenerWrapper intervenerWrapper = caseData.getIntervenerTwo();
                 isInternational = isIntervenerResideOutsideOfUK(intervenerWrapper);
             }
             case INTERVENER3 -> {
-                IntervenerWrapper intervenerWrapper = caseData.getIntervenerThreeWrapper();
+                IntervenerWrapper intervenerWrapper = caseData.getIntervenerThree();
                 isInternational = isIntervenerResideOutsideOfUK(intervenerWrapper);
             }
             case INTERVENER4 -> {
-                IntervenerWrapper intervenerWrapper = caseData.getIntervenerFourWrapper();
+                IntervenerWrapper intervenerWrapper = caseData.getIntervenerFour();
                 isInternational = isIntervenerResideOutsideOfUK(intervenerWrapper);
             }
             default -> isInternational = false;
@@ -182,25 +182,25 @@ public class InternationalPostalService {
 
     private IntervenerWrapper convertToIntervener1Wrapper(Object object) {
         objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper.convertValue(object, new TypeReference<IntervenerOneWrapper>() {
+        return objectMapper.convertValue(object, new TypeReference<IntervenerOne>() {
         });
     }
 
     private IntervenerWrapper convertToIntervener2Wrapper(Object object) {
         objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper.convertValue(object, new TypeReference<IntervenerTwoWrapper>() {
+        return objectMapper.convertValue(object, new TypeReference<IntervenerTwo>() {
         });
     }
 
     private IntervenerWrapper convertToIntervener3Wrapper(Object object) {
         objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper.convertValue(object, new TypeReference<IntervenerThreeWrapper>() {
+        return objectMapper.convertValue(object, new TypeReference<IntervenerThree>() {
         });
     }
 
     private IntervenerWrapper convertToIntervener4Wrapper(Object object) {
         objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper.convertValue(object, new TypeReference<IntervenerFourWrapper>() {
+        return objectMapper.convertValue(object, new TypeReference<IntervenerFour>() {
         });
     }
 

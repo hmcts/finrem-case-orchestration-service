@@ -16,10 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.HashMap;
@@ -107,10 +107,10 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
         ContactDetailsWrapper wrapper = finremCaseData.getContactDetailsWrapper();
         wrapper.setApplicantResideOutsideUK(YesOrNo.YES);
         wrapper.setRespondentResideOutsideUK(YesOrNo.YES);
-        finremCaseData.getIntervenerOneWrapper().setIntervenerResideOutsideUK(YesOrNo.YES);
-        finremCaseData.getIntervenerTwoWrapper().setIntervenerResideOutsideUK(YesOrNo.YES);
-        finremCaseData.getIntervenerThreeWrapper().setIntervenerResideOutsideUK(YesOrNo.YES);
-        finremCaseData.getIntervenerFourWrapper().setIntervenerResideOutsideUK(YesOrNo.YES);
+        finremCaseData.getIntervenerOne().setIntervenerResideOutsideUK(YesOrNo.YES);
+        finremCaseData.getIntervenerTwo().setIntervenerResideOutsideUK(YesOrNo.YES);
+        finremCaseData.getIntervenerThree().setIntervenerResideOutsideUK(YesOrNo.YES);
+        finremCaseData.getIntervenerFour().setIntervenerResideOutsideUK(YesOrNo.YES);
 
         return Stream.of(
             Arguments.of(finremCaseData, APPLICANT, true),
@@ -139,10 +139,10 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
         ContactDetailsWrapper wrapper = finremCaseData.getContactDetailsWrapper();
         wrapper.setApplicantResideOutsideUK(YesOrNo.NO);
         wrapper.setRespondentResideOutsideUK(YesOrNo.NO);
-        finremCaseData.getIntervenerOneWrapper().setIntervenerResideOutsideUK(YesOrNo.NO);
-        finremCaseData.getIntervenerTwoWrapper().setIntervenerResideOutsideUK(YesOrNo.NO);
-        finremCaseData.getIntervenerThreeWrapper().setIntervenerResideOutsideUK(YesOrNo.NO);
-        finremCaseData.getIntervenerFourWrapper().setIntervenerResideOutsideUK(YesOrNo.NO);
+        finremCaseData.getIntervenerOne().setIntervenerResideOutsideUK(YesOrNo.NO);
+        finremCaseData.getIntervenerTwo().setIntervenerResideOutsideUK(YesOrNo.NO);
+        finremCaseData.getIntervenerThree().setIntervenerResideOutsideUK(YesOrNo.NO);
+        finremCaseData.getIntervenerFour().setIntervenerResideOutsideUK(YesOrNo.NO);
 
         return Stream.of(
             Arguments.of(finremCaseData, APPLICANT, false),
@@ -171,13 +171,13 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
         caseData.put(APPLICANT_RESIDE_OUTSIDE_UK, "Yes");
         caseData.put(RESPONDENT_RESIDE_OUTSIDE_UK, "Yes");
 
-        IntervenerWrapper intervenerWrapper1 = IntervenerOneWrapper.builder().intervenerResideOutsideUK(YesOrNo.YES).build();
+        IntervenerWrapper intervenerWrapper1 = IntervenerOne.builder().intervenerResideOutsideUK(YesOrNo.YES).build();
         caseData.put("intervener1", intervenerWrapper1);
-        IntervenerWrapper intervenerWrapper2 = IntervenerTwoWrapper.builder().intervenerResideOutsideUK(YesOrNo.YES).build();
+        IntervenerWrapper intervenerWrapper2 = IntervenerTwo.builder().intervenerResideOutsideUK(YesOrNo.YES).build();
         caseData.put("intervener2", intervenerWrapper2);
-        IntervenerWrapper intervenerWrapper3 = IntervenerThreeWrapper.builder().intervenerResideOutsideUK(YesOrNo.YES).build();
+        IntervenerWrapper intervenerWrapper3 = IntervenerThree.builder().intervenerResideOutsideUK(YesOrNo.YES).build();
         caseData.put("intervener3", intervenerWrapper3);
-        IntervenerWrapper intervenerWrapper4 = IntervenerFourWrapper.builder().intervenerResideOutsideUK(YesOrNo.YES).build();
+        IntervenerWrapper intervenerWrapper4 = IntervenerFour.builder().intervenerResideOutsideUK(YesOrNo.YES).build();
         caseData.put("intervener4", intervenerWrapper4);
 
 
@@ -206,13 +206,13 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
         caseData.put(APPLICANT_RESIDE_OUTSIDE_UK, "No");
         caseData.put(RESPONDENT_RESIDE_OUTSIDE_UK, "No");
 
-        IntervenerWrapper intervenerWrapper1 = IntervenerOneWrapper.builder().intervenerResideOutsideUK(YesOrNo.NO).build();
+        IntervenerWrapper intervenerWrapper1 = IntervenerOne.builder().intervenerResideOutsideUK(YesOrNo.NO).build();
         caseData.put("intervener1", intervenerWrapper1);
-        IntervenerWrapper intervenerWrapper2 = IntervenerTwoWrapper.builder().intervenerResideOutsideUK(YesOrNo.NO).build();
+        IntervenerWrapper intervenerWrapper2 = IntervenerTwo.builder().intervenerResideOutsideUK(YesOrNo.NO).build();
         caseData.put("intervener2", intervenerWrapper2);
-        IntervenerWrapper intervenerWrapper3 = IntervenerThreeWrapper.builder().intervenerResideOutsideUK(YesOrNo.NO).build();
+        IntervenerWrapper intervenerWrapper3 = IntervenerThree.builder().intervenerResideOutsideUK(YesOrNo.NO).build();
         caseData.put("intervener3", intervenerWrapper3);
-        IntervenerWrapper intervenerWrapper4 = IntervenerFourWrapper.builder().intervenerResideOutsideUK(YesOrNo.NO).build();
+        IntervenerWrapper intervenerWrapper4 = IntervenerFour.builder().intervenerResideOutsideUK(YesOrNo.NO).build();
         caseData.put("intervener4", intervenerWrapper4);
 
 
