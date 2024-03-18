@@ -454,7 +454,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertNull(caseDetails.getData().getCourtDetails());
         verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
             DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId());
-        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), any());
+        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), anyBoolean(), any());
     }
 
     private List<DynamicRadioListElement> getDynamicRadioListItems(boolean addIntervenerListElements) {

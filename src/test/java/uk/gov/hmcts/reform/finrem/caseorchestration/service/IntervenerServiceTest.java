@@ -326,7 +326,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
+        IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerSolEmail("test@test.com")
             .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
@@ -334,15 +334,15 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervenerRepresented(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseDataBefore.setIntervenerOneWrapper(oneWrapper);
+        finremCaseDataBefore.setIntervenerOne(oneWrapper);
 
-        IntervenerOneWrapper oneWrapper1 = IntervenerOneWrapper
+        IntervenerOne oneWrapper1 = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerResideOutsideUK(YesOrNo.YES)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
-        finremCaseData.setIntervenerOneWrapper(oneWrapper1);
+        finremCaseData.setIntervenerOne(oneWrapper1);
 
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
@@ -357,7 +357,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         List<String> errors = new ArrayList<>();
         IntervenerChangeDetails intervenerChangeDetails = service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
-        IntervenerOneWrapper intervenerOneWrapper = finremCaseData.getIntervenerOneWrapper();
+        IntervenerOne intervenerOneWrapper = finremCaseData.getIntervenerOne();
 
         assertNotNull(intervenerOneWrapper.getIntervenerDateAdded());
         assertNull(intervenerOneWrapper.getIntervenerSolEmail());
