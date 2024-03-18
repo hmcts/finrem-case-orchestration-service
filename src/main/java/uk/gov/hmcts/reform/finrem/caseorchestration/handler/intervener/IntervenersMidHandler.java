@@ -48,10 +48,10 @@ public class IntervenersMidHandler extends FinremCallbackHandler implements Inte
         String valueCode = caseData.getIntervenersList().getValueCode();
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         switch (valueCode) {
-            case INTERVENER_ONE -> showIntervenerOption(caseDataBefore.getIntervenerOneWrapper(), dynamicListElements);
-            case INTERVENER_TWO -> showIntervenerOption(caseDataBefore.getIntervenerTwoWrapper(), dynamicListElements);
-            case INTERVENER_THREE -> showIntervenerOption(caseDataBefore.getIntervenerThreeWrapper(), dynamicListElements);
-            case INTERVENER_FOUR -> showIntervenerOption(caseDataBefore.getIntervenerFourWrapper(), dynamicListElements);
+            case INTERVENER_ONE -> showIntervenerOption(caseDataBefore.getIntervenerOne(), dynamicListElements);
+            case INTERVENER_TWO -> showIntervenerOption(caseDataBefore.getIntervenerTwo(), dynamicListElements);
+            case INTERVENER_THREE -> showIntervenerOption(caseDataBefore.getIntervenerThree(), dynamicListElements);
+            case INTERVENER_FOUR -> showIntervenerOption(caseDataBefore.getIntervenerFour(), dynamicListElements);
             default -> throw new IllegalArgumentException("Invalid intervener selected for caseId " + caseId);
         }
 

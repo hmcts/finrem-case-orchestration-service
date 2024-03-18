@@ -49,10 +49,10 @@ public class CreateGeneralLetterConsentMidHandler extends FinremCallbackHandler 
         log.info("Received request to consent general letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
         FinremCaseData finremCaseData = caseDetails.getData();
-        finremCaseData.setIntervenerOneWrapper(null);
-        finremCaseData.setIntervenerTwoWrapper(null);
-        finremCaseData.setIntervenerThreeWrapper(null);
-        finremCaseData.setIntervenerFourWrapper(null);
+        finremCaseData.setIntervenerOne(null);
+        finremCaseData.setIntervenerTwo(null);
+        finremCaseData.setIntervenerThree(null);
+        finremCaseData.setIntervenerFour(null);
         List<String> errorsForCreatingPreviewOrFinalLetter
             = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
         if (errorsForCreatingPreviewOrFinalLetter.isEmpty()) {

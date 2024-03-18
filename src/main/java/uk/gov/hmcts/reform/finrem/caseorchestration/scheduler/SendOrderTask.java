@@ -114,7 +114,7 @@ public class SendOrderTask implements Runnable {
         if (documentHelper.hasAnotherHearing(caseData)) {
             Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
             latestAdditionalHearingDocument.ifPresent(
-                caseDocument -> hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
+                caseDocument -> hearingDocumentPack.add(documentHelper.mapToBulkPrintDocument(caseDocument)));
         }
 
         List<BulkPrintDocument> otherHearingDocuments = documentHelper.getHearingDocumentsAsBulkPrintDocuments(
