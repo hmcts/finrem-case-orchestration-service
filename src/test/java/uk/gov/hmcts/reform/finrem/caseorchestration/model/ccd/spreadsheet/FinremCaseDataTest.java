@@ -20,7 +20,6 @@ import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
-@Ignore
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
