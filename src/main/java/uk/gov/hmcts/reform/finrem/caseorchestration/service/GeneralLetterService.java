@@ -258,13 +258,13 @@ public class GeneralLetterService {
         GeneralLetterWrapper generalLetterWrapper = caseDetails.getData().getGeneralLetterWrapper();
         List<GeneralLetterCollection> generalLettersData = generalLetterWrapper.getGeneralLetterCollection();
         GeneralLetterCollection latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
-        bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(latestGeneralLetterData.getValue().getGeneratedLetter()));
+        bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(latestGeneralLetterData.getValue().getGeneratedLetter()));
         Optional.ofNullable(generalLetterWrapper.getGeneralLetterUploadedDocument())
-            .ifPresent(uploadedDocument -> bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(uploadedDocument)));
+            .ifPresent(uploadedDocument -> bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(uploadedDocument)));
 
         Optional.ofNullable(generalLetterWrapper.getGeneralLetterUploadedDocuments())
             .ifPresent(uploadedDocuments -> uploadedDocuments.forEach(
-                generalLetterUploadedDocumentCollection -> bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(
+                generalLetterUploadedDocumentCollection -> bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(
                     generalLetterUploadedDocumentCollection.getValue())
                 )
             ));
