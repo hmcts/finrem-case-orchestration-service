@@ -77,7 +77,7 @@ public class CreateGeneralLetterConsentMidHandlerTest {
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(generalLetterService).getCaseDataErrorsForCreatingPreviewOrFinalLetter(any(FinremCaseDetails.class));
         verify(generalLetterService).previewGeneralLetter(anyString(), any(FinremCaseDetails.class));
-        verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(generalLetterService).validateEncryptionOnUploadedDocuments(any(), any(), any());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class CreateGeneralLetterConsentMidHandlerTest {
             .thenReturn(List.of("Address is missing for recipient type"));
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(generalLetterService, times(1)).getCaseDataErrorsForCreatingPreviewOrFinalLetter(any(FinremCaseDetails.class));
-        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(generalLetterService, never()).validateEncryptionOnUploadedDocuments(any(), any(), any());
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
