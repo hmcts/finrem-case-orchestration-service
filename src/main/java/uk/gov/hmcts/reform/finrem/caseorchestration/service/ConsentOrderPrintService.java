@@ -141,12 +141,12 @@ public class ConsentOrderPrintService {
             bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
         } else {
             if (!isNull(generalOrder) && isNull(generalOrderBefore)) {
-                bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
+                bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
             } else if (isNull(generalOrder) && isNull(generalOrderBefore)) {
                 bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
             } else if (!isNull(generalOrder) && !orderDocuments.isEmpty()
                 && documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.get(0), authorisationToken)) {
-                bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
+                bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
             } else {
                 bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
             }
