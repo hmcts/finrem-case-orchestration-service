@@ -19,8 +19,6 @@ import java.util.List;
 public class GeneralLetter {
     @JsonProperty("generatedLetter")
     private CaseDocument generatedLetter;
-    @JsonProperty("generalLetterUploadedDocument")
-    private CaseDocument generalLetterUploadedDocument;
     @JsonProperty("generalLetterUploadedDocuments")
     private List<DocumentCollection> generalLetterUploadedDocuments;
 }

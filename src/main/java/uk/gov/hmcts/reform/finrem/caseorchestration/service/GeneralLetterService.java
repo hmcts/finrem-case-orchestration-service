@@ -89,15 +89,20 @@ public class GeneralLetterService {
         GeneralLetterWrapper wrapper = caseData.getGeneralLetterWrapper();
         log.info("Generating General letter for Case ID: {}", caseId);
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
-        Optional<CaseDocument> generalLetterUploadedDocument = Optional.ofNullable(wrapper.getGeneralLetterUploadedDocument());
+        List<DocumentCollection> pdfGeneralLetterUploadedDocuments = getUploadedDocumentsAsPdfs(authorisationToken, wrapper, caseId);
+
+        addGeneralLetterToCaseData(caseDetails, document, pdfGeneralLetterUploadedDocuments);
+        printLatestGeneralLetter(caseDetails, authorisationToken);
+        removeFrcCourtFields(caseData);
+        if (caseData.isContestedApplication()) {
+            createGeneralLetterDocumentCategoriser.categorise(caseData);
+        }
+    }
+
+    private List<DocumentCollection> getUploadedDocumentsAsPdfs(String authorisationToken, GeneralLetterWrapper wrapper, Long caseId) {
         Optional<List<DocumentCollection>> generalLetterUploadedDocuments = Optional.ofNullable(wrapper.getGeneralLetterUploadedDocuments());
 
         List<DocumentCollection> pdfGeneralLetterUploadedDocuments = new ArrayList<>();
-        generalLetterUploadedDocument.ifPresent(uploadedDocument -> {
-            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-                uploadedDocument, authorisationToken, caseId.toString());
-            wrapper.setGeneralLetterUploadedDocument(pdfDocument);
-        });
 
         generalLetterUploadedDocuments.ifPresent(uploadedDocuments -> {
             if (!uploadedDocuments.isEmpty()) {
@@ -110,14 +115,7 @@ public class GeneralLetterService {
                 wrapper.setGeneralLetterUploadedDocuments(pdfGeneralLetterUploadedDocuments);
             }
         });
-
-        addGeneralLetterToCaseData(caseDetails, document,
-            generalLetterUploadedDocument.orElse(null), pdfGeneralLetterUploadedDocuments);
-        printLatestGeneralLetter(caseDetails, authorisationToken);
-        removeFrcCourtFields(caseData);
-        if (caseData.isContestedApplication()) {
-            createGeneralLetterDocumentCategoriser.categorise(caseData);
-        }
+        return pdfGeneralLetterUploadedDocuments;
     }
 
     private CaseDocument generateGeneralLetterDocument(FinremCaseDetails caseDetails, String authorisationToken) {
@@ -162,14 +160,12 @@ public class GeneralLetterService {
     }
 
     private void addGeneralLetterToCaseData(FinremCaseDetails caseDetails, CaseDocument document,
-                                            CaseDocument generalLetterUploadedDocument,
                                             List<DocumentCollection> generalLetterUploadedDocuments) {
         List<GeneralLetterCollection> generalLetterCollection = Optional.ofNullable(caseDetails.getData()
             .getGeneralLetterWrapper().getGeneralLetterCollection())
             .orElse(new ArrayList<>(1));
         generalLetterCollection.add(GeneralLetterCollection.builder().value(GeneralLetter.builder()
                 .generatedLetter(document)
-                .generalLetterUploadedDocument(generalLetterUploadedDocument)
                 .generalLetterUploadedDocuments(generalLetterUploadedDocuments)
                 .build())
             .build());

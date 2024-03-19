@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
@@ -102,7 +103,7 @@ public class CreateGeneralLetterConsentMidHandlerTest {
                     .postCode("AB1 1BC").build())
                 .generalLetterCreatedBy("Test")
                 .generalLetterBody("body")
-                .generalLetterUploadedDocument(TestSetUpUtils.caseDocument())
+                .generalLetterUploadedDocuments(List.of(DocumentCollection.builder().value(TestSetUpUtils.caseDocument()).build()))
                 .generalLetterPreview(CaseDocument.builder().build())
                 .build())
             .build();
