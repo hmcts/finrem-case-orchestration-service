@@ -44,7 +44,6 @@ public class CreateGeneralLetterConsentMidHandler extends FinremCallbackHandler 
                                                                               String userAuthorisation) {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId =  String.valueOf(caseDetails.getId());
         log.info("Received request to consent general letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
         FinremCaseData finremCaseData = caseDetails.getData();
