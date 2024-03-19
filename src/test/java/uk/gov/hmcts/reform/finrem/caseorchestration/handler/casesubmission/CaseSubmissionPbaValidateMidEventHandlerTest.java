@@ -40,25 +40,20 @@ class CaseSubmissionPbaValidateMidEventHandlerTest {
 
     @Test
     void testHandle() {
-        // Mock data for caseDetails
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         FinremCaseData caseData = new FinremCaseData();
         caseData.setHelpWithFeesQuestion(YES);
         caseData.setPbaNumber("ValidPbaNumber");
         caseDetails.setData(caseData);
 
-        // Mock behavior
         Mockito.lenient().when(pbaValidationService.isValidPBA(any(), eq("ValidPbaNumber"))).thenReturn(true);
 
-        // Execute the method under test
         FinremCallbackRequest request = FinremCallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
         var response = handler.handle(request, "userAuthorisation");
 
-        // Verify the response
-        assertThat(response).isNotNull();
-        assertEquals(0, response.getErrors().size());
+        assertThat(response.getErrors()).isEmpty();
         assertEquals(caseData, response.getData());
     }
 
