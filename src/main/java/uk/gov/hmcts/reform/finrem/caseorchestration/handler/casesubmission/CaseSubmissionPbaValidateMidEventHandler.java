@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
 import java.util.List;
@@ -46,11 +47,10 @@ public class CaseSubmissionPbaValidateMidEventHandler extends FinremCallbackHand
         validateCaseData(callbackRequestWithFinremCaseDetails);
 
         FinremCaseData caseData = caseDetails.getData();
-        boolean helpWithFeeQuestion = Objects.toString(caseData.getHelpWithFeesQuestion()).equalsIgnoreCase("no");
-        if (helpWithFeeQuestion) {
+        if (YesOrNo.NO.equals(caseData.getHelpWithFeesQuestion())) {
             String pbaNumber = Objects.toString(caseData.getPbaNumber());
             log.info("Validating PBA Number: {}", pbaNumber);
-            if (!pbaValidationService.isValidPBA(null, pbaNumber)) {
+            if (!pbaValidationService.isValidPBA(userAuthorisation, pbaNumber)) {
                 log.info("PBA number is invalid for Case ID: {}", caseDetails.getId());
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                     .errors(List.of("PBA Account Number is not valid, please enter a valid one."))
