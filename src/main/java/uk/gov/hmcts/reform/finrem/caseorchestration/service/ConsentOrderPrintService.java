@@ -113,7 +113,7 @@ public class ConsentOrderPrintService {
                                                         EventType eventType, String authorisationToken) {
         log.info("Sending order documents to recipient / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverSheet));
+        bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverSheet));
         getOrderDocuments(caseDetails,caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(

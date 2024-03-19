@@ -147,7 +147,7 @@ public class ConsentOrderApprovedDocumentService {
 
         if (caseDataService.isPaperApplication(caseData)) {
             CaseDocument coverLetter = generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken);
-            bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter));
+            bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverLetter));
         }
 
         return bulkPrintDocuments;

@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 
 @Component
 @Slf4j
-public class IntervenerFourLetterAddresseeGenerator extends IntervenerLetterAddresseeGenerator<IntervenerFourWrapper> {
+public class IntervenerFourLetterAddresseeGenerator extends IntervenerLetterAddresseeGenerator<IntervenerFour> {
 
     @Autowired
     public IntervenerFourLetterAddresseeGenerator(ObjectMapper objectMapper) {
@@ -26,15 +26,15 @@ public class IntervenerFourLetterAddresseeGenerator extends IntervenerLetterAddr
     }
 
     @Override
-    protected IntervenerFourWrapper getIntervenerWrapper(CaseDetails caseDetails) {
-        IntervenerFourWrapper intervenerWrapper =
+    protected IntervenerFour getIntervenerWrapper(CaseDetails caseDetails) {
+        IntervenerFour intervenerWrapper =
             objectMapper.convertValue(caseDetails.getData().get(getIntervenerFieldName()), new TypeReference<>() {
             });
         return intervenerWrapper;
     }
 
     @Override
-    protected IntervenerFourWrapper getIntervenerWrapper(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getIntervenerFourWrapper();
+    protected IntervenerFour getIntervenerWrapper(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getIntervenerFour();
     }
 }

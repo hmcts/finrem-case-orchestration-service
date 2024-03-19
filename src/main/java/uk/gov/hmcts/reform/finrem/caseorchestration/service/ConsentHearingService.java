@@ -163,7 +163,7 @@ public class ConsentHearingService {
             documentConfiguration.getHearingNoticeConsentedFileName());
 
         hearingData.getValue().setHearingNotice(hearingNotice);
-        documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(hearingNotice));
+        documents.add(documentHelper.mapToBulkPrintDocument(hearingNotice));
         addToBulkPrintList(caseDetails, hearingCaseData, documents, authorisationToken);
 
         log.info("HEARING DATA AFTER ADDING HEARING NOTICE ::{}", hearingData);
@@ -180,7 +180,7 @@ public class ConsentHearingService {
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(hearingData.get(HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments =
                 genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
-            documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
+            documents.add(documentHelper.mapToBulkPrintDocument(additionalUploadedDocuments));
         }
     }
 

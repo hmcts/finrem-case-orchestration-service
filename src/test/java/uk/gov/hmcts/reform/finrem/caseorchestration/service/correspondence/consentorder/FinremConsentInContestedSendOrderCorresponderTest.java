@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
@@ -84,13 +84,13 @@ class FinremConsentInContestedSendOrderCorresponderTest {
 
     @Test
     void shouldSendLettersToParties() {
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+        IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("intervener1@gmail.com")
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .build();
 
-        caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
+        caseDetails.getData().setIntervenerOne(intervenerOne);
 
         List<OrderSentToPartiesCollection> orders = new ArrayList<>();
         orders.add(OrderSentToPartiesCollection.builder().value(SendOrderDocuments.builder().caseDocument(caseDocument()).build()).build());
@@ -98,16 +98,16 @@ class FinremConsentInContestedSendOrderCorresponderTest {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOne.class),
             any(FinremCaseDetails.class))).thenReturn(false);
         when(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(any(ConsentOrderWrapper.class), anyString()))
             .thenReturn(true);
         corresponder.sendCorrespondence(caseDetails, "authToken");
 
-        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOneWrapper, caseDetails);
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOne, caseDetails);
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
-        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOneWrapper.class), any(FinremCaseDetails.class),
+        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOne.class), any(FinremCaseDetails.class),
             anyString(), anyList());
         verify(bulkPrintService).printApplicantDocuments(any(FinremCaseDetails.class),
             anyString(), anyList());
