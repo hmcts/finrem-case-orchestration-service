@@ -183,7 +183,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_EMPTY_COLLECTION_PATH);
         DynamicRadioList addresseeList = getDynamicRadioList(APPLICANT_SOLICITOR, APP_SOLICITOR_LABEL, false);
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterUploadedDocument(caseDocument());
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterUploadedDocuments(
+            List.of(DocumentCollection.builder().value(caseDocument()).build()));
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
 
