@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
@@ -30,6 +31,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -140,6 +143,8 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.applicantSolicitorEmail", is("appsolicitor1@yahoo.com")))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+
+        verify(updateRepresentationService, times(1)).addRemovedSolicitorOrganisationFieldToCaseData(any(CaseDetails.class));
     }
 
     @Test
