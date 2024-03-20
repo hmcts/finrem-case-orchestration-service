@@ -24,8 +24,8 @@ public enum MiamDomesticViolence {
         "A domestic abuse protection notice issued under section 24 of the Crime and Security Act 2010 "
             + "against a prospective party"),
     FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_7("FR_ms_MIAMDomesticViolenceChecklist_Value_7",
-        "A domestic abuse protection notice given under section 22 of the Domestic Abuse Act 2021 against " +
-            "a prospective party"),
+        "A domestic abuse protection notice given under section 22 of the Domestic Abuse Act 2021 against "
+            + "a prospective party"),
     FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_8("FR_ms_MIAMDomesticViolenceChecklist_Value_8",
         "A relevant protective injunction"),
     FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_9("FR_ms_MIAMDomesticViolenceChecklist_Value_9",
@@ -94,7 +94,7 @@ public enum MiamDomesticViolence {
             + "(i) that a person with whom a prospective party is or was personally connected was refused "
             + "admission to a refuge; \n"
             + "(ii) the date on which they were refused admission to the refuge; and \n"
-            + "(iii)they sought admission to the refuge because of allegations of domestic violence by the "
+            + "(iii) they sought admission to the refuge because of allegations of domestic violence by the "
             + "prospective party referred to in paragraph (i)"),
     FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_20("FR_ms_MIAMDomesticViolenceChecklist_Value_20",
         "A letter from a public authority confirming that a person with whom a prospective party is "

@@ -11,10 +11,10 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum MiamOtherGrounds {
     FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1("FR_ms_MIAMOtherGroundsChecklist_Value_1",
-        "the application would be made without notice (Paragraph 5.1 of Practice Direction 18A sets out"
+        "The application would be made without notice (Paragraph 5.1 of Practice Direction 18A sets out"
             + " the circumstances in which applications may be made without notice.)"),
     FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_2("FR_ms_MIAMOtherGroundsChecklist_Value_2",
-        "a child is one of the prospective parties."),
+        "A child is one of the prospective parties."),
     FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_3("FR_ms_MIAMOtherGroundsChecklist_Value_3",
         "(i) the prospective applicant is not able to attend a MIAM online or by video-link"
             + " and an explanation of why this is the case is provided to the court using the text field"
