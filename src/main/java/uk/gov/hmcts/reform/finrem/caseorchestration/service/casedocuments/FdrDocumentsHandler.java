@@ -56,7 +56,7 @@ public class FdrDocumentsHandler extends DocumentHandler {
         } else if (CaseDocumentParty.RESPONDENT.equals(caseDocumentParty)) {
             return respondentFdrDocumentCategoriser.getDocumentCategory(caseDocumentType);
         } else {
-            return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE;
+            return DocumentCategory.FDR_BUNDLE;
         }
     }
 }
