@@ -29,7 +29,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
@@ -111,7 +110,7 @@ public class PBAValidationTest extends BaseTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.errors", hasSize(1)))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .andExpect(jsonPath("$.warnings", is(empty())));
     }
 
     @Test
