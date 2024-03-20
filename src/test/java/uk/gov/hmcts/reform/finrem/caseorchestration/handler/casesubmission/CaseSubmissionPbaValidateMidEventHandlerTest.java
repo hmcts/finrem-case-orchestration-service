@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
 
 @ExtendWith(MockitoExtension.class)
 class CaseSubmissionPbaValidateMidEventHandlerTest {
@@ -39,14 +39,14 @@ class CaseSubmissionPbaValidateMidEventHandlerTest {
     }
 
     @Test
-    void testHandle() {
+    void testHandle_ValidPbaNumber_thenHandlerCanHandle() {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         FinremCaseData caseData = new FinremCaseData();
-        caseData.setHelpWithFeesQuestion(YES);
+        caseData.setHelpWithFeesQuestion(NO);
         caseData.setPbaNumber("ValidPbaNumber");
         caseDetails.setData(caseData);
 
-        Mockito.lenient().when(pbaValidationService.isValidPBA(any(), eq("ValidPbaNumber"))).thenReturn(true);
+        Mockito.when(pbaValidationService.isValidPBA(any(), eq("ValidPbaNumber"))).thenReturn(true);
 
         FinremCallbackRequest request = FinremCallbackRequest.builder()
             .caseDetails(caseDetails)
@@ -55,6 +55,30 @@ class CaseSubmissionPbaValidateMidEventHandlerTest {
 
         assertThat(response.getErrors()).isEmpty();
         assertEquals(caseData, response.getData());
+    }
+
+    @Test
+    void testHandle_InvalidPbaNumber_thenReturnError() {
+        FinremCaseDetails caseDetails = new FinremCaseDetails();
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setHelpWithFeesQuestion(NO);
+        caseData.setPbaNumber("InvalidPbaNumber");
+        caseDetails.setData(caseData);
+
+        Mockito.when(pbaValidationService.isValidPBA(any(), eq("InvalidPbaNumber"))).thenReturn(false);
+
+        FinremCallbackRequest request = FinremCallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        var response = handler.handle(request, "userAuthorisation");
+
+        System.out.println("Response: " + response.getErrors());
+        System.out.println("Response: " + response);
+
+
+        assertThat(response).isNotNull();
+        assertThat(response.getErrors()).isNotEmpty();
+        assertThat(response.getErrors()).contains("PBA Account Number is not valid, please enter a valid one.");
     }
 
 }
