@@ -51,8 +51,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 public class PBAValidationTest extends BaseTest {
 
     private static final String PBA_VALIDATE_URL = "/case-orchestration/ccdMidEvent";
-    private static final String PBA_VALID_RESPONSE = "{\"pbaNumberValid\": true }";
-    private static final String PBA_INVALID_RESPONSE = "{\"pbaNumberValid\": false }";
 
     @Autowired
     private MockMvc webClient;
