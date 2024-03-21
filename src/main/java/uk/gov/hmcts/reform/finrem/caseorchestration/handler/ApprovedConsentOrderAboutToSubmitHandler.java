@@ -57,6 +57,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         String caseId =  String.valueOf(caseDetails.getId());
         log.info("ConsentOrderApprovedAboutToSubmitHandle handle Case ID {}", caseId);
 
@@ -64,7 +65,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         if (!isEmpty(latestConsentOrder)) {
             CaseDocument pdfConsentOrder = genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder, userAuthorisation, caseId);
             caseDetails.getData().put(LATEST_CONSENT_ORDER, pdfConsentOrder);
-            generateAndPrepareDocuments(userAuthorisation, caseDetails, pdfConsentOrder);
+            generateAndPrepareDocuments(userAuthorisation, caseDetails, caseDetailsBefore, pdfConsentOrder);
         } else {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: {}",
                 caseId);
@@ -72,7 +73,8 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }
 
-    private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails, CaseDocument latestConsentOrder) {
+    private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails,
+                                             CaseDetails caseDetailsBefore, CaseDocument latestConsentOrder) {
         String caseId = caseDetails.getId().toString();
         log.info("Generating and preparing documents for latest consent order, Case ID: {}", caseId);
 
@@ -113,7 +115,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
                 caseDetails.setData(caseData);
-                consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
+                consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore, EventType.APPROVE_ORDER, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
             } catch (JsonProcessingException e) {
                 log.error("Case ID: {} Error encountered trying to update status and send for bulk print: {}", caseId, e.getMessage());
