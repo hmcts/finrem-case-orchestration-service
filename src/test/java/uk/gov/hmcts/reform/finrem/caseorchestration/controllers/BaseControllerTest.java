@@ -62,10 +62,6 @@ public abstract class BaseControllerTest extends BaseTest {
         loadRequestContentWith("/fixtures/refusal-order-contested.json");
     }
 
-    protected void doValidCaseDataSetUpForAdditionalHearing() {
-        loadRequestContentWith("/fixtures/bulkprint/bulk-print-additional-hearing.json");
-    }
-
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
