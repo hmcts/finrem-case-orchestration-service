@@ -26,8 +26,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public abstract class BaseControllerTest extends BaseTest {
 
-    @Autowired protected WebApplicationContext applicationContext;
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired
+    protected WebApplicationContext applicationContext;
+    @Autowired
+    protected ObjectMapper objectMapper;
     @MockBean
     protected ScheduledTaskRunner taskRunner;
 
@@ -44,7 +46,7 @@ public abstract class BaseControllerTest extends BaseTest {
     }
 
     protected void doValidCaseDataSetUp() {
-        loadRequestContentWith("/fixtures/pba-validate.json");
+        loadRequestContentWith("/fixtures/submit-general-application.json");
     }
 
     protected void doValidCourtDataSetUp() {
