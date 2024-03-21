@@ -125,7 +125,6 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
         assertThrows(FeignException.InternalServerError.class, () -> {
             handler.handle(callbackRequest, AUTH_TOKEN);
         });
-        ;
     }
 
     @Test
