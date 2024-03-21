@@ -64,14 +64,14 @@ public abstract class BaseControllerTest extends BaseTest {
 
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
     }
 
     protected CallbackRequest buildNoCCaseworkerCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId(UPDATE_CONTACT_DETAILS_EVENT)
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
@@ -80,8 +80,8 @@ public abstract class BaseControllerTest extends BaseTest {
 
     protected CallbackRequest buildCallbackRequestWithBeforeCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(Long.valueOf(120)).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(120L).data(caseData).build();
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 
