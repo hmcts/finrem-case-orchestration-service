@@ -58,7 +58,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
 
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
-    private static final String APPROVE_ORDER_VALID_JSON = "/fixtures/pba-validate.json";
+    private static final String APPROVE_ORDER_VALID_JSON = "/fixtures/submit-general-application.json";
     private static final String APPROVE_ORDER_NO_PENSION_VALID_JSON = "/fixtures/bulkprint/bulk-print-no-pension-collection.json";
     private static final String NO_PENSION_VALID_JSON = "/fixtures/bulkprint/bulk-print-no-pension-collection.json";
 
