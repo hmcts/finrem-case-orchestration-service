@@ -311,7 +311,7 @@ public class DocumentHelper {
             log.warn("Latest general order not found for printing for case");
             return null;
         }
-        return convertToCaseDocument(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument());
+        return caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
     }
 
     public CaseDocument convertToCaseDocumentIfObjNotNull(Object object) {
