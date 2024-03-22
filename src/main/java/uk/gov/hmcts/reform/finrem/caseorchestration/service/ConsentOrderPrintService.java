@@ -116,6 +116,7 @@ public class ConsentOrderPrintService {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverSheet));
         getOrderDocuments(caseDetails,caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
+        FinremCaseData caseData = caseDetails.getData();
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             caseDetails.getId(),
