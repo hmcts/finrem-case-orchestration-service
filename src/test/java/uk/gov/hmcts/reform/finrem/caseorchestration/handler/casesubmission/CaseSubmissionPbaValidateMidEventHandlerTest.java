@@ -72,10 +72,6 @@ class CaseSubmissionPbaValidateMidEventHandlerTest {
             .build();
         var response = handler.handle(request, "userAuthorisation");
 
-        System.out.println("Response: " + response.getErrors());
-        System.out.println("Response: " + response);
-
-
         assertThat(response).isNotNull();
         assertThat(response.getErrors()).isNotEmpty();
         assertThat(response.getErrors()).contains("PBA Account Number is not valid, please enter a valid one.");
