@@ -60,7 +60,6 @@ public class EmailService {
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
             templateVars);
         log.info("Sending confirmation email on Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
-        log.info("just before send email on case 1710514097720170");
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
     }
 
@@ -146,11 +145,8 @@ public class EmailService {
     }
 
     private void sendEmail(EmailToSend emailToSend, String emailDescription) {
-        log.info("just before templateid on case 1710514097720170");
         String templateId = emailToSend.getTemplateId();
-        log.info("template id is {} on case 1710514097720170", templateId);
         String referenceId = emailToSend.getReferenceId();
-        log.info("ref id is {} on case 1710514097720170", referenceId);
         try {
             log.info("Attempting to send {} email with template {}. Reference ID: {}", emailDescription, templateId, referenceId);
             emailClient.sendEmail(
