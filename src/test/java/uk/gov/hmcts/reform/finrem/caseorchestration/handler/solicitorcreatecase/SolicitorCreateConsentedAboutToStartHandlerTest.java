@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
 
 import org.junit.Before;
@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.SolicitorCreateConsentedAboutToStartHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
@@ -19,31 +20,28 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
-public class SolicitorCreateContestedAboutToStartHandlerTest {
+public class SolicitorCreateConsentedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private SolicitorCreateContestedAboutToStartHandler handler;
+    private SolicitorCreateConsentedAboutToStartHandler handler;
 
     @Before
     public void setup() {
-        handler =  new SolicitorCreateContestedAboutToStartHandler(new OnStartDefaultValueService());
+        handler =  new SolicitorCreateConsentedAboutToStartHandler(new OnStartDefaultValueService());
     }
 
     @Test
     public void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.SOLICITOR_CREATE),
             is(false));
     }
 
     @Test
     public void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.SOLICITOR_CREATE),
             is(true));
     }
 
@@ -52,8 +50,6 @@ public class SolicitorCreateContestedAboutToStartHandlerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(NO_VALUE, response.getData().get(CIVIL_PARTNERSHIP));
-        assertEquals(TYPE_OF_APPLICATION_DEFAULT_TO, response.getData().get(TYPE_OF_APPLICATION));
-        assertEquals(NO_VALUE, response.getData().get(URGENT_CASE_QUESTION));
     }
 
     private CallbackRequest buildCallbackRequest() {

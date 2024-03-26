@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.SolicitorCreateContestedSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -24,28 +26,29 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SolicitorCreateConsentedSubmittedHandlerTest {
+public class SolicitorCreateContestedSubmittedHandlerTest {
 
     @InjectMocks
-    private SolicitorCreateConsentedSubmittedHandler handler;
+    private SolicitorCreateContestedSubmittedHandler handler;
 
     @Mock
     private AssignApplicantSolicitorService assignApplicantSolicitorService;
-    @Mock
-    private CreateCaseService createCaseService;
+
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
+    private CreateCaseService createCaseService;
 
     @Before
     public void setup() {
-        handler =  new SolicitorCreateConsentedSubmittedHandler(finremCaseDetailsMapper, assignApplicantSolicitorService,
+        handler =  new SolicitorCreateContestedSubmittedHandler(finremCaseDetailsMapper, assignApplicantSolicitorService,
             createCaseService);
     }
 
     @Test
-    public void givenACcdCallbackSolicitorCreateConsentedCase_WhenCanHandleCalled_thenHandlerCanHandle() {
+    public void givenACcdCallbackSolicitorCreateContestedCase_WhenCanHandleCalled_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.SOLICITOR_CREATE),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
             is(true));
     }
 
