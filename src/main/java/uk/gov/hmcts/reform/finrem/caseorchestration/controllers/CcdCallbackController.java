@@ -39,6 +39,7 @@ public class CcdCallbackController {
 
     private final CallbackDispatchService callbackDispatchService;
 
+
     @PostMapping(path = "/ccdAboutToStartEvent")
     @Operation(summary = "Handles AboutToStart callback requests from CCD")
     @ApiResponses(value = {
