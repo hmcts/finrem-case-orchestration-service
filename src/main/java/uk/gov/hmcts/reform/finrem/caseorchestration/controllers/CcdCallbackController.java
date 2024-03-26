@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,15 +32,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @SuppressWarnings("java:S3740")
 public class CcdCallbackController {
 
     private final CallbackDispatchService callbackDispatchService;
-
-    public CcdCallbackController(CallbackDispatchService callbackDispatchService) {
-        this.callbackDispatchService = callbackDispatchService;
-    }
 
     @PostMapping(path = "/ccdAboutToStartEvent")
     @Operation(summary = "Handles AboutToStart callback requests from CCD")
