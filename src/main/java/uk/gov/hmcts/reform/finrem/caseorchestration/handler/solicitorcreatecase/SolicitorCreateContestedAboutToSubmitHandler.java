@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -19,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallbackHandler {
@@ -28,17 +31,21 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     private final IdamService idamService;
     private final UpdateRepresentationWorkflowService representationWorkflowService;
 
+    private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
+
     @Autowired
     public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnlineFormDocumentService service,
                                                         CaseFlagsService caseFlagsService,
                                                         IdamService idamService,
-                                                        UpdateRepresentationWorkflowService representationWorkflowService) {
+                                                        UpdateRepresentationWorkflowService representationWorkflowService,
+                                                        CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator) {
         super(finremCaseDetailsMapper);
         this.service = service;
         this.caseFlagsService = caseFlagsService;
         this.idamService = idamService;
         this.representationWorkflowService = representationWorkflowService;
+        this.createCaseMandatoryDataValidator = createCaseMandatoryDataValidator;
     }
 
 
@@ -58,6 +65,13 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         caseFlagsService.setCaseFlagInformation(caseDetails);
 
         FinremCaseData caseData = caseDetails.getData();
+
+        List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
+        if (!mandatoryDataErrors.isEmpty()) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .errors(mandatoryDataErrors)
+                .data(caseData).build();
+        }
 
         if (!idamService.isUserRoleAdmin(authorisationToken)) {
             log.info("other users for Case ID: {}", caseDetails.getId());

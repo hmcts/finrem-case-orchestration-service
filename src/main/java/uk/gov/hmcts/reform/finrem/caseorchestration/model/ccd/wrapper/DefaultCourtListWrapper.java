@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NwYorkshireCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SwanseaCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.NullChecker;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -65,10 +64,6 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
     private NorthWalesCourt northWalesCourtList;
 
     private HighCourt highCourtList;
-
-    public boolean isAnyCourtSelected() {
-        return NullChecker.anyNonNull(this);
-    }
 
     @JsonIgnore
     @Override

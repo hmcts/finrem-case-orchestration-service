@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DevonCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DorsetCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HighCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HumberCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
@@ -22,23 +23,43 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NorthWalesCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NwYorkshireCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SwanseaCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DefaultCourtListWrapperTest {
+class ApplicantLocalCourtValidatorTest {
 
     @ParameterizedTest
     @MethodSource
-    void testIsAnyCourtSelected(String courtId, boolean expected) {
-        DefaultCourtListWrapper wrapper = new DefaultCourtListWrapper();
-        wrapper.setCourt(courtId, false);
+    void testValidate(String courtId, boolean expectedValid) {
+        DefaultCourtListWrapper courtList = new DefaultCourtListWrapper();
+        courtList.setCourt(courtId, false);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .regionWrapper(RegionWrapper.builder()
+                .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
+                    .courtListWrapper(courtList)
+                    .build())
+                .build())
+            .build();
 
-        assertThat(wrapper.isAnyCourtSelected()).isEqualTo(expected);
+        ApplicantLocalCourtValidator validator = new ApplicantLocalCourtValidator();
+        List<String> validationErrors = validator.validate(caseData);
+
+        if (expectedValid) {
+            assertThat(validationErrors).isEmpty();
+        } else {
+            assertThat(validationErrors.size()).isEqualTo(1);
+            assertThat(validationErrors.get(0)).isEqualTo(
+                "Applicant's Local Court is required. Update Please choose the Region in which the Applicant resides");
+        }
     }
 
-    private static Stream<Arguments> testIsAnyCourtSelected() {
+    private static Stream<Arguments> testValidate() {
         return Stream.of(
             Arguments.of("Not a valid court id", false),
             Arguments.of(NottinghamCourt.CHESTERFIELD_COUNTY_COURT.getId(), true),
@@ -62,5 +83,4 @@ class DefaultCourtListWrapperTest {
             Arguments.of(HighCourt.HIGHCOURT_COURT.getId(), true)
         );
     }
-
 }

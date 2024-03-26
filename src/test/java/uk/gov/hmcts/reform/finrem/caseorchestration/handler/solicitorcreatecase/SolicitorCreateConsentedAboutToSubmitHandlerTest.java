@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -17,6 +18,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -42,6 +47,8 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
     @Mock
     private CaseFlagsService caseFlagsService;
 
+    @Mock
+    private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     @Test
     void given_case_whenEvent_type_is_solicitorCreate_thenCanHandle() {
@@ -69,6 +76,8 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(idamService.isUserRoleAdmin(any())).thenReturn(false);
         when(consentOrderService.getLatestConsentOrderData(any(FinremCallbackRequest.class))).thenReturn(caseDocument());
+        when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(Collections.emptyList());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -85,6 +94,8 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         when(consentOrderService.getLatestConsentOrderData(any(FinremCallbackRequest.class))).thenReturn(caseDocument());
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(idamService.isUserRoleAdmin(any())).thenReturn(true);
+        when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(Collections.emptyList());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -93,6 +104,18 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         verify(idamService).isUserRoleAdmin(any());
         verify(consentOrderService).getLatestConsentOrderData(any(FinremCallbackRequest.class));
         verify(caseFlagsService).setCaseFlagInformation(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    void givenCase_whenMandatoryDataValidationFails_thenReturnsErrors() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(List.of("Validation failed"));
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors().size()).isEqualTo(1);
+        assertThat(response.getErrors().get(0)).isEqualTo("Validation failed");
+        assertThat(response.getData()).isNotNull();
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
