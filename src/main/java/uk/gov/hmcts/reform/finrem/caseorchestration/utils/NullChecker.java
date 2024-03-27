@@ -5,9 +5,13 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class NullChecker {
+
+    private NullChecker() {
+        // All access through static methods
+    }
+
     public static boolean anyNonNull(Object target) {
         return Arrays.stream(target.getClass().getDeclaredFields())
-            .peek(f -> f.setAccessible(true))
             .map(f -> getFieldValue(f, target))
             .anyMatch(Objects::nonNull);
     }

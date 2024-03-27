@@ -136,7 +136,7 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
             .thenReturn(List.of("Validation failed"));
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
-        Assertions.assertThat(response.getErrors().size()).isEqualTo(1);
+        Assertions.assertThat(response.getErrors()).hasSize(1);
         Assertions.assertThat(response.getErrors().get(0)).isEqualTo("Validation failed");
         Assertions.assertThat(response.getData()).isNotNull();
     }

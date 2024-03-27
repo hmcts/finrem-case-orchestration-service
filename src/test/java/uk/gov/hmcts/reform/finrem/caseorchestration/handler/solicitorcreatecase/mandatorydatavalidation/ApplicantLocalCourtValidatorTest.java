@@ -53,7 +53,7 @@ class ApplicantLocalCourtValidatorTest {
         if (expectedValid) {
             assertThat(validationErrors).isEmpty();
         } else {
-            assertThat(validationErrors.size()).isEqualTo(1);
+            assertThat(validationErrors).hasSize(1);
             assertThat(validationErrors.get(0)).isEqualTo(
                 "Applicant's Local Court is required. Update Please choose the Region in which the Applicant resides");
         }

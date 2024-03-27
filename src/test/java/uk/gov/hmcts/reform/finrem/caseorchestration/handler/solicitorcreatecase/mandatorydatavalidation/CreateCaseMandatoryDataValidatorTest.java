@@ -25,7 +25,6 @@ class CreateCaseMandatoryDataValidatorTest {
         CreateCaseMandatoryDataValidator validator = new CreateCaseMandatoryDataValidator(mandatoryDataValidators);
         List<String> validationErrors = validator.validate(caseData);
 
-        assertThat(validationErrors.size()).isEqualTo(3);
         assertThat(validationErrors).containsExactlyInAnyOrder("Validation Error 1", "Validation Error 2",
             "Validation Error 3");
     }
@@ -41,7 +40,6 @@ class CreateCaseMandatoryDataValidatorTest {
         CreateCaseMandatoryDataValidator validator = new CreateCaseMandatoryDataValidator(mandatoryDataValidators);
         List<String> validationErrors = validator.validate(caseData);
 
-        assertThat(validationErrors.size()).isEqualTo(1);
         assertThat(validationErrors).containsExactly("Validation Error 1");
     }
 
