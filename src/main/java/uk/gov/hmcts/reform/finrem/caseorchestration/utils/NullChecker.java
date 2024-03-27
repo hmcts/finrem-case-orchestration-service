@@ -10,8 +10,10 @@ public class NullChecker {
         // All access through static methods
     }
 
+    @SuppressWarnings({"java:S3011", "java:S3864"})
     public static boolean anyNonNull(Object target) {
         return Arrays.stream(target.getClass().getDeclaredFields())
+            .peek(f -> f.setAccessible(true))
             .map(f -> getFieldValue(f, target))
             .anyMatch(Objects::nonNull);
     }
