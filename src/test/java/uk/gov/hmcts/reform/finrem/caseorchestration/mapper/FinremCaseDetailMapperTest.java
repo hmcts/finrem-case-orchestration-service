@@ -422,7 +422,7 @@ class FinremCaseDetailMapperTest {
 
     private void assertMiam(FinremCaseData caseData) {
         MiamWrapper miamValues = caseData.getMiamWrapper();
-        List<MiamExemption> expectedMiamExemptions = new ArrayList<>(Arrays.asList(MiamExemption.values()));
+        List<MiamExemption> expectedMiamExemptions = List.of(MiamExemption.values());
         assertEquals(expectedMiamExemptions, miamValues.getMiamExemptionsChecklist());
         List<MiamDomesticViolence> expectedMiamDomesticAbuse = List.of(MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_1,
             MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_9,
