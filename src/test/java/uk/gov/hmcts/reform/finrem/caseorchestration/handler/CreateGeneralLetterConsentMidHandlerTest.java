@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
@@ -76,7 +77,7 @@ public class CreateGeneralLetterConsentMidHandlerTest {
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(generalLetterService).getCaseDataErrorsForCreatingPreviewOrFinalLetter(any(FinremCaseDetails.class));
         verify(generalLetterService).previewGeneralLetter(anyString(), any(FinremCaseDetails.class));
-        verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(generalLetterService).validateEncryptionOnUploadedDocuments(any(), any(), any());
     }
 
     @Test
@@ -87,7 +88,7 @@ public class CreateGeneralLetterConsentMidHandlerTest {
             .thenReturn(List.of("Address is missing for recipient type"));
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(generalLetterService, times(1)).getCaseDataErrorsForCreatingPreviewOrFinalLetter(any(FinremCaseDetails.class));
-        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(generalLetterService, never()).validateEncryptionOnUploadedDocuments(any(), any(), any());
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
@@ -102,7 +103,7 @@ public class CreateGeneralLetterConsentMidHandlerTest {
                     .postCode("AB1 1BC").build())
                 .generalLetterCreatedBy("Test")
                 .generalLetterBody("body")
-                .generalLetterUploadedDocument(TestSetUpUtils.caseDocument())
+                .generalLetterUploadedDocuments(List.of(DocumentCollection.builder().value(TestSetUpUtils.caseDocument()).build()))
                 .generalLetterPreview(CaseDocument.builder().build())
                 .build())
             .build();

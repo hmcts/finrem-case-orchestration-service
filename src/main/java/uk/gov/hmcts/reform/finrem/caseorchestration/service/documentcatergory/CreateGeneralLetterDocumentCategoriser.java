@@ -3,13 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
-import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
@@ -46,21 +46,38 @@ public class CreateGeneralLetterDocumentCategoriser extends DocumentCategoriser 
         log.info("Categorising general letter documents based on the recipient role for case with Case ID: {}",
             finremCaseData.getCcdCaseId());
         GeneralLetterWrapper wrapper = finremCaseData.getGeneralLetterWrapper();
-        List<GeneralLetterCollection> generalLetters = wrapper.getGeneralLetterCollection();
-        CaseDocument previewDocument = wrapper.getGeneralLetterPreview();
-        if (previewDocument != null && previewDocument.getCategoryId() == null) {
-            previewDocument.setCategoryId(
-                ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId());
-        }
-        if (generalLetters != null && !generalLetters.isEmpty()) {
-            for (GeneralLetterCollection generalLetter : generalLetters) {
-                CaseDocument generatedLetter = generalLetter.getValue().getGeneratedLetter();
-                if (generatedLetter != null && generatedLetter.getCategoryId() == null) {
-                    generatedLetter.setCategoryId(getGeneratedLetterCategoryId(
-                        wrapper.getGeneralLetterAddressee() != null ? wrapper.getGeneralLetterAddressee().getValue().getCode() : ""));
-                }
-            }
-        }
+        categorisePreviewDocument(wrapper);
+        categoriseGeneralLetters(wrapper);
+        categoriseUploadedDocuments(wrapper);
+    }
+
+    private void categorisePreviewDocument(GeneralLetterWrapper wrapper) {
+        Optional.ofNullable(wrapper.getGeneralLetterPreview())
+            .filter(previewDocument -> previewDocument.getCategoryId() == null)
+            .ifPresent(previewDocument -> previewDocument.setCategoryId(
+                ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL.getDocumentCategoryId()));
+    }
+
+    private void categoriseGeneralLetters(GeneralLetterWrapper wrapper) {
+        Optional.ofNullable(wrapper.getGeneralLetterCollection())
+            .ifPresent(generalLetters -> generalLetters.stream()
+                .map(GeneralLetterCollection::getValue)
+                .map(GeneralLetter::getGeneratedLetter)
+                .filter(generatedLetter -> generatedLetter.getCategoryId() == null)
+                .forEach(generatedLetter -> generatedLetter.setCategoryId(
+                    getGeneratedLetterCategoryId(getSelectedRoleCode(wrapper)))));
+    }
+
+    private void categoriseUploadedDocuments(GeneralLetterWrapper wrapper) {
+        Optional.ofNullable(wrapper.getGeneralLetterUploadedDocuments())
+            .ifPresent(uploadedDocuments -> uploadedDocuments.stream()
+                .filter(document -> document.getValue().getCategoryId() == null)
+                .forEach(document -> document.getValue().setCategoryId(
+                    getGeneratedLetterCategoryId(getSelectedRoleCode(wrapper)))));
+    }
+
+    private static String getSelectedRoleCode(GeneralLetterWrapper wrapper) {
+        return wrapper.getGeneralLetterAddressee() != null ? wrapper.getGeneralLetterAddressee().getValue().getCode() : "";
     }
 
     private String getGeneratedLetterCategoryId(String roleCode) {

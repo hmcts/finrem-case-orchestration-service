@@ -187,7 +187,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Test
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener1() {
         List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
+        documents.add(mapToBulkPrintDocument(
             convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener1-referdetails").build();
@@ -210,7 +210,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Test
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener2() {
         List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
+        documents.add(mapToBulkPrintDocument(
             convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener2-referdetails").build();
@@ -233,7 +233,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Test
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener3() {
         List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
+        documents.add(mapToBulkPrintDocument(
             convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener3-referdetails").build();
@@ -256,7 +256,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Test
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForIntervener4() {
         List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
+        documents.add(mapToBulkPrintDocument(
             convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener4-referdetails").build();
@@ -279,7 +279,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Test
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForApplicant() {
         List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
+        documents.add(mapToBulkPrintDocument(
             convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("applicant-referdetails").build();
@@ -298,7 +298,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Test
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrintedForRespondent() {
         List<BulkPrintDocument> documents = new ArrayList<>();
-        documents.add(getCaseDocumentAsBulkPrintDocument(
+        documents.add(mapToBulkPrintDocument(
             convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("respondent-referdetails").build();
@@ -339,7 +339,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         return objectMapper.convertValue(object, CaseDocument.class);
     }
 
-    private BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
+    private BulkPrintDocument mapToBulkPrintDocument(CaseDocument caseDocument) {
         return BulkPrintDocument.builder()
             .binaryFileUrl(caseDocument.getDocumentBinaryUrl())
             .fileName(caseDocument.getDocumentFilename())

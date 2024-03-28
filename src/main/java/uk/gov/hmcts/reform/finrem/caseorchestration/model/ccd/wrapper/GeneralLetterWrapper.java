@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
@@ -29,5 +30,6 @@ public class GeneralLetterWrapper {
     private String generalLetterBody;
     private CaseDocument generalLetterPreview;
     private CaseDocument generalLetterUploadedDocument;
+    private List<DocumentCollection> generalLetterUploadedDocuments;
     private List<GeneralLetterCollection> generalLetterCollection;
 }
