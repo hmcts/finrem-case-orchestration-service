@@ -1,6 +1,5 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -17,6 +18,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -32,7 +37,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 class SolicitorCreateConsentedAboutToSubmitHandlerTest {
 
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
-    private static final String APPROVE_ORDER_VALID_JSON = "/fixtures/pba-validate.json";
 
     @InjectMocks
     private SolicitorCreateConsentedAboutToSubmitHandler handler;
@@ -43,7 +47,8 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
     @Mock
     private CaseFlagsService caseFlagsService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Mock
+    private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     @Test
     void given_case_whenEvent_type_is_solicitorCreate_thenCanHandle() {
@@ -71,6 +76,8 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(idamService.isUserRoleAdmin(any())).thenReturn(false);
         when(consentOrderService.getLatestConsentOrderData(any(FinremCallbackRequest.class))).thenReturn(caseDocument());
+        when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(Collections.emptyList());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -87,6 +94,8 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         when(consentOrderService.getLatestConsentOrderData(any(FinremCallbackRequest.class))).thenReturn(caseDocument());
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(idamService.isUserRoleAdmin(any())).thenReturn(true);
+        when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(Collections.emptyList());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -95,6 +104,18 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         verify(idamService).isUserRoleAdmin(any());
         verify(consentOrderService).getLatestConsentOrderData(any(FinremCallbackRequest.class));
         verify(caseFlagsService).setCaseFlagInformation(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    void givenCase_whenMandatoryDataValidationFails_thenReturnsErrors() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(List.of("Validation failed"));
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).hasSize(1);
+        assertThat(response.getErrors().get(0)).isEqualTo("Validation failed");
+        assertThat(response.getData()).isNotNull();
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

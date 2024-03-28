@@ -1,9 +1,12 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -15,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallbackHandler {
@@ -22,15 +27,18 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
     private final CaseFlagsService caseFlagsService;
+    private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     public SolicitorCreateConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                 ConsentOrderService consentOrderService,
-                                                 IdamService idamService,
-                                                 CaseFlagsService caseFlagsService) {
+                                                        ConsentOrderService consentOrderService,
+                                                        IdamService idamService,
+                                                        CaseFlagsService caseFlagsService,
+                                                        CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator) {
         super(finremCaseDetailsMapper);
         this.consentOrderService = consentOrderService;
         this.idamService = idamService;
         this.caseFlagsService = caseFlagsService;
+        this.createCaseMandatoryDataValidator = createCaseMandatoryDataValidator;
     }
 
     @Override
@@ -47,6 +55,13 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
         log.info("Invoking contested event {} about to start callback for Case ID: {}",
             EventType.SOLICITOR_CREATE, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
+
+        List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
+        if (!mandatoryDataErrors.isEmpty()) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .errors(mandatoryDataErrors)
+                .data(caseData).build();
+        }
 
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.setLatestConsentOrder(caseDocument);

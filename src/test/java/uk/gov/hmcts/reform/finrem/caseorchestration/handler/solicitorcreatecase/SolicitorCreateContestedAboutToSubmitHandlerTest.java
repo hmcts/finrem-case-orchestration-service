@@ -1,5 +1,6 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,6 +9,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -24,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +60,9 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     @Mock
     UpdateRepresentationWorkflowService representationWorkflowService;
 
+    @Mock
+    CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
+
     @Before
     public void setup() {
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
@@ -63,7 +70,8 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
             onlineFormDocumentService,
             caseFlagsService,
             idamService,
-            representationWorkflowService);
+            representationWorkflowService,
+            createCaseMandatoryDataValidator);
     }
 
     @Test
@@ -92,6 +100,8 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(true);
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(anyString(),
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
+        when(createCaseMandatoryDataValidator.validate(finremCallbackRequest.getCaseDetails().getData()))
+            .thenReturn(Collections.emptyList());
 
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
@@ -109,12 +119,26 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(false);
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(anyString(),
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
+        when(createCaseMandatoryDataValidator.validate(finremCallbackRequest.getCaseDetails().getData()))
+            .thenReturn(Collections.emptyList());
 
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedNonAdminResponseCaseData(responseCaseData);
 
         verify(representationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
+    }
+
+    @Test
+    public void givenCase_whenMandatoryDataValidationFails_thenReturnsErrors() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(List.of("Validation failed"));
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        Assertions.assertThat(response.getErrors()).hasSize(1);
+        Assertions.assertThat(response.getErrors().get(0)).isEqualTo("Validation failed");
+        Assertions.assertThat(response.getData()).isNotNull();
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
