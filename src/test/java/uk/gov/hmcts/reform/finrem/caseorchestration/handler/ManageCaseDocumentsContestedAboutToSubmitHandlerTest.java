@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applic
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentFdrDocumentCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentQuestionnairesAnswersHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.validation.ManageDocumentsHandlerValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.time.LocalDateTime;
@@ -57,8 +56,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     private UploadedDocumentService uploadedDocumentHelper;
     @Mock
     private EvidenceManagementDeleteService evidenceManagementDeleteService;
-    @Mock
-    private ManageDocumentsHandlerValidator manageDocumentsHandlerValidator;
     @Mock
     private FeatureToggleService featureToggleService;
 

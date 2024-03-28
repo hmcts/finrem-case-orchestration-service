@@ -335,14 +335,26 @@ public class CCDConfigValidator {
     }
 
     private static Field[] getAllDeclaredFields(Class<?> frClass) {
+        List<Field[]> fields = new ArrayList<>();
+        fields.add(frClass.getDeclaredFields());
+        fields.add(getJsonUnwrappedFields(frClass));
+
         if (frClass.getSuperclass() != null) {
-            return Stream.of(frClass.getDeclaredFields(), getAllDeclaredFields(frClass.getSuperclass()))
-                .flatMap(Stream::of)
-                .toArray(Field[]::new);
+            fields.add(getAllDeclaredFields(frClass.getSuperclass()));
         }
-        return frClass.getDeclaredFields();
+
+        return fields.stream()
+            .flatMap(Stream::of)
+            .toArray(Field[]::new);
     }
 
+    private static Field[] getJsonUnwrappedFields(Class<?> clazz) {
+        return Arrays.stream(clazz.getDeclaredFields())
+            .filter(f -> f.isAnnotationPresent(JsonUnwrapped.class))
+            .map(f -> f.getType().getDeclaredFields())
+            .flatMap(Stream::of)
+            .toArray(Field[]::new);
+    }
 
     private List<String> validateFixedListCaseField(List<Sheet> fixedListSheets, CcdFieldAttributes ccdFieldAttributes, Field field) {
 

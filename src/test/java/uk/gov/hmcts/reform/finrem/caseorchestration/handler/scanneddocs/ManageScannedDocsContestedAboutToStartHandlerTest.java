@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.scanneddocs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -11,9 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ManageScannedDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +24,6 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertNotNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 public class ManageScannedDocsContestedAboutToStartHandlerTest {
@@ -72,21 +74,39 @@ public class ManageScannedDocsContestedAboutToStartHandlerTest {
                     .documentFilename(documentFilename)
                     .build())
                 .build()).build())).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(finremCaseDetails).build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertNotNull(response.getData().getManageScannedDocumentCollection());
-        assertThat(response.getData().getManageScannedDocumentCollection(), hasSize(1));
-        assertThat(response.getData().getManageScannedDocumentCollection().get(0).getUploadCaseDocument().getFileName(), is(fileName));
-        assertThat(response.getData().getManageScannedDocumentCollection().get(0).getUploadCaseDocument().getScannedDate(), is(scannedDate));
-        assertThat(response.getData().getManageScannedDocumentCollection().get(0).getUploadCaseDocument().getCaseDocuments().getDocumentUrl(),
-            is(documentUrl));
-        assertThat(response.getData().getManageScannedDocumentCollection().get(0).getUploadCaseDocument().getCaseDocuments().getDocumentBinaryUrl(),
-            is(documentBinaryUrl));
-        assertThat(response.getData().getManageScannedDocumentCollection().get(0).getUploadCaseDocument().getCaseDocuments().getDocumentFilename(),
-            is(documentFilename));
+        List<ManageScannedDocumentCollection> collection = response.getData().getManageScannedDocumentCollection();
+        assertThat(collection, hasSize(1));
+        assertThat(collection.get(0).getManageScannedDocument().getSelectForUpdate(), is(YesOrNo.NO));
+        UploadCaseDocument uploadCaseDocument = collection.get(0).getManageScannedDocument().getUploadCaseDocument();
+        assertThat(uploadCaseDocument.getFileName(), is(fileName));
+        assertThat(uploadCaseDocument.getScannedDate(), is(scannedDate));
+        assertThat(uploadCaseDocument.getCaseDocuments().getDocumentUrl(), is(documentUrl));
+        assertThat(uploadCaseDocument.getCaseDocuments().getDocumentBinaryUrl(), is(documentBinaryUrl));
+        assertThat(uploadCaseDocument.getCaseDocuments().getDocumentFilename(), is(documentFilename));
+    }
 
+    @Test
+    public void givenScannedDocWithNoFileExists_whenEventIsManageScannedDocument_thenReturnsError() {
+        ScannedDocumentCollection scannedDocumentCollection = ScannedDocumentCollection.builder()
+            .value(ScannedDocument.builder()
+                .scannedDate(LocalDateTime.of(2020, 1, 1, 1, 1))
+                .fileName("file.pdf")
+                .build()
+            )
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .scannedDocuments(List.of(scannedDocumentCollection))
+            .build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors(), hasSize(1));
+        assertThat(response.getErrors().get(0),
+            is("A scanned document record exists that is missing a file. Please amend this in Attach scanned docs"));
     }
 }
