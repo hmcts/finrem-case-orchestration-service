@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.generalapplication.GeneralApplicationRejectionLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -23,6 +24,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -61,6 +64,8 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
     @Mock
     LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper;
 
+    @Mock
+    InternationalPostalService postalService;
     @InjectMocks
     GeneralApplicationRejectionLetterGenerator generalApplicationRejectionLetterGenerator;
 
@@ -105,13 +110,14 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
 
 
         generalApplicationRejectionLetterGenerator =
-            new GeneralApplicationRejectionLetterGenerator(new ObjectMapper(), caseDataService, documentHelper, letterAddresseeGeneratorMapper);
+            new GeneralApplicationRejectionLetterGenerator(new ObjectMapper(), caseDataService,
+                documentHelper, letterAddresseeGeneratorMapper, postalService);
     }
 
     @Test
     public void givenApplicantRecipient_whenGenerateGeneralApplicationRejectionLetterDetails_thenGenerateCorrectDetails() {
         caseDetails.getData().put(APPLICANT_REPRESENTED, NO_VALUE);
-        when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn("50 Applicant Street");
+        when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn("50 Applicant Street");
         when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
             AddresseeDetails.builder().addresseeName("Poor Guy")
                 .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(APPLICANT_ADDRESS), Map.class)).build());
@@ -129,6 +135,8 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         assertThat(letterDetails.getRespondentName(), is("Contested Respondent"));
         assertThat(letterDetails.getCaseNumber(), is("1234567890"));
         assertThat(letterDetails.getGeneralApplicationRejectionReason(), is("Test rejection reason"));
+        verify(postalService).isRecipientResideOutsideOfUK(caseDetails.getData(),
+            DocumentHelper.PaperNotificationRecipient.APPLICANT.toString());
     }
 
     @Test
@@ -136,7 +144,7 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         caseDetails.getData().put(APPLICANT_REPRESENTED, YES_VALUE);
         caseDetails.getData().put(CONTESTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
 
-        when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn("50 Applicant Solicitor Street");
+        when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn("50 Applicant Solicitor Street");
         when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
             AddresseeDetails.builder().addresseeName(TEST_SOLICITOR_NAME)
                 .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(CONTESTED_SOLICITOR_ADDRESS), Map.class)).build());
@@ -147,13 +155,15 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         assertThat(letterDetails.getAddressee().getName(), is(TEST_SOLICITOR_NAME));
         assertThat(letterDetails.getAddressee().getFormattedAddress(), containsString("50 Applicant Solicitor Street"));
         assertThat(letterDetails.getReference(), is("testSolReference"));
+        verify(postalService).isRecipientResideOutsideOfUK(caseDetails.getData(),
+            DocumentHelper.PaperNotificationRecipient.APPLICANT.toString());
     }
 
     @Test
     public void givenRespondentRecipient_whenGenerateGeneralApplicationRejectionLetterDetails_thenGenerateCorrectDetails() {
         caseDetails.getData().put(CONTESTED_RESPONDENT_REPRESENTED, NO_VALUE);
 
-        when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn("50 Respondent Street");
+        when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn("50 Respondent Street");
         when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(
             AddresseeDetails.builder().addresseeName("Contested Respondent")
                 .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(RESPONDENT_ADDRESS), Map.class)).build());
@@ -164,6 +174,8 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         assertThat(letterDetails.getAddressee().getName(), is("Contested Respondent"));
         assertThat(letterDetails.getAddressee().getFormattedAddress(), containsString("50 Respondent Street"));
         assertThat(letterDetails.getReference(), is(""));
+        verify(postalService).isRecipientResideOutsideOfUK(caseDetails.getData(),
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT.toString());
     }
 
     @Test
@@ -171,7 +183,7 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         caseDetails.getData().put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
         caseDetails.getData().put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
 
-        when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn("50 Respondent Solicitor Street");
+        when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn("50 Respondent Solicitor Street");
         when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(
             AddresseeDetails.builder().addresseeName(TEST_RESP_SOLICITOR_NAME)
                 .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(RESP_SOLICITOR_ADDRESS), Map.class)).build());
@@ -182,5 +194,7 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         assertThat(letterDetails.getAddressee().getName(), is(TEST_RESP_SOLICITOR_NAME));
         assertThat(letterDetails.getAddressee().getFormattedAddress(), containsString("50 Respondent Solicitor Street"));
         assertThat(letterDetails.getReference(), is("testRespSolReference"));
+        verify(postalService).isRecipientResideOutsideOfUK(caseDetails.getData(),
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT.toString());
     }
 }

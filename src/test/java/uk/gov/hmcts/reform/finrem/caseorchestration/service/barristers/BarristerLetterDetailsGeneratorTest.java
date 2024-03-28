@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -55,6 +57,9 @@ public class BarristerLetterDetailsGeneratorTest {
     @Mock
     private PrdOrganisationService prdOrganisationService;
 
+    @Mock
+    private InternationalPostalService postalService;
+
     @InjectMocks
     private BarristerLetterDetailsGenerator barristerLetterDetailsGenerator;
 
@@ -73,7 +78,7 @@ public class BarristerLetterDetailsGeneratorTest {
 
     @Test
     public void givenApplicant_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(APP_FORMATTED_ADDRESS);
+        when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn(APP_FORMATTED_ADDRESS);
         when(prdOrganisationService.findOrganisationByOrgId(APP_BARR_ORG_ID))
             .thenReturn(organisationsResponse(APP_BARR_ORG_NAME));
 
@@ -92,7 +97,7 @@ public class BarristerLetterDetailsGeneratorTest {
 
     @Test
     public void givenRespondent_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(RESP_FORMATTED_ADDRESS);
+        when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn(RESP_FORMATTED_ADDRESS);
         when(prdOrganisationService.findOrganisationByOrgId(RESP_BARR_ORG_ID))
             .thenReturn(organisationsResponse(RESP_BARR_ORG_NAME));
 

@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -318,6 +319,61 @@ public class IntervenerServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenContestedCase_whenUpdatingIntervener1AndChangedRepresetationYesToNoAndCountryNotProvided_thenShowError() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
+            Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
+        ).build();
+        IntervenerOne oneWrapper = IntervenerOne
+            .builder().intervenerName("One name").intervenerEmail("test@test.com")
+            .intervenerSolEmail("test@test.com")
+            .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
+            .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
+            .intervenerRepresented(YesOrNo.YES)
+            .intervenerDateAdded(LocalDate.of(2023, 1, 1))
+            .intervenerOrganisation(organisationPolicy).build();
+        finremCaseDataBefore.setIntervenerOne(oneWrapper);
+
+        IntervenerOne oneWrapper1 = IntervenerOne
+            .builder().intervenerName("One name").intervenerEmail("test@test.com")
+            .intervenerRepresented(YesOrNo.NO)
+            .intervenerResideOutsideUK(YesOrNo.YES)
+            .intervenerDateAdded(LocalDate.of(2023, 1, 1))
+            .intervenerOrganisation(organisationPolicy).build();
+        finremCaseData.setIntervenerOne(oneWrapper1);
+
+
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
+        finremCaseData.getIntervenersList().setValue(option1);
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        List<String> errors = new ArrayList<>();
+        IntervenerChangeDetails intervenerChangeDetails = service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
+
+        IntervenerOne intervenerOneWrapper = finremCaseData.getIntervenerOne();
+
+        assertNotNull(intervenerOneWrapper.getIntervenerDateAdded());
+        assertNull(intervenerOneWrapper.getIntervenerSolEmail());
+        assertNull(intervenerOneWrapper.getIntervenerSolName());
+        assertNull(intervenerOneWrapper.getIntervenerSolPhone());
+        assertNull(intervenerOneWrapper.getIntervenerSolicitorFirm());
+        assertNull(intervenerOneWrapper.getIntervenerSolicitorReference());
+        assertNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID());
+        assertNull(intervenerOneWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationName());
+        verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
+            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        assertFalse(errors.isEmpty());
+        assertTrue(errors.contains("If intervener resides outside of UK, please provide the country of residence."));
+    }
+
+    @Test
     public void givenContestedCase_whenUpdatingIntervener1AndChangedRepresetationYesToNo_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
@@ -339,6 +395,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
+            .intervenerAddress(Address.builder().addressLine1("1 London Road").build())
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerOne(oneWrapper1);
 
@@ -565,6 +622,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
+            .intervenerAddress(Address.builder().addressLine1("1 London Road").build())
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerOne(oneWrapper);
 
@@ -593,6 +651,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         IntervenerTwo wrapper = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
+            .intervenerAddress(Address.builder().addressLine1("1 London Road").build())
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerTwo(wrapper);
 
@@ -668,6 +727,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
+            .intervenerAddress(Address.builder().addressLine1("1 London Road").build())
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerTwo(current);
 
@@ -888,6 +948,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         IntervenerThree wrapper = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
+            .intervenerAddress(Address.builder().addressLine1("1 London Road").build())
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerThree(wrapper);
 
@@ -963,6 +1024,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         IntervenerThree current = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
+            .intervenerAddress(Address.builder().addressLine1("1 London Road").build())
             .intervenerRepresented(YesOrNo.NO)
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerThree(current);
@@ -1185,6 +1247,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         IntervenerFour wrapper = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
+            .intervenerAddress(Address.builder().addressLine1("1 London Road").build())
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerFour(wrapper);
 
@@ -1261,6 +1324,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
+            .intervenerAddress(Address.builder().addressLine1("1 London Road").build())
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerFour(current);
 
@@ -1304,6 +1368,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
             .intervenerRepresented(YesOrNo.NO)
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
+            .intervenerAddress(Address.builder().addressLine1("1 London Road").build())
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseDataBefore.setIntervenerFour(wrapper);
 

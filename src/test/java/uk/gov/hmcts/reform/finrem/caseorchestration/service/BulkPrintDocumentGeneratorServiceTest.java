@@ -53,7 +53,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
         when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
             .thenReturn(new SendLetterResponse(randomId));
 
-        UUID letterId = service.send(getBulkPrintRequest(), APPLICANT, singletonList("abc".getBytes()));
+        UUID letterId = service.send(getBulkPrintRequest(), APPLICANT, true, singletonList("abc".getBytes()));
         assertThat(letterId, is(equalTo(randomId)));
     }
 
@@ -63,7 +63,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
     public void throwsException() {
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
         thrown.expect(RuntimeException.class);
-        service.send(getBulkPrintRequest(), APPLICANT, singletonList("abc".getBytes()));
+        service.send(getBulkPrintRequest(), APPLICANT, true, singletonList("abc".getBytes()));
         verifyNoInteractions(sendLetterApi);
     }
 
@@ -76,7 +76,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
             .thenThrow(new RuntimeException());
 
         thrown.expect(RuntimeException.class);
-        service.send(getBulkPrintRequest(), APPLICANT, singletonList("abc".getBytes()));
+        service.send(getBulkPrintRequest(), APPLICANT, true, singletonList("abc".getBytes()));
         verify(authTokenGenerator).generate();
     }
 

@@ -11,11 +11,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
@@ -30,7 +32,7 @@ public class RespondentAddresseeGeneratorTest {
     protected static final String CONSENTED_RESPONDENT_LAST_NAME_VALUE = "Consented Respondent last name";
     protected static final String CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME_VALUE = "Contested Respondent first middle name";
     protected static final String CONTESTED_RESPONDENT_LAST_NAME_VALUE = "Contested Respondent last name";
-    protected static final Map RESPONDENT_ADDRESS_VALUE = Map.of("AddressLine1", "Consented address line 1");
+    protected static final Map<String, Object> RESPONDENT_ADDRESS_VALUE = Map.of("AddressLine1", "Consented address line 1");
     protected static final String FORMATTED_ADDRESS = "formattedAddress";
     protected static final String CONTESTED_FULL_NAME = "contestedFullName";
     protected static final String CONSESNED_FULL_NAME = "consentedFullName";
@@ -39,6 +41,8 @@ public class RespondentAddresseeGeneratorTest {
     private CaseDataService caseDataService;
     @Mock
     private DocumentHelper documentHelper;
+    @Mock
+    private InternationalPostalService postalService;
 
     @InjectMocks
     RespondentAddresseeGenerator respondentAddresseeGenerator;
@@ -60,14 +64,15 @@ public class RespondentAddresseeGeneratorTest {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
         when(caseDataService.buildFullName(caseData, CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, CONTESTED_RESPONDENT_LAST_NAME)).thenReturn(
             CONTESTED_FULL_NAME);
-        when(documentHelper.formatAddressForLetterPrinting(RESPONDENT_ADDRESS_VALUE)).thenReturn(FORMATTED_ADDRESS);
+
+        when(documentHelper.formatAddressForLetterPrinting(RESPONDENT_ADDRESS_VALUE, false)).thenReturn(FORMATTED_ADDRESS);
 
         Addressee addressee = respondentAddresseeGenerator.generate(caseDetails,
             ChangedRepresentative.builder().build(), "respondent");
 
         assertThat(addressee.getName(), is(CONTESTED_FULL_NAME));
         assertThat(addressee.getFormattedAddress(), is(FORMATTED_ADDRESS));
-
+        verify(postalService).isRespondentResideOutsideOfUK(caseData);
     }
 
     @Test
@@ -76,7 +81,7 @@ public class RespondentAddresseeGeneratorTest {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.TRUE);
         when(caseDataService.buildFullName(caseData, CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME)).thenReturn(
             CONSESNED_FULL_NAME);
-        when(documentHelper.formatAddressForLetterPrinting(RESPONDENT_ADDRESS_VALUE)).thenReturn(FORMATTED_ADDRESS);
+        when(documentHelper.formatAddressForLetterPrinting(RESPONDENT_ADDRESS_VALUE, false)).thenReturn(FORMATTED_ADDRESS);
 
         Addressee addressee = respondentAddresseeGenerator.generate(caseDetails,
             ChangedRepresentative.builder().build(),
@@ -84,6 +89,6 @@ public class RespondentAddresseeGeneratorTest {
 
         assertThat(addressee.getName(), is(CONSESNED_FULL_NAME));
         assertThat(addressee.getFormattedAddress(), is(FORMATTED_ADDRESS));
-
+        verify(postalService).isRespondentResideOutsideOfUK(caseData);
     }
 }

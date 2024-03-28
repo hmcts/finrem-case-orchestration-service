@@ -50,8 +50,8 @@ public class GenerateCoverSheetService {
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
-
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final InternationalPostalService postalService;
 
     /**
      * No Return.
@@ -70,7 +70,9 @@ public class GenerateCoverSheetService {
             caseDataService.isConsentedApplication(caseDetails) ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS,
             caseDataService.isConsentedApplication(caseDetails) ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME,
             APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME,
-            caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData()));
+            caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData()),
+            postalService.isApplicantResideOutsideOfUK(caseDetails.getData())
+            );
     }
 
     public CaseDocument generateApplicantCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
@@ -97,7 +99,8 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, RESPONDENT_ADDRESS, RESP_SOLICITOR_ADDRESS, RESP_SOLICITOR_NAME,
             isConsented ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
             isConsented ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME,
-            caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()));
+            caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()),
+            postalService.isRespondentResideOutsideOfUK(caseDetails.getData()));
     }
 
     public CaseDocument generateRespondentCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
@@ -151,13 +154,22 @@ public class GenerateCoverSheetService {
     private CaseDocument generateCoverSheet(CaseDetails caseDetails, String authorisationToken, String partyAddressCcdFieldName,
                                             String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
                                             String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
-                                            boolean isRepresentedByASolicitor) {
+                                            boolean isRepresentedByASolicitor,
+                                            boolean isInternational) {
 
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        prepareCoverSheet(caseDetailsCopy, partyAddressCcdFieldName, solicitorAddressCcdFieldName, solicitorNameCcdFieldName,
-            partyFirstMiddleNameCcdFieldName, partyLastNameCcdFieldName, isRepresentedByASolicitor);
+        prepareCoverSheet(
+            new Coversheet(caseDetailsCopy,
+                partyAddressCcdFieldName,
+                solicitorAddressCcdFieldName,
+                solicitorNameCcdFieldName,
+                partyFirstMiddleNameCcdFieldName,
+                partyLastNameCcdFieldName,
+                isRepresentedByASolicitor,
+                isInternational));
 
-        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy, documentConfiguration.getBulkPrintTemplate(),
+        return genericDocumentService.generateDocument(authorisationToken,
+            caseDetailsCopy, documentConfiguration.getBulkPrintTemplate(),
             documentConfiguration.getBulkPrintFileName());
     }
 
@@ -173,52 +185,50 @@ public class GenerateCoverSheetService {
             caseDetails.getId().toString());
     }
 
-    /**
-     * No Return.
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails, String partyAddressCcdFieldName,
-     *                                    String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
-     *                                    String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
-     *                                    boolean isRepresentedByASolicitor}
-     */
+    @SuppressWarnings("java:S1123")
     @Deprecated(since = "15-june-2023")
-    private void prepareCoverSheet(CaseDetails caseDetails, String partyAddressCcdFieldName,
-                                   String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
-                                   String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
-                                   boolean isRepresentedByASolicitor) {
-        Map<String, Object> caseData = caseDetails.getData();
-        AddressFoundInCaseData addressFoundInCaseData = checkAddress(caseData, partyAddressCcdFieldName, solicitorAddressCcdFieldName,
-            isRepresentedByASolicitor);
+    private void prepareCoverSheet(Coversheet coversheet) {
+        Map<String, Object> caseData = coversheet.caseDetails().getData();
+        AddressFoundInCaseData addressFoundInCaseData = checkAddress(caseData,
+            coversheet.partyAddressCcdFieldName(),
+            coversheet.solicitorAddressCcdFieldName(),
+            coversheet.isRepresentedByASolicitor());
 
         if (addressFoundInCaseData == AddressFoundInCaseData.NONE) {
-            String offendingCcdField = isRepresentedByASolicitor ? solicitorAddressCcdFieldName : partyAddressCcdFieldName;
+            String offendingCcdField = coversheet.isRepresentedByASolicitor()
+                ? coversheet.solicitorAddressCcdFieldName() : coversheet.partyAddressCcdFieldName();
             log.info("Case {} address field {} needs to contain "
-                + "both first line of address and postcode", caseDetails.getId(), offendingCcdField);
+                + "both first line of address and postcode", coversheet.caseDetails().getId(), offendingCcdField);
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "CCD address field " + offendingCcdField
                 + " needs to contain both first line of address and postcode");
         } else {
             boolean sendToSolicitor = addressFoundInCaseData == AddressFoundInCaseData.SOLICITOR;
 
             Addressee addressee =
-                buildAddressee(partyAddressCcdFieldName, solicitorAddressCcdFieldName, solicitorNameCcdFieldName, partyFirstMiddleNameCcdFieldName,
-                    partyLastNameCcdFieldName, caseData, sendToSolicitor);
+                buildAddressee(coversheet.partyAddressCcdFieldName(),
+                    coversheet.solicitorAddressCcdFieldName(),
+                    coversheet.solicitorNameCcdFieldName(),
+                    coversheet.partyFirstMiddleNameCcdFieldName(),
+                    coversheet.partyLastNameCcdFieldName(),
+                    caseData, sendToSolicitor,
+                    coversheet.isInternational());
             caseData.put(ADDRESSEE, addressee);
             caseData.put(COURT_CONTACT_DETAILS, formatCtscContactDetailsForCoversheet());
-            caseData.put(CASE_NUMBER, CaseDataService.nullToEmpty(caseDetails.getId()));
+            caseData.put(CASE_NUMBER, CaseDataService.nullToEmpty(coversheet.caseDetails().getId()));
         }
     }
 
+    @SuppressWarnings("java:S107")
     private Addressee buildAddressee(String partyAddressCcdFieldName, String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
                                      String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName, Map<String, Object> caseData,
-                                     boolean sendToSolicitor) {
+                                     boolean sendToSolicitor, boolean isInternational) {
         return Addressee.builder()
             .name(sendToSolicitor
                 ? (String) caseData.get(solicitorNameCcdFieldName)
                 : partyName(caseData.get(partyFirstMiddleNameCcdFieldName), caseData.get(partyLastNameCcdFieldName)))
             .formattedAddress(documentHelper.formatAddressForLetterPrinting(sendToSolicitor
-                ? (Map) caseData.get(solicitorAddressCcdFieldName)
-                : (Map) caseData.get(partyAddressCcdFieldName)))
+                    ? (Map) caseData.get(solicitorAddressCcdFieldName)
+                    : (Map) caseData.get(partyAddressCcdFieldName), isInternational))
             .build();
     }
 

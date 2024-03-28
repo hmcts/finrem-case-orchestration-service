@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -105,7 +106,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTes
     NotificationRequestMapper.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class,
     EvidenceManagementDownloadService.class, LetterAddresseeGeneratorMapper.class, ApplicantLetterAddresseeGenerator.class,
     RespondentLetterAddresseeGenerator.class, IntervenerOneLetterAddresseeGenerator.class, IntervenerTwoLetterAddresseeGenerator.class,
-    IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class})
+    IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class,
+    InternationalPostalService.class})
 public class ManageBarristersITest implements IntegrationTest {
 
     private static final String SERVICE_AUTH_TOKEN = "serviceAuth";
@@ -157,6 +159,8 @@ public class ManageBarristersITest implements IntegrationTest {
     private EvidenceManagementDownloadService evidenceManagementDownloadService;
     @Captor
     private ArgumentCaptor<NotificationRequest> notificationRequestArgumentCaptor;
+    @MockBean
+    private InternationalPostalService postalService;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
@@ -255,6 +259,7 @@ public class ManageBarristersITest implements IntegrationTest {
 
         assertNotNull(response.getBody());
         assertThat(response.getBody().getErrors().get(0), is("Barrister is already representing another party on this case"));
+        postalService.isRecipientResideOutsideOfUK(request.getCaseDetails().getData(), "APPLICANT");
     }
 
     @Test

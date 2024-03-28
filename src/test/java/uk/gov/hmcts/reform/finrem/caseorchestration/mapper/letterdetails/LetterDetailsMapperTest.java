@@ -149,7 +149,7 @@ public class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
     private Addressee getAddressee(String name, String addressLine1) {
         return Addressee.builder()
             .name(name)
-            .formattedAddress(formatAddressForLetterPrinting(getAddress(addressLine1)))
+            .formattedAddress(formatAddressForLetterPrinting(getAddress(addressLine1), false))
             .build();
     }
 

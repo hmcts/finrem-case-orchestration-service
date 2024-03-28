@@ -35,6 +35,7 @@ public class ContactDetailsWrapper {
     @JsonProperty("applicantLName")
     private String applicantLname;
     private Address applicantAddress;
+    private YesOrNo applicantResideOutsideUK;
     private String applicantPhone;
     private String applicantEmail;
     @JsonProperty("applicantAddressConfidential")
@@ -60,6 +61,7 @@ public class ContactDetailsWrapper {
     @JsonProperty("rSolicitorDXnumber")
     private String respondentSolicitorDxNumber;
     private Address respondentAddress;
+    private YesOrNo respondentResideOutsideUK;
     private String respondentPhone;
     private String respondentEmail;
     @JsonProperty("respondentAddressConfidential")

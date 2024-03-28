@@ -201,7 +201,7 @@ class AddresseeGeneratorHelperTest {
             Line2
             County""";
 
-        assertEquals(expectedFormattedAddress, AddresseeGeneratorHelper.formatAddressForLetterPrinting(toFormat));
+        assertEquals(expectedFormattedAddress, AddresseeGeneratorHelper.formatAddressForLetterPrinting(toFormat, false));
     }
 
     @Test

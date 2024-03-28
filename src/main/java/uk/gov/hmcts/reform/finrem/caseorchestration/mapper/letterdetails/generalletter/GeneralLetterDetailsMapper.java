@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -13,13 +14,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListW
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -39,8 +38,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Component
 public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
 
-    public GeneralLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+    private final DocumentHelper documentHelper;
+    private final InternationalPostalService postalService;
+
+    public GeneralLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper,
+                                      ObjectMapper objectMapper,
+                                      DocumentHelper documentHelper,
+                                      InternationalPostalService postalService) {
         super(courtDetailsMapper, objectMapper);
+        this.documentHelper = documentHelper;
+        this.postalService = postalService;
     }
 
     @Override
@@ -60,27 +67,17 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
     }
 
     private Addressee getAddressee(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        String generalLetterAddressee = data.getGeneralLetterWrapper().getGeneralLetterAddressee().getValue().getCode();
+        boolean recipientResideOutsideOfUK = postalService.isRecipientResideOutsideOfUK(data, generalLetterAddressee);
         return Addressee.builder()
                 .name(getRecipientName(caseDetails))
-                .formattedAddress(formatAddressForLetterPrinting(getRecipientAddress(caseDetails)))
+                .formattedAddress(formatAddressForLetterPrinting(getRecipientAddress(caseDetails), recipientResideOutsideOfUK))
                 .build();
     }
 
-    public static String formatAddressForLetterPrinting(Address address) {
-        return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class));
-    }
-
-    private static String formatAddressForLetterPrinting(Map<String, Object> address) {
-        if (address != null) {
-            return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")
-                .map(address::get)
-                .filter(Objects::nonNull)
-                .map(Object::toString)
-                .filter(StringUtils::isNotEmpty)
-                .filter(s -> !s.equals("null"))
-                .collect(Collectors.joining("\n"));
-        }
-        return "";
+    public String formatAddressForLetterPrinting(Address address, boolean isInternational) {
+        return documentHelper.formatAddressForLetterPrinting(objectMapper.convertValue(address, Map.class), isInternational);
     }
 
     private String getSolicitorReference(FinremCaseData caseData) {

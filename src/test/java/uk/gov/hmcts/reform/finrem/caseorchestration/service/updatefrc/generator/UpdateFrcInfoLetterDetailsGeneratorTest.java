@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.frcupateinfo.UpdateFrcInfoLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
 
 import java.time.LocalDate;
@@ -22,6 +23,8 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -39,6 +42,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.gen
 public class UpdateFrcInfoLetterDetailsGeneratorTest {
     @Mock
     private DocumentHelper documentHelper;
+    @Mock
+    private InternationalPostalService postalService;
 
     @Mock
     LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper;
@@ -68,7 +73,7 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
 
     @Test
     public void givenApplicant_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(APP_FORMATTED_ADDRESS);
+        when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn(APP_FORMATTED_ADDRESS);
 
         when(letterAddresseeGeneratorMapper.generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
             AddresseeDetails.builder().addresseeName(APPLICANT_FULL_NAME)
@@ -79,11 +84,12 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
         Addressee addressee = letterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(APP_FORMATTED_ADDRESS));
         assertThat(addressee.getName(), is(APPLICANT_FULL_NAME));
+        verify(postalService).isRecipientResideOutsideOfUK(caseDetails.getData(), "APPLICANT");
     }
 
     @Test
     public void givenRespondent_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(RESP_FORMATTED_ADDRESS);
+        when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn(RESP_FORMATTED_ADDRESS);
 
         when(letterAddresseeGeneratorMapper.generate(caseDetails, RESPONDENT)).thenReturn(
             AddresseeDetails.builder().addresseeName(RESPONDENT_FULL_NAME_CONTESTED)
@@ -95,11 +101,12 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
         Addressee addressee = letterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(RESP_FORMATTED_ADDRESS));
         assertThat(addressee.getName(), is(RESPONDENT_FULL_NAME_CONTESTED));
+        verify(postalService).isRecipientResideOutsideOfUK(caseDetails.getData(), "RESPONDENT");
     }
 
     @Test
     public void givenAppSolicitor_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(APP_SOL_FORMATTED_ADDRESS);
+        when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn(APP_SOL_FORMATTED_ADDRESS);
 
         when(letterAddresseeGeneratorMapper.generate(caseDetails, APPLICANT)).thenReturn(
             AddresseeDetails.builder().addresseeName("Solicitor")
@@ -110,11 +117,12 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
         Addressee addressee = letterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(APP_SOL_FORMATTED_ADDRESS));
         assertThat(addressee.getName(), is("Solicitor"));
+        verify(postalService).isRecipientResideOutsideOfUK(caseDetails.getData(), "APPLICANT");
     }
 
     @Test
     public void givenRespSolicitor_whenGenerateLetterDetails_thenReturnCorrectDetails() {
-        when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(RESP_SOL_FORMATTED_ADDRESS);
+        when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn(RESP_SOL_FORMATTED_ADDRESS);
         when(letterAddresseeGeneratorMapper.generate(caseDetails, RESPONDENT)).thenReturn(
             AddresseeDetails.builder().addresseeName("respSolicitor")
                 .addressToSendTo(objectMapper.convertValue(caseDetails.getData().get(RESP_SOLICITOR_ADDRESS), Map.class)).build());
@@ -124,6 +132,7 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
         Addressee addressee = letterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(RESP_SOL_FORMATTED_ADDRESS));
         assertThat(addressee.getName(), is("respSolicitor"));
+        verify(postalService).isRecipientResideOutsideOfUK(caseDetails.getData(), "RESPONDENT");
     }
 
     private void assertLetterDetails(UpdateFrcInfoLetterDetails updateFrcInfoLetterDetails, String reference) {

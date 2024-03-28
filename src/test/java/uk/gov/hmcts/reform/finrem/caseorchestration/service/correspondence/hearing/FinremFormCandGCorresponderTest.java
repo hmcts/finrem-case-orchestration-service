@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentTyp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,7 +37,8 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
     private GenericDocumentService genericDocumentService;
     @Mock
     private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
-
+    @Mock
+    private InternationalPostalService postalService;
 
     private static final String DATE_OF_HEARING = "2019-01-01";
 
@@ -46,7 +48,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
         applicantAndRespondentMultiLetterCorresponder =
             new FinremFormCandGCorresponder(bulkPrintService, notificationService,
                 new DocumentHelper(objectMapper, new CaseDataService(objectMapper), genericDocumentService, finremCaseDetailsMapper,
-                    letterAddresseeGenerator));
+                    letterAddresseeGenerator, postalService));
     }
 
     @Test

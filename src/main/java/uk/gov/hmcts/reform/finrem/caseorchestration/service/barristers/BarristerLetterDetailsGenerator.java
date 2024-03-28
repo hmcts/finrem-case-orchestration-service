@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.barristers.BarristerLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generator.BaseContestedLetterDetailsGenerator;
 
@@ -26,8 +27,9 @@ public class BarristerLetterDetailsGenerator extends BaseContestedLetterDetailsG
     public BarristerLetterDetailsGenerator(CaseDataService caseDataService,
                                            DocumentHelper documentHelper,
                                            LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper,
-                                           PrdOrganisationService prdOrganisationService) {
-        super(caseDataService, documentHelper, letterAddresseeGeneratorMapper);
+                                           PrdOrganisationService prdOrganisationService,
+                                           InternationalPostalService postalService) {
+        super(caseDataService, documentHelper, letterAddresseeGeneratorMapper, postalService);
         this.prdOrganisationService = prdOrganisationService;
     }
 

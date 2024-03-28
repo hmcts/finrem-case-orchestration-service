@@ -35,6 +35,8 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     private String intervenerName;
 
+    private YesOrNo intervenerResideOutsideUK;
+
     private Address intervenerAddress;
 
     private String intervenerEmail;
