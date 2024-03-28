@@ -171,6 +171,7 @@ public class UpdateContestedCaseController extends BaseController {
         caseData.put("soleTraderName", null);
         caseData.put("familyMediatorServiceName", null);
         caseData.put("mediatorRegistrationNumber", null);
+        caseData.put("uploadMediatorDocument", null);
     }
 
     private void removeAllMiamExceptionDetails(Map<String, Object> caseData) {
