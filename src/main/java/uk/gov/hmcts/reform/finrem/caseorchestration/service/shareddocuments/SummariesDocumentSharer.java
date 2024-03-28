@@ -108,12 +108,12 @@ public class SummariesDocumentSharer extends DocumentSharer {
 
     @Override
     protected List<UploadCaseDocumentCollection> getRespondentCollection(UploadCaseDocumentWrapper documentWrapper) {
-        return documentWrapper.getRespOtherCollection();
+        return documentWrapper.getRespCaseSummariesCollection();
     }
 
     @Override
     protected List<UploadCaseDocumentCollection> getApplicantCollection(UploadCaseDocumentWrapper documentWrapper) {
-        return documentWrapper.getAppOtherCollection();
+        return documentWrapper.getAppCaseSummariesCollection();
     }
 
     @Override
