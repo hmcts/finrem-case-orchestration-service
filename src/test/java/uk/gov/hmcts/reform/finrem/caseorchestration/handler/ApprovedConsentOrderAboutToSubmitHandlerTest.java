@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -111,7 +112,8 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
         verify(consentOrderApprovedDocumentService).generateApprovedConsentOrderLetter(any(), any());
         verify(genericDocumentService).annexStampDocument(any(), any(), any(), any());
         verify(documentHelper, times(2)).getPensionDocumentsData(any(Map.class));
-        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(CaseDetails.class),any(CaseDetails.class),
+            any(EventType.class), any());
     }
 
     @Test
@@ -145,11 +147,21 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
             doValidCaseDataSetUp(NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());
 
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(callbackRequest.getCaseDetails())
+            .caseDetailsBefore(callbackRequest.getCaseDetails())
+            .eventId(EventType.APPROVE_ORDER.getCcdType()).build();
+
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest1, AUTH_TOKEN);
+
 
         assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
 
-        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(CaseDetails.class),
+            any(CaseDetails.class),
+            any(EventType.class),
+            any());
     }
 
     @Test
@@ -158,11 +170,19 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
             doValidCaseDataSetUp(APPROVE_ORDER_NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());
 
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(callbackRequest.getCaseDetails())
+            .caseDetailsBefore(callbackRequest.getCaseDetails())
+            .eventId(EventType.APPROVE_ORDER.getCcdType()).build();
 
-        assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest1, AUTH_TOKEN);
 
-        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
+        Assertions.assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
+
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(CaseDetails.class),
+            any(CaseDetails.class),
+            any(EventType.class),
+            any());
     }
 
     private CallbackRequest doValidCaseDataSetUp(final String path) {
