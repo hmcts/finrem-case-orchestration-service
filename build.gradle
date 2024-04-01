@@ -49,7 +49,7 @@ def versions = [
 
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
-    springCloudBomVersion = "2023.0.0"
+    springCloudBomVersion = "2023.0.1"
     restAssuredBomVersion = "5.4.0"
 }
 
