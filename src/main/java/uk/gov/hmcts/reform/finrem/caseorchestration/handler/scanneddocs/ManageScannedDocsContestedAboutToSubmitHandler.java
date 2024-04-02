@@ -89,6 +89,7 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest,
                 manageScannedDocumentCollection, false));
 
+        manageScannedDocumentCollection.forEach(sd -> processedScannedDocumentIds.remove(sd.getId()));
         removeProcessedScannedDocumentsFromCase(caseData, processedScannedDocumentIds);
         caseData.setManageScannedDocumentCollection(null);
 
