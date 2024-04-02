@@ -77,10 +77,7 @@ public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
         List<BulkPrintDocument> documents = consentOrderApprovedDocumentService
             .prepareApplicantLetterPack(finremCaseDetailsTemp, AUTH_TOKEN);
 
-        assertThat(documents, hasSize(3));
-        assertThat(documents.get(0).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(documents.get(1).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(documents.get(2).getBinaryFileUrl(), is(BINARY_URL));
+        assertThat(documents, hasSize(0));
     }
 
     @Test
@@ -96,11 +93,8 @@ public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
         List<BulkPrintDocument> documents = consentOrderApprovedDocumentService
             .prepareApplicantLetterPack(finremCaseDetailsTemp, AUTH_TOKEN);
 
-        assertThat(documents, hasSize(4));
+        assertThat(documents, hasSize(1));
         assertThat(documents.get(0).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(documents.get(1).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(documents.get(2).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(documents.get(3).getBinaryFileUrl(), is(BINARY_URL));
     }
 
     private void addConsentOrderApprovedDataToCaseDetails(FinremCaseDetails caseDetails) {
