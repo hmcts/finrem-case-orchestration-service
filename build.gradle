@@ -354,9 +354,11 @@ bootWithCCD {
     // AAT (Local cftlib not currently supported)
     authMode = uk.gov.hmcts.rse.AuthMode.AAT
 
+    def caseTypes = "FinancialRemedyContested, FinancialRemedyMVP2"
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
     environment("FEATURE_SEND_LETTER_RECIPIENT_CHECK", "false")
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
+    environment("UPLOAD_TIMESTAMP_FEATURED_CASE_TYPES", caseTypes)
 
     // ccd-definition-store-api
     environment("WELSH_TRANSLATION_ENABLED", "false")
