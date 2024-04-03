@@ -215,7 +215,6 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
                 .appRespGeneralApplications(generalApplicationsCollection)
                 .intervener1GeneralApplications(generalApplicationsCollection)
                 .build()).build();
-
     }
 
     private GeneralApplicationsCollection buildGeneralApplicationsCollection(
