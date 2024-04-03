@@ -27,6 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPROVED_ORDERS;
 
 class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     private GeneralApplicationsCategoriser generalApplicationsCategoriser;
@@ -65,7 +66,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         assertThat(generalApplications.get(1).getValue().getGeneralApplicationDraftOrder().getCategoryId())
             .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_2.getDocumentCategoryId());
         assertThat(generalApplications.get(2).getValue().getGeneralApplicationDirectionsDocument().getCategoryId())
-            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3.getDocumentCategoryId());
+            .isEqualTo(APPROVED_ORDERS.getDocumentCategoryId());
         assertThat(generalApplications.get(3).getValue().getGeneralApplicationDocument().getCategoryId())
             .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_4.getDocumentCategoryId());
         assertThat(generalApplications.get(4).getValue().getGeneralApplicationDocument().getCategoryId())
@@ -111,21 +112,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         assertThat(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders()).isNull();
     }
 
-    @Test
-    void testGeneralApplicationDirectionDocumentCategorisation() {
-        FinremCaseData caseData = buildCaseDataWithGeneralApplicationDirectionsPresent();
-        generalApplicationsCategoriser.categorise(caseData);
-
-        List<GeneralApplicationsCollection> generalApplications = caseData.getGeneralApplicationWrapper()
-            .getGeneralApplications();
-
-        CaseDocument caseDocument = generalApplications.get(0).getValue().getGeneralApplicationDirectionsDocument();
-        assertThat(caseDocument.getCategoryId()).isEqualTo(
-            APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
-    }
-
     public DynamicRadioList buildDynamicIntervenerList() {
-
         List<DynamicRadioListElement> dynamicListElements = List.of(
             getDynamicListElement(APPLICANT, APPLICANT),
             getDynamicListElement(RESPONDENT, RESPONDENT),
@@ -182,20 +169,6 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
                 .intervener4GeneralApplications(generalApplicationsCollection)
                 .generalApplicationIntvrOrders(generalApplicationsCollection)
                 .build()).build();
-    }
-
-    private FinremCaseData buildCaseDataWithGeneralApplicationDirectionsPresent() {
-        List<GeneralApplicationsCollection> generalApplications = List.of(
-            buildGeneralApplicationsCollection(false, false, true)
-        );
-
-        return FinremCaseData.builder()
-            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
-                .generalApplicationCreatedBy("Claire Mumford")
-                .generalApplicationPreState("applicationIssued")
-                .generalApplications(generalApplications)
-                .build())
-            .build();
     }
 
     protected FinremCaseData buildFinremCaseData11Applications() {

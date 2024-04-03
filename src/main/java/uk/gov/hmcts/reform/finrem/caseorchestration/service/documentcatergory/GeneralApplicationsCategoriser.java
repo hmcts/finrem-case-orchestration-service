@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPROVED_ORDERS;
+
 @Configuration
 public class GeneralApplicationsCategoriser extends DocumentCategoriser {
 
@@ -42,13 +44,12 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
                     DocumentCategory categoryToApply;
 
                     if (generalApplicationCounter.get() > 10) {
-                        categoryToApply = (DocumentCategory.APPLICATIONS_OTHER_APPLICATION_OVERFLOW);
+                        categoryToApply = DocumentCategory.APPLICATIONS_OTHER_APPLICATION_OVERFLOW;
                     } else {
-                        categoryToApply = (gaNumberToCategory.get(generalApplicationCounter.get()));
+                        categoryToApply = gaNumberToCategory.get(generalApplicationCounter.get());
                     }
 
-                    setCategoryToAllGaDocs(ga, categoryToApply);
-
+                    setCategoryToAllGaDocs(ga, categoryToApply, APPROVED_ORDERS);
                 });
         }
     }
@@ -81,34 +82,28 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
 
     private void removeDocumentCategory(List<GeneralApplicationsCollection> collectionToRemoveCategoryFrom) {
         collectionToRemoveCategoryFrom.forEach(
-            ga -> {
-                setCategoryToAllGaDocs(ga, DocumentCategory.DUPLICATED_GENERAL_ORDERS);
-            }
+            ga -> setCategoryToAllGaDocs(ga, DocumentCategory.DUPLICATED_GENERAL_ORDERS,
+                DocumentCategory.DUPLICATED_GENERAL_ORDERS)
         );
     }
 
-    private void setCategoryToAllGaDocs(GeneralApplicationsCollection ga, DocumentCategory categoryToApply) {
+    private void setCategoryToAllGaDocs(GeneralApplicationsCollection ga, DocumentCategory categoryToApply,
+                                        DocumentCategory directionsDocumentCategory) {
         GeneralApplicationItems generalApplicationItems = ga.getValue();
         CaseDocument generalApplicationDocument = generalApplicationItems.getGeneralApplicationDocument();
         CaseDocument generalApplicationDraftOrder = generalApplicationItems.getGeneralApplicationDraftOrder();
         CaseDocument generalApplicationDirectionsDocument = generalApplicationItems.getGeneralApplicationDirectionsDocument();
 
         if (generalApplicationDocument != null) {
-            generalApplicationDocument.setCategoryId(
-                categoryToApply.getDocumentCategoryId()
-            );
+            generalApplicationDocument.setCategoryId(categoryToApply.getDocumentCategoryId());
         }
 
         if (generalApplicationDraftOrder != null) {
-            generalApplicationDraftOrder.setCategoryId(
-                categoryToApply.getDocumentCategoryId()
-            );
+            generalApplicationDraftOrder.setCategoryId(categoryToApply.getDocumentCategoryId());
         }
 
         if (generalApplicationDirectionsDocument != null) {
-            generalApplicationDirectionsDocument.setCategoryId(
-                categoryToApply.getDocumentCategoryId()
-            );
+            generalApplicationDirectionsDocument.setCategoryId(directionsDocumentCategory.getDocumentCategoryId());
         }
 
         List<GeneralApplicationSupportingDocumentData> generalApplicationSupportDocument = ga.getValue().getGaSupportDocuments();
