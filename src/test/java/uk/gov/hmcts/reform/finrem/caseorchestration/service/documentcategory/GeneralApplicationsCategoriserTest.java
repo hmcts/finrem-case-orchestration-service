@@ -226,7 +226,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         if (isGeneralApplicationDocumentPresent) {
             generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDocument();
         } else if (isGeneralApplicationDraftOrderPresent) {
-            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDarftOrder();
+            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDraftOrder();
         } else if (isGeneralApplicationDirectionsPresent) {
             generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDirections();
         }
@@ -258,7 +258,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .build();
     }
 
-    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDarftOrder() {
+    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDraftOrder() {
         return GeneralApplicationItems.builder()
             .generalApplicationSender(buildDynamicIntervenerList())
             .generalApplicationCreatedBy("Claire Mumford")
