@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1;
 
 class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     private GeneralApplicationsCategoriser generalApplicationsCategoriser;
@@ -46,7 +47,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .getGeneralApplications();
 
         assertThat(generalApplications.get(0).getValue().getGeneralApplicationDocument().getCategoryId())
-            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
+            .isEqualTo(APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
         assertThat(generalApplications.get(2).getValue().getGeneralApplicationDocument().getCategoryId())
             .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3.getDocumentCategoryId());
     }
@@ -60,7 +61,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .getGeneralApplications();
 
         assertThat(generalApplications.get(0).getValue().getGeneralApplicationDocument().getCategoryId())
-            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
+            .isEqualTo(APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
         assertThat(generalApplications.get(1).getValue().getGeneralApplicationDraftOrder().getCategoryId())
             .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_2.getDocumentCategoryId());
         assertThat(generalApplications.get(2).getValue().getGeneralApplicationDirectionsDocument().getCategoryId())
@@ -108,6 +109,19 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         assertThat(finremCaseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications()).isNull();
         assertThat(finremCaseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications()).isNull();
         assertThat(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders()).isNull();
+    }
+
+    @Test
+    void testGeneralApplicationDirectionDocumentCategorisation() {
+        FinremCaseData caseData = buildCaseDataWithGeneralApplicationDirectionsPresent();
+        generalApplicationsCategoriser.categorise(caseData);
+
+        List<GeneralApplicationsCollection> generalApplications = caseData.getGeneralApplicationWrapper()
+            .getGeneralApplications();
+
+        CaseDocument caseDocument = generalApplications.get(0).getValue().getGeneralApplicationDirectionsDocument();
+        assertThat(caseDocument.getCategoryId()).isEqualTo(
+            APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
     }
 
     public DynamicRadioList buildDynamicIntervenerList() {
@@ -170,6 +184,20 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
                 .build()).build();
     }
 
+    private FinremCaseData buildCaseDataWithGeneralApplicationDirectionsPresent() {
+        List<GeneralApplicationsCollection> generalApplications = List.of(
+            buildGeneralApplicationsCollection(false, false, true)
+        );
+
+        return FinremCaseData.builder()
+            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                .generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationPreState("applicationIssued")
+                .generalApplications(generalApplications)
+                .build())
+            .build();
+    }
+
     protected FinremCaseData buildFinremCaseData11Applications() {
         GeneralApplicationsCollection firstGeneralApplications = buildGeneralApplicationsCollection(
             true, false, false);
@@ -217,9 +245,9 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     }
 
     private GeneralApplicationsCollection buildGeneralApplicationsCollection(
-        Boolean isGeneralApplicationDocumentPresent,
-        Boolean isGeneralApplicationDraftOrderPresent,
-        Boolean isGeneralApplicationDirectionsPresent) {
+        boolean isGeneralApplicationDocumentPresent,
+        boolean isGeneralApplicationDraftOrderPresent,
+        boolean isGeneralApplicationDirectionsPresent) {
 
         GeneralApplicationItems generalApplicationItems = buildGeneralApplicationItems();
 
