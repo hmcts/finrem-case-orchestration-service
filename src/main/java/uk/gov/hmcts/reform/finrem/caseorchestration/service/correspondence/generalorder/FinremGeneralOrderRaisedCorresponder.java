@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Finre
 public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSolicitorsCorresponder {
 
     private final CaseDataService caseDataService;
-    private boolean isConsentInContested;
+    private EventType eventType;
 
     public FinremGeneralOrderRaisedCorresponder(NotificationService notificationService,
                                                 CaseDataService caseDataService) {
@@ -22,12 +22,13 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
     }
 
     public void sendCorrespondence(FinremCaseDetails caseDetails, EventType eventId) {
-        this.isConsentInContested = caseDataService.isConsentInContestedGeneralOrderEvent(eventId);
+        eventType = eventId;
         super.sendCorrespondence(caseDetails);
         sendIntervenerCorrespondence(caseDetails);
     }
 
     private void sendIntervenerCorrespondence(FinremCaseDetails caseDetails) {
+
         if (!caseDataService.isContestedApplication(caseDetails)) {
             return;
         }
@@ -42,7 +43,7 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
         if (caseDataService.isConsentedApplication(caseDetails)) {
             notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(caseDetails);
         } else {
-            if (isConsentInContested && caseDataService.isConsentedInContestedCase(caseDetails)) {
+            if (caseDataService.isConsentInContestedGeneralOrderEvent(eventType) && caseDataService.isConsentedInContestedCase(caseDetails)) {
                 notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(caseDetails);
             } else {
                 notificationService.sendContestedGeneralOrderEmailApplicant(caseDetails);
@@ -55,7 +56,7 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
         if (caseDataService.isConsentedApplication(caseDetails)) {
             notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(caseDetails);
         } else {
-            if (isConsentInContested && caseDataService.isConsentedInContestedCase(caseDetails)) {
+            if (caseDataService.isConsentInContestedGeneralOrderEvent(eventType) && caseDataService.isConsentedInContestedCase(caseDetails)) {
                 notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
             } else {
                 notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
@@ -67,7 +68,7 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
         SolicitorCaseDataKeysWrapper caseDataKeysWrapper =
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper);
 
-        if (isConsentInContested && caseDataService.isConsentedInContestedCase(caseDetails)) {
+        if (caseDataService.isConsentInContestedGeneralOrderEvent(eventType) && caseDataService.isConsentedInContestedCase(caseDetails)) {
             notificationService.sendContestedConsentGeneralOrderEmailIntervenerSolicitor(caseDetails,
                 caseDataKeysWrapper);
         } else {
