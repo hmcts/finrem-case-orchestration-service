@@ -50,7 +50,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
                 return getOtherDocumentCategory();
             }
             case PENSION_PLAN -> {
-                return getPensionPlanDocumentCategory();
+                return DocumentCategory.REPORTS;
             }
             case FORM_B, FORM_F, CARE_PLAN -> {
                 return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER;
@@ -90,8 +90,6 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
     }
 
     protected abstract DocumentCategory getOtherDocumentCategory();
-
-    protected abstract DocumentCategory getPensionPlanDocumentCategory();
 
     protected abstract DocumentCategory getCertificatesOfServiceDocumentCategory();
 
