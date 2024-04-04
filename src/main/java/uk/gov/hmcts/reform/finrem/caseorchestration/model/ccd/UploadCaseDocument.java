@@ -33,6 +33,7 @@ public class UploadCaseDocument {
     private LocalDateTime scannedDate;
 
     private String exceptionRecordReference;
+    private YesOrNo selectForUpdate;
 
     public static UploadCaseDocument from(ScannedDocumentCollection scannedDocumentCollection) {
         ScannedDocument scannedDocument = scannedDocumentCollection.getValue();
