@@ -26,8 +26,6 @@ public class UploadCaseDocumentCollection implements CaseDocumentTabData {
     @JsonProperty("value")
     private UploadCaseDocument uploadCaseDocument;
 
-    private YesOrNo selectForUpdate;
-
     @Override
     @JsonIgnore
     public String getElementId() {
