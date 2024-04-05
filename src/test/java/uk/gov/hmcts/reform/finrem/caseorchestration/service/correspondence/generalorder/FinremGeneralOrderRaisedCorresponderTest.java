@@ -63,7 +63,7 @@ class FinremGeneralOrderRaisedCorresponderTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        corresponder.sendCorrespondence(caseDetails, eventId);
+        corresponder.sendCorrespondence(caseDetails);
 
         verify(notificationService).sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(caseDetails);
@@ -91,7 +91,7 @@ class FinremGeneralOrderRaisedCorresponderTest {
         when(caseDataService.isConsentedInContestedCase(caseDetails)).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        corresponder.sendCorrespondence(caseDetails, eventId);
+        corresponder.sendCorrespondence(caseDetails);
 
         verify(notificationService).sendContestedConsentGeneralOrderEmailApplicantSolicitor(caseDetails);
     }
@@ -104,7 +104,7 @@ class FinremGeneralOrderRaisedCorresponderTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        corresponder.sendCorrespondence(caseDetails, eventId);
+        corresponder.sendCorrespondence(caseDetails);
 
         verify(notificationService).sendContestedGeneralOrderEmailApplicant(caseDetails);
         verify(notificationService).sendContestedGeneralOrderEmailRespondent(caseDetails);
