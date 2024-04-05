@@ -42,7 +42,7 @@ public class CreateGeneralOrderContestedSubmittedHandler extends FinremCallbackH
             callbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        generalOrderRaisedCorresponder.sendCorrespondence(caseDetails, callbackRequest.getEventType());
+        generalOrderRaisedCorresponder.sendCorrespondence(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData())
