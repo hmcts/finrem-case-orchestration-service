@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uk.gov.hmcts.reform.ccd.client.model.Classification;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
@@ -38,6 +39,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     private String callbackResponseStatus;
     private LocalDateTime lastModified;
     private Classification securityClassification;
+    private EventType eventId;
     @JsonProperty("case_data")
     @JsonAlias("data")
     private FinremCaseData data;
@@ -249,6 +251,11 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
         return isContestedApplication()
             ? data.getFullRespondentNameContested()
             : data.getFullRespondentNameConsented();
+    }
+
+    @JsonIgnore
+    public EventType getEventId() {
+        return this.eventId;
     }
 
 }

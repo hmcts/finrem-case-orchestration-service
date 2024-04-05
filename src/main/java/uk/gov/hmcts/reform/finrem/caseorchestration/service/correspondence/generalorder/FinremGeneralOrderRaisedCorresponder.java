@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Finre
 public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSolicitorsCorresponder {
 
     private final CaseDataService caseDataService;
-    private EventType eventType;
 
     public FinremGeneralOrderRaisedCorresponder(NotificationService notificationService,
                                                 CaseDataService caseDataService) {
@@ -21,14 +20,12 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
         this.caseDataService = caseDataService;
     }
 
-    public void sendCorrespondence(FinremCaseDetails caseDetails, EventType eventId) {
-        eventType = eventId;
+    public void sendCorrespondence(FinremCaseDetails caseDetails) {
         super.sendCorrespondence(caseDetails);
         sendIntervenerCorrespondence(caseDetails);
     }
 
     private void sendIntervenerCorrespondence(FinremCaseDetails caseDetails) {
-
         if (!caseDataService.isContestedApplication(caseDetails)) {
             return;
         }
@@ -40,10 +37,11 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
 
     @Override
     protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
+        boolean isConsentInContested = checkIfConsentInContestedEvent(caseDetails);
         if (caseDataService.isConsentedApplication(caseDetails)) {
             notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(caseDetails);
         } else {
-            if (caseDataService.isConsentInContestedGeneralOrderEvent(eventType) && caseDataService.isConsentedInContestedCase(caseDetails)) {
+            if (isConsentInContested && caseDataService.isConsentedInContestedCase(caseDetails)) {
                 notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(caseDetails);
             } else {
                 notificationService.sendContestedGeneralOrderEmailApplicant(caseDetails);
@@ -53,10 +51,11 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
 
     @Override
     protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
+        boolean isConsentInContested = checkIfConsentInContestedEvent(caseDetails);
         if (caseDataService.isConsentedApplication(caseDetails)) {
             notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(caseDetails);
         } else {
-            if (caseDataService.isConsentInContestedGeneralOrderEvent(eventType) && caseDataService.isConsentedInContestedCase(caseDetails)) {
+            if (isConsentInContested && caseDataService.isConsentedInContestedCase(caseDetails)) {
                 notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
             } else {
                 notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
@@ -68,11 +67,19 @@ public class FinremGeneralOrderRaisedCorresponder extends FinremEmailOnlyAllSoli
         SolicitorCaseDataKeysWrapper caseDataKeysWrapper =
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper);
 
-        if (caseDataService.isConsentInContestedGeneralOrderEvent(eventType) && caseDataService.isConsentedInContestedCase(caseDetails)) {
+        boolean isConsentInContested = checkIfConsentInContestedEvent(caseDetails);
+
+        if (isConsentInContested && caseDataService.isConsentedInContestedCase(caseDetails)) {
             notificationService.sendContestedConsentGeneralOrderEmailIntervenerSolicitor(caseDetails,
                 caseDataKeysWrapper);
         } else {
             notificationService.sendContestedGeneralOrderEmailIntervener(caseDetails, caseDataKeysWrapper);
         }
+    }
+
+    private boolean checkIfConsentInContestedEvent(FinremCaseDetails caseDetails) {
+        EventType eventId = caseDetails.getEventId();
+        boolean isConsentInContested = caseDataService.isConsentInContestedGeneralOrderEvent(eventId);
+        return isConsentInContested;
     }
 }
