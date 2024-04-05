@@ -83,6 +83,6 @@ class  CreateGeneralOrderContestedSubmittedTest {
         var response = handler.handle(request, "some-token");
 
         assertThat(response).isNotNull();
-        verify(corresponder, times(1)).sendCorrespondence(caseDetails, request.getEventType());
+        verify(corresponder, times(1)).sendCorrespondence(caseDetails);
     }
 }
