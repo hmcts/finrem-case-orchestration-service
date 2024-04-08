@@ -99,7 +99,7 @@ public class IntervenerService {
     private void validateIntervenerPostCode(IntervenerWrapper intervenerWrapper, List<String> errors) {
         String postCode = intervenerWrapper.getIntervenerAddress().getPostCode();
         if (ObjectUtils.isEmpty(postCode)) {
-            errors.add("Postcode field is required for intervener.");
+            errors.add("Postcode field is required for the intervener.");
         }
     }
 
