@@ -53,6 +53,7 @@ public class IntervenerService {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         Long caseId = callbackRequest.getCaseDetails().getId();
 
+        validateIntervenerPostCode(intervenerWrapper, errors);
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         intervenerChangeDetails.setIntervenerType(intervenerWrapper.getIntervenerType());
@@ -94,6 +95,14 @@ public class IntervenerService {
         intervenerChangeDetails.setIntervenerDetails(intervenerWrapper);
         return intervenerChangeDetails;
     }
+
+    private void validateIntervenerPostCode(IntervenerWrapper intervenerWrapper, List<String> errors) {
+        String postCode = intervenerWrapper.getIntervenerAddress().getPostCode();
+        if (ObjectUtils.isEmpty(postCode)) {
+            errors.add("Postcode field is required for intervener.");
+        }
+    }
+
 
     private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore, String orgId,
                                                           String email, List<String> errors) {
