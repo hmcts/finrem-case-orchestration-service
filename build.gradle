@@ -20,7 +20,7 @@ def versions = [
         ccdClient            : '4.9.2',
         commonsIo            : '2.7',
         commonsLang3         : '3.14.0',
-        hmctsNotify          : '4.1.1-RELEASE',
+        hmctsNotify          : '5.0.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.32',
         mockito              : '3.12.4',
