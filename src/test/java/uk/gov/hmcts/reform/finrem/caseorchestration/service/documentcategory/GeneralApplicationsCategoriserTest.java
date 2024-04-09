@@ -26,6 +26,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPROVED_ORDERS;
 
 class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     private GeneralApplicationsCategoriser generalApplicationsCategoriser;
@@ -46,7 +48,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .getGeneralApplications();
 
         assertThat(generalApplications.get(0).getValue().getGeneralApplicationDocument().getCategoryId())
-            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
+            .isEqualTo(APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
         assertThat(generalApplications.get(2).getValue().getGeneralApplicationDocument().getCategoryId())
             .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3.getDocumentCategoryId());
     }
@@ -60,11 +62,11 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .getGeneralApplications();
 
         assertThat(generalApplications.get(0).getValue().getGeneralApplicationDocument().getCategoryId())
-            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
+            .isEqualTo(APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
         assertThat(generalApplications.get(1).getValue().getGeneralApplicationDraftOrder().getCategoryId())
             .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_2.getDocumentCategoryId());
         assertThat(generalApplications.get(2).getValue().getGeneralApplicationDirectionsDocument().getCategoryId())
-            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3.getDocumentCategoryId());
+            .isEqualTo(APPROVED_ORDERS.getDocumentCategoryId());
         assertThat(generalApplications.get(3).getValue().getGeneralApplicationDocument().getCategoryId())
             .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_4.getDocumentCategoryId());
         assertThat(generalApplications.get(4).getValue().getGeneralApplicationDocument().getCategoryId())
@@ -111,7 +113,6 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     }
 
     public DynamicRadioList buildDynamicIntervenerList() {
-
         List<DynamicRadioListElement> dynamicListElements = List.of(
             getDynamicListElement(APPLICANT, APPLICANT),
             getDynamicListElement(RESPONDENT, RESPONDENT),
@@ -217,16 +218,16 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     }
 
     private GeneralApplicationsCollection buildGeneralApplicationsCollection(
-        Boolean isGeneralApplicationDocumentPresent,
-        Boolean isGeneralApplicationDraftOrderPresent,
-        Boolean isGeneralApplicationDirectionsPresent) {
+        boolean isGeneralApplicationDocumentPresent,
+        boolean isGeneralApplicationDraftOrderPresent,
+        boolean isGeneralApplicationDirectionsPresent) {
 
         GeneralApplicationItems generalApplicationItems = buildGeneralApplicationItems();
 
         if (isGeneralApplicationDocumentPresent) {
             generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDocument();
         } else if (isGeneralApplicationDraftOrderPresent) {
-            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDarftOrder();
+            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDraftOrder();
         } else if (isGeneralApplicationDirectionsPresent) {
             generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDirections();
         }
@@ -258,7 +259,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .build();
     }
 
-    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDarftOrder() {
+    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDraftOrder() {
         return GeneralApplicationItems.builder()
             .generalApplicationSender(buildDynamicIntervenerList())
             .generalApplicationCreatedBy("Claire Mumford")
