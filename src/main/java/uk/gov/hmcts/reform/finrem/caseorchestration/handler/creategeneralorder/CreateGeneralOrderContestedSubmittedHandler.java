@@ -11,7 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedConsentInContestedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedContestedCorresponder;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER;
@@ -21,12 +22,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENER
 @Slf4j
 public class CreateGeneralOrderContestedSubmittedHandler extends FinremCallbackHandler {
 
-    private final FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
+    private final FinremGeneralOrderRaisedContestedCorresponder generalOrderRaisedContestedCorresponder;
+    private final FinremGeneralOrderRaisedConsentInContestedCorresponder generalOrderRaisedConsentInContestedCorresponder;
 
     public CreateGeneralOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                       FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder) {
+                                                       FinremGeneralOrderRaisedContestedCorresponder generalOrderRaisedContestedCorresponder,
+                                                       FinremGeneralOrderRaisedConsentInContestedCorresponder generalOrderRaisedConsentInContestedCorresponder
+    ) {
         super(finremCaseDetailsMapper);
-        this.generalOrderRaisedCorresponder = generalOrderRaisedCorresponder;
+
+        this.generalOrderRaisedContestedCorresponder = generalOrderRaisedContestedCorresponder;
+        this.generalOrderRaisedConsentInContestedCorresponder = generalOrderRaisedConsentInContestedCorresponder;
     }
 
     @Override
@@ -42,8 +48,11 @@ public class CreateGeneralOrderContestedSubmittedHandler extends FinremCallbackH
             callbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        generalOrderRaisedCorresponder.sendCorrespondence(caseDetails, callbackRequest.getEventType());
-
+        if (callbackRequest.getEventType().equals(GENERAL_ORDER_CONSENT_IN_CONTESTED) && caseDetails.isConsentedInContestedCase()) {
+            generalOrderRaisedConsentInContestedCorresponder.sendCorrespondence(caseDetails);
+        } else {
+            generalOrderRaisedContestedCorresponder.sendCorrespondence(caseDetails);
+        }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData())
             .build();
