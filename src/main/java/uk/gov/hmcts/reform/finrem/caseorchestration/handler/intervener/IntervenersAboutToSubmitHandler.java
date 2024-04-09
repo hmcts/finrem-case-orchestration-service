@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 
 import java.util.ArrayList;
@@ -55,19 +57,42 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
         List<String> errors = new ArrayList<>();
         switch (selectedOperationCode) {
-            case ADD_INTERVENER_ONE_CODE -> service.updateIntervenerDetails(caseData.getIntervenerOne(), errors, callbackRequest);
-            case ADD_INTERVENER_TWO_CODE -> service.updateIntervenerDetails(caseData.getIntervenerTwo(), errors, callbackRequest);
-            case ADD_INTERVENER_THREE_CODE -> service.updateIntervenerDetails(caseData.getIntervenerThree(), errors, callbackRequest);
-            case ADD_INTERVENER_FOUR_CODE -> service.updateIntervenerDetails(caseData.getIntervenerFour(), errors, callbackRequest);
-            case DEL_INTERVENER_ONE_CODE -> service.removeIntervenerDetails(caseData.getIntervenerOne(), errors, caseData, caseId);
-            case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerDetails(caseData.getIntervenerTwo(), errors, caseData, caseId);
-            case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerDetails(caseData.getIntervenerThree(), errors, caseData, caseId);
-            case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerDetails(caseData.getIntervenerFour(), errors, caseData, caseId);
+            case ADD_INTERVENER_ONE_CODE -> {
+                validateIntervenerPostCode(caseData.getIntervenerOne(), errors);
+                service.updateIntervenerDetails(caseData.getIntervenerOne(), errors, callbackRequest);
+            }
+            case ADD_INTERVENER_TWO_CODE -> {
+                validateIntervenerPostCode(caseData.getIntervenerTwo(), errors);
+                service.updateIntervenerDetails(caseData.getIntervenerTwo(), errors, callbackRequest);
+            }
+            case ADD_INTERVENER_THREE_CODE -> {
+                validateIntervenerPostCode(caseData.getIntervenerThree(), errors);
+                service.updateIntervenerDetails(caseData.getIntervenerThree(), errors, callbackRequest);
+            }
+            case ADD_INTERVENER_FOUR_CODE -> {
+                validateIntervenerPostCode(caseData.getIntervenerFour(), errors);
+                service.updateIntervenerDetails(caseData.getIntervenerFour(), errors, callbackRequest);
+            }
+            case DEL_INTERVENER_ONE_CODE ->
+                service.removeIntervenerDetails(caseData.getIntervenerOne(), errors, caseData, caseId);
+            case DEL_INTERVENER_TWO_CODE ->
+                service.removeIntervenerDetails(caseData.getIntervenerTwo(), errors, caseData, caseId);
+            case DEL_INTERVENER_THREE_CODE ->
+                service.removeIntervenerDetails(caseData.getIntervenerThree(), errors, caseData, caseId);
+            case DEL_INTERVENER_FOUR_CODE ->
+                service.removeIntervenerDetails(caseData.getIntervenerFour(), errors, caseData, caseId);
             default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
+    }
+
+    private void validateIntervenerPostCode(IntervenerWrapper intervenerWrapper, List<String> errors) {
+        String postCode = intervenerWrapper.getIntervenerAddress().getPostCode();
+        if (ObjectUtils.isEmpty(postCode)) {
+            errors.add("Postcode field is required for the intervener.");
+        }
     }
 
 
