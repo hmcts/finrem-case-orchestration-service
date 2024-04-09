@@ -1,11 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcategory;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.BaseHandlerTestSetup;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -23,124 +20,101 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPROVED_ORDERS;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
+class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     private GeneralApplicationsCategoriser generalApplicationsCategoriser;
 
-    @Mock
-    FeatureToggleService featureToggleService;
-
-    @Before
-    public void setUp() {
-        generalApplicationsCategoriser = new GeneralApplicationsCategoriser(featureToggleService);
+    @BeforeEach
+    void setUp() {
+        FeatureToggleService featureToggleService = mock(FeatureToggleService.class);
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
+        generalApplicationsCategoriser = new GeneralApplicationsCategoriser(featureToggleService);
     }
 
     @Test
-    public void testCategorizeDocuments() {
+    void testCategorizeDocuments() {
         FinremCaseData finremCaseData = buildFinremCaseData();
         generalApplicationsCategoriser.categorise(finremCaseData);
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(0).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId()
-            );
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(2).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3.getDocumentCategoryId()
-            );
+
+        List<GeneralApplicationsCollection> generalApplications = finremCaseData.getGeneralApplicationWrapper()
+            .getGeneralApplications();
+
+        assertThat(generalApplications.get(0).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
+        assertThat(generalApplications.get(2).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3.getDocumentCategoryId());
     }
 
     @Test
-    public void testGeneralApplicationOverflowCatergory() {
+    void testGeneralApplicationOverflowCatergory() {
         FinremCaseData finremCaseData = buildFinremCaseData11Applications();
         generalApplicationsCategoriser.categorise(finremCaseData);
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(0).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId()
-            );
 
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(1).getValue()
-            .getGeneralApplicationDraftOrder().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_2.getDocumentCategoryId()
-            );
+        List<GeneralApplicationsCollection> generalApplications = finremCaseData.getGeneralApplicationWrapper()
+            .getGeneralApplications();
 
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(2).getValue()
-            .getGeneralApplicationDirectionsDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3.getDocumentCategoryId()
-            );
-
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(3).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_4.getDocumentCategoryId()
-            );
-
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(4).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_5.getDocumentCategoryId()
-            );
-
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(8).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_9.getDocumentCategoryId()
-            );
-
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(9).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_10.getDocumentCategoryId()
-            );
-
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().get(10).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.APPLICATIONS_OTHER_APPLICATION_OVERFLOW.getDocumentCategoryId()
-            );
+        assertThat(generalApplications.get(0).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(APPLICATIONS_OTHER_APPLICATION_APPLICATION_1.getDocumentCategoryId());
+        assertThat(generalApplications.get(1).getValue().getGeneralApplicationDraftOrder().getCategoryId())
+            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_2.getDocumentCategoryId());
+        assertThat(generalApplications.get(2).getValue().getGeneralApplicationDirectionsDocument().getCategoryId())
+            .isEqualTo(APPROVED_ORDERS.getDocumentCategoryId());
+        assertThat(generalApplications.get(3).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_4.getDocumentCategoryId());
+        assertThat(generalApplications.get(4).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_5.getDocumentCategoryId());
+        assertThat(generalApplications.get(8).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_9.getDocumentCategoryId());
+        assertThat(generalApplications.get(9).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_10.getDocumentCategoryId());
+        assertThat(generalApplications.get(10).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.APPLICATIONS_OTHER_APPLICATION_OVERFLOW.getDocumentCategoryId());
     }
 
     @Test
-    public void testUncategorizeDocuments() {
+    void testUncategorizeDocuments() {
         FinremCaseData finremCaseData = buildFinremCaseData();
         generalApplicationsCategoriser.uncategoriseDuplicatedCollections(finremCaseData);
-        assert finremCaseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId()
-            );
 
-        assert finremCaseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(2).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId()
-            );
+        List<GeneralApplicationsCollection> appRespGeneralApplications = finremCaseData.getGeneralApplicationWrapper()
+            .getAppRespGeneralApplications();
+        assertThat(appRespGeneralApplications.get(0).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
+        assertThat(appRespGeneralApplications.get(2).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
 
-        assert finremCaseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications().get(0).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId()
-            );
+        List<GeneralApplicationsCollection> intervener1GeneralApplications = finremCaseData
+            .getGeneralApplicationWrapper().getIntervener1GeneralApplications();
+        assertThat(intervener1GeneralApplications.get(0).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
+        assertThat(intervener1GeneralApplications.get(2).getValue().getGeneralApplicationDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
 
-        assert finremCaseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications().get(2).getValue()
-            .getGeneralApplicationDocument().getCategoryId().equals(
-                DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId()
-            );
     }
 
     @Test
-    public void testUncategoriseDuplicatedCollections() {
+    void testUncategoriseDuplicatedCollections() {
         FinremCaseData finremCaseData = buildFinremCaseDataNullCollections();
         generalApplicationsCategoriser.uncategoriseDuplicatedCollections(finremCaseData);
-        assert finremCaseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() == null;
-        assert finremCaseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications() == null;
-        assert finremCaseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications() == null;
-        assert finremCaseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications() == null;
-        assert finremCaseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications() == null;
-        assert finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders() == null;
-
+        assertThat(finremCaseData.getGeneralApplicationWrapper().getAppRespGeneralApplications()).isNull();
+        assertThat(finremCaseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications()).isNull();
+        assertThat(finremCaseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications()).isNull();
+        assertThat(finremCaseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications()).isNull();
+        assertThat(finremCaseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications()).isNull();
+        assertThat(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders()).isNull();
     }
 
     public DynamicRadioList buildDynamicIntervenerList() {
-
-        List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
+        List<DynamicRadioListElement> dynamicListElements = List.of(
+            getDynamicListElement(APPLICANT, APPLICANT),
             getDynamicListElement(RESPONDENT, RESPONDENT),
             getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
@@ -169,7 +143,6 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
                 .intervener4GeneralApplications(null)
                 .generalApplicationIntvrOrders(null)
                 .build()).build();
-
     }
 
     protected FinremCaseData buildFinremCaseData() {
@@ -196,7 +169,6 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
                 .intervener4GeneralApplications(generalApplicationsCollection)
                 .generalApplicationIntvrOrders(generalApplicationsCollection)
                 .build()).build();
-
     }
 
     protected FinremCaseData buildFinremCaseData11Applications() {
@@ -243,24 +215,22 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
                 .appRespGeneralApplications(generalApplicationsCollection)
                 .intervener1GeneralApplications(generalApplicationsCollection)
                 .build()).build();
-
     }
 
     private GeneralApplicationsCollection buildGeneralApplicationsCollection(
-        Boolean isGeneralApplicationDocumentPresent,
-        Boolean isGeneralApplicationDraftOrderPresent,
-        Boolean isGeneralApplicationDirectionsPresent) {
+        boolean isGeneralApplicationDocumentPresent,
+        boolean isGeneralApplicationDraftOrderPresent,
+        boolean isGeneralApplicationDirectionsPresent) {
 
         GeneralApplicationItems generalApplicationItems = buildGeneralApplicationItems();
 
         if (isGeneralApplicationDocumentPresent) {
             generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDocument();
         } else if (isGeneralApplicationDraftOrderPresent) {
-            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDarftOrder();
+            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDraftOrder();
         } else if (isGeneralApplicationDirectionsPresent) {
             generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDirections();
         }
-
 
         return GeneralApplicationsCollection.builder()
             .value(generalApplicationItems)
@@ -289,7 +259,7 @@ public class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .build();
     }
 
-    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDarftOrder() {
+    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDraftOrder() {
         return GeneralApplicationItems.builder()
             .generalApplicationSender(buildDynamicIntervenerList())
             .generalApplicationCreatedBy("Claire Mumford")
