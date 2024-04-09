@@ -82,7 +82,7 @@ public class IntervenerOneOtherDocumentsHandlerTest extends BaseManageDocumentsH
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN, CaseDocumentParty.INTERVENER_ONE),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_PENSION_PLAN)
+            is(DocumentCategory.REPORTS)
         );
 
         assertThat(
