@@ -343,13 +343,13 @@ public class GeneralOrderService {
         parties.forEach(role -> {
             data.setApplicantCorrespondenceEnabled(isOrderSharedWithApplicant(caseDetails));
             data.setRespondentCorrespondenceEnabled(isOrderSharedWithRespondent(caseDetails));
-            data.getIntervenerOneWrapper()
+            data.getIntervenerOne()
                 .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener1(caseDetails));
-            data.getIntervenerTwoWrapper()
+            data.getIntervenerTwo()
                 .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener2(caseDetails));
-            data.getIntervenerThreeWrapper()
+            data.getIntervenerThree()
                 .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener3(caseDetails));
-            data.getIntervenerFourWrapper()
+            data.getIntervenerFour()
                 .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener4(caseDetails));
         });
     }

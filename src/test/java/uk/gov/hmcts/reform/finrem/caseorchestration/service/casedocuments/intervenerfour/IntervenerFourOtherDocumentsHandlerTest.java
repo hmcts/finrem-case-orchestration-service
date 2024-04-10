@@ -91,7 +91,7 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN, CaseDocumentParty.INTERVENER_FOUR),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_PENSION_PLAN)
+            is(DocumentCategory.REPORTS)
         );
 
 

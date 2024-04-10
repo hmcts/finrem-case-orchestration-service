@@ -1,5 +1,5 @@
 {
-  "event_id": "FR_issueApplication",
+  "event_id": "FR_approveApplication",
   "case_details": {
     "id": "123",
     "jurisdiction": "DIVORCE",

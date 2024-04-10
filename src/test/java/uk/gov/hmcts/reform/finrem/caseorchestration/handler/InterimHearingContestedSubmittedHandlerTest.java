@@ -7,16 +7,15 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -35,6 +34,8 @@ public class InterimHearingContestedSubmittedHandlerTest extends BaseHandlerTest
     private CaseDataService caseDataService;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String AUTH_TOKEN = "tokien:)";
@@ -70,13 +71,13 @@ public class InterimHearingContestedSubmittedHandlerTest extends BaseHandlerTest
 
     @Test
     public void givenContestedCase_WhenPartiesNeedToNotify_ThenItShouldSendNotificaiton() {
-        CallbackRequest callbackRequest = buildCallbackRequest(TEST_JSON);
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle =
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(TEST_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle =
             interimHearingContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(handle.getData());
 
-        verify(interimHearingService).sendNotification(any(), any());
+        verify(interimHearingService).sendNotification(any());
     }
 
 }
