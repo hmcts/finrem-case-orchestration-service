@@ -413,6 +413,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jacksonDatabind
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jacksonDatabind
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jacksonDatabind
     developmentOnly group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.loadbalancer
 
     implementation("org.apache.poi:poi:5.2.3") {
