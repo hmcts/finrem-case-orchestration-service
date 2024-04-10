@@ -13,20 +13,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPROVED_ORDERS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.DUPLICATED_GENERAL_ORDERS;
+
 @Configuration
 public class GeneralApplicationsCategoriser extends DocumentCategoriser {
 
     private static final Map<Integer, DocumentCategory> gaNumberToCategory = Map.of(
-        1, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_1,
-        2, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_2,
-        3, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_3,
-        4, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_4,
-        5, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_5,
-        6, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_6,
-        7, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_7,
-        8, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_8,
-        9, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_9,
-        10, DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_APPLICATION_10);
+        1, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1,
+        2, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_2,
+        3, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_3,
+        4, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_4,
+        5, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_5,
+        6, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_6,
+        7, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_7,
+        8, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_8,
+        9, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_9,
+        10, DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_10);
 
     public GeneralApplicationsCategoriser(FeatureToggleService featureToggleService) {
         super(featureToggleService);
@@ -42,13 +45,12 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
                     DocumentCategory categoryToApply;
 
                     if (generalApplicationCounter.get() > 10) {
-                        categoryToApply = (DocumentCategory.APPLICATIONS_GENERAL_APPLICATIONS_OVERFLOW);
+                        categoryToApply = DocumentCategory.APPLICATIONS_OTHER_APPLICATION_OVERFLOW;
                     } else {
-                        categoryToApply = (gaNumberToCategory.get(generalApplicationCounter.get()));
+                        categoryToApply = gaNumberToCategory.get(generalApplicationCounter.get());
                     }
 
-                    setCategoryToAllGaDocs(ga, categoryToApply);
-
+                    setCategoryToAllGaDocs(ga, categoryToApply, APPROVED_ORDERS);
                 });
         }
     }
@@ -81,34 +83,27 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
 
     private void removeDocumentCategory(List<GeneralApplicationsCollection> collectionToRemoveCategoryFrom) {
         collectionToRemoveCategoryFrom.forEach(
-            ga -> {
-                setCategoryToAllGaDocs(ga, DocumentCategory.DUPLICATED_GENERAL_ORDERS);
-            }
+            ga -> setCategoryToAllGaDocs(ga, DUPLICATED_GENERAL_ORDERS, DUPLICATED_GENERAL_ORDERS)
         );
     }
 
-    private void setCategoryToAllGaDocs(GeneralApplicationsCollection ga, DocumentCategory categoryToApply) {
+    private void setCategoryToAllGaDocs(GeneralApplicationsCollection ga, DocumentCategory categoryToApply,
+                                        DocumentCategory directionsDocumentCategory) {
         GeneralApplicationItems generalApplicationItems = ga.getValue();
         CaseDocument generalApplicationDocument = generalApplicationItems.getGeneralApplicationDocument();
         CaseDocument generalApplicationDraftOrder = generalApplicationItems.getGeneralApplicationDraftOrder();
         CaseDocument generalApplicationDirectionsDocument = generalApplicationItems.getGeneralApplicationDirectionsDocument();
 
         if (generalApplicationDocument != null) {
-            generalApplicationDocument.setCategoryId(
-                categoryToApply.getDocumentCategoryId()
-            );
+            generalApplicationDocument.setCategoryId(categoryToApply.getDocumentCategoryId());
         }
 
         if (generalApplicationDraftOrder != null) {
-            generalApplicationDraftOrder.setCategoryId(
-                categoryToApply.getDocumentCategoryId()
-            );
+            generalApplicationDraftOrder.setCategoryId(categoryToApply.getDocumentCategoryId());
         }
 
         if (generalApplicationDirectionsDocument != null) {
-            generalApplicationDirectionsDocument.setCategoryId(
-                categoryToApply.getDocumentCategoryId()
-            );
+            generalApplicationDirectionsDocument.setCategoryId(directionsDocumentCategory.getDocumentCategoryId());
         }
 
         List<GeneralApplicationSupportingDocumentData> generalApplicationSupportDocument = ga.getValue().getGaSupportDocuments();

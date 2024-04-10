@@ -16,13 +16,8 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
     }
 
     @Override
-    protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER;
-    }
-
-    @Override
-    protected DocumentCategory getPensionPlanDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_PENSION_PLAN;
+    protected DocumentCategory getOtherDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_OTHER;
     }
 
     @Override
@@ -48,6 +43,16 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
     @Override
     protected DocumentCategory getPreHearingDraftOrderDocumentCategory() {
         return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_PRE_HEARING_DRAFT_ORDER;
+    }
+
+    @Override
+    protected DocumentCategory getPointsOfClaimOrDefenceDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_POINTS_OF_CLAIM_OR_DEFENCE;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryFM5() {
+        return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_FM5;
     }
 
     @Override

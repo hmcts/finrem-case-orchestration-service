@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

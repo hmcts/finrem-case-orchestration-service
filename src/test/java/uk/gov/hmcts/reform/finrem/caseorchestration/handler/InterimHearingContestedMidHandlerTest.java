@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
@@ -77,38 +77,14 @@ class InterimHearingContestedMidHandlerTest extends BaseHandlerTestSetup {
         List<InterimHearingCollection> interimHearings = new  ArrayList<>();
 
         InterimHearingItem hearingItem = InterimHearingItem.builder()
-            .interimPromptForAnyDocument("Yes").interimUploadAdditionalDocument(caseDocument).build();
+            .interimPromptForAnyDocument(YesOrNo.YES).interimUploadAdditionalDocument(caseDocument).build();
 
         interimHearings.add(InterimHearingCollection.builder().value(hearingItem).build());
-        caseData.getInterimWrapper().setInterimHearings(interimHearings);
+        caseData.getInterimWrapper().setInterimHearingsScreenField(interimHearings);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().isEmpty());
         verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
-    }
-
-    @Test
-    void givenContestedCase_whenThereAreAlreadyExistingHearing_thenDoNotcheckDocumentForExisting()  {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.INTERIM_HEARING);
-        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-
-        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
-
-        List<InterimHearingCollection> interimHearings = new  ArrayList<>();
-
-        InterimHearingItem hearingItem = InterimHearingItem.builder()
-            .interimPromptForAnyDocument("Yes").interimUploadAdditionalDocument(caseDocument).build();
-
-        interimHearings.add(InterimHearingCollection.builder().value(hearingItem).build());
-        caseData.getInterimWrapper().setInterimHearings(interimHearings);
-
-        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
-        caseDataBefore.getInterimWrapper().setInterimHearings(interimHearings);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertTrue(response.getErrors().isEmpty());
-        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 }

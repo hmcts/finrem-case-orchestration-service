@@ -16,15 +16,9 @@ public class RespondentOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
+    protected DocumentCategory getOtherDocumentCategory() {
         return DocumentCategory.RESPONDENT_DOCUMENTS_MISCELLANEOUS_OR_OTHER;
     }
-
-    @Override
-    protected DocumentCategory getPensionPlanDocumentCategory() {
-        return DocumentCategory.RESPONDENT_DOCUMENTS_PENSION_PLAN;
-    }
-
 
     @Override
     protected DocumentCategory getCertificatesOfServiceDocumentCategory() {
@@ -49,6 +43,16 @@ public class RespondentOtherDocumentsHandler extends OtherDocumentsHandler {
     @Override
     protected DocumentCategory getPreHearingDraftOrderDocumentCategory() {
         return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
+    }
+
+    @Override
+    protected DocumentCategory getPointsOfClaimOrDefenceDocumentCategory() {
+        return DocumentCategory.RESPONDENT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE;
+    }
+
+    @Override
+    protected DocumentCategory getHearingDocumentsCategoryFM5() {
+        return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_FM5;
     }
 
     @Override

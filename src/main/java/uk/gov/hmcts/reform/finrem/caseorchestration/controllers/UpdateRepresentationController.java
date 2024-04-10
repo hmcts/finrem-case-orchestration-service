@@ -60,8 +60,11 @@ public class UpdateRepresentationController extends BaseController {
         validateCaseData(ccdRequest);
         caseDetails.getData().remove(IS_NOC_REJECTED);
         assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
+        log.info("The creator role has been revoked on case {}", caseDetails.getId());
         Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
+        log.info("Solicitor representation has been updated on case {}", caseDetails.getId());
         caseDetails.getData().putAll(caseData);
+        updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
         return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
     }
 
@@ -81,10 +84,8 @@ public class UpdateRepresentationController extends BaseController {
         Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
         validateCaseData(ccdRequest);
 
-        if (featureToggleService.isCaseworkerNoCEnabled()) {
-            caseData.put(NOC_PARTY, null);
-            caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, null);
-        }
+        caseData.put(NOC_PARTY, null);
+        caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, null);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

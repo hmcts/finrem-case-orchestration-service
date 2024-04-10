@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finrem
 
 public class FinremNotificationRequestMapperTest extends BaseServiceTest {
 
-    private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
+    private static final String TEST_JSON = "/fixtures/contested/interim-hearing-three-collection-no-track.json";
     protected static final String EMPTY_STRING = "";
 
     @Autowired
@@ -202,7 +202,7 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
         FinremCaseData caseData = caseDetails.getData();
 
         List<InterimHearingCollection> interimHearingList = Optional.ofNullable(
-            caseData.getInterimWrapper().getInterimHearings()).orElse(Collections.emptyList());
+            caseData.getInterimWrapper().getInterimHearingsScreenField()).orElse(Collections.emptyList());
 
         assertThat(interimHearingList.isEmpty(), is(false));
 
@@ -212,7 +212,7 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     public void shouldCreateNotificationRequestForIntervenerNotification() {
         Organisation org = Organisation.builder().organisationName("test org").organisationID("1").build();
         OrganisationPolicy intervenerOrg = OrganisationPolicy.builder().organisation(org).build();
-        IntervenerOneWrapper intervenerDetails = IntervenerOneWrapper.builder()
+        IntervenerOne intervenerDetails = IntervenerOne.builder()
             .intervenerName("intervener name")
             .intervenerOrganisation(intervenerOrg)
             .intervenerSolicitorReference(TEST_SOLICITOR_REFERENCE).build();

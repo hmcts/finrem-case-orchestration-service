@@ -12,7 +12,7 @@ import java.util.List;
 
 public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
 
-    private static List<CaseDocumentType> otherDocuments = List.of(
+    private static final List<CaseDocumentType> otherDocuments = List.of(
         CaseDocumentType.OTHER,
         CaseDocumentType.FORM_B,
         CaseDocumentType.FORM_F,
@@ -26,11 +26,13 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
         CaseDocumentType.PRE_HEARING_DRAFT_ORDER,
         CaseDocumentType.WITHOUT_PREJUDICE_OFFERS,
         CaseDocumentType.PENSION_REPORT,
-        CaseDocumentType.BILL_OF_COSTS
+        CaseDocumentType.BILL_OF_COSTS,
+        CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE,
+        CaseDocumentType.FM5
     );
 
-    public OtherDocumentsHandler(CaseDocumentCollectionType caseDocumentCollectionType,
-                                 CaseDocumentParty party, FeatureToggleService featureToggleService) {
+    protected OtherDocumentsHandler(CaseDocumentCollectionType caseDocumentCollectionType,
+                                    CaseDocumentParty party, FeatureToggleService featureToggleService) {
         super(caseDocumentCollectionType, party, featureToggleService);
     }
 
@@ -45,10 +47,10 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
     public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         switch (caseDocumentType) {
             case OTHER -> {
-                return getMiscellaneousOrOtherDocumentCategory();
+                return getOtherDocumentCategory();
             }
             case PENSION_PLAN -> {
-                return getPensionPlanDocumentCategory();
+                return DocumentCategory.REPORTS;
             }
             case FORM_B, FORM_F, CARE_PLAN -> {
                 return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER;
@@ -74,6 +76,12 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
             case PRE_HEARING_DRAFT_ORDER -> {
                 return getPreHearingDraftOrderDocumentCategory();
             }
+            case POINTS_OF_CLAIM_OR_DEFENCE -> {
+                return getPointsOfClaimOrDefenceDocumentCategory();
+            }
+            case FM5 -> {
+                return getHearingDocumentsCategoryFM5();
+            }
             default -> {
                 return getDefaultPartyCategory();
             }
@@ -81,9 +89,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
 
     }
 
-    protected abstract DocumentCategory getMiscellaneousOrOtherDocumentCategory();
-
-    protected abstract DocumentCategory getPensionPlanDocumentCategory();
+    protected abstract DocumentCategory getOtherDocumentCategory();
 
     protected abstract DocumentCategory getCertificatesOfServiceDocumentCategory();
 
@@ -98,5 +104,9 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
     protected abstract DocumentCategory getDefaultPartyCategory();
 
     protected abstract DocumentCategory getPreHearingDraftOrderDocumentCategory();
+
+    protected abstract DocumentCategory getPointsOfClaimOrDefenceDocumentCategory();
+
+    protected abstract DocumentCategory getHearingDocumentsCategoryFM5();
 
 }

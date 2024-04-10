@@ -30,7 +30,7 @@ public class GeneralOrderDocumentCategoriser extends DocumentCategoriser {
         List<ContestedGeneralOrderCollection> generalOrdersConsent =
             finremCaseData.getGeneralOrderWrapper().getGeneralOrdersConsent();
         log.info("Categorising general order consent documents for case with Case ID: {}", finremCaseData.getCcdCaseId());
-        categoriseGeneralOrders(generalOrdersConsent, DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION);
+        categoriseGeneralOrders(generalOrdersConsent, DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS);
     }
 
     private static void categoriseGeneralOrders(List<ContestedGeneralOrderCollection> generalOrderList,

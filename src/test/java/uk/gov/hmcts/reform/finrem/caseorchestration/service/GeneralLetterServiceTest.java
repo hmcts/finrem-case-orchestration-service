@@ -19,10 +19,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 import java.util.ArrayList;
@@ -221,9 +221,9 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(generalLetterData, hasSize(2));
 
         verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
-            DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
+            DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
         verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(),
-            DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
+            DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
 
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
@@ -249,7 +249,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER1, INTV1_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_1, "intvr1");
+        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1, "intvr1");
     }
 
     @Test
@@ -261,7 +261,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER1_SOLICITOR, INTV1_SOLICITOR_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_1, "intvr1sol");
+        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1, "intvr1sol");
     }
 
     @Test
@@ -273,7 +273,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER2_SOLICITOR, INTV2_SOLICITOR_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_2, "intvr2sol");
+        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2, "intvr2sol");
     }
 
     @Test
@@ -285,7 +285,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER2, INTV2_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_2, "intvr2");
+        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2, "intvr2");
     }
 
     @Test
@@ -297,7 +297,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER3_SOLICITOR, INTV3_SOLICITOR_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_3, "intvr3sol");
+        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3, "intvr3sol");
     }
 
     @Test
@@ -309,7 +309,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER3, INTV3_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_3, "intvr3");
+        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3, "intvr3");
     }
 
     @Test
@@ -321,7 +321,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER4_SOLICITOR, INTV4_SOLICITOR_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_4, "intvr4sol");
+        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4, "intvr4sol");
     }
 
     @Test
@@ -333,7 +333,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER4, INTV4_LABEL, true);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.CORRESPONDENCE_INTERVENER_4, "intvr4");
+        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4, "intvr4");
     }
 
     private void verifyIntervenerData(FinremCaseDetails caseDetails, DocumentCategory category, String intervenerName) {
@@ -408,8 +408,9 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         caseData.setCcdCaseType(CaseType.CONTESTED);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
+        assertNull(caseDetails.getData().getCourtDetails());
         verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
-            DocumentCategory.CORRESPONDENCE_OTHER.getDocumentCategoryId());
+            DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId());
         verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), any());
     }
 
@@ -454,27 +455,27 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     }
 
     private void addIntervenerOneWrapper(FinremCaseData caseData) {
-        IntervenerOneWrapper intervenerWrapper = IntervenerOneWrapper.builder().intervenerSolName("intvr1sol")
+        IntervenerOne intervenerWrapper = IntervenerOne.builder().intervenerSolName("intvr1sol")
             .intervenerName("intvr1").intervenerAddress(getAddress()).build();
-        caseData.setIntervenerOneWrapper(intervenerWrapper);
+        caseData.setIntervenerOne(intervenerWrapper);
     }
 
     private void addIntervenerTwoWrapper(FinremCaseData caseData) {
-        IntervenerTwoWrapper intervenerWrapper = IntervenerTwoWrapper.builder().intervenerSolName("intvr2sol")
+        IntervenerTwo intervenerWrapper = IntervenerTwo.builder().intervenerSolName("intvr2sol")
             .intervenerName("intvr2").intervenerAddress(getAddress()).build();
-        caseData.setIntervenerTwoWrapper(intervenerWrapper);
+        caseData.setIntervenerTwo(intervenerWrapper);
     }
 
     private void addIntervenerThreeWrapper(FinremCaseData caseData) {
-        IntervenerThreeWrapper intervenerWrapper = IntervenerThreeWrapper.builder().intervenerSolName("intvr3sol")
+        IntervenerThree intervenerWrapper = IntervenerThree.builder().intervenerSolName("intvr3sol")
             .intervenerName("intvr3").intervenerAddress(getAddress()).build();
-        caseData.setIntervenerThreeWrapper(intervenerWrapper);
+        caseData.setIntervenerThree(intervenerWrapper);
     }
 
     private void addIntervenerFourWrapper(FinremCaseData caseData) {
-        IntervenerFourWrapper intervenerWrapper = IntervenerFourWrapper.builder().intervenerSolName("intvr4sol")
+        IntervenerFour intervenerWrapper = IntervenerFour.builder().intervenerSolName("intvr4sol")
             .intervenerName("intvr4").intervenerAddress(getAddress()).build();
-        caseData.setIntervenerFourWrapper(intervenerWrapper);
+        caseData.setIntervenerFour(intervenerWrapper);
     }
 
     private static void verifyCaseDocumentFields(CaseDocument result, String category) {

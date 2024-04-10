@@ -75,14 +75,14 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         List<ConsentOrderCollection> consentedNotApprovedOrders = caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders();
         consentedNotApprovedOrders.forEach(data -> Assertions.assertEquals(
-            DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId(),
+            DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
             data.getApprovedOrder().getConsentOrder().getCategoryId()));
     }
 
 
     private List<ConsentOrderCollection> generateFinremNotApprovedConsentOrderData() {
         CaseDocument caseDocument = caseDocument();
-        caseDocument.setCategoryId(DocumentCategory.APPROVED_ORDERS_CONSENT_APPLICATION.getDocumentCategoryId());
+        caseDocument.setCategoryId(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId());
         return List.of(ConsentOrderCollection.builder().approvedOrder(
             ApprovedOrder.builder().consentOrder(caseDocument).build()).build());
     }
