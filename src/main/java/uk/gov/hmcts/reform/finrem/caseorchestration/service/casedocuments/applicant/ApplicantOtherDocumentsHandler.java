@@ -21,12 +21,6 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getPensionPlanDocumentCategory() {
-        return DocumentCategory.APPLICANT_DOCUMENTS_PENSION_PLAN;
-    }
-
-
-    @Override
     protected DocumentCategory getCertificatesOfServiceDocumentCategory() {
         return DocumentCategory.APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE;
     }
@@ -70,7 +64,6 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
     }
-
 
 
 }

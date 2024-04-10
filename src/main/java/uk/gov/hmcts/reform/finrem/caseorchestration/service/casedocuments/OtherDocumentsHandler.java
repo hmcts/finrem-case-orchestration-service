@@ -12,7 +12,7 @@ import java.util.List;
 
 public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
 
-    private static List<CaseDocumentType> otherDocuments = List.of(
+    private static final List<CaseDocumentType> otherDocuments = List.of(
         CaseDocumentType.OTHER,
         CaseDocumentType.FORM_B,
         CaseDocumentType.FORM_F,
@@ -31,8 +31,8 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
         CaseDocumentType.FM5
     );
 
-    public OtherDocumentsHandler(CaseDocumentCollectionType caseDocumentCollectionType,
-                                 CaseDocumentParty party, FeatureToggleService featureToggleService) {
+    protected OtherDocumentsHandler(CaseDocumentCollectionType caseDocumentCollectionType,
+                                    CaseDocumentParty party, FeatureToggleService featureToggleService) {
         super(caseDocumentCollectionType, party, featureToggleService);
     }
 
@@ -50,7 +50,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
                 return getOtherDocumentCategory();
             }
             case PENSION_PLAN -> {
-                return getPensionPlanDocumentCategory();
+                return DocumentCategory.REPORTS;
             }
             case FORM_B, FORM_F, CARE_PLAN -> {
                 return DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER;
@@ -90,8 +90,6 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
     }
 
     protected abstract DocumentCategory getOtherDocumentCategory();
-
-    protected abstract DocumentCategory getPensionPlanDocumentCategory();
 
     protected abstract DocumentCategory getCertificatesOfServiceDocumentCategory();
 
