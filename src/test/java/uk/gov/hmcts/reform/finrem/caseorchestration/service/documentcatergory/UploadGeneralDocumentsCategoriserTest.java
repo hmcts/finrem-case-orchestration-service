@@ -65,6 +65,21 @@ class UploadGeneralDocumentsCategoriserTest extends BaseHandlerTestSetup {
         assertNull(finremCaseData.getUploadGeneralDocuments().get(0).getValue());
     }
 
+    @Test
+    void testCategorizeDocumentsHandlesMissingDocumentType() {
+        FinremCaseData finremCaseData = FinremCaseData.builder().uploadGeneralDocuments(List.of(
+            createDocument(UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT),
+            createDocument(null)
+        )).build();
+
+        uploadGeneralDocumentsCategoriser.categorise(finremCaseData);
+
+        assertEquals(2, finremCaseData.getUploadGeneralDocuments().size());
+        assertEquals(DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId(),
+            finremCaseData.getUploadGeneralDocuments().get(0).getValue().getDocumentLink().getCategoryId());
+        assertNull(finremCaseData.getUploadGeneralDocuments().get(1).getValue().getDocumentLink().getCategoryId());
+    }
+
     private FinremCaseData buildFinremCaseData() {
         return FinremCaseData.builder().uploadGeneralDocuments(List.of(
             createDocument(UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT),

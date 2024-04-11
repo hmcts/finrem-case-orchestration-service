@@ -32,29 +32,34 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
 
     @Override
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
-
         if (CollectionUtils.isNotEmpty(finremCaseData.getUploadGeneralDocuments())) {
             finremCaseData.getUploadGeneralDocuments().forEach(doc -> checkTypeAndSetCategory(doc.getValue()));
+        }
+    }
+
+    private void checkTypeAndSetCategory(UploadGeneralDocument document) {
+        if (!isDocumentDataValid(document)) {
+            return;
+        }
+
+        if (APPLICANT_DOC_TYPES.contains(document.getDocumentType())) {
+            CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
+            setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
+            document.setDocumentLink(documentCopy);
+        } else if (RESPONDENT_DOC_TYPES.contains(document.getDocumentType())) {
+            CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
+            setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT.getDocumentCategoryId());
+            document.setDocumentLink(documentCopy);
+        } else {
+            CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
+            setCategoryToAllOrdersDocs(documentCopy, null);
+            document.setDocumentLink(documentCopy);
         }
 
     }
 
-    private void checkTypeAndSetCategory(UploadGeneralDocument document) {
-        if (document != null && document.getDocumentLink() != null) {
-            if (APPLICANT_DOC_TYPES.contains(document.getDocumentType())) {
-                CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
-                setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
-                document.setDocumentLink(documentCopy);
-            } else if (RESPONDENT_DOC_TYPES.contains(document.getDocumentType())) {
-                CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
-                setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT.getDocumentCategoryId());
-                document.setDocumentLink(documentCopy);
-            } else {
-                CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
-                setCategoryToAllOrdersDocs(documentCopy, null);
-                document.setDocumentLink(documentCopy);
-            }
-        }
+    private boolean isDocumentDataValid(UploadGeneralDocument document) {
+        return document != null && document.getDocumentLink() != null && document.getDocumentType() != null;
     }
 
     private void setCategoryToAllOrdersDocs(CaseDocument document, String categoryToApply) {
