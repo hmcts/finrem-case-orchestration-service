@@ -21,12 +21,6 @@ public class RespondentOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getPensionPlanDocumentCategory() {
-        return DocumentCategory.RESPONDENT_DOCUMENTS_PENSION_PLAN;
-    }
-
-
-    @Override
     protected DocumentCategory getCertificatesOfServiceDocumentCategory() {
         return DocumentCategory.RESPONDENT_DOCUMENTS_CERTIFICATES_OF_SERVICE;
     }

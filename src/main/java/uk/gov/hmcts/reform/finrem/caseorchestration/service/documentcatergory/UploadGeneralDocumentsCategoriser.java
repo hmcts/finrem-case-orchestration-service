@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.annotation.Configuration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
@@ -26,11 +25,9 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
 
     private static final List<UploadGeneralDocumentType> RESPONDENT_DOC_TYPES = List.of(LETTER_EMAIL_FROM_RESPONDENT,
         LETTER_EMAIL_FROM_RESPONDENT_SOLICITOR, LETTER_EMAIL_FROM_RESPONDENT_CONTESTED);
-    private final DocumentHelper documentHelper;
 
-    public UploadGeneralDocumentsCategoriser(FeatureToggleService featureToggleService, DocumentHelper documentHelper) {
+    public UploadGeneralDocumentsCategoriser(FeatureToggleService featureToggleService) {
         super(featureToggleService);
-        this.documentHelper = documentHelper;
     }
 
     @Override
