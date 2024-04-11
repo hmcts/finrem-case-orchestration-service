@@ -27,7 +27,8 @@ public class CreateGeneralOrderContestedSubmittedHandler extends FinremCallbackH
 
     public CreateGeneralOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                        FinremGeneralOrderRaisedContestedCorresponder generalOrderRaisedContestedCorresponder,
-                                                       FinremGeneralOrderRaisedConsentInContestedCorresponder generalOrderRaisedConsentInContestedCorresponder
+                                                       FinremGeneralOrderRaisedConsentInContestedCorresponder
+                                                           generalOrderRaisedConsentInContestedCorresponder
     ) {
         super(finremCaseDetailsMapper);
 

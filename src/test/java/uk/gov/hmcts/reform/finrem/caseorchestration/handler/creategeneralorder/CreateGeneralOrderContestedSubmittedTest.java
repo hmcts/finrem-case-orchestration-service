@@ -98,15 +98,15 @@ class  CreateGeneralOrderContestedSubmittedTest {
 
     @Test
     void testHandleContested() {
-            FinremCaseDetails caseDetails = new FinremCaseDetails();
-            FinremCallbackRequest request = FinremCallbackRequest.builder()
-                .caseDetails(caseDetails)
-                .eventType(GENERAL_ORDER)
-                .build();
+        FinremCaseDetails caseDetails = new FinremCaseDetails();
+        FinremCallbackRequest request = FinremCallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventType(GENERAL_ORDER)
+            .build();
 
-            var response = handler.handle(request, "some-token");
+        var response = handler.handle(request, "some-token");
 
-            assertThat(response).isNotNull();
+        assertThat(response).isNotNull();
         verify(finremGeneralOrderRaisedContestedCorresponder, times(1)).sendCorrespondence(caseDetails);
     }
 }
