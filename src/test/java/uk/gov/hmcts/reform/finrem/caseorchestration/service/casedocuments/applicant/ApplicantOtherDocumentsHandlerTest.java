@@ -84,7 +84,7 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN, CaseDocumentParty.APPLICANT),
-            is(DocumentCategory.APPLICANT_DOCUMENTS_PENSION_PLAN)
+            is(DocumentCategory.REPORTS)
         );
 
         assertThat(

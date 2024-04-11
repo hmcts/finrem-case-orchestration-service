@@ -21,11 +21,6 @@ public class IntervenerOneOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getPensionPlanDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_PENSION_PLAN;
-    }
-
-    @Override
     protected DocumentCategory getCertificatesOfServiceDocumentCategory() {
         return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_CERTIFICATES_OF_SERVICE;
     }
