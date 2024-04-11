@@ -42,7 +42,11 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
             return;
         }
 
-        if (APPLICANT_DOC_TYPES.contains(document.getDocumentType())) {
+        if (document.getDocumentType() == null) {
+            CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
+            setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.CASE_DOCUMENTS.getDocumentCategoryId());
+            document.setDocumentLink(documentCopy);
+        } else if (APPLICANT_DOC_TYPES.contains(document.getDocumentType())) {
             CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
             setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
             document.setDocumentLink(documentCopy);
@@ -55,11 +59,10 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
             setCategoryToAllOrdersDocs(documentCopy, null);
             document.setDocumentLink(documentCopy);
         }
-
     }
 
     private boolean isDocumentDataValid(UploadGeneralDocument document) {
-        return document != null && document.getDocumentLink() != null && document.getDocumentType() != null;
+        return document != null && document.getDocumentLink() != null;
     }
 
     private void setCategoryToAllOrdersDocs(CaseDocument document, String categoryToApply) {
