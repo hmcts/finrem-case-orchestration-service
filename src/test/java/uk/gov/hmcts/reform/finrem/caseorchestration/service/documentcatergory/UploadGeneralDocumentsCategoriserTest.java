@@ -65,37 +65,23 @@ class UploadGeneralDocumentsCategoriserTest extends BaseHandlerTestSetup {
         assertNull(finremCaseData.getUploadGeneralDocuments().get(0).getValue());
     }
 
-    protected FinremCaseData buildFinremCaseData() {
-        UploadGeneralDocumentCollection applicantDocument = UploadGeneralDocumentCollection.builder()
-            .value(UploadGeneralDocument.builder().documentLink(CaseDocument.builder().build())
-                .documentType(UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT).build())
-            .build();
+    private FinremCaseData buildFinremCaseData() {
+        return FinremCaseData.builder().uploadGeneralDocuments(List.of(
+            createDocument(UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT),
+            createDocument(UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT_SOLICITOR),
+            createDocument(UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT),
+            createDocument(UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT_SOLICITOR),
+            createDocument(UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT_CONTESTED),
+            createDocument(UploadGeneralDocumentType.DRAFT_ORDER)
+        )).build();
+    }
 
-        UploadGeneralDocumentCollection applicantSolicitorDocument = UploadGeneralDocumentCollection.builder()
-            .value(UploadGeneralDocument.builder().documentLink(CaseDocument.builder().build())
-                .documentType(UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT_SOLICITOR).build())
+    private UploadGeneralDocumentCollection createDocument(UploadGeneralDocumentType documentType) {
+        return UploadGeneralDocumentCollection.builder()
+            .value(UploadGeneralDocument.builder()
+                .documentLink(CaseDocument.builder().build())
+                .documentType(documentType)
+                .build())
             .build();
-        UploadGeneralDocumentCollection respondentDocument = UploadGeneralDocumentCollection.builder()
-            .value(UploadGeneralDocument.builder().documentLink(CaseDocument.builder().build())
-                .documentType(UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT).build())
-            .build();
-
-        UploadGeneralDocumentCollection respondentSolicitorDocument = UploadGeneralDocumentCollection.builder()
-            .value(UploadGeneralDocument.builder().documentLink(CaseDocument.builder().build())
-                .documentType(UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT_SOLICITOR).build())
-            .build();
-
-        UploadGeneralDocumentCollection respondentContestedDocument = UploadGeneralDocumentCollection.builder()
-            .value(UploadGeneralDocument.builder().documentLink(CaseDocument.builder().build())
-                .documentType(UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT_CONTESTED).build())
-            .build();
-
-        UploadGeneralDocumentCollection drafOrder = UploadGeneralDocumentCollection.builder()
-            .value(UploadGeneralDocument.builder().documentLink(CaseDocument.builder().build())
-                .documentType(UploadGeneralDocumentType.DRAFT_ORDER).build())
-            .build();
-
-        return FinremCaseData.builder().uploadGeneralDocuments(List.of(applicantDocument, applicantSolicitorDocument,
-            respondentDocument, respondentSolicitorDocument, respondentContestedDocument, drafOrder)).build();
     }
 }
