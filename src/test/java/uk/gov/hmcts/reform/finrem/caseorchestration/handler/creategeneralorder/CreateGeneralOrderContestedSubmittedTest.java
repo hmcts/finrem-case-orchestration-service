@@ -13,8 +13,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedConsentInContestedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedContestedCorresponder;
 
 import java.util.stream.Stream;
 
@@ -41,7 +45,10 @@ class  CreateGeneralOrderContestedSubmittedTest {
     private FinremCaseDetailsMapper mapper;
 
     @Mock
-    private FinremGeneralOrderRaisedCorresponder corresponder;
+    private FinremGeneralOrderRaisedConsentInContestedCorresponder finremGeneralOrderRaisedConsentInContestedCorresponder;
+
+    @Mock
+    private FinremGeneralOrderRaisedContestedCorresponder finremGeneralOrderRaisedContestedCorresponder;
 
     @ParameterizedTest
     @MethodSource
@@ -74,15 +81,32 @@ class  CreateGeneralOrderContestedSubmittedTest {
     }
 
     @Test
-    void testHandle() {
-        FinremCaseDetails caseDetails = new FinremCaseDetails();
+    void testHandleConsentInContested() {
+        ConsentOrderWrapper consentOrderWrapper = ConsentOrderWrapper.builder().consentD81Question(YesOrNo.YES).build();
+        FinremCaseData finremCaseData = FinremCaseData.builder().consentOrderWrapper(consentOrderWrapper).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CONTESTED).data(finremCaseData).build();
         FinremCallbackRequest request = FinremCallbackRequest.builder()
             .caseDetails(caseDetails)
+            .eventType(GENERAL_ORDER_CONSENT_IN_CONTESTED)
             .build();
 
         var response = handler.handle(request, "some-token");
 
         assertThat(response).isNotNull();
-        verify(corresponder, times(1)).sendCorrespondence(caseDetails, request.getEventType());
+        verify(finremGeneralOrderRaisedConsentInContestedCorresponder, times(1)).sendCorrespondence(caseDetails);
+    }
+
+    @Test
+    void testHandleContested() {
+            FinremCaseDetails caseDetails = new FinremCaseDetails();
+            FinremCallbackRequest request = FinremCallbackRequest.builder()
+                .caseDetails(caseDetails)
+                .eventType(GENERAL_ORDER)
+                .build();
+
+            var response = handler.handle(request, "some-token");
+
+            assertThat(response).isNotNull();
+        verify(finremGeneralOrderRaisedContestedCorresponder, times(1)).sendCorrespondence(caseDetails);
     }
 }
