@@ -26,6 +26,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_FOUR_CODE;
@@ -288,6 +289,34 @@ public class IntervenersAboutToSubmitHandlerTest {
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).removeIntervenerDetails(fourWrapper, new ArrayList<>(),
             finremCaseData, finremCallbackRequest.getCaseDetails().getId());
+    }
+
+    @Test
+    public void givenNullPostCode_whenSelectionMadeToAddIntervener4_thenHandlerThrowError() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        IntervenerFour fourWrapper = IntervenerFour.builder()
+            .intervenerName("Four name")
+            .intervenerEmail("test@test.com")
+            .intervenerAddress(Address.builder().county("West Yorkshire").build())
+            .build();
+
+        finremCaseData.setIntervenerFour(fourWrapper);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
+
+        DynamicRadioListElement option4 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
+        handleResp.getData().getIntervenersList().setValue(option4);
+
+        midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_FOUR_CODE).build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertTrue(response.getErrors().contains("Postcode field is required for the intervener."));
     }
 
     @Test
