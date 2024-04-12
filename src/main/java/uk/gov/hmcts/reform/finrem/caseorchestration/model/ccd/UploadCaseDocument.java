@@ -35,6 +35,8 @@ public class UploadCaseDocument {
     private String exceptionRecordReference;
     private YesOrNo selectForUpdate;
 
+    private YesOrNo selectForUpdate;
+
     public static UploadCaseDocument from(ScannedDocumentCollection scannedDocumentCollection) {
         ScannedDocument scannedDocument = scannedDocumentCollection.getValue();
         return UploadCaseDocument.builder()
