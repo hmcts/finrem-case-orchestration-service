@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -84,7 +85,9 @@ public class IntervenersAboutToSubmitHandlerTest {
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerOne oneWrapper = IntervenerOne
-            .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
+            .builder().intervenerName("One name").intervenerEmail("test@test.com")
+            .intervenerAddress(Address.builder().postCode("12345").build())
+            .build();
 
         finremCaseData.setIntervenerOne(oneWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -135,7 +138,9 @@ public class IntervenersAboutToSubmitHandlerTest {
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerTwo twoWrapper = IntervenerTwo
-            .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
+            .builder().intervenerName("Two name").intervenerEmail("test@test.com")
+            .intervenerAddress(Address.builder().postCode("12345").build())
+            .build();
 
         finremCaseData.setIntervenerTwo(twoWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -186,7 +191,9 @@ public class IntervenersAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         IntervenerThree threeWrapper = IntervenerThree
-            .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
+            .builder().intervenerName("Three name").intervenerEmail("test@test.com")
+            .intervenerAddress(Address.builder().postCode("12345").build())
+            .build();
 
         finremCaseData.setIntervenerThree(threeWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -233,8 +240,11 @@ public class IntervenersAboutToSubmitHandlerTest {
     public void givenContestedCase_whenSelectionMadeToAddIntervener4_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        IntervenerFour fourWrapper = IntervenerFour
-            .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
+        IntervenerFour fourWrapper = IntervenerFour.builder()
+            .intervenerName("Four name")
+            .intervenerEmail("test@test.com")
+            .intervenerAddress(Address.builder().postCode("12345").build())
+            .build();
 
         finremCaseData.setIntervenerFour(fourWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -285,7 +295,9 @@ public class IntervenersAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         IntervenerFour fourWrapper = IntervenerFour
-            .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
+            .builder().intervenerName("Four name").intervenerEmail("test@test.com")
+            .intervenerAddress(Address.builder().postCode("12345").build())
+            .build();
 
         finremCaseData.setIntervenerFour(fourWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -304,7 +316,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         assertThatThrownBy(() ->
             handler.handle(finremCallbackRequest, AUTH_TOKEN)
         ).isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Invalid option received for case " + 123L);
+            .hasMessage("Invalid operation code: " + INTERVENER_INVALID);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
