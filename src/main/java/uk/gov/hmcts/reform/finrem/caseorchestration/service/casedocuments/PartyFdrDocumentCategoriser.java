@@ -23,6 +23,8 @@ public abstract class PartyFdrDocumentCategoriser {
                 return DocumentCategory.FDR_REPORTS;
             case PRE_HEARING_DRAFT_ORDER:
                 return getHearingDraftOrderDocumentCategory();
+            case POINTS_OF_CLAIM_OR_DEFENCE:
+                return getPointsOfClaimOrDefenceDocumentCategory();
             default:
                 return getDefaultDocumentCategory();
         }
@@ -31,6 +33,8 @@ public abstract class PartyFdrDocumentCategoriser {
     protected abstract DocumentCategory getDefaultDocumentCategory();
 
     protected abstract DocumentCategory getHearingDraftOrderDocumentCategory();
+
+    protected abstract DocumentCategory getPointsOfClaimOrDefenceDocumentCategory();
 
     protected abstract DocumentCategory getOtherDocumentCategory();
 
