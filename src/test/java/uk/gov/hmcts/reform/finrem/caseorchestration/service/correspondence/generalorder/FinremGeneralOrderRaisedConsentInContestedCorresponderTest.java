@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -17,7 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FinremGeneralOrderRaisedConsentInContestedCorresponderTest {
+class FinremGeneralOrderRaisedConsentInContestedCorresponderTest {
 
     @InjectMocks
     private FinremGeneralOrderRaisedConsentInContestedCorresponder corresponder;
@@ -27,11 +28,15 @@ public class FinremGeneralOrderRaisedConsentInContestedCorresponderTest {
 
     private FinremCaseData caseData;
     private FinremCaseDetails caseDetails;
+    private SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper;
+    private IntervenerOne intervenerWrapper;
 
     @BeforeEach
     void setup() {
         caseData = FinremCaseData.builder().build();
         caseDetails = FinremCaseDetails.builder().data(caseData).build();
+        solicitorCaseDataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
+        intervenerWrapper = IntervenerOne.builder().build();
     }
 
     @Test

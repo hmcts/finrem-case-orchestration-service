@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FinremGeneralOrderRaisedConsentedCorresponderTest {
+class FinremGeneralOrderRaisedConsentedCorresponderTest {
 
     @InjectMocks
     private FinremGeneralOrderRaisedConsentedCorresponder corresponder;

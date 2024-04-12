@@ -14,6 +14,7 @@ public class FinremGeneralOrderRaisedContestedCorresponder extends FinremEmailOn
         super(notificationService);
     }
 
+    @Override
     public void sendCorrespondence(FinremCaseDetails caseDetails) {
         super.sendCorrespondence(caseDetails);
         sendIntervenerCorrespondence(caseDetails);

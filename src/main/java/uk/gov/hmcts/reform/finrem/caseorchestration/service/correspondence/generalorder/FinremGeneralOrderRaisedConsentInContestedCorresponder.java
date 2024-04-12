@@ -15,6 +15,7 @@ public class FinremGeneralOrderRaisedConsentInContestedCorresponder extends Finr
         super(notificationService);
     }
 
+    @Override
     public void sendCorrespondence(FinremCaseDetails caseDetails) {
         super.sendCorrespondence(caseDetails);
         sendIntervenerCorrespondence(caseDetails);
@@ -42,6 +43,5 @@ public class FinremGeneralOrderRaisedConsentInContestedCorresponder extends Finr
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper);
         notificationService.sendContestedConsentGeneralOrderEmailIntervenerSolicitor(caseDetails,
             caseDataKeysWrapper);
-
     }
 }

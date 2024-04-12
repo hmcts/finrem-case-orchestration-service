@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FinremGeneralOrderRaisedContestedCorresponderTest {
+class FinremGeneralOrderRaisedContestedCorresponderTest {
     @InjectMocks
     private FinremGeneralOrderRaisedContestedCorresponder corresponder;
 

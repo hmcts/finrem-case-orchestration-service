@@ -12,10 +12,6 @@ public class FinremGeneralOrderRaisedConsentedCorresponder extends FinremEmailOn
         super(notificationService);
     }
 
-    public void sendCorrespondence(FinremCaseDetails caseDetails) {
-        super.sendCorrespondence(caseDetails);
-    }
-
     @Override
     protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
         notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(caseDetails);
