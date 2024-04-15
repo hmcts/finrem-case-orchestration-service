@@ -36,14 +36,14 @@ public class MiamCheckService {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<String> miamExemptionErrors = miamExemptionAttendanceCheck(caseData);
-        if (miamExemptionErrors != null) {
+        if (miamExemptionErrors != null && !miamExemptionErrors.isEmpty()) {
             return miamExemptionErrors;
         }
 
         Map<String, List<String>> errors = new HashMap<>();
         addEvidenceUnavailableErrors(errors, caseData);
 
-        return errors.values().stream().filter(Objects::nonNull).findFirst().orElse(List.of());
+        return errors.values().stream().filter(error -> !error.isEmpty()).findFirst().orElse(List.of());
     }
 
     private void addEvidenceUnavailableErrors(Map<String, List<String>> errors, Map<String, Object> caseData) {
@@ -64,7 +64,7 @@ public class MiamCheckService {
         if (applicantAttended.equalsIgnoreCase("no") && claimingExemption.equalsIgnoreCase("no")) {
             return List.of(MIAM_EXEMPT_ERROR);
         }
-        return null;
+        return List.of();
     }
 
     private List<String> getMiamEvidenceUnavailableErrors(Map<String, Object> caseData, String checklistKey,
@@ -75,7 +75,7 @@ public class MiamCheckService {
         if (checklist != null && checklist.contains(checklistValue) && StringUtils.isBlank(textbox)) {
             return List.of(MIAM_EVIDENCE_UNAVAILABLE_ERROR);
         }
-        return null;
+        return List.of();
     }
 
     private String convertObjectToString(Object object) {

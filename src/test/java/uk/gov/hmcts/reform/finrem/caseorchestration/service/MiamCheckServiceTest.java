@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_CHECKLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_TEXTBOX;
 
-public class MiamCheckServiceTest {
+class MiamCheckServiceTest {
 
     private static final String MIAM_EXEMPT_ERROR = "You cannot make this application to court unless the applicant has "
         + "either attended, or is exempt from attending a MIAM. Please refer to "
@@ -58,15 +58,14 @@ public class MiamCheckServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideDataForMiamFieldTest")
-    public void whenSelectedMiamEvidenceUnavailableAndTextboxEmptyThenShouldReturnError(Map<String, Object> data, String expectedError) {
+    void whenSelectedMiamEvidenceUnavailableAndTextboxEmptyThenShouldReturnError(Map<String, Object> data, String expectedError) {
         List<String> errors = getMiamErrorsFromCaseData(data);
         assertThat(errors, contains(expectedError));
     }
 
     private List<String> getMiamErrorsFromCaseData(Map<String, Object> data) {
         when(caseDetails.getData()).thenReturn(data);
-        List<String> errors = service.validateMiamFields(caseDetails);
-        return errors;
+        return service.validateMiamFields(caseDetails);
     }
 
     private static Stream<Arguments> provideDataForMiamFieldTest() {
@@ -81,7 +80,7 @@ public class MiamCheckServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideDataForMiamFieldNoErrorTest")
-    public void shouldNotReturnError(Map<String, Object> data) {
+    void shouldNotReturnError(Map<String, Object> data) {
         List<String> errors = getMiamErrorsFromCaseData(data);
         assertThat(errors, is(empty()));
     }
