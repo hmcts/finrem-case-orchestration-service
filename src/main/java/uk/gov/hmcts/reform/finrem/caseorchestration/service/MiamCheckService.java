@@ -29,8 +29,8 @@ public class MiamCheckService {
         + "https://www.familymediationcouncil.org.uk/family-mediation/assessment-meeting-miam/ "
         + "for further information on what to do next and how to arrange a MIAM.";
 
-    private static final String MIAM_EVIDENCE_UNAVAILABLE_ERROR = "Please explain in the textbox why you are unable to " +
-        "provide the required evidence with your application.";
+    private static final String MIAM_EVIDENCE_UNAVAILABLE_ERROR = "Please explain in the textbox why you are unable to "
+        + "provide the required evidence with your application.";
 
     public List<String> miamExemptAttendCheck(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
