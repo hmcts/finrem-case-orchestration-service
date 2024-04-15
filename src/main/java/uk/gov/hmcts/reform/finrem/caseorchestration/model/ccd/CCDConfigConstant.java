@@ -263,6 +263,14 @@ public class CCDConfigConstant {
     //contest courts
     public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
+    public static final String MIAM_DOMESTIC_VIOLENCE_CHECKLIST = "MIAMDomesticViolenceChecklist";
+    public static final String MIAM_URGENCY_CHECKLIST = "MIAMUrgencyReasonChecklist";
+    public static final String MIAM_PREVIOUS_ATTENDANCE_CHECKLIST = "MIAMPreviousAttendanceChecklist";
+    public static final String MIAM_OTHER_GROUNDS_CHECKLIST = "MIAMOtherGroundsChecklist";
+    public static final String MIAM_DOMESTIC_ABUSE_TEXTBOX = "evidenceUnavailableDomesticAbuseMIAM";
+    public static final String MIAM_PREVIOUS_ATTENDANCE_TEXTBOX = "evidenceUnavailablePreviousAttendanceMIAM";
+    public static final String MIAM_OTHER_GROUNDS_TEXTBOX = "evidenceUnavailableOtherGroundsMIAM";
+    public static final String MIAM_URGENCY_TEXTBOX = "evidenceUnavailableUrgencyMIAM";
     public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
     public static final String IS_ADMIN = "isAdmin";
