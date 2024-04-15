@@ -47,7 +47,9 @@ public enum MiamOtherGrounds {
             + "(i) in prison or any other institution in which the prospective applicant is required to be "
             + "detained and facilities cannot be made available for them to attend a MIAM online or by video link; or\n"
             + "(ii) subject to conditions of bail that prevent contact with the other person; or\n"
-            + "(iii) subject to a licence with a prohibited contact requirement in relation to the other person.\"");
+            + "(iii) subject to a licence with a prohibited contact requirement in relation to the other person.\""),
+    FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_7("FR_ms_MIAMOtherGroundsChecklist_Value_7",
+        "I am unable to provide the required evidence with my application.");
 
     private final String value;
     private final String text;

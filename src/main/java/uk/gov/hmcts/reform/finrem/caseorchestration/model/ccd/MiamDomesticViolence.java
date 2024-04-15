@@ -106,7 +106,10 @@ public enum MiamDomesticViolence {
     FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_22("FR_ms_MIAMDomesticViolenceChecklist_Value_22",
         "Evidence which demonstrates that a prospective party has been, or is at risk of being, the "
             + "victim of domestic abuse by another prospective party in the form of abuse which relates to"
-            + " financial matters");
+            + " financial matters"),
+    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_23("FR_ms_MIAMDomesticViolenceChecklist_Value_23",
+        "I am unable to provide the required evidence with my application.");
+
 
     private final String value;
 

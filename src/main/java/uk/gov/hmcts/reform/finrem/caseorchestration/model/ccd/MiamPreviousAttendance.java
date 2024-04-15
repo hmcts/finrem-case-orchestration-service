@@ -18,7 +18,9 @@ public enum MiamPreviousAttendance {
             + "application, and must include the signature of the provider; or"),
     FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_2("FR_ms_MIAMPreviousAttendanceChecklist_Value_2",
         "The application would be made in existing proceedings which are continuing and the prospective "
-            + "applicant attended a MIAM before initiating those proceedings.");
+            + "applicant attended a MIAM before initiating those proceedings."),
+    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_3("FR_ms_MIAMPreviousAttendanceChecklist_Value_3",
+        "I am unable to provide the required evidence with my application.");
 
     private final String value;
     private final String text;
