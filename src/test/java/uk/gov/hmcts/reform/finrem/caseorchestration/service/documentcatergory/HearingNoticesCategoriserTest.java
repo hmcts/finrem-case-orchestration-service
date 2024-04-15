@@ -29,7 +29,7 @@ class HearingNoticesCategoriserTest {
     }
 
     @Test
-    void categoriseDocuments() {
+    void testCategorise() {
         FinremCaseData finremCaseData = getFinremCaseData();
         hearingNoticesCategoriser.categorise(finremCaseData);
         List<DocumentCollection> hearingNoticeDocuments = finremCaseData.getHearingNoticeDocumentPack();
