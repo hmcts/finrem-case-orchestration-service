@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -30,7 +31,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -80,7 +80,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_SOL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
@@ -431,15 +436,15 @@ public class NotificationService {
     }
 
     public void sendContestOrderApprovedEmailApplicant(CaseDetails caseDetails) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails)));
+        log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}", caseDetails.getId());
+        sendContestOrderApprovedEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_APPLICANT);
     }
 
     public void sendContestOrderApprovedEmailApplicant(FinremCaseDetails caseDetails) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails)));
+        log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}", caseDetails.getId());
+        emailService.sendConfirmationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_APPLICANT);
     }
 
     /**
@@ -451,20 +456,24 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     public void sendContestOrderApprovedEmailRespondent(CaseDetails caseDetails) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails)));
+        log.info("Sending notification email to Respondent for 'Contest Order Approved'. Case ID : {}",
+            caseDetails.getId());
+        sendContestOrderApprovedEmail(
+            notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_RESPONDENT);
     }
 
     public void sendContestOrderApprovedEmailRespondent(FinremCaseDetails caseDetails) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails)));
+        log.info("Sending notification email to Respondent for 'Contest Order Approved'. Case ID : {}",
+            caseDetails.getId());
+        sendContestOrderApprovedEmail(
+            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_RESPONDENT);
     }
 
     /**
      * No Return.
-     * <p>Please use @{@link #sendContestOrderApprovedEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
+     * <p>Please use @{@link #sendContestOrderApprovedEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper, IntervenerType)}</p>
      *
      * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
@@ -472,23 +481,31 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     public void sendContestOrderApprovedEmailIntervener(CaseDetails caseDetails,
-                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper)));
+                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
+                                                        IntervenerType intervener) {
+        log.info("Sending notification email to {} for 'Contest Order Approved'. Case ID : {}",
+            intervener, caseDetails.getId());
+        NotificationRequest request = notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
+            caseDetails, caseDataKeysWrapper);
+        EmailTemplateNames template = getIntervenerSendOrderContestedTemplate(intervener);
+        sendContestOrderApprovedEmail(request, template);
     }
 
     public void sendContestOrderApprovedEmailIntervener(FinremCaseDetails caseDetails,
-                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper)));
+                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
+                                                        IntervenerType intervener) {
+        log.info("Sending notification email to {} for 'Contest Order Approved'. Case ID : {}",
+            intervener, caseDetails.getId());
+        NotificationRequest request = finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
+            caseDetails, caseDataKeysWrapper);
+        EmailTemplateNames template = getIntervenerSendOrderContestedTemplate(intervener);
+        sendContestOrderApprovedEmail(request, template);
     }
 
-    public void sendContestOrderApprovedEmail(NotificationRequest notificationRequest) {
+    public void sendContestOrderApprovedEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         log.info("Received request for notification email for 'Contest Order Approved'. Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
+        emailService.sendConfirmationEmail(notificationRequest, template);
     }
 
     /**
@@ -1851,5 +1868,25 @@ public class NotificationService {
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
         }
         return DEFAULT_EMAIL;
+    }
+
+    private EmailTemplateNames getIntervenerSendOrderContestedTemplate(IntervenerType intervener) {
+        switch (intervener) {
+            case INTERVENER_ONE -> {
+                return FR_CONTEST_ORDER_APPROVED_INTERVENER1;
+            }
+            case INTERVENER_TWO -> {
+                return FR_CONTEST_ORDER_APPROVED_INTERVENER2;
+            }
+            case INTERVENER_THREE -> {
+                return FR_CONTEST_ORDER_APPROVED_INTERVENER3;
+            }
+            case INTERVENER_FOUR -> {
+                return FR_CONTEST_ORDER_APPROVED_INTERVENER4;
+            }
+            default -> {
+                return FR_CONTEST_ORDER_APPROVED_INTERVENER1;
+            }
+        }
     }
 }
