@@ -266,7 +266,7 @@ public class CaseDataService {
     }
 
     public boolean isConsentedApplication(FinremCaseDetails caseDetails) {
-        return CaseType.CONSENTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType()));
+        return CaseType.CONSENTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType().getCcdType()));
     }
 
     /**

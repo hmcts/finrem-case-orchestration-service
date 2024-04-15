@@ -13,7 +13,6 @@ public enum DocumentCategory {
     POST_HEARING_DRAFT_ORDER("postHearingDraftOrder"),
     APPROVED_ORDERS("approvedOrders"),
     APPROVED_ORDERS_CASE("approvedOrdersCase"),
-    APPROVED_ORDERS_OTHER_APPLICATION("approvedOrdersOtherApplication"),
     APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS("approvedOrdersConsentOrderToFinaliseProceedings"),
     APPLICANT_DOCUMENTS("applicantDocuments"),
     APPLICANT_DOCUMENTS_FORM_E("applicantDocumentsFormE"),
