@@ -219,6 +219,7 @@ public class FinremCaseData {
     private String familyMediatorServiceName;
     private String soleTraderName;
     private CaseDocument uploadMediatorDocument;
+    private CaseDocument uploadMediatorDocumentPaperCase;
     private String mediatorRegistrationNumber1;
     private String familyMediatorServiceName1;
     private String soleTraderName1;
