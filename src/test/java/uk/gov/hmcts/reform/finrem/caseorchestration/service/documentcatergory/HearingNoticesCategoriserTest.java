@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -14,32 +12,33 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HearingNoticesCategoriserTest {
+class HearingNoticesCategoriserTest {
 
     HearingNoticesCategoriser hearingNoticesCategoriser;
     FeatureToggleService featureToggleService;
 
-    @Before
-    public void setUpTest() {
+    @BeforeEach
+    void setUp() {
         featureToggleService = mock(FeatureToggleService.class);
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         hearingNoticesCategoriser = new HearingNoticesCategoriser(featureToggleService);
     }
 
     @Test
-    public void categoriseDocuments() {
+    void categoriseDocuments() {
         FinremCaseData finremCaseData = getFinremCaseData();
         hearingNoticesCategoriser.categorise(finremCaseData);
+        List<DocumentCollection> hearingNoticeDocuments = finremCaseData.getHearingNoticeDocumentPack();
 
-        assert finremCaseData.getHearingNoticeDocumentPack().get(0).getValue().getCategoryId().equals(
+        assertThat(hearingNoticeDocuments.get(0).getValue().getCategoryId()).isEqualTo(
             DocumentCategory.HEARING_NOTICES.getDocumentCategoryId()
         );
 
-        assert finremCaseData.getHearingNoticeDocumentPack().get(1).getValue().getCategoryId().equals(
+        assertThat(hearingNoticeDocuments.get(1).getValue().getCategoryId()).isEqualTo(
             DocumentCategory.SYSTEM_DUPLICATES.getDocumentCategoryId()
         );
     }
