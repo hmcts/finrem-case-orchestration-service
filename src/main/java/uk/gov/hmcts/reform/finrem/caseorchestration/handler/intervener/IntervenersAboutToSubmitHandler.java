@@ -30,8 +30,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Service
 public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     private final IntervenerService service;
-    private static final List<String> ADD_OPERATION_CODES = List.of(ADD_INTERVENER_ONE_CODE, ADD_INTERVENER_TWO_CODE, ADD_INTERVENER_THREE_CODE, ADD_INTERVENER_FOUR_CODE);
-    private static final List<String> DELETE_OPERATION_CODES = List.of(DEL_INTERVENER_ONE_CODE, DEL_INTERVENER_TWO_CODE, DEL_INTERVENER_THREE_CODE, DEL_INTERVENER_FOUR_CODE);
+    private static final List<String> ADD_OPERATION_CODES = List.of(ADD_INTERVENER_ONE_CODE, ADD_INTERVENER_TWO_CODE,
+        ADD_INTERVENER_THREE_CODE, ADD_INTERVENER_FOUR_CODE);
+    private static final List<String> DELETE_OPERATION_CODES = List.of(DEL_INTERVENER_ONE_CODE, DEL_INTERVENER_TWO_CODE,
+        DEL_INTERVENER_THREE_CODE, DEL_INTERVENER_FOUR_CODE);
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                            IntervenerService service) {
