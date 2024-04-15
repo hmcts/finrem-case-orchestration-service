@@ -32,17 +32,21 @@ public class MiamCheckService {
     private static final String MIAM_EVIDENCE_UNAVAILABLE_ERROR = "Please explain in the textbox why you are unable to "
         + "provide the required evidence with your application.";
 
-    public List<String> miamExemptAttendCheck(CaseDetails caseDetails) {
+    public List<String> validateMiamFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        String applicantAttended = Objects.toString(caseData.get(APPLICANT_ATTENDED_MIAM));
-        String claimingExemption = Objects.toString(caseData.get(CLAIMING_EXEMPTION_MIAM));
-
-        if (applicantAttended.equalsIgnoreCase("no") && claimingExemption.equalsIgnoreCase("no")) {
-            return List.of(MIAM_EXEMPT_ERROR);
+        List<String> miamExemptionErrors = miamExemptionAttendanceCheck(caseData);
+        if (miamExemptionErrors != null) {
+            return miamExemptionErrors;
         }
 
         Map<String, List<String>> errors = new HashMap<>();
+        addEvidenceUnavailableErrors(errors, caseData);
+
+        return errors.values().stream().filter(Objects::nonNull).findFirst().orElse(List.of());
+    }
+
+    private void addEvidenceUnavailableErrors(Map<String, List<String>> errors, Map<String, Object> caseData) {
         errors.put(MIAM_DOMESTIC_VIOLENCE_CHECKLIST, getMiamEvidenceUnavailableErrors(caseData,
             MIAM_DOMESTIC_VIOLENCE_CHECKLIST, MIAM_DOMESTIC_ABUSE_TEXTBOX, "FR_ms_MIAMDomesticViolenceChecklist_Value_23"));
         errors.put(MIAM_URGENCY_CHECKLIST, getMiamEvidenceUnavailableErrors(caseData,
@@ -51,8 +55,16 @@ public class MiamCheckService {
             MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, MIAM_PREVIOUS_ATTENDANCE_TEXTBOX, "FR_ms_MIAMPreviousAttendanceChecklist_Value_3"));
         errors.put(MIAM_OTHER_GROUNDS_CHECKLIST, getMiamEvidenceUnavailableErrors(caseData,
             MIAM_OTHER_GROUNDS_CHECKLIST, MIAM_OTHER_GROUNDS_TEXTBOX, "FR_ms_MIAMOtherGroundsChecklist_Value_7"));
+    }
 
-        return errors.values().stream().filter(Objects::nonNull).findFirst().orElse(List.of());
+    private static List<String> miamExemptionAttendanceCheck(Map<String, Object> caseData) {
+        String applicantAttended = Objects.toString(caseData.get(APPLICANT_ATTENDED_MIAM));
+        String claimingExemption = Objects.toString(caseData.get(CLAIMING_EXEMPTION_MIAM));
+
+        if (applicantAttended.equalsIgnoreCase("no") && claimingExemption.equalsIgnoreCase("no")) {
+            return List.of(MIAM_EXEMPT_ERROR);
+        }
+        return null;
     }
 
     private List<String> getMiamEvidenceUnavailableErrors(Map<String, Object> caseData, String checklistKey,

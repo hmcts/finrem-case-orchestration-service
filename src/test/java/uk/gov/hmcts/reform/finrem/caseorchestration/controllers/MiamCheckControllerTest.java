@@ -47,7 +47,7 @@ public class MiamCheckControllerTest extends BaseControllerTest {
     @Test
     public void miamExemptErrorMessage() throws Exception {
         doValidCaseDataSetUp();
-        when(service.miamExemptAttendCheck(isA(CaseDetails.class))).thenReturn(ImmutableList.of(ERROR_MSG));
+        when(service.validateMiamFields(isA(CaseDetails.class))).thenReturn(ImmutableList.of(ERROR_MSG));
 
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
@@ -62,7 +62,7 @@ public class MiamCheckControllerTest extends BaseControllerTest {
     @Test
     public void miamCheckNoErrorMessage() throws Exception {
         doValidCaseDataSetUp();
-        when(service.miamExemptAttendCheck(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+        when(service.validateMiamFields(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
 
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
