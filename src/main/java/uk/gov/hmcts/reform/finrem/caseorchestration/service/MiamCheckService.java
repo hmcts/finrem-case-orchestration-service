@@ -76,7 +76,7 @@ public class MiamCheckService {
         if (checklist != null && checklist.contains(checklistValue) && StringUtils.isBlank(textbox)) {
             return List.of(MIAM_EVIDENCE_UNAVAILABLE_ERROR);
         }
-        return List.of();
+        return Collections.emptyList();
     }
 
     private String convertObjectToString(Object object) {
