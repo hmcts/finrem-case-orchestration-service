@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class MiamCheckService {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<String> miamExemptionErrors = miamExemptionAttendanceCheck(caseData);
-        if (miamExemptionErrors != null && !miamExemptionErrors.isEmpty()) {
+        if (!miamExemptionErrors.isEmpty()) {
             return miamExemptionErrors;
         }
 
@@ -64,7 +65,7 @@ public class MiamCheckService {
         if (applicantAttended.equalsIgnoreCase("no") && claimingExemption.equalsIgnoreCase("no")) {
             return List.of(MIAM_EXEMPT_ERROR);
         }
-        return List.of();
+        return Collections.emptyList();
     }
 
     private List<String> getMiamEvidenceUnavailableErrors(Map<String, Object> caseData, String checklistKey,
