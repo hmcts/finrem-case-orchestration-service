@@ -29,6 +29,7 @@ class SolicitorCreateConsentedMidHandlerTest {
 
     @Mock
     private ConsentOrderService consentOrderService;
+
     @Mock
     private InternationalPostalService postalService;
 
