@@ -25,7 +25,7 @@ public enum MiamUrgencyReason {
             + "proceedings relating to the dispute will be brought in another state in which a valid claim "
             + "to jurisdiction may exist, such that a court in that other State would be seized of the dispute "
             + "before a court in England and Wales."),
-    FR_MS_URGENCY_REASON_CHECKLIST_VALUE_6("FR_ms_MIAMDomesticViolenceChecklist_Value_23",
+    FR_MS_URGENCY_REASON_CHECKLIST_VALUE_6("FR_ms_MIAMUrgencyReasonChecklist_Value_6",
         "I am unable to provide the required evidence with my application.");
 
     private final String value;
