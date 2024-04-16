@@ -32,7 +32,7 @@ public class RespondentFdrDocumentCategoriserTest {
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_DRAFT_ORDER,
             categoriser.getDocumentCategory(CaseDocumentType.PRE_HEARING_DRAFT_ORDER));
 
-        Assertions.assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT,
+        Assertions.assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_POINTS_OF_CLAIM_OR_DEFENCE,
             categoriser.getDocumentCategory(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE));
     }
 
