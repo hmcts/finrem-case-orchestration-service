@@ -35,7 +35,8 @@ public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandl
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking consented event {} mid event callback", EventType.UPDATE_CONTACT_DETAILS);
+        log.info("Invoking consented event {} mid event callback for case id {}", EventType.UPDATE_CONTACT_DETAILS,
+            caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
