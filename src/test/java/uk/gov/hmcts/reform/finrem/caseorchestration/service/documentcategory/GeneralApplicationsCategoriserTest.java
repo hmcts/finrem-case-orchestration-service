@@ -54,7 +54,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     }
 
     @Test
-    void testGeneralApplicationOverflowCatergory() {
+    void testGeneralApplicationOverflowCategory() {
         FinremCaseData finremCaseData = buildFinremCaseData11Applications();
         generalApplicationsCategoriser.categorise(finremCaseData);
 
@@ -97,7 +97,6 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .isEqualTo(DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
         assertThat(intervener1GeneralApplications.get(2).getValue().getGeneralApplicationDocument().getCategoryId())
             .isEqualTo(DocumentCategory.DUPLICATED_GENERAL_ORDERS.getDocumentCategoryId());
-
     }
 
     @Test
@@ -112,11 +111,11 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         assertThat(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders()).isNull();
     }
 
-    public DynamicRadioList buildDynamicIntervenerList() {
+    private DynamicRadioList buildGeneralApplicationSenderDynamicList() {
         List<DynamicRadioListElement> dynamicListElements = List.of(
-            getDynamicListElement(APPLICANT, APPLICANT),
-            getDynamicListElement(RESPONDENT, RESPONDENT),
-            getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+            buildDynamicListElement(APPLICANT, APPLICANT),
+            buildDynamicListElement(RESPONDENT, RESPONDENT),
+            buildDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
             .value(dynamicListElements.get(0))
@@ -124,14 +123,14 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .build();
     }
 
-    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+    private DynamicRadioListElement buildDynamicListElement(String code, String label) {
         return DynamicRadioListElement.builder()
             .code(code)
             .label(label)
             .build();
     }
 
-    protected FinremCaseData buildFinremCaseDataNullCollections() {
+    private FinremCaseData buildFinremCaseDataNullCollections() {
         return FinremCaseData.builder()
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
                 .generalApplicationCreatedBy("Claire Mumford").generalApplicationPreState("applicationIssued")
@@ -145,7 +144,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
                 .build()).build();
     }
 
-    protected FinremCaseData buildFinremCaseData() {
+    private FinremCaseData buildFinremCaseData() {
         GeneralApplicationsCollection firstGeneralApplications = buildGeneralApplicationsCollection(
             true, false, false);
         GeneralApplicationsCollection secondGeneralApplications = buildGeneralApplicationsCollection(
@@ -171,7 +170,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
                 .build()).build();
     }
 
-    protected FinremCaseData buildFinremCaseData11Applications() {
+    private FinremCaseData buildFinremCaseData11Applications() {
         GeneralApplicationsCollection firstGeneralApplications = buildGeneralApplicationsCollection(
             true, false, false);
         GeneralApplicationsCollection secondGeneralApplications = buildGeneralApplicationsCollection(
@@ -240,7 +239,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationItems buildGeneralApplicationItems() {
         return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildDynamicIntervenerList())
+            .generalApplicationSender(buildGeneralApplicationSenderDynamicList())
             .generalApplicationCreatedBy("Claire Mumford")
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -250,7 +249,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDocument() {
         return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildDynamicIntervenerList())
+            .generalApplicationSender(buildGeneralApplicationSenderDynamicList())
             .generalApplicationCreatedBy("Claire Mumford")
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -261,7 +260,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDraftOrder() {
         return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildDynamicIntervenerList())
+            .generalApplicationSender(buildGeneralApplicationSenderDynamicList())
             .generalApplicationCreatedBy("Claire Mumford")
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -272,7 +271,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
 
     private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDirections() {
         return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildDynamicIntervenerList())
+            .generalApplicationSender(buildGeneralApplicationSenderDynamicList())
             .generalApplicationCreatedBy("Claire Mumford")
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
