@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT;
@@ -25,6 +26,8 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
 
     private static final List<UploadGeneralDocumentType> RESPONDENT_DOC_TYPES = List.of(LETTER_EMAIL_FROM_RESPONDENT,
         LETTER_EMAIL_FROM_RESPONDENT_SOLICITOR, LETTER_EMAIL_FROM_RESPONDENT_CONTESTED);
+
+    private static final List<UploadGeneralDocumentType> DRAFT_DOC = List.of(DRAFT_ORDER);
 
     public UploadGeneralDocumentsCategoriser(FeatureToggleService featureToggleService) {
         super(featureToggleService);
@@ -53,6 +56,10 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
         } else if (RESPONDENT_DOC_TYPES.contains(document.getDocumentType())) {
             CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
             setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT.getDocumentCategoryId());
+            document.setDocumentLink(documentCopy);
+        } else if (DRAFT_DOC.contains(document.getDocumentType())) {
+            CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
+            setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.CASE_DOCUMENTS.getDocumentCategoryId());
             document.setDocumentLink(documentCopy);
         } else {
             CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
