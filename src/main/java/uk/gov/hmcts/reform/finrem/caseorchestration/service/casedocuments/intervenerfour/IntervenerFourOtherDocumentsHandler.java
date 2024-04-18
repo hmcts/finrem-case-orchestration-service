@@ -17,20 +17,14 @@ public class IntervenerFourOtherDocumentsHandler extends OtherDocumentsHandler {
 
 
     @Override
-    protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MISCELLANEOUS_OR_OTHER;
-    }
-
-    @Override
-    protected DocumentCategory getPensionPlanDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_PENSION_PLAN;
+    protected DocumentCategory getOtherDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_OTHER;
     }
 
     @Override
     protected DocumentCategory getCertificatesOfServiceDocumentCategory() {
         return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_CERTIFICATES_OF_SERVICE;
     }
-
 
     @Override
     protected DocumentCategory getHearingDocumentsCategoryES1() {

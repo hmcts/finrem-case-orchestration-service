@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.conse
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedDraftOrderCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.GeneralOrderRaisedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
@@ -39,7 +38,6 @@ import java.util.Optional;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
@@ -62,8 +60,6 @@ public class NotificationsController extends BaseController {
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
     private final ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
-    private final GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
-
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -119,25 +115,6 @@ public class NotificationsController extends BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         consentOrderNotApprovedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    @PostMapping(value = "/general-order-raised", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for general order raised.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "General order raised e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralOrderRaisedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request to send email for General Order raised for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        generalOrderRaisedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -300,12 +277,10 @@ public class NotificationsController extends BaseController {
         }
         log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
-        log.info("DEBUGGING NOC - sendNoticeOfChangeEmailCaseworker executed and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
-        log.info("DEBUGGING NOC - sendNoticeOfChangeLetters executed and applicant name is still present",
-            caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME) != null);
+
         caseDetails.getData().put(INCLUDES_REPRESENTATIVE_UPDATE, null);
         caseDetails.getData().put(NOC_PARTY, null);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
@@ -334,8 +309,7 @@ public class NotificationsController extends BaseController {
     private boolean requiresNotifications(CallbackRequest callbackRequest) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        return featureToggleService.isCaseworkerNoCEnabled()
-            && Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATIVE_UPDATE))
+        return Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATIVE_UPDATE))
             .map(updateField -> updateField.equals(YES_VALUE)).orElse(false);
     }
 }

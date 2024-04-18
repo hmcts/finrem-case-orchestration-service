@@ -310,7 +310,7 @@ public class DocumentHelper {
             log.warn("Latest general order not found for printing for case");
             return null;
         }
-        return convertToCaseDocument(caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument());
+        return caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
     }
 
     public CaseDocument convertToCaseDocumentIfObjNotNull(Object object) {
@@ -628,7 +628,7 @@ public class DocumentHelper {
         return "";
     }
 
-    public BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
+    public BulkPrintDocument mapToBulkPrintDocument(CaseDocument caseDocument) {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
             .fileName(caseDocument.getDocumentFilename())
             .build();
@@ -664,7 +664,7 @@ public class DocumentHelper {
                 .builder()
                 .value(pdfDocument)
                 .build());
-            bulkPrintDocuments.add(getCaseDocumentAsBulkPrintDocument(pdfDocument));
+            bulkPrintDocuments.add(mapToBulkPrintDocument(pdfDocument));
         });
 
         data.put(HEARING_ORDER_OTHER_COLLECTION, pdfDocuments);

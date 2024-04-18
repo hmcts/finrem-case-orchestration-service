@@ -53,7 +53,7 @@ public class IntervenerTwoFormsHHandlerTest extends FormsHHandlerTest {
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.FORM_H, CaseDocumentParty.INTERVENER_TWO),
-            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_COSTS_ESTIMATES_OR_FORM_H_OR_FORM_H1)
+            is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260)
         );
     }
 }

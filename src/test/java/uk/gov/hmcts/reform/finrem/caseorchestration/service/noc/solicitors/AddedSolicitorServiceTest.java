@@ -123,7 +123,6 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, applicantOrgPolicy);
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
         assertEquals(APP_SOL_NAME, addedSolicitor.getName());
@@ -145,7 +144,6 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, applicantOrgPolicy);
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
         assertEquals(APP_SOL_NAME, addedSolicitor.getName());
@@ -165,8 +163,6 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(RESP_SOLICITOR_EMAIL, RESP_SOL_EMAIL);
         caseDetails.getData().put(NOC_PARTY, RESPONDENT);
         caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, respondentOrgPolicy);
-
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
         assertEquals(RESP_SOL_NAME, addedSolicitor.getName());
@@ -188,6 +184,7 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, applicantOrgPolicy);
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
+        when(caseDataService.isLitigantRepresented(caseDetails, true)).thenReturn(true);
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
@@ -208,6 +205,7 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(NOC_PARTY, RESPONDENT);
         caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, respondentOrgPolicy);
 
+        when(caseDataService.isLitigantRepresented(caseDetails, false)).thenReturn(true);
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);

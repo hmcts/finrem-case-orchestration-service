@@ -40,6 +40,8 @@ public enum EventType {
     GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
     GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
     GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
+    GENERAL_ORDER_CONSENT_IN_CONTESTED("FR_generalOrderConsent"),
+    GENERAL_ORDER("FR_generalOrder"),
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
     CASE_FLAG_CREATE("createFlags"),
@@ -82,6 +84,8 @@ public enum EventType {
     MANAGE_HEARING_BUNDLES("FR_manageHearingBundles"),
 
     MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
+
+    CONSENT_SEND_ORDER_FOR_APPROVED_ORDER("FR_sendOrderForApproved"),
 
     HIDE_CASE("FR_hideCase"),
 

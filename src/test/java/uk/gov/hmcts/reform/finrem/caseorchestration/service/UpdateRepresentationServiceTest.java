@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -284,6 +285,33 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             }
         });
 
+    }
+
+    @Test
+    public void addRemovedSolicitorOrganisationFieldToCaseDataTest() {
+        // Prepare test data
+        Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+
+        // Test when ChangeOrganisationRequest is null
+        updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
+        assertNull(caseData.get("changeOrganisationRequestField"));
+
+        // Test when ChangeOrganisationRequest is not null and OrganisationToRemove is not null
+        ChangeOrganisationRequest changeRequest = ChangeOrganisationRequest.builder()
+            .organisationToRemove(Organisation.builder().organisationID("org1").build())
+            .build();
+        caseData.put("changeOrganisationRequestField", changeRequest);
+        updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
+        assertEquals("org1", ((ChangeOrganisationRequest) caseData.get("changeOrganisationRequestField"))
+            .getOrganisationToRemove().getOrganisationID());
+
+        // Test when ChangeOrganisationRequest is not null and OrganisationToRemove is null
+        changeRequest = ChangeOrganisationRequest.builder().build();
+        caseData.put("changeOrganisationRequestField", changeRequest);
+        updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
+        assertNull(((ChangeOrganisationRequest) caseData.get("changeOrganisationRequestField"))
+            .getOrganisationToRemove().getOrganisationID());
     }
 
     @Test
