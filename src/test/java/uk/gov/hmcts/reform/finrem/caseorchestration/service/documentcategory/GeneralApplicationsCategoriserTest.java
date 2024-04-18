@@ -111,33 +111,6 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         assertThat(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders()).isNull();
     }
 
-    private DynamicRadioList buildGeneralApplicationSenderDynamicList(String selectedItemCode) {
-        List<DynamicRadioListElement> dynamicListElements = List.of(
-            buildDynamicListElement(APPLICANT, APPLICANT),
-            buildDynamicListElement(RESPONDENT, RESPONDENT),
-            buildDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
-        );
-
-        DynamicRadioListElement selectedValue = switch (selectedItemCode) {
-            case APPLICANT -> dynamicListElements.get(0);
-            case RESPONDENT -> dynamicListElements.get(1);
-            case CASE_LEVEL_ROLE -> dynamicListElements.get(2);
-            default -> null;
-        };
-
-        return DynamicRadioList.builder()
-            .value(selectedValue)
-            .listItems(dynamicListElements)
-            .build();
-    }
-
-    private DynamicRadioListElement buildDynamicListElement(String code, String label) {
-        return DynamicRadioListElement.builder()
-            .code(code)
-            .label(label)
-            .build();
-    }
-
     private FinremCaseData buildFinremCaseDataNullCollections() {
         return FinremCaseData.builder()
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
@@ -261,6 +234,33 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
                 LocalDate.of(2022, 8, 2))
+            .build();
+    }
+
+    private DynamicRadioList buildGeneralApplicationSenderDynamicList(String selectedItemCode) {
+        List<DynamicRadioListElement> dynamicListElements = List.of(
+            buildDynamicListElement(APPLICANT, APPLICANT),
+            buildDynamicListElement(RESPONDENT, RESPONDENT),
+            buildDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
+        );
+
+        DynamicRadioListElement selectedValue = switch (selectedItemCode) {
+            case APPLICANT -> dynamicListElements.get(0);
+            case RESPONDENT -> dynamicListElements.get(1);
+            case CASE_LEVEL_ROLE -> dynamicListElements.get(2);
+            default -> null;
+        };
+
+        return DynamicRadioList.builder()
+            .value(selectedValue)
+            .listItems(dynamicListElements)
+            .build();
+    }
+
+    private DynamicRadioListElement buildDynamicListElement(String code, String label) {
+        return DynamicRadioListElement.builder()
+            .code(code)
+            .label(label)
             .build();
     }
 
