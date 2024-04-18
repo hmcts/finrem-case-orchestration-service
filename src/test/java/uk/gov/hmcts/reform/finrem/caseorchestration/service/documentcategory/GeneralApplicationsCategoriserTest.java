@@ -228,15 +228,24 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         boolean isGeneralApplicationDocumentPresent,
         boolean isGeneralApplicationDraftOrderPresent,
         boolean isGeneralApplicationDirectionsPresent) {
+        return buildGeneralApplicationsCollection(APPLICANT, isGeneralApplicationDocumentPresent,
+            isGeneralApplicationDraftOrderPresent, isGeneralApplicationDirectionsPresent);
+    }
 
-        GeneralApplicationItems generalApplicationItems = buildGeneralApplicationItems();
+    private GeneralApplicationsCollection buildGeneralApplicationsCollection(
+        String sender,
+        boolean isGeneralApplicationDocumentPresent,
+        boolean isGeneralApplicationDraftOrderPresent,
+        boolean isGeneralApplicationDirectionsPresent) {
+
+        GeneralApplicationItems generalApplicationItems = buildGeneralApplicationItems(sender);
 
         if (isGeneralApplicationDocumentPresent) {
-            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDocument();
+            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDocument(sender);
         } else if (isGeneralApplicationDraftOrderPresent) {
-            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDraftOrder();
+            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDraftOrder(sender);
         } else if (isGeneralApplicationDirectionsPresent) {
-            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDirections();
+            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDirections(sender);
         }
 
         return GeneralApplicationsCollection.builder()
@@ -245,9 +254,9 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .build();
     }
 
-    private GeneralApplicationItems buildGeneralApplicationItems() {
+    private GeneralApplicationItems buildGeneralApplicationItems(String sender) {
         return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(APPLICANT))
+            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(sender))
             .generalApplicationCreatedBy("Claire Mumford")
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -255,9 +264,9 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .build();
     }
 
-    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDocument() {
+    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDocument(String sender) {
         return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(APPLICANT))
+            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(sender))
             .generalApplicationCreatedBy("Claire Mumford")
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -266,9 +275,9 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .build();
     }
 
-    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDraftOrder() {
+    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDraftOrder(String sender) {
         return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(APPLICANT))
+            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(sender))
             .generalApplicationCreatedBy("Claire Mumford")
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -277,9 +286,9 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .build();
     }
 
-    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDirections() {
+    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDirections(String sender) {
         return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(APPLICANT))
+            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(sender))
             .generalApplicationCreatedBy("Claire Mumford")
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
