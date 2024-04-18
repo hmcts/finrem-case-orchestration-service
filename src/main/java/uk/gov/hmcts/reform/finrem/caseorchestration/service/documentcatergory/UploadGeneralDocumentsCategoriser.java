@@ -45,7 +45,7 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
             return;
         }
 
-        if (document.getDocumentType() == null) {
+        if (document.getDocumentType() == null || DRAFT_DOC.contains(document.getDocumentType())) {
             CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
             setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.CASE_DOCUMENTS.getDocumentCategoryId());
             document.setDocumentLink(documentCopy);
@@ -56,10 +56,6 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
         } else if (RESPONDENT_DOC_TYPES.contains(document.getDocumentType())) {
             CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
             setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT.getDocumentCategoryId());
-            document.setDocumentLink(documentCopy);
-        } else if (DRAFT_DOC.contains(document.getDocumentType())) {
-            CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
-            setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.CASE_DOCUMENTS.getDocumentCategoryId());
             document.setDocumentLink(documentCopy);
         } else {
             CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
