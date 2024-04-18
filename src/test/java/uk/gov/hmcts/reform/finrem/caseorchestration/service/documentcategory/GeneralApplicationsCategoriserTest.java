@@ -241,11 +241,11 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         GeneralApplicationItems generalApplicationItems = buildGeneralApplicationItems(sender);
 
         if (isGeneralApplicationDocumentPresent) {
-            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDocument(sender);
+            generalApplicationItems.setGeneralApplicationDocument(buildGeneralApplicationDocument());
         } else if (isGeneralApplicationDraftOrderPresent) {
-            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDraftOrder(sender);
+            generalApplicationItems.setGeneralApplicationDraftOrder(buildGeneralApplicationDocument());
         } else if (isGeneralApplicationDirectionsPresent) {
-            generalApplicationItems = buildGeneralApplicationItemsWithGeneralApplicationDirections(sender);
+            generalApplicationItems.setGeneralApplicationDirectionsDocument(buildGeneralApplicationDocument());
         }
 
         return GeneralApplicationsCollection.builder()
@@ -261,39 +261,6 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
                 LocalDate.of(2022, 8, 2))
-            .build();
-    }
-
-    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDocument(String sender) {
-        return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(sender))
-            .generalApplicationCreatedBy("Claire Mumford")
-            .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
-            .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
-                LocalDate.of(2022, 8, 2))
-            .generalApplicationDocument(buildGeneralApplicationDocument())
-            .build();
-    }
-
-    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDraftOrder(String sender) {
-        return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(sender))
-            .generalApplicationCreatedBy("Claire Mumford")
-            .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
-            .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
-                LocalDate.of(2022, 8, 2))
-            .generalApplicationDraftOrder(buildGeneralApplicationDocument())
-            .build();
-    }
-
-    private GeneralApplicationItems buildGeneralApplicationItemsWithGeneralApplicationDirections(String sender) {
-        return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(sender))
-            .generalApplicationCreatedBy("Claire Mumford")
-            .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
-            .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
-                LocalDate.of(2022, 8, 2))
-            .generalApplicationDirectionsDocument(buildGeneralApplicationDocument())
             .build();
     }
 
