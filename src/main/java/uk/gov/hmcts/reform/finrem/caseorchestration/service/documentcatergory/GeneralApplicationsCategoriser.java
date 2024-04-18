@@ -40,7 +40,7 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
     @Override
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
         List<GeneralApplicationsCollection> generalApplications = finremCaseData.getGeneralApplicationWrapper()
-            .getAppRespGeneralApplications();
+            .getGeneralApplications();
         if (CollectionUtils.isEmpty(generalApplications)) {
             return;
         }
@@ -55,29 +55,29 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
     }
 
     public void uncategoriseDuplicatedCollections(FinremCaseData finremCaseData) {
-        GeneralApplicationWrapper generalApplication = finremCaseData.getGeneralApplicationWrapper();
-        if (generalApplication.getGeneralApplicationIntvrOrders() != null) {
-            removeDocumentCategory(generalApplication.getGeneralApplicationIntvrOrders());
+        GeneralApplicationWrapper generalApplicationWrapper = finremCaseData.getGeneralApplicationWrapper();
+        if (generalApplicationWrapper.getGeneralApplicationIntvrOrders() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getGeneralApplicationIntvrOrders());
         }
 
-        if (generalApplication.getAppRespGeneralApplications() != null) {
-            removeDocumentCategory(generalApplication.getAppRespGeneralApplications());
+        if (generalApplicationWrapper.getAppRespGeneralApplications() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getAppRespGeneralApplications());
         }
 
-        if (generalApplication.getIntervener1GeneralApplications() != null) {
-            removeDocumentCategory(generalApplication.getIntervener1GeneralApplications());
+        if (generalApplicationWrapper.getIntervener1GeneralApplications() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getIntervener1GeneralApplications());
         }
 
-        if (generalApplication.getIntervener2GeneralApplications() != null) {
-            removeDocumentCategory(generalApplication.getIntervener2GeneralApplications());
+        if (generalApplicationWrapper.getIntervener2GeneralApplications() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getIntervener2GeneralApplications());
         }
 
-        if (generalApplication.getIntervener3GeneralApplications() != null) {
-            removeDocumentCategory(generalApplication.getIntervener3GeneralApplications());
+        if (generalApplicationWrapper.getIntervener3GeneralApplications() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getIntervener3GeneralApplications());
         }
 
-        if (generalApplication.getIntervener4GeneralApplications() != null) {
-            removeDocumentCategory(generalApplication.getIntervener4GeneralApplications());
+        if (generalApplicationWrapper.getIntervener4GeneralApplications() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getIntervener4GeneralApplications());
         }
     }
 
