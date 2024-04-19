@@ -77,7 +77,7 @@ public class CreateGeneralLetterConsentMidHandlerTest {
     @Test
     public void handleShouldHandleWhenErrors() {
         FinremCallbackRequest request = buildFinremCallbackRequest();
-        when(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(any())).thenReturn(List.of("error"));
+        when(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(any())).thenReturn(List.of("Error"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, "userAuthorisation");
 
