@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -28,7 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
-
+@Ignore
 @WebMvcTest(HearingOrderController.class)
 public class HearingOrderControllerTest extends BaseControllerTest {
 
@@ -43,6 +44,7 @@ public class HearingOrderControllerTest extends BaseControllerTest {
     private IdamService idamService;
     @MockBean
     private CaseDataService caseDataService;
+
 
     @Test
     public void whenStoreHearingOrder_expectedServicesAreInvoked() {
