@@ -80,7 +80,13 @@ public abstract class DocumentHandler {
         }
     }
 
-    public void assignDocumentCategoryToUploadDocumentsCollection(FinremCaseData caseData) {
-        applyDocumentCategory(caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType));
+    public void assignDocumentCategoryToUploadDocumentsCollection(FinremCaseData caseData) throws NullPointerException {
+        try {
+            applyDocumentCategory(caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType));
+
+        } catch (Exception e) {
+            log.error("applyDocumentCategory failed for collectionType {}", collectionType);
+            throw e;
+        }
     }
 }
