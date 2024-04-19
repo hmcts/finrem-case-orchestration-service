@@ -33,5 +33,8 @@ public class IntervenerTwoFdrDocumentCategoriserTest {
 
         assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2_DRAFT_ORDER,
             categoriser.getDocumentCategory(CaseDocumentType.PRE_HEARING_DRAFT_ORDER));
+
+        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2_POINTS_OF_CLAIM_OR_DEFENCE,
+            categoriser.getDocumentCategory(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE));
     }
 }
