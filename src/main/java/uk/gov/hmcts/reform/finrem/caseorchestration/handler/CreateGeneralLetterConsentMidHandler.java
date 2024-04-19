@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,25 +47,29 @@ public class CreateGeneralLetterConsentMidHandler extends FinremCallbackHandler 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to consent general letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
-        FinremCaseData finremCaseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getData();
+        resetInterveners(caseData);
+        List<String> errors = new ArrayList<>(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails));
+        if (errors.isEmpty()) {
+            generalLetterService.previewGeneralLetter(userAuthorisation, caseDetails);
+            Optional.ofNullable(caseData.getGeneralLetterWrapper().getGeneralLetterUploadedDocuments())
+                .filter(list -> !list.isEmpty())
+                .ifPresent(list -> generalLetterService.validateEncryptionOnUploadedDocuments(
+                    list, userAuthorisation, String.valueOf(caseDetails.getId()), errors));
+
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).data(caseData).build();
+        } else {
+            log.error("Errors occurred while handling callback request: {} on case id {}", errors, caseDetails.getId());
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .errors(errors)
+                .build();
+        }
+    }
+
+    private void resetInterveners(FinremCaseData finremCaseData) {
         finremCaseData.setIntervenerOne(null);
         finremCaseData.setIntervenerTwo(null);
         finremCaseData.setIntervenerThree(null);
         finremCaseData.setIntervenerFour(null);
-        List<String> errorsForCreatingPreviewOrFinalLetter
-            = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
-        if (errorsForCreatingPreviewOrFinalLetter.isEmpty()) {
-            generalLetterService.previewGeneralLetter(userAuthorisation, caseDetails);
-            Optional.ofNullable(finremCaseData.getGeneralLetterWrapper().getGeneralLetterUploadedDocuments())
-                .filter(list -> !list.isEmpty())
-                .ifPresent(list -> generalLetterService.validateEncryptionOnUploadedDocuments(
-                    list, userAuthorisation, String.valueOf(caseDetails.getId())));
-
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
-        } else {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .errors(errorsForCreatingPreviewOrFinalLetter)
-                .build();
-        }
     }
 }

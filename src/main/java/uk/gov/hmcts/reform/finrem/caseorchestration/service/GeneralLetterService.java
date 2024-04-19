@@ -128,8 +128,7 @@ public class GeneralLetterService {
     }
 
     public void validateEncryptionOnUploadedDocuments(List<DocumentCollection> caseDocuments, String caseId,
-                                                      String auth) {
-        List<String> errors = new ArrayList<>();
+                                                      String auth, List<String> errors) {
         caseDocuments.forEach(doc -> {
             if (doc != null && doc.getValue() != null) {
                 bulkPrintDocumentService.validateEncryptionOnUploadedDocument(

@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -20,75 +21,72 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLet
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
+import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateGeneralLetterConsentMidHandlerTest {
-
-    private CreateGeneralLetterConsentMidHandler handler;
 
     @Mock
     private GeneralLetterService generalLetterService;
     @Mock
     private BulkPrintDocumentService service;
     @Mock
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private FinremCaseDetailsMapper mapper;
+
+    private CreateGeneralLetterConsentMidHandler handler;
 
     @Before
     public void setup() {
-        handler =  new CreateGeneralLetterConsentMidHandler(finremCaseDetailsMapper,
-            generalLetterService, service);
+        handler = new CreateGeneralLetterConsentMidHandler(mapper, generalLetterService, service);
     }
 
     @Test
-    public void givenACcdCallbackCreateGeneralLetterAboutToSubmitHandler_WhenCanHandleCalled_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.CREATE_GENERAL_LETTER),
-            is(true));
+    public void whenCallbackTypeAndCaseTypeAndEventTypeMatch_thenCanHandle() {
+        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.CREATE_GENERAL_LETTER));
     }
 
     @Test
-    public void givenACcdCallbackCreateGeneralLetterAboutToSubmitHandlerJudge_WhenCanHandleCalled_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.CLOSE),
-            is(false));
+    public void whenCallbackTypeOrCaseTypeOrEventTypeIncorrect_thenCannotHandle() {
+        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CREATE_GENERAL_LETTER));
     }
 
     @Test
-    public void givenACcdCallbackAboutToSubmit_WhenCanHandleCalled_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CREATE_GENERAL_LETTER),
-            is(false));
+    public void handleShouldHandleWhenNoErrors() {
+        FinremCallbackRequest request = buildFinremCallbackRequest();
+        when(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(any())).thenReturn(Collections.emptyList());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, "userAuthorisation");
+
+        verify(generalLetterService).previewGeneralLetter(anyString(), any());
+        verify(generalLetterService).validateEncryptionOnUploadedDocuments(any(), any(), any(), any());
+        assertNull(response.getData().getIntervenerOne());
+        assertNull(response.getData().getIntervenerTwo());
+        assertNull(response.getData().getIntervenerThree());
+        assertNull(response.getData().getIntervenerFour());
     }
 
     @Test
-    public void givenACcdCallbackCallbackCreateGeneralLetterAboutToSubmitHandler_WhenHandle_thenCreatePreviewLetter() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(generalLetterService).getCaseDataErrorsForCreatingPreviewOrFinalLetter(any(FinremCaseDetails.class));
-        verify(generalLetterService).previewGeneralLetter(anyString(), any(FinremCaseDetails.class));
-        verify(generalLetterService).validateEncryptionOnUploadedDocuments(any(), any(), any());
-    }
+    public void handleShouldHandleWhenErrors() {
+        FinremCallbackRequest request = buildFinremCallbackRequest();
+        when(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(any())).thenReturn(List.of("error"));
 
-    @Test
-    public void givenACcdCallbackCallbackCreateGeneralLetterAboutToSubmitHandler_WhenHandle_thenCreateError() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setSolicitorAddress(null);
-        when(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(callbackRequest.getCaseDetails()))
-            .thenReturn(List.of("Address is missing for recipient type"));
-        handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(generalLetterService, times(1)).getCaseDataErrorsForCreatingPreviewOrFinalLetter(any(FinremCaseDetails.class));
-        verify(generalLetterService, never()).validateEncryptionOnUploadedDocuments(any(), any(), any());
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, "userAuthorisation");
+
+        verify(generalLetterService, never()).previewGeneralLetter(anyString(), any());
+        verify(generalLetterService, never()).validateEncryptionOnUploadedDocuments(any(), any(), any(), any());
+        assertNotNull(response);
+        assertTrue(response.getErrors().contains("Error"));
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
