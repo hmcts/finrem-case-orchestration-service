@@ -294,7 +294,7 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
     private List<GeneralApplicationsCollection> buildGeneralApplicationTestData(int total) {
         List<GeneralApplicationsCollection> generalApplicationsCollection = new ArrayList<>();
         for (int i = 1; i <= total; i++) {
-            generalApplicationsCollection.add(buildGeneralApplicationsCollection(APPLICANT, true, true, true, true));
+            generalApplicationsCollection.add(buildGeneralApplicationsCollection(true, true, true, true));
         }
 
         return generalApplicationsCollection;
@@ -304,18 +304,17 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
         boolean isGeneralApplicationDocumentPresent,
         boolean isGeneralApplicationDraftOrderPresent,
         boolean isGeneralApplicationDirectionsPresent) {
-        return buildGeneralApplicationsCollection(APPLICANT, isGeneralApplicationDocumentPresent,
+        return buildGeneralApplicationsCollection(isGeneralApplicationDocumentPresent,
             isGeneralApplicationDraftOrderPresent, isGeneralApplicationDirectionsPresent, false);
     }
 
     private GeneralApplicationsCollection buildGeneralApplicationsCollection(
-        String sender,
         boolean isGeneralApplicationDocumentPresent,
         boolean isGeneralApplicationDraftOrderPresent,
         boolean isGeneralApplicationDirectionsPresent,
         boolean isGeneralApplicationSupportingDocsPresent) {
 
-        GeneralApplicationItems generalApplicationItems = buildGeneralApplicationItems(sender);
+        GeneralApplicationItems generalApplicationItems = buildGeneralApplicationItems();
 
         if (isGeneralApplicationDocumentPresent) {
             generalApplicationItems.setGeneralApplicationDocument(buildGeneralApplicationDocument());
@@ -343,9 +342,9 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .build();
     }
 
-    private GeneralApplicationItems buildGeneralApplicationItems(String sender) {
+    private GeneralApplicationItems buildGeneralApplicationItems() {
         return GeneralApplicationItems.builder()
-            .generalApplicationSender(buildGeneralApplicationSenderDynamicList(sender))
+            .generalApplicationSender(buildGeneralApplicationSenderDynamicList())
             .generalApplicationCreatedBy("Claire Mumford")
             .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
             .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(
@@ -353,22 +352,15 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .build();
     }
 
-    private DynamicRadioList buildGeneralApplicationSenderDynamicList(String selectedItemCode) {
+    private DynamicRadioList buildGeneralApplicationSenderDynamicList() {
         List<DynamicRadioListElement> dynamicListElements = List.of(
             buildDynamicListElement(APPLICANT, APPLICANT),
             buildDynamicListElement(RESPONDENT, RESPONDENT),
             buildDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
 
-        DynamicRadioListElement selectedValue = switch (selectedItemCode) {
-            case APPLICANT -> dynamicListElements.get(0);
-            case RESPONDENT -> dynamicListElements.get(1);
-            case CASE_LEVEL_ROLE -> dynamicListElements.get(2);
-            default -> null;
-        };
-
         return DynamicRadioList.builder()
-            .value(selectedValue)
+            .value(dynamicListElements.get(0))
             .listItems(dynamicListElements)
             .build();
     }
