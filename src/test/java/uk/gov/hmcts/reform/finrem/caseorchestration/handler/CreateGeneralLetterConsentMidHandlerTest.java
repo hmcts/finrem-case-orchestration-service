@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
@@ -70,10 +71,7 @@ public class CreateGeneralLetterConsentMidHandlerTest {
 
         verify(generalLetterService).previewGeneralLetter(anyString(), any());
         verify(generalLetterService).validateEncryptionOnUploadedDocuments(any(), any(), any(), any());
-        assertNull(response.getData().getIntervenerOne());
-        assertNull(response.getData().getIntervenerTwo());
-        assertNull(response.getData().getIntervenerThree());
-        assertNull(response.getData().getIntervenerFour());
+        assertNull(response.getData().getIntervenerOne().getIntervenerAddress());
     }
 
     @Test
@@ -91,6 +89,11 @@ public class CreateGeneralLetterConsentMidHandlerTest {
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
         FinremCaseData caseData = FinremCaseData.builder()
+            .intervenerOne(IntervenerOne.builder().intervenerAddress(Address.builder()
+                .addressLine1("line1")
+                .addressLine2("line2")
+                .country("country")
+                .postCode("AB1 1BC").build()).build())
             .generalLetterWrapper(GeneralLetterWrapper.builder()
                 .generalLetterAddressTo(GeneralLetterAddressToType.APPLICANT_SOLICITOR)
                 .generalLetterRecipient("Test")
