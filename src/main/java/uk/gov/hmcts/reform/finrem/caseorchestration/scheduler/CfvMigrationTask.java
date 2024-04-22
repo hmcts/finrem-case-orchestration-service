@@ -33,6 +33,7 @@ public class CfvMigrationTask extends BaseTask {
 
     private static List<State> STATES_TO_CATEGORISE =
         List.of(
+            State.SOLICITOR_DRAFT_ORDER,
             State.PREPARE_FOR_HEARING,
             State.CASE_FILE_SUBMITTED,
             State.GATE_KEEPING_AND_ALLOCATION,
@@ -97,15 +98,13 @@ public class CfvMigrationTask extends BaseTask {
                 log.info("Getting case references for state {} with remaining case reference size {}", state, remaining);
                 String esSearchString = buildSearchString(state.getStateId(), remaining);
                 log.info("Getting case references for state {} with search string {}", state, esSearchString);
-                SearchResult searchResult = null;
                 try {
-                    searchResult = ccdService.esSearchCases(CaseType.CONTESTED, esSearchString, systemUserToken);
+                    SearchResult searchResult = ccdService.esSearchCases(CaseType.CONTESTED, esSearchString, systemUserToken);
+                    log.info("Getting case references for state {} with search result total {}", state, searchResult.getTotal());
+                    caseReferences.addAll(getCaseReferencesFromSearchResult(searchResult));
                 } catch (RuntimeException e) {
-                    log.error("Error occurred while running CFV migration task", e);
-                    e.printStackTrace();
+                    log.error("Error occurred while searching for state {}", state, e);
                 }
-                log.info("Getting case references for state {} with search result total {}", state, searchResult.getTotal());
-                caseReferences.addAll(getCaseReferencesFromSearchResult(searchResult));
             }
         } catch (RuntimeException e) {
             log.error("Error occurred while running CFV migration task", e);
