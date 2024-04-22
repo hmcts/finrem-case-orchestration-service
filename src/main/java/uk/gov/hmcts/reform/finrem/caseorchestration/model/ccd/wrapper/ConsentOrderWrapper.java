@@ -35,7 +35,6 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConsentOrderWrapper {
-    private List<DraftDirectionOrderCollection> draftDirectionOrderCollection;
     private DraftDirectionOrder latestDraftDirectionOrder;
     private List<DraftDirectionOrderCollection> judgesAmendedOrderCollection;
     private List<DraftDirectionDetailsCollection> draftDirectionDetailsCollection;

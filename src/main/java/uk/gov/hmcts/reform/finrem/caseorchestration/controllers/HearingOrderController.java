@@ -91,7 +91,12 @@ public class HearingOrderController extends BaseController {
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
         caseDataService.moveCollection(caseData, DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        uploadedDraftOrderCategoriser.categorise(finremCaseDetails.getData());
+        CaseDetails caseDetailsToReturn = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetailsToReturn.getData()).build());
+
     }
 
     @PostMapping(path = "/hearing-order/approval-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -118,11 +123,8 @@ public class HearingOrderController extends BaseController {
             caseData.remove(LATEST_DRAFT_DIRECTION_ORDER);
         }
 
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        uploadedDraftOrderCategoriser.categorise(finremCaseDetails.getData());
-        CaseDetails caseDetailsToReturn = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetailsToReturn.getData()).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(path = "/hearing-order/approval-store", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
