@@ -82,7 +82,7 @@ public abstract class DocumentHandler {
         }
     }
 
-    public void assignDocumentCategoryToUploadDocumentsCollection(FinremCaseData caseData) throws NullPointerException {
+    public void assignDocumentCategoryToUploadDocumentsCollection(FinremCaseData caseData) {
         applyDocumentCategory(caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType));
     }
 }
