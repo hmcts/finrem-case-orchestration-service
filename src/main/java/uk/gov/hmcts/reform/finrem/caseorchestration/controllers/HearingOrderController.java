@@ -51,7 +51,7 @@ public class HearingOrderController extends BaseController {
     private final IdamService idamService;
     private final CaseDataService caseDataService;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-    private  final UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
+    private final UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
 
     @PostMapping(path = "/hearing-order/start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Cleans data before event that stores hearing order")
@@ -122,7 +122,6 @@ public class HearingOrderController extends BaseController {
         } else {
             caseData.remove(LATEST_DRAFT_DIRECTION_ORDER);
         }
-
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

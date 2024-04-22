@@ -27,8 +27,6 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
     private static final List<UploadGeneralDocumentType> RESPONDENT_DOC_TYPES = List.of(LETTER_EMAIL_FROM_RESPONDENT,
         LETTER_EMAIL_FROM_RESPONDENT_SOLICITOR, LETTER_EMAIL_FROM_RESPONDENT_CONTESTED);
 
-    private static final List<UploadGeneralDocumentType> DRAFT_ORDER_DOC = List.of(DRAFT_ORDER);
-
     public UploadGeneralDocumentsCategoriser(FeatureToggleService featureToggleService) {
         super(featureToggleService);
     }
@@ -45,7 +43,7 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
             return;
         }
 
-        if (document.getDocumentType() == null || DRAFT_ORDER_DOC.contains(document.getDocumentType())) {
+        if (document.getDocumentType() == null || DRAFT_ORDER.equals(document.getDocumentType())) {
             CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
             setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.CASE_DOCUMENTS.getDocumentCategoryId());
             document.setDocumentLink(documentCopy);
