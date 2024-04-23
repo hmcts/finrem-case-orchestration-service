@@ -84,13 +84,13 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES,
                 CaseDocumentParty.INTERVENER_THREE),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS,
                 CaseDocumentParty.INTERVENER_THREE),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3)
         );
 
         assertThat(

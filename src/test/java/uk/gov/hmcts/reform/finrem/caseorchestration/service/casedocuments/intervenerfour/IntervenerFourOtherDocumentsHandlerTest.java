@@ -66,7 +66,7 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
         );
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS, CaseDocumentParty.INTERVENER_FOUR),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4)
         );
 
         assertThat(
@@ -81,7 +81,7 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES, CaseDocumentParty.INTERVENER_FOUR),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4)
         );
 
         assertThat(

@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -14,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPROVED_ORDERS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.DUPLICATED_GENERAL_ORDERS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.SYSTEM_DUPLICATES;
 
 @Configuration
 public class GeneralApplicationsCategoriser extends DocumentCategoriser {
@@ -37,53 +39,61 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
 
     @Override
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
-        AtomicInteger generalApplicationCounter = new AtomicInteger();
-        if (finremCaseData.getGeneralApplicationWrapper().getGeneralApplications() != null) {
-            finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
-                ga -> {
-                    generalApplicationCounter.getAndIncrement();
-                    DocumentCategory categoryToApply;
-
-                    if (generalApplicationCounter.get() > 10) {
-                        categoryToApply = DocumentCategory.APPLICATIONS_OTHER_APPLICATION_OVERFLOW;
-                    } else {
-                        categoryToApply = gaNumberToCategory.get(generalApplicationCounter.get());
-                    }
-
-                    setCategoryToAllGaDocs(ga, categoryToApply, APPROVED_ORDERS);
-                });
+        List<GeneralApplicationsCollection> generalApplications = finremCaseData.getGeneralApplicationWrapper()
+            .getGeneralApplications();
+        if (CollectionUtils.isEmpty(generalApplications)) {
+            return;
         }
+
+        uncategoriseDuplicatedCollections(finremCaseData);
+
+        AtomicInteger generalApplicationCounter = new AtomicInteger();
+        generalApplications.forEach(
+            ga -> {
+                generalApplicationCounter.getAndIncrement();
+                DocumentCategory categoryToApply = getNextApplicationsCategory(generalApplicationCounter.get());
+                setCategoryToAllGaDocs(ga, categoryToApply, APPROVED_ORDERS);
+            });
     }
 
     public void uncategoriseDuplicatedCollections(FinremCaseData finremCaseData) {
-        if (finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders() != null) {
-            removeDocumentCategory(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationIntvrOrders());
+        GeneralApplicationWrapper generalApplicationWrapper = finremCaseData.getGeneralApplicationWrapper();
+        if (generalApplicationWrapper.getGeneralApplicationIntvrOrders() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getGeneralApplicationIntvrOrders());
         }
 
-        if (finremCaseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null) {
-            removeDocumentCategory(finremCaseData.getGeneralApplicationWrapper().getAppRespGeneralApplications());
+        if (generalApplicationWrapper.getAppRespGeneralApplications() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getAppRespGeneralApplications());
         }
 
-        if (finremCaseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications() != null) {
-            removeDocumentCategory(finremCaseData.getGeneralApplicationWrapper().getIntervener1GeneralApplications());
+        if (generalApplicationWrapper.getIntervener1GeneralApplications() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getIntervener1GeneralApplications());
         }
 
-        if (finremCaseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications() != null) {
-            removeDocumentCategory(finremCaseData.getGeneralApplicationWrapper().getIntervener2GeneralApplications());
+        if (generalApplicationWrapper.getIntervener2GeneralApplications() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getIntervener2GeneralApplications());
         }
 
-        if (finremCaseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications() != null) {
-            removeDocumentCategory(finremCaseData.getGeneralApplicationWrapper().getIntervener3GeneralApplications());
+        if (generalApplicationWrapper.getIntervener3GeneralApplications() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getIntervener3GeneralApplications());
         }
 
-        if (finremCaseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications() != null) {
-            removeDocumentCategory(finremCaseData.getGeneralApplicationWrapper().getIntervener4GeneralApplications());
+        if (generalApplicationWrapper.getIntervener4GeneralApplications() != null) {
+            removeDocumentCategory(generalApplicationWrapper.getIntervener4GeneralApplications());
+        }
+    }
+
+    private DocumentCategory getNextApplicationsCategory(int counter) {
+        if (counter > 10) {
+            return DocumentCategory.APPLICATIONS_OTHER_APPLICATION_OVERFLOW;
+        } else {
+            return gaNumberToCategory.get(counter);
         }
     }
 
     private void removeDocumentCategory(List<GeneralApplicationsCollection> collectionToRemoveCategoryFrom) {
         collectionToRemoveCategoryFrom.forEach(
-            ga -> setCategoryToAllGaDocs(ga, DUPLICATED_GENERAL_ORDERS, DUPLICATED_GENERAL_ORDERS)
+            ga -> setCategoryToAllGaDocs(ga, SYSTEM_DUPLICATES, SYSTEM_DUPLICATES)
         );
     }
 
