@@ -30,4 +30,9 @@ public class IntervenerFourFdrDocumentCategoriser extends PartyFdrDocumentCatego
     protected DocumentCategory getPositionStatementsDocumentCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_4_POSITION_STATEMENTS;
     }
+
+    @Override
+    protected DocumentCategory getPointsOfClaimOrDefenceDocumentCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_4_POINTS_OF_CLAIM_OR_DEFENCE;
+    }
 }
