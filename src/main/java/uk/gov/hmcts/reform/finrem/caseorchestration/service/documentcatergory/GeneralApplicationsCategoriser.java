@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPROVED_ORDERS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.DUPLICATED_GENERAL_ORDERS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.SYSTEM_DUPLICATES;
 
 @Configuration
 public class GeneralApplicationsCategoriser extends DocumentCategoriser {
@@ -44,6 +44,8 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
         if (CollectionUtils.isEmpty(generalApplications)) {
             return;
         }
+
+        uncategoriseDuplicatedCollections(finremCaseData);
 
         AtomicInteger generalApplicationCounter = new AtomicInteger();
         generalApplications.forEach(
@@ -91,7 +93,7 @@ public class GeneralApplicationsCategoriser extends DocumentCategoriser {
 
     private void removeDocumentCategory(List<GeneralApplicationsCollection> collectionToRemoveCategoryFrom) {
         collectionToRemoveCategoryFrom.forEach(
-            ga -> setCategoryToAllGaDocs(ga, DUPLICATED_GENERAL_ORDERS, DUPLICATED_GENERAL_ORDERS)
+            ga -> setCategoryToAllGaDocs(ga, SYSTEM_DUPLICATES, SYSTEM_DUPLICATES)
         );
     }
 
