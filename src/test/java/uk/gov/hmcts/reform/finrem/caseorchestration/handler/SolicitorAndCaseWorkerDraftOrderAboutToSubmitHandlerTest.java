@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.POST_HEARING_DRAFT_ORDER;
 
 @ExtendWith(MockitoExtension.class)
-public class SolicitorAndCaseWorkerDraftOrderAboutToSubmitHandlerTest extends  BaseHandlerTestSetup {
+class SolicitorAndCaseWorkerDraftOrderAboutToSubmitHandlerTest extends  BaseHandlerTestSetup {
 
     private SolicitorAndCaseWorkerDraftOrderAboutToSubmitHandler solicitorAndCaseWorkerDraftOrderAboutToSubmitHandler;
 
@@ -49,21 +49,21 @@ public class SolicitorAndCaseWorkerDraftOrderAboutToSubmitHandlerTest extends  B
     }
 
     @Test
-    public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
+    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
         assertThat(solicitorAndCaseWorkerDraftOrderAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CW_DRAFT_ORDER),
             is(true));
     }
 
     @Test
-    public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
+    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
         assertThat(solicitorAndCaseWorkerDraftOrderAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.SOLICITOR_CW_DRAFT_ORDER),
             is(false));
     }
 
     @Test
-    public void givenConsentInContestedCase_whenApprovedOrdersButNoRefusedOrderAvailableToShareWithParties_thenHandleRequest() {
+    void givenConsentInContestedCase_whenApprovedOrdersButNoRefusedOrderAvailableToShareWithParties_thenHandleRequest() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
