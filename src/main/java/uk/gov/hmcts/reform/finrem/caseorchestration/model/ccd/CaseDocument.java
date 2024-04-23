@@ -30,16 +30,11 @@ public class CaseDocument {
     private String documentBinaryUrl;
     @JsonProperty("category_id")
     private String categoryId;
-    @JsonProperty("upload_timestamp")
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime uploadTimestamp;
 
     public CaseDocument(CaseDocument caseDocuments) {
         this.documentUrl = caseDocuments.getDocumentUrl();
         this.documentFilename = caseDocuments.getDocumentFilename();
         this.documentBinaryUrl = caseDocuments.getDocumentBinaryUrl();
         this.categoryId = caseDocuments.getCategoryId();
-        this.uploadTimestamp = caseDocuments.getUploadTimestamp();
-
     }
 }
