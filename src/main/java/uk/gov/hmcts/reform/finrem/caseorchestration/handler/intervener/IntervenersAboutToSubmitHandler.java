@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 
 import java.util.ArrayList;
@@ -28,6 +30,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Service
 public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     private final IntervenerService service;
+    private static final List<String> ADD_OPERATION_CODES = List.of(ADD_INTERVENER_ONE_CODE, ADD_INTERVENER_TWO_CODE,
+        ADD_INTERVENER_THREE_CODE, ADD_INTERVENER_FOUR_CODE);
+    private static final List<String> DELETE_OPERATION_CODES = List.of(DEL_INTERVENER_ONE_CODE, DEL_INTERVENER_TWO_CODE,
+        DEL_INTERVENER_THREE_CODE, DEL_INTERVENER_FOUR_CODE);
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                            IntervenerService service) {
@@ -54,20 +60,41 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         log.info("selected operation choice {} for intervener {} for Case ID: {}",
             selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
         List<String> errors = new ArrayList<>();
-        switch (selectedOperationCode) {
-            case ADD_INTERVENER_ONE_CODE -> service.updateIntervenerDetails(caseData.getIntervenerOne(), errors, callbackRequest);
-            case ADD_INTERVENER_TWO_CODE -> service.updateIntervenerDetails(caseData.getIntervenerTwo(), errors, callbackRequest);
-            case ADD_INTERVENER_THREE_CODE -> service.updateIntervenerDetails(caseData.getIntervenerThree(), errors, callbackRequest);
-            case ADD_INTERVENER_FOUR_CODE -> service.updateIntervenerDetails(caseData.getIntervenerFour(), errors, callbackRequest);
-            case DEL_INTERVENER_ONE_CODE -> service.removeIntervenerDetails(caseData.getIntervenerOne(), errors, caseData, caseId);
-            case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerDetails(caseData.getIntervenerTwo(), errors, caseData, caseId);
-            case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerDetails(caseData.getIntervenerThree(), errors, caseData, caseId);
-            case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerDetails(caseData.getIntervenerFour(), errors, caseData, caseId);
-            default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
+        IntervenerWrapper intervener = getIntervenerWrapper(caseData, selectedOperationCode);
+
+        if (ADD_OPERATION_CODES.contains(selectedOperationCode)) {
+            if (isIntervenerPostCodeMissing(intervener)) {
+                errors.add("Postcode field is required for the intervener.");
+            } else {
+                service.updateIntervenerDetails(intervener, errors, callbackRequest);
+            }
+        } else if (DELETE_OPERATION_CODES.contains(selectedOperationCode)) {
+            service.removeIntervenerDetails(intervener, errors, caseData, caseId);
+        } else {
+            throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
+    }
+
+    private boolean isIntervenerPostCodeMissing(IntervenerWrapper intervener) {
+        String postCode = intervener.getIntervenerAddress().getPostCode();
+        return StringUtils.isEmpty(postCode);
+    }
+
+    private IntervenerWrapper getIntervenerWrapper(FinremCaseData caseData, String selectedOperationCode) {
+        return switch (selectedOperationCode) {
+            case ADD_INTERVENER_ONE_CODE -> caseData.getIntervenerOne();
+            case ADD_INTERVENER_TWO_CODE -> caseData.getIntervenerTwo();
+            case ADD_INTERVENER_THREE_CODE -> caseData.getIntervenerThree();
+            case ADD_INTERVENER_FOUR_CODE -> caseData.getIntervenerFour();
+            case DEL_INTERVENER_ONE_CODE -> caseData.getIntervenerOne();
+            case DEL_INTERVENER_TWO_CODE -> caseData.getIntervenerTwo();
+            case DEL_INTERVENER_THREE_CODE -> caseData.getIntervenerThree();
+            case DEL_INTERVENER_FOUR_CODE -> caseData.getIntervenerFour();
+            default -> throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
+        };
     }
 
 
