@@ -34,4 +34,9 @@ public class ApplicantFdrDocumentCategoriser extends PartyFdrDocumentCategoriser
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS;
     }
 
+    @Override
+    protected DocumentCategory getPointsOfClaimOrDefenceDocumentCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POINTS_OF_CLAIM_OR_DEFENCE;
+    }
+
 }
