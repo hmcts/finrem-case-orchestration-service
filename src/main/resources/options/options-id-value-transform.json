@@ -27,18 +27,21 @@
     "FR_ms_MIAMDomesticViolenceChecklist_Value_19": "A letter or report from an organisation providing domestic abuse support services in the United Kingdom confirming-\n(i) that a person with whom a prospective party is or was personally connected was refused admission to a refuge;\n(ii) the date on which they were refused admission to the refuge; cont...",
     "FR_ms_MIAMDomesticViolenceChecklist_Value_20": "A letter from a public authority confirming that a person with whom a prospective party is or was personally connected, was assessed as being, or at risk of being, a victim of domestic abuse by that prospective party (or a copy of that assessment)",
     "FR_ms_MIAMDomesticViolenceChecklist_Value_21": "A letter from the Secretary of State for the Home Department confirming that a prospective party has been granted leave to remain in the United Kingdom as a victim of domestic abuse",
-    "FR_ms_MIAMDomesticViolenceChecklist_Value_22": "Evidence which demonstrates that a prospective party has been, or is at risk of being, the victim of domestic abuse by another prospective party in the form of abuse which relates to financial matters"
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_22": "Evidence which demonstrates that a prospective party has been, or is at risk of being, the victim of domestic abuse by another prospective party in the form of abuse which relates to financial matters",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_23": "I am unable to provide the required evidence with my application."
   },
   "MIAMUrgencyReasonChecklist": {
     "FR_ms_MIAMUrgencyReasonChecklist_Value_1": "There is risk to the life, liberty or physical safety of the prospective applicant or his or her family or his or her home; or",
     "FR_ms_MIAMUrgencyReasonChecklist_Value_2": "Any delay caused by attending a MIAM would cause a significant risk of a miscarriage of justice; or",
     "FR_ms_MIAMUrgencyReasonChecklist_Value_3": "Any delay caused by attending a MIAM would cause significant financial hardship to the prospective applicant; or",
     "FR_ms_MIAMUrgencyReasonChecklist_Value_4": "Any delay caused by attending a MIAM would cause irretrievable problems in dealing with the dispute (including the irretrievable loss of significant evidence); or",
-    "FR_ms_MIAMUrgencyReasonChecklist_Value_5": "There is a significant risk that in the period necessary to schedule and attend a MIAM, proceedings relating to the dispute will be brought in another state in which a valid claim to jurisdiction may exist cont..."
+    "FR_ms_MIAMUrgencyReasonChecklist_Value_5": "There is a significant risk that in the period necessary to schedule and attend a MIAM, proceedings relating to the dispute will be brought in another state in which a valid claim to jurisdiction may exist cont...",
+    "FR_ms_MIAMUrgencyReasonChecklist_Value_6": "I am unable to provide the required evidence with my application."
   },
   "MIAMPreviousAttendanceChecklist": {
     "FR_ms_MIAMPreviousAttendanceChecklist_Value_1": "In the 4 months prior to making the application, the person attended a MIAM or a non-court dispute resolution process relating to the same or substantially the same dispute; and where the applicant attended a non-court dispute resolution process, there is evidence of that attendance in the form of written confirmation from the dispute resolution provider. This evidence should be submitted alongside your application, and must include the signature of the provider; or",
-    "FR_ms_MIAMPreviousAttendanceChecklist_Value_2": "The application would be made in existing proceedings which are continuing and the prospective applicant attended a MIAM before initiating those proceedings"
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_2": "The application would be made in existing proceedings which are continuing and the prospective applicant attended a MIAM before initiating those proceedings",
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_3": "I am unable to provide the required evidence with my application."
   },
   "MIAMOtherGroundsChecklist": {
     "FR_ms_MIAMOtherGroundsChecklist_Value_1": "The application would be made without notice (Paragraph 5.1 of Practice Direction 18A sets out the circumstances in which applications may be made without notice.)",
@@ -46,7 +49,8 @@
     "FR_ms_MIAMOtherGroundsChecklist_Value_3": "(i) the prospective applicant is not able to attend a MIAM online or by video-link and an explanation of why this is the case is provided to the court using the text field provided; cont...",
     "FR_ms_MIAMOtherGroundsChecklist_Value_4": "(i) the prospective applicant is not able to attend a MIAM online or by video-link and an explanation of why this is the case is provided to the court using the text field provided; cont...",
     "FR_ms_MIAMOtherGroundsChecklist_Value_5": "(i) the prospective applicant is not able to attend a MIAM online or by video-link; and \n(ii) there is no authorised family mediator with an office within fifteen miles of the prospective applicant’s home; cont...",
-    "FR_ms_MIAMOtherGroundsChecklist_Value_6": "The prospective applicant cannot attend a MIAM because the prospective applicant is \n(i) in prison or any other institution in which the prospective applicant is required to be detained and facilities cannot be made available for them to attend a MIAM online or by video link; cont..."
+    "FR_ms_MIAMOtherGroundsChecklist_Value_6": "The prospective applicant cannot attend a MIAM because the prospective applicant is \n(i) in prison or any other institution in which the prospective applicant is required to be detained and facilities cannot be made available for them to attend a MIAM online or by video link; cont...",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_7": "I am unable to provide the required evidence with my application."
   },
   "natureOfApplicationChecklist": {
     "periodicalPaymentOrder": "Periodical Payment Order",
