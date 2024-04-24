@@ -148,13 +148,6 @@ public class UpdateContestedCaseController extends BaseController {
             removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
         } else {
             removeMiamCertificationDetails(caseData);
-            updateWhenClaimingExemptionMiam(caseData);
-        }
-    }
-
-    private void updateWhenClaimingExemptionMiam(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get(CLAIMING_EXEMPTION_MIAM), NO_VALUE)) {
-            removeMiamExceptionDetails(caseData);
         }
     }
 
@@ -169,7 +162,6 @@ public class UpdateContestedCaseController extends BaseController {
         caseData.put("soleTraderName", null);
         caseData.put("familyMediatorServiceName", null);
         caseData.put("mediatorRegistrationNumber", null);
-        caseData.put("uploadMediatorDocument", null);
     }
 
     private void removeAllMiamExceptionDetails(Map<String, Object> caseData) {
@@ -178,34 +170,17 @@ public class UpdateContestedCaseController extends BaseController {
         removeMiamExceptionDetails(caseData);
     }
 
-    private void updateMiamExceptionDetails(Map<String, Object> caseData) {
-        ArrayList miamExemptionsChecklist = (ArrayList) caseData.get("MIAMExemptionsChecklist");
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "other", "MIAMOtherGroundsChecklist");
-
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "domesticViolence", "MIAMDomesticViolenceChecklist");
-
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "urgency", "MIAMUrgencyReasonChecklist");
-
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "previousMIAMattendance", "MIAMPreviousAttendanceChecklist");
-    }
-
-    private void removeExemptionCheckLists(Map<String, Object> caseData, ArrayList miamExemptionsChecklist,
-                                           String other, String miamOtherGroundsChecklist) {
-        if (hasNotSelected(miamExemptionsChecklist, other)) {
-            caseData.put(miamOtherGroundsChecklist, null);
-        }
-    }
-
     private void removeMiamExceptionDetails(Map<String, Object> caseData) {
         caseData.put("MIAMExemptionsChecklist", null);
         caseData.put("MIAMDomesticViolenceChecklist", null);
         caseData.put("MIAMUrgencyReasonChecklist", null);
         caseData.put("MIAMPreviousAttendanceChecklist", null);
         caseData.put("MIAMOtherGroundsChecklist", null);
+        caseData.put("evidenceUnavailableDomesticAbuseMIAM", null);
+        caseData.put("evidenceUnavailableUrgencyMIAM", null);
+        caseData.put("evidenceUnavailablePreviousAttendanceMIAM", null);
+        caseData.put("evidenceUnavailableOtherGroundsMIAM", null);
+        caseData.put("additionalInfoOtherGroundsMIAM", null);
     }
 
     private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData, String typeOfApplication) {
