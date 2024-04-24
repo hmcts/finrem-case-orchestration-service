@@ -142,6 +142,7 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void updateContestedMiamDetails(Map<String, Object> caseData) {
+        caseData.put(FAMILY_MEDIATOR_MIAM, null);
         if (equalsTo((String) caseData.get(APPLICANT_ATTENDED_MIAM), YES_VALUE)) {
             removeAllMiamExceptionDetails(caseData);
             removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
@@ -153,10 +154,7 @@ public class UpdateContestedCaseController extends BaseController {
 
     private void updateWhenClaimingExemptionMiam(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(CLAIMING_EXEMPTION_MIAM), NO_VALUE)) {
-            caseData.put(FAMILY_MEDIATOR_MIAM, null);
             removeMiamExceptionDetails(caseData);
-        } else {
-            updateClaimingExemptionMiamDetails(caseData);
         }
     }
 
@@ -178,15 +176,6 @@ public class UpdateContestedCaseController extends BaseController {
         caseData.put(CLAIMING_EXEMPTION_MIAM, null);
         caseData.put(FAMILY_MEDIATOR_MIAM, null);
         removeMiamExceptionDetails(caseData);
-    }
-
-    private void updateClaimingExemptionMiamDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get(FAMILY_MEDIATOR_MIAM), YES_VALUE)) {
-            removeMiamExceptionDetails(caseData);
-        } else {
-            removeMiamCertificationDetails(caseData);
-            updateMiamExceptionDetails(caseData);
-        }
     }
 
     private void updateMiamExceptionDetails(Map<String, Object> caseData) {
