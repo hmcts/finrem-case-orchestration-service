@@ -49,7 +49,7 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
             case OTHER -> {
                 return getOtherDocumentCategory();
             }
-            case PENSION_PLAN -> {
+            case PENSION_PLAN, PENSION_REPORT -> {
                 return DocumentCategory.REPORTS;
             }
             case FORM_B, FORM_F, CARE_PLAN -> {
@@ -69,9 +69,6 @@ public abstract class OtherDocumentsHandler extends PartyDocumentsHandler {
             }
             case WITHOUT_PREJUDICE_OFFERS -> {
                 return getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory();
-            }
-            case PENSION_REPORT -> {
-                return DocumentCategory.REPORTS;
             }
             case PRE_HEARING_DRAFT_ORDER -> {
                 return getPreHearingDraftOrderDocumentCategory();
