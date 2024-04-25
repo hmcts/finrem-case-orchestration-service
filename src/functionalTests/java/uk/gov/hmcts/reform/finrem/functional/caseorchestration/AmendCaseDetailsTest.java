@@ -95,7 +95,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-periodic-payment-order-without-agreement1.json");
         String message = " associated with periodic payment details and written agreement for children";
-        checkNotNull("natureOfApplication6", message , jsonPathEvaluator);
+        checkNotNull("natureOfApplication6", message, jsonPathEvaluator);
         checkNotNull("natureOfApplication7", message, jsonPathEvaluator);
     }
 
@@ -414,17 +414,19 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     private String[] getMiamExemptionFields() {
-        return new String[]{CLAIMING_EXEMPTION_MIAM,
-                MIAM_EXEMPTIONS_CHECKLIST,
-                MIAM_DOMESTIC_VIOLENCE_CHECKLIST,
-                MIAM_URGENCY_CHECKLIST,
-                MIAM_PREVIOUS_ATTENDANCE_CHECKLIST,
-                MIAM_OTHER_GROUNDS_CHECKLIST,
-                MIAM_DOMESTIC_ABUSE_TEXTBOX,
-                MIAM_URGENCY_TEXTBOX,
-                MIAM_PREVIOUS_ATTENDANCE_TEXTBOX,
-                MIAM_OTHER_GROUNDS_TEXTBOX,
-                MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX};
+        return new String[] {
+            CLAIMING_EXEMPTION_MIAM,
+            MIAM_EXEMPTIONS_CHECKLIST,
+            MIAM_DOMESTIC_VIOLENCE_CHECKLIST,
+            MIAM_URGENCY_CHECKLIST,
+            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST,
+            MIAM_OTHER_GROUNDS_CHECKLIST,
+            MIAM_DOMESTIC_ABUSE_TEXTBOX,
+            MIAM_URGENCY_TEXTBOX,
+            MIAM_PREVIOUS_ATTENDANCE_TEXTBOX,
+            MIAM_OTHER_GROUNDS_TEXTBOX,
+            MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX
+        };
     }
 
 }
