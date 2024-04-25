@@ -33,6 +33,8 @@ public class CfvMigrationTask extends BaseTask {
 
     private static List<State> STATES_TO_CATEGORISE =
         List.of(
+            State.CONSENTED_ORDER_APPROVED,
+            State.CONSENTED_ORDER_NOT_APPROVED,
             State.SOLICITOR_DRAFT_ORDER,
             State.PREPARE_FOR_HEARING,
             State.CASE_FILE_SUBMITTED,
