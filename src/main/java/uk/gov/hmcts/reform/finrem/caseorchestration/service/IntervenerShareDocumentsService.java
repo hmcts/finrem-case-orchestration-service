@@ -469,6 +469,7 @@ public class IntervenerShareDocumentsService implements SharedService {
         return null;
     }
 
+
     public void shareSelectedDocumentWithOtherSelectedSolicitors(FinremCaseData caseData) {
         DynamicMultiSelectList sourceDocumentList = caseData.getSourceDocumentList();
         DynamicMultiSelectList solicitorRoleList = caseData.getSolicitorRoleList();
