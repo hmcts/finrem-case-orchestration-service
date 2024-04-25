@@ -131,7 +131,8 @@ public class CfvMigrationTask extends BaseTask {
 
     private List<CaseReference> getCaseReferencesFromSearchResult(SearchResult searchResult) {
         List<CaseReference> caseReferences = new ArrayList<>();
-        searchResult.getCases().forEach(caseDetails -> log.info("Found case {}", caseDetails.getId()));
+        searchResult.getCases().forEach(caseDetails ->
+            caseReferences.add(new CaseReference(caseDetails.getId().toString())));
         return caseReferences;
     }
 
