@@ -37,6 +37,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAMILY_MEDIATOR_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_ABUSE_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_VIOLENCE_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_EXEMPTIONS_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_TEXTBOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
@@ -171,16 +181,16 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void removeMiamExceptionDetails(Map<String, Object> caseData) {
-        caseData.put("MIAMExemptionsChecklist", null);
-        caseData.put("MIAMDomesticViolenceChecklist", null);
-        caseData.put("MIAMUrgencyReasonChecklist", null);
-        caseData.put("MIAMPreviousAttendanceChecklist", null);
-        caseData.put("MIAMOtherGroundsChecklist", null);
-        caseData.put("evidenceUnavailableDomesticAbuseMIAM", null);
-        caseData.put("evidenceUnavailableUrgencyMIAM", null);
-        caseData.put("evidenceUnavailablePreviousAttendanceMIAM", null);
-        caseData.put("evidenceUnavailableOtherGroundsMIAM", null);
-        caseData.put("additionalInfoOtherGroundsMIAM", null);
+        caseData.put(MIAM_EXEMPTIONS_CHECKLIST, null);
+        caseData.put(MIAM_DOMESTIC_VIOLENCE_CHECKLIST, null);
+        caseData.put(MIAM_URGENCY_CHECKLIST, null);
+        caseData.put(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, null);
+        caseData.put(MIAM_OTHER_GROUNDS_CHECKLIST, null);
+        caseData.put(MIAM_DOMESTIC_ABUSE_TEXTBOX, null);
+        caseData.put(MIAM_URGENCY_TEXTBOX, null);
+        caseData.put(MIAM_PREVIOUS_ATTENDANCE_TEXTBOX, null);
+        caseData.put(MIAM_OTHER_GROUNDS_TEXTBOX, null);
+        caseData.put(MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX, null);
     }
 
     private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData, String typeOfApplication) {
