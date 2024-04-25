@@ -2,8 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -114,38 +114,24 @@ public class CfvMigrationTask extends BaseTask {
     }
 
     private String buildSearchString(final String state, int pageSize) {
-        BoolQueryBuilder cfvFlagMustNotExist = QueryBuilders
-            .boolQuery()
-            .mustNot(QueryBuilders.existsQuery(CASE_DATA_CFV_CATEGORIES_APPLIED_FLAG));
-
-        QueryBuilder stateQuery = QueryBuilders.matchQuery("state", state);
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
         LocalDateTime cfvReleaseDateTime = LocalDateTime.parse(cfvReleaseDate, formatter);
-        QueryBuilder caseCreatedDateBeforeCfv = QueryBuilders.rangeQuery("created_date").lt(cfvReleaseDateTime);
 
-        QueryBuilder query = QueryBuilders
-            .boolQuery()
-            .must(stateQuery)
-            .must(cfvFlagMustNotExist)
-            .must(caseCreatedDateBeforeCfv);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+            .mustNot(QueryBuilders.existsQuery(CASE_DATA_CFV_CATEGORIES_APPLIED_FLAG))
+            .filter(QueryBuilders.rangeQuery("created_date").lt(cfvReleaseDateTime))
+            .filter(new TermQueryBuilder("state.keyword", state));
 
-        int from = 0;
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+            .size(pageSize)
+            .query(boolQueryBuilder);
 
-        SearchSourceBuilder sourceBuilder = SearchSourceBuilder
-            .searchSource()
-            .query(query)
-            .from(from)
-            .size(pageSize);
-
-        return sourceBuilder.toString();
+        return searchSourceBuilder.toString();
     }
 
     private List<CaseReference> getCaseReferencesFromSearchResult(SearchResult searchResult) {
         List<CaseReference> caseReferences = new ArrayList<>();
-        searchResult.getCases().forEach(caseDetails -> {
-            caseReferences.add(new CaseReference(caseDetails.getId().toString()));
-        });
+        searchResult.getCases().forEach(caseDetails -> log.info("Found case {}", caseDetails.getId()));
         return caseReferences;
     }
 
