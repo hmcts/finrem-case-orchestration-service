@@ -272,7 +272,7 @@ public class CCDConfigConstant {
     public static final String MIAM_OTHER_GROUNDS_TEXTBOX = "evidenceUnavailableOtherGroundsMIAM";
     public static final String MIAM_URGENCY_TEXTBOX = "evidenceUnavailableUrgencyMIAM";
     public static final String MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX = "additionalInfoOtherGroundsMIAM";
-    public static final String MIAM_EXEMPTIONS_CHECKLIST = "miamExemptionsChecklist";
+    public static final String MIAM_EXEMPTIONS_CHECKLIST = "MIAMExemptionsChecklist";
     public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
     public static final String IS_ADMIN = "isAdmin";
