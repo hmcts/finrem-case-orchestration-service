@@ -49,14 +49,14 @@ class SolicitorAndCaseWorkerDraftOrderAboutToSubmitHandlerTest extends  BaseHand
     }
 
     @Test
-    void givenContestedCase_whenAboutToSubmitEventForSolicitorCWDraftOrder_thenHandlerCanHandle() {
+    void givenContestedCase_whenAboutToSubmitEventForSolicitorCwDraftOrder_thenHandlerCanHandle() {
         assertThat(solicitorAndCaseWorkerDraftOrderAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CW_DRAFT_ORDER),
             is(true));
     }
 
     @Test
-    void givenConsentedCase_whenAboutToSubmitEventForSolicitorCWDraftOrder_thenHandlerCannotHandle() {
+    void givenConsentedCase_whenAboutToSubmitEventForSolicitorCwDraftOrder_thenHandlerCannotHandle() {
         assertThat(solicitorAndCaseWorkerDraftOrderAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.SOLICITOR_CW_DRAFT_ORDER),
             is(false));
