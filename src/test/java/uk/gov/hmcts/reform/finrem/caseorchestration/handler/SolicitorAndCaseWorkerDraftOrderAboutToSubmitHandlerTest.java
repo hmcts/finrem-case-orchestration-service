@@ -49,21 +49,21 @@ class SolicitorAndCaseWorkerDraftOrderAboutToSubmitHandlerTest extends  BaseHand
     }
 
     @Test
-    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
+    void givenContestedCase_whenAboutToSubmitEventForSolicitorCWDraftOrder_thenHandlerCanHandle() {
         assertThat(solicitorAndCaseWorkerDraftOrderAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CW_DRAFT_ORDER),
             is(true));
     }
 
     @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
+    void givenConsentedCase_whenAboutToSubmitEventForSolicitorCWDraftOrder_thenHandlerCannotHandle() {
         assertThat(solicitorAndCaseWorkerDraftOrderAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.SOLICITOR_CW_DRAFT_ORDER),
             is(false));
     }
 
     @Test
-    void givenConsentInContestedCase_whenApprovedOrdersButNoRefusedOrderAvailableToShareWithParties_thenHandleRequest() {
+    void givenContestedCase_whenSolicitorOrCaseworkerCreatesDraftOrder_thenCategorises() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
