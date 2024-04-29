@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT;
@@ -42,7 +43,7 @@ public class UploadGeneralDocumentsCategoriser extends DocumentCategoriser {
             return;
         }
 
-        if (document.getDocumentType() == null) {
+        if (document.getDocumentType() == null || DRAFT_ORDER.equals(document.getDocumentType())) {
             CaseDocument documentCopy = new CaseDocument(document.getDocumentLink());
             setCategoryToAllOrdersDocs(documentCopy, DocumentCategory.CASE_DOCUMENTS.getDocumentCategoryId());
             document.setDocumentLink(documentCopy);

@@ -71,11 +71,13 @@ public abstract class DocumentHandler {
             for (UploadCaseDocumentCollection uploadCaseDocumentCollection : uploadedCollectionForType) {
                 CaseDocument caseDocument = uploadCaseDocumentCollection.getUploadCaseDocument()
                     .getCaseDocuments();
-                caseDocument.setCategoryId(getDocumentCategoryFromDocumentType(
-                        uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType(),
-                        uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentParty()
-                    ).getDocumentCategoryId()
-                );
+                if (caseDocument != null) {
+                    caseDocument.setCategoryId(getDocumentCategoryFromDocumentType(
+                            uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType(),
+                            uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentParty()
+                        ).getDocumentCategoryId()
+                    );
+                }
             }
         }
     }
