@@ -40,8 +40,8 @@ class MiamCheckServiceTest {
         + "for further information on what to do next and how to arrange a MIAM.";
     private static final String MIAM_EVIDENCE_UNAVAILABLE_ERROR = "Please explain in the textbox why you are unable to "
         + "provide the required evidence with your application.";
-    private static final String MIAM_LEGACY_OPTION_ERROR = "You have selected an outdated MIAM exemption option which " +
-        "needs to be unchecked before you can continue.";
+    private static final String MIAM_LEGACY_OPTION_ERROR = "You have selected an outdated MIAM exemption option which "
+        + "needs to be unchecked before you can continue.";
     private static final String URGENCY_CHECKLIST_VALUE = "FR_ms_MIAMUrgencyReasonChecklist_Value_6";
     private static final String DOMESTIC_VIOLENCE_CHECKLIST_VALUE = "FR_ms_MIAMDomesticViolenceChecklist_Value_23";
     private static final String OTHER_GROUNDS_CHECKLIST_VALUE_7 = "FR_ms_MIAMOtherGroundsChecklist_Value_7";

@@ -33,8 +33,8 @@ public class MiamCheckService {
     private static final String MIAM_EVIDENCE_UNAVAILABLE_ERROR = "Please explain in the textbox why you are unable to "
         + "provide the required evidence with your application.";
 
-    private static final String MIAM_LEGACY_OPTION_ERROR = "You have selected an outdated MIAM exemption option which " +
-        "needs to be unchecked before you can continue.";
+    private static final String MIAM_LEGACY_OPTION_ERROR = "You have selected an outdated MIAM exemption option which "
+        + "needs to be unchecked before you can continue.";
 
     public List<String> validateMiamFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
