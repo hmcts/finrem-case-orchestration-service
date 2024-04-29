@@ -19,8 +19,12 @@ public enum MiamPreviousAttendance {
     FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_2("FR_ms_MIAMPreviousAttendanceChecklist_Value_2",
         "The application would be made in existing proceedings which are continuing and the prospective "
             + "applicant attended a MIAM before initiating those proceedings."),
-    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_3("FR_ms_MIAMPreviousAttendanceChecklist_Value_3",
-        "I am unable to provide the required evidence with my application.");
+    FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_3("FR_ms_MIAMPreviousAttendanceChecklist_Value_3",
+        "I am unable to provide the required evidence with my application."),
+    FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_4("FR_ms_MIAMPreviousAttendanceChecklist_Value_4",
+        "Do not use after 29/04/2024"),
+    FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_5("FR_ms_MIAMPreviousAttendanceChecklist_Value_5",
+        "Do not use after 29/04/2024");
 
     private final String value;
     private final String text;

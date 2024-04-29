@@ -49,7 +49,15 @@ public enum MiamOtherGrounds {
             + "(ii) subject to conditions of bail that prevent contact with the other person; or\n"
             + "(iii) subject to a licence with a prohibited contact requirement in relation to the other person.\""),
     FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_7("FR_ms_MIAMOtherGroundsChecklist_Value_7",
-        "I am unable to provide the required evidence with my application.");
+        "I am unable to provide the required evidence with my application."),
+    FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_8("FR_ms_MIAMOtherGroundsChecklist_Value_8",
+        "Do not use after 29/04/2024"),
+    FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_9("FR_ms_MIAMOtherGroundsChecklist_Value_9",
+        "Do not use after 29/04/2024"),
+    FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_10("FR_ms_MIAMOtherGroundsChecklist_Value_10",
+        "Do not use after 29/04/2024"),
+    FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_11("FR_ms_MIAMOtherGroundsChecklist_Value_11",
+        "Do not use after 29/04/2024");
 
     private final String value;
     private final String text;
