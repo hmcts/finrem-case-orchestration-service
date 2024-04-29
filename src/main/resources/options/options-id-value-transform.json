@@ -42,8 +42,8 @@
     "FR_ms_MIAMPreviousAttendanceChecklist_Value_1": "In the 4 months prior to making the application, the person attended a MIAM or a non-court dispute resolution process relating to the same or substantially the same dispute; and where the applicant attended a non-court dispute resolution process, there is evidence of that attendance in the form of written confirmation from the dispute resolution provider. This evidence should be submitted alongside your application, and must include the signature of the provider; or",
     "FR_ms_MIAMPreviousAttendanceChecklist_Value_2": "The application would be made in existing proceedings which are continuing and the prospective applicant attended a MIAM before initiating those proceedings",
     "FR_ms_MIAMPreviousAttendanceChecklist_Value_3": "I am unable to provide the required evidence with my application.",
-    "FR_ms_MIAMPreviousAttendanceChecklist_Value_4": "Do not use after 29/04/2024",
-    "FR_ms_MIAMPreviousAttendanceChecklist_Value_5": "Do not use after 29/04/2024"
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_4": "Do not use after 29/04/2024 - The application would be made in existing proceedings which are continuing and the prospective applicant attended a MIAM before initiating those proceedings",
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_5": "Do not use after 29/04/2024 - The application would be made in existing proceedings which are continuing and a MIAM exemption applied to the application for those proceedings"
   },
   "MIAMOtherGroundsChecklist": {
     "FR_ms_MIAMOtherGroundsChecklist_Value_1": "The application would be made without notice (Paragraph 5.1 of Practice Direction 18A sets out the circumstances in which applications may be made without notice.)",
@@ -53,10 +53,10 @@
     "FR_ms_MIAMOtherGroundsChecklist_Value_5": "(i) the prospective applicant is not able to attend a MIAM online or by video-link; and \n(ii) there is no authorised family mediator with an office within fifteen miles of the prospective applicant’s home; cont...",
     "FR_ms_MIAMOtherGroundsChecklist_Value_6": "The prospective applicant cannot attend a MIAM because the prospective applicant is \n(i) in prison or any other institution in which the prospective applicant is required to be detained and facilities cannot be made available for them to attend a MIAM online or by video link; cont...",
     "FR_ms_MIAMOtherGroundsChecklist_Value_7": "I am unable to provide the required evidence with my application.",
-    "FR_ms_MIAMOtherGroundsChecklist_Value_8": "Do not use after 29/04/2024",
-    "FR_ms_MIAMOtherGroundsChecklist_Value_9": "Do not use after 29/04/2024",
-    "FR_ms_MIAMOtherGroundsChecklist_Value_10": "Do not use after 29/04/2024",
-    "FR_ms_MIAMOtherGroundsChecklist_Value_11": "Do not use after 29/04/2024"
+    "FR_ms_MIAMOtherGroundsChecklist_Value_8": "Do not use after 29/04/2024 - The prospective applicant or all of the prospective respondents are not habitually resident in England and Wales",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_9": "Do not use after 29/04/2024 - A child is one of the prospective parties by virtue of Rule 12.3(1).",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_10": "Do not use after 29/04/2024 - (i) the prospective applicant has contacted as many authorised family mediators as have an office within fifteen miles of his or her home (or three of them if there are three or more), and all of them have stated that they are not available to conduct a MIAM within fifteen business days of the date of contact; and (ii) the names, postal addresses and telephone numbers or e-mail addresses for such authorised family mediators, and the dates of contact, can be provided to the court if requested.",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_11": "Do not use after 29/04/2024 - There is no authorised family mediator with an office within fifteen miles of the prospective applicant’s home."
   },
   "natureOfApplicationChecklist": {
     "periodicalPaymentOrder": "Periodical Payment Order",

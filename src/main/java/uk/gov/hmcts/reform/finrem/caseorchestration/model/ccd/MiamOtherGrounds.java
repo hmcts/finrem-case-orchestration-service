@@ -51,13 +51,13 @@ public enum MiamOtherGrounds {
     FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_7("FR_ms_MIAMOtherGroundsChecklist_Value_7",
         "I am unable to provide the required evidence with my application."),
     FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_8("FR_ms_MIAMOtherGroundsChecklist_Value_8",
-        "Do not use after 29/04/2024"),
+        "Do not use after 29/04/2024 - The prospective applicant or all of the prospective respondents are not habitually resident in England and Wales"),
     FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_9("FR_ms_MIAMOtherGroundsChecklist_Value_9",
-        "Do not use after 29/04/2024"),
+        "Do not use after 29/04/2024 - A child is one of the prospective parties by virtue of Rule 12.3(1)."),
     FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_10("FR_ms_MIAMOtherGroundsChecklist_Value_10",
-        "Do not use after 29/04/2024"),
+        "Do not use after 29/04/2024 - (i) the prospective applicant has contacted as many authorised family mediators as have an office within fifteen miles of his or her home (or three of them if there are three or more), and all of them have stated that they are not available to conduct a MIAM within fifteen business days of the date of contact; and (ii) the names, postal addresses and telephone numbers or e-mail addresses for such authorised family mediators, and the dates of contact, can be provided to the court if requested."),
     FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_11("FR_ms_MIAMOtherGroundsChecklist_Value_11",
-        "Do not use after 29/04/2024");
+        "Do not use after 29/04/2024 - There is no authorised family mediator with an office within fifteen miles of the prospective applicant’s home.");
 
     private final String value;
     private final String text;
