@@ -143,7 +143,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
         generalOrders.forEach(order -> assertThat(order.getValue().getAdditionalDocument().getCategoryId(),
-            is(DocumentCategory.APPROVED_ORDERS_CASE.getDocumentCategoryId())));
+            is(DocumentCategory.APPROVED_ORDERS.getDocumentCategoryId())));
     }
 
     @Test
