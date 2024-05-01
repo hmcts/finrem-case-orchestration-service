@@ -3,7 +3,7 @@
 ## Overview
 `finrem-case-orchestration` is a [Spring Boot](https://spring.io/projects/spring-boot) application and is responsible for handling all CCD callbacks
 for Financial Remedy cases. It provides the business logic to enable Financial Remedy cases to be progressed through
-the justice system.
+the justice system. 
 
 The CCD definitions supported by this service can be found [here](https://github.com/hmcts/finrem-ccd-definitions).
 
