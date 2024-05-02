@@ -95,7 +95,7 @@ public class MiamExemptionsUpdateTask extends CsvFileProcessingTask {
 
     private void updateDomestic(long caseReference, MiamWrapper miamWrapper) {
         List<MiamDomesticViolence> current = miamWrapper.getMiamDomesticViolenceChecklist();
-        log.info("{} current domestic {}", caseReference, current);
+        log.info("{}: current domestic {}", caseReference, current);
         if (CollectionUtils.isEmpty(current)) {
             return;
         }
@@ -121,7 +121,7 @@ public class MiamExemptionsUpdateTask extends CsvFileProcessingTask {
 
     private void updatePrevious(long caseReference, MiamWrapper miamWrapper) {
         MiamPreviousAttendance currentValue = miamWrapper.getMiamPreviousAttendanceChecklist();
-        log.info("{} current previous {}", caseReference, currentValue);
+        log.info("{}: current previous {}", caseReference, currentValue);
         if (currentValue == null) {
             return;
         }
