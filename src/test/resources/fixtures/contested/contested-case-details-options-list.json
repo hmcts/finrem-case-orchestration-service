@@ -24,7 +24,11 @@
       "FR_ms_MIAMOtherGroundsChecklist_Value_4",
       "FR_ms_MIAMOtherGroundsChecklist_Value_5",
       "FR_ms_MIAMOtherGroundsChecklist_Value_6",
-      "FR_ms_MIAMOtherGroundsChecklist_Value_7"
+      "FR_ms_MIAMOtherGroundsChecklist_Value_7",
+      "FR_ms_MIAMOtherGroundsChecklist_Value_8",
+      "FR_ms_MIAMOtherGroundsChecklist_Value_9",
+      "FR_ms_MIAMOtherGroundsChecklist_Value_10",
+      "FR_ms_MIAMOtherGroundsChecklist_Value_11"
     ],
     "MIAMUrgencyReasonChecklist": [
       "FR_ms_MIAMUrgencyReasonChecklist_Value_1",
@@ -88,7 +92,9 @@
     "MIAMPreviousAttendanceChecklist": [
       "FR_ms_MIAMPreviousAttendanceChecklist_Value_1",
       "FR_ms_MIAMPreviousAttendanceChecklist_Value_2",
-      "FR_ms_MIAMPreviousAttendanceChecklist_Value_3"],
+      "FR_ms_MIAMPreviousAttendanceChecklist_Value_3",
+      "FR_ms_MIAMPreviousAttendanceChecklist_Value_4",
+      "FR_ms_MIAMPreviousAttendanceChecklist_Value_5"],
     "formCCreatedDate": "2019-05-07",
     "eventDatePlus21Days": "2019-05-28",
     "hearingDateLess35Days": "2019-06-05",
