@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Gender.NOT_GIVEN;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -23,7 +25,7 @@ public class ChildrenInfo {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
-    private Gender gender;
+    private Gender gender = NOT_GIVEN;
     private String relationshipToRespondent;
     private String relationshipToApplicant;
     private String countryOfResidence;
