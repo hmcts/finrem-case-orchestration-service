@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -8,11 +9,17 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
 import java.util.Optional;
 
@@ -43,13 +50,32 @@ public class HearingOrderControllerTest extends BaseControllerTest {
     private IdamService idamService;
     @MockBean
     private CaseDataService caseDataService;
+    @MockBean
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @MockBean
+    private UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
+
+    CallbackRequest request;
+    CaseDetails caseDetails;
+    FinremCaseDetails finremCaseDetails;
+
+    @Before
+    public void setup() {
+        request = buildCallbackRequest();
+        caseDetails = request.getCaseDetails();
+        finremCaseDetails = buildFinremCallbackRequest().getCaseDetails();
+    }
 
     @Test
     public void whenStoreHearingOrder_expectedServicesAreInvoked() {
-        hearingOrderController.storeHearingOrder(AUTH_TOKEN, buildCallbackRequest());
+        when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any())).thenReturn(finremCaseDetails);
+
+        hearingOrderController.storeHearingOrder(AUTH_TOKEN, request);
 
         verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
         verify(caseDataService).moveCollection(any(), eq(DRAFT_DIRECTION_DETAILS_COLLECTION), eq(DRAFT_DIRECTION_DETAILS_COLLECTION_RO));
+        verify(uploadedDraftOrderCategoriser).categorise(any());
     }
 
     @Test
@@ -77,6 +103,8 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void givenLatestDraftDirectionOrderOverridesSolicitorCollection_whenStoringApprovedOrder_thenItIsAppendedToJudgesAmendedOrders() {
+        when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any())).thenReturn(finremCaseDetails);
         when(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(any(), any())).thenReturn(true);
 
         hearingOrderController.storeApprovedHearingOrder(AUTH_TOKEN, buildCallbackRequest());
@@ -88,10 +116,18 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void givenLatestDraftDirectionOrderDoesntOverrideSolicitorCollection_whenStoringApprovedOrder_thenItIsNotAppendedToJudgesAmendedOrders() {
+        when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any())).thenReturn(finremCaseDetails);
         when(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(any(), any())).thenReturn(false);
 
         hearingOrderController.storeApprovedHearingOrder(AUTH_TOKEN, buildCallbackRequest());
 
         verify(hearingOrderService, never()).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(any(CaseDetails.class));
+    }
+
+    private FinremCallbackRequest buildFinremCallbackRequest() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
+        return FinremCallbackRequest.builder().eventType(EventType.APPROVE_ORDER).caseDetails(caseDetails).build();
     }
 }

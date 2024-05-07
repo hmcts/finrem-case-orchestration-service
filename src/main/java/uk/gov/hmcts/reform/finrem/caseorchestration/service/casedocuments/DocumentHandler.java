@@ -71,16 +71,24 @@ public abstract class DocumentHandler {
             for (UploadCaseDocumentCollection uploadCaseDocumentCollection : uploadedCollectionForType) {
                 CaseDocument caseDocument = uploadCaseDocumentCollection.getUploadCaseDocument()
                     .getCaseDocuments();
-                caseDocument.setCategoryId(getDocumentCategoryFromDocumentType(
-                        uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType(),
-                        uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentParty()
-                    ).getDocumentCategoryId()
-                );
+                if (caseDocument != null) {
+                    caseDocument.setCategoryId(getDocumentCategoryFromDocumentType(
+                            uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType(),
+                            uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentParty()
+                        ).getDocumentCategoryId()
+                    );
+                }
             }
         }
     }
 
-    public void assignDocumentCategoryToUploadDocumentsCollection(FinremCaseData caseData) {
-        applyDocumentCategory(caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType));
+    public void assignDocumentCategoryToUploadDocumentsCollection(FinremCaseData caseData) throws NullPointerException {
+        try {
+            applyDocumentCategory(caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType));
+
+        } catch (Exception e) {
+            log.error("applyDocumentCategory failed for collectionType {}", collectionType);
+            throw e;
+        }
     }
 }

@@ -53,7 +53,7 @@ public class MiamCheckController extends BaseController {
     }
 
     private AboutToStartOrSubmitCallbackResponse response(CallbackRequest callback) {
-        List<String> errors = service.miamExemptAttendCheck(callback.getCaseDetails());
+        List<String> errors = service.validateMiamFields(callback.getCaseDetails());
         return AboutToStartOrSubmitCallbackResponse.builder().errors(errors).build();
     }
 }
