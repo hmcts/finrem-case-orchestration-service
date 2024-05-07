@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ public class HearingOrderService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final OrderDateService orderDateService;
+    private final UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
 
     public void convertToPdfAndStampAndStoreLatestDraftHearingOrder(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -92,6 +94,7 @@ public class HearingOrderService {
             DraftDirectionOrderCollection directionOrderCollection = DraftDirectionOrderCollection.builder().value(directionOrder).build();
             judgesAmendedDirectionOrders.add(directionOrderCollection);
             caseData.getDraftDirectionWrapper().setJudgesAmendedOrderCollection(judgesAmendedDirectionOrders);
+            uploadedDraftOrderCategoriser.categorise(caseData);
         }
     }
 

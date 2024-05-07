@@ -25,7 +25,7 @@ public class GeneralOrderDocumentCategoriser extends DocumentCategoriser {
         List<ContestedGeneralOrderCollection> generalOrders =
             finremCaseData.getGeneralOrderWrapper().getGeneralOrders();
         log.info("Categorising general order documents for case with Case ID: {}", finremCaseData.getCcdCaseId());
-        categoriseGeneralOrders(generalOrders, DocumentCategory.APPROVED_ORDERS_CASE);
+        categoriseGeneralOrders(generalOrders, DocumentCategory.APPROVED_ORDERS);
 
         List<ContestedGeneralOrderCollection> generalOrdersConsent =
             finremCaseData.getGeneralOrderWrapper().getGeneralOrdersConsent();

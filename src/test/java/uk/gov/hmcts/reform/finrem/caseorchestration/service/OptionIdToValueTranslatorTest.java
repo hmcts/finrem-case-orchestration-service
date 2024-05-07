@@ -33,7 +33,7 @@ public class OptionIdToValueTranslatorTest extends BaseTest {
         CaseDetails actual = caseDetailsWithOptions();
         translator.translateOptionsValues.accept(actual);
 
-        assertEquals(actual, expectedCaseDetails());
+        assertEquals(expectedCaseDetails(), actual);
     }
 
     @Test
