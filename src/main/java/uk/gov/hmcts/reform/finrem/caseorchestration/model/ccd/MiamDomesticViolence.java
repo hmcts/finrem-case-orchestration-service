@@ -24,30 +24,27 @@ public enum MiamDomesticViolence {
         "A domestic abuse protection notice issued under section 24 of the Crime and Security Act 2010 "
             + "against a prospective party"),
     FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_7("FR_ms_MIAMDomesticViolenceChecklist_Value_7",
-        "A domestic abuse protection notice given under section 22 of the Domestic Abuse Act 2021 against "
-            + "a prospective party"),
-    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_8("FR_ms_MIAMDomesticViolenceChecklist_Value_8",
         "A relevant protective injunction"),
-    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_9("FR_ms_MIAMDomesticViolenceChecklist_Value_9",
+    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_8("FR_ms_MIAMDomesticViolenceChecklist_Value_8",
         "An undertaking given in England and Wales under section 46 or 63E of the Family Law Act 1996 "
             + "(or given in Scotland or Northern Ireland in place of a protective injunction) by a prospective "
             + "party, provided that a cross-undertaking relating to domestic violence or abuse was not given by "
             + "another prospective party"),
-    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_10("FR_ms_MIAMDomesticViolenceChecklist_Value_10",
+    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_9("FR_ms_MIAMDomesticViolenceChecklist_Value_9",
         "A copy of a finding of fact, made in proceedings in the United Kingdom, that there has been domestic "
             + "abuse by a prospective party"),
-    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_11("FR_ms_MIAMDomesticViolenceChecklist_Value_11",
+    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_10("FR_ms_MIAMDomesticViolenceChecklist_Value_10",
         "An expert report produced as evidence in proceedings in the United Kingdom for the benefit of a court "
             + "or tribunal confirming that a person with whom a prospective party is or was personally connected, "
             + "was assessed as being, or at risk of being, a victim of domestic abuse by that prospective party"),
-    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_12("FR_ms_MIAMDomesticViolenceChecklist_Value_12",
+    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_11("FR_ms_MIAMDomesticViolenceChecklist_Value_11",
         "A letter or report from an appropriate health professional confirming that- \n"
             + "(i) that professional, or another appropriate health professional, has examined a "
             + "prospective party in person by telephone or by video conferencing, and (ii) in the "
             + "reasonable professional judgment of the author or the examining appropriate health "
             + "professional, that prospective party has, or has had, injuries or a condition consistent "
             + "with being a victim of domestic abuse"),
-    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_13("FR_ms_MIAMDomesticViolenceChecklist_Value_13",
+    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_12("FR_ms_MIAMDomesticViolenceChecklist_Value_12",
         "A letter or report from- \n"
             + "(i) the appropriate health professional who made the referral described below; \n"
             + "(ii) an appropriate health professional who has access to the medical records of the prospective party referred to below; or \n"
@@ -55,11 +52,14 @@ public enum MiamDomesticViolence {
             + "confirming that there was a referral by an appropriate health professional of a prospective party "
             + "to a person who provides specialist support or assistance for victims of, or those at risk of, "
             + "domestic abuse"),
-    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_14("FR_ms_MIAMDomesticViolenceChecklist_Value_14",
+    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_13("FR_ms_MIAMDomesticViolenceChecklist_Value_13",
         "A letter from any person who is a member of a multi-agency risk assessment conference (or other "
             + "suitable local safeguarding forum) confirming that a prospective party, or a person with whom "
             + "that prospective party is personally connected, is or has been at risk of harm from domestic "
             + "abuse by another prospective party"),
+    FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_14("FR_ms_MIAMDomesticViolenceChecklist_Value_14",
+        "A domestic abuse protection notice given under section 22 of the Domestic Abuse Act 2021 against "
+            + "a prospective party"),
     FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_15("FR_ms_MIAMDomesticViolenceChecklist_Value_15",
         "A letter from an independent domestic abuse advisor (IDVA) confirming that they are or "
             + "have provided support to a prospective party"),
