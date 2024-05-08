@@ -37,11 +37,6 @@ public class IntervenerFourOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS;
-    }
-
-    @Override
     protected DocumentCategory getDefaultPartyCategory() {
         return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4;
     }
@@ -59,6 +54,11 @@ public class IntervenerFourOtherDocumentsHandler extends OtherDocumentsHandler {
     @Override
     protected DocumentCategory getHearingDocumentsCategoryFM5() {
         return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_FM5;
+    }
+
+    @Override
+    protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4;
     }
 
     @Override

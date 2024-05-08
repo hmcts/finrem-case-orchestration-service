@@ -184,7 +184,7 @@ public class GeneralOrderService {
     private void updateContestedGeneralOrders(FinremCaseData caseData,
                                               List<ContestedGeneralOrderCollection> generalOrders) {
         GeneralOrderWrapper generalOrderWrapper = caseData.getGeneralOrderWrapper();
-        generalOrderWrapper.setGeneralOrderLatestDocument(generalOrderWrapper.getGeneralOrderPreviewDocument());
+        generalOrderWrapper.setGeneralOrderLatestDocument(new CaseDocument(generalOrderWrapper.getGeneralOrderPreviewDocument()));
         ContestedGeneralOrderCollection contestedGeneralOrderCollection =
             createContestedGeneralOrderCollection(generalOrderWrapper);
         generalOrders.add(contestedGeneralOrderCollection);
@@ -197,7 +197,7 @@ public class GeneralOrderService {
         ContestedGeneralOrder contestedGeneralOrder = ContestedGeneralOrder
             .builder()
             .dateOfOrder(generalOrderWrapper.getGeneralOrderDate())
-            .additionalDocument(generalOrderWrapper.getGeneralOrderPreviewDocument())
+            .additionalDocument(new CaseDocument(generalOrderWrapper.getGeneralOrderPreviewDocument()))
             .generalOrderAddressTo(getAddressToFormatted(generalOrderWrapper.getGeneralOrderAddressTo()))
             .build();
         return ContestedGeneralOrderCollection.builder()

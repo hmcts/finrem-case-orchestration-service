@@ -53,7 +53,11 @@ class UploadGeneralDocumentsCategoriserTest extends BaseHandlerTestSetup {
         assertEquals(DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT.getDocumentCategoryId(),
             documents.get(4).getValue().getDocumentLink().getCategoryId());
 
-        assertNull(documents.get(5).getValue().getDocumentLink().getCategoryId());
+        assertEquals(DocumentCategory.CASE_DOCUMENTS.getDocumentCategoryId(),
+            documents.get(5).getValue().getDocumentLink().getCategoryId());
+
+        assertNull(documents.get(6).getValue().getDocumentLink().getCategoryId());
+
     }
 
     @Test
@@ -85,7 +89,8 @@ class UploadGeneralDocumentsCategoriserTest extends BaseHandlerTestSetup {
             createDocument(UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT),
             createDocument(UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT_SOLICITOR),
             createDocument(UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT_CONTESTED),
-            createDocument(UploadGeneralDocumentType.DRAFT_ORDER)
+            createDocument(UploadGeneralDocumentType.DRAFT_ORDER),
+            createDocument(UploadGeneralDocumentType.APPLICATION)
         )).build();
     }
 

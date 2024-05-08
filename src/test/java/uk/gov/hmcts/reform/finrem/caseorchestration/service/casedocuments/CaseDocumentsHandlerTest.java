@@ -53,6 +53,12 @@ public class CaseDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     @Override
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
+            caseDocumentsHandler.getDocumentCategoryFromDocumentType(null,
+                CaseDocumentParty.RESPONDENT),
+            is(DocumentCategory.CASE_DOCUMENTS)
+        );
+
+        assertThat(
             caseDocumentsHandler.getDocumentCategoryFromDocumentType(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,
                 CaseDocumentParty.RESPONDENT),
             is(DocumentCategory.CASE_DOCUMENTS)
