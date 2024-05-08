@@ -53,23 +53,27 @@ public class MiamCheckService {
 
     private void addEvidenceUnavailableErrors(Map<String, List<String>> errors, Map<String, Object> caseData) {
         errors.put("MiamDomesticViolenceEvidenceUnavailable", getMiamEvidenceUnavailableErrors(caseData,
-            MIAM_DOMESTIC_VIOLENCE_CHECKLIST, MIAM_DOMESTIC_ABUSE_TEXTBOX, "FR_ms_MIAMDomesticViolenceChecklist_Value_23"));
+            MIAM_DOMESTIC_VIOLENCE_CHECKLIST, MIAM_DOMESTIC_ABUSE_TEXTBOX,
+            "FR_ms_MIAMDomesticViolenceChecklist_Value_23"));
         errors.put("MiamUrgencyEvidenceUnavailable", getMiamEvidenceUnavailableErrors(caseData,
             MIAM_URGENCY_CHECKLIST, MIAM_URGENCY_TEXTBOX, "FR_ms_MIAMUrgencyReasonChecklist_Value_6"));
         errors.put("MiamPreviousAttendanceEvidenceUnavailable", getMiamEvidenceUnavailableErrors(caseData,
-            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, MIAM_PREVIOUS_ATTENDANCE_TEXTBOX, "FR_ms_MIAMPreviousAttendanceChecklist_Value_3"));
+            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, MIAM_PREVIOUS_ATTENDANCE_TEXTBOX,
+            "FR_ms_MIAMPreviousAttendanceChecklist_Value_6"));
         errors.put("MiamOtherGroundsEvidenceUnavailable", getMiamEvidenceUnavailableErrors(caseData,
-            MIAM_OTHER_GROUNDS_CHECKLIST, MIAM_OTHER_GROUNDS_TEXTBOX, "FR_ms_MIAMOtherGroundsChecklist_Value_7"));
+            MIAM_OTHER_GROUNDS_CHECKLIST, MIAM_OTHER_GROUNDS_TEXTBOX, "FR_ms_MIAMOtherGroundsChecklist_Value_16"));
     }
 
     private void addLegacyOptionErrors(Map<String, List<String>> errors, Map<String, Object> caseData) {
         errors.put("MiamPreviousAttendanceLegacyOptions", getMiamLegacyErrors(caseData,
-            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, List.of("FR_ms_MIAMPreviousAttendanceChecklist_Value_4",
-                "FR_ms_MIAMPreviousAttendanceChecklist_Value_5")));
+            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, List.of("FR_ms_MIAMPreviousAttendanceChecklist_Value_2",
+                "FR_ms_MIAMPreviousAttendanceChecklist_Value_3", "FR_ms_MIAMPreviousAttendanceChecklist_Value_5")));
         errors.put("MiamOtherGroundsLegacyOptions", getMiamLegacyErrors(caseData,
-            MIAM_OTHER_GROUNDS_CHECKLIST, List.of("FR_ms_MIAMOtherGroundsChecklist_Value_8",
-                "FR_ms_MIAMOtherGroundsChecklist_Value_9", "FR_ms_MIAMOtherGroundsChecklist_Value_10",
-                "FR_ms_MIAMOtherGroundsChecklist_Value_11")));
+            MIAM_OTHER_GROUNDS_CHECKLIST, List.of("FR_ms_MIAMOtherGroundsChecklist_Value_1",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_2", "FR_ms_MIAMOtherGroundsChecklist_Value_3",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_4", "FR_ms_MIAMOtherGroundsChecklist_Value_6",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_7", "FR_ms_MIAMOtherGroundsChecklist_Value_8",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_10", "FR_ms_MIAMOtherGroundsChecklist_Value_11")));
     }
 
     private static List<String> miamExemptionAttendanceCheck(Map<String, Object> caseData) {
@@ -84,6 +88,7 @@ public class MiamCheckService {
 
     private List<String> getMiamEvidenceUnavailableErrors(Map<String, Object> caseData, String checklistKey,
                                                           String textboxKey, String checklistValue) {
+
         String checklist = Objects.toString(caseData.get(checklistKey));
         String textbox = convertObjectToString(caseData.get(textboxKey));
 
@@ -96,12 +101,11 @@ public class MiamCheckService {
     private List<String> getMiamLegacyErrors(Map<String, Object> caseData, String checklistKey,
                                              List<String> checklistValue) {
         String checklist = Objects.toString(caseData.get(checklistKey));
-
-        if (checklist != null && checklistValue.stream().anyMatch(checklist::contains)) {
+        if (checklist != null && checklistValue.stream().anyMatch(checklist::equals)) {
             return List.of(MIAM_LEGACY_OPTION_ERROR);
+        } else {
+            return Collections.emptyList();
         }
-
-        return Collections.emptyList();
     }
 
     private String convertObjectToString(Object object) {
