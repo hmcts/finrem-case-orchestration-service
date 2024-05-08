@@ -37,6 +37,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAMILY_MEDIATOR_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_ABUSE_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_VIOLENCE_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_EXEMPTIONS_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_TEXTBOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
@@ -142,21 +152,12 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void updateContestedMiamDetails(Map<String, Object> caseData) {
+        caseData.put(FAMILY_MEDIATOR_MIAM, null);
         if (equalsTo((String) caseData.get(APPLICANT_ATTENDED_MIAM), YES_VALUE)) {
             removeAllMiamExceptionDetails(caseData);
             removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
         } else {
             removeMiamCertificationDetails(caseData);
-            updateWhenClaimingExemptionMiam(caseData);
-        }
-    }
-
-    private void updateWhenClaimingExemptionMiam(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get(CLAIMING_EXEMPTION_MIAM), NO_VALUE)) {
-            caseData.put(FAMILY_MEDIATOR_MIAM, null);
-            removeMiamExceptionDetails(caseData);
-        } else {
-            updateClaimingExemptionMiamDetails(caseData);
         }
     }
 
@@ -171,6 +172,7 @@ public class UpdateContestedCaseController extends BaseController {
         caseData.put("soleTraderName", null);
         caseData.put("familyMediatorServiceName", null);
         caseData.put("mediatorRegistrationNumber", null);
+        caseData.put("uploadMediatorDocument", null);
     }
 
     private void removeAllMiamExceptionDetails(Map<String, Object> caseData) {
@@ -179,43 +181,17 @@ public class UpdateContestedCaseController extends BaseController {
         removeMiamExceptionDetails(caseData);
     }
 
-    private void updateClaimingExemptionMiamDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get(FAMILY_MEDIATOR_MIAM), YES_VALUE)) {
-            removeMiamExceptionDetails(caseData);
-        } else {
-            removeMiamCertificationDetails(caseData);
-            updateMiamExceptionDetails(caseData);
-        }
-    }
-
-    private void updateMiamExceptionDetails(Map<String, Object> caseData) {
-        ArrayList miamExemptionsChecklist = (ArrayList) caseData.get("MIAMExemptionsChecklist");
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "other", "MIAMOtherGroundsChecklist");
-
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "domesticViolence", "MIAMDomesticViolenceChecklist");
-
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "urgency", "MIAMUrgencyReasonChecklist");
-
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "previousMIAMattendance", "MIAMPreviousAttendanceChecklist");
-    }
-
-    private void removeExemptionCheckLists(Map<String, Object> caseData, ArrayList miamExemptionsChecklist,
-                                           String other, String miamOtherGroundsChecklist) {
-        if (hasNotSelected(miamExemptionsChecklist, other)) {
-            caseData.put(miamOtherGroundsChecklist, null);
-        }
-    }
-
     private void removeMiamExceptionDetails(Map<String, Object> caseData) {
-        caseData.put("MIAMExemptionsChecklist", null);
-        caseData.put("MIAMDomesticViolenceChecklist", null);
-        caseData.put("MIAMUrgencyReasonChecklist", null);
-        caseData.put("MIAMPreviousAttendanceChecklist", null);
-        caseData.put("MIAMOtherGroundsChecklist", null);
+        caseData.put(MIAM_EXEMPTIONS_CHECKLIST, null);
+        caseData.put(MIAM_DOMESTIC_VIOLENCE_CHECKLIST, null);
+        caseData.put(MIAM_URGENCY_CHECKLIST, null);
+        caseData.put(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, null);
+        caseData.put(MIAM_OTHER_GROUNDS_CHECKLIST, null);
+        caseData.put(MIAM_DOMESTIC_ABUSE_TEXTBOX, null);
+        caseData.put(MIAM_URGENCY_TEXTBOX, null);
+        caseData.put(MIAM_PREVIOUS_ATTENDANCE_TEXTBOX, null);
+        caseData.put(MIAM_OTHER_GROUNDS_TEXTBOX, null);
+        caseData.put(MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX, null);
     }
 
     private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData, String typeOfApplication) {

@@ -218,6 +218,8 @@ public class FinremCaseData {
     private String mediatorRegistrationNumber;
     private String familyMediatorServiceName;
     private String soleTraderName;
+    private CaseDocument uploadMediatorDocument;
+    private CaseDocument uploadMediatorDocumentPaperCase;
     private String mediatorRegistrationNumber1;
     private String familyMediatorServiceName1;
     private String soleTraderName1;
@@ -376,7 +378,7 @@ public class FinremCaseData {
     private ScannedDocumentTypeOption scannedDocsTypeOfDocument;
     private List<ScannedDocumentCollection> applicantScanDocuments;
     private List<ScannedDocumentCollection> respondentScanDocuments;
-    private List<UploadCaseDocumentCollection> manageScannedDocumentCollection;
+    private List<ManageScannedDocumentCollection> manageScannedDocumentCollection;
     @JsonProperty("appBarristerCollection")
     private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")
