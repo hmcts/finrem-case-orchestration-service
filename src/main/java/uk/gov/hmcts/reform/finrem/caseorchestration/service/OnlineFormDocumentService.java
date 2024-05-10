@@ -86,7 +86,7 @@ public class OnlineFormDocumentService {
 
     public CaseDocument generateContestedMiniForm(String authorisationToken, FinremCaseDetails caseDetails) {
 
-        log.info("Test Generating Contested Mini Form A for Case ID : {}", caseDetails.getId());
+        log.info("Generating Contested Mini Form A for Case ID : {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         String contestedMiniFormTemplate;
         String typeOfApplication;
