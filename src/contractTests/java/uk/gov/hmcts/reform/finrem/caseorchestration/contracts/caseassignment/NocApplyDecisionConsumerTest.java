@@ -33,7 +33,7 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String AUTHORIZATION_TOKEN = "Bearer some-access-token";
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
-    private static final String SOME_SERVICE_AUTH_TOKEN = "SOME_SERVICE_AUTH_TOKEN";
+    private static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
     private static final String ASSIGNEE_ID = "0a5874a4-3f38-4bbd-ba4c";
     private static final Long CASE_ID = 1583841721773828L;
     private static final String CASE_TYPE_ID = "FinancialRemedyMVP2";
@@ -48,7 +48,7 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
     AssignCaseAccessServiceConfiguration assignCaseAccessServiceConfiguration;
 
     @Rule
-    public PactProviderRule mockProvider = new PactProviderRule("acc_manageCaseAssignment", "localhost", 8889, this);
+    public PactProviderRule mockProvider = new PactProviderRule("acc_manageCaseAssignment", "localhost", 4454, this);
 
     private final CaseDetails caseDetails =
         CaseDetails.builder().id(CASE_ID).caseTypeId(CASE_TYPE_ID).build();
@@ -60,10 +60,9 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
             .given("Given a solicitor against case")
             .uponReceiving("A request to Apply Notice of Change decision")
             .method("POST")
-            .headers(SERVICE_AUTHORIZATION_HEADER, SOME_SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
+            .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
             .body(createJsonObject(DecisionRequest.decisionRequest(caseDetails)))
             .path("/noc/apply-decision")
-            .query("use_user_token=true")
             .willRespondWith()
             .body(buildANCDecisionResponseDsl())
             .status(HttpStatus.SC_OK)
@@ -113,10 +112,9 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
     public void verifyApplyNoticeOfChangeDecision() throws IOException, JSONException {
 
         given(idamService.getIdamUserId(anyString())).willReturn(ASSIGNEE_ID);
-        given(authTokenGenerator.generate()).willReturn(SOME_SERVICE_AUTH_TOKEN);
+        given(authTokenGenerator.generate()).willReturn(SERVICE_AUTH_TOKEN);
 
-        assignCaseAccessService
-            .applyDecision(SOME_SERVICE_AUTH_TOKEN, caseDetails);
+        assignCaseAccessService.applyDecision(AUTHORIZATION_TOKEN, caseDetails);
     }
 
     private String createJsonObject(Object obj) throws JSONException, IOException {
