@@ -163,7 +163,7 @@ public class CfvMigrationTask extends BaseTask {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         log.info("Executing {} for case id {}", getTaskName(), finremCaseDetails.getId());
         documentCategoryAssigner.assignDocumentCategories(finremCaseData);
-        finremCaseData.setIsCfvCategoriesAppliedFlag(YesOrNo.YES);
+        finremCaseData.getCfvMigrationWrapper().setIsCfvCategoriesAppliedFlag(YesOrNo.YES);
         log.info("Executed {} for case id {}", getTaskName(), finremCaseDetails.getId());
 
     }

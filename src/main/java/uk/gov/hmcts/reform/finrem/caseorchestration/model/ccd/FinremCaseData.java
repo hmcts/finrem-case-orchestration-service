@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -400,7 +401,9 @@ public class FinremCaseData {
 
     private YesOrNo isNocRejected;
 
-    private YesOrNo isCfvCategoriesAppliedFlag;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private CfvMigrationWrapper cfvMigrationWrapper;
 
     @JsonIgnore
     private IntervenerChangeDetails currentIntervenerChangeDetails;
@@ -928,5 +931,13 @@ public class FinremCaseData {
         };
     }
 
+    @JsonIgnore
+    public CfvMigrationWrapper getCfvMigrationWrapper() {
+        if (cfvMigrationWrapper == null) {
+            this.cfvMigrationWrapper = new CfvMigrationWrapper();
+        }
+
+        return cfvMigrationWrapper;
+    }
 }
 
