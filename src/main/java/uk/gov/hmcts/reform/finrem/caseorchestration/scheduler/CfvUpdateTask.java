@@ -28,9 +28,6 @@ public class CfvUpdateTask extends BaseTask {
 
     private static final List<State> STATES_TO_UPDATE =
         List.of(
-            State.CONSENTED_ORDER_APPROVED,
-            State.CONSENTED_ORDER_NOT_APPROVED,
-            State.SOLICITOR_DRAFT_ORDER,
             State.PREPARE_FOR_HEARING,
             State.CASE_FILE_SUBMITTED,
             State.GATE_KEEPING_AND_ALLOCATION,
@@ -49,6 +46,8 @@ public class CfvUpdateTask extends BaseTask {
             State.CONSENT_ORDER_APPROVED,
             State.CONSENT_ORDER_NOT_APPROVED,
             State.CONSENTED_ORDER_SUBMITTED,
+            State.CONSENTED_ORDER_APPROVED,
+            State.CONSENTED_ORDER_NOT_APPROVED,
             State.DRAFT_ORDER_NOT_APPROVED,
             State.GENERAL_APPLICATION,
             State.GENERAL_APPLICATION_OUTCOME,
@@ -57,6 +56,7 @@ public class CfvUpdateTask extends BaseTask {
             State.ORDER_MADE,
             State.ORDER_SENT,
             State.PAPER_CASE_ADDED,
+            State.SOLICITOR_DRAFT_ORDER,
             State.RESPONSE_RECEIVED,
             State.SCHEDULE_RAISE_DIRECTIONS_ORDER,
             State.SCHEDULING_AND_HEARING
