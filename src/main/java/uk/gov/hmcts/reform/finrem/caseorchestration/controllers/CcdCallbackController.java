@@ -73,7 +73,7 @@ public class CcdCallbackController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
-        log.info("About to submit Financial Remedy case callback `{}` received for Case ID: `{}`",
+        log.info("Test About to submit Financial Remedy case callback `{}` received for Case ID: `{}`",
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
