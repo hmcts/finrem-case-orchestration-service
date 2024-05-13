@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.ADMINISTRATIVE_DOCUMENTS_TRANSITIONAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICATIONS_OTHER_APPLICATION_APPLICATION_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POINTS_OF_CLAIM_OR_DEFENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_PENSION_PLAN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.POST_HEARING_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.REPORTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.SYSTEM_DUPLICATES;
@@ -257,9 +258,21 @@ class CfvUpdateTaskTest {
                 .build())
             .build();
 
+        UploadCaseDocumentCollection intervener1PensionPlan = UploadCaseDocumentCollection.builder()
+            .uploadCaseDocument(UploadCaseDocument.builder()
+                .caseDocumentParty(CaseDocumentParty.INTERVENER_ONE)
+                .caseDocumentType(CaseDocumentType.PENSION_PLAN)
+                .caseDocumentFdr(YesOrNo.NO)
+                .caseDocuments(CaseDocument.builder()
+                    .categoryId(INTERVENER_DOCUMENTS_INTERVENER_1_PENSION_PLAN.getDocumentCategoryId())
+                    .build())
+                .build())
+            .build();
+
         return UploadCaseDocumentWrapper.builder()
             .appOtherCollection(List.of(applicantPensionPlan))
             .fdrCaseDocumentCollection(List.of(applicantFdr))
+            .intv1Other(List.of(intervener1PensionPlan))
             .build();
     }
 
@@ -269,6 +282,8 @@ class CfvUpdateTaskTest {
         assertThat(uploadCaseDocumentWrapper.getFdrCaseDocumentCollection().get(0).getUploadCaseDocument()
             .getCaseDocuments().getCategoryId()).isEqualTo(
             FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POINTS_OF_CLAIM_OR_DEFENCE.getDocumentCategoryId());
+        assertThat(uploadCaseDocumentWrapper.getIntv1Other().get(0).getUploadCaseDocument().getCaseDocuments()
+            .getCategoryId()).isEqualTo(REPORTS.getDocumentCategoryId());
     }
 
     private SearchResult createSearchResult(FinremCaseData caseData) {
