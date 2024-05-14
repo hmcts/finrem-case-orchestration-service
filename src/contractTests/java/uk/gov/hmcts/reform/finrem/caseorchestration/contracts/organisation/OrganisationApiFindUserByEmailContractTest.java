@@ -47,7 +47,7 @@ public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
     @Rule
     public PactProviderRule mockProvider = new PactProviderRule("rd-professional-api", "localhost", 8080, this);
 
-    @Pact(provider = "rd-professional-api", consumer = "your-consumer-name")
+    @Pact(provider = "rd-professional-api", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePactFragment(PactDslWithProvider builder) {
         return builder
             .given("Given a request to find a user by email")
