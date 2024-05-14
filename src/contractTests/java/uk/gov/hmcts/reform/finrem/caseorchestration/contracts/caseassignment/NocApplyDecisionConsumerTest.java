@@ -75,7 +75,7 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
     public RequestResponsePact generatePactFragment(PactDslWithProvider builder) throws JSONException, IOException {
         // @formatter:off
         return builder
-            .given("A solicitor against case")
+            .given("A notice of change against case")
             .uponReceiving("A request to Apply Notice of Change decision")
             .method("POST")
             .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
