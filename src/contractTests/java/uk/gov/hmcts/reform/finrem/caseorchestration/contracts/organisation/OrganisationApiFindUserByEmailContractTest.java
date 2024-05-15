@@ -10,19 +10,19 @@ import org.apache.http.HttpStatus;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.OrganisationApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
+@SpringBootTest({"prd.organisations.url=http://localhost:8080"})
 public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
@@ -31,12 +31,6 @@ public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
     private static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
     private static final String USER_EMAIL_HEADER = "UserEmail";
     private static final String TEST_USER_EMAIL = "test@example.com";
-
-    @MockBean
-    RestService restService;
-
-    @MockBean
-    OrganisationApi organisationApi;
 
     @MockBean
     SystemUserService systemUserService;
@@ -68,7 +62,7 @@ public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
     }
 
     private DslPart buildOrganisationUserResponseDsl() {
-        return newJsonBody((o) -> {
+        return newJsonBody(o -> {
             o.stringType("userIdentifier", "123456");
             o.stringType("idamStatus", "John");
         }).build();
