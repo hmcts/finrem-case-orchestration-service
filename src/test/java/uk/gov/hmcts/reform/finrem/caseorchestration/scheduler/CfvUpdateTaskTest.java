@@ -149,7 +149,7 @@ class CfvUpdateTaskTest {
 
         cfvUpdateTask.executeTask(caseDetails);
 
-        assertThat(caseDetails.getData().getCfvMigrationWrapper().getCfvMigrationVersion()).isEqualTo("1");
+        assertThat(caseDetails.getData().getCfvMigrationWrapper().getCfvSearchableMigrationVersion()).isEqualTo("1");
         verifyDraftDirectionWrapper(caseData.getDraftDirectionWrapper());
         verifyGeneralApplicationsWrapper(caseData.getGeneralApplicationWrapper());
         verifyOrdersSentToParties(caseData.getOrdersSentToPartiesCollection());

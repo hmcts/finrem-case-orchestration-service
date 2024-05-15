@@ -15,4 +15,5 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 public class CfvMigrationWrapper {
     private YesOrNo isCfvCategoriesAppliedFlag;
     private String cfvMigrationVersion;
+    private String cfvSearchableMigrationVersion;
 }
