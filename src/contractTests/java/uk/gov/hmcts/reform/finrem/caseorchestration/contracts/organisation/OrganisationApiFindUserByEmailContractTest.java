@@ -6,40 +6,46 @@ import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
-import org.json.JSONException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.OrganisationApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
-
-import java.io.IOException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
 
-    private static final String AUTHORIZATION_HEADER = HttpHeaders.AUTHORIZATION;
+    private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String AUTHORIZATION_TOKEN = "Bearer some-access-token";
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
     private static final String USER_EMAIL_HEADER = "UserEmail";
     private static final String TEST_USER_EMAIL = "test@example.com";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @MockBean
+    RestService restService;
+
+    @MockBean
+    OrganisationApi organisationApi;
+
+    @MockBean
+    SystemUserService systemUserService;
 
     @Autowired
     PrdOrganisationService prdOrganisationService;
 
-    @MockBean
-    IdamService idamService;
+    @Autowired
+    private IdamService idamService;
 
     @MockBean
     PrdOrganisationConfiguration prdOrganisationConfiguration;
@@ -50,11 +56,10 @@ public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
     @Pact(provider = "rd-professional-api", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePactFragment(PactDslWithProvider builder) {
         return builder
-            .given("Given a request to find a user by email")
+            .given("Organisation with Id exists")
             .uponReceiving("A request to find a user by email")
             .method("GET")
-            .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
-            .headers(USER_EMAIL_HEADER, TEST_USER_EMAIL) // Specify the test user email
+            .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN, USER_EMAIL_HEADER, TEST_USER_EMAIL)
             .path("/refdata/external/v1/organisations/users/accountId")
             .willRespondWith()
             .status(HttpStatus.SC_OK)
@@ -64,23 +69,19 @@ public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
 
     private DslPart buildOrganisationUserResponseDsl() {
         return newJsonBody((o) -> {
-            o.stringType("userId", "123456");
-            o.stringType("firstName", "John");
-            o.stringType("lastName", "Doe");
+            o.stringType("userIdentifier", "123456");
+            o.stringType("idamStatus", "John");
         }).build();
     }
 
     @Test
     @PactVerification
     public void verifyFindUserByEmail() {
-        given(idamService.getUserEmailId(AUTHORIZATION_TOKEN)).willReturn(TEST_USER_EMAIL);
+        given(idamService.getUserEmailId(anyString())).willReturn(TEST_USER_EMAIL);
+
         given(authTokenGenerator.generate()).willReturn(SERVICE_AUTH_TOKEN);
 
         prdOrganisationService.findUserByEmail(TEST_USER_EMAIL, AUTHORIZATION_TOKEN);
 
-    }
-
-    private String createJsonObject(Object obj) throws JSONException, IOException {
-        return objectMapper.writeValueAsString(obj);
     }
 }
