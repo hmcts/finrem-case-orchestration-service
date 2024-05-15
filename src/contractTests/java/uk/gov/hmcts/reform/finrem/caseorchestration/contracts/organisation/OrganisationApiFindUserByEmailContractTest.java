@@ -44,8 +44,8 @@ public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
     @Autowired
     PrdOrganisationService prdOrganisationService;
 
-    @Autowired
-    private IdamService idamService;
+    @MockBean
+    IdamService idamService;
 
     @MockBean
     PrdOrganisationConfiguration prdOrganisationConfiguration;
