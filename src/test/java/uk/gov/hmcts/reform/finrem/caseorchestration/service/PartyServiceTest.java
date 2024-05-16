@@ -107,6 +107,36 @@ class PartyServiceTest {
         Assertions.assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
         Assertions.assertEquals(2, partiesOnCase.getValue().size(), "selected parties");
     }
+    @Test
+    void givenACcdCallbackContestedCase_whenAllPartiesUnrepresentSelected_thengetUnrepresentedParties() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setCcdCaseType(CONTESTED);
+        data.getContactDetailsWrapper().setApplicantFmName("Tony");
+        data.getContactDetailsWrapper().setApplicantLname("B");
+
+        data.getContactDetailsWrapper().setRespondentFmName("Tony");
+        data.getContactDetailsWrapper().setRespondentLname("C");
+
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()),
+            getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()));
+
+        DynamicMultiSelectList parties = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+
+        data.setPartiesOnCase(parties);
+
+        DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyList(caseDetails);
+
+        Assertions.assertEquals(2, partiesOnCase.getListItems().size(), "available parties");
+        Assertions.assertEquals(2, partiesOnCase.getValue().size(), "selected parties");
+
+        Assertions.assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(), partiesOnCase.getListItems().get(0).getCode(), "selected unrepresented applicant");
+        Assertions.assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(), partiesOnCase.getListItems().get(1).getCode(), "selected unrepresented respondent");
+    }
 
     private DynamicMultiSelectListElement getDynamicElementList(String role) {
         return DynamicMultiSelectListElement.builder()
