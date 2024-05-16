@@ -107,6 +107,7 @@ class PartyServiceTest {
         Assertions.assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
         Assertions.assertEquals(2, partiesOnCase.getValue().size(), "selected parties");
     }
+
     @Test
     void givenACcdCallbackContestedCase_whenAllPartiesUnrepresentSelected_thengetUnrepresentedParties() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
@@ -134,8 +135,10 @@ class PartyServiceTest {
         Assertions.assertEquals(2, partiesOnCase.getListItems().size(), "available parties");
         Assertions.assertEquals(2, partiesOnCase.getValue().size(), "selected parties");
 
-        Assertions.assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(), partiesOnCase.getListItems().get(0).getCode(), "selected unrepresented applicant");
-        Assertions.assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(), partiesOnCase.getListItems().get(1).getCode(), "selected unrepresented respondent");
+        Assertions.assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(), partiesOnCase.getListItems().get(0).getCode(),
+            "selected unrepresented applicant");
+        Assertions.assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(), partiesOnCase.getListItems().get(1).getCode(),
+            "selected unrepresented respondent");
     }
 
     private DynamicMultiSelectListElement getDynamicElementList(String role) {
