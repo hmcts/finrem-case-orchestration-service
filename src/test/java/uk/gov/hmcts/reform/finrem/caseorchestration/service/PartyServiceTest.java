@@ -128,8 +128,6 @@ class PartyServiceTest {
             .listItems(dynamicElementList)
             .build();
 
-        data.setPartiesOnCase(parties);
-
         DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyList(caseDetails);
 
         Assertions.assertEquals(2, partiesOnCase.getListItems().size(), "available parties");
