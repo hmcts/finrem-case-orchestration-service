@@ -22,7 +22,7 @@ import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
-@SpringBootTest({"prd.organisations.url=http://localhost:8080"})
+@SpringBootTest({"prd.organisations.url=http://localhost:8889"})
 public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
@@ -45,9 +45,9 @@ public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
     PrdOrganisationConfiguration prdOrganisationConfiguration;
 
     @Rule
-    public PactProviderRule mockProvider = new PactProviderRule("rd-professional-api", "localhost", 8080, this);
+    public PactProviderRule mockProvider = new PactProviderRule("referenceData_organisationalExternalUsers", "localhost", 8889, this);
 
-    @Pact(provider = "rd-professional-api", consumer = "fr_caseOrchestratorService")
+    @Pact(provider = "referenceData_organisationalExternalUsers", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePactFragment(PactDslWithProvider builder) {
         return builder
             .given("Organisation with Id exists")
