@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -35,6 +36,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray;
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -53,8 +55,6 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
     private static final String TEST_APP_ORG_NAME = "appOrgName";
     private static final String TEST_APP_ORG_ID_NEW = "newAppOrgId";
     private static final String TEST_APP_ORG_NAME_NEW = "newAppOrgName";
-    private static final String TEST_RESP_ORG_ID = "respOrgId";
-    private static final String TEST_RESP_ORG_NAME = "respOrgName";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -90,38 +90,37 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
     private DslPart buildANCDecisionResponseDsl() {
         return newJsonBody((o) -> {
             o.object("data", ob -> ob
-                .stringType("TextField", "TextFieldValue")
-                .stringType("EmailField", "aca72@gmail.com")
-                .numberType("NumberField", 123)
-                .object("OrganisationPolicyField1", op1 -> op1
+                .stringType("divorceCaseNumber", "DD12D12345")
+                .stringType("applicantFMName", "Test")
+                .stringType("applicantLName", "Applicant")
+                .stringType("respondentFMName", "Test")
+                .stringType("respondentLName", "Respondent")
+                .stringType("hearingDate", "2022-01-01")
+                .object("ApplicantOrganisationPolicy", appOrgPol -> appOrgPol
+                    .stringType("OrgPolicyReference", "FinRem-1-Org")
+                    .stringType("OrgPolicyCaseAssignedRole", APP_SOLICITOR_POLICY)
                     .object("Organisation", org -> org
-                        .stringType("OrganisationID", TEST_APP_ORG_ID)
-                        .stringType("OrganisationName", TEST_APP_ORG_NAME))
-                    .stringType("OrgPolicyReference","DefendantPolicy")
-                    .stringType("OrgPolicyCaseAssignedRole","[Defendant]"))
-                .object("OrganisationPolicyField2", op2 -> op2
-                    .object("Organisation", org -> org
-                        .stringType("OrganisationID", TEST_RESP_ORG_ID)
-                        .stringType("OrganisationName", TEST_RESP_ORG_NAME))
-                    .stringType("OrgPolicyReference","ClaimantPolicy")
-                    .stringType("OrgPolicyCaseAssignedRole","[Claimant]")))
-                .object("ChangeOrganisationRequestField", corf -> corf
-                    .stringType("Reason", "some reason")
-                    .stringType("CaseRoleId", "Solicitor")
-                    .stringType("NotesReason", "Some note")
-                    .stringType("ApprovalStatus", "Pending")
+                        .stringType("OrganisationID", TEST_APP_ORG_ID_NEW)
+                        .stringType("OrganisationName", TEST_APP_ORG_NAME_NEW)))
+                .object("changeOrganisationRequestField", corf -> corf
+                    .object("caseRoleId", caseRole -> caseRole
+                        .array("list_items")
+                            .stringType("code", APP_SOLICITOR_POLICY)
+                            .stringType("label", APP_SOLICITOR_POLICY))
+                        .object("value", li -> li
+                            .stringType("code", APP_SOLICITOR_POLICY)
+                            .stringType("label", APP_SOLICITOR_POLICY)))
+                    .stringType("NotesReason", "test Reason")
+                    .stringType("ApprovalStatus", "1")
                     .stringMatcher("date_updated",
-                            "^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}\\+\\d{4})$",
-                            "2020-10-06T18:54:48.785+0000")
+                        "^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}\\+\\d{4})$",
+                        "2020-10-06T18:54:48.785+0000")
                     .object("OrganisationToAdd",  orgRem -> orgRem
-                        .stringType("OrganisationID", TEST_APP_ORG_ID)
-                        .stringType("OrganisationName", TEST_APP_ORG_NAME))
+                        .stringType("OrganisationID", TEST_APP_ORG_ID_NEW)
+                        .stringType("OrganisationName", TEST_APP_ORG_NAME_NEW))
                     .object("OrganisationToRemove",  orgAdd -> orgAdd
-                        .stringType("OrganisationID", "orgId")
-                        .stringType("OrganisationName", "orgName")))
-                .stringMatcher("date_updated",
-                    "^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}\\+\\d{4})$",
-                    "2020-10-06T18:54:48.785+0000");
+                        .stringType("OrganisationID", TEST_APP_ORG_ID)
+                        .stringType("OrganisationName", TEST_APP_ORG_NAME)));
         }).build();
     }
 
@@ -143,6 +142,14 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
         FinremCaseData caseData = new FinremCaseData();
 
         caseData.setCcdCaseType(CaseType.CONTESTED);
+        caseData.setApplicantOrganisationPolicy(OrganisationPolicy.builder()
+            .organisation(Organisation.builder()
+                .organisationID(TEST_APP_ORG_ID)
+                .organisationName(TEST_APP_ORG_NAME)
+                .build())
+            .orgPolicyReference("FinRem-1-Org")
+            .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
+            .build());
         caseData.getContactDetailsWrapper().setApplicantFmName("Test");
         caseData.getContactDetailsWrapper().setApplicantLname("Applicant");
         caseData.getContactDetailsWrapper().setRespondentFmName("Test");
@@ -151,10 +158,6 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
         caseData.getRegionWrapper().getDefaultCourtList().setBristolCourtList(BristolCourt.BRISTOL_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
         caseData.setHearingDate(HEARING_DATE);
         caseData.getContactDetailsWrapper().setSolicitorReference("Test Sol Reference");
-        caseData.getContactDetailsWrapper().setRespondentSolicitorReference("Test Resp Sol Ref");
-        caseData.setAdditionalInformationAboutHearing("Test");
-        caseData.setHearingTime("1pm");
-        caseData.setTimeEstimate("1 hour");
         caseData.setChangeOrganisationRequestField(ChangeOrganisationRequest
             .builder()
             .organisationToRemove(Organisation.builder()
@@ -185,6 +188,4 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
             .listItems(List.of(appSolRole))
             .build();
     }
-
-
 }
