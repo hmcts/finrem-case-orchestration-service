@@ -54,6 +54,9 @@ cftlib can be configured to run either
 - using AAT services. See [cftlib AAT](docs/cftlib-aat.md)
 - in a pure local environment without any AAT dependencies. See [cftlib Local](docs/cftlib-local.md)
 
+#### Logs
+Application logs for the services running locally can be found in `build/cftlib/logs`.
+
 ## API documentation
 API documentation is provided with Swagger. This is available locally at: `http://localhost:9000/swagger-ui.html`
 
