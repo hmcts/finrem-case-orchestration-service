@@ -90,37 +90,50 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
     private DslPart buildANCDecisionResponseDsl() {
         return newJsonBody((o) -> {
             o.object("data", ob -> ob
-                .stringType("divorceCaseNumber", "DD12D12345")
-                .stringType("applicantFMName", "Test")
-                .stringType("applicantLName", "Applicant")
-                .stringType("respondentFMName", "Test")
-                .stringType("respondentLName", "Respondent")
-                .stringType("hearingDate", "2022-01-01")
                 .object("ApplicantOrganisationPolicy", appOrgPol -> appOrgPol
                     .stringType("OrgPolicyReference", "FinRem-1-Org")
                     .stringType("OrgPolicyCaseAssignedRole", APP_SOLICITOR_POLICY)
                     .object("Organisation", org -> org
                         .stringType("OrganisationID", TEST_APP_ORG_ID_NEW)
-                        .stringType("OrganisationName", TEST_APP_ORG_NAME_NEW)))
+                        .stringType("OrganisationName", TEST_APP_ORG_NAME_NEW)
+                    )
+                    .nullValue("LastNoCRequestedBy")
+                )
+                .stringType("applicantFMName", "Test")
+                .stringType("applicantLName", "Applicant")
+                .stringType("bristolCourtList", "FR_bristolList_1")
                 .object("changeOrganisationRequestField", corf -> corf
-                    .object("caseRoleId", caseRole -> caseRole
-                        .array("list_items")
-                            .stringType("code", APP_SOLICITOR_POLICY)
-                            .stringType("label", APP_SOLICITOR_POLICY))
-                        .object("value", li -> li
-                            .stringType("code", APP_SOLICITOR_POLICY)
-                            .stringType("label", APP_SOLICITOR_POLICY)))
-                    .stringType("NotesReason", "test Reason")
+                    .nullValue("ApprovalRejectionTimeStamp")
                     .stringType("ApprovalStatus", "1")
-                    .stringMatcher("date_updated",
-                        "^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}\\+\\d{4})$",
-                        "2020-10-06T18:54:48.785+0000")
+                    .object("CaseRoleId", caseRole -> caseRole
+                        .array("list_items", list -> list
+                            .object(li -> li
+                                .stringType("code", APP_SOLICITOR_POLICY)
+                                .stringType("label", APP_SOLICITOR_POLICY)
+                            )
+                        )
+                        .object("value", val -> val
+                            .stringType("code", APP_SOLICITOR_POLICY)
+                            .stringType("label", APP_SOLICITOR_POLICY)
+                        )
+                    )
+                    .stringType("NotesReason", "test Reason")
                     .object("OrganisationToAdd",  orgRem -> orgRem
                         .stringType("OrganisationID", TEST_APP_ORG_ID_NEW)
-                        .stringType("OrganisationName", TEST_APP_ORG_NAME_NEW))
+                        .stringType("OrganisationName", TEST_APP_ORG_NAME_NEW)
+                    )
                     .object("OrganisationToRemove",  orgAdd -> orgAdd
                         .stringType("OrganisationID", TEST_APP_ORG_ID)
-                        .stringType("OrganisationName", TEST_APP_ORG_NAME)));
+                        .stringType("OrganisationName", TEST_APP_ORG_NAME)
+                    )
+                    .nullValue("RequestTimestamp")
+                )
+                .stringType("divorceCaseNumber", "DD12D12345")
+                .stringType("hearingDate", "2022-01-01")
+                .stringType("respondentFMName", "Test")
+                .stringType("respondentLName", "Respondent")
+                .stringType("solicitorReference", "Test Sol Reference")
+            );
         }).build();
     }
 
