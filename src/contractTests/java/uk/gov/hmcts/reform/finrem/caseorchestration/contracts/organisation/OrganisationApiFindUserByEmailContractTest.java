@@ -49,11 +49,14 @@ public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
 
     @Pact(provider = "referenceData_organisationalExternalUsers", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePactFragment(PactDslWithProvider builder) {
+        // @formatter:off
         return builder
-            .given("Organisation with Id exists")
+            .given("User exists")
             .uponReceiving("A request to find a user by email")
             .method("GET")
-            .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN, USER_EMAIL_HEADER, TEST_USER_EMAIL)
+            .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN,
+                AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN,
+                USER_EMAIL_HEADER, TEST_USER_EMAIL)
             .path("/refdata/external/v1/organisations/users/accountId")
             .willRespondWith()
             .status(HttpStatus.SC_OK)
@@ -62,20 +65,16 @@ public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
     }
 
     private DslPart buildOrganisationUserResponseDsl() {
-        return newJsonBody(o -> {
-            o.stringType("userIdentifier", "123456");
-            o.stringType("idamStatus", "John");
-        }).build();
+        return newJsonBody(o -> o.stringType("userIdentifier", "123456"))
+            .build();
     }
 
     @Test
     @PactVerification
     public void verifyFindUserByEmail() {
         given(idamService.getUserEmailId(anyString())).willReturn(TEST_USER_EMAIL);
-
         given(authTokenGenerator.generate()).willReturn(SERVICE_AUTH_TOKEN);
 
         prdOrganisationService.findUserByEmail(TEST_USER_EMAIL, AUTHORIZATION_TOKEN);
-
     }
 }
