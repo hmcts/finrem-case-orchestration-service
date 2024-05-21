@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.contracts.organisation;
+package uk.gov.hmcts.reform.finrem.caseorchestration.contracts.rdprofessional;
 
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
