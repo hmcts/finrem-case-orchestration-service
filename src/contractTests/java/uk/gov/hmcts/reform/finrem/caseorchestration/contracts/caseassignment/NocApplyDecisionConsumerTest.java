@@ -36,7 +36,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray;
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -82,12 +81,12 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
             .body(createJsonObject(DecisionRequest.decisionRequest(caseDetails)))
             .path("/noc/apply-decision")
             .willRespondWith()
-            .body(buildANCDecisionResponseDsl())
+            .body(buildAncDecisionResponseDsl())
             .status(HttpStatus.SC_OK)
             .toPact();
     }
 
-    private DslPart buildANCDecisionResponseDsl() {
+    private DslPart buildAncDecisionResponseDsl() {
         return newJsonBody((o) -> {
             o.object("data", ob -> ob
                 .object("ApplicantOrganisationPolicy", appOrgPol -> appOrgPol
@@ -151,7 +150,7 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
         return objectMapper.writeValueAsString(obj);
     }
 
-    private Map<String, Object> createCaseData(){
+    private Map<String, Object> createCaseData() {
         FinremCaseData caseData = new FinremCaseData();
 
         caseData.setCcdCaseType(CaseType.CONTESTED);
