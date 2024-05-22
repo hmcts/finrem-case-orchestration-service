@@ -138,7 +138,6 @@ public class UpdateContestedCaseController extends BaseController {
 
     private void removeContestedComplexityDetails(Map<String, Object> caseData) {
         caseData.put("estimatedAssetsChecklist", null);
-        caseData.put("estimatedAssetsChecklist2", null);
         caseData.put("netValueOfHome", null);
         caseData.put("potentialAllegationChecklist", null);
         caseData.put("otherReasonForComplexity", null);
