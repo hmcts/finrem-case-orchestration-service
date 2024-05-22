@@ -298,7 +298,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.potentialAllegationChecklist").doesNotExist())
             .andExpect(jsonPath("$.data.otherReasonForComplexity").doesNotExist())
             .andExpect(jsonPath("$.data.otherReasonForComplexityText").doesNotExist())
-            .andExpect(jsonPath("$.data.detailPotentialAllegation").doesNotExist());
+            .andExpect(jsonPath("$.data.detailPotentialAllegation").doesNotExist())
+            .andExpect(jsonPath("$.data.estimatedAssetsChecklistV2").exists());
     }
 
     @Test
