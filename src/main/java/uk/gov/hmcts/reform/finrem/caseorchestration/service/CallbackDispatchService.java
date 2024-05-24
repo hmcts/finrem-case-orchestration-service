@@ -1,11 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.fo
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class CallbackDispatchService {
 
     @SuppressWarnings("java:S3740")
@@ -36,10 +40,11 @@ public class CallbackDispatchService {
             .warnings(new ArrayList<>())
             .build();
 
+        CaseType caseType = forValue(callbackRequest.getCaseDetails().getCaseTypeId());
+        EventType eventType = getEventType(callbackRequest.getEventId());
+        boolean handled = false;
         for (CallbackHandler callbackHandler : callbackHandlers) {
-            if (callbackHandler.canHandle(callbackType,
-                forValue(callbackRequest.getCaseDetails().getCaseTypeId()),
-                getEventType(callbackRequest.getEventId()))) {
+            if (callbackHandler.canHandle(callbackType, caseType, eventType)) {
 
                 GenericAboutToStartOrSubmitCallbackResponse handlerCallbackResponse =
                     callbackHandler.handle(callbackRequest, userAuthorisation);
@@ -50,7 +55,15 @@ public class CallbackDispatchService {
                 List<String> warnings = Optional.ofNullable(handlerCallbackResponse.getWarnings()).orElse(Collections.emptyList());
                 callbackResponse.getWarnings().addAll(warnings);
                 callbackResponse.setState(handlerCallbackResponse.getState());
+
+                handled = true;
             }
+        }
+
+        if (!handled) {
+            Long caseId = callbackRequest.getCaseDetails().getId();
+            log.warn("No handler for case id {} callback {} case type {} event {}",
+                caseId, callbackType, caseType, eventType);
         }
 
         return callbackResponse;
