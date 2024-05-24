@@ -51,6 +51,25 @@ public class MiamCheckService {
         return errors.values().stream().filter(error -> !error.isEmpty()).findFirst().orElse(List.of());
     }
 
+    //TODO: Check for MIAM existing legacy option MIAMPreviousAttendance
+    public boolean hasLegacyOptionForMIAMPreviousAttendanceChecklist(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        return getMiamLegacyErrors(caseData,
+            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, List.of("FR_ms_MIAMPreviousAttendanceChecklist_Value_2",
+                "FR_ms_MIAMPreviousAttendanceChecklist_Value_3", "FR_ms_MIAMPreviousAttendanceChecklist_Value_5")).isEmpty();
+    }
+    //TODO: Check for MIAM existing legacy option MIAMOtherGrounds
+    public boolean hasLegacyOptionForMIAMOtherGroundsChecklist(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        return getMiamLegacyErrors(caseData,
+            MIAM_OTHER_GROUNDS_CHECKLIST, List.of("FR_ms_MIAMOtherGroundsChecklist_Value_1",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_2", "FR_ms_MIAMOtherGroundsChecklist_Value_3",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_4", "FR_ms_MIAMOtherGroundsChecklist_Value_6",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_7", "FR_ms_MIAMOtherGroundsChecklist_Value_8",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_10", "FR_ms_MIAMOtherGroundsChecklist_Value_11")).isEmpty();
+    }
+
+
     private void addEvidenceUnavailableErrors(Map<String, List<String>> errors, Map<String, Object> caseData) {
         errors.put("MiamDomesticViolenceEvidenceUnavailable", getMiamEvidenceUnavailableErrors(caseData,
             MIAM_DOMESTIC_VIOLENCE_CHECKLIST, MIAM_DOMESTIC_ABUSE_TEXTBOX,
@@ -102,7 +121,7 @@ public class MiamCheckService {
                                              List<String> checklistValue) {
         String checklist = Objects.toString(caseData.get(checklistKey));
         if (checklist != null && checklistValue.stream().anyMatch(checklist::equals)) {
-            return List.of(MIAM_LEGACY_OPTION_ERROR);
+            return List.of(MIAM_LEGACY_OPTION_ERROR + "[ " + Objects.toString(caseData.get(checklistKey)) + " ]");
         } else {
             return Collections.emptyList();
         }

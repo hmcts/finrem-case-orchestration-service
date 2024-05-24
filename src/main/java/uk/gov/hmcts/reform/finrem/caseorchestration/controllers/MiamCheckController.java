@@ -25,6 +25,8 @@ import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_LEGACY_MIAM_EXEMPTION;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -46,8 +48,16 @@ public class MiamCheckController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request for validating MIAM exemption for Case ID: {}", caseDetails.getId());
 
+        // TODO: Check if Case has existing legacy MIAM options
+        //  Then set FieldShowCondition: isLegacyMIAMExemption=Yes to Hide Old exemption
+        if (service.hasLegacyOptionForMIAMPreviousAttendanceChecklist(caseDetails) ||
+            service.hasLegacyOptionForMIAMOtherGroundsChecklist(caseDetails)) {
+            caseDetails.getData().put(IS_LEGACY_MIAM_EXEMPTION, YES_VALUE);
+            callback.setCaseDetails(caseDetails);
+        }
+
+        log.info("Received request for validating MIAM exemption for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
         return ResponseEntity.ok(response(callback));
     }

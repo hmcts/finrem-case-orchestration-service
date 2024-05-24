@@ -49,4 +49,6 @@ public class MiamWrapper {
     private String evidenceUnavailableOtherGroundsMiam;
     @JsonProperty("additionalInfoOtherGroundsMIAM")
     private String additionalInfoOtherGroundsMiam;
+    @JsonProperty("isLegacyMIAMExemption")
+    private String isLegacyMIAMExemption;
 }

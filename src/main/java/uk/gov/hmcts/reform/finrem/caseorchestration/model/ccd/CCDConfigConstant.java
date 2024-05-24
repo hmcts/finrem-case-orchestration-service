@@ -276,6 +276,7 @@ public class CCDConfigConstant {
     public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
     public static final String IS_ADMIN = "isAdmin";
+    public static final String IS_LEGACY_MIAM_EXEMPTION = "isLegacyMIAMExemption";
 
     //Draft Order Related
     public static final String SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER = "solicitorResponsibleForDraftingOrder";
