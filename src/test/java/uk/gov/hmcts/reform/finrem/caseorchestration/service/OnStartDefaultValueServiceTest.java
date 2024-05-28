@@ -65,6 +65,7 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
         assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().getCivilPartnership().getYesOrNo());
     }
 
+    @Test
     public void defaultCivilPartnership_userValue_finrem() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         callbackRequest.getCaseDetails().getData().setCivilPartnership(YesOrNo.YES);
@@ -144,6 +145,20 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
         assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().get(URGENT_CASE_QUESTION));
     }
 
+    @Test
+    public void defaultUrgencyQuestion_defaultValue_finremRequest() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        service.defaultUrgencyQuestion(callbackRequest);
+        assertEquals(YesOrNo.NO, callbackRequest.getCaseDetails().getData().getPromptForUrgentCaseQuestion());
+    }
+
+    @Test
+    public void defaultUrgencyQuestion_userChosen_finremRequest() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        callbackRequest.getCaseDetails().getData().setPromptForUrgentCaseQuestion(YesOrNo.YES);
+        service.defaultUrgencyQuestion(callbackRequest);
+        assertEquals(YesOrNo.YES, callbackRequest.getCaseDetails().getData().getPromptForUrgentCaseQuestion());
+    }
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
