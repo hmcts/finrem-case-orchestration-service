@@ -120,14 +120,6 @@ class PartyServiceTest {
         data.getContactDetailsWrapper().setRespondentFmName("Tony");
         data.getContactDetailsWrapper().setRespondentLname("C");
 
-        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()),
-            getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()));
-
-        DynamicMultiSelectList parties = DynamicMultiSelectList.builder()
-            .value(dynamicElementList)
-            .listItems(dynamicElementList)
-            .build();
-
         DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyList(caseDetails);
 
         Assertions.assertEquals(2, partiesOnCase.getListItems().size(), "available parties");
