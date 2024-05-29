@@ -284,7 +284,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemoveComplexityDetailsForContested() throws Exception {
+    public void shouldUpdateComplexityDetailsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-complexity-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -293,12 +293,12 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.estimatedAssetsChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.netValueOfHome").doesNotExist())
-            .andExpect(jsonPath("$.data.potentialAllegationChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.otherReasonForComplexity").doesNotExist())
-            .andExpect(jsonPath("$.data.otherReasonForComplexityText").doesNotExist())
-            .andExpect(jsonPath("$.data.detailPotentialAllegation").doesNotExist())
+            .andExpect(jsonPath("$.data.estimatedAssetsChecklist").exists())
+            .andExpect(jsonPath("$.data.netValueOfHome").exists())
+            .andExpect(jsonPath("$.data.potentialAllegationChecklist").exists())
+            .andExpect(jsonPath("$.data.otherReasonForComplexity").exists())
+            .andExpect(jsonPath("$.data.otherReasonForComplexityText").exists())
+            .andExpect(jsonPath("$.data.detailPotentialAllegation").exists())
             .andExpect(jsonPath("$.data.estimatedAssetsChecklistV2").exists());
     }
 
