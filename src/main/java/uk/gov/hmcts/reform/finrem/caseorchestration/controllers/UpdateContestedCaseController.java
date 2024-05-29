@@ -123,11 +123,6 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void updateContestedComplexityDetails(Map<String, Object> caseData) {
-        updateComplexityDetails(caseData);
-
-    }
-
-    private void updateComplexityDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("otherReasonForComplexity"), NO_VALUE)) {
             caseData.put("otherReasonForComplexityText", null);
         }
