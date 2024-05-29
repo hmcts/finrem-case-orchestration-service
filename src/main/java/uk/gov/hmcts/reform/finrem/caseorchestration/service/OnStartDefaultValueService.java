@@ -43,6 +43,13 @@ public class OnStartDefaultValueService {
         callbackRequest.getCaseDetails().getData().putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
     }
 
+    public void defaultUrgencyQuestion(FinremCallbackRequest callbackRequest) {
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        if (caseData.getPromptForUrgentCaseQuestion() == null) {
+            caseData.setPromptForUrgentCaseQuestion(YesOrNo.NO);
+        }
+    }
+
     public void defaultTypeOfApplication(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(TYPE_OF_APPLICATION, TYPE_OF_APPLICATION_DEFAULT_TO);
     }
