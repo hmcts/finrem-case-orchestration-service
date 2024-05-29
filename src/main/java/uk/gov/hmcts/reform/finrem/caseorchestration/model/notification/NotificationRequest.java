@@ -53,4 +53,6 @@ public class NotificationRequest {
     private String intervenerSolicitorFirm;
     @JsonProperty("")
     private byte[] documentContents;
+    @JsonProperty("respondentSolicitorIsDigital")
+    private Boolean respondentSolicitorIsDigital;
 }

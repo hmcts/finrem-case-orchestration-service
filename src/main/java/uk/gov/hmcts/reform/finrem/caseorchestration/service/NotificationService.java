@@ -169,7 +169,7 @@ public class NotificationService {
 
     public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails finremCaseDetails) {
         NotificationRequest notificationRequestForRespondentSolicitor =
-            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(finremCaseDetails);
+            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(finremCaseDetails, isRespondentSolicitorDigital(finremCaseDetails));
         sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
     }
 
@@ -1614,6 +1614,14 @@ public class NotificationService {
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isRespondentSolicitorEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isRespondentSolicitorPopulated();
+    }
+
+    public boolean isRespondentSolicitorDigital(FinremCaseDetails caseDetails) {
+        return checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
 
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
