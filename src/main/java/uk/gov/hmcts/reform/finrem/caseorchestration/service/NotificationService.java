@@ -169,8 +169,7 @@ public class NotificationService {
 
     public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails finremCaseDetails) {
         NotificationRequest notificationRequestForRespondentSolicitor =
-            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(finremCaseDetails,
-                isRespondentSolicitorDigital(finremCaseDetails));
+            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(finremCaseDetails);
         sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
     }
 

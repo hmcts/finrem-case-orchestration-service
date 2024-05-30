@@ -38,10 +38,6 @@ public class FinremNotificationRequestMapper {
         return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData()));
     }
 
-    public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails, Boolean isRespondentSolicitorDigital) {
-        return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData(), isRespondentSolicitorDigital));
-    }
-
     public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData()));
     }
@@ -70,15 +66,6 @@ public class FinremNotificationRequestMapper {
             .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
             .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
-            .build();
-    }
-
-    private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData, Boolean isRespondentSolicitorDigital) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
-            .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
-            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
-            .solicitorIsDigitalKey(isRespondentSolicitorDigital)
             .build();
     }
 
@@ -121,7 +108,6 @@ public class FinremNotificationRequestMapper {
                 notificationRequest.getCaseReferenceNumber());
         }
         notificationRequest.setHearingType(caseData.getHearingType() != null ? caseData.getHearingType().getId() : "");
-        notificationRequest.setRespondentSolicitorIsDigital(caseDataKeysWrapper.getSolicitorIsDigitalKey());
 
         return notificationRequest;
     }
