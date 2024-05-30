@@ -19,7 +19,7 @@ public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAl
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
     @Override
-    protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String authorisationToken){
+    protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         if (isRespondentSolicitorEmailPopulates(caseDetails)) {
             log.info("Sending email correspondence to respondent for Case ID: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
@@ -71,7 +71,7 @@ public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAl
     }
 
     protected boolean isRespondentSolicitorEmailPopulates(FinremCaseDetails caseDetails) {
-       return notificationService.isRespondentSolicitorEmailPopulated(caseDetails);
+        return notificationService.isRespondentSolicitorEmailPopulated(caseDetails);
     }
 
 }
