@@ -32,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -154,6 +155,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         NotificationRequest notificationRequest = new NotificationRequest();
         when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class))).thenReturn(notificationRequest);
         when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class))).thenReturn(notificationRequest);
+        when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class), anyBoolean())).thenReturn(notificationRequest);
         when(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(FinremCaseDetails.class),
             any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
     }
@@ -201,7 +203,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(newCallbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails(), false);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_ASSIGNED_TO_JUDGE));
     }
 
@@ -232,7 +234,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails(), false);
     }
 
     @Test
