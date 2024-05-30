@@ -155,7 +155,8 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         NotificationRequest notificationRequest = new NotificationRequest();
         when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class))).thenReturn(notificationRequest);
         when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class))).thenReturn(notificationRequest);
-        when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class), anyBoolean())).thenReturn(notificationRequest);
+        when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class), anyBoolean()))
+            .thenReturn(notificationRequest);
         when(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(FinremCaseDetails.class),
             any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
     }
