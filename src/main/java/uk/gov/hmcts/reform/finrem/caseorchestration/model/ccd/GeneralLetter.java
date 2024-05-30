@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -19,4 +21,6 @@ public class GeneralLetter {
     private CaseDocument generatedLetter;
     @JsonProperty("generalLetterUploadedDocument")
     private CaseDocument generalLetterUploadedDocument;
+    @JsonProperty("generalLetterUploadedDocuments")
+    private List<DocumentCollection> generalLetterUploadedDocuments;
 }

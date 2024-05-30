@@ -33,6 +33,9 @@ public class MiamCheckService {
     private static final String MIAM_EVIDENCE_UNAVAILABLE_ERROR = "Please explain in the textbox why you are unable to "
         + "provide the required evidence with your application.";
 
+    private static final String MIAM_LEGACY_OPTION_ERROR = "You have selected an outdated MIAM exemption option which "
+        + "needs to be unchecked before you can continue.";
+
     public List<String> validateMiamFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -43,19 +46,34 @@ public class MiamCheckService {
 
         Map<String, List<String>> errors = new HashMap<>();
         addEvidenceUnavailableErrors(errors, caseData);
+        addLegacyOptionErrors(errors, caseData);
 
         return errors.values().stream().filter(error -> !error.isEmpty()).findFirst().orElse(List.of());
     }
 
     private void addEvidenceUnavailableErrors(Map<String, List<String>> errors, Map<String, Object> caseData) {
-        errors.put(MIAM_DOMESTIC_VIOLENCE_CHECKLIST, getMiamEvidenceUnavailableErrors(caseData,
-            MIAM_DOMESTIC_VIOLENCE_CHECKLIST, MIAM_DOMESTIC_ABUSE_TEXTBOX, "FR_ms_MIAMDomesticViolenceChecklist_Value_23"));
-        errors.put(MIAM_URGENCY_CHECKLIST, getMiamEvidenceUnavailableErrors(caseData,
+        errors.put("MiamDomesticViolenceEvidenceUnavailable", getMiamEvidenceUnavailableErrors(caseData,
+            MIAM_DOMESTIC_VIOLENCE_CHECKLIST, MIAM_DOMESTIC_ABUSE_TEXTBOX,
+            "FR_ms_MIAMDomesticViolenceChecklist_Value_23"));
+        errors.put("MiamUrgencyEvidenceUnavailable", getMiamEvidenceUnavailableErrors(caseData,
             MIAM_URGENCY_CHECKLIST, MIAM_URGENCY_TEXTBOX, "FR_ms_MIAMUrgencyReasonChecklist_Value_6"));
-        errors.put(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, getMiamEvidenceUnavailableErrors(caseData,
-            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, MIAM_PREVIOUS_ATTENDANCE_TEXTBOX, "FR_ms_MIAMPreviousAttendanceChecklist_Value_3"));
-        errors.put(MIAM_OTHER_GROUNDS_CHECKLIST, getMiamEvidenceUnavailableErrors(caseData,
-            MIAM_OTHER_GROUNDS_CHECKLIST, MIAM_OTHER_GROUNDS_TEXTBOX, "FR_ms_MIAMOtherGroundsChecklist_Value_7"));
+        errors.put("MiamPreviousAttendanceEvidenceUnavailable", getMiamEvidenceUnavailableErrors(caseData,
+            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, MIAM_PREVIOUS_ATTENDANCE_TEXTBOX,
+            "FR_ms_MIAMPreviousAttendanceChecklist_Value_6"));
+        errors.put("MiamOtherGroundsEvidenceUnavailable", getMiamEvidenceUnavailableErrors(caseData,
+            MIAM_OTHER_GROUNDS_CHECKLIST, MIAM_OTHER_GROUNDS_TEXTBOX, "FR_ms_MIAMOtherGroundsChecklist_Value_16"));
+    }
+
+    private void addLegacyOptionErrors(Map<String, List<String>> errors, Map<String, Object> caseData) {
+        errors.put("MiamPreviousAttendanceLegacyOptions", getMiamLegacyErrors(caseData,
+            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, List.of("FR_ms_MIAMPreviousAttendanceChecklist_Value_2",
+                "FR_ms_MIAMPreviousAttendanceChecklist_Value_3", "FR_ms_MIAMPreviousAttendanceChecklist_Value_5")));
+        errors.put("MiamOtherGroundsLegacyOptions", getMiamLegacyErrors(caseData,
+            MIAM_OTHER_GROUNDS_CHECKLIST, List.of("FR_ms_MIAMOtherGroundsChecklist_Value_1",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_2", "FR_ms_MIAMOtherGroundsChecklist_Value_3",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_4", "FR_ms_MIAMOtherGroundsChecklist_Value_6",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_7", "FR_ms_MIAMOtherGroundsChecklist_Value_8",
+                "FR_ms_MIAMOtherGroundsChecklist_Value_10", "FR_ms_MIAMOtherGroundsChecklist_Value_11")));
     }
 
     private static List<String> miamExemptionAttendanceCheck(Map<String, Object> caseData) {
@@ -70,6 +88,7 @@ public class MiamCheckService {
 
     private List<String> getMiamEvidenceUnavailableErrors(Map<String, Object> caseData, String checklistKey,
                                                           String textboxKey, String checklistValue) {
+
         String checklist = Objects.toString(caseData.get(checklistKey));
         String textbox = convertObjectToString(caseData.get(textboxKey));
 
@@ -77,6 +96,16 @@ public class MiamCheckService {
             return List.of(MIAM_EVIDENCE_UNAVAILABLE_ERROR);
         }
         return Collections.emptyList();
+    }
+
+    private List<String> getMiamLegacyErrors(Map<String, Object> caseData, String checklistKey,
+                                             List<String> checklistValue) {
+        String checklist = Objects.toString(caseData.get(checklistKey));
+        if (checklist != null && checklistValue.stream().anyMatch(checklist::equals)) {
+            return List.of(MIAM_LEGACY_OPTION_ERROR);
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private String convertObjectToString(Object object) {
