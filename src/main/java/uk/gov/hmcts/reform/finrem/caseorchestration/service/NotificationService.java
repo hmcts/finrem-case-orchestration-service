@@ -1625,10 +1625,6 @@ public class NotificationService {
         return caseDetails.getData().isRespondentSolicitorPopulated();
     }
 
-    public boolean isRespondentSolicitorDigital(FinremCaseDetails caseDetails) {
-        return checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
-    }
-
     public boolean isIntervenerSolicitorEmailPopulated(IntervenerWrapper intervenerWrapper) {
         return intervenerWrapper.isIntervenerSolicitorPopulated();
     }
