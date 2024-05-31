@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 
 
 @Service
@@ -37,6 +38,7 @@ public class EmailService {
 
     private static final String CONTESTED = "contested";
     private static final String CONSENTED = "consented";
+    private static final String FR_ASSIGNED_TO_JUDGE = "FR_ASSIGNED_TO_JUDGE";
     private static final String CONTESTED_GENERAL_EMAIL = "FR_CONTESTED_GENERAL_EMAIL";
     private static final String CONTESTED_GENERAL_EMAIL_ATTACHMENT = "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT";
     private static final String CONSENT_GENERAL_EMAIL = "FR_CONSENT_GENERAL_EMAIL";
@@ -82,6 +84,10 @@ public class EmailService {
 
             templateVars.put("courtName", courtDetails.get("name"));
             templateVars.put("courtEmail", courtDetails.get("email"));
+        }
+
+        if (FR_ASSIGNED_TO_JUDGE.equals(templateName)) {
+            templateVars.put("isNotDigital", notificationRequest.getIsNotDigital());
         }
 
         //general emails and transfer to local court emails are the only templates that require the generalEmailBody
