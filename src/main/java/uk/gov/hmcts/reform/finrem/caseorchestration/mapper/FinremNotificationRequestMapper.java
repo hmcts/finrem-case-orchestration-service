@@ -38,8 +38,16 @@ public class FinremNotificationRequestMapper {
         return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData()));
     }
 
+    public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails, Boolean isNotDigital) {
+        return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData(), isNotDigital));
+    }
+
     public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData()));
+    }
+
+    public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails, Boolean isNotDigital) {
+        return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData(), isNotDigital));
     }
 
     public NotificationRequest getNotificationRequestForIntervenerSolicitor(FinremCaseDetails caseDetails,
@@ -61,11 +69,29 @@ public class FinremNotificationRequestMapper {
             .build();
     }
 
+    private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData, Boolean isNotDigital) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(caseData.getAppSolicitorEmail())
+            .solicitorNameKey(nullToEmpty(caseData.getAppSolicitorName()))
+            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
+            .solicitorIsNotDigitalKey(isNotDigital)
+            .build();
+    }
+
     private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
             .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
+            .build();
+    }
+
+    private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData, Boolean isNotDigital) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
+            .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
+            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
+            .solicitorIsNotDigitalKey(isNotDigital)
             .build();
     }
 
@@ -108,6 +134,7 @@ public class FinremNotificationRequestMapper {
                 notificationRequest.getCaseReferenceNumber());
         }
         notificationRequest.setHearingType(caseData.getHearingType() != null ? caseData.getHearingType().getId() : "");
+        notificationRequest.setIsNotDigital(caseDataKeysWrapper.getSolicitorIsNotDigitalKey());
 
         return notificationRequest;
     }

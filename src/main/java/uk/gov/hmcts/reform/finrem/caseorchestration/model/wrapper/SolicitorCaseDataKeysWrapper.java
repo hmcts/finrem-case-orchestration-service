@@ -9,4 +9,5 @@ public class SolicitorCaseDataKeysWrapper {
     private String solicitorReferenceKey;
     private String solicitorNameKey;
     private String solicitorEmailKey;
+    private Boolean solicitorIsNotDigitalKey;
 }
