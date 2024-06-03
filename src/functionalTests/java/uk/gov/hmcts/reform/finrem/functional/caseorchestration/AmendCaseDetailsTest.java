@@ -277,7 +277,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyShouldRemoveComplexityDetailsForContested() {
+    public void verifyShouldUpdateComplexityDetailsForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-complexity-details1.json");
         String message = ", associated with the complexity details,";
@@ -290,7 +290,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
             "detailPotentialAllegation"
         };
         for (String field : fields) {
-            checkIsNull(field, message, jsonPathEvaluator);
+            checkNotNull(field, message, jsonPathEvaluator);
         }
     }
 
@@ -414,7 +414,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     private String[] getMiamExemptionFields() {
-        return new String[] {
+        return new String[]{
             CLAIMING_EXEMPTION_MIAM,
             MIAM_EXEMPTIONS_CHECKLIST,
             MIAM_DOMESTIC_VIOLENCE_CHECKLIST,
