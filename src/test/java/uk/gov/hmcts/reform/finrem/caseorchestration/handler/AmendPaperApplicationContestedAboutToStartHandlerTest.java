@@ -3,25 +3,21 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import org.mockito.Mockito;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
 
 public class AmendPaperApplicationContestedAboutToStartHandlerTest {
 
@@ -30,7 +26,9 @@ public class AmendPaperApplicationContestedAboutToStartHandlerTest {
 
     @Before
     public void setup() {
-        handler =  new AmendPaperApplicationContestedAboutToStartHandler(new OnStartDefaultValueService());
+        FinremCaseDetailsMapper finremCaseDetailsMapper = Mockito.mock(FinremCaseDetailsMapper.class);
+        handler =  new AmendPaperApplicationContestedAboutToStartHandler(finremCaseDetailsMapper,
+            new OnStartDefaultValueService());
     }
 
     @Test
@@ -57,17 +55,20 @@ public class AmendPaperApplicationContestedAboutToStartHandlerTest {
 
     @Test
     public void handle() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertEquals(NO_VALUE, response.getData().get(CIVIL_PARTNERSHIP));
-        assertEquals(NO_VALUE, response.getData().get(URGENT_CASE_QUESTION));
-        assertEquals(TYPE_OF_APPLICATION_DEFAULT_TO, response.getData().get(TYPE_OF_APPLICATION));
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertEquals(NO, response.getData().getCivilPartnership());
+        assertEquals(NO, response.getData().getPromptForUrgentCaseQuestion());
+        assertEquals(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS,
+            response.getData().getScheduleOneWrapper().getTypeOfApplication());
     }
 
-    private CallbackRequest buildCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder()
-            .eventId(EventType.AMEND_CONTESTED_PAPER_APP_DETAILS.getCcdType()).caseDetails(caseDetails).build();
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.AMEND_CONTESTED_PAPER_APP_DETAILS)
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .build();
     }
 }
