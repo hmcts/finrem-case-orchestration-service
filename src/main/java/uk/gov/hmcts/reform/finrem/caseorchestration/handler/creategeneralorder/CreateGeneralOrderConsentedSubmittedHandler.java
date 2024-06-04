@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedConsentedCorresponder;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER;
@@ -20,10 +20,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENER
 @Slf4j
 public class CreateGeneralOrderConsentedSubmittedHandler extends FinremCallbackHandler {
 
-    private final FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
+    private final FinremGeneralOrderRaisedConsentedCorresponder generalOrderRaisedCorresponder;
 
     public CreateGeneralOrderConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                       FinremGeneralOrderRaisedCorresponder generalOrderRaisedCorresponder) {
+                                                       FinremGeneralOrderRaisedConsentedCorresponder generalOrderRaisedCorresponder) {
         super(finremCaseDetailsMapper);
         this.generalOrderRaisedCorresponder = generalOrderRaisedCorresponder;
     }
