@@ -38,7 +38,7 @@ public class FinremNotificationRequestMapper {
         return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData()));
     }
 
-    public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails, Boolean isNotDigital) {
+    public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails, boolean isNotDigital) {
         return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData(), isNotDigital));
     }
 
@@ -46,7 +46,7 @@ public class FinremNotificationRequestMapper {
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData()));
     }
 
-    public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails, Boolean isNotDigital) {
+    public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails, boolean isNotDigital) {
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData(), isNotDigital));
     }
 
