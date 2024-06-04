@@ -69,7 +69,7 @@ public class FinremNotificationRequestMapper {
             .build();
     }
 
-    private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData, Boolean isNotDigital) {
+    private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData, boolean isNotDigital) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getAppSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getAppSolicitorName()))
@@ -86,7 +86,7 @@ public class FinremNotificationRequestMapper {
             .build();
     }
 
-    private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData, Boolean isNotDigital) {
+    private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData, boolean isNotDigital) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
