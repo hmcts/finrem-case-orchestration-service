@@ -37,16 +37,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-feign-clients")
 public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private HelpWithFeesDocumentService helpWithFeesDocumentService;
-    @Autowired private EvidenceManagementUploadService evidenceManagementUploadService;
-    @Autowired private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
+    @Autowired
+    private HelpWithFeesDocumentService helpWithFeesDocumentService;
+    @Autowired
+    private EvidenceManagementUploadService evidenceManagementUploadService;
+    @Autowired
+    private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
 
     private CaseDetails caseDetails;
 
     @Before
     public void setUp() {
         DocumentConfiguration config = new DocumentConfiguration();
-        config.setHelpWithFeesSuccessfulNotificationTemplate("FL-FRM-LET-ENG-00096.docx");
+        config.setHelpWithFeesSuccessfulNotificationTemplate("FL-FRM-LET-ENG-00096-size-update.docx");
         config.setHelpWithFeesSuccessfulNotificationFileName("HelpWithFeesSuccessfulNotificationLetter.pdf");
 
         when(docmosisPdfGenerationServiceMock.generateDocFrom(any(), any()))
@@ -67,7 +70,7 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
 
         CaseDocument generatedHwfSuccessfulNotificationLetter =
             helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(
-            caseDetails, AUTH_TOKEN, APPLICANT);
+                caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedHwfSuccessfulNotificationLetter);
         verify(docmosisPdfGenerationServiceMock).generateDocFrom(any(), any());
